@@ -376,7 +376,13 @@ export default function Dashboard() {
             subtitle="آخر ٧ أيام"
             action={<SectionLink to="/admin/products" label="المنتجات" />}
           >
-            <MiniBars rows={topCats} formatValue={(v) => fmtMoney(v)} />
+            {topCats.length === 0 ? (
+              <EmptyState icon={ShoppingBag} title="لا توجد بيانات فئات بعد" />
+            ) : (
+              <Suspense fallback={<ChartFallback h={240} />}>
+                <CategoryBarChart height={240} data={topCats} />
+              </Suspense>
+            )}
           </AdminSection>
 
           <AdminSection title="مركز التنبيهات" subtitle="إشارات تشغيلية مباشرة">
