@@ -19,7 +19,6 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   bookingTimeSlots,
-  formatBookingShort,
   DEPOSIT_THRESHOLD,
 } from "@/lib/sweetsFulfillment";
 import {
