@@ -5,43 +5,74 @@ import {
   Star, BarChart3, Settings, FileClock, Warehouse, Store, Printer, FolderTree, Layout, Banknote,
   Boxes, Layers, ArrowRightLeft, Coins, KeyRound,
   HandCoins, ClipboardList, PiggyBank,
+  Scale, Ban, MessageCircle, AlertTriangle, Globe, Sliders,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const groups = [
   { title: "نظرة عامة", items: [
     { to: "/admin", icon: Home, label: "الرئيسية", exact: true },
+    { to: "/admin/dashboard", icon: BarChart3, label: "لوحة التشغيل" },
     { to: "/admin/analytics", icon: BarChart3, label: "التحليلات" },
+    { to: "/admin/executive", icon: TrendingUp, label: "اللوحة التنفيذية" },
   ]},
   { title: "العمليات", items: [
     { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
     { to: "/admin/products", icon: Package, label: "المنتجات" },
     { to: "/admin/categories", icon: FolderTree, label: "الفئات" },
+    { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات" },
+    { to: "/admin/offers", icon: Gift, label: "العروض والكوبونات" },
     { to: "/admin/print-jobs", icon: Printer, label: "طلبات الطباعة" },
     { to: "/admin/stores", icon: Store, label: "المتاجر" },
+    { to: "/admin/branches", icon: Globe, label: "الفروع الدولية" },
   ]},
   { title: "المخزون واللوجستيات", items: [
     { to: "/admin/inventory", icon: Warehouse, label: "المخزون والأسعار" },
     { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون" },
+    { to: "/admin/warehouses", icon: Warehouse, label: "المخازن المتعددة" },
     { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)" },
     { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع" },
+    { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي" },
+    { to: "/admin/low-stock", icon: AlertTriangle, label: "تنبيهات المخزون" },
+    { to: "/admin/cost-bulk", icon: Receipt, label: "تعبئة التكاليف" },
   ]},
   { title: "العملاء", items: [
     { to: "/admin/customers", icon: Users, label: "العملاء" },
     { to: "/admin/kyc", icon: ShieldCheck, label: "التحقق KYC" },
     { to: "/admin/reviews", icon: Star, label: "التقييمات" },
   ]},
-  { title: "المالية والشركاء", items: [
+  { title: "الشركاء والتجار", items: [
+    { to: "/admin/vendors", icon: Truck, label: "التجار والموردون" },
+    { to: "/admin/suppliers", icon: Truck, label: "الموردون" },
+    { to: "/admin/partners", icon: Star, label: "شركاء المنتجات" },
+    { to: "/admin/purchases", icon: Receipt, label: "فواتير المشتريات" },
+  ]},
+  { title: "المالية والمحافظ", items: [
     { to: "/admin/wallets", icon: Wallet, label: "المحافظ" },
     { to: "/admin/payouts", icon: Banknote, label: "طلبات السحب" },
+    { to: "/admin/topup-approvals", icon: ShieldCheck, label: "موافقات الشحن" },
+    { to: "/admin/advance-approvals", icon: ShieldCheck, label: "موافقات السلف" },
+    { to: "/admin/payments-schedule", icon: FileClock, label: "جدولة المدفوعات" },
+    { to: "/admin/expenses", icon: Receipt, label: "المصروفات" },
     { to: "/admin/commission-ledger", icon: Coins, label: "سجل العمولات" },
+    { to: "/admin/affiliate-settings", icon: Sliders, label: "عمولات الأفلييت" },
     { to: "/admin/savings", icon: Receipt, label: "الادخار" },
     { to: "/admin/finance", icon: TrendingUp, label: "التقارير المالية" },
+    { to: "/admin/cfo", icon: TrendingUp, label: "الرؤية المالية CFO" },
   ]},
-  { title: "العمليات المالية", items: [
+  { title: "تسويات وعمليات نقدية", items: [
     { to: "/admin/cashier-sessions", icon: ClipboardList, label: "ورديات الكاشير" },
-    { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "سجل تسويات المناديب" },
+    { to: "/admin/vendor-settlements", icon: Receipt, label: "تسويات التجار" },
+    { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "تسويات المناديب" },
+    { to: "/admin/driver-settlements", icon: Wallet, label: "تصفية العهدة" },
     { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع" },
+  ]},
+  { title: "الامتثال الشرعي وحكيم AI", items: [
+    { to: "/admin/hakim", icon: Sparkles, label: "المستشار حكيم AI" },
+    { to: "/admin/hakim-chat", icon: MessageCircle, label: "محادثة حكيم" },
+    { to: "/admin/zakat", icon: Scale, label: "حساب الزكاة" },
+    { to: "/admin/riba-audit", icon: Ban, label: "مراجعة الربا" },
+    { to: "/admin/charity", icon: Gift, label: "حاسبة الصدقات" },
   ]},
   { title: "التسويق", items: [
     { to: "/admin/marketing/promos", icon: Sparkles, label: "الكوبونات" },
@@ -49,9 +80,11 @@ const groups = [
     { to: "/admin/marketing/notifications", icon: BellRing, label: "الإشعارات" },
     { to: "/admin/marketing/referrals", icon: Gift, label: "الإحالات" },
   ]},
-  { title: "التوصيل", items: [
+  { title: "التوصيل والمناديب", items: [
     { to: "/admin/delivery", icon: Truck, label: "مهام التوصيل" },
+    { to: "/admin/drivers", icon: Truck, label: "المناديب" },
     { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق" },
+    { to: "/admin/delivery-settings", icon: Sliders, label: "إعدادات التوصيل" },
   ]},
   { title: "إعداد المتجر", items: [
     { to: "/admin/design", icon: Layout, label: "محرر التصميم" },

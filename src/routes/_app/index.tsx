@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import HomePage from "@/pages/Home";
+import { lazyPage } from "@/routes/_lazyRoute";
 
 // Root `/` serves the Main Super App Dashboard (department hub).
-// The Home Goods storefront lives at /store/home (HomeGoods.tsx).
+// Lazy-loaded so first-paint of the shell isn't blocked by the hub bundle.
 export const Route = createFileRoute("/_app/")({
-  component: HomePage,
+  component: lazyPage(() => import("@/pages/Home")),
 });
