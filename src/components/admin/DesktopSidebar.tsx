@@ -7,6 +7,7 @@ import {
   HandCoins, ClipboardList, PiggyBank,
   Scale, Ban, MessageCircle, AlertTriangle, Globe, Sliders,
   CalendarClock, Percent, BookOpen, Handshake,
+  Brain, Radar, Lightbulb, Network, Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -76,9 +77,15 @@ const groups = [
     { to: "/admin/staff-advances", icon: BookOpen, label: "السلف والنثرية" },
     { to: "/admin/advance-approvals", icon: ShieldCheck, label: "موافقات السلف" },
   ]},
-  { title: "الامتثال الشرعي وحكيم AI", items: [
-    { to: "/admin/hakim", icon: Sparkles, label: "المستشار حكيم AI" },
+  { title: "ذكاء النظام (حكيم AI)", items: [
+    { to: "/admin/hakim", icon: Brain, label: "المستشار حكيم" },
     { to: "/admin/hakim-chat", icon: MessageCircle, label: "محادثة حكيم" },
+    { to: "/admin/hakim-insights", icon: Lightbulb, label: "رؤى حكيم" },
+    { to: "/admin/hakim-anomalies", icon: Radar, label: "رادار الشذوذ" },
+    { to: "/admin/category-affinity", icon: Network, label: "ارتباط الفئات" },
+    { to: "/admin/personalized-picks", icon: Wand2, label: "العروض المخصصة" },
+  ]},
+  { title: "الامتثال الشرعي", items: [
     { to: "/admin/zakat", icon: Scale, label: "حساب الزكاة" },
     { to: "/admin/riba-audit", icon: Ban, label: "مراجعة الربا" },
     { to: "/admin/charity", icon: Gift, label: "حاسبة الصدقات" },

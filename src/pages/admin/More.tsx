@@ -11,6 +11,7 @@ import {
   Layers, ArrowRightLeft, Coins, KeyRound,
   HandCoins, ClipboardList, PiggyBank,
   CalendarClock, BookOpen, Handshake, Percent,
+  Brain, Radar, Lightbulb, Network, Wand2,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -81,6 +82,14 @@ export default function More() {
       { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/partner-ledgers", icon: Handshake, label: "حسابات شركاء المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/discount-overrides", icon: Percent, label: "تجاوزات الخصومات", color: "from-destructive to-[hsl(var(--accent))]" },
+    ]},
+    { title: "ذكاء النظام (حكيم AI)", items: [
+      { to: "/admin/hakim", icon: Brain, label: "المستشار حكيم", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
+      { to: "/admin/hakim-chat", icon: MessageCircle, label: "محادثة حكيم", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
+      { to: "/admin/hakim-insights", icon: Lightbulb, label: "رؤى حكيم", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+      { to: "/admin/hakim-anomalies", icon: Radar, label: "رادار الشذوذ", color: "from-destructive to-[hsl(var(--accent))]" },
+      { to: "/admin/category-affinity", icon: Network, label: "ارتباط الفئات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
+      { to: "/admin/personalized-picks", icon: Wand2, label: "العروض المخصصة", color: "from-[hsl(var(--pink))] to-[hsl(var(--purple))]" },
     ]},
     { title: "إدارة الموظفين", items: [
       { to: "/admin/staff", icon: UserCog, label: "الموظفون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
