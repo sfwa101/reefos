@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
+
+const CategoryBarChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })),
+);
 
 type Stats = {
   discounts_this_month: number;
@@ -23,6 +28,16 @@ export default function CFODashboard() {
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const flowChart = useMemo(() => {
+    if (!stats) return [];
+    return [
+      { label: "خصومات", value: Number(stats.discounts_this_month ?? 0) },
+      { label: "عمولات قيد التحرر", value: Number(stats.commissions_pending_vest ?? 0) },
+      { label: "عمولات مصروفة", value: Number(stats.commissions_paid_this_month ?? 0) },
+      { label: "التزامات المحافظ", value: Number(stats.wallet_liabilities_total ?? 0) },
+    ];
+  }, [stats]);
 
   useEffect(() => {
     if (!allowed) { setLoading(false); return; }
@@ -62,6 +77,20 @@ export default function CFODashboard() {
                color="from-[hsl(var(--success))] to-[hsl(var(--teal))]" />
           <KPI icon={Wallet} label="التزامات المحافظ" value={stats?.wallet_liabilities_total ?? 0}
                color="from-[hsl(var(--info))] to-[hsl(var(--indigo))]" subtitle="رصيد العملاء المحتجز" />
+        </div>
+
+        <div className="bg-surface rounded-2xl border border-border/40 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <h3 className="text-[13.5px] font-bold">التدفقات المالية الشهرية</h3>
+          </div>
+          {!stats ? (
+            <Skeleton className="h-[240px] w-full rounded-xl" />
+          ) : (
+            <Suspense fallback={<Skeleton className="h-[240px] w-full rounded-xl" />}>
+              <CategoryBarChart data={flowChart} height={240} />
+            </Suspense>
+          )}
         </div>
 
         <div className="bg-surface rounded-2xl border border-border/40 overflow-hidden">
