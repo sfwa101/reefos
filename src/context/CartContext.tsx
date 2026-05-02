@@ -137,7 +137,7 @@ function dedupeLines<T extends { product: { id: string }; qty: number; meta?: Ca
 
 const cartSignature = (lines: LocalLine[]): string =>
   dedupeLines(lines, "max")
-    .map((l) => `${lineKey(l)}#${l.qty}#${stableJson(l.meta ?? {})}`)
+    .map((l) => `${lineKey(l)}#${l.qty}`)
     .sort()
     .join("||");
 
