@@ -30,6 +30,7 @@ import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCa
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
+import { useSystemSetting } from "@/hooks/useSystemSettings";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
