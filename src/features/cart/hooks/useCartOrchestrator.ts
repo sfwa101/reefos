@@ -59,6 +59,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const navigate = useNavigate();
   const { zone, setFromAddress } = useLocation();
 
+  // Dynamic kill-switch: when disabled, checkout completes in-app and skips WhatsApp dispatch.
+  const { value: enableWaCheckout } = useSystemSetting<boolean>("enable_whatsapp_checkout", true);
+
   const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
     useCartValidation(total);
 
