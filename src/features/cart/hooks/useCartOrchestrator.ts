@@ -664,89 +664,34 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      const isBookingLine = (lid: string, src: string, sub?: string) =>
-        isSweetsProduct(src) && fulfillmentTypeFor(lid, sub) === "C";
-      const instantItems = lines.filter(
-        (l) => !isBookingLine(l.product.id, l.product.source, l.product.subCategory),
-      );
-      const bookingItems = lines.filter((l) =>
-        isBookingLine(l.product.id, l.product.source, l.product.subCategory),
-      );
-      const fmtInstantLine = (l: (typeof lines)[number]) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
-        return `▪️ ${toLatin(l.qty)}x ${l.product.name} (${fmtMoney(unit * l.qty)})`;
-      };
-      const fmtBookingLine = (l: (typeof lines)[number]) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
-        const day = l.meta?.bookingDate
-          ? formatBookingShort(new Date(l.meta.bookingDate))
-          : "—";
-        return `▪️ ${toLatin(l.qty)}x ${l.product.name} — استلام ${day} (${fmtMoney(unit * l.qty)})`;
-      };
-      const addrLine = isGuest
-        ? guestAddress.trim()
-        : selectedAddr
-          ? `${[selectedAddr.label, selectedAddr.street, selectedAddr.building, selectedAddr.district, selectedAddr.city]
-              .filter(Boolean)
-              .join("، ")}`
-          : guestNotes || "—";
-      const etaLine =
-        bookingItems.length > 0 && instantItems.length === 0
-          ? "مجدول"
-          : `خلال ${zone.etaLabel}`;
-      const customerLabel = isGuest
-        ? guestName.trim()
-        : customerName || (currentUser?.email ?? "عميل").split("@")[0];
-      const payShort =
-        payment === "wallet"
-          ? "محفظة"
-          : payment === "cash"
-            ? "كاش"
-            : payment === "instapay"
-              ? "انستاباي"
-              : payment === "vodafone-cash"
-                ? "فودافون كاش"
-                : paymentLabel;
-
-      const guestHeader = isGuest
-        ? `👤 *الاسم:* ${guestName.trim()}\n📞 *الهاتف:* ${guestPhone.trim()}\n📍 *العنوان:* ${guestAddress.trim()}\n\n`
-        : "";
-      const mainMessage =
-        `مرحباً ريف المدينة 👋\n\n` +
-        (isGuest
-          ? `طلب جديد (ضيف):\n\n${guestHeader}`
-          : `أنا ${customerLabel}، وأريد تأكيد طلبي الجديد.\n\n`) +
-        `📝 *رقم الطلب:* #${orderNum}\n` +
-        (isGuest ? "" : `📍 *العنوان:* ${addrLine}\n`) +
-        `🛵 *وقت التوصيل المتوقع:* ${etaLine}\n\n` +
-        (instantItems.length > 0
-          ? `🛒 *تفاصيل الطلب:*\n${instantItems.map(fmtInstantLine).join("\n")}\n\n`
-          : "") +
-        (bookingItems.length > 0
-          ? `📅 *حجوزات خاصة:*\n${bookingItems.map(fmtBookingLine).join("\n")}\n\n`
-          : "") +
-        `💳 *طريقة الدفع:* ${
-          isSplit
-            ? `محفظة (${fmtMoney(walletApplied)}) + ${secondaryLabel} (${fmtMoney(walletShortfall)})`
-            : payShort
-        }\n\n` +
-        `📊 *ملخص الحساب:*\n` +
-        `الإجمالي الفرعي: ${toLatin(subtotal)} ج.م\n` +
-        `التوصيل: ${delivery === 0 ? "مجاني" : `${toLatin(delivery)} ج.م`}\n` +
-        (billSavings > 0 ? `وفرت معنا: 🟢 ${toLatin(billSavings)} ج.م\n` : "") +
-        (tip > 0 ? `إكرامية المندوب: ${toLatin(tip)} ج.م\n` : "") +
-        (sweetsRules.hasBooking
-          ? `\n🔒 يُدفع الآن من الحجوزات: ${toLatin(aggregateDeposit)} ج.م\n` +
-            (payOnDelivery > 0
-              ? `📦 يُحصّل عند التوصيل: ${toLatin(payOnDelivery)} ج.م\n`
-              : "")
-          : "") +
-        `\n------------------------\n\n` +
-        `💰 *الإجمالي النهائي المطلوب:* *${toLatin(grand)} ج.م*\n\n` +
-        (payment === "wallet" && totalCashback > 0
-          ? `🎁 كاش باك المحفظة: +${toLatin(totalCashback)} ج.م (سيُضاف لرصيدك)\n\n`
-          : "") +
-        `في انتظار تأكيدكم، شكراً لكم! 🍃`;
+      const mainMessage = buildWhatsAppMessage({
+        isGuest,
+        guestName,
+        guestPhone,
+        guestAddress,
+        guestNotes,
+        customerName,
+        currentUserEmail: currentUser?.email ?? null,
+        selectedAddr: selectedAddr ?? null,
+        orderNum,
+        zoneEtaLabel: zone.etaLabel,
+        lines,
+        payment,
+        paymentLabel,
+        isSplit,
+        walletApplied,
+        walletShortfall,
+        secondaryLabel,
+        subtotal,
+        delivery,
+        billSavings,
+        tip,
+        sweetsRules,
+        aggregateDeposit,
+        payOnDelivery,
+        grand,
+        totalCashback,
+      });
 
       await minLoading;
 
@@ -759,29 +704,19 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const mainPhone = WA_NUMBER;
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
-      const waUrl = buildWaUrl({ phone: mainPhone, text: mainMessage });
-      console.log("[checkout] attempting WhatsApp checkout URL", { source, url: waUrl });
 
       // Step 3 — clear the cart and celebrate before navigation/redirect.
       clear();
       fireConfetti();
 
       // Step 4 — open WhatsApp.
-      const openResult: OpenResult = onMobile
-        ? ((): OpenResult => {
-            try {
-              console.log("[checkout] mobile window.location.href", { source, url: waUrl });
-              window.location.href = waUrl;
-              return { ok: true, method: "location" };
-            } catch (e) {
-              console.warn("[checkout] mobile location.href failed", { source, error: e });
-              return { ok: false, url: waUrl, text: mainMessage, reason: "location_failed" };
-            }
-          })()
-        : openWhatsApp(
-            { phone: mainPhone, text: mainMessage },
-            { preOpened, preferLocation: false, source },
-          );
+      const openResult: OpenResult = dispatchWhatsApp({
+        phone: mainPhone,
+        text: mainMessage,
+        preOpened,
+        onMobile,
+        source,
+      });
 
       if (!openResult.ok) {
         console.warn("[checkout] WhatsApp open blocked, success fallback armed", {
