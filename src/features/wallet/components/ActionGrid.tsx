@@ -36,7 +36,7 @@ const Tile = ({ action, index }: { action: WalletAction; index: number }) => {
       }}
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.93 }}
-      className={`group relative flex min-w-[5.25rem] snap-start flex-col items-center justify-center gap-2 overflow-hidden rounded-2xl px-3 py-4 shadow-sm ring-1 backdrop-blur-2xl transition ${
+      className={`group relative flex h-14 min-w-[4.25rem] snap-start flex-col items-center justify-center gap-1 overflow-hidden rounded-xl px-2 py-1.5 shadow-sm ring-1 backdrop-blur-2xl transition ${
         isPrimary
           ? "bg-primary text-primary-foreground ring-primary/40"
           : "bg-card/60 text-foreground ring-border/50"
