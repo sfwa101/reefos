@@ -74,9 +74,9 @@ const Tile = ({ action, index }: { action: WalletAction; index: number }) => {
 
 export const ActionGrid = ({ actions }: { actions: WalletAction[] }) => {
   return (
-    <div className="-mx-1 flex snap-x snap-mandatory gap-2.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+    <div className="-mx-1 flex snap-x snap-mandatory gap-2 overflow-x-auto px-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
       {actions.map((a, i) => (
-        <div key={a.id} className="flex-1 min-w-[5.25rem]">
+        <div key={a.id} className="flex-1 min-w-[4.25rem]">
           <Tile action={a} index={i} />
         </div>
       ))}
