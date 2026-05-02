@@ -116,7 +116,7 @@ const lineKey = (l: { product: { id: string }; meta?: CartLineMeta }): string =>
 
 /** Stable deep signature for equality checks before remote pushes. */
 const stableJson = (value: unknown): string => {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   const obj = value as Record<string, unknown>;
   return `{${Object.keys(obj)
@@ -267,6 +267,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         lastPushedSignatureRef.current = nextSignature;
         emit();
         safeStorage.set(STORAGE_KEY, JSON.stringify(next));
+        skipNextPushRef.current = false;
 
         if (shouldPush) {
           await pushRemoteCart(uid, next);
