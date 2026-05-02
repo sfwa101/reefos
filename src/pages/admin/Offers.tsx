@@ -60,7 +60,7 @@ export default function Offers() {
 
   const saveCoupon = async () => {
     if (!cForm.code.trim()) return toast.error("الكود مطلوب");
-    const payload: any = {
+    const payload: CouponInsert = {
       code: cForm.code.trim().toUpperCase(),
       description: cForm.description || null,
       discount_pct: cForm.discount_pct ? Number(cForm.discount_pct) : null,
@@ -85,7 +85,7 @@ export default function Offers() {
 
   const saveDiscount = async () => {
     if (!dForm.name) return toast.error("الاسم مطلوب");
-    const payload: any = {
+    const payload: DiscountInsert = {
       name: dForm.name,
       scope: dForm.scope,
       scope_value: dForm.scope_value || null,
@@ -107,7 +107,7 @@ export default function Offers() {
 
   const saveEvent = async () => {
     if (!eForm.name) return toast.error("الاسم مطلوب");
-    const payload: any = {
+    const payload: MegaEventInsert = {
       name: eForm.name,
       trigger_kind: eForm.trigger_kind,
       active_date: eForm.active_date || null,
