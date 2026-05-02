@@ -44,8 +44,7 @@ export const placeOrderAtomic = async (
 ): Promise<PlaceOrderResult> => {
   try {
     console.error("RPC_PAYLOAD:", payload);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("place_order_atomic", payload);
+    const { data, error } = await supabase.rpc("place_order_atomic", payload);
 
     if (error) {
       console.error("RPC_ERROR:", error);
