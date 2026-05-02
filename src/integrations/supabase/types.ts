@@ -4748,6 +4748,10 @@ export type Database = {
         }[]
       }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
+      order_has_vendor_store: {
+        Args: { _order_id: string; _user_id: string }
+        Returns: boolean
+      }
       payments_schedule: { Args: { _days_ahead?: number }; Returns: Json }
       personalized_flash_picks: {
         Args: { _limit?: number; _user_id: string }
