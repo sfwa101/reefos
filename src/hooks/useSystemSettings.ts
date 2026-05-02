@@ -45,7 +45,7 @@ export function useSystemSetting<T>(key: string, fallback: T): {
 export async function setSystemSetting<T>(key: string, value: T): Promise<boolean> {
   const { error } = await supabase
     .from("app_settings")
-    .upsert({ key, value: value as unknown as object }, { onConflict: "key" });
+    .upsert([{ key, value: value as unknown as object }], { onConflict: "key" });
   if (error) {
     console.error("[system-settings] save failed", key, error);
     return false;
