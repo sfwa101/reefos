@@ -481,11 +481,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const isGuest = !currentUser;
 
       if (isGuest) {
-        const n = guestName.trim();
-        const p = guestPhone.trim();
-        const a = guestAddress.trim();
-        if (!n || !p || !a) {
-          toast.error("من فضلك اكتب الاسم ورقم الهاتف وعنوان التوصيل");
+        if (!validateGuestFields(guestName, guestPhone, guestAddress)) {
           setSubmitting(false);
           submittingRef.current = false;
           try { preOpened?.close(); } catch { /* noop */ }
@@ -493,8 +489,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      if (minOrderTotal > 0 && grand < minOrderTotal) {
-        toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
+      if (!validateMinOrder(grand, minOrderTotal)) {
         setSubmitting(false);
         submittingRef.current = false;
         try { preOpened?.close(); } catch { /* noop */ }
