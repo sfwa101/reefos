@@ -13,12 +13,14 @@ import {
   EmptyState,
   SectionLink,
 } from "@/components/admin/ui";
-const PremiumCharts = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({
-  default: () => null as never, // not used directly; we import named below
-})));
-// named lazy imports
-const RevenueAreaChart = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })));
-const CategoryBarChart = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })));
+const RevenueAreaChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })),
+);
+const CategoryBarChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })),
+);
+
+const ChartFallback = ({ h = 110 }: { h?: number }) => <Skeleton className="w-full rounded-2xl" style={{ height: h }} />;
 import {
   ChevronLeft,
   Package,
