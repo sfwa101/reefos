@@ -260,6 +260,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const nextSignature = cartSignature(next);
         if (nextSignature === cartSignature(linesRef.current)) {
           lastPushedSignatureRef.current = nextSignature;
+          if (shouldPush) await pushRemoteCart(uid, next);
           return;
         }
         skipNextPushRef.current = true;
