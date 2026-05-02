@@ -16,17 +16,35 @@ type PU = {
   is_default_sell: boolean;
   is_active: boolean;
 };
+type Breakdown = { human_readable?: string; total_pieces?: number } | null;
+type ValidatePricing = { ok: boolean; message?: string } | null;
+
+// Typed bridge: these tables/RPCs aren't in the generated Supabase types yet.
+// Wrapping the client in a precise interface keeps every call site checked.
+type ProductUnitsDb = {
+  from(table: "units_of_measure"): {
+    select(s: string): { order(c: string): Promise<{ data: UoM[] | null }> };
+  };
+  from(table: "product_units"): {
+    select(s: string): { eq(c: string, v: string): { order(c: string): Promise<{ data: PU[] | null }> } };
+    delete(): { eq(c: string, v: string): Promise<{ error: { message: string } | null }> };
+    upsert(payload: PU[], opts: { onConflict: string }): Promise<{ error: { message: string } | null }>;
+  };
+  rpc(fn: "nested_stock_breakdown", args: { _product_id: string }): Promise<{ data: Breakdown }>;
+  rpc(fn: "validate_unit_pricing", args: { _product_id: string; _unit_code: string; _selling_price: number }): Promise<{ data: ValidatePricing }>;
+};
 
 export default function ProductUnits() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("store_manager") || hasRole("staff");
+  const db = supabase as unknown as ProductUnitsDb;
 
   const [units, setUnits] = useState<UoM[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [q, setQ] = useState("");
   const [selected, setSelected] = useState<ProductRow | null>(null);
   const [rows, setRows] = useState<PU[]>([]);
-  const [breakdown, setBreakdown] = useState<any>(null);
+  const [breakdown, setBreakdown] = useState<Breakdown>(null);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -34,7 +52,7 @@ export default function ProductUnits() {
     if (!allowed) return;
     (async () => {
       const [{ data: u }, { data: p }] = await Promise.all([
-        (supabase as any).from("units_of_measure").select("*").order("sort_order"),
+        db.from("units_of_measure").select("*").order("sort_order"),
         supabase.from("products").select("id,name,price").eq("is_active", true).order("name").limit(500),
       ]);
       setUnits((u || []) as UoM[]);
@@ -46,8 +64,8 @@ export default function ProductUnits() {
     setSelected(p);
     setLoading(true);
     const [{ data: pu }, { data: bd }] = await Promise.all([
-      (supabase as any).from("product_units").select("*").eq("product_id", p.id).order("conversion_factor"),
-      (supabase as any).rpc("nested_stock_breakdown", { _product_id: p.id }),
+      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor"),
+      db.rpc("nested_stock_breakdown", { _product_id: p.id }),
     ]);
     setRows((pu || []) as PU[]);
     setBreakdown(bd);
@@ -71,7 +89,7 @@ export default function ProductUnits() {
   const removeRow = async (idx: number) => {
     const row = rows[idx];
     if (row.id) {
-      const { error } = await (supabase as any).from("product_units").delete().eq("id", row.id);
+      const { error } = await db.from("product_units").delete().eq("id", row.id);
       if (error) return toast.error(error.message);
     }
     setRows((rs) => rs.filter((_, i) => i !== idx));
@@ -84,13 +102,13 @@ export default function ProductUnits() {
       // Validate pricing per unit
       for (const r of rows) {
         if (r.selling_price && r.selling_price > 0) {
-          const { data: v } = await (supabase as any).rpc("validate_unit_pricing", {
+          const { data: v } = await db.rpc("validate_unit_pricing", {
             _product_id: r.product_id,
             _unit_code: r.unit_code,
             _selling_price: r.selling_price,
           });
-          if (v && (v as any).ok === false) {
-            toast.error(`${r.unit_code}: ${(v as any).message}`);
+          if (v && v.ok === false) {
+            toast.error(`${r.unit_code}: ${v.message ?? "تسعير غير صالح"}`);
             setSaving(false);
             return;
           }
@@ -107,14 +125,14 @@ export default function ProductUnits() {
         is_active: r.is_active,
       }));
 
-      const { error } = await (supabase as any).from("product_units").upsert(payload, {
+      const { error } = await db.from("product_units").upsert(payload, {
         onConflict: "product_id,unit_code",
       });
       if (error) throw error;
       toast.success("تم الحفظ");
       loadProductUnits(selected);
-    } catch (e: any) {
-      toast.error(e?.message || "فشل");
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : "فشل");
     } finally {
       setSaving(false);
     }

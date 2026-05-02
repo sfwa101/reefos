@@ -11,6 +11,31 @@ type Coupon = { id: string; code: string; description: string | null; discount_p
 type Discount = { id: string; name: string; scope: string; scope_value: string | null; discount_pct: number | null; discount_amount: number | null; min_user_level: string | null; is_active: boolean };
 type MegaEvent = { id: string; name: string; trigger_kind: string; active_date: string | null; banner_title: string | null; banner_subtitle: string | null; global_discount_pct: number | null; is_active: boolean };
 
+type CouponInsert = Omit<Coupon, "id" | "uses_count" | "discount_amount"> & { discount_amount: number | null };
+type DiscountInsert = Omit<Discount, "id" | "discount_amount"> & { discount_amount?: number | null };
+type MegaEventInsert = Omit<MegaEvent, "id">;
+
+// Supabase generated types don't yet include these tables — use a typed bridge
+// instead of `as any` so call sites stay strongly checked.
+type OffersDb = {
+  from(table: "coupons"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Coupon[] | null }> };
+    insert(payload: CouponInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<Coupon>): { eq(col: string, val: string): Promise<unknown> };
+  };
+  from(table: "discounts"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Discount[] | null }> };
+    insert(payload: DiscountInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<Discount>): { eq(col: string, val: string): Promise<unknown> };
+  };
+  from(table: "mega_events"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: MegaEvent[] | null }> };
+    insert(payload: MegaEventInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<MegaEvent>): { eq(col: string, val: string): Promise<unknown> };
+  };
+};
+const db = supabase as unknown as OffersDb;
+
 export default function Offers() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -23,9 +48,9 @@ export default function Offers() {
 
   const loadAll = async () => {
     const [c, d, e] = await Promise.all([
-      (supabase as any).from("coupons").select("*").order("created_at", { ascending: false }),
-      (supabase as any).from("discounts").select("*").order("created_at", { ascending: false }),
-      (supabase as any).from("mega_events").select("*").order("created_at", { ascending: false }),
+      db.from("coupons").select("*").order("created_at", { ascending: false }),
+      db.from("discounts").select("*").order("created_at", { ascending: false }),
+      db.from("mega_events").select("*").order("created_at", { ascending: false }),
     ]);
     setCoupons((c.data ?? []) as Coupon[]);
     setDiscounts((d.data ?? []) as Discount[]);
@@ -35,7 +60,7 @@ export default function Offers() {
 
   const saveCoupon = async () => {
     if (!cForm.code.trim()) return toast.error("الكود مطلوب");
-    const payload: any = {
+    const payload: CouponInsert = {
       code: cForm.code.trim().toUpperCase(),
       description: cForm.description || null,
       discount_pct: cForm.discount_pct ? Number(cForm.discount_pct) : null,
@@ -46,7 +71,7 @@ export default function Offers() {
       ends_at: cForm.ends_at || null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("coupons").insert(payload);
+    const { error } = await db.from("coupons").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الكوبون");
     setCForm({ code: "", description: "", discount_pct: "", discount_amount: "", min_order_total: "", min_user_level: "", max_uses: "", ends_at: "" });
@@ -54,13 +79,13 @@ export default function Offers() {
   };
 
   const toggleCoupon = async (id: string, current: boolean) => {
-    await (supabase as any).from("coupons").update({ is_active: !current }).eq("id", id);
+    await db.from("coupons").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 
   const saveDiscount = async () => {
     if (!dForm.name) return toast.error("الاسم مطلوب");
-    const payload: any = {
+    const payload: DiscountInsert = {
       name: dForm.name,
       scope: dForm.scope,
       scope_value: dForm.scope_value || null,
@@ -68,7 +93,7 @@ export default function Offers() {
       min_user_level: dForm.min_user_level || null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("discounts").insert(payload);
+    const { error } = await db.from("discounts").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الخصم");
     setDForm({ name: "", scope: "global", scope_value: "", discount_pct: "", min_user_level: "" });
@@ -76,13 +101,13 @@ export default function Offers() {
   };
 
   const toggleDiscount = async (id: string, current: boolean) => {
-    await (supabase as any).from("discounts").update({ is_active: !current }).eq("id", id);
+    await db.from("discounts").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 
   const saveEvent = async () => {
     if (!eForm.name) return toast.error("الاسم مطلوب");
-    const payload: any = {
+    const payload: MegaEventInsert = {
       name: eForm.name,
       trigger_kind: eForm.trigger_kind,
       active_date: eForm.active_date || null,
@@ -91,7 +116,7 @@ export default function Offers() {
       global_discount_pct: eForm.global_discount_pct ? Number(eForm.global_discount_pct) : null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("mega_events").insert(payload);
+    const { error } = await db.from("mega_events").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الحدث");
     setEForm({ name: "", trigger_kind: "manual", active_date: "", banner_title: "", banner_subtitle: "", global_discount_pct: "" });
@@ -99,7 +124,7 @@ export default function Offers() {
   };
 
   const toggleEvent = async (id: string, current: boolean) => {
-    await (supabase as any).from("mega_events").update({ is_active: !current }).eq("id", id);
+    await db.from("mega_events").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 

@@ -36,6 +36,7 @@ import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-ap
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSuppliersRouteImport } from './routes/admin.suppliers'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
+import { Route as AdminStoreSettlementsRouteImport } from './routes/admin.store-settlements'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
@@ -64,6 +65,7 @@ import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
+import { Route as AdminDriverCashSettlementsRouteImport } from './routes/admin.driver-cash-settlements'
 import { Route as AdminDesignRouteImport } from './routes/admin.design'
 import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delivery-settings'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
@@ -75,6 +77,7 @@ import { Route as AdminCommissionLedgerRouteImport } from './routes/admin.commis
 import { Route as AdminCharityRouteImport } from './routes/admin.charity'
 import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier-sessions'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -262,6 +265,11 @@ const AdminStoresRoute = AdminStoresRouteImport.update({
   path: '/stores',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStoreSettlementsRoute = AdminStoreSettlementsRouteImport.update({
+  id: '/store-settlements',
+  path: '/store-settlements',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStaffRoute = AdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -402,6 +410,12 @@ const AdminDriverSettlementsRoute = AdminDriverSettlementsRouteImport.update({
   path: '/driver-settlements',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminDriverCashSettlementsRoute =
+  AdminDriverCashSettlementsRouteImport.update({
+    id: '/driver-cash-settlements',
+    path: '/driver-cash-settlements',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminDesignRoute = AdminDesignRouteImport.update({
   id: '/design',
   path: '/design',
@@ -456,6 +470,11 @@ const AdminCfoRoute = AdminCfoRouteImport.update({
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   id: '/categories',
   path: '/categories',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCashierSessionsRoute = AdminCashierSessionsRouteImport.update({
+  id: '/cashier-sessions',
+  path: '/cashier-sessions',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBranchesRoute = AdminBranchesRouteImport.update({
@@ -742,6 +761,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
@@ -753,6 +773,7 @@ export interface FileRoutesByFullPath {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -781,6 +802,7 @@ export interface FileRoutesByFullPath {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
@@ -856,6 +878,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
@@ -867,6 +890,7 @@ export interface FileRoutesByTo {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -895,6 +919,7 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
@@ -977,6 +1002,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
@@ -988,6 +1014,7 @@ export interface FileRoutesById {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
@@ -1016,6 +1043,7 @@ export interface FileRoutesById {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
@@ -1099,6 +1127,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
@@ -1110,6 +1139,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1138,6 +1168,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
@@ -1213,6 +1244,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
@@ -1224,6 +1256,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1252,6 +1285,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
@@ -1333,6 +1367,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
@@ -1344,6 +1379,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
     | '/admin/executive'
@@ -1372,6 +1408,7 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
@@ -1634,6 +1671,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStoresRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/store-settlements': {
+      id: '/admin/store-settlements'
+      path: '/store-settlements'
+      fullPath: '/admin/store-settlements'
+      preLoaderRoute: typeof AdminStoreSettlementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/staff': {
       id: '/admin/staff'
       path: '/staff'
@@ -1830,6 +1874,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminDriverSettlementsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/driver-cash-settlements': {
+      id: '/admin/driver-cash-settlements'
+      path: '/driver-cash-settlements'
+      fullPath: '/admin/driver-cash-settlements'
+      preLoaderRoute: typeof AdminDriverCashSettlementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/design': {
       id: '/admin/design'
       path: '/design'
@@ -1905,6 +1956,13 @@ declare module '@tanstack/react-router' {
       path: '/categories'
       fullPath: '/admin/categories'
       preLoaderRoute: typeof AdminCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/cashier-sessions': {
+      id: '/admin/cashier-sessions'
+      path: '/cashier-sessions'
+      fullPath: '/admin/cashier-sessions'
+      preLoaderRoute: typeof AdminCashierSessionsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/branches': {
@@ -2419,6 +2477,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
+  AdminCashierSessionsRoute: typeof AdminCashierSessionsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCfoRoute: typeof AdminCfoRoute
   AdminCharityRoute: typeof AdminCharityRoute
@@ -2430,6 +2489,7 @@ interface AdminRouteChildren {
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
   AdminDeliverySettingsRoute: typeof AdminDeliverySettingsRoute
   AdminDesignRoute: typeof AdminDesignRoute
+  AdminDriverCashSettlementsRoute: typeof AdminDriverCashSettlementsRoute
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
   AdminDriversRoute: typeof AdminDriversRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
@@ -2458,6 +2518,7 @@ interface AdminRouteChildren {
   AdminSavingsRoute: typeof AdminSavingsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
+  AdminStoreSettlementsRoute: typeof AdminStoreSettlementsRoute
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSuppliersRoute: typeof AdminSuppliersRoute
   AdminSupportRoute: typeof AdminSupportRoute
@@ -2479,6 +2540,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
+  AdminCashierSessionsRoute: AdminCashierSessionsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCfoRoute: AdminCfoRoute,
   AdminCharityRoute: AdminCharityRoute,
@@ -2490,6 +2552,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
   AdminDeliverySettingsRoute: AdminDeliverySettingsRoute,
   AdminDesignRoute: AdminDesignRoute,
+  AdminDriverCashSettlementsRoute: AdminDriverCashSettlementsRoute,
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
   AdminDriversRoute: AdminDriversRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
@@ -2518,6 +2581,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSavingsRoute: AdminSavingsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
+  AdminStoreSettlementsRoute: AdminStoreSettlementsRoute,
   AdminStoresRoute: AdminStoresRoute,
   AdminSuppliersRoute: AdminSuppliersRoute,
   AdminSupportRoute: AdminSupportRoute,
