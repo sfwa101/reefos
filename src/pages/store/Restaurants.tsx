@@ -1,10 +1,10 @@
 /**
- * Restaurants — live storefront wired to Supabase `products` table.
- * Fetches items where source = 'restaurants' OR fulfillment_type = 'restaurant'
- * and groups them by `brand` (restaurant name). Mobile-first 2-col grid.
+ * Restaurants — premium food-delivery storefront (Talabat/UberEats-tier).
+ * Live Supabase fetch grouped by brand. Vertical MealRow layout, sticky
+ * restaurant tabs, mobile-first RTL.
  */
-import { useEffect, useMemo, useState } from "react";
-import { Clock, MapPin, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Clock, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 
 import BackHeader from "@/components/BackHeader";
@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
+import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/products";
 
 type RestoProduct = {
@@ -24,11 +25,12 @@ type RestoProduct = {
   rating: number | null;
   source: string | null;
   fulfillment_type: string | null;
+  description: string | null;
   metadata: Record<string, unknown> | null;
 };
 
 const FALLBACK_IMG =
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=600&q=80&auto=format&fit=crop";
+  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80&auto=format&fit=crop";
 
 const getPrep = (m: RestoProduct["metadata"]): number | null => {
   if (!m || typeof m !== "object") return null;
@@ -36,7 +38,9 @@ const getPrep = (m: RestoProduct["metadata"]): number | null => {
   return typeof v === "number" ? v : null;
 };
 
-const MealCard = ({ p }: { p: RestoProduct }) => {
+/* ----------------------------- Meal Row ----------------------------- */
+
+const MealRow = ({ p }: { p: RestoProduct }) => {
   const { add } = useCartActions();
   const qty = useCartLineQty(p.id);
   const prep = getPrep(p.metadata);
@@ -56,51 +60,74 @@ const MealCard = ({ p }: { p: RestoProduct }) => {
   };
 
   return (
-    <article className="group flex flex-col overflow-hidden rounded-2xl bg-card text-right shadow-soft ring-1 ring-border/50">
-      <div className="relative aspect-square overflow-hidden bg-secondary/40">
+    <article
+      dir="rtl"
+      className="flex items-stretch gap-3 rounded-2xl bg-card p-3 shadow-soft ring-1 ring-border/40 transition active:scale-[0.99]"
+    >
+      {/* Image — right side in RTL */}
+      <div className="relative h-[100px] w-[100px] shrink-0 overflow-hidden rounded-xl bg-secondary/40 shadow-soft">
         <img
           src={p.image ?? FALLBACK_IMG}
           alt={p.name}
           loading="lazy"
           decoding="async"
-          className="h-full w-full object-cover transition group-hover:scale-105"
+          className="h-full w-full object-cover"
         />
-        {prep !== null && (
-          <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-foreground/85 px-2 py-1 text-[10px] font-extrabold text-background backdrop-blur">
-            <Clock className="h-3 w-3" />
-            {toLatin(prep)} د
-          </span>
-        )}
       </div>
-      <div className="flex flex-1 flex-col gap-1 p-3">
-        {p.brand && (
-          <p className="line-clamp-1 text-[10px] font-medium text-muted-foreground">
-            {p.brand}
+
+      {/* Details — left */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <h4 className="truncate text-[14px] font-extrabold leading-tight text-foreground">
+          {p.name}
+        </h4>
+
+        {p.description && (
+          <p className="mt-0.5 line-clamp-2 text-[11px] leading-snug text-muted-foreground">
+            {p.description}
           </p>
         )}
-        <h3 className="line-clamp-2 text-[13px] font-extrabold leading-tight text-foreground">
-          {p.name}
-        </h3>
-        {p.rating != null && (
-          <div className="flex items-center gap-1 text-[10.5px]">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            <span className="font-bold tabular-nums">{toLatin(Number(p.rating))}</span>
-          </div>
-        )}
-        <div className="mt-1 flex items-end justify-between">
+
+        <div className="mt-1 flex items-center gap-2 text-[10.5px] text-muted-foreground">
+          {prep !== null && (
+            <span className="inline-flex items-center gap-0.5">
+              <Clock className="h-3 w-3" strokeWidth={2.4} />
+              <span className="tabular-nums">{toLatin(prep)} د</span>
+            </span>
+          )}
+          {p.rating != null && (
+            <span className="inline-flex items-center gap-0.5">
+              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+              <span className="font-bold tabular-nums text-foreground">
+                {toLatin(Number(p.rating))}
+              </span>
+            </span>
+          )}
+        </div>
+
+        {/* Price + Add */}
+        <div className="mt-auto flex items-end justify-between pt-2">
           <div className="leading-none">
-            <span className="font-display text-lg font-extrabold tabular-nums">
+            <span className="font-display text-[17px] font-extrabold tabular-nums text-primary">
               {toLatin(Number(p.price).toLocaleString("en-US"))}
             </span>
-            <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
+            <span className="ms-1 text-[10px] font-bold text-primary/70">
+              ج.م
+            </span>
           </div>
           <button
             onClick={handleAdd}
             aria-label="أضف إلى السلة"
-            className="flex h-9 items-center gap-1 rounded-full bg-primary px-3 text-[11px] font-extrabold text-primary-foreground shadow-pill transition active:scale-95"
+            className={cn(
+              "flex h-9 items-center gap-1 rounded-full px-3.5 text-[11px] font-extrabold shadow-pill transition active:scale-90",
+              qty === 0
+                ? "bg-primary text-primary-foreground"
+                : "bg-foreground text-background",
+            )}
           >
             <Plus className="h-3.5 w-3.5" strokeWidth={3} />
-            {qty === 0 ? "اطلب" : toLatin(qty)}
+            <span className="tabular-nums">
+              {qty === 0 ? "أضف" : toLatin(qty)}
+            </span>
           </button>
         </div>
       </div>
@@ -108,11 +135,74 @@ const MealCard = ({ p }: { p: RestoProduct }) => {
   );
 };
 
+/* ------------------------- Restaurant Section ------------------------- */
+
+const RestaurantSection = ({
+  brand,
+  list,
+  anchorId,
+}: {
+  brand: string;
+  list: RestoProduct[];
+  anchorId: string;
+}) => {
+  const avgPrep = useMemo(() => {
+    const prepTimes = list.map((p) => getPrep(p.metadata)).filter((v): v is number => v !== null);
+    if (!prepTimes.length) return null;
+    return Math.round(prepTimes.reduce((a, b) => a + b, 0) / prepTimes.length);
+  }, [list]);
+
+  const monogram = brand.trim().charAt(0) || "م";
+
+  return (
+    <section id={anchorId} className="space-y-3 scroll-mt-20">
+      {/* Premium header card */}
+      <div className="flex items-center gap-3 rounded-2xl bg-primary-soft p-3.5 ring-1 ring-primary/15">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-pill">
+          <span className="font-display text-lg font-extrabold">{monogram}</span>
+        </div>
+        <div className="min-w-0 flex-1">
+          <h3 className="truncate font-display text-[15px] font-extrabold text-foreground">
+            {brand}
+          </h3>
+          <div className="mt-0.5 flex items-center gap-2 text-[10.5px] text-foreground/70">
+            {avgPrep !== null && (
+              <span className="inline-flex items-center gap-0.5 font-bold">
+                <Clock className="h-3 w-3" strokeWidth={2.4} />
+                {toLatin(avgPrep)} د متوسط
+              </span>
+            )}
+            <span className="inline-flex h-1 w-1 rounded-full bg-foreground/30" />
+            <span className="font-bold">توصيل موحّد</span>
+          </div>
+        </div>
+        <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-extrabold text-primary shadow-soft">
+          {toLatin(list.length)} وجبة
+        </span>
+      </div>
+
+      {/* Vertical meal list */}
+      <div className="flex flex-col space-y-3">
+        {list.map((p) => (
+          <MealRow key={p.id} p={p} />
+        ))}
+      </div>
+    </section>
+  );
+};
+
+/* ------------------------------- Page ------------------------------- */
+
+const slug = (s: string) =>
+  "rest-" + s.replace(/\s+/g, "-").toLowerCase().slice(0, 40);
+
 const Restaurants = () => {
   const theme = storeThemes.restaurants;
   const [items, setItems] = useState<RestoProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [activeBrand, setActiveBrand] = useState<string | null>(null);
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -121,15 +211,13 @@ const Restaurants = () => {
       const { data, error } = await supabase
         .from("products")
         .select(
-          "id,name,brand,price,image,rating,source,fulfillment_type,metadata",
+          "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",
         )
         .or("source.eq.restaurants,fulfillment_type.eq.restaurant")
         .eq("is_active", true)
         .order("sort_order", { ascending: true, nullsFirst: false });
       if (cancelled) return;
-      if (error) {
-        toast.error("تعذّر تحميل المطاعم");
-      }
+      if (error) toast.error("تعذّر تحميل المطاعم");
       setItems((data ?? []) as RestoProduct[]);
       setLoading(false);
     })();
@@ -142,9 +230,7 @@ const Restaurants = () => {
     const q = query.trim();
     const filtered = q
       ? items.filter(
-          (p) =>
-            p.name.includes(q) ||
-            (p.brand ?? "").includes(q),
+          (p) => p.name.includes(q) || (p.brand ?? "").includes(q),
         )
       : items;
     const map = new Map<string, RestoProduct[]>();
@@ -156,10 +242,16 @@ const Restaurants = () => {
     return Array.from(map.entries());
   }, [items, query]);
 
-  const totalRestaurants = useMemo(
-    () => new Set(items.map((p) => p.brand ?? "أخرى")).size,
+  const allBrands = useMemo(
+    () => Array.from(new Set(items.map((p) => p.brand ?? "أخرى"))),
     [items],
   );
+
+  const handleJump = (brand: string) => {
+    setActiveBrand(brand);
+    const el = document.getElementById(slug(brand));
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <div className="space-y-4 pb-12">
@@ -186,20 +278,12 @@ const Restaurants = () => {
         </p>
       </section>
 
-      {/* Stats bar */}
-      <div className="flex items-center gap-2 rounded-2xl bg-primary-soft px-4 py-2.5 ring-1 ring-primary/15">
-        <MapPin className="h-4 w-4 text-primary" />
-        <p className="flex-1 text-[12px] font-extrabold text-foreground">
-          متاح الآن:{" "}
-          <span className="text-primary">
-            {toLatin(totalRestaurants)} مطعم · {toLatin(items.length)} وجبة
-          </span>
-        </p>
-      </div>
-
       {/* Search */}
       <div className="glass flex items-center gap-3 rounded-2xl px-4 py-3 shadow-soft">
-        <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
+        <Search
+          className="h-4 w-4 text-muted-foreground"
+          strokeWidth={2.4}
+        />
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -208,20 +292,58 @@ const Restaurants = () => {
         />
       </div>
 
-      {/* Loading skeletons */}
+      {/* Sticky restaurant tabs */}
+      {!loading && allBrands.length > 1 && (
+        <div
+          ref={tabsRef}
+          className="sticky top-[60px] z-20 -mx-4 bg-background/85 px-4 py-2 backdrop-blur-md"
+        >
+          <div className="no-scrollbar flex gap-2 overflow-x-auto">
+            {allBrands.map((b) => {
+              const active = activeBrand === b;
+              return (
+                <button
+                  key={b}
+                  onClick={() => handleJump(b)}
+                  className={cn(
+                    "whitespace-nowrap rounded-full px-3.5 py-1.5 text-[11px] font-extrabold transition active:scale-95",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-pill"
+                      : "bg-card text-foreground ring-1 ring-border/60",
+                  )}
+                >
+                  {b}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Loading */}
       {loading && (
-        <div className="grid grid-cols-2 gap-3">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="aspect-square w-full rounded-2xl" />
-              <Skeleton className="h-3 w-3/4" />
-              <Skeleton className="h-3 w-1/2" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div
+              key={i}
+              className="flex gap-3 rounded-2xl bg-card p-3 shadow-soft ring-1 ring-border/40"
+            >
+              <Skeleton className="h-[100px] w-[100px] rounded-xl" />
+              <div className="flex-1 space-y-2 py-1">
+                <Skeleton className="h-3.5 w-3/4" />
+                <Skeleton className="h-3 w-full" />
+                <Skeleton className="h-3 w-1/2" />
+                <div className="flex justify-between pt-3">
+                  <Skeleton className="h-4 w-14" />
+                  <Skeleton className="h-8 w-16 rounded-full" />
+                </div>
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Grouped by restaurant */}
+      {/* Empty */}
       {!loading && grouped.length === 0 && (
         <div className="rounded-[1.75rem] bg-card p-8 text-center shadow-soft ring-1 ring-border/40">
           <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft">
@@ -233,21 +355,15 @@ const Restaurants = () => {
         </div>
       )}
 
+      {/* Sections */}
       {!loading &&
         grouped.map(([brand, list]) => (
-          <section key={brand} className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h3 className="font-display text-base font-extrabold">{brand}</h3>
-              <span className="text-[10px] font-bold text-muted-foreground">
-                {toLatin(list.length)} وجبة
-              </span>
-            </div>
-            <div className="grid grid-cols-2 gap-3">
-              {list.map((p) => (
-                <MealCard key={p.id} p={p} />
-              ))}
-            </div>
-          </section>
+          <RestaurantSection
+            key={brand}
+            brand={brand}
+            list={list}
+            anchorId={slug(brand)}
+          />
         ))}
     </div>
   );
