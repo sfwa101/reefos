@@ -3,6 +3,8 @@ import { Image as ImageIcon, Tag, Zap } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PanelErrorBoundary } from "@/features/admin/marketing/PanelErrorBoundary";
+import { PrintReportButton } from "@/components/admin/PrintReportButton";
 
 // Lazy-loaded panels (each tab loads independently)
 const BannersPanel = lazy(() => import("@/features/admin/marketing/BannersPanel"));
@@ -20,6 +22,12 @@ const PanelFallback = () => (
   </div>
 );
 
+const wrapPanel = (key: TabKey, node: React.ReactNode) => (
+  <PanelErrorBoundary label={key} key={key}>
+    <Suspense fallback={<PanelFallback />}>{node}</Suspense>
+  </PanelErrorBoundary>
+);
+
 export default function Marketing() {
   const [tab, setTab] = useState<TabKey>("banners");
 
@@ -33,9 +41,12 @@ export default function Marketing() {
         </p>
       </div>
 
-      <div className="px-4 lg:px-6 pt-3 pb-10 max-w-[1400px] mx-auto">
+      <div className="px-4 lg:px-6 pt-3 pb-10 max-w-[1400px] mx-auto print-area">
+        <div className="flex justify-end mb-3 no-print">
+          <PrintReportButton label="تصدير تقرير التسويق" />
+        </div>
         <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="w-full">
-          <TabsList className="grid w-full grid-cols-3 h-12 bg-surface-muted rounded-2xl p-1 mb-5">
+          <TabsList className="grid w-full grid-cols-3 h-12 bg-surface-muted rounded-2xl p-1 mb-5 no-print">
             <TabsTrigger value="banners" className="rounded-xl gap-2 text-[13px]">
               <ImageIcon className="h-4 w-4" /> البانرات
             </TabsTrigger>
@@ -48,19 +59,13 @@ export default function Marketing() {
           </TabsList>
 
           <TabsContent value="banners" className="mt-0">
-            <Suspense fallback={<PanelFallback />}>
-              <BannersPanel />
-            </Suspense>
+            {wrapPanel("banners", <BannersPanel />)}
           </TabsContent>
           <TabsContent value="flash" className="mt-0">
-            <Suspense fallback={<PanelFallback />}>
-              <FlashPanel />
-            </Suspense>
+            {wrapPanel("flash", <FlashPanel />)}
           </TabsContent>
           <TabsContent value="coupons" className="mt-0">
-            <Suspense fallback={<PanelFallback />}>
-              <CouponsPanel />
-            </Suspense>
+            {wrapPanel("coupons", <CouponsPanel />)}
           </TabsContent>
         </Tabs>
       </div>
