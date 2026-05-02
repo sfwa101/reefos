@@ -208,7 +208,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
               next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
             const normalized = normalizeItems(next);
             const signature = itemsSignature(normalized);
-            if (signature === lastLocalItemsSignatureRef.current) return prev;
+            if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
             lastLocalItemsSignatureRef.current = signature;
             return normalized;
           });
