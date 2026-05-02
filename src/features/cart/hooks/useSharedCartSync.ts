@@ -82,7 +82,7 @@ type UseSharedCartSyncResult = {
 const ACTIVE_STATES: SharedCartStatus[] = ["active"];
 
 const stableJson = (value: unknown): string => {
-  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
   if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
   const obj = value as Record<string, unknown>;
   return `{${Object.keys(obj)
