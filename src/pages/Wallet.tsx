@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toLatin } from "@/lib/format";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
-import { WalletBalanceCard } from "@/features/wallet/components/WalletBalanceCard";
+import { BalanceCard } from "@/features/wallet/components/BalanceCard";
+import { ActionGrid } from "@/features/wallet/components/ActionGrid";
 import {
   SlidingTabs,
   MiniStatGrid,
@@ -69,16 +70,19 @@ const Wallet = () => {
         )}
       </motion.section>
 
-      {/* HOLOGRAPHIC CARD slot */}
-      <WalletBalanceCard
+      {/* HOLOGRAPHIC CARD */}
+      <BalanceCard
         name={c.profile?.full_name || "عميل ريف"}
         balance={Number(c.balance?.balance ?? 0)}
-        points={c.balance?.points ?? 0}
-        savings={c.totalSavings}
-        tierLabel={c.tier?.label}
         trustLimit={c.trustLimit}
+        tierLabel={c.tier?.label}
+      />
+
+      {/* GLASS ACTION GRID */}
+      <ActionGrid
         onTopup={c.openTopup}
         onTransfer={() => c.setShowTransfer(true)}
+        onJar={() => c.setShowJar(true)}
         onPos={() => c.setShowPos(true)}
       />
 
