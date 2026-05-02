@@ -97,6 +97,40 @@ const safeStorage = {
   },
 };
 
+/** Stable identity key for a cart line (product + variant + booking + kind). */
+const lineKey = (l: { product: { id: string }; meta?: CartLineMeta }): string => {
+  const m = l.meta ?? {};
+  return [
+    l.product.id,
+    m.kind ?? "buy",
+    m.variantId ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
+      : "",
+  ].join("|");
+};
+
+/** Collapse duplicate lines (same key) by summing qty. */
+function dedupeLines<T extends { product: { id: string }; qty: number; meta?: CartLineMeta }>(
+  lines: T[],
+): T[] {
+  const map = new Map<string, T>();
+  for (const l of lines) {
+    const k = lineKey(l);
+    const existing = map.get(k);
+    if (existing) {
+      map.set(k, { ...existing, qty: existing.qty + l.qty });
+    } else {
+      map.set(k, l);
+    }
+  }
+  return Array.from(map.values());
+}
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Store lines in a ref so updates do not trigger provider re-renders.
   // Components subscribe via useSyncExternalStore with a selector, so each
