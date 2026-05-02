@@ -1,5 +1,5 @@
 import { useRef, type PointerEvent as ReactPointerEvent } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { motion, useMotionTemplate, useMotionValue, useSpring, useTransform } from "framer-motion";
 import { CreditCard, Cpu, ShieldCheck, Wifi } from "lucide-react";
 import { toLatin } from "@/lib/format";
 
