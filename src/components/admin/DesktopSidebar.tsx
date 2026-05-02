@@ -6,6 +6,7 @@ import {
   Boxes, Layers, ArrowRightLeft, Coins, KeyRound,
   HandCoins, ClipboardList, PiggyBank,
   Scale, Ban, MessageCircle, AlertTriangle, Globe, Sliders,
+  CalendarClock, Percent, BookOpen, Handshake,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -66,6 +67,14 @@ const groups = [
     { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "تسويات المناديب" },
     { to: "/admin/driver-settlements", icon: Wallet, label: "تصفية العهدة" },
     { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع" },
+    { to: "/admin/partner-ledgers", icon: Handshake, label: "حسابات شركاء المنتجات" },
+    { to: "/admin/discount-overrides", icon: Percent, label: "تجاوزات الخصومات" },
+  ]},
+  { title: "إدارة الموظفين", items: [
+    { to: "/admin/staff", icon: UserCog, label: "الموظفون" },
+    { to: "/admin/staff-attendance", icon: CalendarClock, label: "الحضور والانصراف" },
+    { to: "/admin/staff-advances", icon: BookOpen, label: "السلف والنثرية" },
+    { to: "/admin/advance-approvals", icon: ShieldCheck, label: "موافقات السلف" },
   ]},
   { title: "الامتثال الشرعي وحكيم AI", items: [
     { to: "/admin/hakim", icon: Sparkles, label: "المستشار حكيم AI" },
@@ -90,7 +99,6 @@ const groups = [
     { to: "/admin/design", icon: Layout, label: "محرر التصميم" },
   ]},
   { title: "إعدادات النظام", items: [
-    { to: "/admin/staff", icon: UserCog, label: "الموظفون" },
     { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات" },
     { to: "/admin/support", icon: MessagesSquare, label: "الدعم" },
     { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات" },
