@@ -62,6 +62,9 @@ const sharedLineIdentity = (productId: string, meta?: Record<string, unknown> | 
     m.bookingSlot ?? "",
     m.borrowDuration ?? "",
     (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
+      : "",
   ].join("|");
 };
 
