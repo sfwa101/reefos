@@ -266,7 +266,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         trackBuyAgain(p.id);
         void logBehavior({ event: "add_to_cart", productId: p.id, category: (p as any).category });
         setLines((prev) => {
-          const i = prev.findIndex((l) => l.product.id === p.id);
+          // Match on full identity (product + variant + booking + kind).
+          const candidate = { product: p, qty, meta };
+          const targetKey = lineKey(candidate);
+          const i = prev.findIndex((l) => lineKey(l) === targetKey);
           if (i >= 0) {
             const next = prev.slice();
             next[i] = {
@@ -276,7 +279,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             };
             return next;
           }
-          return [...prev, { product: p, qty, meta }];
+          return [...prev, candidate];
         });
       },
       remove: (id) =>
