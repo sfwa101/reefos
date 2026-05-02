@@ -64,7 +64,7 @@ const Wallet = () => {
   });
 
   return (
-    <div className="relative min-h-[100dvh] bg-gradient-to-b from-background via-background/95 to-muted/20">
+    <div className="relative min-h-screen w-full bg-gradient-to-b from-background via-background/95 to-muted/20">
       {/* Ambient theme glow blobs */}
       <div
         aria-hidden
@@ -75,13 +75,13 @@ const Wallet = () => {
         className="pointer-events-none absolute top-40 right-0 h-48 w-48 rounded-full bg-accent/15 blur-3xl"
       />
 
-      <div className="relative mx-auto flex w-full max-w-md flex-col gap-6 px-5 pt-3 pb-32 sm:max-w-lg">
+      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 pt-3 pb-32">
         {/* HEADER */}
         <motion.section
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex items-end justify-between"
+          className="flex items-end justify-between px-5"
         >
           <div>
             <h1 className="font-display text-3xl font-black tracking-tight text-foreground">
@@ -98,19 +98,26 @@ const Wallet = () => {
           )}
         </motion.section>
 
-        {/* HOLOGRAPHIC SUPER-CARD */}
-        <BalanceCard
+        {/* SWIPEABLE SUPER-CARDS CAROUSEL (full-bleed) */}
+        <BalanceCardsCarousel
           name={c.profile?.full_name || "عميل ريف"}
           balance={Number(c.balance?.balance ?? 0)}
           trustLimit={c.trustLimit}
           tierLabel={c.tier?.label}
+          totalCommission={c.totalCommission}
+          successfulRefs={c.successfulRefs}
+          referralCode={c.referralCode}
+          jar={c.jar}
         />
 
-        {/* EXTENSIBLE GLASS ACTION STRIP */}
-        <ActionGrid actions={actions} />
+        {/* COMPACT GLASS ACTION RIBBON */}
+        <div className="px-5">
+          <ActionGrid actions={actions} />
+        </div>
 
         {/* ANIMATED SEGMENTED CONTROL */}
-        <WalletTabs
+        <div className="px-5">
+          <WalletTabs
           tabs={[
             { id: "balance", label: "العمليات", icon: Wallet2 },
             { id: "budgets", label: "التحليلات", icon: PieIcon },
