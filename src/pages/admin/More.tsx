@@ -89,6 +89,7 @@ export default function More() {
     { title: "الإدارة", items: [
       { to: "/admin/staff", icon: UserCog, label: "الموظفون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/support", icon: MessagesSquare, label: "الدعم الفني", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات", color: "from-foreground-secondary to-foreground" },
       { to: "/admin/settings", icon: Settings, label: "الإعدادات", color: "from-foreground-tertiary to-foreground-secondary" },
     ]},
