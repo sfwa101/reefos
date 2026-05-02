@@ -16,6 +16,23 @@ type PU = {
   is_default_sell: boolean;
   is_active: boolean;
 };
+type Breakdown = { human_readable?: string; total_pieces?: number } | null;
+type ValidatePricing = { ok: boolean; message?: string } | null;
+
+// Typed bridge: these tables/RPCs aren't in the generated Supabase types yet.
+// Wrapping the client in a precise interface keeps every call site checked.
+type ProductUnitsDb = {
+  from(table: "units_of_measure"): {
+    select(s: string): { order(c: string): Promise<{ data: UoM[] | null }> };
+  };
+  from(table: "product_units"): {
+    select(s: string): { eq(c: string, v: string): { order(c: string): Promise<{ data: PU[] | null }> } };
+    delete(): { eq(c: string, v: string): Promise<{ error: { message: string } | null }> };
+    upsert(payload: PU[], opts: { onConflict: string }): Promise<{ error: { message: string } | null }>;
+  };
+  rpc(fn: "nested_stock_breakdown", args: { _product_id: string }): Promise<{ data: Breakdown }>;
+  rpc(fn: "validate_unit_pricing", args: { _product_id: string; _unit_code: string; _selling_price: number }): Promise<{ data: ValidatePricing }>;
+};
 
 export default function ProductUnits() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
