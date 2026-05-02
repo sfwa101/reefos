@@ -50,6 +50,7 @@ import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
 import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
+import { Route as AdminPersonalizedPicksRouteImport } from './routes/admin.personalized-picks'
 import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
@@ -61,7 +62,9 @@ import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryLocationsRouteImport } from './routes/admin.inventory-locations'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
+import { Route as AdminHakimInsightsRouteImport } from './routes/admin.hakim-insights'
 import { Route as AdminHakimChatRouteImport } from './routes/admin.hakim-chat'
+import { Route as AdminHakimAnomaliesRouteImport } from './routes/admin.hakim-anomalies'
 import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
@@ -80,6 +83,7 @@ import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
 import { Route as AdminCommissionLedgerRouteImport } from './routes/admin.commission-ledger'
 import { Route as AdminCharityRouteImport } from './routes/admin.charity'
 import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
+import { Route as AdminCategoryAffinityRouteImport } from './routes/admin.category-affinity'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier-sessions'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
@@ -339,6 +343,11 @@ const AdminPrintJobsRoute = AdminPrintJobsRouteImport.update({
   path: '/print-jobs',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPersonalizedPicksRoute = AdminPersonalizedPicksRouteImport.update({
+  id: '/personalized-picks',
+  path: '/personalized-picks',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminPayoutsRoute = AdminPayoutsRouteImport.update({
   id: '/payouts',
   path: '/payouts',
@@ -394,9 +403,19 @@ const AdminInventoryRoute = AdminInventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminHakimInsightsRoute = AdminHakimInsightsRouteImport.update({
+  id: '/hakim-insights',
+  path: '/hakim-insights',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminHakimChatRoute = AdminHakimChatRouteImport.update({
   id: '/hakim-chat',
   path: '/hakim-chat',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHakimAnomaliesRoute = AdminHakimAnomaliesRouteImport.update({
+  id: '/hakim-anomalies',
+  path: '/hakim-anomalies',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminHakimRoute = AdminHakimRouteImport.update({
@@ -489,6 +508,11 @@ const AdminCharityRoute = AdminCharityRouteImport.update({
 const AdminCfoRoute = AdminCfoRouteImport.update({
   id: '/cfo',
   path: '/cfo',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCategoryAffinityRoute = AdminCategoryAffinityRouteImport.update({
+  id: '/category-affinity',
+  path: '/category-affinity',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
@@ -787,6 +811,7 @@ export interface FileRoutesByFullPath {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
@@ -805,7 +830,9 @@ export interface FileRoutesByFullPath {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
@@ -817,6 +844,7 @@ export interface FileRoutesByFullPath {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
@@ -908,6 +936,7 @@ export interface FileRoutesByTo {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
@@ -926,7 +955,9 @@ export interface FileRoutesByTo {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
@@ -938,6 +969,7 @@ export interface FileRoutesByTo {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
@@ -1036,6 +1068,7 @@ export interface FileRoutesById {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
+  '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
@@ -1054,7 +1087,9 @@ export interface FileRoutesById {
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRoute
   '/admin/hakim': typeof AdminHakimRoute
+  '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
@@ -1066,6 +1101,7 @@ export interface FileRoutesById {
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
+  '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
@@ -1165,6 +1201,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/cashier-sessions'
     | '/admin/categories'
+    | '/admin/category-affinity'
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
@@ -1183,7 +1220,9 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
     | '/admin/kyc'
@@ -1195,6 +1234,7 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
+    | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
@@ -1286,6 +1326,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/cashier-sessions'
     | '/admin/categories'
+    | '/admin/category-affinity'
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
@@ -1304,7 +1345,9 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
     | '/admin/kyc'
@@ -1316,6 +1359,7 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
+    | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
@@ -1413,6 +1457,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/cashier-sessions'
     | '/admin/categories'
+    | '/admin/category-affinity'
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
@@ -1431,7 +1476,9 @@ export interface FileRouteTypes {
     | '/admin/expenses'
     | '/admin/finance'
     | '/admin/hakim'
+    | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
     | '/admin/kyc'
@@ -1443,6 +1490,7 @@ export interface FileRouteTypes {
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
+    | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
@@ -1817,6 +1865,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPrintJobsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/personalized-picks': {
+      id: '/admin/personalized-picks'
+      path: '/personalized-picks'
+      fullPath: '/admin/personalized-picks'
+      preLoaderRoute: typeof AdminPersonalizedPicksRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/payouts': {
       id: '/admin/payouts'
       path: '/payouts'
@@ -1894,11 +1949,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminInventoryRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/hakim-insights': {
+      id: '/admin/hakim-insights'
+      path: '/hakim-insights'
+      fullPath: '/admin/hakim-insights'
+      preLoaderRoute: typeof AdminHakimInsightsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/hakim-chat': {
       id: '/admin/hakim-chat'
       path: '/hakim-chat'
       fullPath: '/admin/hakim-chat'
       preLoaderRoute: typeof AdminHakimChatRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hakim-anomalies': {
+      id: '/admin/hakim-anomalies'
+      path: '/hakim-anomalies'
+      fullPath: '/admin/hakim-anomalies'
+      preLoaderRoute: typeof AdminHakimAnomaliesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/hakim': {
@@ -2025,6 +2094,13 @@ declare module '@tanstack/react-router' {
       path: '/cfo'
       fullPath: '/admin/cfo'
       preLoaderRoute: typeof AdminCfoRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/category-affinity': {
+      id: '/admin/category-affinity'
+      path: '/category-affinity'
+      fullPath: '/admin/category-affinity'
+      preLoaderRoute: typeof AdminCategoryAffinityRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/categories': {
@@ -2555,6 +2631,7 @@ interface AdminRouteChildren {
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminCashierSessionsRoute: typeof AdminCashierSessionsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
+  AdminCategoryAffinityRoute: typeof AdminCategoryAffinityRoute
   AdminCfoRoute: typeof AdminCfoRoute
   AdminCharityRoute: typeof AdminCharityRoute
   AdminCommissionLedgerRoute: typeof AdminCommissionLedgerRoute
@@ -2573,7 +2650,9 @@ interface AdminRouteChildren {
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFinanceRoute: typeof AdminFinanceRoute
   AdminHakimRoute: typeof AdminHakimRoute
+  AdminHakimAnomaliesRoute: typeof AdminHakimAnomaliesRoute
   AdminHakimChatRoute: typeof AdminHakimChatRoute
+  AdminHakimInsightsRoute: typeof AdminHakimInsightsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminInventoryLocationsRoute: typeof AdminInventoryLocationsRoute
   AdminKycRoute: typeof AdminKycRoute
@@ -2585,6 +2664,7 @@ interface AdminRouteChildren {
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
+  AdminPersonalizedPicksRoute: typeof AdminPersonalizedPicksRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
   AdminProductBatchesRoute: typeof AdminProductBatchesRoute
   AdminProductUnitsRoute: typeof AdminProductUnitsRoute
@@ -2622,6 +2702,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBranchesRoute: AdminBranchesRoute,
   AdminCashierSessionsRoute: AdminCashierSessionsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
+  AdminCategoryAffinityRoute: AdminCategoryAffinityRoute,
   AdminCfoRoute: AdminCfoRoute,
   AdminCharityRoute: AdminCharityRoute,
   AdminCommissionLedgerRoute: AdminCommissionLedgerRoute,
@@ -2640,7 +2721,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminExpensesRoute: AdminExpensesRoute,
   AdminFinanceRoute: AdminFinanceRoute,
   AdminHakimRoute: AdminHakimRoute,
+  AdminHakimAnomaliesRoute: AdminHakimAnomaliesRoute,
   AdminHakimChatRoute: AdminHakimChatRoute,
+  AdminHakimInsightsRoute: AdminHakimInsightsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminInventoryLocationsRoute: AdminInventoryLocationsRoute,
   AdminKycRoute: AdminKycRoute,
@@ -2652,6 +2735,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
+  AdminPersonalizedPicksRoute: AdminPersonalizedPicksRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
   AdminProductBatchesRoute: AdminProductBatchesRoute,
   AdminProductUnitsRoute: AdminProductUnitsRoute,
