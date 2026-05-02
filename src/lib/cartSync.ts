@@ -2,16 +2,13 @@
 //
 // Responsibilities:
 // - Load remote cart for a logged-in user (one shot).
-// - Push local cart changes to Supabase (debounced, last-write-wins per line).
+// - Push local cart changes to Supabase (debounced, replacement semantics).
 // - Merge guest (localStorage) cart with remote cart on login.
 //
 // Schema: public.cart_items { user_id, product_id, qty, meta jsonb }.
 // We treat (user_id, product_id, meta-signature) as the line identity, where
 // meta-signature is a stable hash of variant/kind/booking/print fields.
-// For the first iteration we keep it simple: one row per (user_id, product_id),
-// and store ALL line meta in the `meta` column. If two lines with the same
-// product_id but different meta exist locally (rare today), the second one
-// wins on push — acceptable for v1.
+// External reads must replace local state; never replay rows through add().
 
 import { supabase } from "@/integrations/supabase/client";
 import { getById, type Product } from "@/lib/products";
@@ -24,6 +21,32 @@ export type RemoteLine = {
 };
 
 export type LocalLine = { product: Product; qty: number; meta?: CartLineMeta };
+
+const lineKey = (line: LocalLine): string => {
+  const meta = (line.meta ?? {}) as CartLineMeta & { variant_id?: string };
+  return [
+    line.product.id,
+    meta.kind ?? "buy",
+    meta.variantId ?? meta.variant_id ?? "",
+    meta.bookingDate ?? "",
+    meta.bookingSlot ?? "",
+    meta.borrowDuration ?? "",
+    (meta.addonIds ?? []).slice().sort().join(","),
+    meta.printConfig
+      ? `${meta.printConfig.pages}-${meta.printConfig.copies}-${meta.printConfig.colorMode}-${meta.printConfig.sided}-${meta.printConfig.binding}-${meta.printConfig.fileName ?? ""}`
+      : "",
+  ].join("|");
+};
+
+const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
+  const map = new Map<string, LocalLine>();
+  for (const line of lines) {
+    const key = lineKey(line);
+    const existing = map.get(key);
+    map.set(key, existing ? { ...existing, qty: existing.qty + line.qty } : line);
+  }
+  return Array.from(map.values());
+};
 
 /** Fetch the current user's persisted cart. Returns [] if not logged in. */
 export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
@@ -56,16 +79,17 @@ export async function pushRemoteCart(
   userId: string,
   lines: LocalLine[],
 ): Promise<void> {
+  const cleanLines = dedupeForPush(lines).filter((l) => l.qty > 0);
   // 1) clear current rows
   const del = await supabase.from("cart_items").delete().eq("user_id", userId);
   if (del.error) {
     console.warn("[cart] failed to clear remote cart:", del.error.message);
     return;
   }
-  if (lines.length === 0) return;
+  if (cleanLines.length === 0) return;
 
   // 2) insert fresh rows
-  const rows = lines.map((l) => ({
+  const rows = cleanLines.map((l) => ({
     user_id: userId,
     product_id: l.product.id,
     qty: l.qty,

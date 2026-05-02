@@ -52,6 +52,22 @@ export const paymentOptions = [
   { id: "instapay", label: "إنستا باي", icon: CreditCard, sub: "تحويل بنكي" },
 ];
 
+const sharedLineIdentity = (productId: string, meta?: Record<string, unknown> | CartLineMeta) => {
+  const m = (meta ?? {}) as CartLineMeta & { variant_id?: string };
+  return [
+    productId,
+    m.kind ?? "buy",
+    m.variantId ?? m.variant_id ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
+      : "",
+  ].join("|");
+};
+
 /**
  * Single source of truth for the Cart UI: state, derived totals, fulfillment
  * segmentation, multi-vendor grouping, cross-sell, and the WhatsApp
@@ -99,7 +115,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   const add: typeof local.add = isSharedMode
     ? async (product, qty = 1, meta) => {
-        const existing = shared.items.find((i) => i.product_id === product.id);
+        const targetIdentity = sharedLineIdentity(product.id, meta);
+        const existing = shared.items.find((i) => sharedLineIdentity(i.product_id, i.meta) === targetIdentity);
         if (existing) await shared.updateItemQty(existing.id, existing.quantity + qty);
         else
           await shared.addItem({

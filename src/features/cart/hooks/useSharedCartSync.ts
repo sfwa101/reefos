@@ -81,6 +81,51 @@ type UseSharedCartSyncResult = {
 
 const ACTIVE_STATES: SharedCartStatus[] = ["active"];
 
+const stableJson = (value: unknown): string => {
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${stableJson(obj[k])}`)
+    .join(",")}}`;
+};
+
+const metaSignature = (meta: Record<string, unknown> | null | undefined): string => {
+  const m = (meta ?? {}) as Record<string, unknown>;
+  const printConfig = (m.printConfig ?? null) as Record<string, unknown> | null;
+  return stableJson({
+    kind: m.kind ?? "buy",
+    variantId: m.variantId ?? m.variant_id ?? "",
+    bookingDate: m.bookingDate ?? "",
+    bookingSlot: m.bookingSlot ?? "",
+    borrowDuration: m.borrowDuration ?? "",
+    addonIds: Array.isArray(m.addonIds) ? [...m.addonIds].sort() : [],
+    printConfigKey: printConfig
+      ? `${printConfig.pages ?? ""}-${printConfig.copies ?? ""}-${printConfig.colorMode ?? ""}-${printConfig.sided ?? ""}-${printConfig.binding ?? ""}-${printConfig.fileName ?? ""}`
+      : "",
+  });
+};
+
+const itemIdentity = (item: Pick<SharedCartItem, "product_id" | "meta">): string =>
+  `${item.product_id}|${metaSignature(item.meta)}`;
+
+const normalizeItems = (rows: SharedCartItem[]): SharedCartItem[] => {
+  const map = new Map<string, SharedCartItem>();
+  for (const row of rows) {
+    const key = itemIdentity(row);
+    const existing = map.get(key);
+    map.set(key, existing ? { ...existing, quantity: Math.max(existing.quantity, row.quantity) } : row);
+  }
+  return Array.from(map.values()).sort((a, b) => a.created_at.localeCompare(b.created_at));
+};
+
+const itemsSignature = (rows: SharedCartItem[]): string =>
+  normalizeItems(rows)
+    .map((i) => `${itemIdentity(i)}#${i.quantity}#${stableJson(i.meta ?? {})}`)
+    .sort()
+    .join("||");
+
 export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyncResult => {
   const { user } = useAuth();
   const [cart, setCart] = useState<SharedCart | null>(null);
@@ -89,6 +134,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const [loading, setLoading] = useState<boolean>(!!sharedCartId);
   const [error, setError] = useState<string | null>(null);
   const cancelledRef = useRef(false);
+  const lastLocalItemsSignatureRef = useRef("");
 
   const fetchAll = useCallback(async (id: string) => {
     setLoading(true);
@@ -103,7 +149,9 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       if (cartRes.error) throw cartRes.error;
       setCart((cartRes.data as SharedCart | null) ?? null);
       setParticipants((partsRes.data as SharedCartParticipant[] | null) ?? []);
-      setItems((itemsRes.data as SharedCartItem[] | null) ?? []);
+      const nextItems = normalizeItems((itemsRes.data as SharedCartItem[] | null) ?? []);
+      lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
+      setItems(nextItems);
     } catch (e) {
       if (!cancelledRef.current) setError(e instanceof Error ? e.message : "shared_cart_load_failed");
     } finally {
@@ -152,12 +200,17 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
         { event: "*", schema: "public", table: "shared_cart_items", filter: `cart_id=eq.${sharedCartId}` },
         (payload) => {
           setItems((prev) => {
-            if (payload.eventType === "INSERT") return [...prev, payload.new as SharedCartItem];
-            if (payload.eventType === "UPDATE")
-              return prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
-            if (payload.eventType === "DELETE")
-              return prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
-            return prev;
+            let next = prev;
+            if (payload.eventType === "INSERT") next = [...prev, payload.new as SharedCartItem];
+            else if (payload.eventType === "UPDATE")
+              next = prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
+            else if (payload.eventType === "DELETE")
+              next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
+            const normalized = normalizeItems(next);
+            const signature = itemsSignature(normalized);
+            if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
+            lastLocalItemsSignatureRef.current = signature;
+            return normalized;
           });
         },
       )
@@ -247,6 +300,22 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     async (input) => {
       guardEditable();
       if (!cart || !user) return;
+      const nextSignature = itemsSignature([
+        ...items,
+        {
+          id: `optimistic-${input.product_id}-${metaSignature(input.meta)}`,
+          cart_id: cart.id,
+          added_by: user.id,
+          product_id: input.product_id,
+          product_name: input.product_name,
+          unit_price: input.unit_price,
+          quantity: input.quantity,
+          meta: input.meta ?? {},
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+      ]);
+      lastLocalItemsSignatureRef.current = nextSignature;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { error: err } = await (supabase as any).from("shared_cart_items").insert({
         cart_id: cart.id,
@@ -259,33 +328,36 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       });
       if (err) throw err;
     },
-    [cart, user, guardEditable],
+    [cart, user, items, guardEditable],
   );
 
   const updateItemQty = useCallback(
     async (itemId: string, quantity: number) => {
       guardEditable();
       if (quantity <= 0) {
+        lastLocalItemsSignatureRef.current = itemsSignature(items.filter((i) => i.id !== itemId));
         const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
         if (err) throw err;
         return;
       }
+      lastLocalItemsSignatureRef.current = itemsSignature(items.map((i) => (i.id === itemId ? { ...i, quantity } : i)));
       const { error: err } = await supabase
         .from("shared_cart_items")
         .update({ quantity })
         .eq("id", itemId);
       if (err) throw err;
     },
-    [guardEditable],
+    [items, guardEditable],
   );
 
   const removeItem = useCallback(
     async (itemId: string) => {
       guardEditable();
+      lastLocalItemsSignatureRef.current = itemsSignature(items.filter((i) => i.id !== itemId));
       const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
       if (err) throw err;
     },
-    [guardEditable],
+    [items, guardEditable],
   );
 
   return {
