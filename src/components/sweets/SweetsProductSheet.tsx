@@ -87,10 +87,28 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
 
   const confirm = () => {
     const date = days[dayIdx];
+    // Stem-cell modifiers (Phase 2): variant delta + addons + booking deposit.
+    const mods: Modifier[] = [];
+    if (variantDelta) {
+      mods.push(mod.variant(`variant:${variantId}`, "متغيّر", variantDelta));
+    }
+    for (const a of addons.filter((x) => addonIds.includes(x.id))) {
+      mods.push(mod.addon(`addon:${a.id}`, a.name ?? a.id, a.price));
+    }
+    if (isBooking) {
+      mods.push(
+        ...sweetsBookingToModifiers({
+          bookingSubtotal: lineTotal,
+          depositPct: DEPOSIT_PCT,
+          threshold: effectivePayDeposit ? 0 : DEPOSIT_THRESHOLD,
+        }),
+      );
+    }
     add(product, qty, {
       variantId: variantId || undefined,
       addonIds: addonIds.length ? addonIds : undefined,
       unitPrice,
+      appliedModifiers: mods,
       bookingDate: isBooking ? date.toISOString().slice(0, 10) : undefined,
       bookingSlot: isBooking ? slot : undefined,
       bookingNote: note.trim() || undefined,
