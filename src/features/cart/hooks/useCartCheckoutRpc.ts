@@ -44,11 +44,8 @@ export const placeOrderAtomic = async (
 ): Promise<PlaceOrderResult> => {
   try {
     console.error("RPC_PAYLOAD:", payload);
-    const { data, error } = await supabase.rpc(
-      "place_order_atomic",
-      // RPC signature is generated; this payload matches it 1:1.
-      payload as unknown as Parameters<typeof supabase.rpc>[1],
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("place_order_atomic", payload);
 
     if (error) {
       console.error("RPC_ERROR:", error);
@@ -76,7 +73,7 @@ export const allocateOrderInventory = async (
   try {
     const { error } = await supabase.rpc("allocate_order_inventory", {
       _order_id: orderId,
-      _zone: zoneId,
+      _zone: zoneId ?? undefined,
     });
     if (error) console.warn("[allocation] failed", error);
   } catch (e) {
