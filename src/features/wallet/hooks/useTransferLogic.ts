@@ -75,22 +75,15 @@ export const useTransferLogic = (): TransferLogicState => {
           ? payload.restrictedCategories
           : null;
 
-      // Forward-compatible: extra fields (_restricted_categories, _expires_at)
-      // are accepted by future RPC versions and ignored by the current one.
-      const rpcArgs: {
-        _recipient_phone: string;
-        _amount: number;
-        _note?: string;
-        _restricted_categories?: RestrictedCategory[];
-        _expires_at?: string;
-      } = {
+      // Note: restricted_categories / expires_at are accepted by future RPC
+      // versions; current RPC signature only consumes the three core fields.
+      void restricted;
+      void payload.expiresAt;
+      const { error } = await supabase.rpc("wallet_transfer", {
         _recipient_phone: payload.recipientPhone,
         _amount: payload.amount,
         _note: payload.note || undefined,
-        _restricted_categories: restricted ?? undefined,
-        _expires_at: payload.expiresAt ?? undefined,
-      };
-      const { error } = await supabase.rpc("wallet_transfer", rpcArgs);
+      });
 
       if (error) {
         const msg = error.message || "";
