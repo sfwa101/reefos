@@ -10,7 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toLatin } from "@/lib/format";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
-import { BalanceCard } from "@/features/wallet/components/BalanceCard";
+import { BalanceCardsCarousel } from "@/features/wallet/components/BalanceCardsCarousel";
 import {
   ActionGrid,
   buildDefaultWalletActions,
