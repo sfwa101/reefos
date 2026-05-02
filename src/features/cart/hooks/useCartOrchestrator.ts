@@ -496,7 +496,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         return;
       }
 
-      const noteParts = [
+      const noteParts = buildOrderNotes([
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,
         !selectedAddr && guestNotes ? `العنوان: ${guestNotes}` : null,
@@ -513,28 +513,18 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         sweetsRules.hasBooking
           ? `يُدفع الآن من الحجوزات: ${fmtMoney(aggregateDeposit)}`
           : null,
-      ].filter(Boolean);
+      ]);
 
       const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
       let savedOrderId: string | null = null;
 
       if (!isGuest && currentUser) {
-        // Guard: address_id must be a real UUID or null. Locally generated
-        // guest-style ids (non-UUID strings) would crash the RPC with
-        // "invalid input syntax for type uuid" before any business validation.
-        const UUID_RE =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        const safeAddressId =
-          selectedAddr?.id && UUID_RE.test(String(selectedAddr.id))
-            ? String(selectedAddr.id)
-            : null;
-
-        const rpcPayload = {
+        const result = await placeOrderAtomic({
           _user_id: currentUser.id,
           _total: grand,
           _payment_method: payment,
-          _address_id: safeAddressId,
-          _notes: noteParts.length ? noteParts.join(" · ") : null,
+          _address_id: safeUuidOrNull(selectedAddr?.id),
+          _notes: noteParts,
           _service_type: "delivery",
           _delivery_zone: zone.id ?? null,
           _items: lines.map((l) => ({
@@ -544,60 +534,17 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
             price: l.meta?.unitPrice ?? l.product.price,
             quantity: l.qty,
           })),
-        };
+        });
 
-        try {
-          console.error("RPC_PAYLOAD:", rpcPayload);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: rpcData, error: rpcErr } = await (supabase as any).rpc(
-            "place_order_atomic",
-            rpcPayload,
-          );
-
-          if (rpcErr) {
-            console.error("RPC_ERROR:", rpcErr);
-            const msg = rpcErr.message || "";
-            let friendly = "تعذر إنشاء الطلب، حاول مرة أخرى";
-            if (msg.includes("out_of_stock")) friendly = "أحد المنتجات نفد من المخزون";
-            else if (msg.includes("product_not_found")) friendly = "منتج غير موجود في الكتالوج";
-            else if (msg.includes("empty_cart")) friendly = "السلة فارغة";
-            else if (msg.includes("unauthorized")) friendly = "غير مصرح";
-            else if (msg.toLowerCase().includes("uuid")) friendly = "بيانات العنوان غير صالحة";
-            toast.error(friendly);
-            setSubmitting(false);
-            submittingRef.current = false;
-            try { preOpened?.close(); } catch { /* noop */ }
-            return;
-          }
-
-          if (!rpcData || typeof rpcData !== "string") {
-            console.error("RPC_ERROR: missing order id, got:", rpcData);
-            toast.error("استجابة غير متوقعة من الخادم");
-            setSubmitting(false);
-            submittingRef.current = false;
-            try { preOpened?.close(); } catch { /* noop */ }
-            return;
-          }
-          savedOrderId = rpcData;
-        } catch (e) {
-          console.error("RPC_EXCEPTION:", e, "PAYLOAD:", rpcPayload);
-          toast.error("حدث خطأ غير متوقع، حاول مرة أخرى");
+        if (!result.ok) {
           setSubmitting(false);
           submittingRef.current = false;
           try { preOpened?.close(); } catch { /* noop */ }
           return;
         }
+        savedOrderId = result.orderId;
 
-        // Best-effort multi-warehouse allocation (non-blocking)
-        try {
-          const { error: allocErr } = await supabase.rpc(
-            "allocate_order_inventory",
-            { _order_id: savedOrderId, _zone: zone.id },
-          );
-          if (allocErr) console.warn("[allocation] failed", allocErr);
-        } catch (e) {
-          console.warn("[allocation] exception", e);
-        }
+        await allocateOrderInventory(savedOrderId, zone.id);
       }
 
       if (!isGuest && currentUser && isWalletPay && walletApplied > 0) {
