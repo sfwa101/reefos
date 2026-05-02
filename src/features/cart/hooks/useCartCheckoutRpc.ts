@@ -18,6 +18,24 @@ export type PlaceOrderPayload = {
   _service_type: string;
   _delivery_zone: string | null;
   _items: PlaceOrderItem[];
+  // ---- Outbox / atomic side-effect inputs (Phase 1) ----
+  // RPC `place_order_atomic` is responsible for:
+  //   - debiting the wallet by `_wallet_applied`
+  //   - depositing `_change_remainder` into savings_jar (if `_save_change`)
+  //   - donating `_change_remainder` (if `_donate_change`)
+  //   - crediting `_total_cashback` (restaurants)
+  //   - enqueuing WhatsApp / vendor notifications via order_outbox
+  // The frontend now ONLY transmits the intent; no client-side mutations.
+  _wallet_applied?: number;
+  _wallet_shortfall?: number;
+  _secondary_payment?: string | null;
+  _total_cashback?: number;
+  _change_remainder?: number;
+  _save_change?: boolean;
+  _donate_change?: boolean;
+  _tip?: number;
+  _promo_code?: string | null;
+  _discount?: number;
 };
 
 export type PlaceOrderResult =
