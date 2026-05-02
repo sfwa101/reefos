@@ -8,6 +8,7 @@ import {
   Warehouse, Store, ShieldCheck, Star, Wallet, Receipt, TrendingUp,
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
   FileClock, BarChart3, Settings, LogOut, Moon, Printer, Boxes, Scale, Ban, MessageCircle,
+  Layers, ArrowRightLeft, Coins, KeyRound,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -34,6 +35,9 @@ export default function More() {
     { title: "العمليات", items: [
       { to: "/admin/print-jobs", icon: Printer, label: "طلبات الطباعة", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/inventory", icon: Warehouse, label: "المخزون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+      { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/warehouses", icon: Warehouse, label: "المخازن المتعددة", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
@@ -63,6 +67,7 @@ export default function More() {
       { to: "/admin/wallets", icon: Wallet, label: "شحن المحافظ (Maker)", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/cost-bulk", icon: Receipt, label: "تعبئة التكاليف", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/affiliate-settings", icon: Gift, label: "عمولات الأفلييت", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/commission-ledger", icon: Coins, label: "سجل عمولات المسوقين", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/low-stock", icon: Warehouse, label: "تنبيهات المخزون", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
       { to: "/admin/savings", icon: Receipt, label: "الادخار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/finance", icon: TrendingUp, label: "التقارير", color: "from-primary to-primary-glow" },
@@ -84,6 +89,7 @@ export default function More() {
     { title: "الإدارة", items: [
       { to: "/admin/staff", icon: UserCog, label: "الموظفون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/support", icon: MessagesSquare, label: "الدعم الفني", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات", color: "from-foreground-secondary to-foreground" },
       { to: "/admin/settings", icon: Settings, label: "الإعدادات", color: "from-foreground-tertiary to-foreground-secondary" },
     ]},

@@ -1,19 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { HakimSovereignCard } from "@/components/admin/HakimSovereignCard";
 import { BentoStats } from "@/components/admin/BentoStats";
 import { OrderSlideOver } from "@/components/admin/OrderSlideOver";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AdminSection,
   KpiCard,
-  Sparkline,
   Funnel,
-  MiniBars,
   ActivityRow,
   EmptyState,
   SectionLink,
 } from "@/components/admin/ui";
+const RevenueAreaChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })),
+);
+const CategoryBarChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })),
+);
+
+const ChartFallback = ({ h = 110 }: { h?: number }) => <Skeleton className="w-full rounded-2xl" style={{ height: h }} />;
 import {
   ChevronLeft,
   Package,
@@ -324,20 +331,24 @@ export default function Dashboard() {
             {series7.every((v) => v === 0) ? (
               <EmptyState icon={Activity} title="لا توجد مبيعات بعد" hint="ستظهر الاتجاهات هنا فور تسجيل أول طلب." />
             ) : (
-              <div className="flex items-end gap-4">
-                <div className="flex-1 h-24 lg:h-28">
-                  <Sparkline data={series7} width={600} height={110} className="w-full h-full" />
+              <div className="flex flex-col lg:flex-row items-stretch lg:items-end gap-4">
+                <div className="flex-1 min-w-0">
+                  <Suspense fallback={<ChartFallback h={180} />}>
+                    <RevenueAreaChart
+                      height={180}
+                      data={series7.map((v, i) => {
+                        const d = new Date();
+                        d.setDate(d.getDate() - (6 - i));
+                        return { label: d.toLocaleDateString("ar-EG", { weekday: "short" }), value: v };
+                      })}
+                    />
+                  </Suspense>
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-[11px] text-foreground-tertiary">اليوم</p>
                   <p className="font-display text-[22px] num leading-tight">{fmtMoney(todayInWeek)}</p>
-                  <p
-                    className={`text-[11px] num font-semibold ${
-                      dayDelta >= 0 ? "text-success" : "text-destructive"
-                    }`}
-                  >
-                    {dayDelta >= 0 ? "+" : ""}
-                    {dayDelta.toFixed(1)}% مقابل أمس
+                  <p className={`text-[11px] num font-semibold ${dayDelta >= 0 ? "text-success" : "text-destructive"}`}>
+                    {dayDelta >= 0 ? "+" : ""}{dayDelta.toFixed(1)}% مقابل أمس
                   </p>
                 </div>
               </div>
@@ -365,7 +376,13 @@ export default function Dashboard() {
             subtitle="آخر ٧ أيام"
             action={<SectionLink to="/admin/products" label="المنتجات" />}
           >
-            <MiniBars rows={topCats} formatValue={(v) => fmtMoney(v)} />
+            {topCats.length === 0 ? (
+              <EmptyState icon={ShoppingBag} title="لا توجد بيانات فئات بعد" />
+            ) : (
+              <Suspense fallback={<ChartFallback h={240} />}>
+                <CategoryBarChart height={240} data={topCats} />
+              </Suspense>
+            )}
           </AdminSection>
 
           <AdminSection title="مركز التنبيهات" subtitle="إشارات تشغيلية مباشرة">
