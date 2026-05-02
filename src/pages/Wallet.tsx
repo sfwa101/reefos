@@ -25,13 +25,14 @@ import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode"
 import { WalletCharityHub } from "@/features/wallet/components/WalletCharityHub";
 
 /**
- * Wallet — page shell.
+ * Wallet — Papara-inspired shell.
  *
- * After the Phase-3 decomposition this file is intentionally thin:
- * it only orchestrates `useWalletDashboard` (the controller) and the
- * stem-cell components in `src/features/wallet/`. Future FinTech features
- * (KYC-gated transfers, split billing, charity routing) attach to the
- * controller — never to this aggregator.
+ * Phase A layout: a calm, theme-bound container that hosts the holographic
+ * balance card, a Papara-style action grid, and the existing tab surfaces.
+ * NOTHING in this file uses hard-coded colors — every surface, border and
+ * accent flows from the active theme tokens (`bg-card`, `bg-primary`,
+ * `text-primary-foreground`, `border-border`, …) so the wallet repaints
+ * automatically when the user switches themes from the theme store.
  */
 const Wallet = () => {
   const c = useWalletDashboard();
@@ -45,8 +46,8 @@ const Wallet = () => {
   }
 
   return (
-    <div className="space-y-5 pb-4">
-      {/* HEADER */}
+    <div className="mx-auto w-full max-w-md space-y-6 px-4 pb-6 pt-2 sm:max-w-lg">
+      {/* HEADER — Papara-style minimal title row */}
       <motion.section
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -54,7 +55,9 @@ const Wallet = () => {
         className="flex items-end justify-between"
       >
         <div>
-          <h1 className="font-display text-3xl font-extrabold tracking-tight">محفظتي</h1>
+          <h1 className="font-display text-3xl font-extrabold tracking-tight text-foreground">
+            محفظتي
+          </h1>
           <p className="mt-1 text-xs text-muted-foreground">
             بنكك الرقمي · مدير ميزانياتك · شركاء النجاح
           </p>
@@ -66,7 +69,7 @@ const Wallet = () => {
         )}
       </motion.section>
 
-      {/* DIGITAL CARD — always visible */}
+      {/* HOLOGRAPHIC CARD slot */}
       <WalletBalanceCard
         name={c.profile?.full_name || "عميل ريف"}
         balance={Number(c.balance?.balance ?? 0)}
@@ -79,20 +82,22 @@ const Wallet = () => {
         onPos={() => c.setShowPos(true)}
       />
 
-      {/* TABS */}
-      <SlidingTabs
-        tabs={[
-          { id: "balance", label: "الرصيد", icon: Wallet2 },
-          { id: "budgets", label: "التحليلات", icon: PieIcon },
-          { id: "charity", label: "الصدقات", icon: Heart },
-          { id: "affiliate", label: "الإحالات", icon: Users },
-        ]}
-        active={c.tab}
-        onChange={(t) => {
-          if (t === "affiliate") c.openAffiliateTab();
-          else c.setTab(t as any);
-        }}
-      />
+      {/* TAB BAR — themed pill, no hardcoded colors */}
+      <div className="rounded-2xl bg-card p-1 ring-1 ring-border">
+        <SlidingTabs
+          tabs={[
+            { id: "balance", label: "الرصيد", icon: Wallet2 },
+            { id: "budgets", label: "التحليلات", icon: PieIcon },
+            { id: "charity", label: "الصدقات", icon: Heart },
+            { id: "affiliate", label: "الإحالات", icon: Users },
+          ]}
+          active={c.tab}
+          onChange={(t) => {
+            if (t === "affiliate") c.openAffiliateTab();
+            else c.setTab(t as typeof c.tab);
+          }}
+        />
+      </div>
 
       <AnimatePresence mode="wait">
         {c.tab === "balance" && (
