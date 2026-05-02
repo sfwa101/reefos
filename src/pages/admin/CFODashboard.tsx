@@ -29,6 +29,16 @@ export default function CFODashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const flowChart = useMemo(() => {
+    if (!stats) return [];
+    return [
+      { label: "خصومات", value: Number(stats.discounts_this_month ?? 0) },
+      { label: "عمولات قيد التحرر", value: Number(stats.commissions_pending_vest ?? 0) },
+      { label: "عمولات مصروفة", value: Number(stats.commissions_paid_this_month ?? 0) },
+      { label: "التزامات المحافظ", value: Number(stats.wallet_liabilities_total ?? 0) },
+    ];
+  }, [stats]);
+
   useEffect(() => {
     if (!allowed) { setLoading(false); return; }
     (async () => {
