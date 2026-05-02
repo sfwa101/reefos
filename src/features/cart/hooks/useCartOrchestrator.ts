@@ -181,7 +181,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [sweetsRules.blockCOD, payment, secondaryPayment]);
 
-  const grouping = useCartVendorGrouping(lines, payment);
+  const grouping = useCartVendorGrouping(deferredLines, payment);
   const {
     crossSell,
     vendorGroups,
