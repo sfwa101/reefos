@@ -1,0 +1,221 @@
+import { useMemo } from "react";
+import type { CartLineMeta } from "@/context/CartContext";
+import type { Product } from "@/lib/products";
+import {
+  computeSweetsRules,
+  fulfillmentTypeFor,
+  isSweetsProduct,
+  DEPOSIT_THRESHOLD,
+} from "@/lib/sweetsFulfillment";
+import { toLatin } from "@/lib/format";
+import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
+
+type Line = { product: Product; qty: number; meta?: CartLineMeta };
+type Zone = {
+  id?: string | null;
+  deliveryFee: number;
+  freeDeliveryThreshold?: number | null;
+  etaLabel?: string;
+  codAllowed?: boolean;
+};
+
+interface CalcInput {
+  lines: Line[];
+  total: number;
+  zone: Zone;
+  appliedPromo: { pct: number } | null;
+  tip: number;
+  payment: string;
+  walletBalance: number;
+  trustLimit: number;
+  secondaryPayment: string;
+}
+
+/**
+ * Pure derivation layer for cart totals, sweets segmentation, wallet
+ * splitting, change-jar logic, and the "free delivery / gift" progress bar.
+ * Extracted from useCartOrchestrator with no behavioral changes.
+ */
+export const useCartCalculations = ({
+  lines,
+  total,
+  zone,
+  appliedPromo,
+  tip,
+  payment,
+  walletBalance,
+  trustLimit,
+  secondaryPayment,
+}: CalcInput) => {
+  const subtotal = total;
+  const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
+  const FREE_DELIVERY_THRESHOLD = zone.freeDeliveryThreshold ?? Infinity;
+  const GIFT_THRESHOLD = isFinite(FREE_DELIVERY_THRESHOLD)
+    ? FREE_DELIVERY_THRESHOLD + GIFT_BONUS
+    : Infinity;
+  const delivery =
+    subtotal === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : zone.deliveryFee;
+  const grand = Math.max(0, subtotal - discount + delivery + tip);
+
+  const sweetsBuckets = useMemo(() => {
+    const buckets: Record<"A" | "B" | "C", SweetsBucket> = {
+      A: { type: "A", lines: [], subtotal: 0 },
+      B: { type: "B", lines: [], subtotal: 0 },
+      C: { type: "C", lines: [], subtotal: 0 },
+    };
+    for (const l of lines) {
+      if (!isSweetsProduct(l.product.source)) continue;
+      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
+      buckets[t].lines.push({
+        product: l.product,
+        qty: l.qty,
+        meta: {
+          date: l.meta?.bookingDate,
+          slot: l.meta?.bookingSlot,
+          note: l.meta?.bookingNote,
+        },
+      });
+      buckets[t].subtotal += l.product.price * l.qty;
+    }
+    return buckets;
+  }, [lines]);
+
+  const sweetsRules = useMemo(
+    () => computeSweetsRules(sweetsBuckets.C.subtotal, grand),
+    [sweetsBuckets.C.subtotal, grand],
+  );
+
+  const bookingLinesMeta = useMemo(() => {
+    return lines
+      .filter(
+        (l) =>
+          isSweetsProduct(l.product.source) &&
+          fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
+      )
+      .map((l) => {
+        const unit = l.meta?.unitPrice ?? l.product.price;
+        const sub = unit * l.qty;
+        const lineRequired = sub >= DEPOSIT_THRESHOLD;
+        const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
+        return {
+          id: l.product.id,
+          subtotal: sub,
+          payDeposit: wantsDeposit,
+          shipMode: (l.meta?.shipMode ?? "split") as "split" | "wait",
+        };
+      });
+  }, [lines]);
+
+  const aggregateDeposit = useMemo(
+    () =>
+      bookingLinesMeta.reduce(
+        (s, b) => s + (b.payDeposit ? Math.round(b.subtotal * 0.5) : b.subtotal),
+        0,
+      ),
+    [bookingLinesMeta],
+  );
+
+  const anyWaitForAll = bookingLinesMeta.some((b) => b.shipMode === "wait");
+  const hasInstantSweets = sweetsBuckets.A.lines.length > 0;
+  const hasFreshSweets = sweetsBuckets.B.lines.length > 0;
+  const hasBooking = sweetsBuckets.C.lines.length > 0;
+  const hasNonBookingItems =
+    hasInstantSweets ||
+    hasFreshSweets ||
+    lines.some((l) => !isSweetsProduct(l.product.source));
+
+  const payDeposit = bookingLinesMeta.some((b) => b.payDeposit);
+
+  const payNowAmount = sweetsRules.hasBooking
+    ? aggregateDeposit + Math.max(0, grand - sweetsRules.bookingSubtotal)
+    : grand;
+  const payOnDelivery = Math.max(0, grand - payNowAmount);
+
+  const billSavings =
+    discount +
+    (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? zone.deliveryFee : 0);
+
+  const isWalletPay = payment === "wallet";
+  const effectiveWallet = walletBalance + trustLimit;
+  const walletShortfall = isWalletPay ? Math.max(0, grand - effectiveWallet) : 0;
+  const walletApplied = isWalletPay ? Math.min(effectiveWallet, grand) : 0;
+  const trustUsed = isWalletPay ? Math.max(0, walletApplied - walletBalance) : 0;
+  const isSplit = isWalletPay && walletShortfall > 0 && effectiveWallet > 0;
+
+  const cashAmount = !isWalletPay
+    ? grand
+    : isSplit && secondaryPayment === "cash"
+      ? walletShortfall
+      : 0;
+  const roundedCash = cashAmount > 0 ? Math.ceil(cashAmount / 10) * 10 : 0;
+  const changeRemainder = roundedCash - cashAmount;
+  const showChangeJar =
+    changeRemainder > 0 &&
+    changeRemainder <= 10 &&
+    [3, 5, 10].some((r) => changeRemainder <= r) &&
+    cashAmount > 0;
+
+  const progress = useMemo(() => {
+    if (!isFinite(FREE_DELIVERY_THRESHOLD)) {
+      return {
+        pct: 0,
+        label: `🚚 رسوم التوصيل ${toLatin(zone.deliveryFee)} ج.م لمنطقتك`,
+        done: false,
+      };
+    }
+    if (subtotal >= GIFT_THRESHOLD) {
+      return { pct: 100, label: "🎁 طلبك مؤهل لهدية مفاجئة + توصيل مجاني!", done: true };
+    }
+    if (subtotal >= FREE_DELIVERY_THRESHOLD) {
+      const remain = GIFT_THRESHOLD - subtotal;
+      return {
+        pct: Math.min(
+          100,
+          ((subtotal - FREE_DELIVERY_THRESHOLD) /
+            (GIFT_THRESHOLD - FREE_DELIVERY_THRESHOLD)) *
+            50 +
+            50,
+        ),
+        label: `أضف ${toLatin(remain)} ج.م لتحصل على هدية مفاجئة 🎁`,
+        done: false,
+      };
+    }
+    const remain = FREE_DELIVERY_THRESHOLD - subtotal;
+    return {
+      pct: Math.min(50, (subtotal / FREE_DELIVERY_THRESHOLD) * 50),
+      label: `أضف ${toLatin(remain)} ج.م لتحصل على توصيل مجاني 🚚`,
+      done: false,
+    };
+  }, [subtotal, FREE_DELIVERY_THRESHOLD, GIFT_THRESHOLD, zone.deliveryFee]);
+
+  return {
+    subtotal,
+    discount,
+    delivery,
+    grand,
+    sweetsBuckets,
+    sweetsRules,
+    bookingLinesMeta,
+    aggregateDeposit,
+    anyWaitForAll,
+    hasInstantSweets,
+    hasFreshSweets,
+    hasBooking,
+    hasNonBookingItems,
+    payDeposit,
+    payNowAmount,
+    payOnDelivery,
+    billSavings,
+    isWalletPay,
+    walletShortfall,
+    walletApplied,
+    trustUsed,
+    isSplit,
+    cashAmount,
+    roundedCash,
+    changeRemainder,
+    showChangeJar,
+    progress,
+    FREE_DELIVERY_THRESHOLD,
+  };
+};
