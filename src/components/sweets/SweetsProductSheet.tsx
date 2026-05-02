@@ -93,7 +93,7 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
       mods.push(mod.variant(`variant:${variantId}`, "متغيّر", variantDelta));
     }
     for (const a of addons.filter((x) => addonIds.includes(x.id))) {
-      mods.push(mod.addon(`addon:${a.id}`, a.name ?? a.id, a.price));
+      mods.push(mod.addon(`addon:${a.id}`, a.label, a.price));
     }
     if (isBooking) {
       mods.push(
