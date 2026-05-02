@@ -44,7 +44,13 @@ export const placeOrderAtomic = async (
 ): Promise<PlaceOrderResult> => {
   try {
     console.error("RPC_PAYLOAD:", payload);
-    const { data, error } = await supabase.rpc("place_order_atomic", payload);
+    // DB signature requires string for _address_id; null is accepted at runtime
+    // but the generated types are strict. Cast through unknown to preserve our
+    // domain-accurate PlaceOrderPayload type without leaking `any`.
+    const args = payload as unknown as Parameters<
+      typeof supabase.rpc<"place_order_atomic">
+    >[1];
+    const { data, error } = await supabase.rpc("place_order_atomic", args);
 
     if (error) {
       console.error("RPC_ERROR:", error);
