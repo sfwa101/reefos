@@ -3,6 +3,7 @@ import {
   Home, ShoppingBag, Package, Users, ShieldCheck, Wallet, Receipt, TrendingUp,
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
   Star, BarChart3, Settings, FileClock, Warehouse, Store, Printer, FolderTree, Layout, Banknote,
+  Boxes, Layers, ArrowRightLeft, Coins, KeyRound,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -16,17 +17,23 @@ const groups = [
     { to: "/admin/products", icon: Package, label: "المنتجات" },
     { to: "/admin/categories", icon: FolderTree, label: "الفئات" },
     { to: "/admin/print-jobs", icon: Printer, label: "طلبات الطباعة" },
-    { to: "/admin/inventory", icon: Warehouse, label: "المخزون والأسعار" },
     { to: "/admin/stores", icon: Store, label: "المتاجر" },
+  ]},
+  { title: "المخزون واللوجستيات", items: [
+    { to: "/admin/inventory", icon: Warehouse, label: "المخزون والأسعار" },
+    { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون" },
+    { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)" },
+    { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع" },
   ]},
   { title: "العملاء", items: [
     { to: "/admin/customers", icon: Users, label: "العملاء" },
     { to: "/admin/kyc", icon: ShieldCheck, label: "التحقق KYC" },
     { to: "/admin/reviews", icon: Star, label: "التقييمات" },
   ]},
-  { title: "المالية", items: [
+  { title: "المالية والشركاء", items: [
     { to: "/admin/wallets", icon: Wallet, label: "المحافظ" },
     { to: "/admin/payouts", icon: Banknote, label: "طلبات السحب" },
+    { to: "/admin/commission-ledger", icon: Coins, label: "سجل العمولات" },
     { to: "/admin/savings", icon: Receipt, label: "الادخار" },
     { to: "/admin/finance", icon: TrendingUp, label: "التقارير المالية" },
   ]},
@@ -43,8 +50,9 @@ const groups = [
   { title: "إعداد المتجر", items: [
     { to: "/admin/design", icon: Layout, label: "محرر التصميم" },
   ]},
-  { title: "الإدارة", items: [
+  { title: "إعدادات النظام", items: [
     { to: "/admin/staff", icon: UserCog, label: "الموظفون" },
+    { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات" },
     { to: "/admin/support", icon: MessagesSquare, label: "الدعم" },
     { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات" },
     { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
