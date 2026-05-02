@@ -79,6 +79,20 @@ export default function CFODashboard() {
                color="from-[hsl(var(--info))] to-[hsl(var(--indigo))]" subtitle="رصيد العملاء المحتجز" />
         </div>
 
+        <div className="bg-surface rounded-2xl border border-border/40 p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <BarChart3 className="h-4 w-4 text-primary" />
+            <h3 className="text-[13.5px] font-bold">التدفقات المالية الشهرية</h3>
+          </div>
+          {!stats ? (
+            <Skeleton className="h-[240px] w-full rounded-xl" />
+          ) : (
+            <Suspense fallback={<Skeleton className="h-[240px] w-full rounded-xl" />}>
+              <CategoryBarChart data={flowChart} height={240} />
+            </Suspense>
+          )}
+        </div>
+
         <div className="bg-surface rounded-2xl border border-border/40 overflow-hidden">
           <div className="px-4 py-3 border-b border-border/40 flex items-center justify-between">
             <div className="flex items-center gap-2">
