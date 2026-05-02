@@ -1,9 +1,14 @@
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
+import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle } from "lucide-react";
+import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
+
+const CategoryBarChart = lazy(() =>
+  import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })),
+);
 
 type Stats = {
   discounts_this_month: number;
