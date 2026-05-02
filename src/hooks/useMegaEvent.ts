@@ -1,16 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { fetchCurrentMegaEvent, type MegaEvent } from "@/integrations/supabase/portal-rpcs";
 
-export type MegaEvent = {
-  id: string;
-  name: string;
-  trigger_kind: string;
-  banner_title: string | null;
-  banner_subtitle: string | null;
-  banner_color_hex: string | null;
-  global_discount_pct: number | null;
-  category_discounts: Record<string, number> | null;
-};
+export type { MegaEvent };
 
 /**
  * Returns the currently-active mega event (if any) — refreshes every 5 minutes
@@ -23,9 +14,9 @@ export function useMegaEvent() {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const { data } = await (supabase as any).rpc("current_mega_event");
+      const next = await fetchCurrentMegaEvent();
       if (cancelled) return;
-      setEvent((data as MegaEvent) ?? null);
+      setEvent(next);
     };
     void load();
     const id = setInterval(load, 5 * 60 * 1000);

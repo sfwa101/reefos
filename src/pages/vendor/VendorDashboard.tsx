@@ -1,24 +1,15 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Package, ShoppingBag, Wallet, TrendingUp, Loader2 } from "lucide-react";
-
-type Stats = {
-  vendor_ids: string[];
-  products_count: number;
-  orders_30d: number;
-  revenue_30d: number;
-  wallet: { available: number; pending: number; lifetime_earned: number; lifetime_paid: number };
-};
+import { fetchVendorPortalStats, type VendorPortalStats } from "@/integrations/supabase/portal-rpcs";
 
 export default function VendorDashboard() {
-  const [stats, setStats] = useState<Stats | null>(null);
+  const [stats, setStats] = useState<VendorPortalStats | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("vendor_portal_stats").then(({ data, error }: { data: Stats; error: { message: string } | null }) => {
+    void fetchVendorPortalStats().then(({ data, error }) => {
       if (error) setErr(error.message);
       else setStats(data);
     });
