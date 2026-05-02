@@ -17,6 +17,8 @@ import {
   DEPOSIT_PCT,
   DEPOSIT_THRESHOLD,
 } from "@/lib/sweetsFulfillment";
+import { sweetsBookingToModifiers } from "@/lib/pricingAdapters";
+import { mod, type Modifier } from "@/lib/pricingEngine";
 import { VariantPicker } from "@/features/sweets/components/VariantPicker";
 import { FulfillmentSelector } from "@/features/sweets/components/FulfillmentSelector";
 import { SweetsCustomizationForm } from "@/features/sweets/components/SweetsCustomizationForm";
