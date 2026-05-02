@@ -236,7 +236,7 @@ export const useCartCalculations = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines, appliedPromo?.pct]);
 
-
+  return {
     subtotal,
     discount,
     delivery,
