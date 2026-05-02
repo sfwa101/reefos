@@ -8,6 +8,7 @@ import {
   Warehouse, Store, ShieldCheck, Star, Wallet, Receipt, TrendingUp,
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
   FileClock, BarChart3, Settings, LogOut, Moon, Printer, Boxes, Scale, Ban, MessageCircle,
+  Layers, ArrowRightLeft, Coins, KeyRound,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
