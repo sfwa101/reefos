@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toLatin } from "@/lib/format";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
-import { WalletBalanceCard } from "@/features/wallet/components/WalletBalanceCard";
+import { BalanceCard } from "@/features/wallet/components/BalanceCard";
+import { ActionGrid } from "@/features/wallet/components/ActionGrid";
 import {
   SlidingTabs,
   MiniStatGrid,
