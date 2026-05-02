@@ -37,6 +37,8 @@ import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSuppliersRouteImport } from './routes/admin.suppliers'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
 import { Route as AdminStoreSettlementsRouteImport } from './routes/admin.store-settlements'
+import { Route as AdminStaffAttendanceRouteImport } from './routes/admin.staff-attendance'
+import { Route as AdminStaffAdvancesRouteImport } from './routes/admin.staff-advances'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
@@ -51,6 +53,7 @@ import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
+import { Route as AdminPartnerLedgersRouteImport } from './routes/admin.partner-ledgers'
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
@@ -66,6 +69,7 @@ import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
 import { Route as AdminDriverCashSettlementsRouteImport } from './routes/admin.driver-cash-settlements'
+import { Route as AdminDiscountOverridesRouteImport } from './routes/admin.discount-overrides'
 import { Route as AdminDesignRouteImport } from './routes/admin.design'
 import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delivery-settings'
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
@@ -270,6 +274,16 @@ const AdminStoreSettlementsRoute = AdminStoreSettlementsRouteImport.update({
   path: '/store-settlements',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminStaffAttendanceRoute = AdminStaffAttendanceRouteImport.update({
+  id: '/staff-attendance',
+  path: '/staff-attendance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminStaffAdvancesRoute = AdminStaffAdvancesRouteImport.update({
+  id: '/staff-advances',
+  path: '/staff-advances',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminStaffRoute = AdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
@@ -338,6 +352,11 @@ const AdminPaymentsScheduleRoute = AdminPaymentsScheduleRouteImport.update({
 const AdminPartnersRoute = AdminPartnersRouteImport.update({
   id: '/partners',
   path: '/partners',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPartnerLedgersRoute = AdminPartnerLedgersRouteImport.update({
+  id: '/partner-ledgers',
+  path: '/partner-ledgers',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminOffersRoute = AdminOffersRouteImport.update({
@@ -416,6 +435,11 @@ const AdminDriverCashSettlementsRoute =
     path: '/driver-cash-settlements',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminDiscountOverridesRoute = AdminDiscountOverridesRouteImport.update({
+  id: '/discount-overrides',
+  path: '/discount-overrides',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDesignRoute = AdminDesignRouteImport.update({
   id: '/design',
   path: '/design',
@@ -773,6 +797,7 @@ export interface FileRoutesByFullPath {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
@@ -788,6 +813,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
@@ -802,6 +828,8 @@ export interface FileRoutesByFullPath {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-advances': typeof AdminStaffAdvancesRoute
+  '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
   '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
@@ -890,6 +918,7 @@ export interface FileRoutesByTo {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
@@ -905,6 +934,7 @@ export interface FileRoutesByTo {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
@@ -919,6 +949,8 @@ export interface FileRoutesByTo {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-advances': typeof AdminStaffAdvancesRoute
+  '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
   '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
@@ -1014,6 +1046,7 @@ export interface FileRoutesById {
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
   '/admin/delivery-settings': typeof AdminDeliverySettingsRoute
   '/admin/design': typeof AdminDesignRoute
+  '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/drivers': typeof AdminDriversRoute
@@ -1029,6 +1062,7 @@ export interface FileRoutesById {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
@@ -1043,6 +1077,8 @@ export interface FileRoutesById {
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
+  '/admin/staff-advances': typeof AdminStaffAdvancesRoute
+  '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
   '/admin/store-settlements': typeof AdminStoreSettlementsRoute
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
@@ -1139,6 +1175,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
@@ -1154,6 +1191,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
@@ -1168,6 +1206,8 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-advances'
+    | '/admin/staff-attendance'
     | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
@@ -1256,6 +1296,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
@@ -1271,6 +1312,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
@@ -1285,6 +1327,8 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-advances'
+    | '/admin/staff-attendance'
     | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
@@ -1379,6 +1423,7 @@ export interface FileRouteTypes {
     | '/admin/delivery'
     | '/admin/delivery-settings'
     | '/admin/design'
+    | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
     | '/admin/drivers'
@@ -1394,6 +1439,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
     | '/admin/payouts'
@@ -1408,6 +1454,8 @@ export interface FileRouteTypes {
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
+    | '/admin/staff-advances'
+    | '/admin/staff-attendance'
     | '/admin/store-settlements'
     | '/admin/stores'
     | '/admin/suppliers'
@@ -1678,6 +1726,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminStoreSettlementsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/staff-attendance': {
+      id: '/admin/staff-attendance'
+      path: '/staff-attendance'
+      fullPath: '/admin/staff-attendance'
+      preLoaderRoute: typeof AdminStaffAttendanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/staff-advances': {
+      id: '/admin/staff-advances'
+      path: '/staff-advances'
+      fullPath: '/admin/staff-advances'
+      preLoaderRoute: typeof AdminStaffAdvancesRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/staff': {
       id: '/admin/staff'
       path: '/staff'
@@ -1774,6 +1836,13 @@ declare module '@tanstack/react-router' {
       path: '/partners'
       fullPath: '/admin/partners'
       preLoaderRoute: typeof AdminPartnersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/partner-ledgers': {
+      id: '/admin/partner-ledgers'
+      path: '/partner-ledgers'
+      fullPath: '/admin/partner-ledgers'
+      preLoaderRoute: typeof AdminPartnerLedgersRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/offers': {
@@ -1879,6 +1948,13 @@ declare module '@tanstack/react-router' {
       path: '/driver-cash-settlements'
       fullPath: '/admin/driver-cash-settlements'
       preLoaderRoute: typeof AdminDriverCashSettlementsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/discount-overrides': {
+      id: '/admin/discount-overrides'
+      path: '/discount-overrides'
+      fullPath: '/admin/discount-overrides'
+      preLoaderRoute: typeof AdminDiscountOverridesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/design': {
@@ -2489,6 +2565,7 @@ interface AdminRouteChildren {
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
   AdminDeliverySettingsRoute: typeof AdminDeliverySettingsRoute
   AdminDesignRoute: typeof AdminDesignRoute
+  AdminDiscountOverridesRoute: typeof AdminDiscountOverridesRoute
   AdminDriverCashSettlementsRoute: typeof AdminDriverCashSettlementsRoute
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
   AdminDriversRoute: typeof AdminDriversRoute
@@ -2504,6 +2581,7 @@ interface AdminRouteChildren {
   AdminMarketingRoute: typeof AdminMarketingRouteWithChildren
   AdminMoreRoute: typeof AdminMoreRoute
   AdminOffersRoute: typeof AdminOffersRoute
+  AdminPartnerLedgersRoute: typeof AdminPartnerLedgersRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
@@ -2518,6 +2596,8 @@ interface AdminRouteChildren {
   AdminSavingsRoute: typeof AdminSavingsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
+  AdminStaffAdvancesRoute: typeof AdminStaffAdvancesRoute
+  AdminStaffAttendanceRoute: typeof AdminStaffAttendanceRoute
   AdminStoreSettlementsRoute: typeof AdminStoreSettlementsRoute
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSuppliersRoute: typeof AdminSuppliersRoute
@@ -2552,6 +2632,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
   AdminDeliverySettingsRoute: AdminDeliverySettingsRoute,
   AdminDesignRoute: AdminDesignRoute,
+  AdminDiscountOverridesRoute: AdminDiscountOverridesRoute,
   AdminDriverCashSettlementsRoute: AdminDriverCashSettlementsRoute,
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
   AdminDriversRoute: AdminDriversRoute,
@@ -2567,6 +2648,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMarketingRoute: AdminMarketingRouteWithChildren,
   AdminMoreRoute: AdminMoreRoute,
   AdminOffersRoute: AdminOffersRoute,
+  AdminPartnerLedgersRoute: AdminPartnerLedgersRoute,
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
@@ -2581,6 +2663,8 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSavingsRoute: AdminSavingsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
+  AdminStaffAdvancesRoute: AdminStaffAdvancesRoute,
+  AdminStaffAttendanceRoute: AdminStaffAttendanceRoute,
   AdminStoreSettlementsRoute: AdminStoreSettlementsRoute,
   AdminStoresRoute: AdminStoresRoute,
   AdminSuppliersRoute: AdminSuppliersRoute,

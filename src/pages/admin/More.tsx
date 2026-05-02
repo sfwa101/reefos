@@ -10,6 +10,7 @@ import {
   FileClock, BarChart3, Settings, LogOut, Moon, Printer, Boxes, Scale, Ban, MessageCircle,
   Layers, ArrowRightLeft, Coins, KeyRound,
   HandCoins, ClipboardList, PiggyBank,
+  CalendarClock, BookOpen, Handshake, Percent,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -78,6 +79,14 @@ export default function More() {
       { to: "/admin/cashier-sessions", icon: ClipboardList, label: "ورديات الكاشير", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "سجل تسويات المناديب", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/partner-ledgers", icon: Handshake, label: "حسابات شركاء المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
+      { to: "/admin/discount-overrides", icon: Percent, label: "تجاوزات الخصومات", color: "from-destructive to-[hsl(var(--accent))]" },
+    ]},
+    { title: "إدارة الموظفين", items: [
+      { to: "/admin/staff", icon: UserCog, label: "الموظفون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/staff-attendance", icon: CalendarClock, label: "الحضور والانصراف", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
+      { to: "/admin/staff-advances", icon: BookOpen, label: "السلف والنثرية", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+      { to: "/admin/advance-approvals", icon: ShieldCheck, label: "موافقات السلف", color: "from-[hsl(var(--warning))] to-[hsl(var(--accent))]" },
     ]},
     { title: "التسويق", items: [
       { to: "/admin/marketing/promos", icon: Sparkles, label: "الكوبونات", color: "from-[hsl(var(--pink))] to-[hsl(335_80%_70%)]" },
@@ -93,7 +102,6 @@ export default function More() {
       { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
     ]},
     { title: "الإدارة", items: [
-      { to: "/admin/staff", icon: UserCog, label: "الموظفون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/support", icon: MessagesSquare, label: "الدعم الفني", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات", color: "from-foreground-secondary to-foreground" },
