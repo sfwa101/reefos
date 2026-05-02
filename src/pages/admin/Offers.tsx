@@ -11,6 +11,31 @@ type Coupon = { id: string; code: string; description: string | null; discount_p
 type Discount = { id: string; name: string; scope: string; scope_value: string | null; discount_pct: number | null; discount_amount: number | null; min_user_level: string | null; is_active: boolean };
 type MegaEvent = { id: string; name: string; trigger_kind: string; active_date: string | null; banner_title: string | null; banner_subtitle: string | null; global_discount_pct: number | null; is_active: boolean };
 
+type CouponInsert = Omit<Coupon, "id" | "uses_count" | "discount_amount"> & { discount_amount: number | null };
+type DiscountInsert = Omit<Discount, "id" | "discount_amount"> & { discount_amount?: number | null };
+type MegaEventInsert = Omit<MegaEvent, "id">;
+
+// Supabase generated types don't yet include these tables — use a typed bridge
+// instead of `as any` so call sites stay strongly checked.
+type OffersDb = {
+  from(table: "coupons"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Coupon[] | null }> };
+    insert(payload: CouponInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<Coupon>): { eq(col: string, val: string): Promise<unknown> };
+  };
+  from(table: "discounts"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Discount[] | null }> };
+    insert(payload: DiscountInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<Discount>): { eq(col: string, val: string): Promise<unknown> };
+  };
+  from(table: "mega_events"): {
+    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: MegaEvent[] | null }> };
+    insert(payload: MegaEventInsert): Promise<{ error: { message: string } | null }>;
+    update(patch: Partial<MegaEvent>): { eq(col: string, val: string): Promise<unknown> };
+  };
+};
+const db = supabase as unknown as OffersDb;
+
 export default function Offers() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
   const [discounts, setDiscounts] = useState<Discount[]>([]);
