@@ -125,9 +125,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [zone.codAllowed, payment, secondaryPayment]);
 
+  // Defer heavy derivations (totals, sweets buckets, vendor grouping) so the
+  // qty +/- UI stays at 60fps even under rapid input.
+  const deferredLines = useDeferredValue(lines);
+  const deferredTotal = useDeferredValue(total);
+
   const calc = useCartCalculations({
-    lines,
-    total,
+    lines: deferredLines,
+    total: deferredTotal,
     zone,
     appliedPromo,
     tip,
