@@ -92,6 +92,8 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
       variantId: weight.id,
       addonIds: addonIds.length ? addonIds : undefined,
       unitPrice,
+      // Stem-cell modifiers (Phase 2) — RPC/receipts can re-price polymorphically.
+      appliedModifiers: butcheryToModifiers(weight, prep, addonIds, rules, packagingId),
       bookingNote: [
         `الوزن: ${weight.label}`,
         `التحضير: ${prep.label}`,
