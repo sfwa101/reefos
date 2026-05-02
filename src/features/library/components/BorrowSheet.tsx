@@ -31,6 +31,8 @@ export const BorrowSheet = ({
       borrowDays: days,
       borrowDeposit: deposit,
       unitPrice: total,
+      // Stem-cell modifiers (Phase 2)
+      appliedModifiers: libraryBorrowToModifiers(product.price, duration),
     });
     toast.success(`تمت إضافة "${product.name}" للاستعارة (${days} أيام)`);
     onOpenChange(false);
