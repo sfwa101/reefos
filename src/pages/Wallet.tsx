@@ -216,6 +216,9 @@ const Wallet = () => {
             </motion.div>
           )}
         </AnimatePresence>
+        </div>
+
+        <AnimatePresence>
 
         <AnimatePresence>
           {c.showTopup && (
