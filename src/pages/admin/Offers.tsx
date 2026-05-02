@@ -48,9 +48,9 @@ export default function Offers() {
 
   const loadAll = async () => {
     const [c, d, e] = await Promise.all([
-      (supabase as any).from("coupons").select("*").order("created_at", { ascending: false }),
-      (supabase as any).from("discounts").select("*").order("created_at", { ascending: false }),
-      (supabase as any).from("mega_events").select("*").order("created_at", { ascending: false }),
+      db.from("coupons").select("*").order("created_at", { ascending: false }),
+      db.from("discounts").select("*").order("created_at", { ascending: false }),
+      db.from("mega_events").select("*").order("created_at", { ascending: false }),
     ]);
     setCoupons((c.data ?? []) as Coupon[]);
     setDiscounts((d.data ?? []) as Discount[]);
@@ -71,7 +71,7 @@ export default function Offers() {
       ends_at: cForm.ends_at || null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("coupons").insert(payload);
+    const { error } = await db.from("coupons").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الكوبون");
     setCForm({ code: "", description: "", discount_pct: "", discount_amount: "", min_order_total: "", min_user_level: "", max_uses: "", ends_at: "" });
@@ -79,7 +79,7 @@ export default function Offers() {
   };
 
   const toggleCoupon = async (id: string, current: boolean) => {
-    await (supabase as any).from("coupons").update({ is_active: !current }).eq("id", id);
+    await db.from("coupons").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 
@@ -93,7 +93,7 @@ export default function Offers() {
       min_user_level: dForm.min_user_level || null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("discounts").insert(payload);
+    const { error } = await db.from("discounts").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الخصم");
     setDForm({ name: "", scope: "global", scope_value: "", discount_pct: "", min_user_level: "" });
@@ -101,7 +101,7 @@ export default function Offers() {
   };
 
   const toggleDiscount = async (id: string, current: boolean) => {
-    await (supabase as any).from("discounts").update({ is_active: !current }).eq("id", id);
+    await db.from("discounts").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 
@@ -116,7 +116,7 @@ export default function Offers() {
       global_discount_pct: eForm.global_discount_pct ? Number(eForm.global_discount_pct) : null,
       is_active: true,
     };
-    const { error } = await (supabase as any).from("mega_events").insert(payload);
+    const { error } = await db.from("mega_events").insert(payload);
     if (error) return toast.error(error.message);
     toast.success("تم إنشاء الحدث");
     setEForm({ name: "", trigger_kind: "manual", active_date: "", banner_title: "", banner_subtitle: "", global_discount_pct: "" });
@@ -124,7 +124,7 @@ export default function Offers() {
   };
 
   const toggleEvent = async (id: string, current: boolean) => {
-    await (supabase as any).from("mega_events").update({ is_active: !current }).eq("id", id);
+    await db.from("mega_events").update({ is_active: !current }).eq("id", id);
     void loadAll();
   };
 
