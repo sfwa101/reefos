@@ -19,7 +19,6 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   bookingTimeSlots,
-  formatBookingShort,
   DEPOSIT_THRESHOLD,
 } from "@/lib/sweetsFulfillment";
 import {
@@ -32,18 +31,19 @@ import {
   WA_NUMBER,
   GIFT_BONUS,
   type Addr,
-  type AppliedPromo,
   type SweetsBucket,
   type VendorGroup,
 } from "../types/cart.types";
-import {
-  preOpenWindow,
-  openWhatsApp,
-  isMobileWaContext,
-  buildWaUrl,
-  type OpenResult,
-} from "@/lib/whatsapp";
+import { preOpenWindow, isMobileWaContext, type OpenResult } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
+import {
+  useCartValidation,
+  safeUuidOrNull,
+  validateGuestFields,
+  validateMinOrder,
+} from "./useCartValidation";
+import { placeOrderAtomic, allocateOrderInventory } from "./useCartCheckoutRpc";
+import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
@@ -128,8 +128,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const navigate = useNavigate();
   const { zone, setFromAddress } = useLocation();
 
-  const [promo, setPromo] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo>(null);
+  // Promo + min-order validation extracted to useCartValidation.
+  const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
+    useCartValidation(total);
+
   const [tip, setTip] = useState(0);
   const [addresses, setAddresses] = useState<Addr[]>([]);
   const [addrId, setAddrId] = useState<string>("");
@@ -147,25 +149,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [saveChange, setSaveChange] = useState<boolean>(true);
   const [donateChange, setDonateChange] = useState<boolean>(false);
   const [customerName, setCustomerName] = useState<string>("");
-  const [minOrderTotal, setMinOrderTotal] = useState<number>(0);
   const [guestName, setGuestName] = useState<string>("");
   const [guestPhone, setGuestPhone] = useState<string>("");
   const [guestAddress, setGuestAddress] = useState<string>("");
-
-  // Finance settings (min order total)
-  useEffect(() => {
-    (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
-        .from("app_settings")
-        .select("value")
-        .eq("key", "finance")
-        .maybeSingle();
-      const raw = (data?.value as { min_order_total?: number | string } | null)?.min_order_total;
-      const n = Number(raw);
-      if (Number.isFinite(n) && n > 0) setMinOrderTotal(n);
-    })();
-  }, []);
 
   useEffect(() => {
     if (!user) {
@@ -461,46 +447,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const scheduledGroups = vendorGroups.filter((g) => groupIsScheduled(g));
   const showFulfillmentSections = instantGroups.length > 0 && scheduledGroups.length > 0;
 
-  const applyPromo = async () => {
-    const code = promo.trim().toUpperCase();
-    if (!code) return;
-    if (code === "REEF10") {
-      setAppliedPromo({ code, pct: 0.1 });
-      toast.success("تم تطبيق كود الخصم 🎉");
-      fireMiniConfetti();
-      return;
-    }
-    if (code === "WELCOME25") {
-      setAppliedPromo({ code, pct: 0.25 });
-      toast.success("خصم 25٪ تم تفعيله! 🎉");
-      fireConfetti();
-      return;
-    }
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("validate_coupon", {
-        _code: code,
-        _order_total: subtotal,
-      });
-      if (error) throw error;
-      const disc = Number(data?.discount ?? 0);
-      if (disc <= 0) throw new Error("invalid");
-      const pct = subtotal > 0 ? disc / subtotal : 0;
-      setAppliedPromo({ code, pct });
-      toast.success(`تم تطبيق ${code} — خصم ${Math.round(disc)} ج 🎉`);
-      fireMiniConfetti();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      setAppliedPromo(null);
-      const msg = String(e?.message ?? "");
-      if (msg.includes("level_too_low")) toast.error("هذا الكود حصري لمستويات أعلى");
-      else if (msg.includes("expired")) toast.error("الكود منتهي");
-      else if (msg.includes("exhausted")) toast.error("نفد رصيد الكود");
-      else if (msg.includes("per_user_limit")) toast.error("تم استخدام الكود من قبل");
-      else if (msg.includes("below_minimum")) toast.error("الطلب أقل من الحد الأدنى");
-      else toast.error("كود غير صالح");
-    }
-  };
+  // applyPromo provided by useCartValidation above.
 
   const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
   const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
@@ -533,11 +480,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const isGuest = !currentUser;
 
       if (isGuest) {
-        const n = guestName.trim();
-        const p = guestPhone.trim();
-        const a = guestAddress.trim();
-        if (!n || !p || !a) {
-          toast.error("من فضلك اكتب الاسم ورقم الهاتف وعنوان التوصيل");
+        if (!validateGuestFields(guestName, guestPhone, guestAddress)) {
           setSubmitting(false);
           submittingRef.current = false;
           try { preOpened?.close(); } catch { /* noop */ }
@@ -545,15 +488,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      if (minOrderTotal > 0 && grand < minOrderTotal) {
-        toast.error(`الحد الأدنى للطلب هو ${toLatin(minOrderTotal)} ج.م`);
+      if (!validateMinOrder(grand, minOrderTotal)) {
         setSubmitting(false);
         submittingRef.current = false;
         try { preOpened?.close(); } catch { /* noop */ }
         return;
       }
 
-      const noteParts = [
+      const noteParts = buildOrderNotes([
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,
         !selectedAddr && guestNotes ? `العنوان: ${guestNotes}` : null,
@@ -570,28 +512,18 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         sweetsRules.hasBooking
           ? `يُدفع الآن من الحجوزات: ${fmtMoney(aggregateDeposit)}`
           : null,
-      ].filter(Boolean);
+      ]);
 
       const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
       let savedOrderId: string | null = null;
 
       if (!isGuest && currentUser) {
-        // Guard: address_id must be a real UUID or null. Locally generated
-        // guest-style ids (non-UUID strings) would crash the RPC with
-        // "invalid input syntax for type uuid" before any business validation.
-        const UUID_RE =
-          /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-        const safeAddressId =
-          selectedAddr?.id && UUID_RE.test(String(selectedAddr.id))
-            ? String(selectedAddr.id)
-            : null;
-
-        const rpcPayload = {
+        const result = await placeOrderAtomic({
           _user_id: currentUser.id,
           _total: grand,
           _payment_method: payment,
-          _address_id: safeAddressId,
-          _notes: noteParts.length ? noteParts.join(" · ") : null,
+          _address_id: safeUuidOrNull(selectedAddr?.id),
+          _notes: noteParts,
           _service_type: "delivery",
           _delivery_zone: zone.id ?? null,
           _items: lines.map((l) => ({
@@ -601,60 +533,17 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
             price: l.meta?.unitPrice ?? l.product.price,
             quantity: l.qty,
           })),
-        };
+        });
 
-        try {
-          console.error("RPC_PAYLOAD:", rpcPayload);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data: rpcData, error: rpcErr } = await (supabase as any).rpc(
-            "place_order_atomic",
-            rpcPayload,
-          );
-
-          if (rpcErr) {
-            console.error("RPC_ERROR:", rpcErr);
-            const msg = rpcErr.message || "";
-            let friendly = "تعذر إنشاء الطلب، حاول مرة أخرى";
-            if (msg.includes("out_of_stock")) friendly = "أحد المنتجات نفد من المخزون";
-            else if (msg.includes("product_not_found")) friendly = "منتج غير موجود في الكتالوج";
-            else if (msg.includes("empty_cart")) friendly = "السلة فارغة";
-            else if (msg.includes("unauthorized")) friendly = "غير مصرح";
-            else if (msg.toLowerCase().includes("uuid")) friendly = "بيانات العنوان غير صالحة";
-            toast.error(friendly);
-            setSubmitting(false);
-            submittingRef.current = false;
-            try { preOpened?.close(); } catch { /* noop */ }
-            return;
-          }
-
-          if (!rpcData || typeof rpcData !== "string") {
-            console.error("RPC_ERROR: missing order id, got:", rpcData);
-            toast.error("استجابة غير متوقعة من الخادم");
-            setSubmitting(false);
-            submittingRef.current = false;
-            try { preOpened?.close(); } catch { /* noop */ }
-            return;
-          }
-          savedOrderId = rpcData;
-        } catch (e) {
-          console.error("RPC_EXCEPTION:", e, "PAYLOAD:", rpcPayload);
-          toast.error("حدث خطأ غير متوقع، حاول مرة أخرى");
+        if (!result.ok) {
           setSubmitting(false);
           submittingRef.current = false;
           try { preOpened?.close(); } catch { /* noop */ }
           return;
         }
+        savedOrderId = result.orderId;
 
-        // Best-effort multi-warehouse allocation (non-blocking)
-        try {
-          const { error: allocErr } = await supabase.rpc(
-            "allocate_order_inventory",
-            { _order_id: savedOrderId, _zone: zone.id },
-          );
-          if (allocErr) console.warn("[allocation] failed", allocErr);
-        } catch (e) {
-          console.warn("[allocation] exception", e);
-        }
+        await allocateOrderInventory(savedOrderId, zone.id);
       }
 
       if (!isGuest && currentUser && isWalletPay && walletApplied > 0) {
@@ -774,89 +663,34 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      const isBookingLine = (lid: string, src: string, sub?: string) =>
-        isSweetsProduct(src) && fulfillmentTypeFor(lid, sub) === "C";
-      const instantItems = lines.filter(
-        (l) => !isBookingLine(l.product.id, l.product.source, l.product.subCategory),
-      );
-      const bookingItems = lines.filter((l) =>
-        isBookingLine(l.product.id, l.product.source, l.product.subCategory),
-      );
-      const fmtInstantLine = (l: (typeof lines)[number]) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
-        return `▪️ ${toLatin(l.qty)}x ${l.product.name} (${fmtMoney(unit * l.qty)})`;
-      };
-      const fmtBookingLine = (l: (typeof lines)[number]) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
-        const day = l.meta?.bookingDate
-          ? formatBookingShort(new Date(l.meta.bookingDate))
-          : "—";
-        return `▪️ ${toLatin(l.qty)}x ${l.product.name} — استلام ${day} (${fmtMoney(unit * l.qty)})`;
-      };
-      const addrLine = isGuest
-        ? guestAddress.trim()
-        : selectedAddr
-          ? `${[selectedAddr.label, selectedAddr.street, selectedAddr.building, selectedAddr.district, selectedAddr.city]
-              .filter(Boolean)
-              .join("، ")}`
-          : guestNotes || "—";
-      const etaLine =
-        bookingItems.length > 0 && instantItems.length === 0
-          ? "مجدول"
-          : `خلال ${zone.etaLabel}`;
-      const customerLabel = isGuest
-        ? guestName.trim()
-        : customerName || (currentUser?.email ?? "عميل").split("@")[0];
-      const payShort =
-        payment === "wallet"
-          ? "محفظة"
-          : payment === "cash"
-            ? "كاش"
-            : payment === "instapay"
-              ? "انستاباي"
-              : payment === "vodafone-cash"
-                ? "فودافون كاش"
-                : paymentLabel;
-
-      const guestHeader = isGuest
-        ? `👤 *الاسم:* ${guestName.trim()}\n📞 *الهاتف:* ${guestPhone.trim()}\n📍 *العنوان:* ${guestAddress.trim()}\n\n`
-        : "";
-      const mainMessage =
-        `مرحباً ريف المدينة 👋\n\n` +
-        (isGuest
-          ? `طلب جديد (ضيف):\n\n${guestHeader}`
-          : `أنا ${customerLabel}، وأريد تأكيد طلبي الجديد.\n\n`) +
-        `📝 *رقم الطلب:* #${orderNum}\n` +
-        (isGuest ? "" : `📍 *العنوان:* ${addrLine}\n`) +
-        `🛵 *وقت التوصيل المتوقع:* ${etaLine}\n\n` +
-        (instantItems.length > 0
-          ? `🛒 *تفاصيل الطلب:*\n${instantItems.map(fmtInstantLine).join("\n")}\n\n`
-          : "") +
-        (bookingItems.length > 0
-          ? `📅 *حجوزات خاصة:*\n${bookingItems.map(fmtBookingLine).join("\n")}\n\n`
-          : "") +
-        `💳 *طريقة الدفع:* ${
-          isSplit
-            ? `محفظة (${fmtMoney(walletApplied)}) + ${secondaryLabel} (${fmtMoney(walletShortfall)})`
-            : payShort
-        }\n\n` +
-        `📊 *ملخص الحساب:*\n` +
-        `الإجمالي الفرعي: ${toLatin(subtotal)} ج.م\n` +
-        `التوصيل: ${delivery === 0 ? "مجاني" : `${toLatin(delivery)} ج.م`}\n` +
-        (billSavings > 0 ? `وفرت معنا: 🟢 ${toLatin(billSavings)} ج.م\n` : "") +
-        (tip > 0 ? `إكرامية المندوب: ${toLatin(tip)} ج.م\n` : "") +
-        (sweetsRules.hasBooking
-          ? `\n🔒 يُدفع الآن من الحجوزات: ${toLatin(aggregateDeposit)} ج.م\n` +
-            (payOnDelivery > 0
-              ? `📦 يُحصّل عند التوصيل: ${toLatin(payOnDelivery)} ج.م\n`
-              : "")
-          : "") +
-        `\n------------------------\n\n` +
-        `💰 *الإجمالي النهائي المطلوب:* *${toLatin(grand)} ج.م*\n\n` +
-        (payment === "wallet" && totalCashback > 0
-          ? `🎁 كاش باك المحفظة: +${toLatin(totalCashback)} ج.م (سيُضاف لرصيدك)\n\n`
-          : "") +
-        `في انتظار تأكيدكم، شكراً لكم! 🍃`;
+      const mainMessage = buildWhatsAppMessage({
+        isGuest,
+        guestName,
+        guestPhone,
+        guestAddress,
+        guestNotes,
+        customerName,
+        currentUserEmail: currentUser?.email ?? null,
+        selectedAddr: selectedAddr ?? null,
+        orderNum,
+        zoneEtaLabel: zone.etaLabel,
+        lines,
+        payment,
+        paymentLabel,
+        isSplit,
+        walletApplied,
+        walletShortfall,
+        secondaryLabel,
+        subtotal,
+        delivery,
+        billSavings,
+        tip,
+        sweetsRules,
+        aggregateDeposit,
+        payOnDelivery,
+        grand,
+        totalCashback,
+      });
 
       await minLoading;
 
@@ -869,29 +703,19 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const mainPhone = WA_NUMBER;
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
-      const waUrl = buildWaUrl({ phone: mainPhone, text: mainMessage });
-      console.log("[checkout] attempting WhatsApp checkout URL", { source, url: waUrl });
 
       // Step 3 — clear the cart and celebrate before navigation/redirect.
       clear();
       fireConfetti();
 
       // Step 4 — open WhatsApp.
-      const openResult: OpenResult = onMobile
-        ? ((): OpenResult => {
-            try {
-              console.log("[checkout] mobile window.location.href", { source, url: waUrl });
-              window.location.href = waUrl;
-              return { ok: true, method: "location" };
-            } catch (e) {
-              console.warn("[checkout] mobile location.href failed", { source, error: e });
-              return { ok: false, url: waUrl, text: mainMessage, reason: "location_failed" };
-            }
-          })()
-        : openWhatsApp(
-            { phone: mainPhone, text: mainMessage },
-            { preOpened, preferLocation: false, source },
-          );
+      const openResult: OpenResult = dispatchWhatsApp({
+        phone: mainPhone,
+        text: mainMessage,
+        preOpened,
+        onMobile,
+        source,
+      });
 
       if (!openResult.ok) {
         console.warn("[checkout] WhatsApp open blocked, success fallback armed", {
