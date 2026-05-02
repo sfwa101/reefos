@@ -940,3 +940,38 @@ html[data-view-mode="simplified"] .glass {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
+
+/* ============================================
+   Print styles — clean executive reports
+============================================ */
+@media print {
+  /* Hide chrome: sidebars, mobile bars, action buttons, dialogs */
+  aside, nav, .no-print,
+  [data-sidebar], [data-mobile-bottom-nav], [data-mobile-topbar],
+  [role="dialog"], [data-radix-popper-content-wrapper],
+  button.no-print {
+    display: none !important;
+  }
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  main, .print-area {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    box-shadow: none !important;
+  }
+  .bg-surface, .bg-card {
+    background: #fff !important;
+    border-color: #e5e7eb !important;
+    box-shadow: none !important;
+  }
+  /* Recharts: keep colors */
+  .recharts-surface { overflow: visible !important; }
+  /* Avoid breaking sections in half */
+  section, .print-block { break-inside: avoid; page-break-inside: avoid; }
+  @page { margin: 14mm; }
+}

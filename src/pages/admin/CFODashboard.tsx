@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PrintReportButton } from "@/components/admin/PrintReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
@@ -66,7 +67,10 @@ export default function CFODashboard() {
   return (
     <>
       <MobileTopbar title="الرؤية المالية (CFO)" />
-      <div className="px-4 lg:px-6 pt-2 pb-6 max-w-4xl mx-auto space-y-4" dir="rtl">
+      <div className="px-4 lg:px-6 pt-2 pb-6 max-w-4xl mx-auto space-y-4 print-area" dir="rtl">
+        <div className="flex justify-end no-print">
+          <PrintReportButton label="تصدير تقرير CFO" />
+        </div>
 
         <div className="grid grid-cols-2 gap-3">
           <KPI icon={Percent} label="خصومات الشهر" value={stats?.discounts_this_month ?? 0}
