@@ -1,19 +1,12 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Wallet, TrendingUp, Banknote } from "lucide-react";
-
-type Stats = { driver: { full_name: string; driver_type: string }; today_tasks: number; today_delivered: number;
-  wallet: { cash_in_hand: number; earned_balance: number; lifetime_earned: number; lifetime_settled: number } };
+import { fetchDriverPortalStats, type DriverPortalStats } from "@/integrations/supabase/portal-rpcs";
 
 export default function DriverWallet() {
-  const [s, setS] = useState<Stats | null>(null);
+  const [s, setS] = useState<DriverPortalStats | null>(null);
 
-  useEffect(() => { (async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any).rpc("driver_portal_stats");
-    setS(data as Stats);
-  })(); }, []);
+  useEffect(() => { void fetchDriverPortalStats().then(({ data }) => setS(data)); }, []);
 
   if (!s) return <p className="text-center text-foreground-tertiary py-8">جارٍ التحميل…</p>;
 
