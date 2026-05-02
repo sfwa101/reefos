@@ -1,6 +1,7 @@
 import { Activity, ShoppingBag, Wallet, Users } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { HakimPulseMonitor } from "@/features/hakim/components/HakimPulseMonitor";
+import AnalyticsCharts from "@/components/admin/AnalyticsCharts";
 import { fmtMoney, fmtNum } from "@/lib/format";
 
 type OrderRow = {
