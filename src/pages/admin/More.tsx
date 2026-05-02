@@ -35,6 +35,9 @@ export default function More() {
     { title: "العمليات", items: [
       { to: "/admin/print-jobs", icon: Printer, label: "طلبات الطباعة", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/inventory", icon: Warehouse, label: "المخزون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+      { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/warehouses", icon: Warehouse, label: "المخازن المتعددة", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
