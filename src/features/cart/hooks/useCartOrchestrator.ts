@@ -32,18 +32,19 @@ import {
   WA_NUMBER,
   GIFT_BONUS,
   type Addr,
-  type AppliedPromo,
   type SweetsBucket,
   type VendorGroup,
 } from "../types/cart.types";
-import {
-  preOpenWindow,
-  openWhatsApp,
-  isMobileWaContext,
-  buildWaUrl,
-  type OpenResult,
-} from "@/lib/whatsapp";
+import { preOpenWindow, isMobileWaContext, type OpenResult } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
+import {
+  useCartValidation,
+  safeUuidOrNull,
+  validateGuestFields,
+  validateMinOrder,
+} from "./useCartValidation";
+import { placeOrderAtomic, allocateOrderInventory } from "./useCartCheckoutRpc";
+import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
