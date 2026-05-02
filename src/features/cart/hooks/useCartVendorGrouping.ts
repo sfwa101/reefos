@@ -1,0 +1,134 @@
+import { useEffect, useMemo, useState } from "react";
+import type { CartLineMeta } from "@/context/CartContext";
+import { supabase } from "@/integrations/supabase/client";
+import { products as allProducts, type Product } from "@/lib/products";
+import {
+  vendorForProduct,
+  type VendorKey,
+} from "@/lib/restaurants";
+import {
+  fulfillmentTypeFor,
+  isSweetsProduct,
+} from "@/lib/sweetsFulfillment";
+import type { VendorGroup } from "../types/cart.types";
+
+type Line = { product: Product; qty: number; meta?: CartLineMeta };
+
+interface FrequentlyBoughtRow {
+  product_id: string;
+}
+
+/**
+ * Vendor segmentation, AI-driven cross-sell, and cashback aggregation.
+ * Extracted from useCartOrchestrator with identical behavior.
+ */
+export const useCartVendorGrouping = (lines: Line[], payment: string) => {
+  const [coPurchaseIds, setCoPurchaseIds] = useState<string[]>([]);
+
+  const lineIdsKey = lines.map((l) => l.product.id).join(",");
+  useEffect(() => {
+    if (lines.length === 0) {
+      setCoPurchaseIds([]);
+      return;
+    }
+    const ids = lines.map((l) => l.product.id);
+    let cancelled = false;
+    (async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase as any).rpc("frequently_bought_together", {
+        _product_ids: ids,
+        _limit: 6,
+      });
+      if (!cancelled && Array.isArray(data)) {
+        setCoPurchaseIds((data as FrequentlyBoughtRow[]).map((r) => r.product_id));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lineIdsKey]);
+
+  const crossSell = useMemo<Product[]>(() => {
+    if (lines.length === 0) return [];
+    const inCart = new Set(lines.map((l) => l.product.id));
+    const cartSources = new Set(lines.map((l) => l.product.source));
+    const cartCategories = new Set(lines.map((l) => l.product.category));
+    const coReal = coPurchaseIds
+      .map((id) => allProducts.find((p) => p.id === id))
+      .filter((p): p is Product => !!p && !inCart.has(p.id));
+    const heur = allProducts
+      .filter(
+        (p) =>
+          !inCart.has(p.id) &&
+          !coReal.find((c) => c.id === p.id) &&
+          (cartSources.has(p.source) || cartCategories.has(p.category)),
+      )
+      .sort((a, b) => {
+        const scoreA = (a.badge === "best" ? 3 : a.badge === "trending" ? 2 : 1) - a.price / 200;
+        const scoreB = (b.badge === "best" ? 3 : b.badge === "trending" ? 2 : 1) - b.price / 200;
+        return scoreB - scoreA;
+      });
+    return [...coReal, ...heur].slice(0, 6);
+  }, [lines, coPurchaseIds]);
+
+  const vendorGroups = useMemo<VendorGroup[]>(() => {
+    const map = new Map<string, VendorGroup>();
+    for (const l of lines) {
+      const v = vendorForProduct(l.product.id, l.product.source);
+      const key =
+        v.kind === "restaurant" ? `r:${v.restaurant.id}` : v.kind === "kitchen" ? "k" : "s";
+      if (!map.has(key)) {
+        map.set(key, { key, vendor: v, lines: [], subtotal: 0, cashback: 0 });
+      }
+      const g = map.get(key)!;
+      g.lines.push(l);
+      g.subtotal += l.product.price * l.qty;
+    }
+    for (const g of map.values()) {
+      if (g.vendor.kind === "restaurant") {
+        g.cashback = Math.round((g.subtotal * g.vendor.restaurant.cashbackPct) / 100);
+      }
+    }
+    return Array.from(map.values()).sort((a, b) => {
+      const order = (v: VendorKey) =>
+        v.kind === "restaurant" ? 0 : v.kind === "kitchen" ? 1 : 2;
+      return order(a.vendor) - order(b.vendor);
+    });
+  }, [lines]);
+
+  const isMultiVendor = vendorGroups.length > 1;
+  const totalCashback = useMemo(
+    () => (payment === "wallet" ? vendorGroups.reduce((s, g) => s + g.cashback, 0) : 0),
+    [vendorGroups, payment],
+  );
+
+  const groupIsScheduled = (g: VendorGroup) =>
+    g.lines.length > 0 &&
+    g.lines.every((l) => {
+      if (!isSweetsProduct(l.product.source)) return false;
+      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
+      return t === "B" || t === "C";
+    });
+  const groupIsMixedScheduled = (g: VendorGroup) =>
+    g.lines.some((l) => {
+      if (!isSweetsProduct(l.product.source)) return false;
+      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
+      return t === "B" || t === "C";
+    });
+
+  const instantGroups = vendorGroups.filter((g) => !groupIsScheduled(g));
+  const scheduledGroups = vendorGroups.filter((g) => groupIsScheduled(g));
+  const showFulfillmentSections = instantGroups.length > 0 && scheduledGroups.length > 0;
+
+  return {
+    crossSell,
+    vendorGroups,
+    instantGroups,
+    scheduledGroups,
+    showFulfillmentSections,
+    isMultiVendor,
+    totalCashback,
+    groupIsMixedScheduled,
+  };
+};

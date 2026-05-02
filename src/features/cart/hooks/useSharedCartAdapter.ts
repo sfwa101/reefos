@@ -1,0 +1,108 @@
+import { useMemo } from "react";
+import { useCart, type CartLineMeta } from "@/context/CartContext";
+import { useSharedCartSync } from "./useSharedCartSync";
+import { products as allProducts, type Product } from "@/lib/products";
+
+const sharedLineIdentity = (
+  productId: string,
+  meta?: Record<string, unknown> | CartLineMeta,
+) => {
+  const m = (meta ?? {}) as CartLineMeta & { variant_id?: string };
+  return [
+    productId,
+    m.kind ?? "buy",
+    m.variantId ?? m.variant_id ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
+      : "",
+  ].join("|");
+};
+
+/**
+ * Adapts the shared-cart RPC surface into the same shape as the local
+ * CartContext so all downstream derivations work transparently in either
+ * mode. Pure refactor extracted from useCartOrchestrator.
+ */
+export const useSharedCartAdapter = (sharedCartId: string | null) => {
+  const local = useCart();
+  const shared = useSharedCartSync(sharedCartId);
+  const isSharedMode = !!sharedCartId;
+
+  const sharedLines = useMemo(() => {
+    if (!isSharedMode) return [] as { product: Product; qty: number; meta?: CartLineMeta }[];
+    const out: { product: Product; qty: number; meta?: CartLineMeta }[] = [];
+    for (const it of shared.items) {
+      const product = allProducts.find((p) => p.id === it.product_id);
+      if (!product) continue;
+      out.push({ product, qty: it.quantity, meta: it.meta as CartLineMeta | undefined });
+    }
+    return out;
+  }, [isSharedMode, shared.items]);
+
+  const lines = isSharedMode ? sharedLines : local.lines;
+  const count = isSharedMode ? sharedLines.reduce((s, l) => s + l.qty, 0) : local.count;
+  const total = isSharedMode
+    ? sharedLines.reduce((s, l) => s + l.product.price * l.qty, 0)
+    : local.total;
+
+  const setQty: typeof local.setQty = isSharedMode
+    ? async (productId, qty) => {
+        const it = shared.items.find((i) => i.product_id === productId);
+        if (it) await shared.updateItemQty(it.id, qty);
+      }
+    : local.setQty;
+
+  const remove: typeof local.remove = isSharedMode
+    ? async (productId) => {
+        const it = shared.items.find((i) => i.product_id === productId);
+        if (it) await shared.removeItem(it.id);
+      }
+    : local.remove;
+
+  const add: typeof local.add = isSharedMode
+    ? async (product, qty = 1, meta) => {
+        const targetIdentity = sharedLineIdentity(product.id, meta);
+        const existing = shared.items.find(
+          (i) => sharedLineIdentity(i.product_id, i.meta) === targetIdentity,
+        );
+        if (existing) await shared.updateItemQty(existing.id, existing.quantity + qty);
+        else
+          await shared.addItem({
+            product_id: product.id,
+            product_name: product.name,
+            unit_price: product.price,
+            quantity: qty,
+            meta: (meta ?? {}) as Record<string, unknown>,
+          });
+      }
+    : local.add;
+
+  const clear: typeof local.clear = isSharedMode
+    ? async () => {
+        await Promise.all(shared.items.map((i) => shared.removeItem(i.id)));
+      }
+    : local.clear;
+
+  const updateMeta: typeof local.updateMeta = isSharedMode
+    ? () => {
+        // Itemized meta updates in shared mode are deferred to a follow-up phase.
+      }
+    : local.updateMeta;
+
+  return {
+    isSharedMode,
+    lines,
+    count,
+    total,
+    setQty,
+    remove,
+    add,
+    clear,
+    updateMeta,
+    shared,
+  };
+};
