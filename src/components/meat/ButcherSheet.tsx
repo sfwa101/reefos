@@ -13,6 +13,7 @@ import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
 } from "@/lib/butcheryPrep";
+import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/features/meat/components/Panel";
 import { CutBuilder } from "@/features/meat/components/CutBuilder";
 import { PrepOptions } from "@/features/meat/components/PrepOptions";
@@ -91,6 +92,8 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
       variantId: weight.id,
       addonIds: addonIds.length ? addonIds : undefined,
       unitPrice,
+      // Stem-cell modifiers (Phase 2) — RPC/receipts can re-price polymorphically.
+      appliedModifiers: butcheryToModifiers(weight, prep, addonIds, rules, packagingId),
       bookingNote: [
         `الوزن: ${weight.label}`,
         `التحضير: ${prep.label}`,

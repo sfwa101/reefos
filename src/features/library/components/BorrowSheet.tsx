@@ -11,6 +11,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import {
   BORROW_DURATIONS, calcBorrowPrice, type BorrowDuration,
 } from "@/lib/library";
+import { libraryBorrowToModifiers } from "@/lib/pricingAdapters";
 import { PALETTE } from "../data";
 
 export const BorrowSheet = ({
@@ -30,6 +31,8 @@ export const BorrowSheet = ({
       borrowDays: days,
       borrowDeposit: deposit,
       unitPrice: total,
+      // Stem-cell modifiers (Phase 2)
+      appliedModifiers: libraryBorrowToModifiers(product.price, duration),
     });
     toast.success(`تمت إضافة "${product.name}" للاستعارة (${days} أيام)`);
     onOpenChange(false);

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useRef, useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -125,9 +125,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [zone.codAllowed, payment, secondaryPayment]);
 
+  // Defer heavy derivations (totals, sweets buckets, vendor grouping) so the
+  // qty +/- UI stays at 60fps even under rapid input.
+  const deferredLines = useDeferredValue(lines);
+  const deferredTotal = useDeferredValue(total);
+
   const calc = useCartCalculations({
-    lines,
-    total,
+    lines: deferredLines,
+    total: deferredTotal,
     zone,
     appliedPromo,
     tip,
@@ -176,7 +181,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [sweetsRules.blockCOD, payment, secondaryPayment]);
 
-  const grouping = useCartVendorGrouping(lines, payment);
+  const grouping = useCartVendorGrouping(deferredLines, payment);
   const {
     crossSell,
     vendorGroups,
