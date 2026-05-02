@@ -81,6 +81,51 @@ type UseSharedCartSyncResult = {
 
 const ACTIVE_STATES: SharedCartStatus[] = ["active"];
 
+const stableJson = (value: unknown): string => {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${stableJson(obj[k])}`)
+    .join(",")}}`;
+};
+
+const metaSignature = (meta: Record<string, unknown> | null | undefined): string => {
+  const m = (meta ?? {}) as Record<string, unknown>;
+  const printConfig = (m.printConfig ?? null) as Record<string, unknown> | null;
+  return stableJson({
+    kind: m.kind ?? "buy",
+    variantId: m.variantId ?? m.variant_id ?? "",
+    bookingDate: m.bookingDate ?? "",
+    bookingSlot: m.bookingSlot ?? "",
+    borrowDuration: m.borrowDuration ?? "",
+    addonIds: Array.isArray(m.addonIds) ? [...m.addonIds].sort() : [],
+    printConfigKey: printConfig
+      ? `${printConfig.pages ?? ""}-${printConfig.copies ?? ""}-${printConfig.colorMode ?? ""}-${printConfig.sided ?? ""}-${printConfig.binding ?? ""}-${printConfig.fileName ?? ""}`
+      : "",
+  });
+};
+
+const itemIdentity = (item: Pick<SharedCartItem, "product_id" | "meta">): string =>
+  `${item.product_id}|${metaSignature(item.meta)}`;
+
+const normalizeItems = (rows: SharedCartItem[]): SharedCartItem[] => {
+  const map = new Map<string, SharedCartItem>();
+  for (const row of rows) {
+    const key = itemIdentity(row);
+    const existing = map.get(key);
+    map.set(key, existing ? { ...existing, quantity: Math.max(existing.quantity, row.quantity) } : row);
+  }
+  return Array.from(map.values()).sort((a, b) => a.created_at.localeCompare(b.created_at));
+};
+
+const itemsSignature = (rows: SharedCartItem[]): string =>
+  normalizeItems(rows)
+    .map((i) => `${itemIdentity(i)}#${i.quantity}#${stableJson(i.meta ?? {})}`)
+    .sort()
+    .join("||");
+
 export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyncResult => {
   const { user } = useAuth();
   const [cart, setCart] = useState<SharedCart | null>(null);
@@ -89,6 +134,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const [loading, setLoading] = useState<boolean>(!!sharedCartId);
   const [error, setError] = useState<string | null>(null);
   const cancelledRef = useRef(false);
+  const lastLocalItemsSignatureRef = useRef("");
 
   const fetchAll = useCallback(async (id: string) => {
     setLoading(true);
