@@ -3,6 +3,7 @@ import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
 import type { Product } from "@/lib/products";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 
 export type StoreCategory = {
@@ -172,9 +173,21 @@ const SinglePageStore = ({
               {g.name} <span className="text-xs text-muted-foreground">· {g.items.length}</span>
             </h2>
             {g.items.length === 0 ? (
-              <p className="rounded-2xl bg-foreground/5 p-6 text-center text-xs text-muted-foreground">
-                لا توجد منتجات في هذا القسم بعد
-              </p>
+              products.length === 0 && !query ? (
+                <div className="grid grid-cols-2 gap-3">
+                  {Array.from({ length: 4 }).map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="aspect-square w-full rounded-2xl" />
+                      <Skeleton className="h-3 w-3/4" />
+                      <Skeleton className="h-3 w-1/2" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="rounded-2xl bg-foreground/5 p-6 text-center text-xs text-muted-foreground">
+                  لا توجد منتجات في هذا القسم بعد
+                </p>
+              )
             ) : (
               <div className="grid grid-cols-2 gap-3">
                 {g.items.map((p) => <ProductCard key={`${g.id}-${p.id}`} product={p} />)}
