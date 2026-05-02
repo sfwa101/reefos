@@ -219,8 +219,6 @@ const Wallet = () => {
         </div>
 
         <AnimatePresence>
-
-        <AnimatePresence>
           {c.showTopup && (
             <WalletTopupDialog
               onClose={() => c.setShowTopup(false)}
