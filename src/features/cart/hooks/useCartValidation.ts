@@ -75,22 +75,21 @@ export const useCartValidation = (subtotal: number) => {
       return;
     }
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("validate_coupon", {
+      const { data, error } = await supabase.rpc("validate_coupon", {
         _code: code,
         _order_total: subtotal,
       });
       if (error) throw error;
-      const disc = Number(data?.discount ?? 0);
+      const payload = (data ?? {}) as { discount?: number };
+      const disc = Number(payload.discount ?? 0);
       if (disc <= 0) throw new Error("invalid");
       const pct = subtotal > 0 ? disc / subtotal : 0;
       setAppliedPromo({ code, pct });
       toast.success(`تم تطبيق ${code} — خصم ${Math.round(disc)} ج 🎉`);
       fireMiniConfetti();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
       setAppliedPromo(null);
-      const msg = String(e?.message ?? "");
+      const msg = e instanceof Error ? e.message : String(e ?? "");
       if (msg.includes("level_too_low")) toast.error("هذا الكود حصري لمستويات أعلى");
       else if (msg.includes("expired")) toast.error("الكود منتهي");
       else if (msg.includes("exhausted")) toast.error("نفد رصيد الكود");
