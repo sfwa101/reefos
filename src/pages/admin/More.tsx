@@ -67,6 +67,7 @@ export default function More() {
       { to: "/admin/wallets", icon: Wallet, label: "شحن المحافظ (Maker)", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/cost-bulk", icon: Receipt, label: "تعبئة التكاليف", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/affiliate-settings", icon: Gift, label: "عمولات الأفلييت", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/commission-ledger", icon: Coins, label: "سجل عمولات المسوقين", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/low-stock", icon: Warehouse, label: "تنبيهات المخزون", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
       { to: "/admin/savings", icon: Receipt, label: "الادخار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/finance", icon: TrendingUp, label: "التقارير", color: "from-primary to-primary-glow" },
