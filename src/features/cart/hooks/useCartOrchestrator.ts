@@ -271,6 +271,17 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
             price: l.meta?.unitPrice ?? l.product.price,
             quantity: l.qty,
           })),
+          // ---- Outbox payload — RPC owns ALL financial side-effects ----
+          _wallet_applied: walletApplied,
+          _wallet_shortfall: walletShortfall,
+          _secondary_payment: isSplit ? secondaryPayment : null,
+          _total_cashback: payment === "wallet" ? totalCashback : 0,
+          _change_remainder: showChangeJar ? changeRemainder : 0,
+          _save_change: showChangeJar && saveChange && !donateChange,
+          _donate_change: showChangeJar && donateChange,
+          _tip: tip,
+          _promo_code: appliedPromo?.code ?? null,
+          _discount: discount,
         });
 
         if (!result.ok) {
@@ -282,122 +293,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         savedOrderId = result.orderId;
 
         await allocateOrderInventory(savedOrderId, zone.id);
-      }
-
-      if (!isGuest && currentUser && isWalletPay && walletApplied > 0) {
-        try {
-          const { data: bal } = await supabase
-            .from("wallet_balances")
-            .select("balance")
-            .eq("user_id", currentUser.id)
-            .maybeSingle();
-          const newBalance = Number(bal?.balance ?? 0) - walletApplied;
-          await supabase
-            .from("wallet_balances")
-            .update({ balance: newBalance })
-            .eq("user_id", currentUser.id);
-          await supabase.from("wallet_transactions").insert({
-            user_id: currentUser.id,
-            kind: "debit",
-            amount: walletApplied,
-            label:
-              trustUsed > 0
-                ? `طلب ${orderNum} (شامل ${Math.round(trustUsed)} ج رصيد ثقة)`
-                : `طلب ${orderNum}`,
-            source: trustUsed > 0 ? "wallet_bnpl" : "wallet_pay",
-          });
-        } catch (e) {
-          console.warn("wallet debit skipped", e);
-        }
-      }
-
-      if (
-        !isGuest &&
-        currentUser &&
-        showChangeJar &&
-        saveChange &&
-        !donateChange &&
-        changeRemainder > 0
-      ) {
-        try {
-          const { data: jarRow } = await supabase
-            .from("savings_jar")
-            .select("balance,auto_save_enabled,round_to,goal,goal_label")
-            .eq("user_id", currentUser.id)
-            .maybeSingle();
-          const newBalance = Number(jarRow?.balance ?? 0) + changeRemainder;
-          if (jarRow) {
-            await supabase
-              .from("savings_jar")
-              .update({ balance: newBalance })
-              .eq("user_id", currentUser.id);
-          } else {
-            await supabase
-              .from("savings_jar")
-              .insert({ user_id: currentUser.id, balance: newBalance });
-          }
-          await supabase.from("savings_transactions").insert({
-            user_id: currentUser.id,
-            amount: changeRemainder,
-            kind: "deposit",
-            label: `ادخار فكة طلب ${orderNum}`,
-          });
-        } catch (e) {
-          console.warn("savings jar update skipped", e);
-        }
-      }
-
-      if (
-        !isGuest &&
-        currentUser &&
-        showChangeJar &&
-        donateChange &&
-        changeRemainder > 0
-      ) {
-        try {
-          await supabase.rpc("donate_to_campaign", {
-            _campaign_id: null as unknown as string,
-            _amount: changeRemainder,
-            _source: "spare_change",
-          });
-        } catch (e) {
-          console.warn("charity spare-change donation skipped", e);
-        }
-      }
-
-      if (!isGuest && currentUser && payment === "wallet" && totalCashback > 0) {
-        try {
-          const { data: bal } = await supabase
-            .from("wallet_balances")
-            .select("balance,cashback")
-            .eq("user_id", currentUser.id)
-            .maybeSingle();
-          const newBalance = Number(bal?.balance ?? 0) + totalCashback;
-          const newCashback = Number(bal?.cashback ?? 0) + totalCashback;
-          if (bal) {
-            await supabase
-              .from("wallet_balances")
-              .update({ balance: newBalance, cashback: newCashback })
-              .eq("user_id", currentUser.id);
-          } else {
-            await supabase
-              .from("wallet_balances")
-              .insert({
-                user_id: currentUser.id,
-                balance: newBalance,
-                cashback: newCashback,
-              });
-          }
-          await supabase.from("wallet_transactions").insert({
-            user_id: currentUser.id,
-            kind: "credit",
-            amount: totalCashback,
-            label: `كاش باك المطاعم — طلب ${orderNum}`,
-            source: "restaurants_cashback",
-          });
-        } catch (e) {
-          console.warn("cashback credit skipped", e);
-        }
       }
 
       const mainMessage = buildWhatsAppMessage({

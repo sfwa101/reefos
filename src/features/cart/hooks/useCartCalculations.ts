@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { CartLineMeta } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
 import {
@@ -8,6 +8,7 @@ import {
   DEPOSIT_THRESHOLD,
 } from "@/lib/sweetsFulfillment";
 import { toLatin } from "@/lib/format";
+import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };
@@ -187,6 +188,53 @@ export const useCartCalculations = ({
       done: false,
     };
   }, [subtotal, FREE_DELIVERY_THRESHOLD, GIFT_THRESHOLD, zone.deliveryFee]);
+
+  /* ---------------- Shadow compute (PoC, Phase 1) ----------------
+   * Run the Universal Pricing Engine in parallel with the legacy
+   * calculation. Result is logged ONLY (no UI consumption) so we can
+   * audit deltas before flipping the source-of-truth in Phase 2.
+   * ---------------------------------------------------------------- */
+  useEffect(() => {
+    if (lines.length === 0) return;
+    try {
+      let shadowSubtotal = 0;
+      let shadowDeposit = 0;
+      for (const l of lines) {
+        const base = l.meta?.unitPrice ?? l.product.price;
+        const mods: Modifier[] = [];
+        // Domain-agnostic projection: any preserved meta.appliedModifiers
+        // bubbles straight through; otherwise we treat the line as flat.
+        const stored = (l.meta as { appliedModifiers?: Modifier[] } | undefined)
+          ?.appliedModifiers;
+        if (Array.isArray(stored)) mods.push(...stored);
+        const br = calculateUniversalPrice(base, mods, l.qty);
+        shadowSubtotal += br.lineTotal;
+        shadowDeposit += br.depositAmount;
+      }
+      const shadowDiscount = appliedPromo
+        ? calculateUniversalPrice(shadowSubtotal, [
+            mod.discount("promo", "كود خصم", appliedPromo.pct, {
+              percent: true,
+              scope: "line",
+            }),
+          ]).discountTotal
+        : 0;
+      const delta = Math.abs(shadowSubtotal - subtotal);
+      console.info("[pricing-shadow]", {
+        legacy: { subtotal, discount, aggregateDeposit },
+        universal: {
+          subtotal: shadowSubtotal,
+          discount: shadowDiscount,
+          deposit: shadowDeposit,
+        },
+        delta,
+      });
+    } catch (e) {
+      console.warn("[pricing-shadow] failed", e);
+    }
+    // Only re-run on cart structure / promo changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines, appliedPromo?.pct]);
 
   return {
     subtotal,
