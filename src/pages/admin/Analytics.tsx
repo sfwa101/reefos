@@ -33,7 +33,8 @@ const ACTIVE = new Set(["pending", "confirmed", "preparing", "ready", "out_for_d
 
 export default function AnalyticsAdmin() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pt-3">
+      <AnalyticsCharts />
       <UniversalAdminGrid<OrderRow>
         title="التحليلات"
         subtitle="نظرة لحظية على آخر 200 طلب — الإيرادات، الحالات، وقنوات البيع"
