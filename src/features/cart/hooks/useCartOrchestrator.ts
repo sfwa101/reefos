@@ -342,6 +342,20 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       clear();
       fireConfetti();
 
+      // ─── Dynamic kill-switch (Phase 3) ───
+      // When WhatsApp checkout is disabled by admin, complete in-app:
+      // skip dispatch, skip preOpened window, jump straight to success page.
+      if (!enableWaCheckout) {
+        try { preOpened?.close(); } catch { /* noop */ }
+        try { sessionStorage.removeItem("reef:checkout:wa-fallback"); } catch { /* noop */ }
+        console.info("[checkout] WhatsApp disabled by admin → in-app completion", { source });
+        toast.success("تم استلام طلبك بنجاح 🎉");
+        navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
+        setSubmitting(false);
+        submittingRef.current = false;
+        return;
+      }
+
       const openResult: OpenResult = dispatchWhatsApp({
         phone: mainPhone,
         text: mainMessage,
