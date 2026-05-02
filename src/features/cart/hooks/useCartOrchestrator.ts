@@ -1,26 +1,12 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useCart, type CartLineMeta } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { useSharedCartSync } from "./useSharedCartSync";
 import { useLocation } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
-import { fmtMoney, toLatin } from "@/lib/format";
-import { fireConfetti, fireMiniConfetti } from "@/lib/confetti";
-import { products as allProducts, type Product } from "@/lib/products";
-import {
-  vendorForProduct,
-  type VendorKey,
-} from "@/lib/restaurants";
-import {
-  computeSweetsRules,
-  fulfillmentTypeFor,
-  isSweetsProduct,
-  bookingTimeSlots,
-  DEPOSIT_THRESHOLD,
-} from "@/lib/sweetsFulfillment";
+import { fmtMoney } from "@/lib/format";
+import { fireConfetti } from "@/lib/confetti";
 import {
   Banknote,
   CreditCard,
@@ -29,10 +15,7 @@ import {
 } from "lucide-react";
 import {
   WA_NUMBER,
-  GIFT_BONUS,
   type Addr,
-  type SweetsBucket,
-  type VendorGroup,
 } from "../types/cart.types";
 import { preOpenWindow, isMobileWaContext, type OpenResult } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
@@ -44,6 +27,9 @@ import {
 } from "./useCartValidation";
 import { placeOrderAtomic, allocateOrderInventory } from "./useCartCheckoutRpc";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
+import { useSharedCartAdapter } from "./useSharedCartAdapter";
+import { useCartCalculations } from "./useCartCalculations";
+import { useCartVendorGrouping } from "./useCartVendorGrouping";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
@@ -52,100 +38,26 @@ export const paymentOptions = [
   { id: "instapay", label: "إنستا باي", icon: CreditCard, sub: "تحويل بنكي" },
 ];
 
-const sharedLineIdentity = (productId: string, meta?: Record<string, unknown> | CartLineMeta) => {
-  const m = (meta ?? {}) as CartLineMeta & { variant_id?: string };
-  return [
-    productId,
-    m.kind ?? "buy",
-    m.variantId ?? m.variant_id ?? "",
-    m.bookingDate ?? "",
-    m.bookingSlot ?? "",
-    m.borrowDuration ?? "",
-    (m.addonIds ?? []).slice().sort().join(","),
-    m.printConfig
-      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
-      : "",
-  ].join("|");
-};
-
 /**
  * Single source of truth for the Cart UI: state, derived totals, fulfillment
- * segmentation, multi-vendor grouping, cross-sell, and the WhatsApp
- * checkout pipeline. Pure refactor of the previous in-page logic — no
- * behavior changes.
+ * segmentation, multi-vendor grouping, cross-sell, and the WhatsApp checkout
+ * pipeline. This hook is now a thin Facade that composes:
+ *   - useSharedCartAdapter  → shared/local cart unification
+ *   - useCartCalculations   → totals, sweets, wallet split, progress
+ *   - useCartVendorGrouping → vendor segmentation + cross-sell
+ *   - useCartValidation     → promo + min-order
+ *   - useCartCheckoutRpc / useCartWhatsApp → checkout side-effects
  */
 export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => {
   const sharedCartId = opts?.sharedCartId ?? null;
-  const local = useCart();
-  const shared = useSharedCartSync(sharedCartId);
-  const isSharedMode = !!sharedCartId;
 
-  // Adapt shared items into local-shaped lines so all downstream derivations
-  // (vendor groups, sweets buckets, totals, cross-sell) keep working unchanged.
-  const sharedLines = useMemo(() => {
-    if (!isSharedMode) return [] as { product: Product; qty: number; meta?: CartLineMeta }[];
-    const out: { product: Product; qty: number; meta?: CartLineMeta }[] = [];
-    for (const it of shared.items) {
-      const product = allProducts.find((p) => p.id === it.product_id);
-      if (!product) continue;
-      out.push({ product, qty: it.quantity, meta: it.meta as CartLineMeta | undefined });
-    }
-    return out;
-  }, [isSharedMode, shared.items]);
-
-  const lines = isSharedMode ? sharedLines : local.lines;
-  const count = isSharedMode ? sharedLines.reduce((s, l) => s + l.qty, 0) : local.count;
-  const total = isSharedMode
-    ? sharedLines.reduce((s, l) => s + l.product.price * l.qty, 0)
-    : local.total;
-
-  const setQty: typeof local.setQty = isSharedMode
-    ? async (productId, qty) => {
-        const it = shared.items.find((i) => i.product_id === productId);
-        if (it) await shared.updateItemQty(it.id, qty);
-      }
-    : local.setQty;
-
-  const remove: typeof local.remove = isSharedMode
-    ? async (productId) => {
-        const it = shared.items.find((i) => i.product_id === productId);
-        if (it) await shared.removeItem(it.id);
-      }
-    : local.remove;
-
-  const add: typeof local.add = isSharedMode
-    ? async (product, qty = 1, meta) => {
-        const targetIdentity = sharedLineIdentity(product.id, meta);
-        const existing = shared.items.find((i) => sharedLineIdentity(i.product_id, i.meta) === targetIdentity);
-        if (existing) await shared.updateItemQty(existing.id, existing.quantity + qty);
-        else
-          await shared.addItem({
-            product_id: product.id,
-            product_name: product.name,
-            unit_price: product.price,
-            quantity: qty,
-            meta: (meta ?? {}) as Record<string, unknown>,
-          });
-      }
-    : local.add;
-
-  const clear: typeof local.clear = isSharedMode
-    ? async () => {
-        await Promise.all(shared.items.map((i) => shared.removeItem(i.id)));
-      }
-    : local.clear;
-
-  const updateMeta: typeof local.updateMeta = isSharedMode
-    ? () => {
-        // Itemized meta updates in shared mode are deferred to a follow-up phase.
-      }
-    : local.updateMeta;
+  const cart = useSharedCartAdapter(sharedCartId);
+  const { lines, count, total, setQty, remove, add, clear, updateMeta, isSharedMode, shared } = cart;
 
   const { user } = useAuth();
   const navigate = useNavigate();
   const { zone, setFromAddress } = useLocation();
 
-  // Promo + min-order validation extracted to useCartValidation.
   const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
     useCartValidation(total);
 
@@ -155,9 +67,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [guestNotes, setGuestNotes] = useState("");
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
-  // Double-submit guard — synchronous flag that beats React batching
   const submittingRef = useRef(false);
-  // WhatsApp fallback dialog (shown when popup is blocked)
   const [waFallback, setWaFallback] = useState<WaFallbackPayload | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [trustLimit, setTrustLimit] = useState<number>(0);
@@ -215,88 +125,44 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [zone.codAllowed, payment, secondaryPayment]);
 
-  const subtotal = total;
-  const discount = appliedPromo ? Math.round(subtotal * appliedPromo.pct) : 0;
-  const FREE_DELIVERY_THRESHOLD = zone.freeDeliveryThreshold ?? Infinity;
-  const GIFT_THRESHOLD = isFinite(FREE_DELIVERY_THRESHOLD)
-    ? FREE_DELIVERY_THRESHOLD + GIFT_BONUS
-    : Infinity;
-  const delivery =
-    subtotal === 0 ? 0 : subtotal >= FREE_DELIVERY_THRESHOLD ? 0 : zone.deliveryFee;
-  const grand = Math.max(0, subtotal - discount + delivery + tip);
-
-  const sweetsBuckets = useMemo(() => {
-    const buckets: Record<"A" | "B" | "C", SweetsBucket> = {
-      A: { type: "A", lines: [], subtotal: 0 },
-      B: { type: "B", lines: [], subtotal: 0 },
-      C: { type: "C", lines: [], subtotal: 0 },
-    };
-    for (const l of lines) {
-      if (!isSweetsProduct(l.product.source)) continue;
-      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
-      buckets[t].lines.push({
-        product: l.product,
-        qty: l.qty,
-        meta: {
-          date: l.meta?.bookingDate,
-          slot: l.meta?.bookingSlot,
-          note: l.meta?.bookingNote,
-        },
-      });
-      buckets[t].subtotal += l.product.price * l.qty;
-    }
-    return buckets;
-  }, [lines]);
-
-  const sweetsRules = useMemo(
-    () => computeSweetsRules(sweetsBuckets.C.subtotal, grand),
-    [sweetsBuckets.C.subtotal, grand],
-  );
-
-  const bookingLinesMeta = useMemo(() => {
-    return lines
-      .filter(
-        (l) =>
-          isSweetsProduct(l.product.source) &&
-          fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
-      )
-      .map((l) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
-        const sub = unit * l.qty;
-        const lineRequired = sub >= DEPOSIT_THRESHOLD;
-        const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
-        return {
-          id: l.product.id,
-          subtotal: sub,
-          payDeposit: wantsDeposit,
-          shipMode: (l.meta?.shipMode ?? "split") as "split" | "wait",
-        };
-      });
-  }, [lines]);
-
-  const aggregateDeposit = useMemo(
-    () =>
-      bookingLinesMeta.reduce(
-        (s, b) => s + (b.payDeposit ? Math.round(b.subtotal * 0.5) : b.subtotal),
-        0,
-      ),
-    [bookingLinesMeta],
-  );
-  const anyWaitForAll = bookingLinesMeta.some((b) => b.shipMode === "wait");
-  const hasInstantSweets = sweetsBuckets.A.lines.length > 0;
-  const hasFreshSweets = sweetsBuckets.B.lines.length > 0;
-  const hasBooking = sweetsBuckets.C.lines.length > 0;
-  const hasNonBookingItems =
-    hasInstantSweets ||
-    hasFreshSweets ||
-    lines.some((l) => !isSweetsProduct(l.product.source));
-
-  const payDeposit = bookingLinesMeta.some((b) => b.payDeposit);
-
-  const payNowAmount = sweetsRules.hasBooking
-    ? aggregateDeposit + Math.max(0, grand - sweetsRules.bookingSubtotal)
-    : grand;
-  const payOnDelivery = Math.max(0, grand - payNowAmount);
+  const calc = useCartCalculations({
+    lines,
+    total,
+    zone,
+    appliedPromo,
+    tip,
+    payment,
+    walletBalance,
+    trustLimit,
+    secondaryPayment,
+  });
+  const {
+    subtotal,
+    discount,
+    delivery,
+    grand,
+    sweetsBuckets,
+    sweetsRules,
+    aggregateDeposit,
+    anyWaitForAll,
+    hasInstantSweets,
+    hasFreshSweets,
+    hasBooking,
+    hasNonBookingItems,
+    payDeposit,
+    payOnDelivery,
+    billSavings,
+    isWalletPay,
+    walletShortfall,
+    walletApplied,
+    trustUsed,
+    isSplit,
+    roundedCash,
+    changeRemainder,
+    showChangeJar,
+    progress,
+    FREE_DELIVERY_THRESHOLD,
+  } = calc;
 
   useEffect(() => {
     if (sweetsRules.blockCOD && payment === "cash") {
@@ -310,168 +176,23 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   }, [sweetsRules.blockCOD, payment, secondaryPayment]);
 
-  const billSavings =
-    discount +
-    (subtotal >= FREE_DELIVERY_THRESHOLD && subtotal > 0 ? zone.deliveryFee : 0);
-
-  const isWalletPay = payment === "wallet";
-  const effectiveWallet = walletBalance + trustLimit;
-  const walletShortfall = isWalletPay ? Math.max(0, grand - effectiveWallet) : 0;
-  const walletApplied = isWalletPay ? Math.min(effectiveWallet, grand) : 0;
-  const trustUsed = isWalletPay ? Math.max(0, walletApplied - walletBalance) : 0;
-  const isSplit = isWalletPay && walletShortfall > 0 && effectiveWallet > 0;
-
-  const cashAmount = !isWalletPay
-    ? grand
-    : isSplit && secondaryPayment === "cash"
-      ? walletShortfall
-      : 0;
-  const roundedCash = cashAmount > 0 ? Math.ceil(cashAmount / 10) * 10 : 0;
-  const changeRemainder = roundedCash - cashAmount;
-  const showChangeJar =
-    changeRemainder > 0 &&
-    changeRemainder <= 10 &&
-    [3, 5, 10].some((r) => changeRemainder <= r) &&
-    cashAmount > 0;
-
-  const progress = useMemo(() => {
-    if (!isFinite(FREE_DELIVERY_THRESHOLD)) {
-      return {
-        pct: 0,
-        label: `🚚 رسوم التوصيل ${toLatin(zone.deliveryFee)} ج.م لمنطقتك`,
-        done: false,
-      };
-    }
-    if (subtotal >= GIFT_THRESHOLD) {
-      return { pct: 100, label: "🎁 طلبك مؤهل لهدية مفاجئة + توصيل مجاني!", done: true };
-    }
-    if (subtotal >= FREE_DELIVERY_THRESHOLD) {
-      const remain = GIFT_THRESHOLD - subtotal;
-      return {
-        pct: Math.min(
-          100,
-          ((subtotal - FREE_DELIVERY_THRESHOLD) /
-            (GIFT_THRESHOLD - FREE_DELIVERY_THRESHOLD)) *
-            50 +
-            50,
-        ),
-        label: `أضف ${toLatin(remain)} ج.م لتحصل على هدية مفاجئة 🎁`,
-        done: false,
-      };
-    }
-    const remain = FREE_DELIVERY_THRESHOLD - subtotal;
-    return {
-      pct: Math.min(50, (subtotal / FREE_DELIVERY_THRESHOLD) * 50),
-      label: `أضف ${toLatin(remain)} ج.م لتحصل على توصيل مجاني 🚚`,
-      done: false,
-    };
-  }, [subtotal, FREE_DELIVERY_THRESHOLD, GIFT_THRESHOLD, zone.deliveryFee]);
-
-  const [coPurchaseIds, setCoPurchaseIds] = useState<string[]>([]);
-  useEffect(() => {
-    if (lines.length === 0) {
-      setCoPurchaseIds([]);
-      return;
-    }
-    const ids = lines.map((l) => l.product.id);
-    let cancelled = false;
-    (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).rpc("frequently_bought_together", {
-        _product_ids: ids,
-        _limit: 6,
-      });
-      if (!cancelled && Array.isArray(data)) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        setCoPurchaseIds((data as any[]).map((r) => r.product_id));
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines.map((l) => l.product.id).join(",")]);
-
-  const crossSell = useMemo<Product[]>(() => {
-    if (lines.length === 0) return [];
-    const inCart = new Set(lines.map((l) => l.product.id));
-    const cartSources = new Set(lines.map((l) => l.product.source));
-    const cartCategories = new Set(lines.map((l) => l.product.category));
-    const coReal = coPurchaseIds
-      .map((id) => allProducts.find((p) => p.id === id))
-      .filter((p): p is Product => !!p && !inCart.has(p.id));
-    const heur = allProducts
-      .filter(
-        (p) =>
-          !inCart.has(p.id) &&
-          !coReal.find((c) => c.id === p.id) &&
-          (cartSources.has(p.source) || cartCategories.has(p.category)),
-      )
-      .sort((a, b) => {
-        const scoreA = (a.badge === "best" ? 3 : a.badge === "trending" ? 2 : 1) - a.price / 200;
-        const scoreB = (b.badge === "best" ? 3 : b.badge === "trending" ? 2 : 1) - b.price / 200;
-        return scoreB - scoreA;
-      });
-    return [...coReal, ...heur].slice(0, 6);
-  }, [lines, coPurchaseIds]);
-
-  const vendorGroups = useMemo<VendorGroup[]>(() => {
-    const map = new Map<string, VendorGroup>();
-    for (const l of lines) {
-      const v = vendorForProduct(l.product.id, l.product.source);
-      const key =
-        v.kind === "restaurant" ? `r:${v.restaurant.id}` : v.kind === "kitchen" ? "k" : "s";
-      if (!map.has(key)) {
-        map.set(key, { key, vendor: v, lines: [], subtotal: 0, cashback: 0 });
-      }
-      const g = map.get(key)!;
-      g.lines.push(l);
-      g.subtotal += l.product.price * l.qty;
-    }
-    for (const g of map.values()) {
-      if (g.vendor.kind === "restaurant") {
-        g.cashback = Math.round((g.subtotal * g.vendor.restaurant.cashbackPct) / 100);
-      }
-    }
-    return Array.from(map.values()).sort((a, b) => {
-      const order = (v: VendorKey) =>
-        v.kind === "restaurant" ? 0 : v.kind === "kitchen" ? 1 : 2;
-      return order(a.vendor) - order(b.vendor);
-    });
-  }, [lines]);
-
-  const isMultiVendor = vendorGroups.length > 1;
-  const totalCashback = useMemo(
-    () => (payment === "wallet" ? vendorGroups.reduce((s, g) => s + g.cashback, 0) : 0),
-    [vendorGroups, payment],
-  );
-
-  const groupIsScheduled = (g: VendorGroup) =>
-    g.lines.length > 0 &&
-    g.lines.every((l) => {
-      if (!isSweetsProduct(l.product.source)) return false;
-      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
-      return t === "B" || t === "C";
-    });
-  const groupIsMixedScheduled = (g: VendorGroup) =>
-    g.lines.some((l) => {
-      if (!isSweetsProduct(l.product.source)) return false;
-      const t = fulfillmentTypeFor(l.product.id, l.product.subCategory);
-      return t === "B" || t === "C";
-    });
-
-  const instantGroups = vendorGroups.filter((g) => !groupIsScheduled(g));
-  const scheduledGroups = vendorGroups.filter((g) => groupIsScheduled(g));
-  const showFulfillmentSections = instantGroups.length > 0 && scheduledGroups.length > 0;
-
-  // applyPromo provided by useCartValidation above.
+  const grouping = useCartVendorGrouping(lines, payment);
+  const {
+    crossSell,
+    vendorGroups,
+    instantGroups,
+    scheduledGroups,
+    showFulfillmentSections,
+    isMultiVendor,
+    totalCashback,
+    groupIsMixedScheduled,
+  } = grouping;
 
   const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
   const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
   const selectedAddr = addresses.find((a) => a.id === addrId);
 
   const checkoutWA = async () => {
-    // Double-submit protection — runs synchronously, beats setState batching
     if (submittingRef.current) {
       console.warn("[checkout] duplicate submit blocked");
       return;
@@ -626,7 +347,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      // Phase 8 — route spare change to General Charity Pool when toggled.
       if (
         !isGuest &&
         currentUser &&
@@ -711,21 +431,13 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
       await minLoading;
 
-      // Order of operations (per checkout spec):
-      //   1. mainMessage already built above (uses `lines` data)
-      //   2. RPC place_order_atomic already executed above
-      //   3. clear() — empty the cart now, BEFORE opening WhatsApp
-      //   4. Open WhatsApp with the prebuilt mainMessage
-      //   5. Navigate to success page (only if WA actually opened)
       const mainPhone = WA_NUMBER;
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
 
-      // Step 3 — clear the cart and celebrate before navigation/redirect.
       clear();
       fireConfetti();
 
-      // Step 4 — open WhatsApp.
       const openResult: OpenResult = dispatchWhatsApp({
         phone: mainPhone,
         text: mainMessage,
@@ -762,9 +474,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      // Vendor + producer notifications are delivered via DB (place_order_atomic
-      // → vendor_notifications / admin notifications). Browsers cannot reliably
-      // fire multiple sequential window.open calls, so we just log here.
       const restaurantGroups = vendorGroups.filter((g) => g.vendor.kind === "restaurant");
       if (restaurantGroups.length > 0) {
         console.info(
@@ -778,7 +487,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         console.info("[checkout] producer booking present (DB-routed)");
       }
 
-      // Step 5 — navigate to success page only if WhatsApp actually opened.
       if (openResult.ok) {
         toast.success("تم إرسال طلبك إلى واتساب 🎉");
         navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
@@ -794,7 +502,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
   };
 
-  /** Called by the Cart page when the WhatsApp fallback dialog closes. */
   const dismissWaFallback = () => {
     setWaFallback(null);
   };
