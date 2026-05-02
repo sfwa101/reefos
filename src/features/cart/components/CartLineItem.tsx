@@ -331,3 +331,15 @@ const CartLineItemImpl = ({
     </div>
   );
 };
+
+export const CartLineItem = memo(CartLineItemImpl, (prev, next) => {
+  return (
+    prev.l.product === next.l.product &&
+    prev.l.qty === next.l.qty &&
+    prev.l.meta === next.l.meta &&
+    prev.setQty === next.setQty &&
+    prev.remove === next.remove &&
+    prev.updateMeta === next.updateMeta
+  );
+});
+
