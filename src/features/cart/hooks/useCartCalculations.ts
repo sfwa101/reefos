@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import type { CartLineMeta } from "@/context/CartContext";
 import type { Product } from "@/lib/products";
 import {
@@ -8,6 +8,7 @@ import {
   DEPOSIT_THRESHOLD,
 } from "@/lib/sweetsFulfillment";
 import { toLatin } from "@/lib/format";
+import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };
