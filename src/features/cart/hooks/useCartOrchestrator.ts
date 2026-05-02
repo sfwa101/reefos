@@ -129,8 +129,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const navigate = useNavigate();
   const { zone, setFromAddress } = useLocation();
 
-  const [promo, setPromo] = useState("");
-  const [appliedPromo, setAppliedPromo] = useState<AppliedPromo>(null);
+  // Promo + min-order validation extracted to useCartValidation.
+  const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
+    useCartValidation(total);
+
   const [tip, setTip] = useState(0);
   const [addresses, setAddresses] = useState<Addr[]>([]);
   const [addrId, setAddrId] = useState<string>("");
@@ -148,25 +150,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [saveChange, setSaveChange] = useState<boolean>(true);
   const [donateChange, setDonateChange] = useState<boolean>(false);
   const [customerName, setCustomerName] = useState<string>("");
-  const [minOrderTotal, setMinOrderTotal] = useState<number>(0);
   const [guestName, setGuestName] = useState<string>("");
   const [guestPhone, setGuestPhone] = useState<string>("");
   const [guestAddress, setGuestAddress] = useState<string>("");
-
-  // Finance settings (min order total)
-  useEffect(() => {
-    (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
-        .from("app_settings")
-        .select("value")
-        .eq("key", "finance")
-        .maybeSingle();
-      const raw = (data?.value as { min_order_total?: number | string } | null)?.min_order_total;
-      const n = Number(raw);
-      if (Number.isFinite(n) && n > 0) setMinOrderTotal(n);
-    })();
-  }, []);
 
   useEffect(() => {
     if (!user) {
