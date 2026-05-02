@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Skeleton } from "@/components/ui/skeleton";
+import { PrintReportButton } from "@/components/admin/PrintReportButton";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
