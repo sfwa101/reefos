@@ -4,6 +4,7 @@ import {
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
   Star, BarChart3, Settings, FileClock, Warehouse, Store, Printer, FolderTree, Layout, Banknote,
   Boxes, Layers, ArrowRightLeft, Coins, KeyRound,
+  HandCoins, ClipboardList, PiggyBank,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,11 @@ const groups = [
     { to: "/admin/commission-ledger", icon: Coins, label: "سجل العمولات" },
     { to: "/admin/savings", icon: Receipt, label: "الادخار" },
     { to: "/admin/finance", icon: TrendingUp, label: "التقارير المالية" },
+  ]},
+  { title: "العمليات المالية", items: [
+    { to: "/admin/cashier-sessions", icon: ClipboardList, label: "ورديات الكاشير" },
+    { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "سجل تسويات المناديب" },
+    { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع" },
   ]},
   { title: "التسويق", items: [
     { to: "/admin/marketing/promos", icon: Sparkles, label: "الكوبونات" },

@@ -9,6 +9,7 @@ import {
   Sparkles, Image, BellRing, Gift, Truck, MapPin, UserCog, MessagesSquare,
   FileClock, BarChart3, Settings, LogOut, Moon, Printer, Boxes, Scale, Ban, MessageCircle,
   Layers, ArrowRightLeft, Coins, KeyRound,
+  HandCoins, ClipboardList, PiggyBank,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,11 @@ export default function More() {
       { to: "/admin/savings", icon: Receipt, label: "الادخار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/finance", icon: TrendingUp, label: "التقارير", color: "from-primary to-primary-glow" },
       { to: "/admin/analytics", icon: BarChart3, label: "التحليلات", color: "from-[hsl(var(--indigo))] to-[hsl(var(--purple))]" },
+    ]},
+    { title: "العمليات المالية", items: [
+      { to: "/admin/cashier-sessions", icon: ClipboardList, label: "ورديات الكاشير", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "سجل تسويات المناديب", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
+      { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
     ]},
     { title: "التسويق", items: [
       { to: "/admin/marketing/promos", icon: Sparkles, label: "الكوبونات", color: "from-[hsl(var(--pink))] to-[hsl(335_80%_70%)]" },
