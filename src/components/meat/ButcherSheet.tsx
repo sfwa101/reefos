@@ -13,6 +13,7 @@ import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
 } from "@/lib/butcheryPrep";
+import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/features/meat/components/Panel";
 import { CutBuilder } from "@/features/meat/components/CutBuilder";
 import { PrepOptions } from "@/features/meat/components/PrepOptions";
