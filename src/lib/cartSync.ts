@@ -93,7 +93,9 @@ export async function pushRemoteCart(
     user_id: userId,
     product_id: l.product.id,
     qty: l.qty,
-    meta: (l.meta ?? {}) as CartLineMeta,
+    // CartLineMeta is JSON-serializable (POJOs only — Modifier objects
+    // are plain shapes). The Database type widens to Json, so cast.
+    meta: (l.meta ?? {}) as never,
   }));
   const ins = await supabase.from("cart_items").insert(rows);
   if (ins.error) {

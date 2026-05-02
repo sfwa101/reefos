@@ -18,13 +18,30 @@ import {
   mergeCarts,
   type LocalLine,
 } from "@/lib/cartSync";
+import type { Modifier } from "@/lib/pricingEngine";
 
 /**
- * Optional per-line meta. Used by the sweets section to attach a chosen
- * pickup date/time slot on Type C (pre-order) bookings, but generic enough
- * that other sections can extend it (e.g. kitchen scheduled meals).
+ * Per-line meta.
+ *
+ * NEW (Universal Commerce Engine — Phase 3):
+ *   - `appliedModifiers`: Modifier[] — the canonical, polymorphic
+ *     way every section (meat / sweets / library / pharmacy / …)
+ *     should describe what the user added on top of the base price.
+ *     Re-pricing the cart only needs basePrice + appliedModifiers.
+ *   - `properties`: free-form Record for non-pricing flags (e.g.
+ *     bookingNote, fileName, gift wrap message text, etc.).
+ *
+ * LEGACY (kept for backward compatibility while consumers migrate):
+ *   bookingDate / bookingSlot / borrowDuration / printConfig / …
+ *   These will be removed once every section emits Modifier[].
  */
 export type CartLineMeta = {
+  /** Universal modifiers — preferred shape going forward. */
+  appliedModifiers?: Modifier[];
+  /** Free-form, domain-specific non-pricing data. */
+  properties?: Record<string, unknown>;
+
+  /* ---- Legacy fields (do not extend) ---- */
   bookingDate?: string;
   bookingSlot?: string;
   bookingNote?: string;
