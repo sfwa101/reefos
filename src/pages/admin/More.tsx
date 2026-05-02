@@ -52,8 +52,6 @@ export default function More() {
       { to: "/admin/reviews", icon: Star, label: "التقييمات", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
     ]},
     { title: "المالية", items: [
-      { to: "/admin/hakim", icon: Sparkles, label: "المستشار حكيم AI", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
-      { to: "/admin/hakim-chat", icon: MessageCircle, label: "محادثة حكيم", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
       { to: "/admin/zakat", icon: Scale, label: "حساب الزكاة", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/riba-audit", icon: Ban, label: "مراجعة الربا الشرعية", color: "from-destructive to-[hsl(var(--accent))]" },
       { to: "/admin/offers", icon: Gift, label: "العروض والكوبونات والأحداث", color: "from-[hsl(var(--accent))] to-[hsl(var(--warning))]" },
