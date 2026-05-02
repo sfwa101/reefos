@@ -81,30 +81,22 @@ type UseSharedCartSyncResult = {
 
 const ACTIVE_STATES: SharedCartStatus[] = ["active"];
 
-const stableJson = (value: unknown): string => {
-  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
-  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
-  const obj = value as Record<string, unknown>;
-  return `{${Object.keys(obj)
-    .sort()
-    .map((k) => `${JSON.stringify(k)}:${stableJson(obj[k])}`)
-    .join(",")}}`;
-};
-
 const metaSignature = (meta: Record<string, unknown> | null | undefined): string => {
   const m = (meta ?? {}) as Record<string, unknown>;
   const printConfig = (m.printConfig ?? null) as Record<string, unknown> | null;
-  return stableJson({
-    kind: m.kind ?? "buy",
-    variantId: m.variantId ?? m.variant_id ?? "",
-    bookingDate: m.bookingDate ?? "",
-    bookingSlot: m.bookingSlot ?? "",
-    borrowDuration: m.borrowDuration ?? "",
-    addonIds: Array.isArray(m.addonIds) ? [...m.addonIds].sort() : [],
-    printConfigKey: printConfig
-      ? `${printConfig.pages ?? ""}-${printConfig.copies ?? ""}-${printConfig.colorMode ?? ""}-${printConfig.sided ?? ""}-${printConfig.binding ?? ""}-${printConfig.fileName ?? ""}`
-      : "",
-  });
+  const addonIds = Array.isArray(m.addonIds) ? [...(m.addonIds as unknown[])].sort().join(",") : "";
+  const printKey = printConfig
+    ? `${printConfig.pages ?? ""}-${printConfig.copies ?? ""}-${printConfig.colorMode ?? ""}-${printConfig.sided ?? ""}-${printConfig.binding ?? ""}-${printConfig.fileName ?? ""}`
+    : "";
+  return [
+    m.kind ?? "buy",
+    m.variantId ?? m.variant_id ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    addonIds,
+    printKey,
+  ].join("|");
 };
 
 const itemIdentity = (item: Pick<SharedCartItem, "product_id" | "meta">): string =>
@@ -122,7 +114,7 @@ const normalizeItems = (rows: SharedCartItem[]): SharedCartItem[] => {
 
 const itemsSignature = (rows: SharedCartItem[]): string =>
   normalizeItems(rows)
-    .map((i) => `${itemIdentity(i)}#${i.quantity}#${stableJson(i.meta ?? {})}`)
+    .map((i) => `${itemIdentity(i)}#${i.quantity}`)
     .sort()
     .join("||");
 

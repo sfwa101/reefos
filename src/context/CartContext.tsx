@@ -114,17 +114,6 @@ const lineKey = (l: { product: { id: string }; meta?: CartLineMeta }): string =>
   ].join("|");
 };
 
-/** Stable deep signature for equality checks before remote pushes. */
-const stableJson = (value: unknown): string => {
-  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "undefined";
-  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
-  const obj = value as Record<string, unknown>;
-  return `{${Object.keys(obj)
-    .sort()
-    .map((k) => `${JSON.stringify(k)}:${stableJson(obj[k])}`)
-    .join(",")}}`;
-};
-
 /** Collapse duplicate lines (same key). External sync uses max to avoid echo-amplifying corrupted duplicates. */
 function dedupeLines<T extends { product: { id: string }; qty: number; meta?: CartLineMeta }>(
   lines: T[],
@@ -148,7 +137,7 @@ function dedupeLines<T extends { product: { id: string }; qty: number; meta?: Ca
 
 const cartSignature = (lines: LocalLine[]): string =>
   dedupeLines(lines, "max")
-    .map((l) => `${lineKey(l)}#${l.qty}#${stableJson(l.meta ?? {})}`)
+    .map((l) => `${lineKey(l)}#${l.qty}`)
     .sort()
     .join("||");
 
