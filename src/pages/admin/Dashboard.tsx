@@ -1,19 +1,24 @@
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { HakimSovereignCard } from "@/components/admin/HakimSovereignCard";
 import { BentoStats } from "@/components/admin/BentoStats";
 import { OrderSlideOver } from "@/components/admin/OrderSlideOver";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   AdminSection,
   KpiCard,
-  Sparkline,
   Funnel,
-  MiniBars,
   ActivityRow,
   EmptyState,
   SectionLink,
 } from "@/components/admin/ui";
+const PremiumCharts = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({
+  default: () => null as never, // not used directly; we import named below
+})));
+// named lazy imports
+const RevenueAreaChart = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })));
+const CategoryBarChart = lazy(() => import("@/components/admin/PremiumCharts").then((m) => ({ default: m.CategoryBarChart })));
 import {
   ChevronLeft,
   Package,
