@@ -448,46 +448,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const scheduledGroups = vendorGroups.filter((g) => groupIsScheduled(g));
   const showFulfillmentSections = instantGroups.length > 0 && scheduledGroups.length > 0;
 
-  const applyPromo = async () => {
-    const code = promo.trim().toUpperCase();
-    if (!code) return;
-    if (code === "REEF10") {
-      setAppliedPromo({ code, pct: 0.1 });
-      toast.success("تم تطبيق كود الخصم 🎉");
-      fireMiniConfetti();
-      return;
-    }
-    if (code === "WELCOME25") {
-      setAppliedPromo({ code, pct: 0.25 });
-      toast.success("خصم 25٪ تم تفعيله! 🎉");
-      fireConfetti();
-      return;
-    }
-    try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("validate_coupon", {
-        _code: code,
-        _order_total: subtotal,
-      });
-      if (error) throw error;
-      const disc = Number(data?.discount ?? 0);
-      if (disc <= 0) throw new Error("invalid");
-      const pct = subtotal > 0 ? disc / subtotal : 0;
-      setAppliedPromo({ code, pct });
-      toast.success(`تم تطبيق ${code} — خصم ${Math.round(disc)} ج 🎉`);
-      fireMiniConfetti();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
-      setAppliedPromo(null);
-      const msg = String(e?.message ?? "");
-      if (msg.includes("level_too_low")) toast.error("هذا الكود حصري لمستويات أعلى");
-      else if (msg.includes("expired")) toast.error("الكود منتهي");
-      else if (msg.includes("exhausted")) toast.error("نفد رصيد الكود");
-      else if (msg.includes("per_user_limit")) toast.error("تم استخدام الكود من قبل");
-      else if (msg.includes("below_minimum")) toast.error("الطلب أقل من الحد الأدنى");
-      else toast.error("كود غير صالح");
-    }
-  };
+  // applyPromo provided by useCartValidation above.
 
   const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
   const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
