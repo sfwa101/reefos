@@ -39,11 +39,13 @@ import { Route as AdminStoresRouteImport } from './routes/admin.stores'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
+import { Route as AdminRolePermissionsRouteImport } from './routes/admin.role-permissions'
 import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
+import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
@@ -53,6 +55,7 @@ import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
+import { Route as AdminInventoryLocationsRouteImport } from './routes/admin.inventory-locations'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminHakimChatRouteImport } from './routes/admin.hakim-chat'
 import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
@@ -66,7 +69,9 @@ import { Route as AdminDeliverySettingsRouteImport } from './routes/admin.delive
 import { Route as AdminDeliveryRouteImport } from './routes/admin.delivery'
 import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
+import { Route as AdminCrossBranchTransfersRouteImport } from './routes/admin.cross-branch-transfers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
+import { Route as AdminCommissionLedgerRouteImport } from './routes/admin.commission-ledger'
 import { Route as AdminCharityRouteImport } from './routes/admin.charity'
 import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
@@ -272,6 +277,11 @@ const AdminSavingsRoute = AdminSavingsRouteImport.update({
   path: '/savings',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminRolePermissionsRoute = AdminRolePermissionsRouteImport.update({
+  id: '/role-permissions',
+  path: '/role-permissions',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminRibaAuditRoute = AdminRibaAuditRouteImport.update({
   id: '/riba-audit',
   path: '/riba-audit',
@@ -295,6 +305,11 @@ const AdminProductsRoute = AdminProductsRouteImport.update({
 const AdminProductUnitsRoute = AdminProductUnitsRouteImport.update({
   id: '/product-units',
   path: '/product-units',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminProductBatchesRoute = AdminProductBatchesRouteImport.update({
+  id: '/product-batches',
+  path: '/product-batches',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPrintJobsRoute = AdminPrintJobsRouteImport.update({
@@ -340,6 +355,11 @@ const AdminLowStockRoute = AdminLowStockRouteImport.update({
 const AdminKycRoute = AdminKycRouteImport.update({
   id: '/kyc',
   path: '/kyc',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminInventoryLocationsRoute = AdminInventoryLocationsRouteImport.update({
+  id: '/inventory-locations',
+  path: '/inventory-locations',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminInventoryRoute = AdminInventoryRouteImport.update({
@@ -407,9 +427,20 @@ const AdminCustomersRoute = AdminCustomersRouteImport.update({
   path: '/customers',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCrossBranchTransfersRoute =
+  AdminCrossBranchTransfersRouteImport.update({
+    id: '/cross-branch-transfers',
+    path: '/cross-branch-transfers',
+    getParentRoute: () => AdminRoute,
+  } as any)
 const AdminCostBulkRoute = AdminCostBulkRouteImport.update({
   id: '/cost-bulk',
   path: '/cost-bulk',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminCommissionLedgerRoute = AdminCommissionLedgerRouteImport.update({
+  id: '/commission-ledger',
+  path: '/commission-ledger',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminCharityRoute = AdminCharityRouteImport.update({
@@ -714,7 +745,9 @@ export interface FileRoutesByFullPath {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
+  '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
+  '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -728,6 +761,7 @@ export interface FileRoutesByFullPath {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
@@ -737,11 +771,13 @@ export interface FileRoutesByFullPath {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
+  '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -823,7 +859,9 @@ export interface FileRoutesByTo {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
+  '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
+  '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -837,6 +875,7 @@ export interface FileRoutesByTo {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
@@ -846,11 +885,13 @@ export interface FileRoutesByTo {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
+  '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -939,7 +980,9 @@ export interface FileRoutesById {
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
+  '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
+  '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
   '/admin/dashboard': typeof AdminDashboardRoute
   '/admin/delivery': typeof AdminDeliveryRouteWithChildren
@@ -953,6 +996,7 @@ export interface FileRoutesById {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
   '/admin/inventory': typeof AdminInventoryRoute
+  '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
@@ -962,11 +1006,13 @@ export interface FileRoutesById {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
+  '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
+  '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -1056,7 +1102,9 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
+    | '/admin/commission-ledger'
     | '/admin/cost-bulk'
+    | '/admin/cross-branch-transfers'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery'
@@ -1070,6 +1118,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-chat'
     | '/admin/inventory'
+    | '/admin/inventory-locations'
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
@@ -1079,11 +1128,13 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/print-jobs'
+    | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
+    | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -1165,7 +1216,9 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
+    | '/admin/commission-ledger'
     | '/admin/cost-bulk'
+    | '/admin/cross-branch-transfers'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery'
@@ -1179,6 +1232,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-chat'
     | '/admin/inventory'
+    | '/admin/inventory-locations'
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
@@ -1188,11 +1242,13 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/print-jobs'
+    | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
+    | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -1280,7 +1336,9 @@ export interface FileRouteTypes {
     | '/admin/categories'
     | '/admin/cfo'
     | '/admin/charity'
+    | '/admin/commission-ledger'
     | '/admin/cost-bulk'
+    | '/admin/cross-branch-transfers'
     | '/admin/customers'
     | '/admin/dashboard'
     | '/admin/delivery'
@@ -1294,6 +1352,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-chat'
     | '/admin/inventory'
+    | '/admin/inventory-locations'
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
@@ -1303,11 +1362,13 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/print-jobs'
+    | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
+    | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
     | '/admin/staff'
@@ -1594,6 +1655,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminSavingsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/role-permissions': {
+      id: '/admin/role-permissions'
+      path: '/role-permissions'
+      fullPath: '/admin/role-permissions'
+      preLoaderRoute: typeof AdminRolePermissionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/riba-audit': {
       id: '/admin/riba-audit'
       path: '/riba-audit'
@@ -1627,6 +1695,13 @@ declare module '@tanstack/react-router' {
       path: '/product-units'
       fullPath: '/admin/product-units'
       preLoaderRoute: typeof AdminProductUnitsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/product-batches': {
+      id: '/admin/product-batches'
+      path: '/product-batches'
+      fullPath: '/admin/product-batches'
+      preLoaderRoute: typeof AdminProductBatchesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/print-jobs': {
@@ -1690,6 +1765,13 @@ declare module '@tanstack/react-router' {
       path: '/kyc'
       fullPath: '/admin/kyc'
       preLoaderRoute: typeof AdminKycRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/inventory-locations': {
+      id: '/admin/inventory-locations'
+      path: '/inventory-locations'
+      fullPath: '/admin/inventory-locations'
+      preLoaderRoute: typeof AdminInventoryLocationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/inventory': {
@@ -1783,11 +1865,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/cross-branch-transfers': {
+      id: '/admin/cross-branch-transfers'
+      path: '/cross-branch-transfers'
+      fullPath: '/admin/cross-branch-transfers'
+      preLoaderRoute: typeof AdminCrossBranchTransfersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cost-bulk': {
       id: '/admin/cost-bulk'
       path: '/cost-bulk'
       fullPath: '/admin/cost-bulk'
       preLoaderRoute: typeof AdminCostBulkRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/commission-ledger': {
+      id: '/admin/commission-ledger'
+      path: '/commission-ledger'
+      fullPath: '/admin/commission-ledger'
+      preLoaderRoute: typeof AdminCommissionLedgerRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/charity': {
@@ -2326,7 +2422,9 @@ interface AdminRouteChildren {
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCfoRoute: typeof AdminCfoRoute
   AdminCharityRoute: typeof AdminCharityRoute
+  AdminCommissionLedgerRoute: typeof AdminCommissionLedgerRoute
   AdminCostBulkRoute: typeof AdminCostBulkRoute
+  AdminCrossBranchTransfersRoute: typeof AdminCrossBranchTransfersRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
   AdminDashboardRoute: typeof AdminDashboardRoute
   AdminDeliveryRoute: typeof AdminDeliveryRouteWithChildren
@@ -2340,6 +2438,7 @@ interface AdminRouteChildren {
   AdminHakimRoute: typeof AdminHakimRoute
   AdminHakimChatRoute: typeof AdminHakimChatRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
+  AdminInventoryLocationsRoute: typeof AdminInventoryLocationsRoute
   AdminKycRoute: typeof AdminKycRoute
   AdminLowStockRoute: typeof AdminLowStockRoute
   AdminMarketingRoute: typeof AdminMarketingRouteWithChildren
@@ -2349,11 +2448,13 @@ interface AdminRouteChildren {
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
+  AdminProductBatchesRoute: typeof AdminProductBatchesRoute
   AdminProductUnitsRoute: typeof AdminProductUnitsRoute
   AdminProductsRoute: typeof AdminProductsRoute
   AdminPurchasesRoute: typeof AdminPurchasesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminRibaAuditRoute: typeof AdminRibaAuditRoute
+  AdminRolePermissionsRoute: typeof AdminRolePermissionsRoute
   AdminSavingsRoute: typeof AdminSavingsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminStaffRoute: typeof AdminStaffRoute
@@ -2381,7 +2482,9 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCfoRoute: AdminCfoRoute,
   AdminCharityRoute: AdminCharityRoute,
+  AdminCommissionLedgerRoute: AdminCommissionLedgerRoute,
   AdminCostBulkRoute: AdminCostBulkRoute,
+  AdminCrossBranchTransfersRoute: AdminCrossBranchTransfersRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
   AdminDashboardRoute: AdminDashboardRoute,
   AdminDeliveryRoute: AdminDeliveryRouteWithChildren,
@@ -2395,6 +2498,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHakimRoute: AdminHakimRoute,
   AdminHakimChatRoute: AdminHakimChatRoute,
   AdminInventoryRoute: AdminInventoryRoute,
+  AdminInventoryLocationsRoute: AdminInventoryLocationsRoute,
   AdminKycRoute: AdminKycRoute,
   AdminLowStockRoute: AdminLowStockRoute,
   AdminMarketingRoute: AdminMarketingRouteWithChildren,
@@ -2404,11 +2508,13 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
+  AdminProductBatchesRoute: AdminProductBatchesRoute,
   AdminProductUnitsRoute: AdminProductUnitsRoute,
   AdminProductsRoute: AdminProductsRoute,
   AdminPurchasesRoute: AdminPurchasesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminRibaAuditRoute: AdminRibaAuditRoute,
+  AdminRolePermissionsRoute: AdminRolePermissionsRoute,
   AdminSavingsRoute: AdminSavingsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminStaffRoute: AdminStaffRoute,
