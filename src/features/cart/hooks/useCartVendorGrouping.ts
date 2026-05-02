@@ -33,18 +33,22 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
     }
     const ids = lines.map((l) => l.product.id);
     let cancelled = false;
-    (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).rpc("frequently_bought_together", {
-        _product_ids: ids,
-        _limit: 6,
-      });
-      if (!cancelled && Array.isArray(data)) {
-        setCoPurchaseIds((data as FrequentlyBoughtRow[]).map((r) => r.product_id));
-      }
-    })();
+    // 800ms debounce — protects DB from per-keystroke qty bursts.
+    const timer = setTimeout(() => {
+      (async () => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { data } = await (supabase as any).rpc("frequently_bought_together", {
+          _product_ids: ids,
+          _limit: 6,
+        });
+        if (!cancelled && Array.isArray(data)) {
+          setCoPurchaseIds((data as FrequentlyBoughtRow[]).map((r) => r.product_id));
+        }
+      })();
+    }, 800);
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lineIdsKey]);
