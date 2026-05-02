@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  X, Check, Star, Info, Scale, ChefHat, Package, Sparkles,
-  Clock, MessageSquare, ShoppingBag, Flame, ChevronLeft, ChevronDown, Plus,
+  X, Star, Clock, MessageSquare, ShoppingBag, Flame, ChevronLeft, Check, Plus,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useCart } from "@/context/CartContext";
@@ -11,90 +10,21 @@ import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import type { Product } from "@/lib/products";
 import {
-  getButcheryRules,
-  computeButcheryPrice,
-  slaForPrep,
-  slaMeta,
-  type PrepOption,
-  type WeightOption,
+  getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
+  type PrepOption, type WeightOption,
 } from "@/lib/butcheryPrep";
+import { AnimatedNumber, Panel } from "@/features/meat/components/Panel";
+import { CutBuilder } from "@/features/meat/components/CutBuilder";
+import { PrepOptions } from "@/features/meat/components/PrepOptions";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 
-/** Animated number — counts up/down to `value` over a short interval. */
-const AnimatedNumber = ({ value, className }: { value: number; className?: string }) => {
-  const [display, setDisplay] = useState(value);
-  const fromRef = useRef(value);
-  useEffect(() => {
-    const from = fromRef.current;
-    const to = value;
-    if (from === to) return;
-    const start = performance.now();
-    const dur = 360;
-    let raf = 0;
-    const tick = (t: number) => {
-      const k = Math.min(1, (t - start) / dur);
-      const eased = 1 - Math.pow(1 - k, 3);
-      setDisplay(Math.round(from + (to - from) * eased));
-      if (k < 1) raf = requestAnimationFrame(tick);
-      else fromRef.current = to;
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [value]);
-  return <span className={className}>{toLatin(display)}</span>;
-};
-
-/** Collapsible card section — premium accordion shell */
-const Panel = ({
-  icon, title, hint, defaultOpen = true, children,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  hint?: string;
-  defaultOpen?: boolean;
-  children: React.ReactNode;
-}) => {
-  const [open, setOpen] = useState(defaultOpen);
-  return (
-    <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-2 px-3.5 py-3 text-right"
-      >
-        <span className="flex items-center gap-2">
-          {icon}
-          <span className="text-sm font-extrabold">{title}</span>
-          {hint && (
-            <span className="text-[10px] font-bold text-muted-foreground">{hint}</span>
-          )}
-        </span>
-        <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="border-t border-border/50 px-3.5 pb-3.5 pt-3">{children}</div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </section>
-  );
-};
-
 /**
- * The Butcher's Block — premium product modal for اللحوم/الدواجن/الأسماك.
- * Drives prep options, conditional addons, packaging, dynamic SLA badge,
- * recipe upsell + cross-sells and a free-form note for the butcher.
+ * Orchestrator for the butcher product modal. Owns:
+ *   - prep/weight/addons/packaging/cross-sell/qty/note state
+ *   - dynamic SLA tier derived from selected prep
+ *   - all pricing math (delegated to lib/butcheryPrep.computeButcheryPrice)
+ * Pure UI for weight + prep/addons/packaging is delegated to feature/meat/*.
  */
 const ButcherSheet = ({ product, open, onClose }: Props) => {
   const { add } = useCart();
@@ -124,7 +54,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
     setCrossIds([]);
   }, [open, product.id, rules]);
 
-  // Disabled addons removed from selection automatically when prep changes
+  // Disabled addons removed automatically when prep changes
   useEffect(() => {
     const p = rules?.preps.find((x) => x.id === prepId);
     if (!p?.disables?.length) return;
@@ -161,16 +91,13 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
       variantId: weight.id,
       addonIds: addonIds.length ? addonIds : undefined,
       unitPrice,
-      bookingNote:
-        [
-          `الوزن: ${weight.label}`,
-          `التحضير: ${prep.label}`,
-          `التغليف: ${rules.packaging.find((p) => p.id === packagingId)?.label}`,
-          note.trim() ? `ملاحظة: ${note.trim()}` : "",
-        ].filter(Boolean).join(" · "),
+      bookingNote: [
+        `الوزن: ${weight.label}`,
+        `التحضير: ${prep.label}`,
+        `التغليف: ${rules.packaging.find((p) => p.id === packagingId)?.label}`,
+        note.trim() ? `ملاحظة: ${note.trim()}` : "",
+      ].filter(Boolean).join(" · "),
     });
-    // Cross-sell items as standalone pseudo-products would require real ids;
-    // for now we stash them in the note + toast count to reflect intent.
     if (crossIds.length) {
       toast.success(`تمت إضافة ${toLatin(crossIds.length)} منتج مكمّل`);
     }
@@ -206,7 +133,6 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
               >
                 <X className="h-4 w-4" />
               </button>
-              {/* Dynamic SLA badge */}
               <motion.span
                 key={sla}
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -218,9 +144,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
               </motion.span>
               <div className="absolute inset-x-4 bottom-3 flex items-end justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="font-display text-xl font-extrabold leading-tight text-foreground">
-                    {product.name}
-                  </h2>
+                  <h2 className="font-display text-xl font-extrabold leading-tight text-foreground">{product.name}</h2>
                   <p className="text-[11px] text-muted-foreground">{product.unit} · {toLatin(product.price)} ج.م للكيلو</p>
                 </div>
                 {product.rating && (
@@ -242,7 +166,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                 ))}
               </div>
 
-              {/* SLA message strip — color-synced with modal ring */}
+              {/* SLA message strip */}
               <motion.div
                 key={`msg-${sla}`}
                 initial={{ opacity: 0, y: -4 }}
@@ -253,152 +177,24 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                 {slaInfo.message}
               </motion.div>
 
-              {/* Weight */}
-              <Panel
-                icon={<Scale className="h-4 w-4 text-rose-600" />}
-                title="اختر الوزن"
-                defaultOpen
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  {rules.weights.map((w) => {
-                    const active = w.id === weightId;
-                    const wp = Math.round(product.price * w.factor);
-                    return (
-                      <button
-                        key={w.id}
-                        onClick={() => setWeightId(w.id)}
-                        className={`flex items-center justify-between rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
-                          active
-                            ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                            : "border-border bg-background"
-                        }`}
-                      >
-                        <span className="text-[12px] font-extrabold">{w.label}</span>
-                        <span className="text-[11px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
-                          {toLatin(wp)} ج.م
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-                <p className="mt-2 flex items-start gap-1.5 text-[10.5px] font-bold leading-relaxed text-muted-foreground">
-                  <Info className="mt-0.5 h-3 w-3 shrink-0" />
-                  الوزن المذكور هو الوزن التقريبي قبل التنظيف والتحضير.
-                </p>
-              </Panel>
+              <CutBuilder
+                weights={rules.weights}
+                weightId={weightId}
+                basePrice={product.price}
+                onChange={setWeightId}
+              />
 
-              {/* Prep */}
-              <Panel
-                icon={<ChefHat className="h-4 w-4 text-rose-600" />}
-                title="طريقة التحضير"
-                defaultOpen
-              >
-                <div className="grid grid-cols-1 gap-2">
-                  {rules.preps.map((p) => {
-                    const active = p.id === prepId;
-                    const tier = slaForPrep(p);
-                    const tMeta = slaMeta[tier];
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => setPrepId(p.id)}
-                        className={`flex items-center justify-between gap-3 rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
-                          active
-                            ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                            : "border-border bg-background"
-                        }`}
-                      >
-                        <span className="flex items-center gap-2 text-[12px] font-extrabold">
-                          <span className={`flex h-4 w-4 items-center justify-center rounded-full border-2 ${
-                            active ? "border-rose-500 bg-rose-500" : "border-muted-foreground/40"
-                          }`}>
-                            {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={4} />}
-                          </span>
-                          {p.label}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <span className={`rounded-full px-2 py-0.5 text-[9.5px] font-extrabold ${tMeta.bgClass} ${tMeta.textClass}`}>
-                            {tMeta.label}
-                          </span>
-                          {p.price > 0 && (
-                            <span className="text-[11px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
-                              +{toLatin(p.price)}
-                            </span>
-                          )}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Panel>
-
-              {/* Conditional addons */}
-              {visibleAddons.length > 0 && (
-                <Panel
-                  icon={<Sparkles className="h-4 w-4 text-rose-600" />}
-                  title="إضافات"
-                  hint="(حسب التحضير)"
-                  defaultOpen={false}
-                >
-                  <div className="grid grid-cols-1 gap-2">
-                    {visibleAddons.map((a) => {
-                      const active = addonIds.includes(a.id);
-                      return (
-                        <button
-                          key={a.id}
-                          onClick={() => toggle(a.id, addonIds, setAddonIds)}
-                          className={`flex items-center justify-between gap-3 rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
-                            active
-                              ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                              : "border-border bg-background"
-                          }`}
-                        >
-                          <span className="flex items-center gap-2 text-[12px] font-extrabold">
-                            <span className={`flex h-4 w-4 items-center justify-center rounded-[5px] border-2 ${
-                              active ? "border-rose-500 bg-rose-500" : "border-muted-foreground/40"
-                            }`}>
-                              {active && <Check className="h-2.5 w-2.5 text-white" strokeWidth={4} />}
-                            </span>
-                            {a.label}
-                          </span>
-                          <span className="text-[11px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
-                            {a.price > 0 ? `+${toLatin(a.price)} ج.م` : "مجاني"}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </Panel>
-              )}
-
-              {/* Packaging */}
-              <Panel
-                icon={<Package className="h-4 w-4 text-rose-600" />}
-                title="التغليف"
-                defaultOpen={false}
-              >
-                <div className="grid grid-cols-2 gap-2">
-                  {rules.packaging.map((p) => {
-                    const active = p.id === packagingId;
-                    return (
-                      <button
-                        key={p.id}
-                        onClick={() => setPackagingId(p.id)}
-                        className={`flex flex-col items-start gap-0.5 rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
-                          active
-                            ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                            : "border-border bg-background"
-                        }`}
-                      >
-                        <span className="text-[12px] font-extrabold">{p.label}</span>
-                        <span className="text-[10px] font-bold text-muted-foreground">
-                          {p.price > 0 ? `+${toLatin(p.price)} ج.م` : (p.hint ?? "مجاني")}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              </Panel>
+              <PrepOptions
+                preps={rules.preps}
+                prepId={prepId}
+                onPrepChange={setPrepId}
+                visibleAddons={visibleAddons}
+                addonIds={addonIds}
+                onToggleAddon={(id) => toggle(id, addonIds, setAddonIds)}
+                packaging={rules.packaging}
+                packagingId={packagingId}
+                onPackagingChange={setPackagingId}
+              />
 
               {/* Recipe Upsell */}
               {rules.recipe && (
@@ -452,9 +248,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                           <div
                             key={c.id}
                             className={`relative flex w-[120px] shrink-0 flex-col items-center gap-1 rounded-2xl border-2 p-2.5 transition ${
-                              active
-                                ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10"
-                                : "border-border bg-card"
+                              active ? "border-rose-500 bg-rose-50 dark:bg-rose-500/10" : "border-border bg-card"
                             }`}
                           >
                             <span className="text-3xl">{c.emoji}</span>
@@ -467,9 +261,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                               onClick={() => toggle(c.id, crossIds, setCrossIds)}
                               aria-label={active ? "إزالة" : "إضافة"}
                               className={`mt-1 flex h-7 w-7 items-center justify-center rounded-full shadow-pill transition active:scale-90 ${
-                                active
-                                  ? "bg-emerald-500 text-white"
-                                  : "bg-rose-600 text-white"
+                                active ? "bg-emerald-500 text-white" : "bg-rose-600 text-white"
                               }`}
                             >
                               {active ? <Check className="h-3.5 w-3.5" strokeWidth={3.5} /> : <Plus className="h-3.5 w-3.5" strokeWidth={3.5} />}
