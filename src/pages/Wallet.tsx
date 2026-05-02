@@ -70,16 +70,19 @@ const Wallet = () => {
         )}
       </motion.section>
 
-      {/* HOLOGRAPHIC CARD slot */}
-      <WalletBalanceCard
+      {/* HOLOGRAPHIC CARD */}
+      <BalanceCard
         name={c.profile?.full_name || "عميل ريف"}
         balance={Number(c.balance?.balance ?? 0)}
-        points={c.balance?.points ?? 0}
-        savings={c.totalSavings}
-        tierLabel={c.tier?.label}
         trustLimit={c.trustLimit}
+        tierLabel={c.tier?.label}
+      />
+
+      {/* GLASS ACTION GRID */}
+      <ActionGrid
         onTopup={c.openTopup}
         onTransfer={() => c.setShowTransfer(true)}
+        onJar={() => c.setShowJar(true)}
         onPos={() => c.setShowPos(true)}
       />
 
