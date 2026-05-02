@@ -50,22 +50,32 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
 
     // Make sure a code + state row exists.
     try {
-      await (supabase.rpc as any)("ensure_referral_code", { _user_id: userId });
+      await supabase.rpc("ensure_referral_code", { _user_id: userId });
     } catch {
       /* non-fatal */
     }
 
     const [{ data: tiers }, { data: stateRow }] = await Promise.all([
-      (supabase.from as any)("affiliate_tiers")
+      supabase
+        .from("affiliate_tiers")
         .select("*")
         .order("rank", { ascending: true }),
-      (supabase.from as any)("user_affiliate_state")
+      supabase
+        .from("user_affiliate_state")
         .select("*")
         .eq("user_id", userId)
         .maybeSingle(),
     ]);
 
-    const allTiers: AffiliateTier[] = (tiers as any[]) ?? [];
+    const allTiers: AffiliateTier[] = (tiers ?? []).map((t) => ({
+      id: t.id,
+      name: t.name,
+      rank: t.rank,
+      min_successful_invites: t.min_successful_invites,
+      commission_fixed: Number(t.commission_fixed),
+      unlocks_wholesale: t.unlocks_wholesale,
+      badge_emoji: t.badge_emoji,
+    }));
     const invites: number = stateRow?.successful_invites ?? 0;
 
     const currentTier =
