@@ -154,7 +154,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [emit]);
 
-  // Auth-driven remote sync: pull on login, merge guest cart, push back.
+  // Auth-driven remote sync.
+  // CRITICAL: On page refresh (initial session restore) the localStorage cart
+  // and the remote cart represent the SAME state. Merging them would SUM
+  // quantities and duplicate items on every refresh. So:
+  //   - Initial restore (prevUid === undefined): REPLACE local with remote.
+  //   - Real login (prevUid === null → uid): merge guest cart into remote.
   useEffect(() => {
     let cancelled = false;
 
@@ -168,19 +173,35 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       try {
         const remote = await fetchRemoteCart(uid);
         const guest: LocalLine[] = linesRef.current.slice();
-        const merged = mergeCarts(guest, remote);
+        const isInitialRestore = prevUid === undefined;
+        const isFreshLogin = prevUid === null;
 
-        // Apply merged locally without re-triggering a push.
+        let next: LocalLine[];
+        let shouldPush = false;
+
+        if (isInitialRestore) {
+          // Page refresh / app boot: trust remote as source of truth.
+          // Dedupe defensively in case of legacy duplicated rows.
+          next = dedupeLines(remote);
+          shouldPush = next.length !== remote.length; // only if we cleaned dups
+        } else if (isFreshLogin && guest.length > 0) {
+          // Anonymous → logged-in with items in guest cart: merge.
+          next = dedupeLines(mergeCarts(guest, remote));
+          shouldPush = true;
+        } else {
+          // User switched accounts or logged in with empty guest cart.
+          next = dedupeLines(remote);
+          shouldPush = false;
+        }
+
+        // Apply locally without re-triggering a push.
         skipNextPushRef.current = true;
-        linesRef.current = merged;
+        linesRef.current = next;
         emit();
-        safeStorage.set(STORAGE_KEY, JSON.stringify(merged));
+        safeStorage.set(STORAGE_KEY, JSON.stringify(next));
 
-        // Only push back if the merge actually changed remote (i.e. guest
-        // contributed lines) or this is the first sync of the session.
-        const isFirstSync = prevUid === undefined || prevUid === null;
-        if (guest.length > 0 || isFirstSync) {
-          await pushRemoteCart(uid, merged);
+        if (shouldPush) {
+          await pushRemoteCart(uid, next);
         }
       } catch (err) {
         console.warn("[cart] sync on login failed:", err);
