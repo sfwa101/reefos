@@ -99,11 +99,11 @@ const safeStorage = {
 
 /** Stable identity key for a cart line (product + variant + booking + kind). */
 const lineKey = (l: { product: { id: string }; meta?: CartLineMeta }): string => {
-  const m = l.meta ?? {};
+  const m = (l.meta ?? {}) as CartLineMeta & { variant_id?: string };
   return [
     l.product.id,
     m.kind ?? "buy",
-    m.variantId ?? "",
+    m.variantId ?? m.variant_id ?? "",
     m.bookingDate ?? "",
     m.bookingSlot ?? "",
     m.borrowDuration ?? "",
@@ -114,22 +114,43 @@ const lineKey = (l: { product: { id: string }; meta?: CartLineMeta }): string =>
   ].join("|");
 };
 
-/** Collapse duplicate lines (same key) by summing qty. */
+/** Stable deep signature for equality checks before remote pushes. */
+const stableJson = (value: unknown): string => {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return `[${value.map(stableJson).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  return `{${Object.keys(obj)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${stableJson(obj[k])}`)
+    .join(",")}}`;
+};
+
+/** Collapse duplicate lines (same key). External sync uses max to avoid echo-amplifying corrupted duplicates. */
 function dedupeLines<T extends { product: { id: string }; qty: number; meta?: CartLineMeta }>(
   lines: T[],
+  mode: "sum" | "max" = "sum",
 ): T[] {
   const map = new Map<string, T>();
   for (const l of lines) {
     const k = lineKey(l);
     const existing = map.get(k);
     if (existing) {
-      map.set(k, { ...existing, qty: existing.qty + l.qty });
+      map.set(k, {
+        ...existing,
+        qty: mode === "sum" ? existing.qty + l.qty : Math.max(existing.qty, l.qty),
+      });
     } else {
       map.set(k, l);
     }
   }
   return Array.from(map.values());
 }
+
+const cartSignature = (lines: LocalLine[]): string =>
+  dedupeLines(lines, "max")
+    .map((l) => `${lineKey(l)}#${l.qty}#${stableJson(l.meta ?? {})}`)
+    .sort()
+    .join("||");
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Store lines in a ref so updates do not trigger provider re-renders.
