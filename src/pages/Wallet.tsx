@@ -131,7 +131,9 @@ const Wallet = () => {
             else c.setTab(t as typeof c.tab);
           }}
         />
+        </div>
 
+        <div className="px-5">
         <AnimatePresence mode="wait">
           {c.tab === "balance" && (
             <motion.div
