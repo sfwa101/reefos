@@ -108,7 +108,8 @@ export default function More() {
       { to: "/admin/delivery-settings", icon: ShieldCheck, label: "إعدادات التحقق", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
     ]},
-    { title: "الإدارة", items: [
+    { title: "إعدادات النظام", items: [
+      { to: "/admin/system-settings", icon: Settings, label: "مفاتيح التشغيل", color: "from-primary to-primary-glow" },
       { to: "/admin/support", icon: MessagesSquare, label: "الدعم الفني", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات", color: "from-foreground-secondary to-foreground" },

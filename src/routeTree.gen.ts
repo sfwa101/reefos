@@ -33,6 +33,7 @@ import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
 import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
 import { Route as AdminVendorSettlementsRouteImport } from './routes/admin.vendor-settlements'
 import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
+import { Route as AdminSystemSettingsRouteImport } from './routes/admin.system-settings'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
 import { Route as AdminSuppliersRouteImport } from './routes/admin.suppliers'
 import { Route as AdminStoresRouteImport } from './routes/admin.stores'
@@ -256,6 +257,11 @@ const AdminVendorSettlementsRoute = AdminVendorSettlementsRouteImport.update({
 const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
   id: '/topup-approvals',
   path: '/topup-approvals',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSystemSettingsRoute = AdminSystemSettingsRouteImport.update({
+  id: '/system-settings',
+  path: '/system-settings',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSupportRoute = AdminSupportRouteImport.update({
@@ -862,6 +868,7 @@ export interface FileRoutesByFullPath {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -987,6 +994,7 @@ export interface FileRoutesByTo {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -1119,6 +1127,7 @@ export interface FileRoutesById {
   '/admin/stores': typeof AdminStoresRoute
   '/admin/suppliers': typeof AdminSuppliersRoute
   '/admin/support': typeof AdminSupportRoute
+  '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
   '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
   '/admin/vendors': typeof AdminVendorsRoute
@@ -1252,6 +1261,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
+    | '/admin/system-settings'
     | '/admin/topup-approvals'
     | '/admin/vendor-settlements'
     | '/admin/vendors'
@@ -1377,6 +1387,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
+    | '/admin/system-settings'
     | '/admin/topup-approvals'
     | '/admin/vendor-settlements'
     | '/admin/vendors'
@@ -1508,6 +1519,7 @@ export interface FileRouteTypes {
     | '/admin/stores'
     | '/admin/suppliers'
     | '/admin/support'
+    | '/admin/system-settings'
     | '/admin/topup-approvals'
     | '/admin/vendor-settlements'
     | '/admin/vendors'
@@ -1744,6 +1756,13 @@ declare module '@tanstack/react-router' {
       path: '/topup-approvals'
       fullPath: '/admin/topup-approvals'
       preLoaderRoute: typeof AdminTopupApprovalsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/system-settings': {
+      id: '/admin/system-settings'
+      path: '/system-settings'
+      fullPath: '/admin/system-settings'
+      preLoaderRoute: typeof AdminSystemSettingsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/support': {
@@ -2682,6 +2701,7 @@ interface AdminRouteChildren {
   AdminStoresRoute: typeof AdminStoresRoute
   AdminSuppliersRoute: typeof AdminSuppliersRoute
   AdminSupportRoute: typeof AdminSupportRoute
+  AdminSystemSettingsRoute: typeof AdminSystemSettingsRoute
   AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
   AdminVendorSettlementsRoute: typeof AdminVendorSettlementsRoute
   AdminVendorsRoute: typeof AdminVendorsRoute
@@ -2753,6 +2773,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminStoresRoute: AdminStoresRoute,
   AdminSuppliersRoute: AdminSuppliersRoute,
   AdminSupportRoute: AdminSupportRoute,
+  AdminSystemSettingsRoute: AdminSystemSettingsRoute,
   AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
   AdminVendorSettlementsRoute: AdminVendorSettlementsRoute,
   AdminVendorsRoute: AdminVendorsRoute,

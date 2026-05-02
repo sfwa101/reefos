@@ -30,6 +30,7 @@ import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCa
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
+import { useSystemSetting } from "@/hooks/useSystemSettings";
 
 export const paymentOptions = [
   { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
@@ -57,6 +58,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const { user } = useAuth();
   const navigate = useNavigate();
   const { zone, setFromAddress } = useLocation();
+
+  // Dynamic kill-switch: when disabled, checkout completes in-app and skips WhatsApp dispatch.
+  const { value: enableWaCheckout } = useSystemSetting<boolean>("enable_whatsapp_checkout", true);
 
   const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
     useCartValidation(total);
@@ -337,6 +341,20 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
       clear();
       fireConfetti();
+
+      // ─── Dynamic kill-switch (Phase 3) ───
+      // When WhatsApp checkout is disabled by admin, complete in-app:
+      // skip dispatch, skip preOpened window, jump straight to success page.
+      if (!enableWaCheckout) {
+        try { preOpened?.close(); } catch { /* noop */ }
+        try { sessionStorage.removeItem("reef:checkout:wa-fallback"); } catch { /* noop */ }
+        console.info("[checkout] WhatsApp disabled by admin → in-app completion", { source });
+        toast.success("تم استلام طلبك بنجاح 🎉");
+        navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
+        setSubmitting(false);
+        submittingRef.current = false;
+        return;
+      }
 
       const openResult: OpenResult = dispatchWhatsApp({
         phone: mainPhone,
