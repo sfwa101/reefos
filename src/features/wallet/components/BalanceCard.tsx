@@ -88,11 +88,7 @@ export const BalanceCard = ({
           aria-hidden
           className="pointer-events-none absolute inset-0 mix-blend-overlay"
           style={{
-            background: useTransform(
-              [sheenX, sheenY] as unknown as ReadonlyArray<unknown>,
-              ([x, y]) =>
-                `radial-gradient(circle at ${x as string} ${y as string}, hsl(var(--primary-foreground) / 0.45), transparent 55%)`,
-            ),
+            background: useMotionTemplate`radial-gradient(circle at ${sheenX} ${sheenY}, hsl(var(--primary-foreground) / 0.45), transparent 55%)`,
           }}
         />
 
