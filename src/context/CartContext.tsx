@@ -178,9 +178,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (!raw) return;
       const parsed = JSON.parse(raw);
       if (Array.isArray(parsed)) {
-        linesRef.current = parsed.filter(
+        const valid = parsed.filter(
           (l) => l && l.product && typeof l.qty === "number",
         );
+        // Defensive: collapse any duplicate lines that may have been
+        // persisted by older buggy versions.
+        linesRef.current = dedupeLines(valid);
         emit();
       }
     } catch {
