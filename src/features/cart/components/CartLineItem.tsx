@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { memo, useMemo, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
 import { CalendarDays, Minus, Pencil, Plus, Trash2, X } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
@@ -19,7 +19,7 @@ import { NumberFlow } from "./NumberFlow";
  * Handles inline qty stepper, swipe-to-delete, and the Type-C booking
  * editor for sweets products that require scheduling.
  */
-export const CartLineItem = ({
+const CartLineItemImpl = ({
   l,
   setQty,
   remove,
