@@ -57,15 +57,15 @@ const Tile = ({ action, index }: { action: WalletAction; index: number }) => {
         className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 ring-2 ring-primary/35 transition-opacity duration-300 group-hover:opacity-100"
       />
       <span
-        className={`relative flex h-11 w-11 items-center justify-center rounded-2xl ring-1 ${
+        className={`relative flex h-7 w-7 items-center justify-center rounded-lg ${
           isPrimary
-            ? "bg-primary-foreground/15 text-primary-foreground ring-primary-foreground/25"
-            : "bg-primary/10 text-primary ring-primary/15"
+            ? "bg-primary-foreground/15 text-primary-foreground"
+            : "bg-primary/10 text-primary"
         }`}
       >
-        <Icon className="h-[18px] w-[18px]" strokeWidth={2.4} />
+        <Icon className="h-[14px] w-[14px]" strokeWidth={2.4} />
       </span>
-      <span className="relative whitespace-nowrap text-[11px] font-extrabold leading-none">
+      <span className="relative whitespace-nowrap text-[10px] font-bold leading-none">
         {action.label}
       </span>
     </motion.button>
