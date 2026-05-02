@@ -166,6 +166,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // Track auth + remote-sync state
   const userIdRef = useRef<string | null | undefined>(undefined);
   const skipNextPushRef = useRef(false);
+  const lastPushedSignatureRef = useRef("");
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const schedulePush = useCallback(() => {
@@ -178,6 +179,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
     pushTimerRef.current = setTimeout(() => {
       const snapshot = linesRef.current.slice();
+      const signature = cartSignature(snapshot);
+      if (signature === lastPushedSignatureRef.current) return;
+      lastPushedSignatureRef.current = signature;
       void pushRemoteCart(uid, snapshot);
     }, 600);
   }, []);
@@ -204,7 +208,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         );
         // Defensive: collapse any duplicate lines that may have been
         // persisted by older buggy versions.
-        linesRef.current = dedupeLines(valid);
+        linesRef.current = dedupeLines(valid, "max");
         emit();
       }
     } catch {
@@ -240,7 +244,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         if (isInitialRestore) {
           // Page refresh / app boot: trust remote as source of truth.
           // Dedupe defensively in case of legacy duplicated rows.
-          next = dedupeLines(remote);
+          next = dedupeLines(remote, "max");
           shouldPush = next.length !== remote.length; // only if we cleaned dups
         } else if (isFreshLogin && guest.length > 0) {
           // Anonymous → logged-in with items in guest cart: merge.
@@ -248,13 +252,19 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           shouldPush = true;
         } else {
           // User switched accounts or logged in with empty guest cart.
-          next = dedupeLines(remote);
+          next = dedupeLines(remote, "max");
           shouldPush = false;
         }
 
         // Apply locally without re-triggering a push.
+        const nextSignature = cartSignature(next);
+        if (nextSignature === cartSignature(linesRef.current)) {
+          lastPushedSignatureRef.current = nextSignature;
+          return;
+        }
         skipNextPushRef.current = true;
         linesRef.current = next;
+        lastPushedSignatureRef.current = nextSignature;
         emit();
         safeStorage.set(STORAGE_KEY, JSON.stringify(next));
 
