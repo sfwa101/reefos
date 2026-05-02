@@ -123,10 +123,24 @@ export const SavingsJarDialog = ({
   };
 
   const upsertJar = async (patch: Partial<SavingsJar> & { balance?: number }) => {
-    const next = { ...jar, ...patch, user_id: userId };
+    const next: {
+      user_id: string;
+      balance: number;
+      auto_save_enabled: boolean;
+      round_to: number;
+      goal: number | null;
+      goal_label: string | null;
+    } = {
+      user_id: userId,
+      balance: patch.balance ?? jar.balance,
+      auto_save_enabled: patch.auto_save_enabled ?? jar.auto_save_enabled,
+      round_to: patch.round_to ?? jar.round_to,
+      goal: patch.goal !== undefined ? patch.goal : jar.goal,
+      goal_label: patch.goal_label !== undefined ? patch.goal_label : jar.goal_label,
+    };
     const { error } = await supabase
       .from("savings_jar")
-      .upsert(next as any, { onConflict: "user_id" });
+      .upsert(next, { onConflict: "user_id" });
     if (error) {
       toast.error("تعذّر الحفظ");
       return false;
