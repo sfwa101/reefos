@@ -40,7 +40,7 @@ export type PlaceOrderPayload = {
 
 export type PlaceOrderResult =
   | { ok: true; orderId: string }
-  | { ok: false };
+  | { ok: false; error: string };
 
 /** Map known Postgres / RPC errors to a friendly Arabic toast string. */
 const friendlyRpcError = (msg: string): string => {
@@ -72,19 +72,22 @@ export const placeOrderAtomic = async (
 
     if (error) {
       console.error("RPC_ERROR:", error);
-      toast.error(friendlyRpcError(error.message || ""));
-      return { ok: false };
+      const friendly = friendlyRpcError(error.message || "");
+      toast.error(friendly);
+      return { ok: false, error: friendly };
     }
     if (!data || typeof data !== "string") {
       console.error("RPC_ERROR: missing order id, got:", data);
-      toast.error("استجابة غير متوقعة من الخادم");
-      return { ok: false };
+      const msg = "استجابة غير متوقعة من الخادم";
+      toast.error(msg);
+      return { ok: false, error: msg };
     }
     return { ok: true, orderId: data };
   } catch (e) {
     console.error("RPC_EXCEPTION:", e, "PAYLOAD:", payload);
-    toast.error("حدث خطأ غير متوقع، حاول مرة أخرى");
-    return { ok: false };
+    const msg = "حدث خطأ غير متوقع، حاول مرة أخرى";
+    toast.error(msg);
+    return { ok: false, error: msg };
   }
 };
 
