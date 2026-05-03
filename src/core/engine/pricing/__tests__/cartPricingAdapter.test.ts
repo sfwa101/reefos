@@ -78,8 +78,11 @@ describe("cartPricingAdapter — ok branch", () => {
     });
     expect(result.kind).toBe("ok");
     if (result.kind !== "ok") return;
-    expect(result.breakdown.unitPrice).toBe(45); // 50 - 5
-    expect(result.breakdown.lineTotal).toBe(540); // 45 × 12
+    expect(result.breakdown.unitPrice).toBe(45); // 50 - 5 (tier break)
+    // 45 × 12 = 540, then BulkQuantityDiscount auto-applies -6% at qty≥12
+    // → 540 × 0.94 = 507.6
+    expect(result.breakdown.lineTotal).toBeCloseTo(507.6, 2);
+    expect(result.breakdown.discountTotal).toBeCloseTo(32.4, 2);
   });
 });
 
