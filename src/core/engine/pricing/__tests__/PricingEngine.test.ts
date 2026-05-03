@@ -207,13 +207,23 @@ describe("Scenario 3 — Sweets Type C (deposit + zero silent failures)", () => 
       // booking intentionally omitted
     };
 
-    expect(() =>
+    let caught: unknown;
+    try {
       pricingEngine.calculate<SweetsSelection>({
         product: cake,
         selection,
         context: { customerTier: "guest" },
-      }),
-    ).toThrowError(/requires a booking/);
+      });
+    } catch (e) {
+      caught = e;
+    }
+
+    // Engine wraps strategy throws as a typed PricingEngineError(STRATEGY_FAILED)
+    // — the original "requires a booking" message lives on `cause`.
+    expect(caught).toBeInstanceOf(PricingEngineError);
+    const err = caught as PricingEngineError;
+    expect(err.code).toBe("STRATEGY_FAILED");
+    expect((err.cause as Error)?.message).toMatch(/requires a booking/);
   });
 });
 
