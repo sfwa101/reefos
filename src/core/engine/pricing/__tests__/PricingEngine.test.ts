@@ -17,11 +17,12 @@ import {
   pricingEngine,
 } from "../PricingEngine";
 import { initPricingEngine } from "../bootstrap";
-import type {
-  IPricingStrategy,
-  PricingContext,
-  PricingModifier,
-  PricingSelection,
+import {
+  PricingEngineError,
+  type IPricingStrategy,
+  type PricingContext,
+  type PricingModifier,
+  type PricingSelection,
 } from "../types";
 import type { MeatSelection } from "../strategies/MeatPricingStrategy";
 import type { SweetsSelection } from "../strategies/SweetsPricingStrategy";
