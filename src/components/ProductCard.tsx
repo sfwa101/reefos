@@ -265,11 +265,11 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
 
         <div className="mt-auto flex items-center justify-between pt-1">
           <div className="leading-none">
-            <span className="font-display text-lg font-extrabold text-foreground tabular-nums">{toLatin(product.price)}</span>
+            <span className="font-display text-lg font-extrabold text-foreground tabular-nums">{toLatin(Number(product?.price) || 0)}</span>
             <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
-            {product.oldPrice && (
-              <div className="text-[10px] text-muted-foreground line-through tabular-nums">{toLatin(product.oldPrice)} ج.م</div>
-            )}
+            {product.oldPrice ? (
+              <div className="text-[10px] text-muted-foreground line-through tabular-nums">{toLatin(Number(product.oldPrice) || 0)} ج.م</div>
+            ) : null}
           </div>
 
           <div className="relative">
