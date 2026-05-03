@@ -288,7 +288,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
         if (!result.ok || !result.orderId) {
           console.error("[checkout] place_order_atomic failed — aborting", result);
-          toast.error(result.error || "حدث خطأ أثناء تسجيل الطلب");
+          toast.error((!result.ok && result.error) || "حدث خطأ أثناء تسجيل الطلب");
           setSubmitting(false);
           submittingRef.current = false;
           return;
