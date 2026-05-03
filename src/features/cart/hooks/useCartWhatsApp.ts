@@ -3,9 +3,6 @@ import { formatBookingShort, isSweetsProduct, fulfillmentTypeFor } from "@/lib/s
 import {
   buildWaUrl,
   isMobileWaContext,
-  openWhatsApp,
-  preOpenWindow,
-  redirectPreOpenedWindow,
   type OpenResult,
 } from "@/lib/whatsapp";
 import type { Product } from "@/lib/products";
