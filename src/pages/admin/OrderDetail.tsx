@@ -134,7 +134,7 @@ export default function OrderDetail() {
               <p className="text-[12px] opacity-80">الإجمالي</p>
               <p className="font-display text-[34px] leading-none num tracking-tight mt-1">{fmtMoney(order.total)}</p>
             </div>
-            <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-full bg-white/20")}>{order.payment_method ?? "—"}</span>
+            <span className={cn("text-[11px] font-semibold px-2 py-0.5 rounded-full bg-primary-foreground/20")}>{order.payment_method ?? "—"}</span>
           </div>
           <div className="text-[12.5px] opacity-90">{fmtDate(order.created_at)}</div>
         </IOSCard>

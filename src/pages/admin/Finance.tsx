@@ -113,7 +113,7 @@ export default function FinanceDashboard() {
             <Link to="/admin/orders" className="col-span-2 xl:col-span-2 group relative overflow-hidden rounded-3xl p-5 bg-gradient-to-br from-success to-[hsl(var(--teal))] text-white shadow-soft hover:shadow-elegant transition-all hover:-translate-y-0.5 press">
               <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.18),transparent_60%)]" />
               <div className="relative">
-                <div className="h-9 w-9 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center mb-2">
+                <div className="h-9 w-9 rounded-xl bg-primary-foreground/20 backdrop-blur flex items-center justify-center mb-2">
                   <TrendingUp className="h-5 w-5" strokeWidth={2.5} />
                 </div>
                 <p className="text-[11.5px] opacity-90">إيرادات 30 يوماً</p>

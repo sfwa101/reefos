@@ -120,11 +120,16 @@ export default function Orders() {
   };
 
   const fetcher = async (): Promise<OrderRow[]> => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("orders")
       .select("id,status,total,payment_method,notes,whatsapp_sent,user_id,created_at")
       .order("created_at", { ascending: false })
       .limit(500);
+    if (error) {
+      console.error("[admin/orders] fetch failed:", error.message, error.details, error.hint);
+      toast.error(`تعذر جلب الطلبات: ${error.message}`);
+      return [];
+    }
     const rows = (data ?? []) as OrderRow[];
     if (firstLoad.current) {
       rows.forEach((o) => seenIds.current.add(o.id));

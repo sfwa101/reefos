@@ -40,8 +40,11 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
   const fMeta = fulfillmentMeta[fType];
   const isBooking = fType === "C";
 
-  const variants = product.variants ?? [];
-  const addons = product.addons ?? [];
+  // Stabilize identity — `product.variants ?? []` creates a NEW array on every
+  // render which previously triggered the reset-effect repeatedly → infinite
+  // setState loop ("Maximum update depth exceeded" white-screen crash).
+  const variants = useMemo(() => product.variants ?? [], [product.variants]);
+  const addons = useMemo(() => product.addons ?? [], [product.addons]);
 
   const [variantId, setVariantId] = useState<string>(variants[0]?.id ?? "");
   const [addonIds, setAddonIds] = useState<string[]>([]);
@@ -55,7 +58,8 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
   const [shipMode, setShipMode] = useState<"split" | "wait">("split");
   const [payDeposit, setPayDeposit] = useState<boolean>(true);
 
-  // Reset on each open
+  // Reset on each open. Depend ONLY on `open` + product id; the `variants`
+  // identity is unstable across renders and would re-fire this effect.
   useEffect(() => {
     if (!open) return;
     setVariantId(variants[0]?.id ?? "");
@@ -66,7 +70,8 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
     setSlot(bookingTimeSlots[1].id);
     setShipMode("split");
     setPayDeposit(true);
-  }, [open, product.id, variants]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, product.id]);
 
   const variantDelta = variants.find((v) => v.id === variantId)?.priceDelta ?? 0;
   const addonsSum = addons
