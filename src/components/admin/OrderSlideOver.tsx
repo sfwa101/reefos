@@ -52,7 +52,7 @@ export function OrderSlideOver({ orderId, onClose }: Props) {
               <p className="font-mono text-[14px] truncate">#{String(order.id).slice(0, 8).toUpperCase()}</p>
               <p className="font-display text-[28px] num mt-2">{fmtMoney(order.total)}</p>
               <Link to="/admin/orders/$orderId" params={{ orderId: order.id }} onClick={onClose}
-                className="inline-flex items-center gap-1 mt-2 text-[11px] bg-white/20 backdrop-blur rounded-full px-2.5 py-1">
+                className="inline-flex items-center gap-1 mt-2 text-[11px] bg-primary-foreground/20 backdrop-blur rounded-full px-2.5 py-1">
                 <ExternalLink className="h-3 w-3" /> فتح الصفحة الكاملة
               </Link>
             </div>
