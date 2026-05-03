@@ -42,12 +42,28 @@ const OrderSuccess = () => {
 
   return (
     <div className="flex flex-col items-center gap-5 py-8 text-center">
-      <div className="relative flex h-32 w-32 items-center justify-center">
-        <div className="absolute inset-0 animate-ping rounded-full bg-primary/30" />
-        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[hsl(142_70%_42%)] shadow-float">
-          <Check className="h-16 w-16 text-white" strokeWidth={3} />
+      <motion.div
+        className="relative flex h-32 w-32 items-center justify-center"
+        initial={{ scale: 0.6, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ type: "spring", stiffness: 220, damping: 18 }}
+      >
+        <motion.div
+          className="absolute inset-0 rounded-full bg-primary/20"
+          initial={{ scale: 0.8, opacity: 0.6 }}
+          animate={{ scale: 1.4, opacity: 0 }}
+          transition={{ duration: 1.4, repeat: Infinity, ease: "easeOut" }}
+        />
+        <div className="relative flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/70 shadow-[0_20px_60px_-15px_hsl(var(--primary)/0.5)] ring-1 ring-primary/30">
+          <motion.div
+            initial={{ scale: 0, rotate: -45 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ delay: 0.2, type: "spring", stiffness: 260, damping: 16 }}
+          >
+            <Check className="h-16 w-16 text-primary-foreground" strokeWidth={3} />
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
 
       <div className="space-y-1">
         <h1 className="font-display text-3xl font-extrabold">تم استلام طلبك!</h1>
