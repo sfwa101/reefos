@@ -17,7 +17,7 @@ import {
   WA_NUMBER,
   type Addr,
 } from "../types/cart.types";
-import { preOpenWindow, isMobileWaContext, type OpenResult } from "@/lib/whatsapp";
+import { type OpenResult } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
 import {
   useCartValidation,
