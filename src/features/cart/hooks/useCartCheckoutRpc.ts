@@ -40,7 +40,7 @@ export type PlaceOrderPayload = {
 
 export type PlaceOrderResult =
   | { ok: true; orderId: string }
-  | { ok: false };
+  | { ok: false; error: string };
 
 /** Map known Postgres / RPC errors to a friendly Arabic toast string. */
 const friendlyRpcError = (msg: string): string => {
