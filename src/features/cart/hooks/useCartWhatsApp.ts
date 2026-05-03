@@ -3,9 +3,6 @@ import { formatBookingShort, isSweetsProduct, fulfillmentTypeFor } from "@/lib/s
 import {
   buildWaUrl,
   isMobileWaContext,
-  openWhatsApp,
-  preOpenWindow,
-  redirectPreOpenedWindow,
   type OpenResult,
 } from "@/lib/whatsapp";
 import type { Product } from "@/lib/products";
@@ -161,37 +158,31 @@ export const buildOrderNotes = (parts: (string | null | false | undefined)[]): s
 export type DispatchWaInput = {
   phone: string;
   text: string;
-  preOpened: Window | null;
-  onMobile: boolean;
   source: string;
 };
 
-/** Open WhatsApp using the best available strategy for the platform. */
+/**
+ * Open WhatsApp via a hidden anchor click. Browsers honor user-initiated
+ * anchor clicks even after async work, and unlike `window.location.href`
+ * this does NOT navigate the host iframe (so X-Frame-Options can't kill us).
+ */
 export const dispatchWhatsApp = (i: DispatchWaInput): OpenResult => {
   const url = buildWaUrl({ phone: i.phone, text: i.text });
-  console.log("[checkout] attempting WhatsApp checkout URL", { source: i.source, url });
-
-  // Strategy: على الموبايل (وأيضاً كحل احتياطي على الديسكتوب لو فشل preOpened)،
-  // نستخدم window.location.href لأن window.open يُحظر بعد await.
-  if (i.preOpened && !i.preOpened.closed) {
-    try {
-      i.preOpened.location.href = url;
-      console.info("[checkout] WA opened via preopened redirect", { source: i.source });
-      return { ok: true, method: "preopened" };
-    } catch (e) {
-      console.warn("[checkout] preopened redirect failed, falling back to location.href", { source: i.source, error: e });
-      try { i.preOpened.close(); } catch { /* noop */ }
-    }
-  }
+  console.log("[checkout] dispatching WhatsApp via hidden anchor", { source: i.source, url });
   try {
-    console.log("[checkout] WA via window.location.href", { source: i.source, url });
-    window.location.href = url;
-    return { ok: true, method: "location" };
+    const link = document.createElement("a");
+    link.href = url;
+    link.target = "_blank";
+    link.rel = "noopener noreferrer";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    return { ok: true, method: "window-open" };
   } catch (e) {
-    console.warn("[checkout] location.href failed", { source: i.source, error: e });
-    return { ok: false, url, text: i.text, reason: "location_failed" };
+    console.warn("[checkout] hidden anchor click failed", { source: i.source, error: e });
+    return { ok: false, url, text: i.text, reason: "anchor_failed" };
   }
 };
 
 // Re-export low-level helpers consumers may still need.
-export { preOpenWindow, redirectPreOpenedWindow, isMobileWaContext, buildWaUrl };
+export { isMobileWaContext, buildWaUrl };

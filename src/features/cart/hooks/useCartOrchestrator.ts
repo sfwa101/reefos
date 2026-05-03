@@ -17,7 +17,7 @@ import {
   WA_NUMBER,
   type Addr,
 } from "../types/cart.types";
-import { preOpenWindow, isMobileWaContext, type OpenResult } from "@/lib/whatsapp";
+import { type OpenResult } from "@/lib/whatsapp";
 import type { WaFallbackPayload } from "../components/WhatsAppFallbackDialog";
 import {
   useCartValidation,
@@ -208,12 +208,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     }
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
-    const onMobile = isMobileWaContext();
-    const preOpened: Window | null = onMobile ? null : preOpenWindow(source);
     console.info("[checkout] WhatsApp checkout invoked", {
       source,
-      mode: onMobile ? "mobile-location" : "desktop-preopen",
-      preOpened: !!preOpened,
       cartLines: lines.length,
     });
     submittingRef.current = true;
@@ -230,7 +226,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         if (!validateGuestFields(guestName, guestPhone, guestAddress)) {
           setSubmitting(false);
           submittingRef.current = false;
-          try { preOpened?.close(); } catch { /* noop */ }
           return;
         }
       }
@@ -238,7 +233,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       if (!validateMinOrder(grand, minOrderTotal)) {
         setSubmitting(false);
         submittingRef.current = false;
-        try { preOpened?.close(); } catch { /* noop */ }
         return;
       }
 
@@ -280,7 +274,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
             price: l.meta?.unitPrice ?? l.product.price,
             quantity: l.qty,
           })),
-          // ---- Outbox payload — RPC owns ALL financial side-effects ----
           _wallet_applied: walletApplied,
           _wallet_shortfall: walletShortfall,
           _secondary_payment: isSplit ? secondaryPayment : null,
@@ -294,11 +287,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         });
 
         if (!result.ok || !result.orderId) {
-          // STRICT: never proceed to clear/navigate when DB persistence failed.
           console.error("[checkout] place_order_atomic failed — aborting", result);
+          toast.error((!result.ok && result.error) || "حدث خطأ أثناء تسجيل الطلب");
           setSubmitting(false);
           submittingRef.current = false;
-          try { preOpened?.close(); } catch { /* noop */ }
           return;
         }
         savedOrderId = result.orderId;
@@ -341,14 +333,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const orderId = savedOrderId ?? orderNum;
       const orderTotal = grand;
 
+      // CRITICAL: clear cart immediately after server confirms, BEFORE any navigation.
       clear();
       fireConfetti();
 
-      // ─── Dynamic kill-switch (Phase 3) ───
-      // When WhatsApp checkout is disabled by admin, complete in-app:
-      // skip dispatch, skip preOpened window, jump straight to success page.
+      // Kill-switch: in-app completion only.
       if (!enableWaCheckout) {
-        try { preOpened?.close(); } catch { /* noop */ }
         try { sessionStorage.removeItem("reef:checkout:wa-fallback"); } catch { /* noop */ }
         console.info("[checkout] WhatsApp disabled by admin → in-app completion", { source });
         toast.success("تم استلام طلبك بنجاح 🎉");
@@ -361,8 +351,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const openResult: OpenResult = dispatchWhatsApp({
         phone: mainPhone,
         text: mainMessage,
-        preOpened,
-        onMobile,
         source,
       });
 
@@ -370,8 +358,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         console.warn("[checkout] WhatsApp open blocked, success fallback armed", {
           source,
           reason: openResult.reason,
-          preOpened: !!preOpened,
-          onMobile,
         });
         try {
           sessionStorage.setItem(
@@ -407,10 +393,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         console.info("[checkout] producer booking present (DB-routed)");
       }
 
-      if (openResult.ok) {
-        toast.success("تم إرسال طلبك إلى واتساب 🎉");
-        navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
-      }
+      toast.success("تم إرسال طلبك إلى واتساب 🎉");
+      navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
       setSubmitting(false);
       submittingRef.current = false;
     } catch (err) {
@@ -418,7 +402,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       toast.error("حدث خطأ غير متوقّع");
       setSubmitting(false);
       submittingRef.current = false;
-      try { preOpened?.close(); } catch { /* noop */ }
     }
   };
 
