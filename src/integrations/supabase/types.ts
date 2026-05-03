@@ -2058,6 +2058,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "order_items_store_id_fkey"
             columns: ["store_id"]
             isOneToOne: false
@@ -2073,47 +2080,127 @@ export type Database = {
           },
         ]
       }
+      order_outbox: {
+        Row: {
+          attempts: number
+          channel: string
+          created_at: string
+          id: string
+          last_error: string | null
+          order_id: string
+          payload: Json
+          recipient: string | null
+          scheduled_at: string
+          sent_at: string | null
+          status: string
+        }
+        Insert: {
+          attempts?: number
+          channel: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          order_id: string
+          payload?: Json
+          recipient?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Update: {
+          attempts?: number
+          channel?: string
+          created_at?: string
+          id?: string
+          last_error?: string | null
+          order_id?: string
+          payload?: Json
+          recipient?: string | null
+          scheduled_at?: string
+          sent_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_outbox_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       orders: {
         Row: {
           address_id: string | null
+          change_remainder: number
           created_at: string
           delivery_zone: string | null
+          discount: number
+          donate_change: boolean
           id: string
           notes: string | null
           payment_method: string | null
+          promo_code: string | null
+          save_change: boolean
+          secondary_payment: string | null
           service_type: string
           status: string
+          tip: number
           total: number
+          total_cashback: number
           updated_at: string
           user_id: string
+          wallet_applied: number
+          wallet_shortfall: number
           whatsapp_sent: boolean
         }
         Insert: {
           address_id?: string | null
+          change_remainder?: number
           created_at?: string
           delivery_zone?: string | null
+          discount?: number
+          donate_change?: boolean
           id?: string
           notes?: string | null
           payment_method?: string | null
+          promo_code?: string | null
+          save_change?: boolean
+          secondary_payment?: string | null
           service_type?: string
           status?: string
+          tip?: number
           total?: number
+          total_cashback?: number
           updated_at?: string
           user_id: string
+          wallet_applied?: number
+          wallet_shortfall?: number
           whatsapp_sent?: boolean
         }
         Update: {
           address_id?: string | null
+          change_remainder?: number
           created_at?: string
           delivery_zone?: string | null
+          discount?: number
+          donate_change?: boolean
           id?: string
           notes?: string | null
           payment_method?: string | null
+          promo_code?: string | null
+          save_change?: boolean
+          secondary_payment?: string | null
           service_type?: string
           status?: string
+          tip?: number
           total?: number
+          total_cashback?: number
           updated_at?: string
           user_id?: string
+          wallet_applied?: number
+          wallet_shortfall?: number
           whatsapp_sent?: boolean
         }
         Relationships: [
@@ -4767,13 +4854,23 @@ export type Database = {
       place_order_atomic: {
         Args: {
           _address_id: string
+          _change_remainder?: number
           _delivery_zone: string
+          _discount?: number
+          _donate_change?: boolean
           _items: Json
           _notes: string
           _payment_method: string
+          _promo_code?: string
+          _save_change?: boolean
+          _secondary_payment?: string
           _service_type: string
+          _tip?: number
           _total: number
+          _total_cashback?: number
           _user_id: string
+          _wallet_applied?: number
+          _wallet_shortfall?: number
         }
         Returns: string
       }
