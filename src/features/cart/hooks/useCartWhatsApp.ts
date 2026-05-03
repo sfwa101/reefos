@@ -171,20 +171,26 @@ export const dispatchWhatsApp = (i: DispatchWaInput): OpenResult => {
   const url = buildWaUrl({ phone: i.phone, text: i.text });
   console.log("[checkout] attempting WhatsApp checkout URL", { source: i.source, url });
 
-  if (i.onMobile) {
+  // Strategy: على الموبايل (وأيضاً كحل احتياطي على الديسكتوب لو فشل preOpened)،
+  // نستخدم window.location.href لأن window.open يُحظر بعد await.
+  if (i.preOpened && !i.preOpened.closed) {
     try {
-      console.log("[checkout] mobile window.location.href", { source: i.source, url });
-      window.location.href = url;
-      return { ok: true, method: "location" };
+      i.preOpened.location.href = url;
+      console.info("[checkout] WA opened via preopened redirect", { source: i.source });
+      return { ok: true, method: "preopened" };
     } catch (e) {
-      console.warn("[checkout] mobile location.href failed", { source: i.source, error: e });
-      return { ok: false, url, text: i.text, reason: "location_failed" };
+      console.warn("[checkout] preopened redirect failed, falling back to location.href", { source: i.source, error: e });
+      try { i.preOpened.close(); } catch { /* noop */ }
     }
   }
-  return openWhatsApp(
-    { phone: i.phone, text: i.text },
-    { preOpened: i.preOpened, preferLocation: false, source: i.source },
-  );
+  try {
+    console.log("[checkout] WA via window.location.href", { source: i.source, url });
+    window.location.href = url;
+    return { ok: true, method: "location" };
+  } catch (e) {
+    console.warn("[checkout] location.href failed", { source: i.source, error: e });
+    return { ok: false, url, text: i.text, reason: "location_failed" };
+  }
 };
 
 // Re-export low-level helpers consumers may still need.
