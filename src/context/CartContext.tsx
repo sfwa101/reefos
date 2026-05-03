@@ -19,6 +19,7 @@ import {
   type LocalLine,
 } from "@/lib/cartSync";
 import type { Modifier } from "@/lib/pricingEngine";
+import { evaluateCartLineItem } from "@/core/engine/pricing/cartPricingAdapter";
 
 /**
  * Per-line meta.
@@ -399,12 +400,53 @@ export const useCartLines = () => useCartSelector((lines) => lines);
 export const useCartCount = () =>
   useCartSelector((lines) => lines.reduce((s, l) => s + l.qty, 0));
 
+/**
+ * Cart grand total — Phase 2.I (Flip the Switch).
+ *
+ * Per-line decision tree:
+ *   1. Fail-Safe Guard: legacy line (no `appliedModifiers` AND no
+ *      structured `properties.selection`) → use legacy unit-price math.
+ *      Prevents `engine_error` for items added BEFORE the migration.
+ *   2. Otherwise call `evaluateCartLineItem`:
+ *        • "ok"           → add `breakdown.grandTotal` (incl. deposit/discount)
+ *        • "fallback"     → add legacy unit-price total (no strategy yet)
+ *        • "engine_error" → skip + warn (Zero Silent Failure; UI banner in 2.J)
+ */
 export const useCartTotal = () =>
   useCartSelector((lines) =>
-    lines.reduce(
-      (s, l) => s + l.qty * (l.meta?.unitPrice ?? l.product.price),
-      0,
-    ),
+    lines.reduce((sum, l) => {
+      const legacyTotal = l.qty * (l.meta?.unitPrice ?? l.product.price);
+
+      // (1) Fail-Safe Guard for legacy cart lines that pre-date the engine.
+      const props = l.meta?.properties as
+        | { selection?: unknown }
+        | undefined;
+      const hasNewShape =
+        (l.meta?.appliedModifiers && l.meta.appliedModifiers.length > 0) ||
+        (props?.selection !== undefined);
+      if (!hasNewShape) {
+        return sum + legacyTotal;
+      }
+
+      // (2) Route through the new engine.
+      const r = evaluateCartLineItem({
+        product: l.product,
+        quantity: l.qty,
+        selection: ((props?.selection ?? props) ?? {}) as never,
+        // customerTier will be wired from AuthContext in a follow-up phase.
+      });
+
+      if (r.kind === "ok") return sum + r.breakdown.grandTotal;
+      if (r.kind === "fallback") return sum + legacyTotal;
+      // engine_error → surface to UI later; do not silently miscount.
+      console.warn(
+        "[cart] pricing engine error:",
+        r.code,
+        r.message,
+        { productId: l.product.id },
+      );
+      return sum;
+    }, 0),
   );
 
 /** Per-product qty selector — ideal for ProductCard. */
