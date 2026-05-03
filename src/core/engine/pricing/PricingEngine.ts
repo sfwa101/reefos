@@ -154,6 +154,25 @@ export class PricingEngine {
     return this;
   }
 
+  /**
+   * Non-throwing capability probe. The cart adapter calls this before
+   * `calculate()` to decide whether to delegate to the new engine or
+   * fall back to the legacy pricing pipeline.
+   */
+  canPrice(product: Product, explicitKey?: string): boolean {
+    if (explicitKey) return this.strategies.has(explicitKey);
+    const ctx: PricingContext = { product, currency: "EGP" };
+    for (const s of this.strategies.values()) {
+      try {
+        if (s.canHandle(ctx)) return true;
+      } catch {
+        // A misbehaving strategy must NEVER block other strategies.
+        continue;
+      }
+    }
+    return false;
+  }
+
   /** Resolve a strategy explicitly by key, or fall back to canHandle scan. */
   private resolveStrategy(
     explicitKey: string | undefined,
