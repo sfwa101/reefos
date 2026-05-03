@@ -77,10 +77,6 @@ export const openWhatsApp = (
     return { ok: false, url, text, reason: "anchor_failed" };
   }
 };
-  }
-
-  return { ok: false, url, text, reason: "popup_blocked" };
-};
 
 /** Detect mobile (iOS/Android) for routing decisions. */
 export const isMobileWaContext = (): boolean => {
