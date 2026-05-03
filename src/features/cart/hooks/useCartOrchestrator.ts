@@ -293,7 +293,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           _discount: discount,
         });
 
-        if (!result.ok) {
+        if (!result.ok || !result.orderId) {
+          // STRICT: never proceed to clear/navigate when DB persistence failed.
+          console.error("[checkout] place_order_atomic failed — aborting", result);
           setSubmitting(false);
           submittingRef.current = false;
           try { preOpened?.close(); } catch { /* noop */ }
