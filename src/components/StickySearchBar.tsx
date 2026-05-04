@@ -21,12 +21,17 @@ const StickySearchBar = () => {
   return (
     <div
       className={[
-        "sticky top-16 z-30 -mx-4 mb-6 mt-4 px-4 transition-[background,backdrop-filter,box-shadow] duration-300",
-        scrolled ? "bg-background/80 shadow-sm backdrop-blur-xl" : "bg-transparent",
+        // Sticks flush under the fixed TopBar (h-14 ≈ top-14). The wrapper
+        // ALWAYS carries the glass surface (no transparent gap above the pill);
+        // on scroll we just deepen the blur + add a hairline shadow.
+        "sticky top-14 z-30 -mx-4 mb-6 px-4 pb-3 pt-3 transition-[background-color,backdrop-filter,box-shadow] duration-300",
+        scrolled
+          ? "bg-background/90 shadow-[0_1px_0_0_hsl(var(--border)/0.6)] backdrop-blur-xl"
+          : "bg-background/85 backdrop-blur-md",
       ].join(" ")}
     >
       <div
-        className="flex h-12 items-center gap-2 rounded-full bg-secondary/50 px-2 ring-1 ring-border/40"
+        className="flex h-12 items-center gap-2 rounded-full bg-secondary/60 px-2 ring-1 ring-border/40"
         dir="rtl"
       >
         <Link
