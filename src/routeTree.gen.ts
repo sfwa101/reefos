@@ -47,6 +47,7 @@ import { Route as AdminRolePermissionsRouteImport } from './routes/admin.role-pe
 import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
+import { Route as AdminProfitObservationRouteImport } from './routes/admin.profit-observation'
 import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
 import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
@@ -87,6 +88,7 @@ import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
 import { Route as AdminCategoryAffinityRouteImport } from './routes/admin.category-affinity'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
 import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier-sessions'
+import { Route as AdminBusinessRulesRouteImport } from './routes/admin.business-rules'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
@@ -329,6 +331,11 @@ const AdminPurchasesRoute = AdminPurchasesRouteImport.update({
   path: '/purchases',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminProfitObservationRoute = AdminProfitObservationRouteImport.update({
+  id: '/profit-observation',
+  path: '/profit-observation',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminProductsRoute = AdminProductsRouteImport.update({
   id: '/products',
   path: '/products',
@@ -529,6 +536,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
 const AdminCashierSessionsRoute = AdminCashierSessionsRouteImport.update({
   id: '/cashier-sessions',
   path: '/cashier-sessions',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminBusinessRulesRoute = AdminBusinessRulesRouteImport.update({
+  id: '/business-rules',
+  path: '/business-rules',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminBranchesRoute = AdminBranchesRouteImport.update({
@@ -815,6 +827,7 @@ export interface FileRoutesByFullPath {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
@@ -855,6 +868,7 @@ export interface FileRoutesByFullPath {
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
@@ -941,6 +955,7 @@ export interface FileRoutesByTo {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
@@ -981,6 +996,7 @@ export interface FileRoutesByTo {
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
@@ -1074,6 +1090,7 @@ export interface FileRoutesById {
   '/admin/analytics': typeof AdminAnalyticsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
+  '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
@@ -1114,6 +1131,7 @@ export interface FileRoutesById {
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/products': typeof AdminProductsRoute
+  '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
   '/admin/riba-audit': typeof AdminRibaAuditRoute
@@ -1208,6 +1226,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/business-rules'
     | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/category-affinity'
@@ -1248,6 +1267,7 @@ export interface FileRouteTypes {
     | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
+    | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
@@ -1334,6 +1354,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/business-rules'
     | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/category-affinity'
@@ -1374,6 +1395,7 @@ export interface FileRouteTypes {
     | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
+    | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
@@ -1466,6 +1488,7 @@ export interface FileRouteTypes {
     | '/admin/analytics'
     | '/admin/audit-log'
     | '/admin/branches'
+    | '/admin/business-rules'
     | '/admin/cashier-sessions'
     | '/admin/categories'
     | '/admin/category-affinity'
@@ -1506,6 +1529,7 @@ export interface FileRouteTypes {
     | '/admin/product-batches'
     | '/admin/product-units'
     | '/admin/products'
+    | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
     | '/admin/riba-audit'
@@ -1856,6 +1880,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminPurchasesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/profit-observation': {
+      id: '/admin/profit-observation'
+      path: '/profit-observation'
+      fullPath: '/admin/profit-observation'
+      preLoaderRoute: typeof AdminProfitObservationRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/products': {
       id: '/admin/products'
       path: '/products'
@@ -2134,6 +2165,13 @@ declare module '@tanstack/react-router' {
       path: '/cashier-sessions'
       fullPath: '/admin/cashier-sessions'
       preLoaderRoute: typeof AdminCashierSessionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/business-rules': {
+      id: '/admin/business-rules'
+      path: '/business-rules'
+      fullPath: '/admin/business-rules'
+      preLoaderRoute: typeof AdminBusinessRulesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/branches': {
@@ -2648,6 +2686,7 @@ interface AdminRouteChildren {
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
+  AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
   AdminCashierSessionsRoute: typeof AdminCashierSessionsRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCategoryAffinityRoute: typeof AdminCategoryAffinityRoute
@@ -2688,6 +2727,7 @@ interface AdminRouteChildren {
   AdminProductBatchesRoute: typeof AdminProductBatchesRoute
   AdminProductUnitsRoute: typeof AdminProductUnitsRoute
   AdminProductsRoute: typeof AdminProductsRoute
+  AdminProfitObservationRoute: typeof AdminProfitObservationRoute
   AdminPurchasesRoute: typeof AdminPurchasesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
   AdminRibaAuditRoute: typeof AdminRibaAuditRoute
@@ -2720,6 +2760,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAnalyticsRoute: AdminAnalyticsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
+  AdminBusinessRulesRoute: AdminBusinessRulesRoute,
   AdminCashierSessionsRoute: AdminCashierSessionsRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCategoryAffinityRoute: AdminCategoryAffinityRoute,
@@ -2760,6 +2801,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminProductBatchesRoute: AdminProductBatchesRoute,
   AdminProductUnitsRoute: AdminProductUnitsRoute,
   AdminProductsRoute: AdminProductsRoute,
+  AdminProfitObservationRoute: AdminProfitObservationRoute,
   AdminPurchasesRoute: AdminPurchasesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
   AdminRibaAuditRoute: AdminRibaAuditRoute,

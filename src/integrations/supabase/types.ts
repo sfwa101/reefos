@@ -1890,6 +1890,45 @@ export type Database = {
         }
         Relationships: []
       }
+      incentive_milestones: {
+        Row: {
+          created_at: string
+          icon: string
+          id: string
+          is_active: boolean
+          key: string
+          reward: string
+          sort_order: number
+          threshold: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key: string
+          reward: string
+          sort_order?: number
+          threshold: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          icon?: string
+          id?: string
+          is_active?: boolean
+          key?: string
+          reward?: string
+          sort_order?: number
+          threshold?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_locations: {
         Row: {
           created_at: string
@@ -1976,6 +2015,39 @@ export type Database = {
           submitted_at?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      loyalty_tier_rules: {
+        Row: {
+          created_at: string
+          discount_pct: number
+          id: string
+          is_active: boolean
+          min_lifetime_spend: number
+          points_multiplier: number
+          tier: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          discount_pct?: number
+          id?: string
+          is_active?: boolean
+          min_lifetime_spend?: number
+          points_multiplier?: number
+          tier: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          discount_pct?: number
+          id?: string
+          is_active?: boolean
+          min_lifetime_spend?: number
+          points_multiplier?: number
+          tier?: string
+          updated_at?: string
         }
         Relationships: []
       }
