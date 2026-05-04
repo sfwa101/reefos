@@ -83,14 +83,24 @@ const Wallet = () => {
               أهلاً، {ownerName.split(" ")[0]}
             </h1>
           </div>
-          {activeAsset && (
-            <motion.span
-              layoutId="active-asset-badge"
-              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-primary/20"
+          <div className="flex items-center gap-2">
+            {activeAsset && (
+              <motion.span
+                layoutId="active-asset-badge"
+                className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-primary/20"
+              >
+                {activeAsset.label}
+              </motion.span>
+            )}
+            <button
+              type="button"
+              onClick={toggleHide}
+              aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
+              className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
             >
-              {activeAsset.label}
-            </motion.span>
-          )}
+              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </motion.section>
 
         {/* SUPER-CARDS CAROUSEL (cards keep their own gradient) */}
