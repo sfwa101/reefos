@@ -449,6 +449,24 @@ function evaluateLineForCart(
   return { result, legacyTotal };
 }
 
+/* ===================================================================
+ * Phase 5.3 — Per-line breakdown selector for UI fidelity.
+ * `useCartLineBreakdown(productId)` finds the matching line and runs
+ * the same pipeline as totals/errors, so the UI always sees the
+ * exact same numbers as the cart total.
+ * =================================================================== */
+export const useCartLineBreakdown = (
+  productId: string,
+): CartPricingResult | null => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines) => {
+    const tier = getTier();
+    const line = lines.find((l) => l.product.id === productId);
+    if (!line) return null;
+    return evaluateLineForCart(line, tier).result;
+  });
+};
+
 /**
  * Cart grand total — Phase 2.I (Flip the Switch) + 2.J (tier wiring).
  *
