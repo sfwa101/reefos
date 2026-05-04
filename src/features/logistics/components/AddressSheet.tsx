@@ -9,6 +9,7 @@
  */
 import { useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
+import { useHardwareBackModal } from "@/hooks/useHardwareBackModal";
 import { Loader2, MapPin, Check, Building2, Home, Briefcase, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
