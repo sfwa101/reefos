@@ -167,7 +167,6 @@ const Wallet = () => {
               </div>
             )}
           </motion.div>
-</motion.div>
         </AnimatePresence>
       </div>
 
