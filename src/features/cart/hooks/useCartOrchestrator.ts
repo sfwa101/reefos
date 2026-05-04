@@ -292,6 +292,19 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         return;
       }
 
+      // Phase 13.26 — Pre-flight guard: block wallet payment when balance
+      // is insufficient and no secondary payment method has been configured.
+      if (
+        payment === "wallet" &&
+        effectiveGrand > walletBalance &&
+        !isSplit
+      ) {
+        toast.error("رصيد المحفظة لا يكفي، يرجى اختيار طريقة دفع للمبلغ المتبقي");
+        setSubmitting(false);
+        submittingRef.current = false;
+        return;
+      }
+
       const noteParts = buildOrderNotes([
         appliedPromo ? `كود: ${appliedPromo.code}` : null,
         tip > 0 ? `إكرامية: ${tip}` : null,

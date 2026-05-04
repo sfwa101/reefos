@@ -72,11 +72,19 @@ export type PlaceOrderResult =
 
 const friendlyRpcError = (msg: string): string => {
   if (msg.includes("out_of_stock")) return "أحد المنتجات نفد من المخزون";
+  if (msg.includes("invalid_product_id"))
+    return "أحد المنتجات في سلتك لم يعد متوفراً، يرجى تحديث السلة.";
   if (msg.includes("product_not_found")) return "منتج غير موجود في الكتالوج";
   if (msg.includes("empty_cart") || msg.includes("empty_fulfillment"))
     return "السلة فارغة";
+  if (msg.includes("invalid_payment_configuration"))
+    return "رصيد المحفظة لا يكفي، يرجى اختيار طريقة دفع إضافية.";
   if (msg.includes("insufficient_wallet_balance"))
     return "رصيد المحفظة غير كافٍ";
+  if (msg.includes("kyc_required"))
+    return "يجب توثيق حسابك لإتمام هذه المعاملة.";
+  if (msg.includes("limit_exceeded"))
+    return "لقد تجاوزت حد التحويل المسموح لك.";
   if (msg.includes("unauthorized")) return "غير مصرح";
   if (msg.toLowerCase().includes("uuid")) return "بيانات العنوان غير صالحة";
   return "تعذر إنشاء الطلب، حاول مرة أخرى";
