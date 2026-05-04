@@ -1,47 +1,35 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useCallback, useMemo, useState } from "react";
+import { useRestaurantsQuery } from "@/core/data/restaurantQueries";
 import type { RestoProduct } from "../types";
 
 export type GroupedRestaurants = ReadonlyArray<readonly [string, RestoProduct[]]>;
 
 /**
- * useRestaurantsLogic — fetches restaurant products from Supabase,
- * groups them by brand, and exposes search + active-brand state.
+ * useRestaurantsLogic — orchestrates the restaurants page.
  *
- * NOTE on pricing: this view does NOT compute any inline pricing.
- * Per-line totals are read straight off `p.price`. When the meat/sweets
- * pattern of `pricingEngine.calculate` is applied to restaurant lines,
- * the integration point will be inside `MealRow` (a future
- * `useRestaurantLinePrice` hook) — not here.
+ * Data layer: delegated entirely to `useRestaurantsQuery` (TanStack Query).
+ * No more direct Supabase calls / `useEffect` fetch dance / manual
+ * loading state — the hook owns caching, dedup, and background refetch.
+ *
+ * Local responsibilities (kept here):
+ *   • search query state,
+ *   • active brand for the sticky tabs,
+ *   • brand grouping + search filtering (memoised),
+ *   • imperative scroll-into-view jump.
+ *
+ * NOTE on pricing: still no inline pricing in this view. Per-line totals
+ * read from `p.price`. Future `pricingEngine.calculate` integration lands
+ * inside `MealRow`, not here.
  */
 export function useRestaurantsLogic() {
-  const [items, setItems] = useState<RestoProduct[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const { data, isLoading, isError, error } = useRestaurantsQuery();
+
+  // Stable empty array — avoids re-creating identity on every render and
+  // keeps downstream `useMemo` deps stable when the query is still loading.
+  const items = useMemo<ReadonlyArray<RestoProduct>>(() => data ?? [], [data]);
+
   const [query, setQuery] = useState<string>("");
   const [activeBrand, setActiveBrand] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("products")
-        .select(
-          "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",
-        )
-        .or("source.eq.restaurants,fulfillment_type.eq.restaurant")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true, nullsFirst: false });
-      if (cancelled) return;
-      if (error) toast.error("تعذّر تحميل المطاعم");
-      setItems((data ?? []) as RestoProduct[]);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
   const grouped = useMemo<GroupedRestaurants>(() => {
     const q = query.trim();
@@ -75,7 +63,9 @@ export function useRestaurantsLogic() {
   }, []);
 
   return {
-    loading,
+    loading: isLoading,
+    isError,
+    error,
     query,
     setQuery,
     activeBrand,
