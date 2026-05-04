@@ -1,13 +1,15 @@
 /**
- * CheckoutSheet — Step 2 of the Two-Step Zen Checkout (Phase 12.7).
+ * CheckoutSheet — Step 2 of the Two-Step Zen Checkout.
  *
- * The cart page (Step 1) stays focused on item review + address. All money,
- * promo, tip, guest-fields and the final WhatsApp submit live here, behind
- * a single bottom-sheet so the user makes one decision at a time.
+ * Phase 12.8 additions:
+ *  - Gift Mode toggle (disables COD, hides invoice, optional gift message)
+ *  - Smart Fakka Engine: Team Bonus rail + Charity rail (interlocked totals)
+ *  - 3/4 + 1/4 sticky CTA (submit + Home shortcut)
  */
+import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, Loader2, Lock, MessageCircle, Tag } from "lucide-react";
-import { Link } from "@tanstack/react-router";
+import { Check, Gift, Home, Loader2, Lock, MessageCircle, Tag } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
   Sheet,
@@ -15,13 +17,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { fmtMoney, toLatin } from "@/lib/format";
+import { toLatin } from "@/lib/format";
 import type { useCartOrchestrator } from "../hooks/useCartOrchestrator";
 import { CartPaymentMethods } from "./CartPaymentMethods";
 import { CartSummary } from "./CartSummary";
 import { CartLogisticsBanners } from "./CartLogisticsBanners";
 import { NumberFlow } from "./NumberFlow";
-import { useTipPresets } from "../hooks/useTipPresets";
+import { SmartFakkaRail } from "./SmartFakkaRail";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
@@ -33,8 +35,21 @@ type Props = {
   isLocked: boolean;
 };
 
+const CHARITY_CAUSES = [
+  { id: "food", label: "إطعام الفقراء 🍞" },
+  { id: "hospitals", label: "دعم المستشفيات 🏥" },
+  { id: "orphans", label: "كفالة الأيتام 👶" },
+  { id: "general", label: "صندوق الخير العام ❤" },
+] as const;
+
 export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocked }: Props) => {
-  const tipPresets = useTipPresets(o.subtotal);
+  const navigate = useNavigate();
+  const [giftMsgOpen, setGiftMsgOpen] = useState(false);
+
+  // Interlocked running totals — each rail builds on the previous one.
+  const baseTotal = Math.round(o.effectiveGrand - o.tip - o.charity);
+  const tipRailTotal = baseTotal; // tip computed on the pre-tip total
+  const charityRailTotal = baseTotal + o.tip; // charity options shift after tip is picked
 
   const blockedMessage = (() => {
     if (isLocked) return "السلة مقفلة بانتظار موافقات المشاركين";
@@ -66,6 +81,75 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
 
         <div className="space-y-4 px-4 pb-32 pt-4" dir="rtl">
           <CartLogisticsBanners quote={o.logisticsQuote} />
+
+          {/* Gift Mode — Phase 12.8 */}
+          <section
+            className={`overflow-hidden rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 transition ${
+              o.giftMode ? "ring-rose-400/50" : "ring-border/30"
+            }`}
+          >
+            <label className="flex items-center gap-3">
+              <div
+                className={`flex h-10 w-10 items-center justify-center rounded-[12px] transition ${
+                  o.giftMode ? "bg-gradient-to-br from-rose-500 to-rose-600 text-white" : "bg-foreground/5 text-foreground/70"
+                }`}
+              >
+                <Gift className="h-5 w-5" strokeWidth={2.4} />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-extrabold">إرسال كهدية 🎁</p>
+                <p className="text-[10.5px] text-muted-foreground">
+                  {o.giftMode
+                    ? "لن نُرفق فاتورة السعر • الدفع الإلكتروني فقط"
+                    : "إخفاء الفاتورة وفرض الدفع المسبق"}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={o.giftMode}
+                onClick={() => o.setGiftMode(!o.giftMode)}
+                className={`relative h-6 w-11 shrink-0 rounded-full transition ${
+                  o.giftMode ? "bg-rose-500" : "bg-foreground/20"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition ${
+                    o.giftMode ? "right-0.5" : "right-[1.4rem]"
+                  }`}
+                />
+              </button>
+            </label>
+
+            <AnimatePresence>
+              {o.giftMode && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="mt-3 space-y-2 overflow-hidden"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setGiftMsgOpen((v) => !v)}
+                    className="text-[11px] font-extrabold text-rose-600 underline-offset-2 hover:underline"
+                  >
+                    {giftMsgOpen ? "إخفاء رسالة الهدية" : "+ إضافة رسالة (اختياري)"}
+                  </button>
+                  {giftMsgOpen && (
+                    <textarea
+                      value={o.giftMessage}
+                      onChange={(e) => o.setGiftMessage(e.target.value)}
+                      placeholder="اكتب رسالتك للمستلم…"
+                      maxLength={160}
+                      rows={2}
+                      className="w-full rounded-xl bg-foreground/5 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </section>
 
           <CartPaymentMethods o={o} />
 
@@ -115,34 +199,28 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
             </AnimatePresence>
           </motion.div>
 
-          {/* Tip — dynamic presets (5/10/15% of subtotal) */}
-          <div className="rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
-            <div className="mb-2 flex items-center justify-between">
-              <p className="text-sm font-bold">إكرامية المندوب 💚</p>
-              <span className="text-xs font-extrabold text-primary tabular-nums">
-                {o.tip > 0 ? fmtMoney(o.tip) : "اختياري"}
-              </span>
-            </div>
-            <div className="grid grid-cols-4 gap-2">
-              {tipPresets.map((t) => {
-                const active = o.tip === t.amount;
-                return (
-                  <motion.button
-                    whileTap={{ scale: 0.94 }}
-                    key={`${t.amount}-${t.label}`}
-                    onClick={() => o.setTip(t.amount)}
-                    className={`relative rounded-[12px] py-2.5 text-[11px] font-extrabold transition tabular-nums ${
-                      active
-                        ? "bg-gradient-to-br from-primary to-[hsl(150_55%_38%)] text-primary-foreground shadow-[0_6px_18px_-6px_hsl(150_60%_40%/0.55)]"
-                        : "bg-foreground/5"
-                    }`}
-                  >
-                    {t.label}
-                  </motion.button>
-                );
-              })}
-            </div>
-          </div>
+          {/* Smart Fakka — Team Bonus */}
+          <SmartFakkaRail
+            title="مكافأة فريق العمل"
+            emoji="💚"
+            runningTotal={tipRailTotal}
+            value={o.tip}
+            onChange={o.setTip}
+            accent="primary"
+          />
+
+          {/* Smart Fakka — Charity (interlocked: starts after tip) */}
+          <SmartFakkaRail
+            title="صندوق الصدقات"
+            emoji="🤲"
+            runningTotal={charityRailTotal}
+            value={o.charity}
+            onChange={o.setCharity}
+            causes={CHARITY_CAUSES}
+            selectedCause={o.charityCauseId}
+            onCauseChange={o.setCharityCauseId}
+            accent="rose"
+          />
 
           {/* Guest checkout fields */}
           {!o.user && (
@@ -207,39 +285,54 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
           />
         </div>
 
-        {/* Sticky submit — single unified guard */}
+        {/* Sticky submit — 3/4 CTA + 1/4 Home shortcut (Phase 12.8) */}
         <div
           className="fixed inset-x-0 bottom-0 z-20 border-t border-border/40 bg-background/95 px-3 py-3 backdrop-blur"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
         >
-          <button
-            type="button"
-            onClick={onSubmit}
-            disabled={o.submitting || blockedMessage !== null}
-            className="flex w-full items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3.5 font-extrabold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition disabled:cursor-not-allowed disabled:bg-foreground/30 disabled:text-foreground/60"
-          >
-            <span className="flex items-center gap-2">
-              {o.submitting ? (
-                <Loader2 className="h-5 w-5 animate-spin" />
-              ) : blockedMessage ? (
-                <Lock className="h-5 w-5" />
-              ) : (
-                <MessageCircle className="h-5 w-5" />
-              )}
-              <span className="text-sm">
-                {blockedMessage
-                  ? blockedMessage.length > 40
-                    ? `${blockedMessage.slice(0, 38)}…`
-                    : blockedMessage
-                  : o.submitting
-                    ? "جاري إرسال طلبك..."
-                    : "إتمام عبر واتساب"}
+          <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+            <button
+              type="button"
+              onClick={onSubmit}
+              disabled={o.submitting || blockedMessage !== null}
+              className="flex flex-1 items-center justify-between gap-3 rounded-2xl bg-primary px-4 py-3.5 font-extrabold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition disabled:cursor-not-allowed disabled:bg-foreground/30 disabled:text-foreground/60"
+            >
+              <span className="flex items-center gap-2">
+                {o.submitting ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : blockedMessage ? (
+                  <Lock className="h-5 w-5" />
+                ) : (
+                  <MessageCircle className="h-5 w-5" />
+                )}
+                <span className="text-sm">
+                  {blockedMessage
+                    ? blockedMessage.length > 38
+                      ? `${blockedMessage.slice(0, 36)}…`
+                      : blockedMessage
+                    : o.submitting
+                      ? "جاري إرسال طلبك..."
+                      : "إتمام عبر واتساب"}
+                </span>
               </span>
-            </span>
-            <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
-              {toLatin(Math.round(o.effectiveGrand))} ج
-            </span>
-          </button>
+              <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
+                {toLatin(Math.round(o.effectiveGrand))} ج
+              </span>
+            </button>
+
+            <button
+              type="button"
+              aria-label="العودة للرئيسية"
+              onClick={() => {
+                onOpenChange(false);
+                navigate({ to: "/" });
+              }}
+              className="flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-2xl bg-card text-foreground ring-1 ring-border/50 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)] transition active:scale-95"
+            >
+              <Home className="h-5 w-5" strokeWidth={2.4} />
+              <span className="text-[9.5px] font-extrabold leading-none">الرئيسية</span>
+            </button>
+          </div>
         </div>
       </SheetContent>
     </Sheet>
