@@ -495,6 +495,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     // sweets / fulfillment
     sweetsBuckets,
     sweetsRules,
+    // engine-driven checkout guardrails (Phase 6)
+    engineRules,
     aggregateDeposit,
     payOnDelivery,
     payDeposit,
