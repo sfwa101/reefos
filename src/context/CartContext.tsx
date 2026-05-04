@@ -19,7 +19,21 @@ import {
   type LocalLine,
 } from "@/lib/cartSync";
 import type { Modifier } from "@/lib/pricingEngine";
-import { evaluateCartLineItem } from "@/core/engine/pricing/cartPricingAdapter";
+import {
+  evaluateCartLineItem,
+  type CartPricingResult,
+} from "@/core/engine/pricing/cartPricingAdapter";
+import type { PricingContext } from "@/core/engine/pricing/types";
+
+/**
+ * Customer tier source — Phase 2.J.
+ * We currently only know "guest" vs "member" from the auth session.
+ * VIP promotion is handled later by a profile flag (e.g. loyalty points
+ * threshold) and will be wired here once the profiles schema exposes it.
+ */
+type CustomerTier = NonNullable<PricingContext["customerTier"]>;
+const tierFromUserId = (uid: string | null | undefined): CustomerTier =>
+  uid ? "member" : "guest";
 
 /**
  * Per-line meta.
