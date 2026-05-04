@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Cake, HandHeart, PiggyBank, Wallet, Lock } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { paymentOptions, type useCartOrchestrator } from "../hooks/useCartOrchestrator";
+import type { useCartOrchestrator } from "../hooks/useCartOrchestrator";
+import { PAYMENT_METHODS } from "../data/paymentMethods";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
