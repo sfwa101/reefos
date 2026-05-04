@@ -3,10 +3,10 @@ import { ScanBarcode, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 
 /**
- * StickySearchBar — Phase 11.5.
- * Pinned just below the fixed TopBar (top-16). On scroll, the bar lifts onto
- * a glass surface (backdrop-blur + translucent bg + soft shadow) so it floats
- * elegantly above the product feed.
+ * StickySearchBar — Phase 11.6.
+ * Sticks FLUSH under the fixed TopBar (top-14) with a full-width glass
+ * surface that ALWAYS paints the background — never a transparent strip —
+ * so product cards never bleed through behind the pill while scrolling.
  */
 const StickySearchBar = () => {
   const [scrolled, setScrolled] = useState(false);
