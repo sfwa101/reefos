@@ -35,22 +35,8 @@ const TopBar = () => {
 
   const firstName = profile?.full_name?.split(" ")[0];
 
-  // Smart capsule: expand-on-increase
-  const prevTotalRef = useRef(total);
-  const [expanded, setExpanded] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    if (total > prevTotalRef.current) {
-      setExpanded(true);
-      if (timerRef.current) clearTimeout(timerRef.current);
-      timerRef.current = setTimeout(() => setExpanded(false), 3000);
-    }
-    prevTotalRef.current = total;
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
-    };
-  }, [total]);
+  // Smart capsule: stays open whenever cart has value
+  const expanded = total > 0;
 
   return (
     <header
@@ -77,30 +63,30 @@ const TopBar = () => {
           </h1>
         </div>
 
-        {/* Left side (RTL): smart cart capsule */}
+        {/* Left side (RTL): smart cart capsule — icon on the LEFT, price on the RIGHT */}
         <Link
           to="/cart"
           aria-label="السلة"
-          className="relative mt-1 inline-flex h-11 min-w-11 items-center justify-end overflow-hidden rounded-full bg-primary/10 text-primary backdrop-blur-md ring-1 ring-primary/15 transition active:scale-[0.97]"
+          className="relative mt-1 inline-flex h-11 min-w-11 items-center justify-start overflow-hidden rounded-full bg-primary/10 text-primary backdrop-blur-md ring-1 ring-primary/15 transition active:scale-[0.97]"
           dir="ltr"
         >
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center">
+            <ShoppingBag className="h-5 w-5" strokeWidth={2.2} />
+          </span>
           <AnimatePresence initial={false}>
-            {expanded && total > 0 && (
+            {expanded && (
               <motion.span
                 key="amount"
-                initial={{ width: 0, opacity: 0, marginLeft: 0 }}
-                animate={{ width: "auto", opacity: 1, marginLeft: 10 }}
-                exit={{ width: 0, opacity: 0, marginLeft: 0 }}
-                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                className="overflow-hidden whitespace-nowrap font-display text-[13px] font-extrabold tabular-nums"
+                initial={{ width: 0, opacity: 0, marginRight: 0, paddingRight: 0 }}
+                animate={{ width: "auto", opacity: 1, marginRight: 2, paddingRight: 14 }}
+                exit={{ width: 0, opacity: 0, marginRight: 0, paddingRight: 0 }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tabular-nums"
               >
                 {fmtMoney(total)}
               </motion.span>
             )}
           </AnimatePresence>
-          <span className="flex h-11 w-11 items-center justify-center">
-            <ShoppingBag className="h-5 w-5" strokeWidth={2.2} />
-          </span>
         </Link>
       </div>
     </header>
