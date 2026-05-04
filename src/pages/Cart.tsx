@@ -98,7 +98,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4 px-4 pb-28">
       <BackHeader title="سلتي" subtitle={`${toLatin(o.count)} منتج`} />
 
       {/* Smart Progress Bar */}
