@@ -2847,6 +2847,9 @@ export type Database = {
           id: string
           lifestyle_tags: string[] | null
           likes: string[] | null
+          loyalty_lifetime_spend: number
+          loyalty_points: number
+          loyalty_tier: Database["public"]["Enums"]["loyalty_tier"]
           occupation: string | null
           phone: string | null
           preferred_locale: string | null
@@ -2866,6 +2869,9 @@ export type Database = {
           id: string
           lifestyle_tags?: string[] | null
           likes?: string[] | null
+          loyalty_lifetime_spend?: number
+          loyalty_points?: number
+          loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
           occupation?: string | null
           phone?: string | null
           preferred_locale?: string | null
@@ -2885,6 +2891,9 @@ export type Database = {
           id?: string
           lifestyle_tags?: string[] | null
           likes?: string[] | null
+          loyalty_lifetime_spend?: number
+          loyalty_points?: number
+          loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
           occupation?: string | null
           phone?: string | null
           preferred_locale?: string | null
@@ -5092,6 +5101,7 @@ export type Database = {
       app_user_level: "bronze" | "silver" | "gold" | "platinum"
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
+      loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
       shared_cart_approval: "pending" | "approved" | "rejected"
       shared_cart_role: "owner" | "contributor"
       shared_cart_split_type: "percentage" | "fixed" | "itemized"
@@ -5244,6 +5254,7 @@ export const Constants = {
       app_user_level: ["bronze", "silver", "gold", "platinum"],
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
+      loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
       shared_cart_approval: ["pending", "approved", "rejected"],
       shared_cart_role: ["owner", "contributor"],
       shared_cart_split_type: ["percentage", "fixed", "itemized"],
