@@ -1,0 +1,13 @@
+{
+  "$schema": "./catalog_seed.schema.md",
+  "version": 1,
+  "exported_at": null,
+  "exported_by": null,
+  "note": "Disaster-recovery seed for PUBLIC catalog only. NEVER stores customer PII.",
+  "tables": {
+    "categories": [],
+    "products": [],
+    "loyalty_tier_rules": [],
+    "incentive_milestones": []
+  }
+}
