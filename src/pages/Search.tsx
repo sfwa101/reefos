@@ -106,6 +106,12 @@ const SearchPage = () => {
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
   const { data: featuredCats = [] } = useFeaturedCategoriesQuery();
 
+  // Persist successful searches (debounced via the URL `q` write above).
+  useEffect(() => {
+    const term = q.trim();
+    if (term.length >= 2) pushHistory(term);
+  }, [q, pushHistory]);
+
   // ─── BRAIN TRANSPLANT ────────────────────────────────────────────────
   // Phase 11.6: drop the naive `name/category/brand/subCategory` substring
   // filter and delegate to `useUniversalSearch`. That hook owns:
