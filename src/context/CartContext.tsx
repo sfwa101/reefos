@@ -192,6 +192,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const skipNextPushRef = useRef(false);
   const lastPushedSignatureRef = useRef("");
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Phase 4.4.R — Realtime cross-device sync.
+  // Holds the active Supabase channel for the signed-in user; rebound on
+  // login / user-switch and torn down on logout. Coalesce bursts of
+  // postgres_changes events into a single re-fetch via realtimeFetchTimerRef.
+  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
+    null,
+  );
+  const realtimeFetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const schedulePush = useCallback(() => {
     if (skipNextPushRef.current) {
