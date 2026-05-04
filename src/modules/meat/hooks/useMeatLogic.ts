@@ -4,6 +4,7 @@ import {
   useProductsVersion,
   type Product,
 } from "@/lib/products";
+import { useProductsQuery } from "@/hooks/useProductsQuery";
 import { MEAT_GROUPS, groupOf } from "../constants";
 import { NAV_OFFSETS, type MeatMainGroup } from "../types";
 
@@ -37,13 +38,18 @@ const { HEADER_OFFSET, TIER1, TIER2, TRIGGER } = NAV_OFFSETS;
  * inside `MeatProductCard` (or a future `useMeatLinePrice` hook) — not here.
  */
 export function useMeatLogic() {
-  // Reactive catalog: re-derive when the in-memory products cache mutates.
+  // Subscribe to the TanStack Query catalog so loader-warmed data renders
+  // immediately on first paint (zero-wait nav) and SWR is owned by Query.
+  const { data: queryProducts } = useProductsQuery();
+  // Realtime channel mutates the in-memory `products` array between
+  // refetches; the version bump keeps the derived feed live.
   const productsVersion = useProductsVersion();
   const meatProducts = useMemo<ReadonlyArray<Product>>(
-    () => products.filter((p) => p.source === "meat"),
-    // productsVersion is the trigger — `products` itself is a mutable module ref.
+    () => (queryProducts ?? products).filter((p) => p.source === "meat"),
+    // queryProducts + productsVersion together cover both fetch updates and
+    // in-memory realtime mutations.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [productsVersion],
+    [queryProducts, productsVersion],
   );
 
   const [activeMain, setActiveMain] = useState<string>(MEAT_GROUPS[0].id);
