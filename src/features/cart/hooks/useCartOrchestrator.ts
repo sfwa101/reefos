@@ -577,6 +577,15 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     effectiveDelivery,
     effectiveGrand,
     codAllowed,
+    // Phase 12.8 — Gift mode + Smart Fakka (charity)
+    giftMode,
+    setGiftMode,
+    giftMessage,
+    setGiftMessage,
+    charity,
+    setCharity,
+    charityCauseId,
+    setCharityCauseId,
   };
 };
 
