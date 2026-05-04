@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { lazyStorePage } from "../_lazyRoute";
+import { lazyStorePageWith } from "../_lazyRoute";
+import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
+
 export const Route = createFileRoute("/_app/store/kitchen")({
-  component: lazyStorePage(() => import("@/pages/store/Kitchen"), "grid"),
+  component: lazyStorePageWith(
+    () => import("@/pages/store/Kitchen"),
+    <StorePageSkeleton productCount={6} withHero />,
+  ),
 });
