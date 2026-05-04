@@ -37,6 +37,13 @@ const CartLineItemImpl = ({
   const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.6, 0]);
   const unitPrice = l.meta?.unitPrice ?? l.product.price;
 
+  // Phase 5.3 — engine-driven breakdown (null = legacy line, keep old UI).
+  const breakdown = useCartLineBreakdown(l.product.id);
+  const engine = breakdown?.kind === "ok" ? breakdown.breakdown : null;
+  const legacyLineTotal = unitPrice * l.qty;
+  const displayTotal = engine ? engine.grandTotal : legacyLineTotal;
+  const showStrike = engine !== null && engine.discountTotal > 0;
+
   const isBooking =
     isSweetsProduct(l.product.source) &&
     fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C";
