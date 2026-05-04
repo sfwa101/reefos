@@ -20,6 +20,7 @@ import { NeoCardsCarousel } from "@/features/wallet/components/NeoCardsCarousel"
 import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialog";
 import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
+import { GameyasDockContent } from "@/features/wallet/components/GameyasDockContent";
 
 /**
  * Wallet — Phase 13.34 Neo-Bank rebuild (shell only).
