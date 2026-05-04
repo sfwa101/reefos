@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { products as allProducts, useProductsVersion, type Product } from "@/lib/products";
+import { useProductsQuery } from "@/hooks/useProductsQuery";
 import { villageMetaFor } from "@/lib/villageMeta";
 import {
   ROUTINE_KEY,
@@ -41,7 +42,11 @@ export interface UseVillageLogicResult {
 }
 
 export function useVillageLogic(): UseVillageLogicResult {
-  // Re-run memoized filter when product catalog version bumps.
+  // Subscribe to the TanStack Query catalog so loader-warmed data triggers
+  // a render and SWR / background refetch is owned by React Query.
+  const { data: queryProducts } = useProductsQuery();
+  // Realtime channel mutates the in-memory `products` array; the version
+  // bump keeps us in sync with live updates between query refetches.
   const productsVersion = useProductsVersion();
 
   const [query, setQuery] = useState("");
@@ -53,9 +58,12 @@ export function useVillageLogic(): UseVillageLogicResult {
     setRoutines(loadRoutines());
   }, []);
 
-  const villageProducts = useMemo(
-    () => allProducts.filter((p) => p.source === "village"),
-    [productsVersion],
+  const villageProducts = useMemo<Product[]>(
+    () => (queryProducts ?? allProducts).filter((p) => p.source === "village"),
+    // queryProducts updates flow through; productsVersion captures realtime
+    // mutations to the shared in-memory array.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [queryProducts, productsVersion],
   );
 
   const items = useMemo(() => {
