@@ -115,10 +115,10 @@ export const GameyaCreationSheet = ({
 
         <div className="mb-4">
           <span className="mb-1 block text-[11px] font-bold text-muted-foreground">
-            عدد الأعضاء (الأشهر)
+            مدة الجمعية (أشهر) — تساوي عدد الأعضاء
           </span>
-          <div className="grid grid-cols-4 gap-2">
-            {MEMBERS_PRESETS.map((v) => (
+          <div className="grid grid-cols-3 gap-2">
+            {DURATION_PRESETS.map((v: number) => (
               <button
                 key={v}
                 type="button"
