@@ -86,6 +86,13 @@ const RoleSwitcher = ({ roles, customerId }: Props) => {
             key={key}
             onSelect={() => {
               writeActiveView(key);
+              if (key === "admin" && typeof window !== "undefined") {
+                const host = window.location.hostname;
+                if (host === "reefam.com" || host === "www.reefam.com") {
+                  window.location.href = "https://admin.reefam.com";
+                  return;
+                }
+              }
               navigate({ to: VIEW_PATHS[key] });
             }}
             className="cursor-pointer rounded-xl px-3 py-2 text-[13px] font-bold focus:bg-foreground/10"
