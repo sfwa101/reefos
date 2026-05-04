@@ -165,13 +165,17 @@ const Wallet = () => {
             transition={{ duration: 0.2 }}
           >
             {dock === "ops" ? (
-              <OperationsDockContent userId={c.userId} />
+              <OperationsDockContent userId={c.userId} data={txnsData} />
             ) : dock === "gameyas" ? (
               <GameyasDockContent userId={c.userId} />
             ) : dock === "vaults" ? (
-              <VaultsDockContent userId={c.userId} onOpenSettings={() => c.setShowJar(true)} />
+              <VaultsDockContent
+                userId={c.userId}
+                onOpenSettings={() => c.setShowJar(true)}
+                data={savingsData}
+              />
             ) : (
-              <InsightsDockContent userId={c.userId} />
+              <InsightsDockContent userId={c.userId} data={txnsData} />
             )}
           </motion.div>
         </AnimatePresence>
