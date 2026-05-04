@@ -24,24 +24,12 @@ export function lazyStorePage(
 }
 
 /**
- * Phase 3 — preferred wrapper for store routes once a domain-faithful
- * Skeleton exists (StorePageSkeleton, ProductDetailSkeleton, …). Pass
- * the rendered fallback element directly so different routes can pick
- * different layouts without coupling to the generic StoreSkeleton.
+ * NOTE: `lazyStorePageWith` was removed — the TanStack Router code-splitter
+ * cannot parse JSX passed inline to `component:` (?tsr-split=component throws
+ * a Babel SyntaxError). Use the native `pendingComponent` + `lazyRouteComponent`
+ * pattern in the route file instead. This also keeps the skeleton in the
+ * critical bundle (instant paint) instead of bundled with the lazy chunk.
  */
-export function lazyStorePageWith(
-  loader: () => Promise<{ default: ComponentType<unknown> }>,
-  fallback: ReactNode,
-) {
-  const LazyPage = lazy(loader);
-  return function StoreRouteComponent() {
-    return (
-      <Suspense fallback={fallback}>
-        <LazyPage />
-      </Suspense>
-    );
-  };
-}
 
 /**
  * Generic lazy page wrapper for critical non-store routes (cart, product
