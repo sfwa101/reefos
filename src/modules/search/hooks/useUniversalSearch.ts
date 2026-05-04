@@ -66,7 +66,7 @@ const MINI_OPTIONS = {
   searchOptions: {
     boost: { title: 3, subtitle: 1.5, category: 1.2 },
     prefix: true,
-    fuzzy: 0.2,
+    fuzzy: 0.25,
   },
 } as const;
 
