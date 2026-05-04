@@ -190,6 +190,18 @@ const Wallet = () => {
             points={c.balance?.points ?? 0}
           />
         )}
+        {c.showJar && c.userId && c.jar && (
+          <SavingsJarDialog
+            onClose={() => c.setShowJar(false)}
+            userId={c.userId}
+            jar={c.jar}
+            txs={c.jarTxs}
+            onUpdate={(j, t) => {
+              c.setJar(j);
+              c.setJarTxs(t);
+            }}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
