@@ -94,7 +94,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
   const { supported, breakdown } = useLivePrice<MeatSelection>(
     product,
     liveSelection,
-    { zoneAcceptsPerishables: true, customerTier: "member" },
+    { zoneAcceptsPerishables: true, customerTier: "bronze" },
     { strategyKey: "meat" },
   );
 
