@@ -1,116 +1,102 @@
 
-## Goal
+# Phase 13.1 — Multi-Fulfillment & Pre-order Architecture
 
-Transform `/store/supermarket` from a flat single-bar list into a premium, color-coded **dual-navigation** single-page market with 7 main groups, sub-category rails, ScrollSpy in both directions, and conversion boosters (Buy-it-Again, volume discount badges, smart pairing toast).
+Backend-only phase. Zero UI changes. Establishes the data foundation for orders that mix instant delivery, scheduled pre-orders, and items requiring upfront deposits.
 
-## 1. New data taxonomy
+## Why "Order → Fulfillments → Items"
 
-Create `src/lib/supermarketTaxonomy.ts` — a single source of truth that maps each main group to its sub-categories and the colored theme (pastel + accent hue used for active chip background and underline).
+Today: one `orders` row owns N `order_items` directly. There is one status, one ETA, one delivery_zone — so a cart that mixes "fresh meat now" + "wedding cake next week" cannot be modeled honestly. We splice both into one row and lie about timing.
 
-Tree (7 main groups, exact mapping requested):
-
-```text
-1. المواد الغذائية الأساسية   (mint pastel #DDF3E4 / hue 142)
-   خضار وفواكه · ألبان وأجبان · بيض · لحوم ودواجن · أسماك ومأكولات بحرية ·
-   خبز ومخبوزات · أرز ومكرونة ودقيق · معلبات ومحفوظات · بهارات وصلصات ·
-   سناكات وحلويات
-2. المشروبات                 (aqua pastel #DCEEF5 / hue 198)
-   مياه · عصائر · غازية · شاي · قهوة
-3. النظافة الشخصية            (lavender pastel #E8E4F5 / hue 262)
-   صابون · شامبو · معجون أسنان · فرشاة أسنان · مزيل عرق · مناديل ورقية · حلاقة
-4. التنظيف والمنزل            (sky pastel #DDEAF7 / hue 212)
-   جلي · غسيل · أرضيات · أكياس قمامة · إسفنج · مناديل مطبخ · ورق تواليت
-5. مستلزمات الأطفال           (rose pastel #FADCE6 / hue 340)
-   حفاضات · مناديل مبللة · حليب أطفال · أغذية أطفال
-6. الصحة البسيطة              (peach pastel #FCE3D2 / hue 22)
-   فيتامينات · مسكنات · لاصقات جروح · مطهرات
-7. مستلزمات يومية إضافية      (sand pastel #F2EAD3 / hue 44)
-   بطاريات · أكياس حفظ طعام · ألمنيوم · أدوات مطبخ صغيرة
-```
-
-Each entry: `{ id, name, color: { tint, hue, fg }, subs: [{ id, name, match: (p)=>boolean }] }`.
-
-Matching uses existing `product.subCategory` first, then keyword fallback on `product.name` (e.g. مياه/water, شامبو, حفاض, بطارية…) so the existing seeded products wire up without DB changes. Products that don't match any sub fall into a per-group `أخرى` bucket (rendered only if non-empty).
-
-## 2. New `DualNavStore` component
-
-Create `src/components/store/DualNavStore.tsx` (a Supermarket-specific replacement for `SinglePageStore`). It owns:
-
-- Main rail (sticky top, height 44, full width) — 7 colored chips. Active chip uses its group `tint` background + `hsl(hue)` text; underline indicator removed here (lives on the sub rail).
-- Sub rail (sticky directly under main rail, height 40) — chips for the active group's sub-categories. Active sub chip shows a 3px bottom underline in the group's `hsl(hue)`. Soft `shadow-[0_8px_18px_-12px_rgba(0,0,0,0.18)]` under the second rail to detach it from product grid.
-- Margin-top spacer (`pt-3`) below the global TopBar so the sticky header sits with breathing room.
-- Scroll-spy: a single `IntersectionObserver` watching every sub-section. The active sub determines both bars (group derived from sub). Clicking a chip uses `scrollTo` with offset = `HEADER_OFFSET + 44 + 40 + 8`.
-- Renders a long single page: for each group → group title; for each sub with items → `<h3>` + responsive 2-col `ProductCard` grid.
-
-Layout offsets (constants in component):
-```text
-HEADER_OFFSET = 56
-MAIN_BAR = 44
-SUB_BAR  = 40
-TOTAL_STICKY = 140 (used for scrollMarginTop & jumpTo)
-```
-
-## 3. Conversion rails injected at the top of the page
-
-Above the first group section (rendered by `DualNavStore` via an `intro` slot):
-
-1. **اشتريتها سابقاً** — horizontal carousel using `buyAgainProducts(supermarketPool, 12)` from `src/lib/buyAgain.ts`. Authenticated users additionally fetch the last 30 `order_items` rows for `auth.uid()` and merge product ids before calling `buyAgainProducts` — guests still see the localStorage list. Hidden if empty.
-2. **عروض الكمية** — auto-generated from products tagged as bulk-friendly (paper, water, diapers, tissues, bags). New helper `volumeDealFor(product)` returns `{ buy: 3, save: 15 }` when `product.id` matches a small allow-list or when `subCategory ∈ {مياه, مناديل, حفاضات, ورق تواليت}`. Used both as a horizontal "خصم الكميات" carousel and as a small `Badge` overlay on the matching `ProductCard`.
-
-## 4. Smart Pairing toast (cross-sell)
-
-Create `src/lib/smartPairs.ts` exporting a map `{ "pasta": "tomato-sauce", "bread": "butter", "rice": "oil", "coffee": "milk", … }` (8–10 pairs from existing seeded products). Hook into Supermarket page only via a `useEffect` watching `cart.lines` length and the most-recent line id (kept in a ref). When a new line is added and a pair exists and the partner isn't already in cart:
+After: each `orders` row owns N `fulfillments` (one per delivery wave / pickup slot / pre-order batch), and each `fulfillments` row owns its own slice of `order_items`. Every wave gets its own status, ETA, driver, and tracking URL. The order header stays as the financial truth (totals, payments, gift mode) while fulfillments carry the logistics truth.
 
 ```text
-sonner toast: "لا تنسَ صلصة الطماطم!"
-action button: "أضف بـ 25 ج.م"  → cart.add(partner)
-duration 5000ms
+orders (financial header)
+ └── fulfillments[] (one per delivery wave)
+      ├── status, scheduled_for, eta_minutes, driver_id, tracking_url
+      └── order_items[] (rows with fulfillment_id = this fulfillment)
 ```
 
-No global wiring — only mounted inside the Supermarket page so other stores aren't affected.
+Backwards compatible: `order_items.fulfillment_id` is nullable, legacy rows keep working until backfilled.
 
-## 5. ProductCard — small, additive tweaks
+## DB Migration (single transaction)
 
-Already morphs `+` into `+ qty −` capsule (good — keep). Two minor additions guarded so no other store regresses:
+### 1. `orders` — new columns (additive only)
+- `tip_amount numeric(12,2) NOT NULL DEFAULT 0` — replaces legacy `tip` going forward; both kept until code switches over
+- `charity_amount numeric(12,2) NOT NULL DEFAULT 0`
+- `charity_cause_id text` — free-form key (food / hospitals / orphans / general)
+- `is_gift boolean NOT NULL DEFAULT false`
+- `gift_message text`
+- `upfront_payment_required numeric(12,2) NOT NULL DEFAULT 0`
+- `upfront_payment_collected numeric(12,2) NOT NULL DEFAULT 0`
+- CHECK: `upfront_payment_collected >= 0 AND upfront_payment_collected <= upfront_payment_required + 0.01`
 
-- Accept optional `volumeBadge?: { buy: number; save: number }` prop. When set, render a small chip at `right-2 bottom-12`: `اشترِ {buy} ووفر {save} ج.م`. `DualNavStore` passes it from `volumeDealFor(p)`.
-- No other visual changes; modal/unit emphasis is already handled in `ProductDetail.tsx` and not in scope.
+### 2. `fulfillment_status` enum
+`pending | preparing | ready | out_for_delivery | delivered | cancelled`
+(Extra `ready` slot for pickup-style waves; cheap to ship now, hard to add later.)
 
-## 6. Page wiring
-
-`src/pages/store/Supermarket.tsx` becomes:
-
-```text
-<DualNavStore
-  themeKey="supermarket"
-  title="السوبرماركت"
-  subtitle="كل ما تحتاجه يوميًا"
-  taxonomy={supermarketTaxonomy}
-  products={products.filter(...supermarket pool)}
-  intro={<><BuyItAgainRail/><VolumeDealsRail/></>}
-/>
-<SmartPairingWatcher />
+### 3. `fulfillments` table
+```sql
+id                  uuid PK default gen_random_uuid()
+order_id            uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE
+sequence            smallint NOT NULL DEFAULT 1   -- 1, 2, 3 within an order
+status              fulfillment_status NOT NULL DEFAULT 'pending'
+delivery_method_id  uuid REFERENCES delivery_methods(id) ON DELETE SET NULL
+scheduled_for       timestamptz                    -- null = ASAP
+eta_minutes         integer
+driver_id           uuid REFERENCES drivers(id) ON DELETE SET NULL
+tracking_url        text
+delivery_fee        numeric(12,2) NOT NULL DEFAULT 0  -- per-wave fee
+notes               text
+created_at          timestamptz NOT NULL DEFAULT now()
+updated_at          timestamptz NOT NULL DEFAULT now()
+UNIQUE (order_id, sequence)
 ```
+Indexes: `(order_id)`, `(driver_id)`, `(status)`, `(scheduled_for)` partial where status not in (delivered, cancelled).
+Trigger: reuse existing `set_updated_at()` if present, else create one.
 
-## 7. Files
+### 4. `order_items` — new columns
+- `fulfillment_id uuid REFERENCES fulfillments(id) ON DELETE SET NULL` (nullable for legacy)
+- `is_preorder boolean NOT NULL DEFAULT false`
+- `requires_downpayment boolean NOT NULL DEFAULT false`
+- Index `(fulfillment_id)`
 
-Create:
-- `src/lib/supermarketTaxonomy.ts`
-- `src/lib/volumeDeals.ts`
-- `src/lib/smartPairs.ts`
-- `src/components/store/DualNavStore.tsx`
-- `src/components/store/BuyItAgainRail.tsx`
-- `src/components/store/VolumeDealsRail.tsx`
-- `src/components/store/SmartPairingWatcher.tsx`
+### 5. RLS for `fulfillments`
+Mirror `orders` policies exactly:
+- `Users_Read_Own_Fulfillments` — `EXISTS (orders WHERE id = order_id AND user_id = auth.uid())`
+- `Admin_Read_Fulfillments` — admin role check
+- `Admin_Update_Fulfillments` — admin role check
+- `Drivers_Read_Assigned_Fulfillments` — `driver_id IN (SELECT id FROM drivers WHERE user_id = auth.uid())`
+- `Drivers_Update_Assigned_Fulfillments` — same predicate (for status/tracking updates)
+- `System_Insert_Fulfillments` — service role only (orders are created by RPC)
 
-Edit:
-- `src/pages/store/Supermarket.tsx` — swap to `DualNavStore` + intros + watcher.
-- `src/components/ProductCard.tsx` — add optional `volumeBadge` prop (purely additive, default off).
+## TypeScript contracts
 
-Untouched: `SinglePageStore.tsx` (still used by Dairy/Produce/Meat/etc.), routes, schema, other stores.
+`src/integrations/supabase/types.ts` is auto-generated — do NOT touch it. Instead create a hand-rolled domain contract:
 
-## Out of scope (explicit)
+`src/core/orders/types.ts`
+- `FulfillmentStatus` union matching the enum
+- `Fulfillment` shape (camelCase mirror of the DB row + `items: OrderItem[]`)
+- `OrderItem` shape with `fulfillmentId`, `isPreorder`, `requiresDownpayment`
+- `Order` shape including `tipAmount`, `charityAmount`, `charityCauseId`, `isGift`, `giftMessage`, `upfrontPaymentRequired`, `upfrontPaymentCollected`, `fulfillments: Fulfillment[]`
+- A small `mapOrderRow(row, fulfillmentRows, itemRows)` pure function that takes raw Supabase row shapes (typed via the generated `Database` types) and returns the nested domain `Order`. Useful when later phases load orders.
 
-- No DB migrations — taxonomy is derived from existing `category`/`subCategory`/keyword fallback so the 100+ seeded products map immediately. We can promote it to a real `categories` table later.
-- ProductDetail unit emphasis is already prominent; not retouching here.
-- Other store pages keep the current single-bar layout.
+No `any`. All raw row inputs typed via `Database['public']['Tables']['…']['Row']`.
+
+## Out of scope this phase
+- No UI changes (Cart, Admin, Vendor, Driver dashboards untouched).
+- No edits to `place_order_atomic` RPC (next phase will rewrite it to insert one fulfillment per logistics group).
+- No backfill of historic orders — they continue to render with `fulfillments = []` and the legacy single-status field.
+
+## Files
+
+- New SQL migration (run via supabase migration tool):
+  - adds columns to `orders`
+  - creates `fulfillment_status` enum
+  - creates `fulfillments` table + indexes + RLS
+  - adds columns + index to `order_items`
+- New file `src/core/orders/types.ts` — domain types + `mapOrderRow` helper.
+
+## Verification
+- `tsc --noEmit` clean.
+- `psql -c "\d fulfillments"` shows the table with all FKs and policies.
+- Existing `orders` reads still work because every new column has a default.

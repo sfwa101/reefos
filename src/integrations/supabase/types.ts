@@ -1611,6 +1611,76 @@ export type Database = {
         }
         Relationships: []
       }
+      fulfillments: {
+        Row: {
+          created_at: string
+          delivery_fee: number
+          delivery_method_id: string | null
+          driver_id: string | null
+          eta_minutes: number | null
+          id: string
+          notes: string | null
+          order_id: string
+          scheduled_for: string | null
+          sequence: number
+          status: Database["public"]["Enums"]["fulfillment_status"]
+          tracking_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_fee?: number
+          delivery_method_id?: string | null
+          driver_id?: string | null
+          eta_minutes?: number | null
+          id?: string
+          notes?: string | null
+          order_id: string
+          scheduled_for?: string | null
+          sequence?: number
+          status?: Database["public"]["Enums"]["fulfillment_status"]
+          tracking_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          delivery_fee?: number
+          delivery_method_id?: string | null
+          driver_id?: string | null
+          eta_minutes?: number | null
+          id?: string
+          notes?: string | null
+          order_id?: string
+          scheduled_for?: string | null
+          sequence?: number
+          status?: Database["public"]["Enums"]["fulfillment_status"]
+          tracking_url?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fulfillments_delivery_method_id_fkey"
+            columns: ["delivery_method_id"]
+            isOneToOne: false
+            referencedRelation: "delivery_methods"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fulfillments_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fulfillments_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_zones: {
         Row: {
           accent: string | null
@@ -2218,41 +2288,57 @@ export type Database = {
       order_items: {
         Row: {
           created_at: string
+          fulfillment_id: string | null
           id: string
+          is_preorder: boolean
           order_id: string
           price: number
           product_id: string
           product_image: string | null
           product_name: string
           quantity: number
+          requires_downpayment: boolean
           store_id: string | null
           sub_order_id: string | null
         }
         Insert: {
           created_at?: string
+          fulfillment_id?: string | null
           id?: string
+          is_preorder?: boolean
           order_id: string
           price?: number
           product_id: string
           product_image?: string | null
           product_name: string
           quantity?: number
+          requires_downpayment?: boolean
           store_id?: string | null
           sub_order_id?: string | null
         }
         Update: {
           created_at?: string
+          fulfillment_id?: string | null
           id?: string
+          is_preorder?: boolean
           order_id?: string
           price?: number
           product_id?: string
           product_image?: string | null
           product_name?: string
           quantity?: number
+          requires_downpayment?: boolean
           store_id?: string | null
           sub_order_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "order_items_fulfillment_id_fkey"
+            columns: ["fulfillment_id"]
+            isOneToOne: false
+            referencedRelation: "fulfillments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "order_items_order_id_fkey"
             columns: ["order_id"]
@@ -2337,11 +2423,15 @@ export type Database = {
         Row: {
           address_id: string | null
           change_remainder: number
+          charity_amount: number
+          charity_cause_id: string | null
           created_at: string
           delivery_zone: string | null
           discount: number
           donate_change: boolean
+          gift_message: string | null
           id: string
+          is_gift: boolean
           notes: string | null
           payment_method: string | null
           promo_code: string | null
@@ -2350,9 +2440,12 @@ export type Database = {
           service_type: string
           status: string
           tip: number
+          tip_amount: number
           total: number
           total_cashback: number
           updated_at: string
+          upfront_payment_collected: number
+          upfront_payment_required: number
           user_id: string
           wallet_applied: number
           wallet_shortfall: number
@@ -2361,11 +2454,15 @@ export type Database = {
         Insert: {
           address_id?: string | null
           change_remainder?: number
+          charity_amount?: number
+          charity_cause_id?: string | null
           created_at?: string
           delivery_zone?: string | null
           discount?: number
           donate_change?: boolean
+          gift_message?: string | null
           id?: string
+          is_gift?: boolean
           notes?: string | null
           payment_method?: string | null
           promo_code?: string | null
@@ -2374,9 +2471,12 @@ export type Database = {
           service_type?: string
           status?: string
           tip?: number
+          tip_amount?: number
           total?: number
           total_cashback?: number
           updated_at?: string
+          upfront_payment_collected?: number
+          upfront_payment_required?: number
           user_id: string
           wallet_applied?: number
           wallet_shortfall?: number
@@ -2385,11 +2485,15 @@ export type Database = {
         Update: {
           address_id?: string | null
           change_remainder?: number
+          charity_amount?: number
+          charity_cause_id?: string | null
           created_at?: string
           delivery_zone?: string | null
           discount?: number
           donate_change?: boolean
+          gift_message?: string | null
           id?: string
+          is_gift?: boolean
           notes?: string | null
           payment_method?: string | null
           promo_code?: string | null
@@ -2398,9 +2502,12 @@ export type Database = {
           service_type?: string
           status?: string
           tip?: number
+          tip_amount?: number
           total?: number
           total_cashback?: number
           updated_at?: string
+          upfront_payment_collected?: number
+          upfront_payment_required?: number
           user_id?: string
           wallet_applied?: number
           wallet_shortfall?: number
@@ -5302,6 +5409,13 @@ export type Database = {
         | "inventory_clerk"
         | "charity_auditor"
       app_user_level: "bronze" | "silver" | "gold" | "platinum"
+      fulfillment_status:
+        | "pending"
+        | "preparing"
+        | "ready"
+        | "out_for_delivery"
+        | "delivered"
+        | "cancelled"
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
@@ -5455,6 +5569,14 @@ export const Constants = {
         "charity_auditor",
       ],
       app_user_level: ["bronze", "silver", "gold", "platinum"],
+      fulfillment_status: [
+        "pending",
+        "preparing",
+        "ready",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+      ],
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
