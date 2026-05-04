@@ -309,6 +309,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         sweetsRules.hasBooking
           ? `يُدفع الآن من الحجوزات: ${fmtMoney(aggregateDeposit)}`
           : null,
+        giftMode && giftRecipientName ? `🎁 مستلم الهدية: ${giftRecipientName}` : null,
+        giftMode && giftRecipientPhone ? `هاتف المستلم: ${giftRecipientPhone}` : null,
+        giftMode && giftRecipientAddress ? `عنوان التسليم: ${giftRecipientAddress}` : null,
+        giftMode && giftMessage ? `رسالة الهدية: ${giftMessage}` : null,
       ]);
 
       const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
