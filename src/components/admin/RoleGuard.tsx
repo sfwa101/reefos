@@ -16,8 +16,9 @@ export function useAdminRoles() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("user_roles")
-      .select("role")
+      .select("role, is_active")
       .eq("user_id", user.id)
+      .eq("is_active", true)
       .then(({ data }: { data: { role: AppRole }[] | null }) => {
         setRoles(data?.map(r => r.role) ?? []);
       });
