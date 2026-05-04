@@ -147,6 +147,7 @@ function RootComponent() {
             </AuthProvider>
           </TooltipProvider>
         </UIProvider>
+        </LocaleProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
