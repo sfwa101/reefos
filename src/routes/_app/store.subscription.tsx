@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { lazyStorePageWith } from "../-lazyRoute";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
 
 export const Route = createFileRoute("/_app/store/subscription")({
-  component: lazyStorePageWith(
+  pendingComponent: () => (
+    <StorePageSkeleton productCount={4} hideCategories withHero />
+  ),
+  component: lazyRouteComponent(
     () => import("@/modules/subscriptions/SubscriptionsPage"),
-    <StorePageSkeleton productCount={4} hideCategories withHero />,
   ),
 });

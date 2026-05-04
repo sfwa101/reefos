@@ -1,5 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { lazyStorePageWith } from "../-lazyRoute";
+import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
 import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
 import { productsQueryOptions } from "@/hooks/useProductsQuery";
 
@@ -10,8 +9,6 @@ export const Route = createFileRoute("/_app/store/village")({
   loader: ({ context: { queryClient } }) => {
     void queryClient.ensureQueryData(productsQueryOptions());
   },
-  component: lazyStorePageWith(
-    () => import("@/modules/village/VillagePage"),
-    <StorePageSkeleton productCount={6} withHero />,
-  ),
+  pendingComponent: () => <StorePageSkeleton productCount={6} withHero />,
+  component: lazyRouteComponent(() => import("@/modules/village/VillagePage")),
 });
