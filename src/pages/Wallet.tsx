@@ -22,6 +22,9 @@ import { WalletTransferDialog } from "@/features/wallet/components/WalletTransfe
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
 import { GameyasDockContent } from "@/features/wallet/components/GameyasDockContent";
 import { OperationsDockContent } from "@/features/wallet/components/OperationsDockContent";
+import { VaultsDockContent } from "@/features/wallet/components/VaultsDockContent";
+import { InsightsDockContent } from "@/features/wallet/components/InsightsDockContent";
+import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
 
 /**
  * Wallet — Phase 13.34 Neo-Bank rebuild (shell only).
