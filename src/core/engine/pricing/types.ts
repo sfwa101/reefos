@@ -67,6 +67,11 @@ export interface PricingContext {
     | "gold"
     | "platinum"
     | "vip";
+  /**
+   * Phase 9 — bypass the LossPreventionRule. ONLY a verified admin
+   * session may set this. The engine never elevates this on its own.
+   */
+  readonly adminOverride?: boolean;
 }
 
 /** Customer tiers known to discount + reward rules. */
@@ -95,10 +100,47 @@ export interface PriceBreakdown {
    * a "+50 نقطة هدية" chip inside the Cart.
    */
   readonly bonusPoints?: number;
+  /* ---------------- Phase 9 — Profit awareness ---------------- */
+  /**
+   * Effective cost basis used by the engine for this line.
+   * Source of truth, in order:
+   *   1. `product.metadata.costPrice` (explicit)
+   *   2. fallback: `unitPrice × 0.80 × qty` (default 80% COGS heuristic)
+   */
+  readonly costPrice: number;
+  /** `grandTotal − costPrice` after all discounts + reward valuations. */
+  readonly netProfit: number;
+  /**
+   * Set to true when LossPreventionRule had to roll back discounts to
+   * keep the line above the safe profit floor. UI surfaces this as a
+   * subtle "تم تعديل الخصم لحماية الربحية" badge.
+   */
+  readonly isLossPreventionTriggered: boolean;
+  /**
+   * Optional human-readable trace of WHY loss-prevention fired. Useful
+   * for receipts and Hakim audits. Empty string when not triggered.
+   */
+  readonly lossPreventionReason?: string;
   readonly appliedModifiers: ReadonlyArray<PricingModifier>;
   /** Strategy that produced this breakdown — for receipts & audit. */
   readonly strategyKey: string;
 }
+
+/* ===================================================================
+ * Phase 9 — Profit Guardrail constants
+ * =================================================================== */
+
+/** Default COGS ratio when `metadata.costPrice` is missing. */
+export const DEFAULT_COST_RATIO = 0.8;
+/**
+ * Monetary value of a single loyalty point (EGP). Used by
+ * LossPreventionRule to convert `pointsEarned` into a comparable cost
+ * when computing the total customer-incentive spend per line.
+ */
+export const POINT_REDEMPTION_VALUE = 0.1;
+/** Maximum share of gross profit that can be returned to the customer
+ *  via discounts + reward valuations. Above this, the guardrail kicks in. */
+export const MAX_INCENTIVE_SHARE_OF_PROFIT = 0.7;
 
 /* ===================================================================
  * Strategy & Discount interfaces (Strategy Pattern + DI)
