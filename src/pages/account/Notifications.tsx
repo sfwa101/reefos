@@ -122,13 +122,7 @@ const Notifications = () => {
                   <p className="text-sm font-bold">{o.label}</p>
                   <p className="text-[10px] text-muted-foreground">{o.sub}</p>
                 </div>
-                <button
-                  onClick={() => togglePref(o.id)}
-                  className={`relative h-7 w-12 rounded-full transition ${checked ? "bg-primary" : "bg-foreground/15"}`}
-                  aria-pressed={checked}
-                >
-                  <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition ${checked ? "right-0.5" : "right-6"}`} />
-                </button>
+                <Switch checked={checked} onCheckedChange={() => togglePref(o.id)} aria-label={o.label} />
               </div>
             );
           })}
