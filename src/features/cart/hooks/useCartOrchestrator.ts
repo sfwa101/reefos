@@ -236,10 +236,22 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const effectiveDelivery = logisticsQuote?.deliveryFee ?? delivery;
   const effectiveGrand =
     logisticsQuote != null
-      ? Math.max(0, subtotal - discount + effectiveDelivery + tip)
-      : grand;
-  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads. */
-  const codAllowed = logisticsQuote ? logisticsQuote.zone.codAllowed : zone.codAllowed;
+      ? Math.max(0, subtotal - discount + effectiveDelivery + tip + charity)
+      : Math.max(0, grand + charity);
+  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads.
+   *  Gift mode forces electronic payment (no COD) so the recipient is not asked to pay. */
+  const codAllowed = giftMode
+    ? false
+    : logisticsQuote
+      ? logisticsQuote.zone.codAllowed
+      : zone.codAllowed;
+
+  // Auto-switch off cash whenever gift mode flips on
+  useEffect(() => {
+    if (giftMode && payment === "cash") setPayment("wallet");
+    if (giftMode && secondaryPayment === "cash") setSecondaryPayment("instapay");
+  }, [giftMode, payment, secondaryPayment]);
+
 
 
   const checkoutWA = async () => {
