@@ -17,45 +17,17 @@
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
  *     bun run scripts/db-backup/sync-seed.ts backup | restore
  */
-import { createClient, type SupabaseClient } from "@supabase/supabase-js";
-import { readFile, writeFile } from "node:fs/promises";
-import { resolve, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
+import {
+  CATALOG_TABLES,
+  PK,
+  FORBIDDEN_TABLES,
+  type CatalogTable,
+  type SeedFile,
+  type SeedRow as Row,
+} from "../../src/lib/catalogSeedShared";
 
-// ─── HARD-CODED ALLOWLIST (single source of truth) ──────────────────────
-const CATALOG_TABLES = [
-  "categories",
-  "products",
-  "loyalty_tier_rules",
-  "incentive_milestones",
-] as const;
-type CatalogTable = (typeof CATALOG_TABLES)[number];
-
-// Natural primary keys used for UPSERT conflict resolution
-const PK: Record<CatalogTable, string> = {
-  categories: "id",
-  products: "id",
-  loyalty_tier_rules: "tier",
-  incentive_milestones: "key",
-};
-
-// Extra explicit blocklist (defense in depth; informational)
-export const FORBIDDEN_TABLES = [
-  "profiles", "orders", "order_items", "cart_items", "carts",
-  "wallet_transactions", "wallet_balances", "addresses", "user_roles",
-  "audit_logs", "payments", "invoices", "referral_codes",
-  "messages", "notifications",
-] as const;
-
-type Row = Record<string, unknown>;
-type SeedFile = {
-  $schema: string;
-  version: 1;
-  exported_at: string | null;
-  exported_by: string | null;
-  note: string;
-  tables: Record<CatalogTable, Row[]>;
-};
+// Re-export so existing consumers (and external tooling) keep working.
+export { CATALOG_TABLES, PK, FORBIDDEN_TABLES, type CatalogTable, type SeedFile };
 
 // ─── Helpers ────────────────────────────────────────────────────────────
 const __filename = fileURLToPath(import.meta.url);
