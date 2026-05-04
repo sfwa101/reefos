@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Check, Clock, Gift, Lock, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
@@ -21,13 +22,41 @@ import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallb
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
 import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
 import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
+import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { useCartHasErrors } from "@/context/CartContext";
+import { isPerishable } from "@/lib/products";
+import { computeLogisticsQuote } from "@/core/logistics/quote";
+import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
+import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
   const { sharedCartId } = useSharedCartContext();
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = useCartHasErrors();
+  const { data: deliveryMethod } = useDefaultDeliveryMethod();
+
+  // Logistics Engine quote — single source of truth for delivery fee,
+  // ETA, blockers (min-order) and warnings (perishables / surge).
+  const logisticsQuote = useMemo(() => {
+    if (!deliveryMethod) return null;
+    const hasPerishables = o.lines.some((l) => isPerishable(l.product));
+    return computeLogisticsQuote({
+      zone: legacyZoneToLogisticsZone(o.zone),
+      method: deliveryMethod,
+      subtotal: o.subtotal,
+      hasPerishables,
+    });
+  }, [deliveryMethod, o.zone, o.subtotal, o.lines]);
+
+  const logisticsBlocked = (logisticsQuote?.blockers.length ?? 0) > 0;
+  // Engine wins for delivery fee when a quote is available; legacy delivery
+  // is the safe fallback during the brief moment the method query is in-flight.
+  const effectiveDelivery = logisticsQuote?.deliveryFee ?? o.delivery;
+  const effectiveGrand =
+    logisticsQuote != null
+      ? Math.max(0, o.subtotal - o.discount + effectiveDelivery + o.tip)
+      : o.grand;
 
   const updateSplit = async (
     participantId: string,
