@@ -21,6 +21,7 @@ export const BalanceCardsCarousel = ({
   successfulRefs,
   referralCode,
   jar,
+  userId,
 }: {
   name: string;
   balance: number;
@@ -30,6 +31,7 @@ export const BalanceCardsCarousel = ({
   successfulRefs: number;
   referralCode: string | null;
   jar: SavingsJar | null;
+  userId: string | null;
 }) => {
   const copyCode = async () => {
     if (!referralCode) {
@@ -42,8 +44,8 @@ export const BalanceCardsCarousel = ({
 
   return (
     <div
-      className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-      style={{ scrollPaddingInline: "1.25rem" }}
+      className="flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      style={{ scrollPaddingInline: "1rem" }}
     >
       {/* 1. Holographic balance */}
       <div className="w-[88vw] max-w-md shrink-0 snap-center">
@@ -52,6 +54,7 @@ export const BalanceCardsCarousel = ({
           balance={balance}
           trustLimit={trustLimit}
           tierLabel={tierLabel}
+          userId={userId}
         />
       </div>
 

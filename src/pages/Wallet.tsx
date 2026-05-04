@@ -5,16 +5,18 @@ import {
   Users,
   Wallet2,
   PiggyBank,
+  Target,
+  Send,
+  Plus,
+  ScanLine,
+  Sparkles,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toLatin } from "@/lib/format";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
 import { BalanceCardsCarousel } from "@/features/wallet/components/BalanceCardsCarousel";
-import {
-  ActionGrid,
-  buildDefaultWalletActions,
-} from "@/features/wallet/components/ActionGrid";
+import { ActionGrid, type WalletAction } from "@/features/wallet/components/ActionGrid";
 import { WalletTabs } from "@/features/wallet/components/WalletTabs";
 import { MiniStatGrid } from "@/features/wallet/components/WalletActionGrid";
 import { WalletTransactionList } from "@/features/wallet/components/WalletTransactionList";
@@ -32,18 +34,18 @@ import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialo
 import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
 import { WalletCharityHub } from "@/features/wallet/components/WalletCharityHub";
+import { GameyasTab } from "@/features/wallet/components/GameyasTab";
+import { VaultsGrid } from "@/features/wallet/components/VaultsGrid";
 
 /**
- * Wallet — Phase B Fintech overhaul.
+ * Wallet — Phase 13.13 Halal Neo-Bank UI.
  *
- * Layout choreography:
- *   1. Theme-bound vertical gradient background (`from-background via-background/95 to-muted/20`).
- *   2. Generous spatial rhythm (`gap-6`, `px-5`) — luxury negative space.
- *   3. Holographic super-card → extensible glass action strip → animated
- *      segmented control → "The Vault" sheet anchored at the bottom.
+ * Hierarchy (Mobile-first, edge-safe `px-4 lg:px-8`):
+ *   1. Holographic IBAN-style super card (Papara-grade glassmorphism).
+ *   2. Fintech action ribbon (Send · Topup · Cashback · QR Pay).
+ *   3. Segmented control: Ledger · Gam'eyas · Vaults · Charity · Analytics · Partners.
  *
- * Logic untouched: every modal trigger and slice still consumes the same
- * `useWalletDashboard` facade.
+ * All payment methods now arrive from a stem-cell layer (no in-memory arrays).
  */
 const Wallet = () => {
   const c = useWalletDashboard();
@@ -56,12 +58,23 @@ const Wallet = () => {
     );
   }
 
-  const actions = buildDefaultWalletActions({
-    onTopup: c.openTopup,
-    onTransfer: () => c.setShowTransfer(true),
-    onJar: () => c.setShowJar(true),
-    onPos: () => c.setShowPos(true),
-  });
+  const actions: WalletAction[] = [
+    {
+      id: "transfer",
+      label: "إرسال",
+      icon: Send,
+      onClick: () => c.setShowTransfer(true),
+      primary: true,
+    },
+    { id: "topup", label: "إيداع", icon: Plus, onClick: c.openTopup },
+    {
+      id: "cashback",
+      label: "كاش باك",
+      icon: Sparkles,
+      onClick: () => c.openAffiliateTab(),
+    },
+    { id: "qr", label: "دفع QR", icon: ScanLine, onClick: () => c.setShowPos(true) },
+  ];
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-b from-background via-background/95 to-muted/20">
@@ -75,20 +88,20 @@ const Wallet = () => {
         className="pointer-events-none absolute top-40 right-0 h-48 w-48 rounded-full bg-accent/15 blur-3xl"
       />
 
-      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 pt-3 pb-32">
+      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-3 pb-32">
         {/* HEADER */}
         <motion.section
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
-          className="flex items-end justify-between px-5"
+          className="flex items-end justify-between"
         >
           <div>
             <h1 className="font-display text-3xl font-black tracking-tight text-foreground">
               محفظتي
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              بنكك الرقمي · مدير ميزانياتك · شركاء النجاح
+              بنكك الرقمي الإسلامي · جمعيات · حصّالات · شركاء النجاح
             </p>
           </div>
           {c.tier && (
@@ -99,41 +112,37 @@ const Wallet = () => {
         </motion.section>
 
         {/* SWIPEABLE SUPER-CARDS CAROUSEL (full-bleed) */}
-        <BalanceCardsCarousel
-          name={c.profile?.full_name || "عميل ريف"}
-          balance={Number(c.balance?.balance ?? 0)}
-          trustLimit={c.trustLimit}
-          tierLabel={c.tier?.label}
-          totalCommission={c.totalCommission}
-          successfulRefs={c.successfulRefs}
-          referralCode={c.referralCode}
-          jar={c.jar}
-        />
-
-        {/* COMPACT GLASS ACTION RIBBON */}
-        <div className="px-5">
-          <ActionGrid actions={actions} />
+        <div className="-mx-4 lg:-mx-8">
+          <BalanceCardsCarousel
+            name={c.profile?.full_name || "عميل ريف"}
+            balance={Number(c.balance?.balance ?? 0)}
+            trustLimit={c.trustLimit}
+            tierLabel={c.tier?.label}
+            totalCommission={c.totalCommission}
+            successfulRefs={c.successfulRefs}
+            referralCode={c.referralCode}
+            jar={c.jar}
+            userId={c.userId}
+          />
         </div>
 
-        {/* ANIMATED SEGMENTED CONTROL */}
-        <div className="px-5">
-          <WalletTabs
+        {/* FINTECH ACTION RIBBON */}
+        <ActionGrid actions={actions} />
+
+        {/* SEGMENTED CONTROL */}
+        <WalletTabs
           tabs={[
             { id: "balance", label: "العمليات", icon: Wallet2 },
-            { id: "budgets", label: "التحليلات", icon: PieIcon },
-            { id: "savings", label: "الحصّالة", icon: PiggyBank },
-            { id: "charity", label: "الصدقات", icon: Heart },
-            { id: "affiliate", label: "شركاء النجاح", icon: Users },
+            { id: "gameyas", label: "الجمعيات", icon: Users },
+            { id: "vaults", label: "حصّالاتي", icon: Target },
+            { id: "savings", label: "ذكية", icon: PiggyBank },
+            { id: "charity", label: "صدقات", icon: Heart },
+            { id: "budgets", label: "تحليلات", icon: PieIcon },
           ]}
           active={c.tab}
-          onChange={(t) => {
-            if (t === "affiliate") c.openAffiliateTab();
-            else c.setTab(t as typeof c.tab);
-          }}
+          onChange={(t) => c.setTab(t as typeof c.tab)}
         />
-        </div>
 
-        <div className="px-5">
         <AnimatePresence mode="wait">
           {c.tab === "balance" && (
             <motion.div
@@ -150,6 +159,30 @@ const Wallet = () => {
                 refs={c.successfulRefs}
               />
               <WalletTransactionList txs={c.txs} />
+            </motion.div>
+          )}
+
+          {c.tab === "gameyas" && (
+            <motion.div
+              key="gameyas"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.25 }}
+            >
+              <GameyasTab />
+            </motion.div>
+          )}
+
+          {c.tab === "vaults" && (
+            <motion.div
+              key="vaults"
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 10 }}
+              transition={{ duration: 0.25 }}
+            >
+              <VaultsGrid userId={c.userId} />
             </motion.div>
           )}
 
@@ -216,7 +249,6 @@ const Wallet = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        </div>
 
         <AnimatePresence>
           {c.showTopup && (

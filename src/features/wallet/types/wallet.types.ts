@@ -71,7 +71,14 @@ export type PaymentMethod = {
   sub: string;
 };
 
-export type WalletTab = "balance" | "budgets" | "savings" | "affiliate" | "charity";
+export type WalletTab =
+  | "balance"
+  | "gameyas"
+  | "vaults"
+  | "budgets"
+  | "savings"
+  | "affiliate"
+  | "charity";
 
 export type CharityCampaign = {
   id: string;

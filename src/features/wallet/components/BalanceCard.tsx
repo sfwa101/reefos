@@ -6,8 +6,16 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { CreditCard, Cpu, ShieldCheck, Wifi } from "lucide-react";
+import { CreditCard, Copy, Cpu, ShieldCheck, Wifi } from "lucide-react";
+import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
+
+/** Build an IBAN-style display id from the user UUID, e.g. REEF-A1B2-C3D4. */
+const buildAccountNumber = (userId: string | null | undefined): string => {
+  if (!userId) return "REEF-•••• ••••";
+  const clean = userId.replace(/-/g, "").toUpperCase();
+  return `REEF-${clean.slice(0, 4)}-${clean.slice(4, 8)}`;
+};
 
 /**
  * BalanceCard — Holographic Super-Card (Papara/Apple Pay grade).
@@ -27,13 +35,20 @@ export const BalanceCard = ({
   balance,
   trustLimit,
   tierLabel,
+  userId,
 }: {
   name: string;
   balance: number;
   trustLimit: number;
   tierLabel?: string;
+  userId?: string | null;
 }) => {
   const ref = useRef<HTMLDivElement | null>(null);
+  const accountNo = buildAccountNumber(userId);
+  const copyAccount = async () => {
+    await navigator.clipboard.writeText(accountNo);
+    toast.success("تم نسخ رقم الحساب");
+  };
 
   // Pointer position normalized to [-0.5, 0.5]
   const px = useMotionValue(0);
@@ -178,6 +193,23 @@ export const BalanceCard = ({
               </span>
             </motion.p>
           </div>
+
+          {/* IBAN-style account number with copy */}
+          <button
+            type="button"
+            onClick={copyAccount}
+            className="group flex items-center justify-between gap-2 rounded-xl bg-primary-foreground/10 px-3 py-1.5 ring-1 ring-primary-foreground/20 backdrop-blur-sm transition active:scale-[0.98]"
+          >
+            <div className="min-w-0 text-start">
+              <p className="text-[8px] font-bold uppercase tracking-[0.2em] text-primary-foreground/65">
+                Account No
+              </p>
+              <p className="truncate font-display text-xs font-extrabold tracking-[0.18em] tabular-nums">
+                {accountNo}
+              </p>
+            </div>
+            <Copy className="h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100" />
+          </button>
 
           {/* Bottom — name + trust limit */}
           <div className="flex items-end justify-between gap-2">
