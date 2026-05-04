@@ -83,7 +83,7 @@ export const useGameyaDetails = (circleId: string | null) => {
       const [{ data: mem }, { data: inst }] = await Promise.all([
         supabase
           .from("gam_eya_members")
-          .select("id,user_id,turn_number,is_trusted,profiles(full_name)")
+          .select("id,user_id,turn_number,is_trusted")
           .eq("gam_eya_id", circleId)
           .order("turn_number", { ascending: true }),
         supabase
@@ -93,19 +93,29 @@ export const useGameyaDetails = (circleId: string | null) => {
           .order("cycle_index", { ascending: true }),
       ]);
       if (!mounted) return;
+      const memRows = (mem ?? []) as Array<{
+        id: string;
+        user_id: string;
+        turn_number: number;
+        is_trusted: boolean;
+      }>;
+      const userIds = Array.from(new Set(memRows.map((m) => m.user_id)));
+      const { data: profs } = userIds.length
+        ? await supabase.from("profiles").select("id, full_name").in("id", userIds)
+        : { data: [] as Array<{ id: string; full_name: string | null }> };
+      const nameMap = new Map(
+        ((profs ?? []) as Array<{ id: string; full_name: string | null }>).map((p) => [
+          p.id,
+          p.full_name,
+        ]),
+      );
       setMembers(
-        ((mem ?? []) as Array<{
-          id: string;
-          user_id: string;
-          turn_number: number;
-          is_trusted: boolean;
-          profiles: { full_name: string | null } | null;
-        }>).map((m) => ({
+        memRows.map((m) => ({
           id: m.id,
           user_id: m.user_id,
           turn_number: m.turn_number,
           is_trusted: m.is_trusted,
-          full_name: m.profiles?.full_name ?? null,
+          full_name: nameMap.get(m.user_id) ?? null,
         })),
       );
       setInstallments((inst ?? []) as GameyaInstallment[]);
