@@ -3990,6 +3990,48 @@ export type Database = {
           },
         ]
       }
+      storefront_rails: {
+        Row: {
+          created_at: string
+          ends_at: string | null
+          id: string
+          is_active: boolean
+          sort_order: number
+          starts_at: string | null
+          subtitle: string | null
+          target_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["storefront_rail_type"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          target_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["storefront_rail_type"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          is_active?: boolean
+          sort_order?: number
+          starts_at?: string | null
+          subtitle?: string | null
+          target_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["storefront_rail_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       stores: {
         Row: {
           address: string | null
@@ -5566,6 +5608,13 @@ export type Database = {
         | "frozen"
         | "completed"
         | "cancelled"
+      storefront_rail_type:
+        | "flash_sale"
+        | "bundle"
+        | "personalized"
+        | "category"
+        | "restaurant"
+        | "sponsored"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -5727,6 +5776,14 @@ export const Constants = {
         "frozen",
         "completed",
         "cancelled",
+      ],
+      storefront_rail_type: [
+        "flash_sale",
+        "bundle",
+        "personalized",
+        "category",
+        "restaurant",
+        "sponsored",
       ],
     },
   },
