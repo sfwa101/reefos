@@ -109,7 +109,7 @@ export function useUniversalSearch(query: string): UseUniversalSearchResult {
   }, [entities]);
 
   const hits = useMemo<readonly SearchHit[]>(() => {
-    const term = deferredQuery.trim();
+    const term = normalizeArabic(deferredQuery);
     const mini = indexRef.current;
     if (!term || term.length < 2 || !mini) return [];
     const results = mini.search(term, MINI_OPTIONS.searchOptions) as SearchResult[];
