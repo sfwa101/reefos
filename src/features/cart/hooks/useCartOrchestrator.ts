@@ -174,6 +174,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     FREE_DELIVERY_THRESHOLD,
   } = calc;
 
+  // Phase 6 — engine-driven checkout guardrails (deposit / COD block).
+  const engineRules = useCartCheckoutRules();
+
   useEffect(() => {
     if (sweetsRules.blockCOD && payment === "cash") {
       setPayment("wallet");
@@ -185,6 +188,19 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       setSecondaryPayment("instapay");
     }
   }, [sweetsRules.blockCOD, payment, secondaryPayment]);
+
+  // Engine-driven block (Phase 6) — required deposit ⇒ upfront payment only.
+  useEffect(() => {
+    if (engineRules.blocksCOD && payment === "cash") {
+      setPayment("wallet");
+      toast.message("الدفع عند الاستلام غير متاح", {
+        description: `العربون المطلوب ${fmtMoney(engineRules.totalDepositAmount)} يُدفع مسبقاً`,
+      });
+    }
+    if (engineRules.blocksCOD && secondaryPayment === "cash") {
+      setSecondaryPayment("instapay");
+    }
+  }, [engineRules.blocksCOD, engineRules.totalDepositAmount, payment, secondaryPayment]);
 
   const grouping = useCartVendorGrouping(deferredLines, payment);
   const {
