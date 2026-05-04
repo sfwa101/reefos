@@ -22,6 +22,9 @@ import { WalletTransferDialog } from "@/features/wallet/components/WalletTransfe
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
 import { GameyasDockContent } from "@/features/wallet/components/GameyasDockContent";
 import { OperationsDockContent } from "@/features/wallet/components/OperationsDockContent";
+import { VaultsDockContent } from "@/features/wallet/components/VaultsDockContent";
+import { InsightsDockContent } from "@/features/wallet/components/InsightsDockContent";
+import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
 
 /**
  * Wallet — Phase 13.34 Neo-Bank rebuild (shell only).
@@ -151,14 +154,10 @@ const Wallet = () => {
               <OperationsDockContent userId={c.userId} />
             ) : dock === "gameyas" ? (
               <GameyasDockContent userId={c.userId} />
+            ) : dock === "vaults" ? (
+              <VaultsDockContent userId={c.userId} onOpenSettings={() => c.setShowJar(true)} />
             ) : (
-              <div className="rounded-3xl bg-card text-card-foreground ring-1 ring-border/50 shadow-sm p-5 min-h-[180px]">
-                <p className="text-[12px] font-bold text-muted-foreground mb-1.5">قادم في Phase 13.38</p>
-                <p className="text-[14px] text-foreground/90">
-                  {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
-                  {dock === "insights" && "مدير مالي شخصي يحلّل إنفاقك ويقترح الميزانيات."}
-                </p>
-              </div>
+              <InsightsDockContent userId={c.userId} />
             )}
           </motion.div>
         </AnimatePresence>
@@ -189,6 +188,18 @@ const Wallet = () => {
             name={ownerName}
             balance={Number(c.balance?.balance ?? 0)}
             points={c.balance?.points ?? 0}
+          />
+        )}
+        {c.showJar && c.userId && c.jar && (
+          <SavingsJarDialog
+            onClose={() => c.setShowJar(false)}
+            userId={c.userId}
+            jar={c.jar}
+            txs={c.jarTxs}
+            onUpdate={(j, t) => {
+              c.setJar(j);
+              c.setJarTxs(t);
+            }}
           />
         )}
       </AnimatePresence>
