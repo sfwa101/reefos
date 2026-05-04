@@ -23,29 +23,35 @@ type ThemeCtx = {
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
+// Read what the pre-hydration ScriptOnce already applied to <html>, so React
+// state matches the DOM on first render and we never re-flash to defaults.
+const readInitialMode = (): Mode => {
+  if (typeof window === "undefined") return "light";
+  try {
+    return (localStorage.getItem("reef-mode") as Mode | null) ?? "light";
+  } catch {
+    return "light";
+  }
+};
+const readInitialColor = (): ColorTheme => {
+  if (typeof window === "undefined") return "sage";
+  try {
+    return (localStorage.getItem("reef-color") as ColorTheme | null) ?? "sage";
+  } catch {
+    return "sage";
+  }
+};
+
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // SSR-safe defaults; hydrate from localStorage on mount.
   // STRICT: First app launch is ALWAYS light + sage — never auto-pick system dark.
-  const [mode, setModeState] = useState<Mode>("light");
-  const [colorTheme, setColorThemeState] = useState<ColorTheme>("sage");
+  const [mode, setModeState] = useState<Mode>(readInitialMode);
+  const [colorTheme, setColorThemeState] = useState<ColorTheme>(readInitialColor);
   const [systemMode, setSystemMode] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    const storedMode = localStorage.getItem("reef-mode") as Mode | null;
-    const storedColor = localStorage.getItem("reef-color") as ColorTheme | null;
-    // First launch → persist light/sage explicitly so we never re-evaluate system pref.
-    if (!storedMode) {
-      localStorage.setItem("reef-mode", "light");
-      setModeState("light");
-    } else {
-      setModeState(storedMode);
-    }
-    if (!storedColor) {
-      localStorage.setItem("reef-color", "sage");
-      setColorThemeState("sage");
-    } else {
-      setColorThemeState(storedColor);
-    }
+    // Persist defaults explicitly the first time so we never re-evaluate system pref.
+    if (!localStorage.getItem("reef-mode")) localStorage.setItem("reef-mode", "light");
+    if (!localStorage.getItem("reef-color")) localStorage.setItem("reef-color", "sage");
 
     const mq = window.matchMedia("(prefers-color-scheme: dark)");
     setSystemMode(mq.matches ? "dark" : "light");
