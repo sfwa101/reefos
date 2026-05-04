@@ -17,6 +17,24 @@ const BasicInfoForm = ({
   form, update, uploading, onUpload, categories, stores,
 }: BasicInfoFormProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const rawAliases = form.metadata?.aliases;
+  const aliases: readonly string[] = Array.isArray(rawAliases)
+    ? rawAliases.filter((x): x is string => typeof x === "string")
+    : typeof rawAliases === "string"
+      ? rawAliases.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+  const setAliases = (next: string[]) => {
+    const meta: ProductMetadata = { ...(form.metadata ?? {}) };
+    if (next.length === 0) {
+      delete meta.aliases;
+    } else {
+      meta.aliases = next;
+    }
+    update("metadata", meta);
+  };
+
   return (
     <div className="space-y-4 mt-0">
       <div>
