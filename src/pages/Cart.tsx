@@ -85,6 +85,8 @@ const Cart = () => {
 
       <CartUpgradeBanner />
 
+      <CartPricingErrorsBanner />
+
       {/* Multi-vendor segmented lines */}
       <div className="space-y-4">
         {o.isMultiVendor && (
