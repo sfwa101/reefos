@@ -1,6 +1,13 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts, ScriptOnce } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import {
+  Outlet,
+  Link,
+  createRootRouteWithContext,
+  HeadContent,
+  Scripts,
+  ScriptOnce,
+} from "@tanstack/react-router";
+import { useEffect } from "react";
+import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -37,7 +44,13 @@ function NotFoundComponent() {
   );
 }
 
-export const Route = createRootRoute({
+// Router context shape — `queryClient` is injected from `getRouter()` and
+// is what loaders use to call `ensureQueryData(...)` for parallel prefetch.
+interface RouterContext {
+  queryClient: QueryClient;
+}
+
+export const Route = createRootRouteWithContext<RouterContext>()({
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -99,7 +112,8 @@ function RootShell({ children }: { children: React.ReactNode }) {
 }
 
 function RootComponent() {
-  const [queryClient] = useState(() => new QueryClient());
+  // Pull the same QueryClient the router/loaders use, so cache is shared.
+  const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
     registerPWA();
