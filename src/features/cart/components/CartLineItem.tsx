@@ -148,9 +148,37 @@ const CartLineItemImpl = ({
                 })}
               </div>
             )}
+            {/* Phase 5.3 — engine-driven transparency badges */}
+            {engine && (engine.discountTotal > 0 || engine.depositRequired || engine.feeTotal > 0) && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {engine.discountTotal > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/12 px-1.5 py-0.5 text-[9px] font-extrabold text-emerald-700 dark:text-emerald-300">
+                    <Tag className="h-2.5 w-2.5" strokeWidth={2.8} />
+                    خصم {fmtMoney(Math.round(engine.discountTotal))}
+                  </span>
+                )}
+                {engine.feeTotal > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-sky-500/12 px-1.5 py-0.5 text-[9px] font-extrabold text-sky-700 dark:text-sky-300">
+                    <Snowflake className="h-2.5 w-2.5" strokeWidth={2.8} />
+                    رسوم {fmtMoney(Math.round(engine.feeTotal))}
+                  </span>
+                )}
+                {engine.depositRequired && engine.depositAmount > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-800 dark:text-amber-300">
+                    <Wallet className="h-2.5 w-2.5" strokeWidth={2.8} />
+                    عربون {fmtMoney(Math.round(engine.depositAmount))}
+                  </span>
+                )}
+              </div>
+            )}
             <div className="mt-auto flex items-center justify-between pt-2">
               <span className="font-display text-base font-extrabold text-primary">
-                <NumberFlow value={unitPrice * l.qty} />{" "}
+                {showStrike && (
+                  <span className="me-1.5 align-middle text-[10.5px] font-bold tabular-nums text-muted-foreground line-through decoration-1">
+                    {fmtMoney(Math.round(legacyLineTotal + engine.discountTotal))}
+                  </span>
+                )}
+                <NumberFlow value={displayTotal} />{" "}
                 <span className="text-[10px] font-bold text-muted-foreground">ج.م</span>
               </span>
               <div className="flex items-center gap-0.5 rounded-full bg-foreground/[0.06] p-0.5 ring-1 ring-border/40">
