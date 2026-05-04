@@ -19,6 +19,7 @@ import {
   PricingEngineError,
   type IDiscountRule,
   type IPricingStrategy,
+  type IRewardRule,
   type PriceBreakdown,
   type PricingContext,
   type PricingModifier,
@@ -134,6 +135,7 @@ function foldModifiers(
 export class PricingEngine {
   private readonly strategies = new Map<string, IPricingStrategy<PricingSelection>>();
   private readonly discountRules: IDiscountRule[] = [];
+  private readonly rewardRules: IRewardRule[] = [];
 
   /** Register a strategy. Last registration with the same key wins. */
   registerStrategy<T extends PricingSelection>(
@@ -152,6 +154,12 @@ export class PricingEngine {
   /** Register a discount rule. Applied in registration order. */
   registerDiscountRule(rule: IDiscountRule): this {
     this.discountRules.push(rule);
+    return this;
+  }
+
+  /** Register a reward rule. Applied in registration order, AFTER discounts. */
+  registerRewardRule(rule: IRewardRule): this {
+    this.rewardRules.push(rule);
     return this;
   }
 
@@ -249,6 +257,27 @@ export class PricingEngine {
         [...current.appliedModifiers, ...extra],
         strategy.key,
       );
+    }
+
+    // Phase 8 — Apply reward rules. Rewards never mutate prices; they
+    // accumulate `pointsEarned` (and optional bonusPoints) on top of the
+    // final breakdown so loyalty stays orthogonal to pricing.
+    let pointsEarned = 0;
+    let bonusPoints = 0;
+    for (const rule of this.rewardRules) {
+      if (!rule.isApplicable(current, context)) continue;
+      const outcome = rule.apply(current, context);
+      pointsEarned += Math.max(0, Math.round(outcome.points));
+      if (outcome.bonusPoints) {
+        bonusPoints += Math.max(0, Math.round(outcome.bonusPoints));
+      }
+    }
+    if (pointsEarned > 0 || bonusPoints > 0) {
+      current = {
+        ...current,
+        pointsEarned,
+        ...(bonusPoints > 0 ? { bonusPoints } : {}),
+      };
     }
     return current;
   }
