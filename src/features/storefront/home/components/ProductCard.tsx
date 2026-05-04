@@ -17,11 +17,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
+import { getById } from "@/lib/products";
 
-import { fmt } from "../data";
+import { fmt } from "../dictionaries";
 import type { HGProduct } from "../types";
 
 export const toCompareItem = (p: HGProduct): CompareItem => ({
@@ -61,38 +63,23 @@ export const ProductCard = ({
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const product = getById(p.id);
+    if (!product) {
+      toast.error("المنتج غير متاح حالياً");
+      return;
+    }
     if (isPre) {
-      add(
-        {
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          image: p.image,
-          unit: p.unit,
-          category: "أدوات منزلية",
-          source: "home",
-        } as unknown as import("@/lib/products").Product,
-        1,
-        {
-          payDeposit: true,
-          unitPrice: p.price,
-          bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
-        },
-      );
+      add(product, 1, {
+        payDeposit: true,
+        unitPrice: p.price,
+        bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
+      });
       toast.success("تم تأكيد الحجز", {
         description: `دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
       });
       return;
     }
-    add({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      image: p.image,
-      unit: p.unit,
-      category: "أدوات منزلية",
-      source: "home",
-    } as unknown as import("@/lib/products").Product);
+    add(product);
     toast.success("أُضيف إلى السلة", { description: p.name });
   };
 
@@ -126,14 +113,13 @@ export const ProductCard = ({
       )}
 
       <div className="relative aspect-square overflow-hidden bg-secondary/40">
-        <img
+        <OptimizedImage
           src={p.image}
           alt={p.name}
-          loading="lazy"
-          decoding="async"
           width={768}
           height={768}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
+          wrapperClassName="absolute inset-0"
         />
 
         {isPre ? (

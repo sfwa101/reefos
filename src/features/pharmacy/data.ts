@@ -1,3 +1,11 @@
+/**
+ * Pharmacy — UI dictionaries + Supabase-backed product feed.
+ *
+ * Phase 11.2: hardcoded `RX` products were removed. Categories,
+ * idToLabel and the icon registry remain here as **UI configuration**
+ * (not product data). Products are projected from the live Supabase
+ * catalog via `useRxProducts()`.
+ */
 import {
   Sparkle,
   Leaf,
@@ -7,15 +15,12 @@ import {
   ShieldPlus,
   Baby,
 } from "lucide-react";
-import rxVitD from "@/assets/rx-vitd.jpg";
-import rxOmega from "@/assets/rx-omega.jpg";
-import rxGlucose from "@/assets/rx-glucose.jpg";
-import rxFirstAid from "@/assets/rx-firstaid.jpg";
-import rxSerum from "@/assets/rx-serum.jpg";
-import rxBp from "@/assets/rx-bp.jpg";
-import pMedicine from "@/assets/p-medicine.jpg";
-import pDiapers from "@/assets/p-diapers.jpg";
-import type { Category, RxProduct } from "./types";
+import { useMemo } from "react";
+
+import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
+import type { Product } from "@/lib/products";
+
+import type { CatId, Category, RxProduct } from "./types";
 
 export const categories: Category[] = [
   { id: "all", name: "الكل", icon: Sparkle },
@@ -27,19 +32,75 @@ export const categories: Category[] = [
   { id: "baby", name: "عناية الأطفال", icon: Baby },
 ];
 
-export const RX: RxProduct[] = [
-  { id: "vit-d3", name: "فيتامين د3 5000 وحدة", brand: "ناتشورال", unit: "60 كبسولة", price: 185, oldPrice: 220, image: rxVitD, rating: 4.8, reviews: 312, category: "vitamins", tagline: "لمناعة قوية وعظام سليمة", badges: ["خالٍ من الجلوتين", "غير معدّل وراثياً", "نباتي"], dosage: "كبسولة واحدة يومياً مع الطعام", inStock: true },
-  { id: "omega3", name: "أوميجا 3 عالي التركيز", brand: "نوردك بيور", unit: "90 كبسولة · 1000mg", price: 295, image: rxOmega, rating: 4.9, reviews: 421, category: "vitamins", tagline: "لصحة القلب والدماغ", badges: ["نقي طبياً", "بدون رائحة", "مُختبر معملياً"], dosage: "كبسولتان يومياً مع الوجبات", inStock: true },
-  { id: "para", name: "باراسيتامول 500mg", brand: "أبيمول", unit: "20 قرص", price: 22, image: pMedicine, rating: 4.6, reviews: 98, category: "rx", tagline: "مسكن وخافض للحرارة", badges: ["لا يحتاج وصفة", "آمن للحامل بإشراف"], dosage: "قرص كل 6 ساعات عند الحاجة", inStock: true },
-  { id: "amox", name: "أموكسيسيلين 500mg", brand: "ميديك", unit: "21 كبسولة", price: 65, image: pMedicine, rating: 4.5, reviews: 54, category: "rx", tagline: "مضاد حيوي واسع الطيف", badges: ["يحتاج وصفة طبية"], dosage: "كبسولة كل 8 ساعات", inStock: true },
-  { id: "serum", name: "سيروم حمض الهيالورونيك", brand: "ديرما لوكس", unit: "30ml", price: 340, oldPrice: 420, image: rxSerum, rating: 4.9, reviews: 256, category: "personal", tagline: "ترطيب عميق ومكافحة الشيخوخة", badges: ["ديرماتولوجياً مختبر", "خالٍ من البارابين"], dosage: "قطرتان صباحاً ومساءً", inStock: true },
-  { id: "glucose", name: "جهاز قياس السكر الذكي", brand: "أكيوريت", unit: "جهاز + 50 شريحة", price: 890, image: rxGlucose, rating: 4.7, reviews: 128, category: "diabetes", tagline: "نتائج دقيقة في 5 ثوانٍ", badges: ["متصل بالموبايل", "ضمان سنتين"], dosage: "كما يحدده طبيبك", inStock: true },
-  { id: "firstaid", name: "حقيبة إسعافات أولية شاملة", brand: "ميد سيف", unit: "32 قطعة", price: 245, image: rxFirstAid, rating: 4.8, reviews: 89, category: "firstaid", tagline: "كل ما تحتاجه للطوارئ المنزلية", badges: ["معتمدة طبياً", "محمولة"], dosage: "—", inStock: true },
-  { id: "bp", name: "جهاز قياس ضغط الدم", brand: "أوميرون", unit: "ذراع رقمي", price: 1250, oldPrice: 1450, image: rxBp, rating: 4.9, reviews: 201, category: "personal", tagline: "قياسات دقيقة في المنزل", badges: ["شاشة كبيرة", "ذاكرة 60 قراءة"], dosage: "قراءتان يومياً", inStock: true },
-  { id: "diapers", name: "حفاضات الأطفال الفاخرة", brand: "بامبو", unit: "مقاس 4 · 60 حبة", price: 215, image: pDiapers, rating: 4.7, reviews: 312, category: "baby", tagline: "جلد طفلك يستحق الأفضل", badges: ["ناعم على البشرة", "امتصاص 12 ساعة"], dosage: "—", inStock: true },
-];
+/**
+ * Maps a UI CatId pill to the DB sub_category strings it includes.
+ */
+const CAT_TO_SUBCAT: Record<Exclude<CatId, "all">, string[]> = {
+  vitamins: ["فيتامينات", "زيوت", "مكملات"],
+  rx: ["صداع", "التهاب", "شراب"],
+  personal: ["معقم", "نظافة"],
+  diabetes: ["قياس", "أجهزة"],
+  firstaid: ["ضماد", "إسعافات"],
+  baby: ["جفاف", "أطفال"],
+};
 
-export const idToLabel = (id: string) =>
+const subCatToCatId = (subCat: string | undefined): CatId => {
+  if (!subCat) return "rx";
+  for (const [cat, subs] of Object.entries(CAT_TO_SUBCAT)) {
+    if (subs.includes(subCat)) return cat as CatId;
+  }
+  return "rx";
+};
+
+type RxMeta = {
+  brand?: string;
+  tagline?: string;
+  badges?: string[];
+  dosage?: string;
+  reviews?: number;
+};
+
+const asRxMeta = (m: Product["metadata"]): RxMeta => {
+  if (!m || typeof m !== "object") return {};
+  const safe = m as Record<string, unknown>;
+  const out: RxMeta = {};
+  if (typeof safe.brand === "string") out.brand = safe.brand;
+  if (typeof safe.tagline === "string") out.tagline = safe.tagline;
+  if (Array.isArray(safe.badges))
+    out.badges = safe.badges.filter((b): b is string => typeof b === "string");
+  if (typeof safe.dosage === "string") out.dosage = safe.dosage;
+  if (typeof safe.reviews === "number") out.reviews = safe.reviews;
+  return out;
+};
+
+const productToRx = (p: Product): RxProduct => {
+  const meta = asRxMeta(p.metadata);
+  return {
+    id: p.id,
+    name: p.name,
+    brand: meta.brand ?? p.brand ?? "Reef Pharmacy",
+    unit: p.unit,
+    price: p.price,
+    oldPrice: p.oldPrice,
+    image: p.image,
+    rating: p.rating ?? 4.7,
+    reviews: meta.reviews ?? 0,
+    category: subCatToCatId(p.subCategory),
+    tagline: meta.tagline ?? "",
+    badges: meta.badges ?? [],
+    dosage: meta.dosage ?? "—",
+    inStock: true,
+  };
+};
+
+/** Live Supabase-backed pharmacy catalog (replaces the old static RX). */
+export const useRxProducts = (): { rx: RxProduct[]; rawProducts: Product[]; loading: boolean } => {
+  const { data: rawProducts = [], isLoading } = useProductsBySourceQuery("pharmacy");
+  const rx = useMemo(() => rawProducts.map(productToRx), [rawProducts]);
+  return { rx, rawProducts, loading: isLoading };
+};
+
+export const idToLabel = (id: string): string =>
   ({
     "ai-symptoms": "تحليل الأعراض",
     "ai-schedule": "جدول الأدوية",

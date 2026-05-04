@@ -7,7 +7,7 @@ import { CheckCircle2, X } from "lucide-react";
 
 import { toLatin } from "@/lib/format";
 
-import { SORTS } from "../data";
+import { SORTS } from "../dictionaries";
 import type { FulfillmentFilter, SortId } from "../types";
 
 export const FiltersSheet = ({

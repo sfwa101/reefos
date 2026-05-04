@@ -2,7 +2,7 @@
  * CategoriesGrid — sticky horizontal pill row for category navigation.
  * Pure presentational; controlled by `useHomeOrchestrator`.
  */
-import { CATS } from "../data";
+import { CATS } from "../dictionaries";
 import type { CatId } from "../types";
 
 export const CategoriesGrid = ({

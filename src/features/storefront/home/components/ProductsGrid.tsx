@@ -5,7 +5,7 @@ import { Layers3 } from "lucide-react";
 
 import { toLatin } from "@/lib/format";
 
-import { CATS } from "../data";
+import { CATS } from "../dictionaries";
 import type { CatId, HGProduct } from "../types";
 import { ProductCard } from "./ProductCard";
 import { RailHeader } from "./RailHeader";

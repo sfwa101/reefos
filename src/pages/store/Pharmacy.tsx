@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { categories, idToLabel, RX } from "@/features/pharmacy/data";
+import { categories, idToLabel, useRxProducts } from "@/features/pharmacy/data";
 import type { CatId, RxProduct } from "@/features/pharmacy/types";
 import { SmartBar } from "@/features/pharmacy/components/SmartBar";
 import { CategoryRail } from "@/features/pharmacy/components/CategoryRail";
@@ -33,6 +33,7 @@ const ScannerOverlay = lazy(
 
 const Pharmacy = () => {
   const theme = storeThemes.pharmacy;
+  const { rx: RX } = useRxProducts();
   const [active, setActive] = useState<CatId>("all");
   const [query, setQuery] = useState("");
   const [openProduct, setOpenProduct] = useState<RxProduct | null>(null);
@@ -43,11 +44,11 @@ const Pharmacy = () => {
     return RX.filter((p) => active === "all" || p.category === active).filter(
       (p) => !q || p.name.includes(q) || p.brand.includes(q),
     );
-  }, [active, query]);
+  }, [active, query, RX]);
 
   const recommendations = useMemo(
-    () => RX.filter((p) => ["vit-d3", "omega3", "serum", "firstaid"].includes(p.id)),
-    [],
+    () => RX.filter((p) => ["pharmacy-004", "pharmacy-005", "pharmacy-001", "pharmacy-007"].includes(p.id)),
+    [RX],
   );
 
   return (
