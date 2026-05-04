@@ -2,18 +2,24 @@
  * useHomeOrchestrator — single source of truth for the Home Goods
  * storefront page state.
  *
+ * Phase 11.2 — products are now fetched from Supabase via
+ * `useProductsBySourceQuery("home")` and projected to the legacy
+ * `HGProduct` view-model via `productToHGView`. There is no longer
+ * any local product data.
+ *
  * Owns:
  *   - search query, active category, fulfillment filter, sort, price cap
  *   - bottom-sheet (filters) + product detail overlay open state
  *   - derived: filtered list, best sellers, opened product, filtersActive flag
- *
- * Pure orchestration: NO data fetching today (catalog is static), no
- * side-effects beyond local state. The shape mirrors the original inline
- * logic exactly so swapping the legacy monolith is behaviourally a no-op.
+ *   - loading flag for skeleton states
  */
 import { useMemo, useState } from "react";
 
-import { CATALOG, BESTSELLER_IDS } from "../data";
+import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
+import type { Product } from "@/lib/products";
+
+import { BESTSELLER_IDS } from "../dictionaries";
+import { productToHGView } from "../mapper";
 import type {
   CatId,
   FulfillmentFilter,
@@ -40,10 +46,16 @@ export type HomeOrchestrator = {
   priceMaxAvail: number;
 
   // ─── derived ───
+  /** Full live catalog (DB-driven, view-model). */
+  catalog: HGProduct[];
+  /** Live `Product` rows — used by Add-To-Cart paths. */
+  rawProducts: Product[];
   filtered: HGProduct[];
   bestSellers: HGProduct[];
   opened: HGProduct | null;
+  openedRaw: Product | null;
   filtersActive: boolean;
+  loading: boolean;
 
   // ─── compound actions ───
   resetAll: () => void;
@@ -51,6 +63,13 @@ export type HomeOrchestrator = {
 };
 
 export const useHomeOrchestrator = (): HomeOrchestrator => {
+  const { data: rawProducts = [], isLoading } = useProductsBySourceQuery("home");
+
+  const catalog = useMemo(
+    () => rawProducts.map(productToHGView),
+    [rawProducts],
+  );
+
   const [cat, setCat] = useState<CatId>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
@@ -59,17 +78,20 @@ export const useHomeOrchestrator = (): HomeOrchestrator => {
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const priceMaxAvail = useMemo(
-    () => Math.max(...CATALOG.map((p) => p.price)),
-    [],
+    () => (catalog.length ? Math.max(...catalog.map((p) => p.price)) : 50000),
+    [catalog],
   );
-  const [priceMax, setPriceMax] = useState(priceMaxAvail);
+  const [priceMax, setPriceMaxRaw] = useState<number | null>(null);
+  // Auto-track the dynamic max while the user hasn't customised it.
+  const effectivePriceMax = priceMax ?? priceMaxAvail;
+  const setPriceMax = (n: number) => setPriceMaxRaw(n);
 
   const filtered = useMemo(() => {
     const term = q.trim();
-    let list = CATALOG.filter((p) => {
+    let list = catalog.filter((p) => {
       if (cat !== "all" && p.category !== cat) return false;
       if (fulFilter !== "all" && p.fulfillment !== fulFilter) return false;
-      if (p.price > priceMax) return false;
+      if (p.price > effectivePriceMax) return false;
       if (!term) return true;
       return (
         p.name.includes(term) ||
@@ -98,30 +120,33 @@ export const useHomeOrchestrator = (): HomeOrchestrator => {
         break;
     }
     return list;
-  }, [cat, q, sort, fulFilter, priceMax]);
+  }, [catalog, cat, q, sort, fulFilter, effectivePriceMax]);
 
   const bestSellers = useMemo(
-    () => CATALOG.filter((p) => BESTSELLER_IDS.includes(p.id)),
-    [],
+    () => catalog.filter((p) => BESTSELLER_IDS.includes(p.id)),
+    [catalog],
   );
 
-  const opened = openId
-    ? CATALOG.find((p) => p.id === openId) ?? null
+  const opened = openId ? catalog.find((p) => p.id === openId) ?? null : null;
+  const openedRaw = openId
+    ? rawProducts.find((p) => p.id === openId) ?? null
     : null;
 
   const filtersActive =
-    fulFilter !== "all" || priceMax < priceMaxAvail || sort !== "relevance";
+    fulFilter !== "all" ||
+    effectivePriceMax < priceMaxAvail ||
+    sort !== "relevance";
 
   const resetFilters = () => {
     setFulFilter("all");
-    setPriceMax(priceMaxAvail);
+    setPriceMaxRaw(null);
     setSort("relevance");
   };
 
   const resetAll = () => {
     setQ("");
     setFulFilter("all");
-    setPriceMax(priceMaxAvail);
+    setPriceMaxRaw(null);
     setSort("relevance");
     setCat("all");
   };
@@ -139,13 +164,17 @@ export const useHomeOrchestrator = (): HomeOrchestrator => {
     setFulFilter,
     filtersOpen,
     setFiltersOpen,
-    priceMax,
+    priceMax: effectivePriceMax,
     setPriceMax,
     priceMaxAvail,
+    catalog,
+    rawProducts,
     filtered,
     bestSellers,
     opened,
+    openedRaw,
     filtersActive,
+    loading: isLoading,
     resetAll,
     resetFilters,
   };
