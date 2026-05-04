@@ -2553,7 +2553,7 @@ export type Database = {
           is_preorder: boolean
           order_id: string
           price: number
-          product_id: string
+          product_id: string | null
           product_image: string | null
           product_name: string
           quantity: number
@@ -2568,7 +2568,7 @@ export type Database = {
           is_preorder?: boolean
           order_id: string
           price?: number
-          product_id: string
+          product_id?: string | null
           product_image?: string | null
           product_name: string
           quantity?: number
@@ -2583,7 +2583,7 @@ export type Database = {
           is_preorder?: boolean
           order_id?: string
           price?: number
-          product_id?: string
+          product_id?: string | null
           product_image?: string | null
           product_name?: string
           quantity?: number

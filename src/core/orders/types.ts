@@ -126,7 +126,7 @@ const mapItem = (r: OrderItemRow): OrderItem => ({
   orderId: r.order_id,
   fulfillmentId: (r as OrderItemRow & { fulfillment_id?: string | null })
     .fulfillment_id ?? null,
-  productId: r.product_id,
+  productId: r.product_id ?? "",
   productName: r.product_name,
   productImage: r.product_image ?? null,
   price: num(r.price),

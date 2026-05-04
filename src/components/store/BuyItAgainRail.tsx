@@ -29,7 +29,9 @@ const BuyItAgainRail = ({ pool }: Props) => {
           .order("created_at", { ascending: false })
           .limit(30);
         if (error || !data || cancelled) return;
-        const ids = Array.from(new Set(data.map((r) => r.product_id)));
+        const ids = Array.from(
+          new Set(data.map((r) => r.product_id).filter((id): id is string => Boolean(id))),
+        );
         const poolIds = new Set(pool.map((p) => p.id));
         const fromOrders = ids
           .filter((id) => poolIds.has(id))
