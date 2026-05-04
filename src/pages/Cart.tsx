@@ -76,7 +76,7 @@ const Cart = () => {
 
   if (o.lines.length === 0) {
     return (
-      <div>
+      <div className="px-4">
         <BackHeader title="سلتي" subtitle="جاهز للطلب" />
         <div className="mt-12 flex flex-col items-center gap-4 text-center">
           <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-primary-soft">
