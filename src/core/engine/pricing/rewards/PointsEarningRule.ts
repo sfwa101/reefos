@@ -25,24 +25,15 @@
  */
 
 import type {
-  CustomerTierKey,
   IRewardRule,
   PriceBreakdown,
   PricingContext,
   RewardOutcome,
 } from "../types";
+import { liveRules } from "../config/liveRulesCache";
 
 /** Base earning rate: 1 point per 1 EGP of final grand total. */
 const POINTS_PER_EGP = 1;
-
-const TIER_MULTIPLIER: Readonly<Record<CustomerTierKey, number>> = {
-  guest: 0,
-  bronze: 1,
-  silver: 1.25,
-  gold: 1.5,
-  platinum: 2,
-  vip: 3,
-};
 
 /** Narrow read of a single metadata key without using `any`. */
 function readBoolFlag(
@@ -91,7 +82,7 @@ export class PointsEarningRule implements IRewardRule {
       return bonus > 0 ? { points: 0, bonusPoints: bonus } : { points: 0 };
     }
 
-    const multiplier = TIER_MULTIPLIER[tier];
+    const multiplier = liveRules.getTierMultiplier(tier);
     const points = breakdown.grandTotal * POINTS_PER_EGP * multiplier;
 
     return bonus > 0

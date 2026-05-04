@@ -21,22 +21,13 @@
  */
 
 import type {
-  CustomerTierKey,
   IDiscountRule,
   PriceBreakdown,
   PricingContext,
   PricingModifier,
 } from "../types";
 import { isExcludedFromDiscounts } from "../utils/exclusions";
-
-const TIER_PCT: Readonly<Record<CustomerTierKey, number>> = {
-  guest: 0,
-  bronze: 0,
-  silver: 0.02,
-  gold: 0.04,
-  platinum: 0.06,
-  vip: 0.1,
-};
+import { liveRules } from "../config/liveRulesCache";
 
 export class LoyaltyTierDiscount implements IDiscountRule {
   readonly key = "loyalty-tier";
@@ -45,7 +36,7 @@ export class LoyaltyTierDiscount implements IDiscountRule {
     if (isExcludedFromDiscounts(context)) return false;
     const tier = context.customerTier;
     if (!tier) return false;
-    return TIER_PCT[tier] > 0;
+    return liveRules.getTierDiscount(tier) > 0;
   }
 
   apply(
@@ -54,7 +45,7 @@ export class LoyaltyTierDiscount implements IDiscountRule {
   ): ReadonlyArray<PricingModifier> {
     const tier = context.customerTier;
     if (!tier) return [];
-    const pct = TIER_PCT[tier];
+    const pct = liveRules.getTierDiscount(tier);
     if (pct <= 0) return [];
 
     return [

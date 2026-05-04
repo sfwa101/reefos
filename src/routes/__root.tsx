@@ -21,6 +21,8 @@ import { SharedCartProvider } from "@/context/SharedCartContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { registerPWA } from "@/lib/pwa";
+import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
+import { SubdomainGuard } from "@/components/SubdomainGuard";
 
 function NotFoundComponent() {
   return (
@@ -131,6 +133,8 @@ function RootComponent() {
                   <SharedCartProvider>
                     <CompareProvider>
                       <FavoritesProvider>
+                        <LiveRulesBootstrap />
+                        <SubdomainGuard />
                         <Toaster />
                         <Outlet />
                       </FavoritesProvider>
