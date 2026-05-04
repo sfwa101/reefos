@@ -290,7 +290,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
           className="fixed inset-x-0 bottom-0 z-20 border-t border-border/40 bg-background/95 px-3 py-3 backdrop-blur"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
         >
-          <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+          <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
             <button
               type="button"
               onClick={onSubmit}
