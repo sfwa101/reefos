@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
-import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, MessageCircle, X } from "lucide-react";
+import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, MessageCircle, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
