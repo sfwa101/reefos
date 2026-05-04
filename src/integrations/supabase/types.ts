@@ -304,6 +304,48 @@ export type Database = {
         }
         Relationships: []
       }
+      bogo_rules: {
+        Row: {
+          active: boolean
+          buy_qty: number
+          created_at: string
+          ends_at: string | null
+          get_discount_pct: number
+          get_qty: number
+          id: string
+          name: string
+          product_id: string | null
+          starts_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          buy_qty: number
+          created_at?: string
+          ends_at?: string | null
+          get_discount_pct?: number
+          get_qty: number
+          id?: string
+          name: string
+          product_id?: string | null
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          buy_qty?: number
+          created_at?: string
+          ends_at?: string | null
+          get_discount_pct?: number
+          get_qty?: number
+          id?: string
+          name?: string
+          product_id?: string | null
+          starts_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       branches: {
         Row: {
           code: string
@@ -356,6 +398,38 @@ export type Database = {
             columns: ["geo_zone_id"]
             isOneToOne: false
             referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      bundle_items: {
+        Row: {
+          bundle_id: string
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+        }
+        Insert: {
+          bundle_id: string
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+        }
+        Update: {
+          bundle_id?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "product_bundles"
             referencedColumns: ["id"]
           },
         ]
@@ -2641,6 +2715,33 @@ export type Database = {
         }
         Relationships: []
       }
+      personalized_offers: {
+        Row: {
+          created_at: string
+          discount_pct: number
+          expires_at: string | null
+          id: string
+          product_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          discount_pct: number
+          expires_at?: string | null
+          id?: string
+          product_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          discount_pct?: number
+          expires_at?: string | null
+          id?: string
+          product_id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       pos_shifts: {
         Row: {
           branch_id: string | null
@@ -2806,6 +2907,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      product_bundles: {
+        Row: {
+          active: boolean
+          created_at: string
+          ends_at: string | null
+          id: string
+          price_label: string | null
+          starts_at: string | null
+          subtitle: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          price_label?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          price_label?: string | null
+          starts_at?: string | null
+          subtitle?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       product_partners: {
         Row: {
