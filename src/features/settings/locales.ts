@@ -52,8 +52,7 @@ const ar: Dict = {
   "themes.peach": "خوخي",
   "themes.plum": "بنفسجي ملكي",
   "themes.navy": "أزرق ليلي",
-  "themes.apple": "آبل فاتح",
-  "themes.graphite": "آبل داكن",
+  "themes.apple-glass": "زجاج آبل",
 };
 
 const en: Dict = {
@@ -93,8 +92,7 @@ const en: Dict = {
   "themes.peach": "Peach",
   "themes.plum": "Royal Plum",
   "themes.navy": "Deep Navy",
-  "themes.apple": "Apple Light",
-  "themes.graphite": "Apple Dark",
+  "themes.apple-glass": "Apple Glass",
 };
 
 export const DICTIONARIES: Record<Locale, Dict> = { ar, en };

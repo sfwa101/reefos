@@ -142,33 +142,34 @@
 }
 
 .dark {
-  --surface: 150 10% 12%;
-  --surface-muted: 150 8% 16%;
-  --foreground-secondary: 130 12% 78%;
-  --foreground-tertiary: 140 10% 60%;
+  /* Surface scale — graphite deep grays (Apple/Facebook comfort tones), never pure black */
+  --surface: 222 8% 14%;
+  --surface-muted: 222 8% 18%;
+  --foreground-secondary: 220 10% 78%;
+  --foreground-tertiary: 220 8% 60%;
 }
 
-/* Dark theme */
+/* Dark theme — global defaults (graphite base) */
 .dark {
-  --background: 150 12% 8%;
-  --foreground: 130 22% 94%; /* tinted white — never pure */
+  --background: 222 10% 11%;          /* ≈ oklch(0.18 0.02 260) */
+  --foreground: 220 12% 92%;          /* ≈ oklch(0.92 0.01 260) */
 
-  --card: 150 10% 12%;
-  --card-foreground: 130 15% 92%;
+  --card: 222 9% 15%;                 /* ≈ oklch(0.22 0.02 260) */
+  --card-foreground: 220 12% 92%;
 
-  --popover: 150 10% 12%;
-  --popover-foreground: 130 15% 92%;
+  --popover: 222 9% 15%;
+  --popover-foreground: 220 12% 92%;
 
   --primary: 138 50% 55%;
   --primary-foreground: 150 20% 8%;
   --primary-glow: 138 60% 65%;
   --primary-soft: 142 30% 18%;
 
-  --secondary: 150 8% 16%;
-  --secondary-foreground: 130 15% 92%;
+  --secondary: 222 8% 18%;
+  --secondary-foreground: 220 12% 92%;
 
-  --muted: 150 8% 16%;
-  --muted-foreground: 140 10% 62%;
+  --muted: 222 8% 18%;
+  --muted-foreground: 220 8% 65%;
 
   --accent: 36 70% 60%;
   --accent-foreground: 30 30% 8%;
@@ -176,28 +177,28 @@
   --destructive: 4 70% 52%;
   --destructive-foreground: 0 0% 100%;
 
-  --border: 150 8% 20%;
-  --input: 150 8% 20%;
+  --border: 220 8% 22%;
+  --input: 220 8% 22%;
   --ring: 138 50% 55%;
 
-  --glass-bg: 150 10% 14% / 0.8;
-  --glass-border: 150 8% 22% / 0.6;
-  --glass-highlight: 150 10% 20% / 0.65;
+  --glass-bg: 222 9% 16% / 0.78;
+  --glass-border: 0 0% 100% / 0.08;
+  --glass-highlight: 222 10% 22% / 0.6;
 
-  --gradient-aurora: radial-gradient(circle at 20% 0%, hsl(138 40% 22% / 0.55), transparent 50%),
-                     radial-gradient(circle at 90% 30%, hsl(45 50% 22% / 0.45), transparent 45%),
-                     radial-gradient(circle at 50% 100%, hsl(160 40% 18% / 0.5), transparent 55%);
+  --gradient-aurora: radial-gradient(circle at 20% 0%, hsl(138 40% 22% / 0.45), transparent 50%),
+                     radial-gradient(circle at 90% 30%, hsl(45 50% 22% / 0.35), transparent 45%),
+                     radial-gradient(circle at 50% 100%, hsl(160 40% 18% / 0.4), transparent 55%);
 
   --shadow-soft: 0 1px 2px hsl(0 0% 0% / 0.4), 0 8px 24px -8px hsl(0 0% 0% / 0.5);
   --shadow-tile: 0 2px 4px hsl(0 0% 0% / 0.4), 0 24px 48px -16px hsl(0 0% 0% / 0.6);
   --shadow-float: 0 8px 32px hsl(0 0% 0% / 0.5), 0 2px 6px hsl(0 0% 0% / 0.4);
   --shadow-pill: 0 6px 20px -4px hsl(138 60% 30% / 0.5);
-  --card-elevated: 150 30% 16%;
-  --card-elevated-foreground: 130 25% 96%;
+  --card-elevated: 222 10% 18%;
+  --card-elevated-foreground: 220 14% 96%;
   --gradient-wallet: linear-gradient(135deg,
-                       hsl(150 30% 10%) 0%,
-                       hsl(142 35% 16%) 55%,
-                       hsl(138 40% 22%) 120%);
+                       hsl(222 12% 12%) 0%,
+                       hsl(150 25% 14%) 55%,
+                       hsl(138 35% 20%) 120%);
 }
 
 /* Accent color theme variants — apply as data-theme on <html> */
@@ -685,24 +686,26 @@
 }
 
 /* APPLE GLASS — Light. Cool neutral whites with translucent surfaces. */
-[data-theme="apple"] {
+/* APPLE GLASS — single identity, auto light/dark via .dark variant.
+   Translucent surfaces + thin highlight borders to mimic Apple's frosted glass. */
+[data-theme="apple-glass"] {
   --background: 220 20% 98%;
   --foreground: 220 25% 12%;
-  --card: 0 0% 100%;
+  --card: 0 0% 100% / 0.7;
   --card-foreground: 220 25% 12%;
-  --popover: 0 0% 100%;
+  --popover: 0 0% 100% / 0.78;
   --popover-foreground: 220 25% 12%;
   --primary: 211 100% 50%;
   --primary-foreground: 0 0% 100%;
   --primary-glow: 211 100% 65%;
   --primary-soft: 211 100% 95%;
-  --secondary: 220 15% 94%;
+  --secondary: 220 15% 94% / 0.7;
   --secondary-foreground: 220 25% 14%;
   --muted: 220 15% 94%;
   --muted-foreground: 220 10% 42%;
   --accent: 211 100% 50%;
   --accent-foreground: 0 0% 100%;
-  --border: 220 15% 88%;
+  --border: 220 15% 88% / 0.7;
   --input: 220 15% 88%;
   --ring: 211 100% 50%;
   --glass-bg: 0 0% 100% / 0.7;
@@ -712,26 +715,24 @@
                      radial-gradient(circle at 50% 100%, hsl(200 60% 92% / 0.5), transparent 55%);
 }
 
-/* APPLE GLASS — Dark (Graphite). Deep saturated grays, never pure black. */
-[data-theme="graphite"],
-.dark[data-theme="graphite"] {
-  --background: 222 14% 8%;
+.dark[data-theme="apple-glass"] {
+  --background: 222 14% 9%;
   --foreground: 220 14% 95%;
-  --card: 222 12% 12%;
+  --card: 222 12% 14% / 0.7;
   --card-foreground: 220 14% 95%;
-  --popover: 222 12% 12%;
+  --popover: 222 12% 14% / 0.78;
   --popover-foreground: 220 14% 95%;
   --primary: 211 100% 60%;
   --primary-foreground: 220 30% 10%;
   --primary-glow: 211 100% 70%;
   --primary-soft: 211 60% 18%;
-  --secondary: 222 10% 16%;
+  --secondary: 222 10% 18% / 0.7;
   --secondary-foreground: 220 14% 95%;
   --muted: 222 10% 16%;
   --muted-foreground: 220 10% 65%;
   --accent: 211 100% 60%;
   --accent-foreground: 220 30% 10%;
-  --border: 222 10% 20%;
+  --border: 0 0% 100% / 0.08;
   --input: 222 10% 20%;
   --ring: 211 100% 60%;
   --glass-bg: 222 14% 12% / 0.7;
@@ -739,26 +740,6 @@
   --gradient-aurora: radial-gradient(circle at 20% 0%, hsl(211 60% 18% / 0.55), transparent 50%),
                      radial-gradient(circle at 90% 30%, hsl(222 30% 14% / 0.55), transparent 45%),
                      radial-gradient(circle at 50% 100%, hsl(220 40% 16% / 0.5), transparent 55%);
-}
-.dark[data-theme="apple"] {
-  --background: 222 14% 8%;
-  --foreground: 220 14% 95%;
-  --card: 222 12% 12%;
-  --card-foreground: 220 14% 95%;
-  --popover: 222 12% 12%;
-  --popover-foreground: 220 14% 95%;
-  --primary: 211 100% 60%;
-  --primary-foreground: 220 30% 10%;
-  --primary-soft: 211 60% 18%;
-  --secondary: 222 10% 16%;
-  --secondary-foreground: 220 14% 95%;
-  --muted: 222 10% 16%;
-  --muted-foreground: 220 10% 65%;
-  --border: 222 10% 20%;
-  --input: 222 10% 20%;
-  --ring: 211 100% 60%;
-  --glass-bg: 222 14% 12% / 0.7;
-  --glass-border: 0 0% 100% / 0.08;
 }
 
 @layer base {

@@ -11,8 +11,7 @@ export type ColorTheme =
   | "peach"
   | "plum"
   | "navy"
-  | "apple"
-  | "graphite";
+  | "apple-glass";
 export type Mode = "light" | "dark" | "system";
 
 type ThemeCtx = {
