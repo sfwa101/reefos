@@ -119,7 +119,7 @@ const AccountTierCard = ({
             <Stat value={toLatin(ordersCount)} label="طلب" />
           </div>
         </div>
-      </Link>
+      </div>
     </motion.div>
   );
 };
