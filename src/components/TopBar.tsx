@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ChevronDown, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useCartTotal } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { useLocation as useDeliveryLocation } from "@/context/LocationContext";
