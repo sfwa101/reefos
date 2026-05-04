@@ -347,23 +347,6 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                     aria-label="زيادة"
                   >+</button>
                 </div>
-              {/* Qty + total */}
-              <section className="flex items-center justify-between gap-3 rounded-2xl bg-foreground/5 p-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => setQty(Math.max(1, qty - 1))}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-background text-foreground shadow-pill"
-                    aria-label="إنقاص"
-                  >−</button>
-                  <span className="min-w-[1.5ch] text-center font-display text-base font-extrabold tabular-nums">
-                    {toLatin(qty)}
-                  </span>
-                  <button
-                    onClick={() => setQty(qty + 1)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-600 text-white shadow-pill"
-                    aria-label="زيادة"
-                  >+</button>
-                </div>
                 <div className="text-left">
                   <p className="text-[10px] font-bold text-muted-foreground">الإجمالي</p>
                   {useEngine && (
