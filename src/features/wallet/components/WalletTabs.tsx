@@ -27,7 +27,8 @@ export const WalletTabs = ({
   return (
     <div
       role="tablist"
-      className="-mx-1 flex snap-x gap-1 overflow-x-auto rounded-2xl bg-muted/40 p-1 ring-1 ring-border/50 backdrop-blur-xl [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+      className="grid w-full gap-1 rounded-2xl bg-foreground/5 p-1 ring-1 ring-border/40 backdrop-blur-xl"
+      style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
     >
       {tabs.map((t) => {
         const Icon = t.icon;
@@ -38,14 +39,14 @@ export const WalletTabs = ({
             role="tab"
             aria-selected={isActive}
             onClick={() => onChange(t.id)}
-            className={`relative flex flex-1 min-w-[5.5rem] snap-start items-center justify-center gap-1.5 rounded-xl px-3 py-2.5 text-[12px] font-extrabold transition-colors ${
-              isActive ? "text-primary" : "text-muted-foreground hover:text-foreground"
+            className={`relative flex items-center justify-center gap-1.5 rounded-xl px-2 py-2.5 text-[12px] font-extrabold transition-colors ${
+              isActive ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             }`}
           >
             {isActive && (
               <motion.span
                 layoutId="wallet-tab-pill"
-                className="absolute inset-0 rounded-xl bg-card shadow-sm ring-1 ring-border/60"
+                className="absolute inset-0 rounded-xl bg-background shadow-sm ring-1 ring-border/60"
                 transition={{ type: "spring", stiffness: 380, damping: 32 }}
               />
             )}
