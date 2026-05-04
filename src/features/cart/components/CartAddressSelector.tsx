@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { Check, MapPin, Plus } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Addr } from "../types/cart.types";
+import AddressSheet from "@/features/logistics/components/AddressSheet";
 
 type Props = {
   user: User | null;
@@ -13,8 +14,8 @@ type Props = {
 };
 
 /**
- * Address selector: signed-in users see horizontal address cards;
- * guests see a free-form notes textarea.
+ * Address selector — opens a Map-first BottomSheet for new addresses
+ * instead of navigating to /account/addresses (preserves cart state).
  */
 export const CartAddressSelector = ({
   user,
@@ -24,12 +25,15 @@ export const CartAddressSelector = ({
   guestNotes,
   setGuestNotes,
 }: Props) => {
+  const [sheetOpen, setSheetOpen] = useState(false);
+
   return (
     <section className="rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
       <div className="mb-2 flex items-center gap-2">
         <MapPin className="h-4 w-4 text-primary" />
         <p className="text-sm font-bold">عنوان التوصيل</p>
       </div>
+
       {user ? (
         addresses.length > 0 ? (
           <div className="-mx-4 overflow-x-auto px-4">
@@ -63,21 +67,23 @@ export const CartAddressSelector = ({
                   </button>
                 );
               })}
-              <Link
-                to="/account/addresses"
-                className="flex w-[120px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-border bg-background/50 p-3 text-[11px] font-bold text-primary"
+              <button
+                type="button"
+                onClick={() => setSheetOpen(true)}
+                className="flex w-[120px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 p-3 text-[11px] font-bold text-primary"
               >
                 <Plus className="h-5 w-5" /> عنوان جديد
-              </Link>
+              </button>
             </div>
           </div>
         ) : (
-          <Link
-            to="/account/addresses"
-            className="flex items-center justify-center rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-primary"
+          <button
+            type="button"
+            onClick={() => setSheetOpen(true)}
+            className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary/10 py-3 text-xs font-bold text-primary"
           >
-            + أضف عنوانًا للتوصيل
-          </Link>
+            <Plus className="h-4 w-4" /> أضف عنوانًا للتوصيل
+          </button>
         )
       ) : (
         <textarea
@@ -88,6 +94,12 @@ export const CartAddressSelector = ({
           className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none"
         />
       )}
+
+      <AddressSheet
+        open={sheetOpen}
+        onOpenChange={setSheetOpen}
+        onSaved={(id) => setAddrId(id)}
+      />
     </section>
   );
 };
