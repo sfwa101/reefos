@@ -1,6 +1,7 @@
 // Shared types & constants for the ProductEditor module.
 
-export type ProductMetadata = Record<string, string | number | boolean | null>;
+export type ProductMetadataValue = string | number | boolean | null | readonly string[];
+export type ProductMetadata = Record<string, ProductMetadataValue>;
 export type ProductVariantRow = { id: string; label: string; priceDelta: number };
 export type ProductAddonRow = { id: string; label: string; price: number };
 
