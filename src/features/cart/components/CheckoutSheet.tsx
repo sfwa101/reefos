@@ -24,6 +24,7 @@ import { CartSummary } from "./CartSummary";
 import { CartLogisticsBanners } from "./CartLogisticsBanners";
 import { NumberFlow } from "./NumberFlow";
 import { SmartFakkaRail } from "./SmartFakkaRail";
+import { useHardwareBackModal } from "@/hooks/useHardwareBackModal";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
