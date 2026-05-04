@@ -70,7 +70,7 @@ const Offers = () => {
   };
 
   return (
-    <div className="space-y-6 px-4 lg:px-8" dir="rtl">
+    <div className="space-y-6 lg:px-8" dir="rtl">
       <section className="animate-float-up">
         <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight">العروض</h1>
         <p className="mt-1 text-xs text-muted-foreground">خصومات اليوم من جميع الأقسام</p>

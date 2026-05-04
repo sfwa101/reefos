@@ -172,7 +172,7 @@ const HomePage = () => {
   }, [user?.id]);
 
   return (
-    <div className="space-y-6 bg-background px-4 pb-32 text-foreground" dir="rtl">
+    <div className="space-y-6 bg-background pb-32 text-foreground" dir="rtl">
       {/* Native smart header — replaces parasitic LayoutFactory hero */}
       <SmartGreeting />
       <StickySearchBar />
