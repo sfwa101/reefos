@@ -139,6 +139,8 @@ function foldModifiers(
     costPrice: 0,
     netProfit: 0,
     isLossPreventionTriggered: false,
+    requiresAdminApproval: false,
+    discountLocked: false,
     appliedModifiers: modifiers,
     strategyKey,
   };
