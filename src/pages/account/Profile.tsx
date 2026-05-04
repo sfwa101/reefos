@@ -154,7 +154,7 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-5 px-4">
         <BackHeader title="ملفي الذكي" subtitle="سجّل الدخول لإدارة بياناتك" accent="حسابي" />
         <section className="rounded-[2rem] border border-border/60 bg-card p-6 text-center shadow-tile">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-primary">
