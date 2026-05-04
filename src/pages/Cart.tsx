@@ -168,6 +168,8 @@ const Cart = () => {
 
       <CartAddressSelector user={o.user} addresses={o.addresses} addrId={o.addrId} setAddrId={o.setAddrId} guestNotes={o.guestNotes} setGuestNotes={o.setGuestNotes} />
 
+      <CartLogisticsBanners quote={logisticsQuote} />
+
       {o.isSharedMode && o.sharedCart && (
         <SharedCartManager
           cart={o.sharedCart}
@@ -236,7 +238,7 @@ const Cart = () => {
 
       <CartLoyaltyBar />
 
-      <CartSummary subtotal={o.subtotal} discount={o.discount} appliedPromo={o.appliedPromo} delivery={o.delivery} billSavings={o.billSavings} tip={o.tip} isSplit={o.isSplit} walletApplied={o.walletApplied} walletShortfall={o.walletShortfall} secondaryLabel={o.secondaryLabel} grand={o.grand} />
+      <CartSummary subtotal={o.subtotal} discount={o.discount} appliedPromo={o.appliedPromo} delivery={effectiveDelivery} billSavings={o.billSavings} tip={o.tip} isSplit={o.isSplit} walletApplied={o.walletApplied} walletShortfall={o.walletShortfall} secondaryLabel={o.secondaryLabel} grand={effectiveGrand} />
 
       <button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">تفريغ السلة</button>
 
@@ -260,11 +262,17 @@ const Cart = () => {
 
       <div className="relative">
         <CartCheckoutActions
-          grand={o.grand}
+          grand={effectiveGrand}
           minOrderTotal={o.minOrderTotal}
           submitting={o.submitting}
           onCheckout={
-            hasPricingErrors
+            logisticsBlocked
+              ? () =>
+                  toast.error(
+                    logisticsQuote?.blockers[0]?.message ??
+                      "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
+                  )
+              : hasPricingErrors
               ? () => toast.error("يوجد منتجات تحتاج إلى استكمال بياناتها قبل إتمام الطلب")
               : isLocked
               ? () => toast.error("السلة مقفلة بانتظار موافقات المشاركين")
