@@ -105,10 +105,7 @@ const HomePage = () => {
   );
 
   return (
-    <div
-      className="space-y-6 pb-12"
-      style={{ background: "var(--gradient-aurora)" }}
-    >
+    <div className="space-y-6 bg-background px-4 pb-12 text-foreground">
       {/* SDUI HERO — admin-controlled order via /admin/design */}
       <LayoutFactory pageKey="main_hub" theme={storeThemes.homeTools} />
 
