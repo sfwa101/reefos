@@ -201,7 +201,7 @@ const Cart = () => {
           <button
             type="button"
             aria-label="العودة للرئيسية"
-            onClick={() => navigate({ to: "/", search: { clear_focus: true } })}
+            onClick={() => navigate({ to: "/" })}
             className="flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-[18px] bg-card text-foreground ring-1 ring-border/50 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)] transition active:scale-95"
           >
             <Home className="h-5 w-5" strokeWidth={2.4} />
