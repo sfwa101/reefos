@@ -196,7 +196,7 @@ const SearchPage = () => {
     activeCat !== "all" || sort !== "relevance" || (priceCeiling && maxPrice < priceCeiling);
 
   return (
-    <div className="-mx-4 pb-24" dir="rtl">
+    <div className="pb-24" dir="rtl">
       {/* Sticky glass header — sits flush under the fixed TopBar (h-14). */}
       <div className="sticky top-14 z-40 border-b border-border/50 bg-background/90 px-4 py-3 backdrop-blur-xl">
         <div className="flex items-center gap-2">
