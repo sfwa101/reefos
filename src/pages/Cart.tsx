@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Gift, Lock, ShoppingBag, Sparkles, Truck, Zap } from "lucide-react";
+import { CalendarDays, Home, Lock, ShoppingBag, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
@@ -17,6 +17,7 @@ import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallb
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
 import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { CheckoutSheet } from "@/features/cart/components/CheckoutSheet";
+import { PremiumProgressBar } from "@/features/cart/components/PremiumProgressBar";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
@@ -26,6 +27,7 @@ const Cart = () => {
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = useCartHasErrors();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const navigate = useNavigate();
 
   const updateSplit = async (
     participantId: string,
@@ -66,18 +68,8 @@ const Cart = () => {
     <div className="space-y-4 px-4 pb-28">
       <BackHeader title="سلتي" subtitle={`${toLatin(o.count)} منتج`} />
 
-      {/* Smart Progress Bar */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-primary/10 via-accent/10 to-primary/5 p-3 ring-1 ring-primary/15">
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground">
-            {o.progress.done ? <Gift className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
-          </div>
-          <p className="flex-1 text-[11px] font-extrabold text-foreground">{o.progress.label}</p>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${o.progress.pct}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="h-full rounded-full bg-gradient-to-r from-primary to-accent" />
-        </div>
-      </motion.div>
+      {/* Premium Progress Bar — Phase 12.8 */}
+      <PremiumProgressBar progress={o.progress} />
 
       <CartUpgradeBanner />
       <CartPricingErrorsBanner />
