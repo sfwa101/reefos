@@ -267,18 +267,41 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     let cancelled = false;
 
+    const setTier = (next: CustomerTier) => {
+      if (next === tierRef.current) return;
+      tierRef.current = next;
+      emit();
+    };
+
+    const fetchProfileTier = async (uid: string): Promise<void> => {
+      try {
+        const { data, error } = await supabase
+          .from("profiles")
+          .select("loyalty_tier")
+          .eq("id", uid)
+          .maybeSingle();
+        if (error || cancelled) return;
+        const raw = (data as { loyalty_tier?: unknown } | null)?.loyalty_tier;
+        const tier: CustomerTier = isCustomerTier(raw) ? raw : "bronze";
+        setTier(tier);
+      } catch {
+        /* network hiccup — keep current tier */
+      }
+    };
+
     const handleUser = async (uid: string | null) => {
       if (cancelled) return;
       const prevUid = userIdRef.current;
       userIdRef.current = uid;
-      const nextTier = tierFromUserId(uid);
-      if (nextTier !== tierRef.current) {
-        tierRef.current = nextTier;
-        // Force selectors (totals, error list) to re-evaluate with the new tier.
-        emit();
+
+      if (!uid) {
+        setTier("guest");
+        return; // guest stays on localStorage
       }
 
-      if (!uid) return; // guest stays on localStorage
+      // Optimistic: bronze immediately, then upgrade from the live profile.
+      setTier("bronze");
+      void fetchProfileTier(uid);
 
       try {
         const remote = await fetchRemoteCart(uid);
