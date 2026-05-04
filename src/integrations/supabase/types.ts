@@ -16,45 +16,83 @@ export type Database = {
     Tables: {
       addresses: {
         Row: {
+          apartment_no: string | null
           building: string | null
+          building_type: string | null
           city: string
           created_at: string
+          delivery_instructions: string | null
           district: string | null
+          floor: string | null
           id: string
+          is_active: boolean
           is_default: boolean
           label: string
+          lat: number | null
+          lng: number | null
           notes: string | null
+          recipient_name: string | null
+          recipient_phone: string | null
           street: string | null
           updated_at: string
           user_id: string
+          zone_id: string | null
         }
         Insert: {
+          apartment_no?: string | null
           building?: string | null
+          building_type?: string | null
           city: string
           created_at?: string
+          delivery_instructions?: string | null
           district?: string | null
+          floor?: string | null
           id?: string
+          is_active?: boolean
           is_default?: boolean
           label: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
           street?: string | null
           updated_at?: string
           user_id: string
+          zone_id?: string | null
         }
         Update: {
+          apartment_no?: string | null
           building?: string | null
+          building_type?: string | null
           city?: string
           created_at?: string
+          delivery_instructions?: string | null
           district?: string | null
+          floor?: string | null
           id?: string
+          is_active?: boolean
           is_default?: boolean
           label?: string
+          lat?: number | null
+          lng?: number | null
           notes?: string | null
+          recipient_name?: string | null
+          recipient_phone?: string | null
           street?: string | null
           updated_at?: string
           user_id?: string
+          zone_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "addresses_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "geo_zones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       admin_override_logs: {
         Row: {
@@ -992,6 +1030,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      delivery_methods: {
+        Row: {
+          base_eta_mins: number
+          code: string
+          created_at: string
+          eta_label_ar: string
+          fee_multiplier: number
+          flat_surcharge: number
+          icon: string | null
+          id: string
+          is_active: boolean
+          name_ar: string
+          name_en: string
+          requires_scheduling: boolean
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          base_eta_mins?: number
+          code: string
+          created_at?: string
+          eta_label_ar?: string
+          fee_multiplier?: number
+          flat_surcharge?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_ar: string
+          name_en: string
+          requires_scheduling?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          base_eta_mins?: number
+          code?: string
+          created_at?: string
+          eta_label_ar?: string
+          fee_multiplier?: number
+          flat_surcharge?: number
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          name_ar?: string
+          name_en?: string
+          requires_scheduling?: boolean
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       delivery_settings: {
         Row: {
