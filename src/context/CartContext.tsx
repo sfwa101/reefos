@@ -251,6 +251,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       if (cancelled) return;
       const prevUid = userIdRef.current;
       userIdRef.current = uid;
+      const nextTier = tierFromUserId(uid);
+      if (nextTier !== tierRef.current) {
+        tierRef.current = nextTier;
+        // Force selectors (totals, error list) to re-evaluate with the new tier.
+        emit();
+      }
 
       if (!uid) return; // guest stays on localStorage
 
