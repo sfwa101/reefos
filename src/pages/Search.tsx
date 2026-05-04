@@ -1,11 +1,12 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
 import { Search as SearchIcon, X, PackageSearch, SlidersHorizontal, ArrowUpDown, Star, CheckCircle2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { products, useProductsVersion, type Product } from "@/lib/products";
+import { products, useProducts, useProductsVersion, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
+import { useUniversalSearch } from "@/modules/search";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
@@ -89,17 +90,31 @@ const SearchPage = () => {
 
   const setQuery = (val: string) => setInputVal(val);
 
-  const localMatches = useMemo(() => {
-    const term = q.trim().toLowerCase();
-    if (!term) return [] as Product[];
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(term) ||
-        p.category.toLowerCase().includes(term) ||
-        (p.subCategory ?? "").toLowerCase().includes(term) ||
-        (p.brand ?? "").toLowerCase().includes(term),
-    );
-  }, [q, _pv]);
+  // ─── BRAIN TRANSPLANT ────────────────────────────────────────────────
+  // Phase 11.6: drop the naive `name/category/brand/subCategory` substring
+  // filter and delegate to `useUniversalSearch`. That hook owns:
+  //   • Arabic normalization (alef/ya/ta-marbuta unification, diacritics)
+  //   • Bidirectional alias dictionary ("بندورة" ⇄ "طماطم", …)
+  //   • `metadata.aliases` extraction (SEED-time enrichment, per-product)
+  //   • MiniSearch fuzzy + prefix scoring
+  // We then map the product hits back to full `Product` objects via the
+  // in-memory cache so the rest of the page (filters, sort, group-by-cat,
+  // ProductCard rendering) keeps its existing contract unchanged.
+  const { products: catalog } = useProducts();
+  const { hits } = useUniversalSearch(q);
+
+  const localMatches = useMemo<Product[]>(() => {
+    if (!q.trim()) return [];
+    const byId = new Map(catalog.map((p) => [p.id, p] as const));
+    const out: Product[] = [];
+    for (const h of hits) {
+      if (h.kind !== "product") continue;
+      const full = byId.get(h.rawId);
+      if (full) out.push(full);
+    }
+    return out;
+    // `_pv` triggers re-eval whenever the global products cache mutates.
+  }, [q, hits, catalog, _pv]);
 
   // Pull additional results from Supabase (server-side products that may not
   // be in the in-memory `products` cache yet). De-duplicated by id.
