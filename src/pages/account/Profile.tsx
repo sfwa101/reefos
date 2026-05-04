@@ -174,7 +174,7 @@ const Profile = () => {
   const fallbackPhone = extractPhoneFromPseudoEmail(user.email);
 
   return (
-    <div className="space-y-4 pb-6">
+    <div className="space-y-4 px-4 pb-6">
       <BackHeader title="ملفي الذكي" subtitle="بياناتك تُخصِّص لك المتجر بأكمله" accent="حسابي" />
 
       <ProfileHero form={form} fallbackPhone={fallbackPhone} initials={initials} completion={completion} AvatarIcon={AvatarIcon} />
