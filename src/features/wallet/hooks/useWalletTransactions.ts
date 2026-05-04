@@ -1,49 +1,87 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { fireConfetti } from "@/lib/confetti";
-import type { Tx } from "@/features/wallet/types/wallet.types";
+
+export type WalletTxn = {
+  id: string;
+  amount: number;
+  kind: string;
+  label: string;
+  status: string;
+  source: string | null;
+  reference_order_id: string | null;
+  created_at: string;
+};
+
+export type TxnGroup = {
+  key: string;
+  label: string;
+  items: WalletTxn[];
+};
+
+const dayKey = (iso: string): string => iso.slice(0, 10);
+
+const groupLabel = (iso: string): string => {
+  const d = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  if (dayKey(iso) === dayKey(today.toISOString())) return "اليوم";
+  if (dayKey(iso) === dayKey(yesterday.toISOString())) return "أمس";
+  return d.toLocaleDateString("ar-EG", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+};
 
 /**
- * useWalletTransactions — isolated transaction history slice.
- * Triggers the referral confetti when a fresh reward lands.
+ * useWalletTransactions — paginated transaction history grouped by day.
+ * Returns the latest 100 wallet entries for the current user.
  */
 export const useWalletTransactions = (userId: string | null) => {
-  const [txs, setTxs] = useState<Tx[]>([]);
+  const [rows, setRows] = useState<WalletTxn[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!userId) {
-      setTxs([]);
+      setRows([]);
       setLoading(false);
       return;
     }
     let mounted = true;
     (async () => {
+      setLoading(true);
       const { data } = await supabase
         .from("wallet_transactions")
-        .select("id,label,amount,kind,created_at,source")
+        .select(
+          "id, amount, kind, label, status, source, reference_order_id, created_at",
+        )
         .eq("user_id", userId)
         .order("created_at", { ascending: false })
-        .limit(30);
-
+        .limit(100);
       if (!mounted) return;
-      const rows = (data ?? []) as Tx[];
-      setTxs(rows);
+      setRows((data ?? []) as WalletTxn[]);
       setLoading(false);
-
-      const lastReward = rows.find(
-        (t) => t.kind === "reward" && t.source === "referral",
-      );
-      if (lastReward) {
-        const ageH =
-          (Date.now() - new Date(lastReward.created_at).getTime()) / 36e5;
-        if (ageH < 0.1) setTimeout(fireConfetti, 400);
-      }
     })();
     return () => {
       mounted = false;
     };
   }, [userId]);
 
-  return { txs, loading };
+  const groups: TxnGroup[] = useMemo(() => {
+    const map = new Map<string, WalletTxn[]>();
+    for (const r of rows) {
+      const k = dayKey(r.created_at);
+      const arr = map.get(k) ?? [];
+      arr.push(r);
+      map.set(k, arr);
+    }
+    return Array.from(map.entries()).map(([k, items]) => ({
+      key: k,
+      label: groupLabel(items[0].created_at),
+      items,
+    }));
+  }, [rows]);
+
+  return { rows, groups, loading };
 };
