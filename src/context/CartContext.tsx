@@ -26,14 +26,22 @@ import {
 import type { PricingContext } from "@/core/engine/pricing/types";
 
 /**
- * Customer tier source — Phase 2.J.
- * We currently only know "guest" vs "member" from the auth session.
- * VIP promotion is handled later by a profile flag (e.g. loyalty points
- * threshold) and will be wired here once the profiles schema exposes it.
+ * Customer tier source — Phase 8 (5-tier loyalty).
+ * Anonymous visitors are `guest`. Authenticated customers default to
+ * `bronze` and are upgraded based on their `profiles.loyalty_tier`
+ * column (synced via `fetchProfileTier` below + Realtime).
  */
 type CustomerTier = NonNullable<PricingContext["customerTier"]>;
-const tierFromUserId = (uid: string | null | undefined): CustomerTier =>
-  uid ? "member" : "guest";
+const VALID_TIERS: ReadonlySet<CustomerTier> = new Set([
+  "guest",
+  "bronze",
+  "silver",
+  "gold",
+  "platinum",
+  "vip",
+]);
+const isCustomerTier = (v: unknown): v is CustomerTier =>
+  typeof v === "string" && VALID_TIERS.has(v as CustomerTier);
 
 /**
  * Per-line meta.
