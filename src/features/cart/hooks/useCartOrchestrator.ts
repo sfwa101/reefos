@@ -79,6 +79,11 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [guestName, setGuestName] = useState<string>("");
   const [guestPhone, setGuestPhone] = useState<string>("");
   const [guestAddress, setGuestAddress] = useState<string>("");
+  // Phase 12.8 — Gift mode + Smart Fakka (charity)
+  const [giftMode, setGiftMode] = useState<boolean>(false);
+  const [giftMessage, setGiftMessage] = useState<string>("");
+  const [charity, setCharity] = useState<number>(0);
+  const [charityCauseId, setCharityCauseId] = useState<string>("food");
 
   useEffect(() => {
     if (!user) {
@@ -231,10 +236,22 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const effectiveDelivery = logisticsQuote?.deliveryFee ?? delivery;
   const effectiveGrand =
     logisticsQuote != null
-      ? Math.max(0, subtotal - discount + effectiveDelivery + tip)
-      : grand;
-  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads. */
-  const codAllowed = logisticsQuote ? logisticsQuote.zone.codAllowed : zone.codAllowed;
+      ? Math.max(0, subtotal - discount + effectiveDelivery + tip + charity)
+      : Math.max(0, grand + charity);
+  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads.
+   *  Gift mode forces electronic payment (no COD) so the recipient is not asked to pay. */
+  const codAllowed = giftMode
+    ? false
+    : logisticsQuote
+      ? logisticsQuote.zone.codAllowed
+      : zone.codAllowed;
+
+  // Auto-switch off cash whenever gift mode flips on
+  useEffect(() => {
+    if (giftMode && payment === "cash") setPayment("wallet");
+    if (giftMode && secondaryPayment === "cash") setSecondaryPayment("instapay");
+  }, [giftMode, payment, secondaryPayment]);
+
 
 
   const checkoutWA = async () => {
@@ -560,6 +577,15 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     effectiveDelivery,
     effectiveGrand,
     codAllowed,
+    // Phase 12.8 — Gift mode + Smart Fakka (charity)
+    giftMode,
+    setGiftMode,
+    giftMessage,
+    setGiftMessage,
+    charity,
+    setCharity,
+    charityCauseId,
+    setCharityCauseId,
   };
 };
 

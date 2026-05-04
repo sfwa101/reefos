@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Gift, Lock, ShoppingBag, Sparkles, Truck, Zap } from "lucide-react";
+import { CalendarDays, Home, Lock, ShoppingBag, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
@@ -17,6 +17,7 @@ import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallb
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
 import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { CheckoutSheet } from "@/features/cart/components/CheckoutSheet";
+import { PremiumProgressBar } from "@/features/cart/components/PremiumProgressBar";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
@@ -26,6 +27,7 @@ const Cart = () => {
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = useCartHasErrors();
   const [checkoutOpen, setCheckoutOpen] = useState(false);
+  const navigate = useNavigate();
 
   const updateSplit = async (
     participantId: string,
@@ -66,18 +68,8 @@ const Cart = () => {
     <div className="space-y-4 px-4 pb-28">
       <BackHeader title="سلتي" subtitle={`${toLatin(o.count)} منتج`} />
 
-      {/* Smart Progress Bar */}
-      <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} className="relative overflow-hidden rounded-2xl bg-gradient-to-l from-primary/10 via-accent/10 to-primary/5 p-3 ring-1 ring-primary/15">
-        <div className="mb-2 flex items-center gap-2">
-          <div className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-primary text-primary-foreground">
-            {o.progress.done ? <Gift className="h-3.5 w-3.5" /> : <Truck className="h-3.5 w-3.5" />}
-          </div>
-          <p className="flex-1 text-[11px] font-extrabold text-foreground">{o.progress.label}</p>
-        </div>
-        <div className="h-2 overflow-hidden rounded-full bg-foreground/10">
-          <motion.div initial={{ width: 0 }} animate={{ width: `${o.progress.pct}%` }} transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }} className="h-full rounded-full bg-gradient-to-r from-primary to-accent" />
-        </div>
-      </motion.div>
+      {/* Premium Progress Bar — Phase 12.8 */}
+      <PremiumProgressBar progress={o.progress} />
 
       <CartUpgradeBanner />
       <CartPricingErrorsBanner />
@@ -172,7 +164,7 @@ const Cart = () => {
         تفريغ السلة
       </button>
 
-      {/* Single sticky CTA — opens the Zen Checkout Sheet */}
+      {/* Sticky CTA — 3/4 checkout + 1/4 home shortcut (Phase 12.8) */}
       <motion.div
         initial={{ y: 80 }}
         animate={{ y: 0 }}
@@ -180,28 +172,42 @@ const Cart = () => {
         className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pt-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
       >
-        <button
-          type="button"
-          onClick={() => setCheckoutOpen(true)}
-          disabled={checkoutDisabled}
-          className="mx-auto flex w-full max-w-md items-center justify-between gap-3 rounded-[18px] bg-gradient-to-r from-primary via-[hsl(var(--primary)/0.9)] to-primary px-4 py-3.5 font-extrabold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition disabled:cursor-not-allowed disabled:from-foreground/20 disabled:via-foreground/20 disabled:to-foreground/20 disabled:text-foreground/60"
-        >
-          <span className="flex items-center gap-2 text-sm">
-            {checkoutDisabled && <Lock className="h-4 w-4" />}
-            {isLocked
-              ? "مقفلة — بانتظار الموافقات"
-              : hasPricingErrors
-                ? "أكمل بيانات المنتجات أولاً"
-                : o.logisticsBlocked
-                  ? o.logisticsQuote?.blockers[0]?.code === "below_min_order"
-                    ? "الحد الأدنى للمنطقة غير مكتمل"
-                    : "غير متاح في منطقتك حالياً"
-                  : "متابعة الدفع"}
-          </span>
-          <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
-            {toLatin(Math.round(o.effectiveGrand))} ج
-          </span>
-        </button>
+        <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+          {/* Primary CTA — flex-1 (≈3/4) */}
+          <button
+            type="button"
+            onClick={() => setCheckoutOpen(true)}
+            disabled={checkoutDisabled}
+            className="flex flex-1 items-center justify-between gap-3 rounded-[18px] bg-gradient-to-r from-primary via-[hsl(var(--primary)/0.9)] to-primary px-4 py-3.5 font-extrabold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition disabled:cursor-not-allowed disabled:from-foreground/20 disabled:via-foreground/20 disabled:to-foreground/20 disabled:text-foreground/60"
+          >
+            <span className="flex items-center gap-2 text-sm">
+              {checkoutDisabled && <Lock className="h-4 w-4" />}
+              {isLocked
+                ? "مقفلة — بانتظار الموافقات"
+                : hasPricingErrors
+                  ? "أكمل بيانات المنتجات أولاً"
+                  : o.logisticsBlocked
+                    ? o.logisticsQuote?.blockers[0]?.code === "below_min_order"
+                      ? "الحد الأدنى للمنطقة غير مكتمل"
+                      : "غير متاح في منطقتك حالياً"
+                    : "متابعة الدفع"}
+            </span>
+            <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
+              {toLatin(Math.round(o.effectiveGrand))} ج
+            </span>
+          </button>
+
+          {/* Home shortcut — shrink-0 w-16 (≈1/4) */}
+          <button
+            type="button"
+            aria-label="العودة للرئيسية"
+            onClick={() => navigate({ to: "/" })}
+            className="flex w-16 shrink-0 flex-col items-center justify-center gap-0.5 rounded-[18px] bg-card text-foreground ring-1 ring-border/50 shadow-[0_8px_24px_-12px_rgba(0,0,0,0.25)] transition active:scale-95"
+          >
+            <Home className="h-5 w-5" strokeWidth={2.4} />
+            <span className="text-[9.5px] font-extrabold leading-none">الرئيسية</span>
+          </button>
+        </div>
       </motion.div>
 
       <CheckoutSheet
