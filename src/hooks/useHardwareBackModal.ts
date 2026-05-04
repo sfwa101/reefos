@@ -3,14 +3,19 @@
  * modal/sheet is open and converts it into an `onClose()` call instead of
  * navigating away from the current route.
  *
- * Trick: when `isOpen` flips to true we push a sentinel state onto the
- * History stack. Pressing Back triggers a `popstate` event (instead of a
- * real navigation) which we intercept to close the sheet. On clean close
- * (user taps the X), we pop our sentinel back off so we don't leak history.
+ * Stability: `onClose` is stored in a ref so it can change identity each
+ * render without re-running the effect. The effect only re-runs when
+ * `isOpen` actually flips, preventing an infinite pushState/back loop.
  */
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export const useHardwareBackModal = (isOpen: boolean, onClose: () => void): void => {
+  const savedOnClose = useRef(onClose);
+
+  useEffect(() => {
+    savedOnClose.current = onClose;
+  }, [onClose]);
+
   useEffect(() => {
     if (!isOpen || typeof window === "undefined") return;
 
@@ -18,21 +23,19 @@ export const useHardwareBackModal = (isOpen: boolean, onClose: () => void): void
     window.history.pushState(sentinel, "", window.location.href);
 
     const handlePop = (_e: PopStateEvent): void => {
-      onClose();
+      savedOnClose.current();
     };
 
     window.addEventListener("popstate", handlePop);
 
     return () => {
       window.removeEventListener("popstate", handlePop);
-      // If our sentinel is still on top (sheet closed via UI not Back),
-      // pop it so the user's real history isn't polluted.
       const current = window.history.state as { __modalSentinel?: boolean } | null;
       if (current && current.__modalSentinel) {
         window.history.back();
       }
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 };
 
 export default useHardwareBackModal;
