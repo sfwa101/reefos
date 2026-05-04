@@ -23,8 +23,15 @@ import { useWalletTransactions, type WalletTxn } from "../hooks/useWalletTransac
  *  - Negative / debit:  text-foreground + leading − sign.
  *  - Each row uses bg-card / ring-border / text-foreground.
  */
-export const OperationsDockContent = ({ userId }: { userId: string | null }) => {
-  const { groups, loading, rows } = useWalletTransactions(userId);
+export const OperationsDockContent = ({
+  userId,
+  data,
+}: {
+  userId: string | null;
+  data?: ReturnType<typeof useWalletTransactions>;
+}) => {
+  const fallback = useWalletTransactions(data ? null : userId);
+  const { groups, loading, rows } = data ?? fallback;
 
   if (loading) {
     return (
