@@ -24,6 +24,26 @@ export function lazyStorePage(
 }
 
 /**
+ * Phase 3 — preferred wrapper for store routes once a domain-faithful
+ * Skeleton exists (StorePageSkeleton, ProductDetailSkeleton, …). Pass
+ * the rendered fallback element directly so different routes can pick
+ * different layouts without coupling to the generic StoreSkeleton.
+ */
+export function lazyStorePageWith(
+  loader: () => Promise<{ default: ComponentType<unknown> }>,
+  fallback: ReactNode,
+) {
+  const LazyPage = lazy(loader);
+  return function StoreRouteComponent() {
+    return (
+      <Suspense fallback={fallback}>
+        <LazyPage />
+      </Suspense>
+    );
+  };
+}
+
+/**
  * Generic lazy page wrapper for critical non-store routes (cart, product
  * detail, account, admin marketing, …). Uses StoreSkeleton by default but
  * accepts any custom fallback node for tighter UX matching.
