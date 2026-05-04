@@ -160,7 +160,7 @@ const Orders = () => {
                 <span className="font-display text-base font-extrabold text-primary tabular-nums">{fmtMoney(Number(o.total))}</span>
                 <div className="flex gap-2">
                   {o.whatsapp_sent && (
-                    <span className="flex items-center gap-1 rounded-full bg-[hsl(142_70%_42%)]/15 px-2 py-1 text-[10px] font-bold text-[hsl(142_70%_42%)]">
+                    <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-[10px] font-bold text-success">
                       <MessageCircle className="h-3 w-3" /> واتساب
                     </span>
                   )}
