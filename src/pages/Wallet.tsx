@@ -154,14 +154,10 @@ const Wallet = () => {
               <OperationsDockContent userId={c.userId} />
             ) : dock === "gameyas" ? (
               <GameyasDockContent userId={c.userId} />
+            ) : dock === "vaults" ? (
+              <VaultsDockContent userId={c.userId} onOpenSettings={() => c.setShowJar(true)} />
             ) : (
-              <div className="rounded-3xl bg-card text-card-foreground ring-1 ring-border/50 shadow-sm p-5 min-h-[180px]">
-                <p className="text-[12px] font-bold text-muted-foreground mb-1.5">قادم في Phase 13.38</p>
-                <p className="text-[14px] text-foreground/90">
-                  {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
-                  {dock === "insights" && "مدير مالي شخصي يحلّل إنفاقك ويقترح الميزانيات."}
-                </p>
-              </div>
+              <InsightsDockContent userId={c.userId} />
             )}
           </motion.div>
         </AnimatePresence>
