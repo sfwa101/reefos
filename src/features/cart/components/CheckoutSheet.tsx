@@ -129,6 +129,36 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                   exit={{ height: 0, opacity: 0 }}
                   className="mt-3 space-y-2 overflow-hidden"
                 >
+                  <div className="space-y-2 rounded-xl bg-rose-500/5 p-3 ring-1 ring-rose-400/20">
+                    <p className="text-[11px] font-extrabold text-rose-600">
+                      بيانات المستلم 🎀
+                    </p>
+                    <input
+                      type="text"
+                      value={o.giftRecipientName}
+                      onChange={(e) => o.setGiftRecipientName(e.target.value)}
+                      placeholder="اسم المستلم بالكامل"
+                      maxLength={80}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      value={o.giftRecipientPhone}
+                      onChange={(e) => o.setGiftRecipientPhone(e.target.value)}
+                      placeholder="هاتف المستلم"
+                      maxLength={20}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                    <textarea
+                      value={o.giftRecipientAddress}
+                      onChange={(e) => o.setGiftRecipientAddress(e.target.value)}
+                      placeholder="عنوان تسليم الهدية بالتفصيل"
+                      maxLength={300}
+                      rows={2}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={() => setGiftMsgOpen((v) => !v)}
