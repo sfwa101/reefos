@@ -11,11 +11,14 @@ import {
   PieChart as PieIcon,
   Wallet2,
   ArrowDownUp,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
 import { useWalletAssets, type WalletAsset } from "@/features/wallet/hooks/useWalletAssets";
 import { useHideBalance } from "@/features/wallet/hooks/useHideBalance";
+import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
 import { NeoCardsCarousel } from "@/features/wallet/components/NeoCardsCarousel";
 import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialog";
 import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
@@ -25,23 +28,16 @@ import { OperationsDockContent } from "@/features/wallet/components/OperationsDo
 import { VaultsDockContent } from "@/features/wallet/components/VaultsDockContent";
 import { InsightsDockContent } from "@/features/wallet/components/InsightsDockContent";
 import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
+import { WalletAssetConvertSheet } from "@/features/wallet/components/WalletAssetConvertSheet";
 
-/**
- * Wallet — Phase 13.34 Neo-Bank rebuild (shell only).
- *
- * Hierarchy (mobile-first, edge-safe):
- *   1. Stealth-aware greeting + active-asset badge.
- *   2. Embla horizontal Super-Cards (5 assets) with shared layoutId.
- *   3. Quick-action ribbon (Send · Topup · Convert · QR · Cashback).
- *   4. Mini-app dock (Operations · Gameyas · Vaults · Insights) — placeholders.
- *   5. Existing Topup/Transfer/POS sheets re-skinned in dark surface.
- */
 const Wallet = () => {
   const c = useWalletDashboard();
   const { assets, loading: assetsLoading } = useWalletAssets(c.userId);
   const { hidden, toggle: toggleHide } = useHideBalance(c.userId);
+  const txnsData = useWalletTransactions(c.userId);
   const [activeAsset, setActiveAsset] = useState<WalletAsset | null>(null);
   const [dock, setDock] = useState<"ops" | "gameyas" | "vaults" | "insights">("ops");
+  const [showConvert, setShowConvert] = useState(false);
 
   if (c.loading || assetsLoading) {
     return (
@@ -53,10 +49,18 @@ const Wallet = () => {
 
   const ownerName = c.profile?.full_name || "عميل ريف";
 
+  const savingsData = {
+    jar: c.jar,
+    jarTxs: c.jarTxs,
+    setJar: c.setJar,
+    setJarTxs: c.setJarTxs,
+    loading: false,
+  };
+
   const actions = [
     { id: "send", label: "إرسال", icon: Send, onClick: () => c.setShowTransfer(true) },
     { id: "topup", label: "إيداع", icon: Plus, onClick: c.openTopup },
-    { id: "convert", label: "تحويل أصول", icon: ArrowDownUp, onClick: () => {} },
+    { id: "convert", label: "تحويل أصول", icon: ArrowDownUp, onClick: () => setShowConvert(true) },
     { id: "qr", label: "دفع QR", icon: ScanLine, onClick: () => c.setShowPos(true) },
     { id: "cashback", label: "كاش باك", icon: Sparkles, onClick: () => c.openAffiliateTab() },
   ];
