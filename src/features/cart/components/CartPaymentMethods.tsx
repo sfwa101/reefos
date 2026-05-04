@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, HandHeart, PiggyBank } from "lucide-react";
+import { Cake, HandHeart, PiggyBank, Wallet, Lock } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { paymentOptions, type useCartOrchestrator } from "../hooks/useCartOrchestrator";
 
