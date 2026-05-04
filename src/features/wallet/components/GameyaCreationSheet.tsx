@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toLatin } from "@/lib/format";
 
 const AMOUNT_PRESETS = [500, 1000, 2000, 5000];
-const MEMBERS_PRESETS = [4, 6, 8, 12];
+const DURATION_PRESETS = [6, 10, 12];
 
 /**
  * GameyaCreationSheet — bottom-sheet form to open a new ROSCA circle.
@@ -35,6 +35,7 @@ export const GameyaCreationSheet = ({
       _name: name.trim(),
       _cycle_amount: amount,
       _max_members: members,
+      _cycle_duration_months: members,
     });
     setBusy(false);
     if (error || !data) {
@@ -114,10 +115,10 @@ export const GameyaCreationSheet = ({
 
         <div className="mb-4">
           <span className="mb-1 block text-[11px] font-bold text-muted-foreground">
-            عدد الأعضاء (الأشهر)
+            مدة الجمعية (أشهر) — تساوي عدد الأعضاء
           </span>
-          <div className="grid grid-cols-4 gap-2">
-            {MEMBERS_PRESETS.map((v) => (
+          <div className="grid grid-cols-3 gap-2">
+            {DURATION_PRESETS.map((v: number) => (
               <button
                 key={v}
                 type="button"

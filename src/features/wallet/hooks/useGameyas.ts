@@ -10,6 +10,23 @@ export type GameyaCircle = {
   status: "pending" | "active" | "completed" | "cancelled";
   starts_at: string | null;
   my_turn: number;
+  cycle_duration_months: number | null;
+  reward_pool: number;
+  min_kyc_tier: number | null;
+};
+
+export type OpenCircle = {
+  id: string;
+  name: string;
+  cycle_amount: number;
+  max_members: number;
+  cycle_duration_months: number | null;
+  min_kyc_tier: number | null;
+  reward_pool: number;
+  status: string;
+  starts_at: string | null;
+  members_count: number;
+  is_member: boolean;
 };
 
 export type GameyaInstallment = {
@@ -30,9 +47,14 @@ export type GameyaMember = {
   full_name: string | null;
 };
 
+export type TrustScore = {
+  score: number;
+  tier: number;
+  is_trusted: boolean;
+};
+
 /**
- * useGameyas — lists all circles the current user belongs to (creator
- * or member). Reads `gam_eya_members` first then enriches with `gam_eyas`.
+ * useGameyas — lists all circles the current user belongs to.
  */
 export const useGameyas = (userId: string | null) => {
   const [circles, setCircles] = useState<GameyaCircle[]>([]);
@@ -48,7 +70,7 @@ export const useGameyas = (userId: string | null) => {
     const { data: membership } = await supabase
       .from("gam_eya_members")
       .select(
-        "turn_number, gam_eyas(id, name, cycle_amount, max_members, current_cycle_index, status, starts_at)",
+        "turn_number, gam_eyas(id, name, cycle_amount, max_members, current_cycle_index, status, starts_at, cycle_duration_months, reward_pool, min_kyc_tier)",
       )
       .eq("user_id", userId);
 
@@ -67,6 +89,54 @@ export const useGameyas = (userId: string | null) => {
   }, [refresh]);
 
   return { circles, loading, refresh };
+};
+
+/** Public list of open circles to discover & join. */
+export const useOpenCircles = () => {
+  const [circles, setCircles] = useState<OpenCircle[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    setLoading(true);
+    const { data } = await supabase.rpc("list_open_gam_eyas");
+    setCircles((data ?? []) as OpenCircle[]);
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  return { circles, loading, refresh };
+};
+
+/** Read current user's trust score (defaults to tier=0 if missing). */
+export const useTrustScore = (userId: string | null) => {
+  const [trust, setTrust] = useState<TrustScore>({ score: 0, tier: 0, is_trusted: false });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!userId) {
+      setLoading(false);
+      return;
+    }
+    let mounted = true;
+    (async () => {
+      const { data } = await supabase
+        .from("user_trust_score")
+        .select("score, tier, is_trusted")
+        .eq("user_id", userId)
+        .maybeSingle();
+      if (!mounted) return;
+      if (data) setTrust(data as TrustScore);
+      setLoading(false);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [userId]);
+
+  return { trust, loading };
 };
 
 /** Loads ordered members + next pending installment for a circle. */
