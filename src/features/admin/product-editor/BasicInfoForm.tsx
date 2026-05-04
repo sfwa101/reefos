@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { ImageIcon, Loader2, Upload, ShieldCheck } from "lucide-react";
 import { Field, Label, Toggle, inputCls } from "./primitives";
-import { SOURCES, BADGES, type ProductRow, type ProductMetadata } from "./types";
+import { SOURCES, BADGES, type ProductRow, type ProductMetadata, type ProductMetadataValue } from "./types";
 import SmartTagSuggester from "./SmartTagSuggester";
 
 export interface BasicInfoFormProps {
