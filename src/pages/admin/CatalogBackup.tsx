@@ -23,7 +23,7 @@ import {
   PK,
   type CatalogTable,
   type SeedFile,
-} from "../../../scripts/db-backup/sync-seed";
+} from "@/lib/catalogSeedShared";
 
 type Counts = Partial<Record<CatalogTable, number>>;
 type LogLine = { level: "ok" | "warn" | "err"; text: string };
