@@ -1,102 +1,86 @@
+## Phase 14.03 — Master ID & Smart Role Switcher
 
-# Phase 13.1 — Multi-Fulfillment & Pre-order Architecture
+Goal: turn `AccountTierCard` into a premium identity hub displaying a bank-style Customer ID, plus a glass `RoleSwitcher` dropdown for users with multiple roles (admin / delivery / vendor / staff …).
 
-Backend-only phase. Zero UI changes. Establishes the data foundation for orders that mix instant delivery, scheduled pre-orders, and items requiring upfront deposits.
+### 1. New hook — `src/hooks/useUserRoles.ts` (plural)
 
-## Why "Order → Fulfillments → Items"
+The current `useUserRole` returns only the highest-priority role. We need the full list for the switcher.
 
-Today: one `orders` row owns N `order_items` directly. There is one status, one ETA, one delivery_zone — so a cart that mixes "fresh meat now" + "wedding cake next week" cannot be modeled honestly. We splice both into one row and lie about timing.
+- Returns `{ roles: AppRole[]; primary: AppRole; branchId; loading }`.
+- Same query as `useUserRole` but keeps the full sorted array.
+- `useUserRole` keeps working unchanged (back-compat).
 
-After: each `orders` row owns N `fulfillments` (one per delivery wave / pickup slot / pre-order batch), and each `fulfillments` row owns its own slice of `order_items`. Every wave gets its own status, ETA, driver, and tracking URL. The order header stays as the financial truth (totals, payments, gift mode) while fulfillments carry the logistics truth.
+### 2. Customer ID derivation — `src/features/account/lib/customerId.ts`
 
-```text
-orders (financial header)
- └── fulfillments[] (one per delivery wave)
-      ├── status, scheduled_for, eta_minutes, driver_id, tracking_url
-      └── order_items[] (rows with fulfillment_id = this fulfillment)
+- `formatCustomerId(uuid: string): string` → take the first 12 hex chars of the user's UUID, uppercase, format as `2050 8800 6600` style (groups of 4, padded with leading "20" prefix). Pure function, deterministic, no DB call.
+- Also export `toBankGroups(s, size=4)` helper.
+
+### 3. New stem-cell — `src/features/account/components/RoleSwitcher.tsx`
+
+Props: `{ roles: AppRole[]; currentView: "customer" | role; }`.
+
+Behavior:
+- If `roles.length <= 1` (only customer): render a static premium `ID · 2050 8800 6600` chip — no chevron, no dropdown.
+- If multiple roles: render the same chip with a `ChevronDown` and wrap in shadcn `DropdownMenu`.
+- Menu items derived from a small map:
+
+  ```
+  customer       → "واجهة العميل"  /         🏠
+  delivery       → "واجهة المندوب" /driver   🚚
+  vendor         → "واجهة البائع"  /vendor   🏪
+  admin/manager  → "لوحة الإدارة"  /admin    ⚙️
+  cashier        → "نقطة البيع"    /pos      💳
+  staff          → "بوابة الموظف"  /employee 👔
+  ```
+
+- Selecting an item calls `useNavigate()({ to: path })` AND persists the choice in `localStorage` under `reef.activeView`.
+- Styling: `DropdownMenuContent` overridden with `bg-background/70 backdrop-blur-xl border-border/40 shadow-xl rounded-2xl` — Apple glass.
+- Typography: `font-mono tracking-[0.25em] text-[11px] opacity-90` for the ID line, mimicking engraved card numbers. Wrapped in `bg-foreground/15 ring-1 ring-foreground/20 rounded-md px-2 py-1`.
+
+All colors via tokens (`foreground/`, `background/`) — zero hardcoded HSL.
+
+### 4. Wire into `AccountTierCard.tsx`
+
+Replace the existing top-left badge:
+
+```
+<span>REEF · MEMBER</span>
 ```
 
-Backwards compatible: `order_items.fulfillment_id` is nullable, legacy rows keep working until backfilled.
+with:
 
-## DB Migration (single transaction)
-
-### 1. `orders` — new columns (additive only)
-- `tip_amount numeric(12,2) NOT NULL DEFAULT 0` — replaces legacy `tip` going forward; both kept until code switches over
-- `charity_amount numeric(12,2) NOT NULL DEFAULT 0`
-- `charity_cause_id text` — free-form key (food / hospitals / orphans / general)
-- `is_gift boolean NOT NULL DEFAULT false`
-- `gift_message text`
-- `upfront_payment_required numeric(12,2) NOT NULL DEFAULT 0`
-- `upfront_payment_collected numeric(12,2) NOT NULL DEFAULT 0`
-- CHECK: `upfront_payment_collected >= 0 AND upfront_payment_collected <= upfront_payment_required + 0.01`
-
-### 2. `fulfillment_status` enum
-`pending | preparing | ready | out_for_delivery | delivered | cancelled`
-(Extra `ready` slot for pickup-style waves; cheap to ship now, hard to add later.)
-
-### 3. `fulfillments` table
-```sql
-id                  uuid PK default gen_random_uuid()
-order_id            uuid NOT NULL REFERENCES orders(id) ON DELETE CASCADE
-sequence            smallint NOT NULL DEFAULT 1   -- 1, 2, 3 within an order
-status              fulfillment_status NOT NULL DEFAULT 'pending'
-delivery_method_id  uuid REFERENCES delivery_methods(id) ON DELETE SET NULL
-scheduled_for       timestamptz                    -- null = ASAP
-eta_minutes         integer
-driver_id           uuid REFERENCES drivers(id) ON DELETE SET NULL
-tracking_url        text
-delivery_fee        numeric(12,2) NOT NULL DEFAULT 0  -- per-wave fee
-notes               text
-created_at          timestamptz NOT NULL DEFAULT now()
-updated_at          timestamptz NOT NULL DEFAULT now()
-UNIQUE (order_id, sequence)
 ```
-Indexes: `(order_id)`, `(driver_id)`, `(status)`, `(scheduled_for)` partial where status not in (delivered, cancelled).
-Trigger: reuse existing `set_updated_at()` if present, else create one.
+<RoleSwitcher roles={roles} currentView="customer" />
+```
 
-### 4. `order_items` — new columns
-- `fulfillment_id uuid REFERENCES fulfillments(id) ON DELETE SET NULL` (nullable for legacy)
-- `is_preorder boolean NOT NULL DEFAULT false`
-- `requires_downpayment boolean NOT NULL DEFAULT false`
-- Index `(fulfillment_id)`
+`AccountTierCard` receives `roles` + `customerId` as new props (keeps it dumb). `Account.tsx` reads them via `useUserRoles()` and `formatCustomerId(user.id)` and passes them down. The Sparkles "REEF · MEMBER" chip moves to a smaller secondary badge or is removed (to avoid duplication) — final card keeps tier badge on the right untouched.
 
-### 5. RLS for `fulfillments`
-Mirror `orders` policies exactly:
-- `Users_Read_Own_Fulfillments` — `EXISTS (orders WHERE id = order_id AND user_id = auth.uid())`
-- `Admin_Read_Fulfillments` — admin role check
-- `Admin_Update_Fulfillments` — admin role check
-- `Drivers_Read_Assigned_Fulfillments` — `driver_id IN (SELECT id FROM drivers WHERE user_id = auth.uid())`
-- `Drivers_Update_Assigned_Fulfillments` — same predicate (for status/tracking updates)
-- `System_Insert_Fulfillments` — service role only (orders are created by RPC)
+### 5. Smart Default View — `src/lib/defaultView.ts` + root redirect
 
-## TypeScript contracts
+- Helper `pickDefaultPath(roles, savedView)`:
+  - If `savedView` exists in localStorage → return its path.
+  - Else if roles include `delivery` → `/driver`.
+  - Else if roles include `vendor` → `/vendor`.
+  - Else if roles include any admin-tier → `/admin`.
+  - Else → `/` (customer).
+- Hook this into `src/routes/_app/index.tsx` (or `Home.tsx` mount): on first visit after login, if user has a non-customer role and no `reef.activeView` saved, `navigate({ to: pickedPath, replace: true })`. Customers are never redirected.
+- The role switcher in the account page is the user's escape hatch back to `/` (writes `reef.activeView = "customer"`).
 
-`src/integrations/supabase/types.ts` is auto-generated — do NOT touch it. Instead create a hand-rolled domain contract:
+### 6. Files
 
-`src/core/orders/types.ts`
-- `FulfillmentStatus` union matching the enum
-- `Fulfillment` shape (camelCase mirror of the DB row + `items: OrderItem[]`)
-- `OrderItem` shape with `fulfillmentId`, `isPreorder`, `requiresDownpayment`
-- `Order` shape including `tipAmount`, `charityAmount`, `charityCauseId`, `isGift`, `giftMessage`, `upfrontPaymentRequired`, `upfrontPaymentCollected`, `fulfillments: Fulfillment[]`
-- A small `mapOrderRow(row, fulfillmentRows, itemRows)` pure function that takes raw Supabase row shapes (typed via the generated `Database` types) and returns the nested domain `Order`. Useful when later phases load orders.
+Created:
+- `src/hooks/useUserRoles.ts`
+- `src/features/account/lib/customerId.ts`
+- `src/features/account/components/RoleSwitcher.tsx`
+- `src/lib/defaultView.ts`
 
-No `any`. All raw row inputs typed via `Database['public']['Tables']['…']['Row']`.
+Edited:
+- `src/features/account/components/AccountTierCard.tsx` — accept `roles`, `customerId`; replace static badge.
+- `src/pages/Account.tsx` — fetch roles + customerId, pass through.
+- `src/routes/_app/index.tsx` — smart default redirect on mount.
 
-## Out of scope this phase
-- No UI changes (Cart, Admin, Vendor, Driver dashboards untouched).
-- No edits to `place_order_atomic` RPC (next phase will rewrite it to insert one fulfillment per logistics group).
-- No backfill of historic orders — they continue to render with `fulfillments = []` and the legacy single-status field.
+### 7. Strictness
 
-## Files
-
-- New SQL migration (run via supabase migration tool):
-  - adds columns to `orders`
-  - creates `fulfillment_status` enum
-  - creates `fulfillments` table + indexes + RLS
-  - adds columns + index to `order_items`
-- New file `src/core/orders/types.ts` — domain types + `mapOrderRow` helper.
-
-## Verification
-- `tsc --noEmit` clean.
-- `psql -c "\d fulfillments"` shows the table with all FKs and policies.
-- Existing `orders` reads still work because every new column has a default.
+- `roles: AppRole[]` typed; all icons typed `LucideIcon`. Zero `any`.
+- All colors via CSS variables / tailwind tokens.
+- `tsc --noEmit` must pass.
