@@ -18,6 +18,8 @@ import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingE
 import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { CheckoutSheet } from "@/features/cart/components/CheckoutSheet";
 import { PremiumProgressBar } from "@/features/cart/components/PremiumProgressBar";
+import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
+import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
