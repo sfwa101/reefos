@@ -788,6 +788,80 @@ export const useCartLoyalty = (): CartLoyaltySummary => {
   });
 };
 
+/* ===================================================================
+ * Phase 9.1 — Profit awareness selector.
+ * Folds every line's `breakdown.netProfit` (and exposes whether the
+ * cart contains any kitchen-source product) so incentive hooks can
+ * make affordability-aware decisions WITHOUT touching pricing math
+ * themselves. All numbers come straight from `pricingEngine`.
+ * =================================================================== */
+export interface CartProfitSummary {
+  /** Sum of `breakdown.netProfit` across all lines (post-guardrail). */
+  readonly totalNetProfit: number;
+  /** Sum of `breakdown.costPrice` across all lines. */
+  readonly totalCostPrice: number;
+  /** True when at least one line currently needs an admin approval. */
+  readonly requiresAdminApproval: boolean;
+  /** Product IDs that triggered the guardrail — for admin queue UI. */
+  readonly flaggedLines: ReadonlyArray<{
+    readonly productId: string;
+    readonly productName: string;
+    readonly reason: string;
+  }>;
+  /** True when the cart already includes a kitchen-source product. */
+  readonly hasKitchenItem: boolean;
+}
+
+const EMPTY_PROFIT: CartProfitSummary = {
+  totalNetProfit: 0,
+  totalCostPrice: 0,
+  requiresAdminApproval: false,
+  flaggedLines: [],
+  hasKitchenItem: false,
+};
+
+export const useCartProfit = (): CartProfitSummary => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines): CartProfitSummary => {
+    if (lines.length === 0) return EMPTY_PROFIT;
+    const tier = getTier();
+    let totalNetProfit = 0;
+    let totalCostPrice = 0;
+    let requiresAdminApproval = false;
+    let hasKitchenItem = false;
+    const flaggedLines: Array<{
+      productId: string;
+      productName: string;
+      reason: string;
+    }> = [];
+
+    for (const l of lines) {
+      if (l.product.source === "kitchen") hasKitchenItem = true;
+      const { result } = evaluateLineForCart(l, tier);
+      if (!result || result.kind !== "ok") continue;
+      const b = result.breakdown;
+      totalNetProfit += b.netProfit;
+      totalCostPrice += b.costPrice;
+      if (b.requiresAdminApproval) {
+        requiresAdminApproval = true;
+        flaggedLines.push({
+          productId: l.product.id,
+          productName: l.product.name,
+          reason: b.lossPreventionReason ?? "بانتظار مراجعة الإدارة",
+        });
+      }
+    }
+
+    return {
+      totalNetProfit: Math.round(totalNetProfit * 100) / 100,
+      totalCostPrice: Math.round(totalCostPrice * 100) / 100,
+      requiresAdminApproval,
+      flaggedLines,
+      hasKitchenItem,
+    };
+  });
+};
+
 
 /** Per-product qty selector — ideal for ProductCard. */
 export const useCartLineQty = (productId: string) =>
