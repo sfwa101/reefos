@@ -1,62 +1,31 @@
-import { useMemo } from "react";
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { CalendarDays, Check, Clock, Gift, Lock, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
-import { toast } from "sonner";
+import { CalendarDays, Gift, Lock, ShoppingBag, Sparkles, Truck, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
-import { fmtMoney, toLatin } from "@/lib/format";
+import { toLatin } from "@/lib/format";
 import { useCartOrchestrator } from "@/features/cart/hooks/useCartOrchestrator";
 import { useSharedCartContext } from "@/context/SharedCartContext";
 import { CartCrossSellRail } from "@/features/cart/components/CartCrossSellRail";
 import { CartAddressSelector } from "@/features/cart/components/CartAddressSelector";
-import { CartCheckoutActions } from "@/features/cart/components/CartCheckoutActions";
-import { CartPaymentMethods } from "@/features/cart/components/CartPaymentMethods";
 import { CartSummary } from "@/features/cart/components/CartSummary";
-import { NumberFlow } from "@/features/cart/components/NumberFlow";
-import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { VendorGroupCard } from "@/features/cart/components/VendorGroupCard";
 import { SharedCartManager } from "@/features/cart/components/SharedCartManager";
 import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallbackDialog";
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
-import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
-import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
 import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
+import { CheckoutSheet } from "@/features/cart/components/CheckoutSheet";
+import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { useCartHasErrors } from "@/context/CartContext";
-import { isPerishable } from "@/lib/products";
-import { computeLogisticsQuote } from "@/core/logistics/quote";
-import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
-import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
   const { sharedCartId } = useSharedCartContext();
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = useCartHasErrors();
-  const { data: deliveryMethod } = useDefaultDeliveryMethod();
-
-  // Logistics Engine quote — single source of truth for delivery fee,
-  // ETA, blockers (min-order) and warnings (perishables / surge).
-  const logisticsQuote = useMemo(() => {
-    if (!deliveryMethod) return null;
-    const hasPerishables = o.lines.some((l) => isPerishable(l.product));
-    return computeLogisticsQuote({
-      zone: legacyZoneToLogisticsZone(o.zone),
-      method: deliveryMethod,
-      subtotal: o.subtotal,
-      hasPerishables,
-    });
-  }, [deliveryMethod, o.zone, o.subtotal, o.lines]);
-
-  const logisticsBlocked = (logisticsQuote?.blockers.length ?? 0) > 0;
-  // Engine wins for delivery fee when a quote is available; legacy delivery
-  // is the safe fallback during the brief moment the method query is in-flight.
-  const effectiveDelivery = logisticsQuote?.deliveryFee ?? o.delivery;
-  const effectiveGrand =
-    logisticsQuote != null
-      ? Math.max(0, o.subtotal - o.discount + effectiveDelivery + o.tip)
-      : o.grand;
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
 
   const updateSplit = async (
     participantId: string,
@@ -71,8 +40,8 @@ const Cart = () => {
     if (error) throw error;
   };
 
-  const isLocked =
-    o.isSharedMode && o.sharedCart?.status === "pending_approvals";
+  const isLocked = o.isSharedMode && o.sharedCart?.status === "pending_approvals";
+  const checkoutDisabled = o.logisticsBlocked || hasPricingErrors || isLocked;
 
   if (o.lines.length === 0) {
     return (
@@ -88,11 +57,7 @@ const Cart = () => {
             تصفّح الأقسام
           </Link>
         </div>
-        <WhatsAppFallbackDialog
-          open={!!o.waFallback}
-          payload={o.waFallback}
-          onClose={o.dismissWaFallback}
-        />
+        <WhatsAppFallbackDialog open={!!o.waFallback} payload={o.waFallback} onClose={o.dismissWaFallback} />
       </div>
     );
   }
@@ -115,10 +80,9 @@ const Cart = () => {
       </motion.div>
 
       <CartUpgradeBanner />
-
       <CartPricingErrorsBanner />
 
-      {/* Multi-vendor segmented lines */}
+      {/* Lines */}
       <div className="space-y-4">
         {o.isMultiVendor && (
           <div className="flex items-start gap-2 rounded-2xl bg-accent/10 p-2.5 ring-1 ring-accent/20">
@@ -166,9 +130,16 @@ const Cart = () => {
 
       <CartCrossSellRail items={o.crossSell} add={o.add} />
 
-      <CartAddressSelector user={o.user} addresses={o.addresses} addrId={o.addrId} setAddrId={o.setAddrId} guestNotes={o.guestNotes} setGuestNotes={o.setGuestNotes} />
+      <CartAddressSelector
+        user={o.user}
+        addresses={o.addresses}
+        addrId={o.addrId}
+        setAddrId={o.setAddrId}
+        guestNotes={o.guestNotes}
+        setGuestNotes={o.setGuestNotes}
+      />
 
-      <CartLogisticsBanners quote={logisticsQuote} />
+      <CartLogisticsBanners quote={o.logisticsQuote} />
 
       {o.isSharedMode && o.sharedCart && (
         <SharedCartManager
@@ -183,151 +154,76 @@ const Cart = () => {
         />
       )}
 
-      <CartPaymentMethods o={o} />
+      <CartSummary
+        subtotal={o.subtotal}
+        discount={o.discount}
+        appliedPromo={o.appliedPromo}
+        delivery={o.effectiveDelivery}
+        billSavings={o.billSavings}
+        tip={o.tip}
+        isSplit={o.isSplit}
+        walletApplied={o.walletApplied}
+        walletShortfall={o.walletShortfall}
+        secondaryLabel={o.secondaryLabel}
+        grand={o.effectiveGrand}
+      />
 
-      {/* Promo */}
-      <motion.div layout className={`overflow-hidden rounded-2xl bg-card shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 transition ${o.appliedPromo ? "ring-primary/40" : "ring-border/30"}`}>
-        <div className="flex items-center gap-2 p-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary/10 text-primary"><Tag className="h-4 w-4" /></div>
-          <input value={o.promo} onChange={(e) => o.setPromo(e.target.value)} onKeyDown={(e) => e.key === "Enter" && o.applyPromo()} placeholder="كود الخصم (REEF10، WELCOME25)" className="flex-1 bg-transparent text-sm font-bold outline-none" />
-          <button onClick={o.applyPromo} className={`rounded-[10px] px-4 py-2 text-xs font-extrabold transition ${o.appliedPromo ? "bg-primary text-primary-foreground" : "bg-foreground text-background"}`}>
-            {o.appliedPromo ? <Check className="h-4 w-4" /> : "تطبيق"}
-          </button>
-        </div>
-        <AnimatePresence>
-          {o.appliedPromo && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: "auto", opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="border-t border-primary/15 bg-primary/5 px-3 py-2">
-              <div className="flex items-center justify-between">
-                <p className="text-[11px] font-extrabold text-primary">🎉 وفّرت اليوم</p>
-                <p className="font-display text-base font-extrabold text-primary"><NumberFlow value={o.discount} /> ج.م</p>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+      <button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">
+        تفريغ السلة
+      </button>
+
+      {/* Single sticky CTA — opens the Zen Checkout Sheet */}
+      <motion.div
+        initial={{ y: 80 }}
+        animate={{ y: 0 }}
+        transition={{ type: "spring", damping: 24, stiffness: 240 }}
+        className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pt-2"
+        style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
+      >
+        <button
+          type="button"
+          onClick={() => setCheckoutOpen(true)}
+          disabled={checkoutDisabled}
+          className="mx-auto flex w-full max-w-md items-center justify-between gap-3 rounded-[18px] bg-gradient-to-r from-primary via-[hsl(var(--primary)/0.9)] to-primary px-4 py-3.5 font-extrabold text-primary-foreground shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] transition disabled:cursor-not-allowed disabled:from-foreground/20 disabled:via-foreground/20 disabled:to-foreground/20 disabled:text-foreground/60"
+        >
+          <span className="flex items-center gap-2 text-sm">
+            {checkoutDisabled && <Lock className="h-4 w-4" />}
+            {isLocked
+              ? "مقفلة — بانتظار الموافقات"
+              : hasPricingErrors
+                ? "أكمل بيانات المنتجات أولاً"
+                : o.logisticsBlocked
+                  ? o.logisticsQuote?.blockers[0]?.code === "below_min_order"
+                    ? "الحد الأدنى للمنطقة غير مكتمل"
+                    : "غير متاح في منطقتك حالياً"
+                  : "متابعة الدفع"}
+          </span>
+          <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
+            {toLatin(Math.round(o.effectiveGrand))} ج
+          </span>
+        </button>
       </motion.div>
 
-      {/* Tip */}
-      <div className="rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
-        <div className="mb-2 flex items-center justify-between">
-          <p className="text-sm font-bold">إكرامية المندوب 💚</p>
-          <span className="text-xs font-extrabold text-primary tabular-nums">{o.tip > 0 ? fmtMoney(o.tip) : "اختياري"}</span>
-        </div>
-        <div className="grid grid-cols-4 gap-2">
-          {[0, 5, 10, 20].map((t) => {
-            const active = o.tip === t;
-            return (
-              <motion.button whileTap={{ scale: 0.94 }} key={t} onClick={() => o.setTip(t)} className={`relative rounded-[12px] py-2.5 text-xs font-extrabold transition tabular-nums ${active ? "bg-gradient-to-br from-primary to-[hsl(150_55%_38%)] text-primary-foreground shadow-[0_6px_18px_-6px_hsl(150_60%_40%/0.55)]" : "bg-foreground/5"}`}>
-                {t === 0 ? "بدون" : `${toLatin(t)} ج`}
-              </motion.button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* ETA */}
-      <div className="flex items-center gap-3 rounded-2xl bg-card p-3 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
-        <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary-soft"><Clock className="h-4 w-4 text-primary" /></div>
-        <div className="flex-1">
-          <p className="text-xs font-bold">وقت التوصيل لمنطقتك ({o.zone.shortName})</p>
-          <p className="text-[10px] text-muted-foreground">{o.zone.etaLabel}</p>
-        </div>
-        <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground">نطاق {o.zone.id}</span>
-      </div>
-
-      <CartIncentiveProgress subtotal={o.subtotal} />
-
-      <CartLoyaltyBar />
-
-      <CartSummary subtotal={o.subtotal} discount={o.discount} appliedPromo={o.appliedPromo} delivery={effectiveDelivery} billSavings={o.billSavings} tip={o.tip} isSplit={o.isSplit} walletApplied={o.walletApplied} walletShortfall={o.walletShortfall} secondaryLabel={o.secondaryLabel} grand={effectiveGrand} />
-
-      <button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">تفريغ السلة</button>
-
-      {/* Guest checkout */}
-      {!o.user && (
-        <section className="space-y-3 rounded-2xl bg-card p-4 ring-1 ring-border/40">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="font-display text-sm font-extrabold">إتمام الطلب كضيف</p>
-              <p className="text-[11px] text-muted-foreground">أو <Link to="/auth" className="font-bold text-primary underline">سجّل الدخول</Link> لحفظ طلباتك</p>
-            </div>
-            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-extrabold text-primary">سريع</span>
-          </div>
-          <div className="space-y-2">
-            <input type="text" value={o.guestName} onChange={(e) => o.setGuestName(e.target.value)} placeholder="الاسم بالكامل" maxLength={80} className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" />
-            <input type="tel" inputMode="tel" value={o.guestPhone} onChange={(e) => o.setGuestPhone(e.target.value)} placeholder="رقم الهاتف" maxLength={20} className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" />
-            <textarea value={o.guestAddress} onChange={(e) => o.setGuestAddress(e.target.value)} placeholder="عنوان التوصيل بالتفصيل" maxLength={300} rows={2} className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40" />
-          </div>
-        </section>
-      )}
-
-      <div className="relative">
-        <CartCheckoutActions
-          grand={effectiveGrand}
-          minOrderTotal={o.minOrderTotal}
-          submitting={o.submitting}
-          onCheckout={
-            logisticsBlocked
-              ? () =>
-                  toast.error(
-                    logisticsQuote?.blockers[0]?.message ??
-                      "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
-                  )
-              : hasPricingErrors
-              ? () => toast.error("يوجد منتجات تحتاج إلى استكمال بياناتها قبل إتمام الطلب")
-              : isLocked
-              ? () => toast.error("السلة مقفلة بانتظار موافقات المشاركين")
-              : o.checkoutWA
-          }
-        />
-        {isLocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-foreground/70 backdrop-blur-sm">
-            <Lock className="h-5 w-5 text-background" />
-            <p className="text-xs font-extrabold text-background">مقفلة — بانتظار الموافقات</p>
-            <p className="text-[10px] font-bold text-background/80">
-              {o.sharedParticipants.filter((p) => p.approval_status === "pending").length} بانتظار الموافقة
-            </p>
-          </div>
-        )}
-        {!isLocked && hasPricingErrors && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-destructive/80 backdrop-blur-sm">
-            <Lock className="h-5 w-5 text-destructive-foreground" />
-            <p className="text-xs font-extrabold text-destructive-foreground">
-              أكمل بيانات المنتجات أولاً
-            </p>
-          </div>
-        )}
-        {!isLocked && !hasPricingErrors && logisticsBlocked && (
-          <button
-            type="button"
-            onClick={() =>
-              toast.error(
-                logisticsQuote?.blockers[0]?.message ??
-                  "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
-              )
-            }
-            className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-destructive/80 backdrop-blur-sm"
-          >
-            <Lock className="h-5 w-5 text-destructive-foreground" />
-            <p className="text-xs font-extrabold text-destructive-foreground">
-              {logisticsQuote?.blockers[0]?.code === "below_min_order"
-                ? `الحد الأدنى للمنطقة غير مكتمل`
-                : "غير متاح في منطقتك حالياً"}
-            </p>
-          </button>
-        )}
-      </div>
+      <CheckoutSheet
+        open={checkoutOpen}
+        onOpenChange={setCheckoutOpen}
+        o={o}
+        hasPricingErrors={hasPricingErrors}
+        isLocked={isLocked}
+      />
 
       <AnimatePresence>
         {o.showRecharge && o.user && (
-          <RechargeDialog onClose={() => o.setShowRecharge(false)} userId={o.user.id} currentBalance={o.walletBalance} shortfall={Math.max(0, o.grand - o.walletBalance)} />
+          <RechargeDialog
+            onClose={() => o.setShowRecharge(false)}
+            userId={o.user.id}
+            currentBalance={o.walletBalance}
+            shortfall={Math.max(0, o.grand - o.walletBalance)}
+          />
         )}
       </AnimatePresence>
 
-      <WhatsAppFallbackDialog
-        open={!!o.waFallback}
-        payload={o.waFallback}
-        onClose={o.dismissWaFallback}
-      />
+      <WhatsAppFallbackDialog open={!!o.waFallback} payload={o.waFallback} onClose={o.dismissWaFallback} />
     </div>
   );
 };

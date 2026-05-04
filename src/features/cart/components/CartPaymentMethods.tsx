@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Cake, HandHeart, PiggyBank, Wallet, Lock } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { paymentOptions, type useCartOrchestrator } from "../hooks/useCartOrchestrator";
+import type { useCartOrchestrator } from "../hooks/useCartOrchestrator";
+import { PAYMENT_METHODS } from "../data/paymentMethods";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
@@ -14,7 +15,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
     <section className="rounded-2xl bg-card p-4 shadow-[0_4px_18px_-8px_rgba(0,0,0,0.1)] ring-1 ring-border/30">
       <div className="mb-2 flex items-center justify-between">
         <p className="text-sm font-bold">طريقة الدفع</p>
-        {!o.zone.codAllowed && (
+        {!o.codAllowed && (
           <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-extrabold text-amber-700 dark:text-amber-400">
             الدفع عند الاستلام غير متاح في {o.zone.shortName}
           </span>
@@ -46,7 +47,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
       )}
 
       <div className="space-y-2">
-        {paymentOptions.map((m) => {
+        {PAYMENT_METHODS.map((m) => {
           const Icon = m.icon;
           const active = o.payment === m.id;
           const isWallet = m.id === "wallet";
@@ -55,10 +56,10 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
           // or the engine has flagged a required deposit on any line.
           const cashBlocked =
             isCash &&
-            (!o.zone.codAllowed ||
+            (!o.codAllowed ||
               o.sweetsRules.blockCOD ||
               o.engineRules.blocksCOD);
-          const cashBlockReason = !o.zone.codAllowed
+          const cashBlockReason = !o.codAllowed
             ? `غير متاح في ${o.zone.shortName}`
             : o.engineRules.blocksCOD
               ? "يلزم عربون مسبق"
@@ -148,9 +149,9 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
               <span className="rounded-md bg-accent/20 px-2 py-0.5 text-[10px] font-extrabold text-accent-foreground">{toLatin(Math.round(o.walletShortfall))} ج.م متبقّية</span>
             </div>
             <div className="grid grid-cols-3 gap-2">
-              {paymentOptions
+              {PAYMENT_METHODS
                 .filter((p) => p.id !== "wallet")
-                .filter((p) => o.zone.codAllowed || p.id !== "cash")
+                .filter((p) => o.codAllowed || p.id !== "cash")
                 .filter((p) => !o.sweetsRules.blockCOD || p.id !== "cash")
                 .filter((p) => !o.engineRules.blocksCOD || p.id !== "cash")
                 .map((m) => {

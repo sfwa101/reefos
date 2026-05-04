@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -7,12 +7,6 @@ import { useLocation } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
-import {
-  Banknote,
-  CreditCard,
-  Smartphone,
-  Wallet as WalletIcon,
-} from "lucide-react";
 import {
   WA_NUMBER,
   type Addr,
@@ -32,13 +26,14 @@ import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules } from "@/context/CartContext";
+import { isPerishable } from "@/lib/products";
+import { computeLogisticsQuote } from "@/core/logistics/quote";
+import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
+import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
+import { PAYMENT_METHODS, findPaymentMethod } from "../data/paymentMethods";
 
-export const paymentOptions = [
-  { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
-  { id: "cash", label: "كاش عند الاستلام", icon: Banknote, sub: "ادفع للمندوب" },
-  { id: "vodafone-cash", label: "فودافون كاش", icon: Smartphone, sub: "تحويل فوري" },
-  { id: "instapay", label: "إنستا باي", icon: CreditCard, sub: "تحويل بنكي" },
-];
+/** @deprecated Re-exported only for backward compatibility. Import PAYMENT_METHODS instead. */
+export const paymentOptions = PAYMENT_METHODS;
 
 /**
  * Single source of truth for the Cart UI: state, derived totals, fulfillment
@@ -214,9 +209,33 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     groupIsMixedScheduled,
   } = grouping;
 
-  const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
-  const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
+  const paymentLabel = findPaymentMethod(payment)?.label ?? "";
+  const secondaryLabel = findPaymentMethod(secondaryPayment)?.label ?? "";
   const selectedAddr = addresses.find((a) => a.id === addrId);
+
+  // Logistics Engine quote — single source of truth for delivery fee, ETA,
+  // blockers (min-order) and warnings (perishables / surge).
+  const { data: deliveryMethod } = useDefaultDeliveryMethod();
+  const logisticsQuote = useMemo(() => {
+    if (!deliveryMethod) return null;
+    const hasPerishables = lines.some((l) => isPerishable(l.product));
+    return computeLogisticsQuote({
+      zone: legacyZoneToLogisticsZone(zone),
+      method: deliveryMethod,
+      subtotal,
+      hasPerishables,
+    });
+  }, [deliveryMethod, zone, subtotal, lines]);
+
+  const logisticsBlocked = (logisticsQuote?.blockers.length ?? 0) > 0;
+  const effectiveDelivery = logisticsQuote?.deliveryFee ?? delivery;
+  const effectiveGrand =
+    logisticsQuote != null
+      ? Math.max(0, subtotal - discount + effectiveDelivery + tip)
+      : grand;
+  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads. */
+  const codAllowed = logisticsQuote ? logisticsQuote.zone.codAllowed : zone.codAllowed;
+
 
   const checkoutWA = async () => {
     if (submittingRef.current) {
@@ -535,6 +554,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     sharedReject: shared.reject,
     sharedCancel: shared.cancelCart,
     sharedMarkCompleted: shared.markCompleted,
+    // Logistics engine surface (Phase 12.7)
+    logisticsQuote,
+    logisticsBlocked,
+    effectiveDelivery,
+    effectiveGrand,
+    codAllowed,
   };
 };
 
