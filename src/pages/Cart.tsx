@@ -178,7 +178,7 @@ const Cart = () => {
         className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pt-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
       >
-        <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+        <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
           {/* Primary CTA — flex-1 (≈3/4) */}
           <button
             type="button"
