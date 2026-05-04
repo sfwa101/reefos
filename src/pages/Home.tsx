@@ -87,6 +87,48 @@ const HomePage = () => {
     return pool.slice(0, RAIL_LIMIT);
   }, [zoneSafe]);
 
+  // Rail 4 — Premium brands (curated by `brand` presence + premium badge or rating)
+  const premiumBrandsRail = useMemo<Product[]>(() => {
+    const branded = zoneSafe.filter(
+      (p) => typeof p.brand === "string" && p.brand.trim().length > 1,
+    );
+    const premium = branded.filter((p) => p.badge === "premium");
+    const pool = premium.length >= 6
+      ? premium
+      : [...branded].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    return pool.slice(0, RAIL_LIMIT);
+  }, [zoneSafe]);
+
+  // Rail 5 — New arrivals (last items in catalog; reverse for "newest first")
+  const newArrivalsRail = useMemo<Product[]>(() => {
+    const flagged = zoneSafe.filter((p) => p.badge === "new");
+    if (flagged.length >= 6) return flagged.slice(0, RAIL_LIMIT);
+    return [...zoneSafe].slice(-RAIL_LIMIT).reverse();
+  }, [zoneSafe]);
+
+  // Rail 6 — Bulk savings (wholesale source or "كرتونة"/"جملة" in unit)
+  const bulkRail = useMemo<Product[]>(
+    () =>
+      zoneSafe
+        .filter(
+          (p) =>
+            p.source === "wholesale" ||
+            (typeof p.unit === "string" &&
+              (p.unit.includes("كرتونة") || p.unit.includes("جملة") || p.unit.includes("كرتون"))),
+        )
+        .slice(0, RAIL_LIMIT),
+    [zoneSafe],
+  );
+
+  // Rail 7 — Quick meals (recipes/kitchen sources)
+  const quickMealsRail = useMemo<Product[]>(
+    () =>
+      zoneSafe
+        .filter((p) => p.source === "recipes" || p.source === "kitchen")
+        .slice(0, RAIL_LIMIT),
+    [zoneSafe],
+  );
+
   // Wallet + referral state for SmartBanners
   useEffect(() => {
     if (!user) {
