@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
-import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, MessageCircle, X } from "lucide-react";
+import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, MessageCircle, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,13 +14,13 @@ type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type ItemRow = Database["public"]["Tables"]["order_items"]["Row"];
 type OrderWithItems = OrderRow & { order_items: ItemRow[] };
 
-const statusInfo: Record<string, { label: string; color: string; icon: any }> = {
-  delivered:        { label: "تم التسليم",  color: "bg-primary text-primary-foreground", icon: Check },
-  out_for_delivery: { label: "في الطريق",   color: "bg-accent text-accent-foreground",   icon: Truck },
-  preparing:        { label: "قيد التحضير", color: "bg-amber-500 text-white",            icon: Clock },
-  confirmed:        { label: "مؤكد",         color: "bg-blue-500 text-white",             icon: Check },
-  pending:          { label: "بانتظار",      color: "bg-foreground/15 text-foreground",   icon: Clock },
-  cancelled:        { label: "ملغي",         color: "bg-destructive text-destructive-foreground", icon: X },
+const statusInfo: Record<string, { label: string; color: string; icon: LucideIcon }> = {
+  delivered:        { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
+  out_for_delivery: { label: "في الطريق",   color: "bg-accent text-accent-foreground",          icon: Truck },
+  preparing:        { label: "قيد التحضير", color: "bg-warning/15 text-warning",                icon: Clock },
+  confirmed:        { label: "مؤكد",         color: "bg-info/15 text-info",                      icon: Check },
+  pending:          { label: "بانتظار",      color: "bg-foreground/10 text-foreground",          icon: Clock },
+  cancelled:        { label: "ملغي",         color: "bg-destructive/15 text-destructive",        icon: X },
 };
 
 const formatDate = (iso: string) => {
@@ -160,7 +160,7 @@ const Orders = () => {
                 <span className="font-display text-base font-extrabold text-primary tabular-nums">{fmtMoney(Number(o.total))}</span>
                 <div className="flex gap-2">
                   {o.whatsapp_sent && (
-                    <span className="flex items-center gap-1 rounded-full bg-[hsl(142_70%_42%)]/15 px-2 py-1 text-[10px] font-bold text-[hsl(142_70%_42%)]">
+                    <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-[10px] font-bold text-success">
                       <MessageCircle className="h-3 w-3" /> واتساب
                     </span>
                   )}

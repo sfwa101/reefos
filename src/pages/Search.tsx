@@ -250,7 +250,7 @@ const SearchPage = () => {
         )}
       </div>
 
-      <div className="space-y-6 px-4 pt-5">
+      <div className="space-y-6 pt-5">
         {!q && (
           <>
             {history.length > 0 && (

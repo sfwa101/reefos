@@ -142,7 +142,7 @@ const Addresses = () => {
   };
 
   return (
-    <div className="space-y-5 px-4 pb-8">
+    <div className="space-y-5 pb-8">
       <BackHeader title="العناوين" subtitle={`${toLatin(list.length)} عناوين محفوظة`} accent="حسابي" />
 
       {loading ? (
