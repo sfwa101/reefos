@@ -1,7 +1,8 @@
 import { useRef } from "react";
 import { ImageIcon, Loader2, Upload } from "lucide-react";
 import { Field, Label, Toggle, inputCls } from "./primitives";
-import { SOURCES, BADGES, type ProductRow } from "./types";
+import { SOURCES, BADGES, type ProductRow, type ProductMetadata } from "./types";
+import SmartTagSuggester from "./SmartTagSuggester";
 
 export interface BasicInfoFormProps {
   form: ProductRow;
@@ -16,6 +17,24 @@ const BasicInfoForm = ({
   form, update, uploading, onUpload, categories, stores,
 }: BasicInfoFormProps) => {
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const rawAliases = form.metadata?.aliases;
+  const aliases: readonly string[] = Array.isArray(rawAliases)
+    ? rawAliases.filter((x): x is string => typeof x === "string")
+    : typeof rawAliases === "string"
+      ? rawAliases.split(",").map((s) => s.trim()).filter(Boolean)
+      : [];
+
+  const setAliases = (next: string[]) => {
+    const meta: ProductMetadata = { ...(form.metadata ?? {}) };
+    if (next.length === 0) {
+      delete meta.aliases;
+    } else {
+      meta.aliases = next;
+    }
+    update("metadata", meta);
+  };
+
   return (
     <div className="space-y-4 mt-0">
       <div>
@@ -60,6 +79,12 @@ const BasicInfoForm = ({
       <Field label="الاسم *">
         <input value={form.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
       </Field>
+
+      <SmartTagSuggester
+        productName={form.name}
+        aliases={aliases}
+        onChange={setAliases}
+      />
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="القسم *">

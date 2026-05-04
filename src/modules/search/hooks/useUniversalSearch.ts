@@ -8,22 +8,36 @@ import { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import MiniSearch, { type SearchResult } from "minisearch";
 import { useProducts, type Product } from "@/lib/products";
 import { restaurants, type Restaurant } from "@/lib/restaurants";
+import { normalizeArabic, expandKeywords } from "@/core/search/utils/arabicLogic";
 import type { SearchableEntity, SearchHit } from "../types";
 
-/** Map a product → searchable entity. */
+/** Extract aliases stored on metadata (string[] or comma-separated string). */
+function extractAliases(metadata: unknown): readonly string[] {
+  if (!metadata || typeof metadata !== "object") return [];
+  const a = (metadata as Record<string, unknown>).aliases;
+  if (Array.isArray(a)) return a.filter((x): x is string => typeof x === "string");
+  if (typeof a === "string") return a.split(",").map((s) => s.trim()).filter(Boolean);
+  return [];
+}
+
+/** Map a product → searchable entity (normalized text + alias-expanded keywords). */
 function toProductEntity(p: Product): SearchableEntity {
   const barcode =
     p.metadata && typeof p.metadata === "object"
       ? (p.metadata as Record<string, unknown>).barcode
       : undefined;
+  const aliases = extractAliases(p.metadata);
+  const baseExtras = [p.subCategory, p.brand, p.source, ...aliases].filter(
+    (x): x is string => typeof x === "string" && x.length > 0,
+  );
   return {
     id: `product:${p.id}`,
     kind: "product",
     rawId: p.id,
-    title: p.name,
-    subtitle: p.brand ?? p.unit,
-    category: p.category,
-    keywords: [p.subCategory, p.brand, p.source].filter(Boolean).join(" "),
+    title: normalizeArabic(p.name),
+    subtitle: normalizeArabic(p.brand ?? p.unit ?? ""),
+    category: normalizeArabic(p.category),
+    keywords: expandKeywords(p.name, baseExtras),
     image: p.image,
     barcode: typeof barcode === "string" ? barcode : undefined,
     href: `/product/${p.id}`,
@@ -35,10 +49,10 @@ function toRestaurantEntity(r: Restaurant): SearchableEntity {
     id: `restaurant:${r.id}`,
     kind: "restaurant",
     rawId: r.id,
-    title: r.name,
-    subtitle: r.tagline,
-    category: "مطاعم",
-    keywords: r.tagline,
+    title: normalizeArabic(r.name),
+    subtitle: normalizeArabic(r.tagline ?? ""),
+    category: normalizeArabic("مطاعم"),
+    keywords: expandKeywords(r.name, [r.tagline].filter((x): x is string => !!x)),
     href: `/restaurant/${r.id}`,
   };
 }
@@ -52,7 +66,7 @@ const MINI_OPTIONS = {
   searchOptions: {
     boost: { title: 3, subtitle: 1.5, category: 1.2 },
     prefix: true,
-    fuzzy: 0.2,
+    fuzzy: 0.25,
   },
 } as const;
 
@@ -95,7 +109,7 @@ export function useUniversalSearch(query: string): UseUniversalSearchResult {
   }, [entities]);
 
   const hits = useMemo<readonly SearchHit[]>(() => {
-    const term = deferredQuery.trim();
+    const term = normalizeArabic(deferredQuery);
     const mini = indexRef.current;
     if (!term || term.length < 2 || !mini) return [];
     const results = mini.search(term, MINI_OPTIONS.searchOptions) as SearchResult[];
