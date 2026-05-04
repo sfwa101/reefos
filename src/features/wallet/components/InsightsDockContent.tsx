@@ -38,8 +38,15 @@ const labelFor = (kind: string, source: string | null): string => {
  * Aggregates outgoing wallet movements by category and renders
  * a theme-aware donut. All colors derive from `--primary`.
  */
-export const InsightsDockContent = ({ userId }: { userId: string | null }) => {
-  const { rows, loading } = useWalletTransactions(userId);
+export const InsightsDockContent = ({
+  userId,
+  data,
+}: {
+  userId: string | null;
+  data?: ReturnType<typeof useWalletTransactions>;
+}) => {
+  const fallback = useWalletTransactions(data ? null : userId);
+  const { rows, loading } = data ?? fallback;
 
   const { slices, total, topShare, topName } = useMemo(() => {
     const monthStart = new Date();
