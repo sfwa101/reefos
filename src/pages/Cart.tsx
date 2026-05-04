@@ -73,6 +73,10 @@ const Cart = () => {
       {/* Premium Progress Bar — Phase 12.8 */}
       <PremiumProgressBar progress={o.progress} />
 
+      {/* Incentives ladder + loyalty (Phase 12.10 — re-injected) */}
+      <CartIncentiveProgress subtotal={o.subtotal} />
+      <CartLoyaltyBar />
+
       <CartUpgradeBanner />
       <CartPricingErrorsBanner />
 
