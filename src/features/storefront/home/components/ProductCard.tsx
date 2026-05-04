@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { OptimizedImage } from "@/components/ui/OptimizedImage";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
@@ -112,14 +113,13 @@ export const ProductCard = ({
       )}
 
       <div className="relative aspect-square overflow-hidden bg-secondary/40">
-        <img
+        <OptimizedImage
           src={p.image}
           alt={p.name}
-          loading="lazy"
-          decoding="async"
           width={768}
           height={768}
-          className="h-full w-full object-cover"
+          className="h-full w-full object-cover object-center"
+          wrapperClassName="absolute inset-0"
         />
 
         {isPre ? (
