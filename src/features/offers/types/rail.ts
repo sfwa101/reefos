@@ -6,6 +6,13 @@ export type RailType =
   | "restaurant"
   | "sponsored";
 
+export type FrequencyTag =
+  | "NONE"
+  | "DAILY_FLASH"
+  | "SEMI_WEEKLY_FRESH"
+  | "WEEKLY_BIG"
+  | "MONTHLY_PANTRY";
+
 export type StorefrontRail = {
   id: string;
   type: RailType;
@@ -16,4 +23,5 @@ export type StorefrontRail = {
   starts_at: string | null;
   ends_at: string | null;
   is_active: boolean;
+  frequency_tag: FrequencyTag;
 };

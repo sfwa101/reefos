@@ -3994,6 +3994,7 @@ export type Database = {
         Row: {
           created_at: string
           ends_at: string | null
+          frequency_tag: Database["public"]["Enums"]["rail_frequency_tag"]
           id: string
           is_active: boolean
           sort_order: number
@@ -4007,6 +4008,7 @@ export type Database = {
         Insert: {
           created_at?: string
           ends_at?: string | null
+          frequency_tag?: Database["public"]["Enums"]["rail_frequency_tag"]
           id?: string
           is_active?: boolean
           sort_order?: number
@@ -4020,6 +4022,7 @@ export type Database = {
         Update: {
           created_at?: string
           ends_at?: string | null
+          frequency_tag?: Database["public"]["Enums"]["rail_frequency_tag"]
           id?: string
           is_active?: boolean
           sort_order?: number
@@ -5599,6 +5602,12 @@ export type Database = {
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
+      rail_frequency_tag:
+        | "NONE"
+        | "DAILY_FLASH"
+        | "SEMI_WEEKLY_FRESH"
+        | "WEEKLY_BIG"
+        | "MONTHLY_PANTRY"
       shared_cart_approval: "pending" | "approved" | "rejected"
       shared_cart_role: "owner" | "contributor"
       shared_cart_split_type: "percentage" | "fixed" | "itemized"
@@ -5767,6 +5776,13 @@ export const Constants = {
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
+      rail_frequency_tag: [
+        "NONE",
+        "DAILY_FLASH",
+        "SEMI_WEEKLY_FRESH",
+        "WEEKLY_BIG",
+        "MONTHLY_PANTRY",
+      ],
       shared_cart_approval: ["pending", "approved", "rejected"],
       shared_cart_role: ["owner", "contributor"],
       shared_cart_split_type: ["percentage", "fixed", "itemized"],

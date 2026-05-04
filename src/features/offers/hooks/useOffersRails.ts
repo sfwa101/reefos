@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { isFrequencyActive } from "@/core/engine/offers/frequency";
 import type { StorefrontRail } from "../types/rail";
 
 type RailsDb = {
@@ -15,9 +16,11 @@ type RailsDb = {
   };
 };
 
-const isLive = (r: StorefrontRail, now: number): boolean => {
-  if (r.starts_at && new Date(r.starts_at).getTime() > now) return false;
-  if (r.ends_at && new Date(r.ends_at).getTime() <= now) return false;
+const isLive = (r: StorefrontRail, now: Date): boolean => {
+  const ms = now.getTime();
+  if (r.starts_at && new Date(r.starts_at).getTime() > ms) return false;
+  if (r.ends_at && new Date(r.ends_at).getTime() <= ms) return false;
+  if (!isFrequencyActive(r.frequency_tag ?? "NONE", now)) return false;
   return true;
 };
 
@@ -35,7 +38,7 @@ export const useOffersRails = () => {
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
       if (cancelled) return;
-      const now = Date.now();
+      const now = new Date();
       setRails((data ?? []).filter((r) => isLive(r, now)));
       setLoading(false);
     };
@@ -47,3 +50,4 @@ export const useOffersRails = () => {
 
   return { rails, loading };
 };
+
