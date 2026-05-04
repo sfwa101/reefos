@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent, Scripts, ScriptOnce } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -80,12 +80,17 @@ export const Route = createRootRoute({
 });
 
 function RootShell({ children }: { children: React.ReactNode }) {
+  // Pre-hydration: read persisted theme and apply class/attribute BEFORE first
+  // paint to eliminate the green-flash (FOUC) when a non-default theme is set.
+  // Mirrors exactly what ThemeContext does inside its useEffect.
+  const themeBootstrap = `(function(){try{var m=localStorage.getItem("reef-mode");var c=localStorage.getItem("reef-color");var resolved=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(m||"light");var r=document.documentElement;if(resolved==="dark")r.classList.add("dark");if(c&&c!=="sage")r.setAttribute("data-theme",c);}catch(e){}})();`;
   return (
-    <html lang="ar" dir="rtl">
+    <html lang="ar" dir="rtl" suppressHydrationWarning>
       <head>
+        <ScriptOnce>{themeBootstrap}</ScriptOnce>
         <HeadContent />
       </head>
-      <body>
+      <body suppressHydrationWarning>
         {children}
         <Scripts />
       </body>
