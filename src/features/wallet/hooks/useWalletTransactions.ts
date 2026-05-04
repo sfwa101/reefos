@@ -83,5 +83,5 @@ export const useWalletTransactions = (userId: string | null) => {
     }));
   }, [rows]);
 
-  return { rows, groups, loading };
+  return { rows, txs: rows, groups, loading };
 };
