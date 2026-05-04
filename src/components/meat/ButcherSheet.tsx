@@ -17,6 +17,8 @@ import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/features/meat/components/Panel";
 import { CutBuilder } from "@/features/meat/components/CutBuilder";
 import { PrepOptions } from "@/features/meat/components/PrepOptions";
+import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
+import type { MeatSelection } from "@/core/engine/pricing/strategies/MeatPricingStrategy";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 
@@ -75,14 +77,44 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
     return true;
   });
 
-  const unitPrice = computeButcheryPrice(
+  // ── Live Pricing Integration (Phase 5.1) ───────────────────────
+  // Build a stable MeatSelection that mirrors the engine contract.
+  const liveSelection = useMemo<MeatSelection | null>(() => {
+    if (!weight || !prep) return null;
+    return {
+      quantity: qty,
+      weight,
+      prep,
+      addonIds,
+      packagingId,
+      crossSellIds: crossIds,
+    };
+  }, [qty, weight, prep, addonIds, packagingId, crossIds]);
+
+  const { supported, breakdown } = useLivePrice<MeatSelection>(
+    product,
+    liveSelection,
+    { zoneAcceptsPerishables: true, customerTier: "member" },
+    { strategyKey: "meat" },
+  );
+
+  // Legacy fallback math — used only if engine is unavailable for safety.
+  const legacyUnit = computeButcheryPrice(
     product.price, weight, prep, addonIds, rules, packagingId,
   );
-  const lineTotal = unitPrice * qty;
-  const crossTotal = rules.crossSell
+  const legacyLine = legacyUnit * qty;
+  const legacyCross = rules.crossSell
     .filter((c) => crossIds.includes(c.id))
     .reduce((s, c) => s + c.price, 0);
-  const grand = lineTotal + crossTotal;
+
+  // Prefer the engine; fall back to legacy if unsupported / errored.
+  const useEngine = supported && breakdown !== null;
+  const unitPrice = useEngine ? breakdown.unitPrice : legacyUnit;
+  const lineTotal = useEngine ? breakdown.lineTotal : legacyLine;
+  const crossTotal = useEngine ? breakdown.crossSellTotal : legacyCross;
+  const feeTotal = useEngine ? breakdown.feeTotal : 0;
+  const discountTotal = useEngine ? breakdown.discountTotal : 0;
+  const grand = useEngine ? breakdown.grandTotal : legacyLine + legacyCross;
 
   const toggle = (id: string, list: string[], set: (x: string[]) => void) =>
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
@@ -317,6 +349,18 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                 </div>
                 <div className="text-left">
                   <p className="text-[10px] font-bold text-muted-foreground">الإجمالي</p>
+                  {useEngine && (
+                    <div className="mb-1 space-y-0.5 text-[10px] font-bold tabular-nums text-muted-foreground">
+                      <p>السطر: {toLatin(Math.round(lineTotal))} ج.م</p>
+                      {crossTotal > 0 && <p>+ مكمّلات: {toLatin(Math.round(crossTotal))} ج.م</p>}
+                      {feeTotal > 0 && <p>+ رسوم تبريد: {toLatin(Math.round(feeTotal))} ج.م</p>}
+                      {discountTotal > 0 && (
+                        <p className="text-emerald-600 dark:text-emerald-400">
+                          − خصم: {toLatin(Math.round(discountTotal))} ج.م
+                        </p>
+                      )}
+                    </div>
+                  )}
                   <p className="font-display text-lg font-extrabold tabular-nums text-foreground">
                     <AnimatedNumber value={grand} /> ج.م
                   </p>
