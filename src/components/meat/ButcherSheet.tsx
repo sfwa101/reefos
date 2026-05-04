@@ -17,6 +17,8 @@ import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/features/meat/components/Panel";
 import { CutBuilder } from "@/features/meat/components/CutBuilder";
 import { PrepOptions } from "@/features/meat/components/PrepOptions";
+import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
+import type { MeatSelection } from "@/core/engine/pricing/strategies/MeatPricingStrategy";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 
