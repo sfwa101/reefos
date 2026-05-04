@@ -312,31 +312,55 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       let savedOrderId: string | null = null;
 
       if (!isGuest && currentUser) {
+        // Phase 13.2 — Build a single fulfillment wave with ALL items.
+        // Smart splitting (instant vs preorder) will be wired in a later UI phase.
+        const orderItems = lines.map((l) => ({
+          product_id: l.product.id,
+          product_name: l.product.name,
+          product_image: l.product.image ?? null,
+          price: l.meta?.unitPrice ?? l.product.price,
+          quantity: l.qty,
+        }));
+
         const result = await placeOrderAtomic({
-          _user_id: currentUser.id,
-          _total: grand,
-          _payment_method: payment,
-          _address_id: safeUuidOrNull(selectedAddr?.id),
-          _notes: noteParts,
-          _service_type: "delivery",
-          _delivery_zone: zone.id ?? null,
-          _items: lines.map((l) => ({
-            product_id: l.product.id,
-            product_name: l.product.name,
-            product_image: l.product.image ?? null,
-            price: l.meta?.unitPrice ?? l.product.price,
-            quantity: l.qty,
-          })),
-          _wallet_applied: walletApplied,
-          _wallet_shortfall: walletShortfall,
-          _secondary_payment: isSplit ? secondaryPayment : null,
-          _total_cashback: payment === "wallet" ? totalCashback : 0,
-          _change_remainder: showChangeJar ? changeRemainder : 0,
-          _save_change: showChangeJar && saveChange && !donateChange,
-          _donate_change: showChangeJar && donateChange,
-          _tip: tip,
-          _promo_code: appliedPromo?.code ?? null,
-          _discount: discount,
+          user_id: currentUser.id,
+          total: effectiveGrand,
+          payment_method: payment,
+          address_id: safeUuidOrNull(selectedAddr?.id),
+          notes: noteParts,
+          service_type: "delivery",
+          delivery_zone: zone.id ?? null,
+          wallet_applied: walletApplied,
+          wallet_shortfall: walletShortfall,
+          secondary_payment: isSplit ? secondaryPayment : null,
+          total_cashback: payment === "wallet" ? totalCashback : 0,
+          change_remainder: showChangeJar ? changeRemainder : 0,
+          save_change: showChangeJar && saveChange && !donateChange,
+          donate_change: showChangeJar && donateChange,
+          tip,
+          promo_code: appliedPromo?.code ?? null,
+          discount,
+          // Phase 13.1 financial fields
+          tip_amount: tip,
+          charity_amount: charity,
+          charity_cause_id: charity > 0 ? charityCauseId : null,
+          is_gift: giftMode,
+          gift_message: giftMode ? (giftMessage || null) : null,
+          upfront_payment_required: 0,
+          upfront_payment_collected: 0,
+          // Single-wave fulfillment (smart split is a later UI phase)
+          fulfillments: [
+            {
+              sequence: 1,
+              status: "pending",
+              delivery_method_id: deliveryMethod?.id ?? null,
+              scheduled_for: null,
+              eta_minutes: logisticsQuote?.etaMinutes ?? null,
+              delivery_fee: effectiveDelivery,
+              notes: null,
+              items: orderItems,
+            },
+          ],
         });
 
         if (!result.ok || !result.orderId) {
