@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { tierProgress } from "@/lib/tiers";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { formatCustomerId } from "@/features/account/lib/customerId";
 import AccountActionGrid from "@/features/account/components/AccountActionGrid";
 import AccountTierCard from "@/features/account/components/AccountTierCard";
 import AccountWalletRail from "@/features/account/components/AccountWalletRail";
@@ -25,6 +27,7 @@ type KycStatus = "pending" | "verified" | "rejected" | null;
 const Account = () => {
   const { resolvedMode } = useTheme();
   const { user, profile, signOut, isInitializing } = useAuth();
+  const { roles } = useUserRoles();
   const nav = useNavigate();
   const [points, setPoints] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -123,6 +126,8 @@ const Account = () => {
         points={points}
         balance={balance}
         ordersCount={ordersCount}
+        roles={roles}
+        customerId={formatCustomerId(user.id)}
       />
 
       <AccountWalletRail balance={balance} points={points} />
