@@ -1,10 +1,8 @@
 import {
-  Heart,
   Loader2,
   PieChart as PieIcon,
   Users,
   Wallet2,
-  PiggyBank,
   Target,
   Send,
   Plus,
@@ -20,32 +18,27 @@ import { ActionGrid, type WalletAction } from "@/features/wallet/components/Acti
 import { WalletTabs } from "@/features/wallet/components/WalletTabs";
 import { MiniStatGrid } from "@/features/wallet/components/WalletActionGrid";
 import { WalletTransactionList } from "@/features/wallet/components/WalletTransactionList";
-import {
-  SavingsJarTile,
-  SavingsJarDialog,
-} from "@/features/wallet/components/WalletSavingsJars";
+import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
 import {
   SpendingDonut,
   AIAdvisor,
   BudgetTracker,
 } from "@/features/wallet/components/WalletAnalytics";
-import { WalletAffiliateHub } from "@/features/wallet/components/WalletAffiliateHub";
 import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialog";
 import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
-import { WalletCharityHub } from "@/features/wallet/components/WalletCharityHub";
 import { GameyasTab } from "@/features/wallet/components/GameyasTab";
 import { VaultsGrid } from "@/features/wallet/components/VaultsGrid";
+import { NetWorthCard } from "@/features/wallet/components/NetWorthCard";
 
 /**
- * Wallet — Phase 13.13 Halal Neo-Bank UI.
+ * Wallet — Phase 13.16 Halal Neo-Bank rebuild.
  *
- * Hierarchy (Mobile-first, edge-safe `px-4 lg:px-8`):
- *   1. Holographic IBAN-style super card (Papara-grade glassmorphism).
+ * 4-segment hierarchy (Mobile-first, edge-safe `px-4 lg:px-8`):
+ *   1. Holographic IBAN super-card carousel.
  *   2. Fintech action ribbon (Send · Topup · Cashback · QR Pay).
- *   3. Segmented control: Ledger · Gam'eyas · Vaults · Charity · Analytics · Partners.
- *
- * All payment methods now arrive from a stem-cell layer (no in-memory arrays).
+ *   3. Segmented control: العمليات · الجمعيات · حصّالاتي · تحليلات.
+ *   4. Personal CFO panel (NetWorth + SpendingDonut + AIAdvisor).
  */
 const Wallet = () => {
   const c = useWalletDashboard();
@@ -78,7 +71,6 @@ const Wallet = () => {
 
   return (
     <div className="relative min-h-screen w-full bg-gradient-to-b from-background via-background/95 to-muted/20">
-      {/* Ambient theme glow blobs */}
       <div
         aria-hidden
         className="pointer-events-none absolute -top-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
@@ -101,7 +93,7 @@ const Wallet = () => {
               محفظتي
             </h1>
             <p className="mt-1 text-xs text-muted-foreground">
-              بنكك الرقمي الإسلامي · جمعيات · حصّالات · شركاء النجاح
+              بنكك الرقمي الإسلامي · جمعيات · حصّالات · مدير مالي شخصي
             </p>
           </div>
           {c.tier && (
@@ -111,7 +103,7 @@ const Wallet = () => {
           )}
         </motion.section>
 
-        {/* SWIPEABLE SUPER-CARDS CAROUSEL (full-bleed) */}
+        {/* SUPER-CARDS CAROUSEL */}
         <div className="-mx-4 lg:-mx-8">
           <BalanceCardsCarousel
             name={c.profile?.full_name || "عميل ريف"}
@@ -129,14 +121,12 @@ const Wallet = () => {
         {/* FINTECH ACTION RIBBON */}
         <ActionGrid actions={actions} />
 
-        {/* SEGMENTED CONTROL */}
+        {/* 4-SEGMENT NAV */}
         <WalletTabs
           tabs={[
             { id: "balance", label: "العمليات", icon: Wallet2 },
             { id: "gameyas", label: "الجمعيات", icon: Users },
             { id: "vaults", label: "حصّالاتي", icon: Target },
-            { id: "savings", label: "ذكية", icon: PiggyBank },
-            { id: "charity", label: "صدقات", icon: Heart },
             { id: "budgets", label: "تحليلات", icon: PieIcon },
           ]}
           active={c.tab}
@@ -170,7 +160,7 @@ const Wallet = () => {
               exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.25 }}
             >
-              <GameyasTab />
+              <GameyasTab userId={c.userId} />
             </motion.div>
           )}
 
@@ -195,6 +185,10 @@ const Wallet = () => {
               transition={{ duration: 0.25 }}
               className="space-y-5"
             >
+              <NetWorthCard
+                walletBalance={Number(c.balance?.balance ?? 0)}
+                userId={c.userId}
+              />
               <SpendingDonut stats={c.categoryStats} />
               <AIAdvisor monthByCat={c.monthByCat} budgets={c.budgets} />
               <BudgetTracker
@@ -202,49 +196,6 @@ const Wallet = () => {
                 monthByCat={c.monthByCat}
                 budgets={c.budgets}
                 onChange={c.setBudgets}
-              />
-            </motion.div>
-          )}
-
-          {c.tab === "savings" && (
-            <motion.div
-              key="savings"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <SavingsJarTile jar={c.jar} onOpen={() => c.setShowJar(true)} />
-            </motion.div>
-          )}
-
-          {c.tab === "charity" && (
-            <motion.div
-              key="charity"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <WalletCharityHub walletBalance={Number(c.balance?.balance ?? 0)} />
-            </motion.div>
-          )}
-
-          {c.tab === "affiliate" && (
-            <motion.div
-              key="affiliate"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <WalletAffiliateHub
-                userId={c.userId}
-                code={c.referralCode}
-                referrals={c.referrals}
-                totalCommission={c.totalCommission}
-                successfulRefs={c.successfulRefs}
-                onEnsureCode={c.ensureReferralCode}
               />
             </motion.div>
           )}
