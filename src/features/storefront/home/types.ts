@@ -1,11 +1,24 @@
 /**
  * Home Storefront — domain types.
  *
- * Pure type definitions extracted from the legacy `pages/store/Home.tsx`
- * monolith. No runtime, no React. Safe to import anywhere.
+ * `HGProduct` is now a thin **view-model** derived from a Supabase
+ * `Product` row + its `metadata` (Phase 11.2 — Single Source of Truth
+ * migration). All UI fields the legacy components used (tagline, badges,
+ * fulfillment, depositPct, etaDays, warranty, reviews) are read from
+ * `metadata` via the mapper in `./mapper.ts`.
+ *
+ * `CatId` is now `string` because category labels live in the DB
+ * (`sub_category`) — the FILTER mapping in `./dictionaries.ts` matches
+ * each pill to the actual sub_category strings.
  */
 
-export type CatId = "all" | "majors" | "small" | "kitchen" | "clean" | "decor";
+export type CatId =
+  | "all"
+  | "majors"
+  | "small"
+  | "kitchen"
+  | "clean"
+  | "decor";
 
 export type Fulfillment = "instant" | "preorder";
 
