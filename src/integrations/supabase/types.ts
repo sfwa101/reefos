@@ -2330,6 +2330,68 @@ export type Database = {
           },
         ]
       }
+      kyc_limits: {
+        Row: {
+          created_at: string
+          daily_transfer_limit: number
+          id: string
+          max_balance: number
+          monthly_transfer_limit: number
+          tier_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_transfer_limit?: number
+          id?: string
+          max_balance?: number
+          monthly_transfer_limit?: number
+          tier_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_transfer_limit?: number
+          id?: string
+          max_balance?: number
+          monthly_transfer_limit?: number
+          tier_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "kyc_limits_tier_id_fkey"
+            columns: ["tier_id"]
+            isOneToOne: true
+            referencedRelation: "kyc_tiers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      kyc_tiers: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          level: number
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          level: number
+          name: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          level?: number
+          name?: string
+        }
+        Relationships: []
+      }
       kyc_verifications: {
         Row: {
           back_image_path: string | null
@@ -2808,6 +2870,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      payment_methods: {
+        Row: {
+          brand: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default: boolean
+          kind: Database["public"]["Enums"]["payment_method_kind"]
+          label: string | null
+          last4: string | null
+          metadata: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          kind: Database["public"]["Enums"]["payment_method_kind"]
+          label?: string | null
+          last4?: string | null
+          metadata?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          brand?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default?: boolean
+          kind?: Database["public"]["Enums"]["payment_method_kind"]
+          label?: string | null
+          last4?: string | null
+          metadata?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       permissions: {
         Row: {
@@ -3811,6 +3915,51 @@ export type Database = {
           id?: string
           kind?: string
           label?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      scheduled_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          frequency: Database["public"]["Enums"]["scheduled_transfer_frequency"]
+          id: string
+          is_active: boolean
+          last_run_at: string | null
+          next_run_at: string
+          purpose: Database["public"]["Enums"]["scheduled_transfer_purpose"]
+          recipient_id: string | null
+          reference_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          frequency: Database["public"]["Enums"]["scheduled_transfer_frequency"]
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at: string
+          purpose?: Database["public"]["Enums"]["scheduled_transfer_purpose"]
+          recipient_id?: string | null
+          reference_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          frequency?: Database["public"]["Enums"]["scheduled_transfer_frequency"]
+          id?: string
+          is_active?: boolean
+          last_run_at?: string | null
+          next_run_at?: string
+          purpose?: Database["public"]["Enums"]["scheduled_transfer_purpose"]
+          recipient_id?: string | null
+          reference_id?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -5498,6 +5647,15 @@ export type Database = {
         Args: { _product_id: string; _qty: number; _unit_code: string }
         Returns: number
       }
+      create_gam_eya: {
+        Args: {
+          _cycle_amount: number
+          _max_members: number
+          _name: string
+          _starts_at?: string
+        }
+        Returns: string
+      }
       current_mega_event: { Args: never; Returns: Json }
       current_user_branch_id: { Args: never; Returns: string }
       current_user_role: {
@@ -5550,6 +5708,10 @@ export type Database = {
           score: number
         }[]
       }
+      get_user_daily_transfer_limit: {
+        Args: { _user_id?: string }
+        Returns: number
+      }
       get_user_kyc_level: { Args: { _user_id?: string }; Returns: number }
       group_buy_current_price: {
         Args: { _campaign_id: string }
@@ -5594,6 +5756,14 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      join_gam_eya: {
+        Args: {
+          _gam_eya_id: string
+          _guarantor_id?: string
+          _turn_number: number
+        }
+        Returns: string
+      }
       log_behavior: {
         Args: {
           _category?: string
@@ -5619,6 +5789,10 @@ export type Database = {
       order_has_vendor_store: {
         Args: { _order_id: string; _user_id: string }
         Returns: boolean
+      }
+      pay_gam_eya_installment: {
+        Args: { _installment_id: string }
+        Returns: Json
       }
       payments_schedule: { Args: { _days_ahead?: number }; Returns: Json }
       personalized_flash_picks: {
@@ -5804,12 +5978,20 @@ export type Database = {
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
+      payment_method_kind:
+        | "card"
+        | "wallet"
+        | "bank"
+        | "vodafone_cash"
+        | "instapay"
       rail_frequency_tag:
         | "NONE"
         | "DAILY_FLASH"
         | "SEMI_WEEKLY_FRESH"
         | "WEEKLY_BIG"
         | "MONTHLY_PANTRY"
+      scheduled_transfer_frequency: "weekly" | "monthly"
+      scheduled_transfer_purpose: "gam_eya" | "savings" | "p2p" | "vault"
       shared_cart_approval: "pending" | "approved" | "rejected"
       shared_cart_role: "owner" | "contributor"
       shared_cart_split_type: "percentage" | "fixed" | "itemized"
@@ -5980,6 +6162,13 @@ export const Constants = {
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
+      payment_method_kind: [
+        "card",
+        "wallet",
+        "bank",
+        "vodafone_cash",
+        "instapay",
+      ],
       rail_frequency_tag: [
         "NONE",
         "DAILY_FLASH",
@@ -5987,6 +6176,8 @@ export const Constants = {
         "WEEKLY_BIG",
         "MONTHLY_PANTRY",
       ],
+      scheduled_transfer_frequency: ["weekly", "monthly"],
+      scheduled_transfer_purpose: ["gam_eya", "savings", "p2p", "vault"],
       shared_cart_approval: ["pending", "approved", "rejected"],
       shared_cart_role: ["owner", "contributor"],
       shared_cart_split_type: ["percentage", "fixed", "itemized"],
