@@ -2547,6 +2547,45 @@ export type Database = {
           },
         ]
       }
+      product_requests: {
+        Row: {
+          barcode: string | null
+          created_at: string
+          description: string | null
+          id: string
+          image_url: string | null
+          product_name: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          barcode?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          product_name: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          barcode?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          image_url?: string | null
+          product_name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       product_units: {
         Row: {
           conversion_factor: number
