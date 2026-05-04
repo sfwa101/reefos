@@ -54,6 +54,7 @@ const AppShell = () => {
         {!hideCartPanel && <CartPanel />}
       </div>
       {!hideTabBar && <TabBar />}
+      <BarcodeScannerModal />
     </div>
   );
 };
