@@ -1,12 +1,24 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
-import { Search as SearchIcon, X, PackageSearch, SlidersHorizontal, ArrowUpDown, Star, CheckCircle2 } from "lucide-react";
+import {
+  Search as SearchIcon,
+  X,
+  PackageSearch,
+  SlidersHorizontal,
+  ArrowUpDown,
+  Star,
+  CheckCircle2,
+  ScanBarcode,
+  Clock,
+  Sparkles,
+  TrendingUp,
+} from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { products, useProducts, useProductsVersion, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
-import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
-import { useUniversalSearch } from "@/modules/search";
+import { useUniversalSearch, useSearchHistory } from "@/modules/search";
+import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
