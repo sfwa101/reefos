@@ -5920,11 +5920,27 @@ export type Database = {
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       join_gam_eya: {
         Args: {
-          _gam_eya_id: string
+          _circle_id: string
           _guarantor_id?: string
           _turn_number: number
         }
         Returns: string
+      }
+      list_open_gam_eyas: {
+        Args: never
+        Returns: {
+          cycle_amount: number
+          cycle_duration_months: number
+          id: string
+          is_member: boolean
+          max_members: number
+          members_count: number
+          min_kyc_tier: number
+          name: string
+          reward_pool: number
+          starts_at: string
+          status: string
+        }[]
       }
       log_behavior: {
         Args: {
