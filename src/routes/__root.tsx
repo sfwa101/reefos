@@ -126,6 +126,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <LocaleProvider>
         <UIProvider>
           <TooltipProvider>
             <AuthProvider>
