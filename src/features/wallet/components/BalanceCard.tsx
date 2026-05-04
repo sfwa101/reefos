@@ -35,13 +35,20 @@ export const BalanceCard = ({
   balance,
   trustLimit,
   tierLabel,
+  userId,
 }: {
   name: string;
   balance: number;
   trustLimit: number;
   tierLabel?: string;
+  userId?: string | null;
 }) => {
   const ref = useRef<HTMLDivElement | null>(null);
+  const accountNo = buildAccountNumber(userId);
+  const copyAccount = async () => {
+    await navigator.clipboard.writeText(accountNo);
+    toast.success("تم نسخ رقم الحساب");
+  };
 
   // Pointer position normalized to [-0.5, 0.5]
   const px = useMotionValue(0);
