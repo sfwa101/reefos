@@ -7,6 +7,8 @@ import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { tierProgress } from "@/lib/tiers";
+import { useUserRoles } from "@/hooks/useUserRoles";
+import { formatCustomerId } from "@/features/account/lib/customerId";
 import AccountActionGrid from "@/features/account/components/AccountActionGrid";
 import AccountTierCard from "@/features/account/components/AccountTierCard";
 import AccountWalletRail from "@/features/account/components/AccountWalletRail";
