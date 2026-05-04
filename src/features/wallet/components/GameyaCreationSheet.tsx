@@ -6,7 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toLatin } from "@/lib/format";
 
 const AMOUNT_PRESETS = [500, 1000, 2000, 5000];
-const MEMBERS_PRESETS = [4, 6, 8, 12];
+const DURATION_PRESETS = [6, 10, 12];
 
 /**
  * GameyaCreationSheet — bottom-sheet form to open a new ROSCA circle.
