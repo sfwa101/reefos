@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { OptimizedImage } from "@/components/ui/OptimizedImage";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
