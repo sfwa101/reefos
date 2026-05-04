@@ -332,7 +332,6 @@ export class PricingEngine {
   }
 }
 
-const round = (n: number): number => Math.round(n * 100) / 100;
 
 /* ===================================================================
  * Default singleton — strategies are wired in a separate `bootstrap.ts`
