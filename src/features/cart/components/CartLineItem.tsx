@@ -1,9 +1,12 @@
 import { memo, useMemo, useState } from "react";
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "framer-motion";
-import { CalendarDays, Minus, Pencil, Plus, Trash2, X } from "lucide-react";
+import { CalendarDays, Minus, Pencil, Plus, Trash2, X, Wallet, Tag, Snowflake } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import type { Product } from "@/lib/products";
-import type { CartLineMeta } from "@/context/CartContext";
+import {
+  type CartLineMeta,
+  useCartLineBreakdown,
+} from "@/context/CartContext";
 import {
   bookingTimeSlots,
   buildBookingDays,
