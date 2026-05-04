@@ -80,6 +80,12 @@ const BasicInfoForm = ({
         <input value={form.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
       </Field>
 
+      <SmartTagSuggester
+        productName={form.name}
+        aliases={aliases}
+        onChange={setAliases}
+      />
+
       <div className="grid grid-cols-2 gap-3">
         <Field label="القسم *">
           <select value={form.source} onChange={(e) => update("source", e.target.value)} className={inputCls}>
