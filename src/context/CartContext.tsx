@@ -101,6 +101,8 @@ type CartCtxValue = {
   getSnapshot: () => CartLine[];
   /** Stable ref of actions. */
   actions: CartActions;
+  /** Current customer tier (read inside selectors via ref). */
+  getTier: () => CustomerTier;
 };
 
 const Ctx = createContext<CartCtxValue | null>(null);
