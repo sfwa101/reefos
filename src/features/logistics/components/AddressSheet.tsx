@@ -39,6 +39,7 @@ const BUILDING_TYPES: { id: BuildingType; label: string }[] = [
 
 export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
   const { user } = useAuth();
+  useHardwareBackModal(open, () => onOpenChange(false));
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [label, setLabel] = useState("المنزل");
