@@ -16,7 +16,7 @@ import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
 import { BalanceCardsCarousel } from "@/features/wallet/components/BalanceCardsCarousel";
 import { ActionGrid, type WalletAction } from "@/features/wallet/components/ActionGrid";
 import { WalletTabs } from "@/features/wallet/components/WalletTabs";
-import { MiniStatGrid } from "@/features/wallet/components/WalletActionGrid";
+import { MiniStatGrid } from "@/features/wallet/components/MiniStatGrid";
 import { WalletTransactionList } from "@/features/wallet/components/WalletTransactionList";
 import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
 import {
