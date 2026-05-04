@@ -554,6 +554,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     sharedReject: shared.reject,
     sharedCancel: shared.cancelCart,
     sharedMarkCompleted: shared.markCompleted,
+    // Logistics engine surface (Phase 12.7)
+    logisticsQuote,
+    logisticsBlocked,
+    effectiveDelivery,
+    effectiveGrand,
+    codAllowed,
   };
 };
 
