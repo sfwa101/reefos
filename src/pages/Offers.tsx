@@ -1,15 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import ProductCard from "@/components/ProductCard";
 import { products, useProductsVersion } from "@/lib/products";
-import { Tag, Gift, Percent, Sparkles, Flame, Clock } from "lucide-react";
-import { toLatin } from "@/lib/format";
-
-const promoCards = [
-  { title: "عميل جديد", desc: "خصم 20٪", code: "WELCOME20", icon: Sparkles, bg: "from-primary to-primary/70" },
-  { title: "توصيل مجاني", desc: "أول طلبين", code: "FREESHIP", icon: Gift, bg: "from-amber-500 to-orange-400" },
-  { title: "خصم كاش", desc: "50 ج.م", code: "CASH50", icon: Tag, bg: "from-rose-500 to-pink-400" },
-  { title: "خصم الجملة", desc: "حتى 35٪", code: "BULK35", icon: Percent, bg: "from-blue-600 to-indigo-500" },
-];
+import ProductCard from "@/components/ProductCard";
+import DynamicHeroBanner from "@/features/offers/components/DynamicHeroBanner";
+import PersonalizedDealsRail from "@/features/offers/components/PersonalizedDealsRail";
+import FlashSalesGrid from "@/features/offers/components/FlashSalesGrid";
+import BundleDealsRail, { type BundleDeal } from "@/features/offers/components/BundleDealsRail";
+import TierExclusiveOffers, { type TierOffer } from "@/features/offers/components/TierExclusiveOffers";
 
 const tabs = [
   { id: "all", label: "الكل" },
@@ -17,6 +13,8 @@ const tabs = [
   { id: "trending", label: "رائج" },
   { id: "discount", label: "تخفيضات" },
 ] as const;
+
+type TabId = typeof tabs[number]["id"];
 
 const useDailyCountdown = () => {
   const [left, setLeft] = useState("");
@@ -29,7 +27,9 @@ const useDailyCountdown = () => {
       const h = Math.floor(diff / 36e5);
       const m = Math.floor((diff % 36e5) / 6e4);
       const s = Math.floor((diff % 6e4) / 1e3);
-      setLeft(`${toLatin(String(h).padStart(2, "0"))}:${toLatin(String(m).padStart(2, "0"))}:${toLatin(String(s).padStart(2, "0"))}`);
+      setLeft(
+        `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`,
+      );
     };
     tick();
     const i = setInterval(tick, 1000);
@@ -40,79 +40,88 @@ const useDailyCountdown = () => {
 
 const Offers = () => {
   const _pv = useProductsVersion();
-  const [tab, setTab] = useState<typeof tabs[number]["id"]>("all");
+  const [tab, setTab] = useState<TabId>("all");
   const countdown = useDailyCountdown();
 
   const discounted = useMemo(() => products.filter((p) => p.oldPrice), [_pv]);
   const flashSale = useMemo(() => discounted.slice(0, 4), [discounted]);
+  const personalized = useMemo(() => discounted.slice(4, 10), [discounted]);
+
+  const bundles: BundleDeal[] = useMemo(
+    () => [
+      { id: "b1", title: "باقة الإفطار العائلي", subtitle: "وفر 18٪", priceLabel: "ابدأ من 149 ج" },
+      { id: "b2", title: "باقة المخبوزات", subtitle: "وفر 22٪", priceLabel: "ابدأ من 89 ج" },
+    ],
+    [],
+  );
+
+  const tierOffers: TierOffer[] = useMemo(
+    () => [
+      { id: "t1", title: "خصم 15٪ على اللحوم", tier: "silver", description: "كل أسبوع" },
+      { id: "t2", title: "توصيل VIP مجاني", tier: "gold" },
+      { id: "t3", title: "كاشباك مضاعف", tier: "platinum" },
+    ],
+    [],
+  );
 
   const filtered = useMemo(() => {
     const onSale = new Set(discounted.map((p) => p.id));
-    const featured = products.filter((p) => onSale.has(p.id) || p.badge === "best" || p.badge === "trending");
+    const featured = products.filter(
+      (p) => onSale.has(p.id) || p.badge === "best" || p.badge === "trending",
+    );
     if (tab === "all") return featured;
     if (tab === "discount") return discounted;
     return featured.filter((p) => p.badge === tab);
   }, [tab, discounted, _pv]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 px-4 lg:px-8" dir="rtl">
       <section className="animate-float-up">
         <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight">العروض</h1>
         <p className="mt-1 text-xs text-muted-foreground">خصومات اليوم من جميع الأقسام</p>
       </section>
 
-      <section className="relative overflow-hidden rounded-[1.75rem] p-5 shadow-tile" style={{ background: "linear-gradient(135deg, hsl(0 65% 45%), hsl(20 70% 55%))" }}>
-        <div className="absolute -bottom-12 -right-10 h-44 w-44 rounded-full bg-white/15 blur-3xl" />
-        <div className="relative">
-          <div className="flex items-center gap-2 text-[10px] font-bold text-white/90"><Flame className="h-3 w-3" /> عرض الفلاش</div>
-          <h2 className="mt-1 font-display text-2xl font-extrabold text-white text-balance">خصومات حتى 40٪</h2>
-          <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-white/20 px-3 py-1.5 text-xs font-bold text-white">
-            <Clock className="h-3.5 w-3.5" /> ينتهي خلال <span className="tabular-nums">{countdown}</span>
-          </div>
-        </div>
-      </section>
+      <DynamicHeroBanner countdown={countdown} />
 
-      <section>
-        <h3 className="mb-3 px-1 font-display text-base font-extrabold">عروض الفلاش</h3>
-        <div className="grid grid-cols-2 gap-3">
-          {flashSale.map((p) => <ProductCard key={p.id} product={p} />)}
-        </div>
-      </section>
+      <PersonalizedDealsRail items={personalized} />
 
-      <section className="grid grid-cols-2 gap-3">
-        {promoCards.map((c, i) => {
-          const Icon = c.icon;
-          return (
-            <div key={i} className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${c.bg} p-4 text-white shadow-tile`}>
-              <Icon className="absolute -bottom-3 -left-2 h-20 w-20 text-white/15" />
-              <p className="text-[10px] font-bold opacity-90">{c.title}</p>
-              <p className="font-display text-xl font-extrabold">{c.desc}</p>
-              <p className="mt-2 inline-block rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-bold">{c.code}</p>
-            </div>
-          );
-        })}
-      </section>
+      <FlashSalesGrid items={flashSale} />
+
+      <BundleDealsRail bundles={bundles} />
+
+      <TierExclusiveOffers offers={tierOffers} userTier="bronze" />
 
       <section className="space-y-3">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
           {tabs.map((t) => {
             const active = t.id === tab;
             return (
-              <button key={t.id} onClick={() => setTab(t.id)} className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold transition ${active ? "bg-primary text-primary-foreground shadow-pill" : "bg-foreground/5"}`}>
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold transition ${
+                  active ? "bg-primary text-primary-foreground shadow-pill" : "bg-foreground/5"
+                }`}
+              >
                 {t.label}
               </button>
             );
           })}
         </div>
         {filtered.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">لا توجد عروض في هذا القسم حالياً</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">
+            لا توجد عروض في هذا القسم حالياً
+          </p>
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
+            {filtered.map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
           </div>
         )}
       </section>
     </div>
   );
 };
+
 export default Offers;
