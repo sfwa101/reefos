@@ -168,7 +168,7 @@ const PaletteSection = ({
               style={{ background: p.swatch }}
             >
               {isActive && (
-                <div className="rounded-full bg-white/90 p-1 shadow">
+                <div className="rounded-full bg-background/90 p-1 shadow">
                   <Check className="h-3.5 w-3.5 text-foreground" strokeWidth={3} />
                 </div>
               )}
