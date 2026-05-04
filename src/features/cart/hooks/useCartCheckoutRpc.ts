@@ -87,7 +87,7 @@ const friendlyRpcError = (msg: string): string => {
     return "لقد تجاوزت حد التحويل المسموح لك.";
   if (msg.includes("unauthorized")) return "غير مصرح";
   if (msg.toLowerCase().includes("uuid")) return "بيانات العنوان غير صالحة";
-  return "تعذر إنشاء الطلب، حاول مرة أخرى";
+  return "DB Error: " + msg;
 };
 
 /**
