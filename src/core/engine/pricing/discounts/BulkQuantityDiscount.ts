@@ -26,6 +26,7 @@ import type {
   PricingContext,
   PricingModifier,
 } from "../types";
+import { isExcludedFromDiscounts } from "../utils/exclusions";
 
 export interface BulkTier {
   readonly minQty: number;
@@ -60,7 +61,8 @@ export class BulkQuantityDiscount implements IDiscountRule {
     return winner;
   }
 
-  isApplicable(breakdown: PriceBreakdown, _context: PricingContext): boolean {
+  isApplicable(breakdown: PriceBreakdown, context: PricingContext): boolean {
+    if (isExcludedFromDiscounts(context)) return false;
     const qty = this.resolveQty(breakdown);
     return this.bestTier(qty) !== null;
   }

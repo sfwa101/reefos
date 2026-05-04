@@ -27,6 +27,7 @@ import type {
   PricingContext,
   PricingModifier,
 } from "../types";
+import { isExcludedFromDiscounts } from "../utils/exclusions";
 
 const TIER_PCT: Readonly<Record<CustomerTierKey, number>> = {
   guest: 0,
@@ -41,6 +42,7 @@ export class LoyaltyTierDiscount implements IDiscountRule {
   readonly key = "loyalty-tier";
 
   isApplicable(_breakdown: PriceBreakdown, context: PricingContext): boolean {
+    if (isExcludedFromDiscounts(context)) return false;
     const tier = context.customerTier;
     if (!tier) return false;
     return TIER_PCT[tier] > 0;

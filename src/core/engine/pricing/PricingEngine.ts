@@ -17,6 +17,7 @@
 import type { Product } from "@/lib/products";
 import {
   PricingEngineError,
+  DEFAULT_COST_RATIO,
   type IDiscountRule,
   type IPricingStrategy,
   type IRewardRule,
@@ -25,6 +26,18 @@ import {
   type PricingModifier,
   type PricingSelection,
 } from "./types";
+import { LossPreventionRule } from "./guardrails/LossPreventionRule";
+
+const lossPreventionRule = new LossPreventionRule();
+
+/** Reads `product.metadata.costPrice` (per-unit) when present. */
+function readCostPerUnit(product: Product): number | null {
+  const meta = (product as { metadata?: Readonly<Record<string, unknown>> })
+    .metadata;
+  if (!meta) return null;
+  const v = meta["costPrice"];
+  return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : null;
+}
 
 const round = (n: number): number => Math.round(n * 100) / 100;
 
@@ -123,9 +136,27 @@ function foldModifiers(
     discountTotal,
     grandTotal,
     pointsEarned: 0,
+    costPrice: 0,
+    netProfit: 0,
+    isLossPreventionTriggered: false,
     appliedModifiers: modifiers,
     strategyKey,
   };
+}
+
+/**
+ * Phase 9 — derive the cost basis for a line. Uses explicit
+ * `metadata.costPrice` when present, otherwise falls back to the
+ * configured `DEFAULT_COST_RATIO` of the post-discount unit price.
+ */
+function deriveCostPrice(
+  product: Product,
+  unitPrice: number,
+  qty: number,
+): number {
+  const explicit = readCostPerUnit(product);
+  const perUnit = explicit ?? unitPrice * DEFAULT_COST_RATIO;
+  return round(perUnit * qty);
 }
 
 /* ===================================================================
@@ -279,9 +310,28 @@ export class PricingEngine {
         ...(bonusPoints > 0 ? { bonusPoints } : {}),
       };
     }
+
+    // Phase 9 — Profit awareness. Cost basis comes from
+    // `metadata.costPrice` or falls back to DEFAULT_COST_RATIO.
+    const costPrice = deriveCostPrice(
+      input.product,
+      base.unitPrice,
+      input.selection.quantity,
+    );
+    current = {
+      ...current,
+      costPrice,
+      netProfit: round(current.grandTotal - costPrice),
+    };
+
+    // Phase 9 — Final guardrail. Original (pre-discount) line total
+    // equals the freshly-folded `base.lineTotal` (no discount rules
+    // had run at that point).
+    current = lossPreventionRule.evaluate(current, context, base.lineTotal);
     return current;
   }
 }
+
 
 /* ===================================================================
  * Default singleton — strategies are wired in a separate `bootstrap.ts`

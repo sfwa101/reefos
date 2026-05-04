@@ -20,6 +20,7 @@ import { SharedCartManager } from "@/features/cart/components/SharedCartManager"
 import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallbackDialog";
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
 import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
+import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
 import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
@@ -201,6 +202,8 @@ const Cart = () => {
         </div>
         <span className="rounded-full bg-foreground/5 px-2 py-0.5 text-[10px] font-extrabold text-muted-foreground">نطاق {o.zone.id}</span>
       </div>
+
+      <CartIncentiveProgress subtotal={o.subtotal} />
 
       <CartLoyaltyBar />
 
