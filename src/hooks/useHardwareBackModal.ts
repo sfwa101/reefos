@@ -30,10 +30,6 @@ export const useHardwareBackModal = (isOpen: boolean, onClose: () => void): void
 
     return () => {
       window.removeEventListener("popstate", handlePop);
-      const current = window.history.state as { __modalSentinel?: boolean } | null;
-      if (current && current.__modalSentinel) {
-        window.history.back();
-      }
     };
   }, [isOpen]);
 };

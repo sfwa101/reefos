@@ -9,7 +9,6 @@
  */
 import { useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
-import { useHardwareBackModal } from "@/hooks/useHardwareBackModal";
 import { Loader2, MapPin, Check, Building2, Home, Briefcase, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -39,7 +38,7 @@ const BUILDING_TYPES: { id: BuildingType; label: string }[] = [
 
 export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
   const { user } = useAuth();
-  useHardwareBackModal(open, () => onOpenChange(false));
+  // useHardwareBackModal(open, () => onOpenChange(false));
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
   const [label, setLabel] = useState("المنزل");
