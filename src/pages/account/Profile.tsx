@@ -144,7 +144,7 @@ const Profile = () => {
 
   if (loading && !forceReady) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-4">
         <BackHeader title="ملفي الذكي" subtitle="جاري تجهيز ملفك" accent="حسابي" />
         <div className="h-44 animate-pulse rounded-[2rem] bg-card shadow-soft" />
         <div className="h-72 animate-pulse rounded-[1.6rem] bg-card shadow-soft" />
