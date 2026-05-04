@@ -40,8 +40,8 @@ import LoyaltyProgress from "@/components/LoyaltyProgress";
 import InactivityNudger from "@/components/InactivityNudger";
 import FlashSalesRail from "@/components/FlashSalesRail";
 
-import { LayoutFactory } from "@/features/storefront/home/components/LayoutFactory";
-import { storeThemes } from "@/lib/storeThemes";
+import SmartGreeting from "@/features/main-hub/components/SmartGreeting";
+import DynamicStoryCircles from "@/features/main-hub/components/DynamicStoryCircles";
 
 const cv = { contentVisibility: "auto" as const, containIntrinsicSize: "1px 360px" };
 const RAIL_LIMIT = 12;
@@ -112,8 +112,9 @@ const HomePage = () => {
 
   return (
     <div className="space-y-6 bg-background px-4 pb-32 text-foreground" dir="rtl">
-      {/* SDUI HERO — admin-controlled order via /admin/design */}
-      <LayoutFactory pageKey="main_hub" theme={storeThemes.homeTools} />
+      {/* Native smart header — replaces parasitic LayoutFactory hero */}
+      <SmartGreeting />
+      <DynamicStoryCircles />
 
       {/* Contextual smart banners (DB-fed) */}
       <SmartBanners walletBalance={walletBalance} hasReferralCode={hasReferralCode} />
