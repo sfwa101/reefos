@@ -399,6 +399,7 @@ const SearchPage = () => {
           </div>
         </section>
       ))}
+      </div>
 
       {/* Filters sheet */}
       {filtersOpen && (
