@@ -220,6 +220,12 @@ const Wallet = () => {
             }}
           />
         )}
+        {showConvert && (
+          <WalletAssetConvertSheet
+            assets={assets}
+            onClose={() => setShowConvert(false)}
+          />
+        )}
       </AnimatePresence>
     </div>
   );
