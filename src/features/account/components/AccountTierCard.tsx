@@ -39,15 +39,19 @@ const AccountTierCard = ({
   roles, customerId,
 }: Props) => {
   const v = TIER_VISUALS[tierKey] ?? TIER_VISUALS.bronze;
+  const navigate = useNavigate();
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <Link
-        to="/account/profile"
-        className="group relative block overflow-hidden rounded-[2rem] shadow-tile ring-1 ring-foreground/10"
+      <div
+        role="link"
+        tabIndex={0}
+        onClick={() => navigate({ to: "/account/profile" })}
+        onKeyDown={(e) => { if (e.key === "Enter") navigate({ to: "/account/profile" }); }}
+        className="group relative block cursor-pointer overflow-hidden rounded-[2rem] shadow-tile ring-1 ring-foreground/10"
         style={{ background: v.mesh, color: `hsl(${v.ink})`, contain: "layout paint" }}
         aria-label="بطاقة العميل وملف الولاء"
       >
