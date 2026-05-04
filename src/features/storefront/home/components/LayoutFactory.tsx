@@ -61,8 +61,8 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
     ) : null,
   CategoriesGrid: ({ orchestrator: o, theme }) =>
     o ? <CategoriesGrid cat={o.cat} setCat={o.setCat} hue={theme.hue} /> : null,
-  BundlesRail: ({ theme, showRails }) =>
-    showRails ? <BundlesRail hue={theme.hue} /> : null,
+  BundlesRail: ({ orchestrator: o, theme, showRails }) =>
+    showRails && o ? <BundlesRail catalog={o.catalog} hue={theme.hue} /> : null,
   BestSellersRail: ({ orchestrator: o, theme, showRails }) =>
     showRails && o ? (
       <BestSellersRail
