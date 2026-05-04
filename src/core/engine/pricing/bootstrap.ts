@@ -21,6 +21,7 @@ import { pricingEngine, type PricingEngine } from "./PricingEngine";
 import { MeatPricingStrategy } from "./strategies/MeatPricingStrategy";
 import { SweetsPricingStrategy } from "./strategies/SweetsPricingStrategy";
 import { WholesalePricingStrategy } from "./strategies/WholesalePricingStrategy";
+import { SupermarketPricingStrategy } from "./strategies/SupermarketPricingStrategy";
 import { LoyaltyTierDiscount } from "./discounts/LoyaltyTierDiscount";
 import { BulkQuantityDiscount } from "./discounts/BulkQuantityDiscount";
 import { PointsEarningRule } from "./rewards/PointsEarningRule";
@@ -35,11 +36,15 @@ let initialised = false;
 export function initPricingEngine(): PricingEngine {
   if (initialised) return pricingEngine;
 
-  // Strategies — order does not matter (Map keyed by `.key`).
+  // Strategies — registration ORDER matters for `canHandle` resolution.
+  // Specialised strategies first (meat, sweets, wholesale), then the
+  // universal supermarket fallback so any retail/piece SKU still gets
+  // loyalty discounts + reward points instead of being skipped.
   pricingEngine
     .registerStrategy(new MeatPricingStrategy())
     .registerStrategy(new SweetsPricingStrategy())
-    .registerStrategy(new WholesalePricingStrategy());
+    .registerStrategy(new WholesalePricingStrategy())
+    .registerStrategy(new SupermarketPricingStrategy());
 
   // Discount rules — order DOES matter (sequential application).
   // Loyalty first (broad % on line), then bulk (quantity-based) so that
