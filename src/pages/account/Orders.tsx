@@ -59,14 +59,15 @@ const Orders = () => {
     if (!o.order_items?.length) return;
     let added = 0;
     for (const it of o.order_items) {
-      const p = getById(it.product_id);
+      const pid = it.product_id ?? "";
+      const p = pid ? getById(pid) : undefined;
       if (p) {
         add(p, it.quantity);
         added++;
       } else {
         // Fallback: synthesize a minimal product so the user can still re-order custom items
         add({
-          id: it.product_id,
+          id: pid || `custom-${it.id}`,
           name: it.product_name,
           unit: "",
           price: Number(it.price),
