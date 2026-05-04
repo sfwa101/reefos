@@ -72,6 +72,12 @@ const TabBar = () => {
             <Link
               key={item.id}
               to={item.to}
+              onClick={(e) => {
+                if (item.to === "/" && pathname === "/") {
+                  e.preventDefault();
+                  window.scrollTo({ top: 0, behavior: "smooth" });
+                }
+              }}
               className="group flex flex-1 flex-col items-center gap-0.5 py-1.5"
               aria-label={item.label}
             >
