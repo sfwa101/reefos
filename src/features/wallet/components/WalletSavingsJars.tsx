@@ -326,7 +326,7 @@ export const SavingsJarDialog = ({
               }`}
             >
               <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-background shadow ring-1 ring-border/50 transition-all ${
                   autoSave ? "right-0.5" : "right-[calc(100%-1.375rem)]"
                 }`}
               />
