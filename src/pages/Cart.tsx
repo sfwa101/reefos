@@ -296,6 +296,25 @@ const Cart = () => {
             </p>
           </div>
         )}
+        {!isLocked && !hasPricingErrors && logisticsBlocked && (
+          <button
+            type="button"
+            onClick={() =>
+              toast.error(
+                logisticsQuote?.blockers[0]?.message ??
+                  "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
+              )
+            }
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-destructive/80 backdrop-blur-sm"
+          >
+            <Lock className="h-5 w-5 text-destructive-foreground" />
+            <p className="text-xs font-extrabold text-destructive-foreground">
+              {logisticsQuote?.blockers[0]?.code === "below_min_order"
+                ? `الحد الأدنى للمنطقة غير مكتمل`
+                : "غير متاح في منطقتك حالياً"}
+            </p>
+          </button>
+        )}
       </div>
 
       <AnimatePresence>
