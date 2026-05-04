@@ -53,6 +53,24 @@ const HomePage = () => {
   const [walletBalance, setWalletBalance] = useState(0);
   const [hasReferralCode, setHasReferralCode] = useState(false);
 
+  // Hardware Back override — if user scrolled down, scroll-to-top instead of exiting.
+  useEffect(() => {
+    const sentinel = { __homeScrollGuard: true };
+    window.history.pushState(sentinel, "", window.location.href);
+    const onPop = (_e: PopStateEvent) => {
+      if (window.scrollY > 0) {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+        window.history.pushState(sentinel, "", window.location.href);
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("popstate", onPop);
+      const cur = window.history.state as { __homeScrollGuard?: boolean } | null;
+      if (cur && cur.__homeScrollGuard) window.history.back();
+    };
+  }, []);
+
   // ─── DB sources ────────────────────────────────────────────────────
   const { data: catalog = [] } = useProductsQuery();
   const { products: buyAgain } = useBuyAgainProducts();
