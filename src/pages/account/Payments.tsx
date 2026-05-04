@@ -39,15 +39,16 @@ const Payments = () => {
       }
       // Stem-cell read — table may not exist yet; fall back gracefully.
       try {
-        const { data, error } = await supabase
-          // @ts-expect-error — table created in a later migration
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const sb = supabase as any;
+        const { data, error } = await sb
           .from("payment_methods")
           .select("id,kind,brand,last4,expires_label,is_default")
           .eq("user_id", uid)
           .order("is_default", { ascending: false });
         if (!mounted) return;
         if (!error && Array.isArray(data)) {
-          setList(data as unknown as PaymentMethod[]);
+          setList(data as PaymentMethod[]);
         }
       } catch {
         /* table not yet provisioned — empty state is fine */
