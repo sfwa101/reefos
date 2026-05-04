@@ -1,5 +1,5 @@
 import { useRef } from "react";
-import { ImageIcon, Loader2, Upload } from "lucide-react";
+import { ImageIcon, Loader2, Upload, ShieldCheck } from "lucide-react";
 import { Field, Label, Toggle, inputCls } from "./primitives";
 import { SOURCES, BADGES, type ProductRow, type ProductMetadata } from "./types";
 import SmartTagSuggester from "./SmartTagSuggester";
@@ -31,6 +31,24 @@ const BasicInfoForm = ({
       delete meta.aliases;
     } else {
       meta.aliases = next;
+    }
+    update("metadata", meta);
+  };
+
+  /* ---------------- Phase 10 — exclusion flags ---------------- */
+  const excludeFromDiscounts = form.metadata?.excludeFromDiscounts === true;
+  const excludeFromLoyalty = form.metadata?.excludeFromLoyalty === true;
+  const exclusionMessage =
+    typeof form.metadata?.exclusionMessage === "string"
+      ? form.metadata.exclusionMessage
+      : "";
+
+  const setMetaFlag = (key: keyof ProductMetadata, value: ProductMetadataValue) => {
+    const meta: ProductMetadata = { ...(form.metadata ?? {}) };
+    if (value === false || value === null || value === "" ) {
+      delete meta[key];
+    } else {
+      meta[key] = value;
     }
     update("metadata", meta);
   };
@@ -148,6 +166,37 @@ const BasicInfoForm = ({
           onChange={(v) => update("perishable", v ? true : null)}
           label="قابل للتلف"
         />
+      </div>
+
+      {/* ---------- Phase 10 — Exclusion Controls ---------- */}
+      <div className="rounded-2xl border border-amber-300/40 bg-amber-50/60 dark:bg-amber-950/15 p-3 space-y-3">
+        <div className="flex items-center gap-2 text-[12.5px] font-extrabold text-amber-800 dark:text-amber-300">
+          <ShieldCheck className="h-4 w-4" />
+          استثناءات السعر والولاء
+        </div>
+        <div className="flex flex-wrap items-center gap-3">
+          <Toggle
+            checked={excludeFromDiscounts}
+            onChange={(v) => setMetaFlag("excludeFromDiscounts", v ? true : null)}
+            label="استثناء من الخصومات"
+          />
+          <Toggle
+            checked={excludeFromLoyalty}
+            onChange={(v) => setMetaFlag("excludeFromLoyalty", v ? true : null)}
+            label="استثناء من نقاط الولاء"
+          />
+        </div>
+        {(excludeFromDiscounts || excludeFromLoyalty) && (
+          <Field label="رسالة الاستثناء (تظهر للعميل في السلة)">
+            <input
+              value={exclusionMessage}
+              onChange={(e) => setMetaFlag("exclusionMessage", e.target.value)}
+              placeholder="هذا المنتج يتمتع بأفضل سعر بيع مباشر…"
+              className={inputCls}
+              maxLength={120}
+            />
+          </Field>
+        )}
       </div>
     </div>
   );
