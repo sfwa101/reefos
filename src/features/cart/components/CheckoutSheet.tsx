@@ -45,6 +45,7 @@ const CHARITY_CAUSES = [
 
 export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocked }: Props) => {
   const navigate = useNavigate();
+  useHardwareBackModal(open, () => onOpenChange(false));
   const [giftMsgOpen, setGiftMsgOpen] = useState(false);
 
   // Interlocked running totals — each rail builds on the previous one.
