@@ -82,6 +82,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   // Phase 12.8 — Gift mode + Smart Fakka (charity)
   const [giftMode, setGiftMode] = useState<boolean>(false);
   const [giftMessage, setGiftMessage] = useState<string>("");
+  const [giftRecipientName, setGiftRecipientName] = useState<string>("");
+  const [giftRecipientPhone, setGiftRecipientPhone] = useState<string>("");
+  const [giftRecipientAddress, setGiftRecipientAddress] = useState<string>("");
   const [charity, setCharity] = useState<number>(0);
   const [charityCauseId, setCharityCauseId] = useState<string>("food");
 
@@ -306,6 +309,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         sweetsRules.hasBooking
           ? `يُدفع الآن من الحجوزات: ${fmtMoney(aggregateDeposit)}`
           : null,
+        giftMode && giftRecipientName ? `🎁 مستلم الهدية: ${giftRecipientName}` : null,
+        giftMode && giftRecipientPhone ? `هاتف المستلم: ${giftRecipientPhone}` : null,
+        giftMode && giftRecipientAddress ? `عنوان التسليم: ${giftRecipientAddress}` : null,
+        giftMode && giftMessage ? `رسالة الهدية: ${giftMessage}` : null,
       ]);
 
       const orderNum = `ORD-${Math.floor(10000 + Math.random() * 90000)}`;
@@ -606,6 +613,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setGiftMode,
     giftMessage,
     setGiftMessage,
+    giftRecipientName,
+    setGiftRecipientName,
+    giftRecipientPhone,
+    setGiftRecipientPhone,
+    giftRecipientAddress,
+    setGiftRecipientAddress,
     charity,
     setCharity,
     charityCauseId,

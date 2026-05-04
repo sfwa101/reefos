@@ -3,6 +3,13 @@ import { motion } from "framer-motion";
 import { Pencil } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { useFakkaCalculator } from "../hooks/useFakkaCalculator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Props = {
   title: string;
@@ -141,20 +148,29 @@ export const SmartFakkaRail = ({
 
       {causes && causes.length > 0 && value > 0 && onCauseChange && (
         <div className="mt-3">
-          <label className="mb-1 block text-[10px] font-bold text-muted-foreground">
+          <label className="mb-1.5 block text-[10px] font-bold text-muted-foreground">
             وجّه تبرعك إلى
           </label>
-          <select
+          <Select
             value={selectedCause ?? causes[0].id}
-            onChange={(e) => onCauseChange(e.target.value)}
-            className="w-full rounded-xl bg-foreground/5 px-3 py-2 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/40"
+            onValueChange={onCauseChange}
+            dir="rtl"
           >
-            {causes.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="h-11 w-full rounded-xl border-0 bg-foreground/5 text-sm font-bold focus:ring-2 focus:ring-rose-400/40">
+              <SelectValue placeholder="اختر باب التبرع" />
+            </SelectTrigger>
+            <SelectContent className="rounded-xl">
+              {causes.map((c) => (
+                <SelectItem
+                  key={c.id}
+                  value={c.id}
+                  className="text-sm font-bold"
+                >
+                  {c.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       )}
     </div>

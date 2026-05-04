@@ -60,7 +60,7 @@ export function calcFakkaSuggestions(runningTotal: number): FakkaOption[] {
       amount,
       resulting: target,
       step,
-      label: `+${fmt(amount)} ⇢ ${fmt(target)}`,
+      label: `${fmt(amount)} ج`,
     });
   }
   return out.sort((a, b) => a.amount - b.amount).slice(0, 3);

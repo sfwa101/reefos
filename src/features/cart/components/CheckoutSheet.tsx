@@ -56,6 +56,8 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
     if (hasPricingErrors) return "يوجد منتجات تحتاج إلى استكمال بياناتها";
     if (o.logisticsBlocked)
       return o.logisticsQuote?.blockers[0]?.message ?? "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل";
+    if (o.giftMode && (!o.giftRecipientName.trim() || !o.giftRecipientPhone.trim() || !o.giftRecipientAddress.trim()))
+      return "أكمل بيانات مستلم الهدية";
     return null;
   })();
 
@@ -129,6 +131,36 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                   exit={{ height: 0, opacity: 0 }}
                   className="mt-3 space-y-2 overflow-hidden"
                 >
+                  <div className="space-y-2 rounded-xl bg-rose-500/5 p-3 ring-1 ring-rose-400/20">
+                    <p className="text-[11px] font-extrabold text-rose-600">
+                      بيانات المستلم 🎀
+                    </p>
+                    <input
+                      type="text"
+                      value={o.giftRecipientName}
+                      onChange={(e) => o.setGiftRecipientName(e.target.value)}
+                      placeholder="اسم المستلم بالكامل"
+                      maxLength={80}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      value={o.giftRecipientPhone}
+                      onChange={(e) => o.setGiftRecipientPhone(e.target.value)}
+                      placeholder="هاتف المستلم"
+                      maxLength={20}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                    <textarea
+                      value={o.giftRecipientAddress}
+                      onChange={(e) => o.setGiftRecipientAddress(e.target.value)}
+                      placeholder="عنوان تسليم الهدية بالتفصيل"
+                      maxLength={300}
+                      rows={2}
+                      className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
+                    />
+                  </div>
                   <button
                     type="button"
                     onClick={() => setGiftMsgOpen((v) => !v)}
@@ -290,7 +322,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
           className="fixed inset-x-0 bottom-0 z-20 border-t border-border/40 bg-background/95 px-3 py-3 backdrop-blur"
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
         >
-          <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+          <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
             <button
               type="button"
               onClick={onSubmit}

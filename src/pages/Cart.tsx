@@ -18,6 +18,8 @@ import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingE
 import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { CheckoutSheet } from "@/features/cart/components/CheckoutSheet";
 import { PremiumProgressBar } from "@/features/cart/components/PremiumProgressBar";
+import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
+import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
@@ -70,6 +72,10 @@ const Cart = () => {
 
       {/* Premium Progress Bar — Phase 12.8 */}
       <PremiumProgressBar progress={o.progress} />
+
+      {/* Incentives ladder + loyalty (Phase 12.10 — re-injected) */}
+      <CartIncentiveProgress subtotal={o.subtotal} />
+      <CartLoyaltyBar />
 
       <CartUpgradeBanner />
       <CartPricingErrorsBanner />
@@ -172,7 +178,7 @@ const Cart = () => {
         className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 pt-2"
         style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
       >
-        <div className="mx-auto flex w-full max-w-md items-stretch gap-2">
+        <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
           {/* Primary CTA — flex-1 (≈3/4) */}
           <button
             type="button"
