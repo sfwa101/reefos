@@ -310,9 +310,29 @@ export class PricingEngine {
         ...(bonusPoints > 0 ? { bonusPoints } : {}),
       };
     }
+
+    // Phase 9 — Profit awareness. Cost basis comes from
+    // `metadata.costPrice` or falls back to DEFAULT_COST_RATIO.
+    const costPrice = deriveCostPrice(
+      input.product,
+      base.unitPrice,
+      input.selection.quantity,
+    );
+    current = {
+      ...current,
+      costPrice,
+      netProfit: round(current.grandTotal - costPrice),
+    };
+
+    // Phase 9 — Final guardrail. Original (pre-discount) line total
+    // equals the freshly-folded `base.lineTotal` (no discount rules
+    // had run at that point).
+    current = lossPreventionRule.evaluate(current, context, base.lineTotal);
     return current;
   }
 }
+
+const round = (n: number): number => Math.round(n * 100) / 100;
 
 /* ===================================================================
  * Default singleton — strategies are wired in a separate `bootstrap.ts`
