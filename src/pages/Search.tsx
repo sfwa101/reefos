@@ -102,6 +102,10 @@ const SearchPage = () => {
 
   const setQuery = (val: string) => setInputVal(val);
 
+  // Search history (recent queries) + featured categories (trending grid)
+  const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
+  const { data: featuredCats = [] } = useFeaturedCategoriesQuery();
+
   // ─── BRAIN TRANSPLANT ────────────────────────────────────────────────
   // Phase 11.6: drop the naive `name/category/brand/subCategory` substring
   // filter and delegate to `useUniversalSearch`. That hook owns:
