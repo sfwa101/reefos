@@ -22,11 +22,10 @@ export const SkBlock = ({
   <div
     aria-hidden
     className={cn(
-      "relative overflow-hidden rounded-xl bg-foreground/[0.07]",
-      // shimmer — disabled automatically when user prefers reduced motion
-      "before:absolute before:inset-0 before:-translate-x-full",
-      "before:bg-gradient-to-r before:from-transparent before:via-foreground/[0.06] before:to-transparent",
-      "before:animate-[shimmer_1.6s_infinite] motion-reduce:before:animate-none",
+      "rounded-xl bg-foreground/[0.07]",
+      // shimmer keyframe is defined in src/styles.css (opacity pulse).
+      // motion-reduce disables it for accessibility.
+      "animate-[shimmer_1.6s_ease-in-out_infinite] motion-reduce:animate-none",
       className,
     )}
     {...rest}
