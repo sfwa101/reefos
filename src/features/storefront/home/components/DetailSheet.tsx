@@ -24,7 +24,9 @@ import { toast } from "sonner";
 import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 
-import { fmt } from "../data";
+import { getById } from "@/lib/products";
+
+import { fmt } from "../dictionaries";
 import type { HGProduct } from "../types";
 
 const TrustBadge = ({
@@ -97,16 +99,13 @@ export const DetailSheet = ({
   }, []);
 
   const handleConfirm = () => {
+    const dbProduct = getById(product.id);
+    if (!dbProduct) {
+      toast.error("المنتج غير متاح حالياً");
+      return;
+    }
     add(
-      {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        unit: product.unit,
-        category: "أدوات منزلية",
-        source: "home",
-      } as unknown as import("@/lib/products").Product,
+      dbProduct,
       1,
       isPre
         ? {

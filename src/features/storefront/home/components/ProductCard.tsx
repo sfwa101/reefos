@@ -20,8 +20,9 @@ import { toast } from "sonner";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
+import { getById } from "@/lib/products";
 
-import { fmt } from "../data";
+import { fmt } from "../dictionaries";
 import type { HGProduct } from "../types";
 
 export const toCompareItem = (p: HGProduct): CompareItem => ({
@@ -61,38 +62,23 @@ export const ProductCard = ({
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    const product = getById(p.id);
+    if (!product) {
+      toast.error("المنتج غير متاح حالياً");
+      return;
+    }
     if (isPre) {
-      add(
-        {
-          id: p.id,
-          name: p.name,
-          price: p.price,
-          image: p.image,
-          unit: p.unit,
-          category: "أدوات منزلية",
-          source: "home",
-        } as unknown as import("@/lib/products").Product,
-        1,
-        {
-          payDeposit: true,
-          unitPrice: p.price,
-          bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
-        },
-      );
+      add(product, 1, {
+        payDeposit: true,
+        unitPrice: p.price,
+        bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
+      });
       toast.success("تم تأكيد الحجز", {
         description: `دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
       });
       return;
     }
-    add({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      image: p.image,
-      unit: p.unit,
-      category: "أدوات منزلية",
-      source: "home",
-    } as unknown as import("@/lib/products").Product);
+    add(product);
     toast.success("أُضيف إلى السلة", { description: p.name });
   };
 

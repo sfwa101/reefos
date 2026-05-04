@@ -12,7 +12,7 @@ import {
   X,
 } from "lucide-react";
 
-import { SORTS } from "../data";
+import { SORTS } from "../dictionaries";
 import type { FulfillmentFilter, SortId } from "../types";
 
 export const SearchAndFilters = ({

@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
+import { getById } from "@/lib/products";
 
 import type { Bundle, HGProduct } from "../types";
 
@@ -24,17 +25,18 @@ export const BundleCard = ({
 
   const onBuy = (e: React.MouseEvent) => {
     e.stopPropagation();
-    items.forEach((p) =>
-      add({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        image: p.image,
-        unit: p.unit,
-        category: "أدوات منزلية",
-        source: "home",
-      } as unknown as import("@/lib/products").Product),
-    );
+    let added = 0;
+    items.forEach((p) => {
+      const dbProduct = getById(p.id);
+      if (dbProduct) {
+        add(dbProduct);
+        added += 1;
+      }
+    });
+    if (added === 0) {
+      toast.error("الحزمة غير متاحة حالياً");
+      return;
+    }
     toast.success("أُضيفت الحزمة إلى السلة", { description: bundle.title });
   };
 
