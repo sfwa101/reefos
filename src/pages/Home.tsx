@@ -42,6 +42,7 @@ import FlashSalesRail from "@/components/FlashSalesRail";
 
 import SmartGreeting from "@/features/main-hub/components/SmartGreeting";
 import DynamicStoryCircles from "@/features/main-hub/components/DynamicStoryCircles";
+import StickySearchBar from "@/components/StickySearchBar";
 
 const cv = { contentVisibility: "auto" as const, containIntrinsicSize: "1px 360px" };
 const RAIL_LIMIT = 12;
@@ -114,6 +115,7 @@ const HomePage = () => {
     <div className="space-y-6 bg-background px-4 pb-32 text-foreground" dir="rtl">
       {/* Native smart header — replaces parasitic LayoutFactory hero */}
       <SmartGreeting />
+      <StickySearchBar />
       <DynamicStoryCircles />
 
       {/* Contextual smart banners (DB-fed) */}
