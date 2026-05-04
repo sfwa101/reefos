@@ -431,7 +431,18 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       const orderTotal = grand;
 
       // CRITICAL: clear cart immediately after server confirms, BEFORE any navigation.
+      // 1) Wipe local state so the UI reflects an empty cart instantly.
       clear();
+      // 2) Hard-delete the persisted rows synchronously to defeat the
+      //    debounced background push and any realtime refetch race that
+      //    would otherwise resurrect the cart on the next page load.
+      if (currentUser?.id) {
+        try {
+          await supabase.from("cart_items").delete().eq("user_id", currentUser.id);
+        } catch (e) {
+          console.warn("[checkout] failed to purge remote cart_items:", e);
+        }
+      }
       fireConfetti();
 
       // Kill-switch: in-app completion only.
