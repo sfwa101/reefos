@@ -5,6 +5,7 @@ import TabBar from "@/components/TabBar";
 import SectionsPanel from "@/components/desktop/SectionsPanel";
 import CartPanel from "@/components/desktop/CartPanel";
 import GlobalApprovalBanner from "@/components/GlobalApprovalBanner";
+import BarcodeScannerModal from "@/components/BarcodeScannerModal";
 import { useCartLines } from "@/context/CartContext";
 import { useHakimEdgeWorker } from "@/features/hakim/hooks/useHakimEdgeWorker";
 
