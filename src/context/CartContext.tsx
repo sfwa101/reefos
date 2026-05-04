@@ -467,6 +467,72 @@ export const useCartLineBreakdown = (
   });
 };
 
+/* ===================================================================
+ * Phase 6 — Checkout guardrails aggregator.
+ * Walks every line through the engine and folds the breakdowns into a
+ * single immutable summary the Checkout / PaymentMethods UI uses to:
+ *   • disable Cash-on-Delivery when ANY line requires a deposit or
+ *     explicitly blocks COD (e.g. high-value bookings, library borrows).
+ *   • surface the total upfront deposit to the customer.
+ *   • list the offending products so the UX can explain WHY COD is off.
+ * =================================================================== */
+export interface CartCheckoutRules {
+  readonly hasRequiredDeposit: boolean;
+  readonly totalDepositAmount: number;
+  readonly blocksCOD: boolean;
+  readonly depositLines: ReadonlyArray<{
+    readonly productId: string;
+    readonly productName: string;
+    readonly amount: number;
+  }>;
+}
+
+const EMPTY_CHECKOUT_RULES: CartCheckoutRules = {
+  hasRequiredDeposit: false,
+  totalDepositAmount: 0,
+  blocksCOD: false,
+  depositLines: [],
+};
+
+export const useCartCheckoutRules = (): CartCheckoutRules => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines): CartCheckoutRules => {
+    if (lines.length === 0) return EMPTY_CHECKOUT_RULES;
+    const tier = getTier();
+    let hasRequiredDeposit = false;
+    let totalDepositAmount = 0;
+    let blocksCOD = false;
+    const depositLines: Array<{
+      productId: string;
+      productName: string;
+      amount: number;
+    }> = [];
+
+    for (const l of lines) {
+      const { result } = evaluateLineForCart(l, tier);
+      if (!result || result.kind !== "ok") continue;
+      const b = result.breakdown;
+      if (b.depositRequired && b.depositAmount > 0) {
+        hasRequiredDeposit = true;
+        blocksCOD = true; // required deposit must be paid upfront → no COD.
+        totalDepositAmount += b.depositAmount;
+        depositLines.push({
+          productId: l.product.id,
+          productName: l.product.name,
+          amount: b.depositAmount,
+        });
+      }
+    }
+
+    return {
+      hasRequiredDeposit,
+      totalDepositAmount: Math.round(totalDepositAmount * 100) / 100,
+      blocksCOD,
+      depositLines,
+    };
+  });
+};
+
 /**
  * Cart grand total — Phase 2.I (Flip the Switch) + 2.J (tier wiring).
  *

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Cake, HandHeart, PiggyBank } from "lucide-react";
+import { Cake, HandHeart, PiggyBank, Wallet, Lock } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { paymentOptions, type useCartOrchestrator } from "../hooks/useCartOrchestrator";
 
@@ -30,47 +30,96 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
         </div>
       )}
 
+      {/* Phase 6 — engine-driven deposit banner. */}
+      {o.engineRules.hasRequiredDeposit && (
+        <div className="mb-3 flex items-start gap-2 rounded-2xl bg-amber-500/12 p-2.5 ring-1 ring-amber-500/30">
+          <Wallet className="mt-0.5 h-4 w-4 shrink-0 text-amber-700 dark:text-amber-400" />
+          <div className="flex-1 space-y-1">
+            <p className="text-[11px] font-extrabold leading-snug text-amber-900 dark:text-amber-200">
+              يلزم دفع عربون مسبق بقيمة {fmtMoney(o.engineRules.totalDepositAmount)}
+            </p>
+            <p className="text-[10px] font-bold leading-relaxed text-amber-800/85 dark:text-amber-200/80">
+              لذلك تم تعطيل «الدفع عند الاستلام». اختر محفظتك أو وسيلة دفع إلكترونية لإتمام الحجز.
+            </p>
+          </div>
+        </div>
+      )}
+
       <div className="space-y-2">
-        {paymentOptions
-          .filter((m) => o.zone.codAllowed || m.id !== "cash")
-          .filter((m) => !o.sweetsRules.blockCOD || m.id !== "cash")
-          .map((m) => {
-            const Icon = m.icon;
-            const active = o.payment === m.id;
-            const isWallet = m.id === "wallet";
-            const walletAfter = isWallet ? Math.max(0, o.walletBalance - o.grand) : 0;
-            return (
-              <motion.button whileTap={{ scale: 0.99 }} key={m.id} onClick={() => o.setPayment(m.id)} className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${active ? "border-primary bg-primary-soft shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_24px_-12px_hsl(var(--primary)/0.45)]" : "border-border bg-background hover:border-primary/30"}`}>
-                <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${active ? "bg-primary text-primary-foreground" : "bg-foreground/5"}`}>
-                  <Icon className="h-4 w-4" strokeWidth={2.4} />
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm font-extrabold">{m.label}</p>
-                  {isWallet && o.user ? (
-                    <>
-                      <p className="text-[10px] font-bold text-primary">
-                        متاح: {toLatin(Math.round(o.walletBalance))} ج.م
-                        {active && o.walletBalance >= o.grand && o.grand > 0 && (
-                          <span className="ms-1 text-foreground/60 font-extrabold">· المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م</span>
+        {paymentOptions.map((m) => {
+          const Icon = m.icon;
+          const active = o.payment === m.id;
+          const isWallet = m.id === "wallet";
+          const isCash = m.id === "cash";
+          // Disable cash when zone forbids COD, sweets booking blocks COD,
+          // or the engine has flagged a required deposit on any line.
+          const cashBlocked =
+            isCash &&
+            (!o.zone.codAllowed ||
+              o.sweetsRules.blockCOD ||
+              o.engineRules.blocksCOD);
+          const cashBlockReason = !o.zone.codAllowed
+            ? `غير متاح في ${o.zone.shortName}`
+            : o.engineRules.blocksCOD
+              ? "يلزم عربون مسبق"
+              : o.sweetsRules.blockCOD
+                ? "حجز يتطلب دفعاً مسبقاً"
+                : null;
+          const walletAfter = isWallet ? Math.max(0, o.walletBalance - o.grand) : 0;
+          return (
+            <motion.button
+              whileTap={cashBlocked ? undefined : { scale: 0.99 }}
+              key={m.id}
+              type="button"
+              disabled={cashBlocked}
+              aria-disabled={cashBlocked}
+              onClick={() => !cashBlocked && o.setPayment(m.id)}
+              className={`flex w-full items-center gap-3 rounded-2xl border-2 p-3 text-right transition ${
+                cashBlocked
+                  ? "cursor-not-allowed border-border/60 bg-muted/40 opacity-55"
+                  : active
+                    ? "border-primary bg-primary-soft shadow-[0_0_0_4px_hsl(var(--primary)/0.08),0_8px_24px_-12px_hsl(var(--primary)/0.45)]"
+                    : "border-border bg-background hover:border-primary/30"
+              }`}
+            >
+              <div className={`flex h-10 w-10 items-center justify-center rounded-[12px] ${active && !cashBlocked ? "bg-primary text-primary-foreground" : "bg-foreground/5"}`}>
+                <Icon className="h-4 w-4" strokeWidth={2.4} />
+              </div>
+              <div className="flex-1">
+                <p className="flex items-center gap-1.5 text-sm font-extrabold">
+                  {m.label}
+                  {cashBlocked && cashBlockReason && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[9px] font-extrabold text-amber-700 dark:text-amber-300">
+                      <Lock className="h-2.5 w-2.5" strokeWidth={2.8} />
+                      {cashBlockReason}
+                    </span>
+                  )}
+                </p>
+                {isWallet && o.user ? (
+                  <>
+                    <p className="text-[10px] font-bold text-primary">
+                      متاح: {toLatin(Math.round(o.walletBalance))} ج.م
+                      {active && o.walletBalance >= o.grand && o.grand > 0 && (
+                        <span className="ms-1 text-foreground/60 font-extrabold">· المتبقي بعد العملية {toLatin(Math.round(walletAfter))} ج.م</span>
+                      )}
+                    </p>
+                    {o.trustLimit > 0 && (
+                      <p className="mt-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
+                        🛡️ رصيد ثقة: +{toLatin(o.trustLimit)} ج.م
+                        {active && o.trustUsed > 0 && (
+                          <span className="ms-1 font-extrabold">· مستخدم {toLatin(Math.round(o.trustUsed))} ج (يُسدَّد لاحقًا)</span>
                         )}
                       </p>
-                      {o.trustLimit > 0 && (
-                        <p className="mt-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-300">
-                          🛡️ رصيد ثقة: +{toLatin(o.trustLimit)} ج.م
-                          {active && o.trustUsed > 0 && (
-                            <span className="ms-1 font-extrabold">· مستخدم {toLatin(Math.round(o.trustUsed))} ج (يُسدَّد لاحقًا)</span>
-                          )}
-                        </p>
-                      )}
-                    </>
-                  ) : (
-                    <p className="text-[10px] text-muted-foreground">{m.sub}</p>
-                  )}
-                </div>
-                <div className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
-              </motion.button>
-            );
-          })}
+                    )}
+                  </>
+                ) : (
+                  <p className="text-[10px] text-muted-foreground">{m.sub}</p>
+                )}
+              </div>
+              <div className={`h-4 w-4 rounded-full border-2 ${active && !cashBlocked ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
+            </motion.button>
+          );
+        })}
       </div>
 
       {o.sweetsRules.hasBooking && (
@@ -103,6 +152,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                 .filter((p) => p.id !== "wallet")
                 .filter((p) => o.zone.codAllowed || p.id !== "cash")
                 .filter((p) => !o.sweetsRules.blockCOD || p.id !== "cash")
+                .filter((p) => !o.engineRules.blocksCOD || p.id !== "cash")
                 .map((m) => {
                   const Icon = m.icon;
                   const a = o.secondaryPayment === m.id;
