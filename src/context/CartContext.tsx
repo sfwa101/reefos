@@ -186,6 +186,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Track auth + remote-sync state
   const userIdRef = useRef<string | null | undefined>(undefined);
+  const tierRef = useRef<CustomerTier>("guest");
   const skipNextPushRef = useRef(false);
   const lastPushedSignatureRef = useRef("");
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
