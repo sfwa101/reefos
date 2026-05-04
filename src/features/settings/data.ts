@@ -32,8 +32,7 @@ export const THEMES: ThemeMeta[] = [
   { id: "plum", tKey: "themes.plum", group: "premium" },
   { id: "navy", tKey: "themes.navy", group: "premium" },
   // Apple Glass
-  { id: "apple", tKey: "themes.apple", group: "apple" },
-  { id: "graphite", tKey: "themes.graphite", group: "apple" },
+  { id: "apple-glass", tKey: "themes.apple-glass", group: "apple" },
 ];
 
 export const THEME_GROUP_TKEYS: { id: ThemeGroupKey; tKey: string }[] = [
