@@ -47,7 +47,7 @@ const AppShell = () => {
       <div className="mx-auto flex w-full max-w-[1400px] gap-5 px-0 pt-[96px] lg:gap-6 lg:px-6 lg:pt-[112px]">
         <SectionsPanel />
         <main
-          className={`mx-auto w-full max-w-md flex-1 sm:max-w-2xl md:max-w-4xl lg:mx-0 lg:max-w-none lg:min-w-0 ${hideTabBar ? "pb-[120px]" : "pb-28"} lg:pb-10`}
+          className={`mx-auto w-full max-w-md flex-1 px-4 sm:max-w-2xl md:max-w-4xl lg:mx-0 lg:max-w-none lg:min-w-0 lg:px-0 ${hideTabBar ? "pb-[120px]" : "pb-28"} lg:pb-10`}
         >
           <Outlet />
         </main>
