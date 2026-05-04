@@ -38,6 +38,11 @@ export const CartIncentiveProgress = ({ subtotal }: Props) => {
             </span>{" "}
             ج.م
           </p>
+        ) : nextIndex !== -1 ? (
+          // Threshold met but affordability gate failed — surface hint inline.
+          <p className="text-[10px] font-extrabold text-amber-700 dark:text-amber-300">
+            {milestones[nextIndex].affordabilityHint ?? "تحتاج هامش ربح أعلى"}
+          </p>
         ) : (
           <p className="text-[10px] font-extrabold text-emerald-600">
             كل المكافآت مفتوحة ✨
