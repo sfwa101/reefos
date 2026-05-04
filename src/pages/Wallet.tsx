@@ -58,18 +58,8 @@ const Wallet = () => {
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-[oklch(0.16_0.02_260)] text-white">
-      {/* aurora background */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-90"
-        style={{
-          background:
-            "radial-gradient(60% 50% at 30% 0%, oklch(0.45 0.18 280 / 0.55), transparent 70%), radial-gradient(50% 40% at 80% 10%, oklch(0.55 0.18 165 / 0.40), transparent 70%)",
-        }}
-      />
-
-      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-4 pb-32">
+    <div className="w-full min-h-screen bg-background text-foreground pb-24">
+      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-4">
         {/* HEADER */}
         <motion.section
           initial={{ opacity: 0, y: -8 }}
@@ -78,24 +68,24 @@ const Wallet = () => {
           className="flex items-end justify-between"
         >
           <div>
-            <p className="text-[11px] font-bold tracking-[0.18em] uppercase opacity-60">
+            <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
               REEF · NEO BANK
             </p>
-            <h1 className="font-display text-[28px] font-black tracking-tight mt-0.5">
+            <h1 className="font-display text-[28px] font-black tracking-tight mt-0.5 text-foreground">
               أهلاً، {ownerName.split(" ")[0]}
             </h1>
           </div>
           {activeAsset && (
             <motion.span
               layoutId="active-asset-badge"
-              className="inline-flex items-center gap-1 rounded-full bg-white/10 backdrop-blur-md px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-white/15"
+              className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-primary/20"
             >
               {activeAsset.label}
             </motion.span>
           )}
         </motion.section>
 
-        {/* SUPER-CARDS CAROUSEL */}
+        {/* SUPER-CARDS CAROUSEL (cards keep their own gradient) */}
         <div className="-mx-4 lg:-mx-8">
           <NeoCardsCarousel
             assets={assets}
@@ -113,18 +103,18 @@ const Wallet = () => {
               key={a.id}
               type="button"
               onClick={a.onClick}
-              className="group flex flex-col items-center gap-1.5 rounded-2xl bg-white/5 backdrop-blur-md px-2 py-3 ring-1 ring-white/10 active:scale-[0.96] transition"
+              className="group flex flex-col items-center gap-1.5 rounded-2xl bg-card text-card-foreground px-2 py-3 ring-1 ring-border/50 shadow-sm active:scale-[0.96] transition"
             >
-              <span className="grid place-items-center h-10 w-10 rounded-xl bg-white/10 text-white group-active:bg-primary/60 transition">
+              <span className="grid place-items-center h-10 w-10 rounded-xl bg-primary/10 text-primary group-active:bg-primary group-active:text-primary-foreground transition">
                 <a.icon className="h-[18px] w-[18px]" />
               </span>
-              <span className="text-[10.5px] font-bold opacity-85">{a.label}</span>
+              <span className="text-[10.5px] font-bold text-foreground/80">{a.label}</span>
             </button>
           ))}
         </div>
 
         {/* MINI-APP DOCK */}
-        <div className="grid grid-cols-4 gap-1.5 rounded-2xl bg-white/5 p-1.5 ring-1 ring-white/10">
+        <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
           {[
             { id: "ops", label: "العمليات", icon: Wallet2 },
             { id: "gameyas", label: "الجمعيات", icon: Users },
@@ -136,7 +126,9 @@ const Wallet = () => {
               type="button"
               onClick={() => setDock(t.id as typeof dock)}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition ${
-                dock === t.id ? "bg-white text-[oklch(0.16_0.02_260)]" : "text-white/70"
+                dock === t.id
+                  ? "bg-background text-foreground ring-1 ring-border/50 shadow-sm"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
             >
               <t.icon className="h-4 w-4" />
@@ -145,7 +137,7 @@ const Wallet = () => {
           ))}
         </div>
 
-        {/* DOCK CONTENT (placeholders for next phase) */}
+        {/* DOCK CONTENT */}
         <AnimatePresence mode="wait">
           <motion.div
             key={dock}
@@ -157,9 +149,9 @@ const Wallet = () => {
             {dock === "gameyas" ? (
               <GameyasDockContent userId={c.userId} />
             ) : (
-              <div className="rounded-3xl bg-white/[0.04] backdrop-blur-md ring-1 ring-white/10 p-5 min-h-[180px]">
-                <p className="text-[12px] font-bold opacity-60 mb-1.5">قادم في Phase 13.36</p>
-                <p className="text-[14px] opacity-90">
+              <div className="rounded-3xl bg-card text-card-foreground ring-1 ring-border/50 shadow-sm p-5 min-h-[180px]">
+                <p className="text-[12px] font-bold text-muted-foreground mb-1.5">قادم في Phase 13.37</p>
+                <p className="text-[14px] text-foreground/90">
                   {dock === "ops" && "سجل العمليات الموحّد عبر الأصول الخمسة + فلترة ذكية."}
                   {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
                   {dock === "insights" && "مدير مالي شخصي يحلّل إنفاقك ويقترح الميزانيات."}
