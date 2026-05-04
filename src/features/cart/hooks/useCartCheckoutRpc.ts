@@ -93,15 +93,30 @@ export const placeOrderAtomic = async (
 ): Promise<PlaceOrderResult> => {
   try {
     console.error("RPC_PAYLOAD_V2:", payload);
-    // The generated `Database` types may not include the new RPC yet.
-    // Cast through unknown to keep our domain-accurate payload type.
+    console.time("Checkout-Lat");
     const args = { _payload: payload } as unknown as Parameters<
       typeof supabase.rpc<"place_order_atomic_v2">
     >[1];
-    const { data, error } = await supabase.rpc(
+
+    // Phase 13.20 — client-side hard timeout to prevent indefinite UI freeze
+    // even if the network call or DB lock hangs beyond expected limits.
+    const TIMEOUT_MS = 20_000;
+    const rpcPromise = supabase.rpc(
       "place_order_atomic_v2" as "place_order_atomic_v2",
       args,
     );
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(
+        () => reject(new Error("checkout_timeout")),
+        TIMEOUT_MS,
+      ),
+    );
+
+    const { data, error } = (await Promise.race([
+      rpcPromise,
+      timeoutPromise,
+    ])) as Awaited<typeof rpcPromise>;
+    console.timeEnd("Checkout-Lat");
 
     if (error) {
       console.error("RPC_ERROR_V2:", error);
@@ -117,8 +132,12 @@ export const placeOrderAtomic = async (
     }
     return { ok: true, orderId: data };
   } catch (e) {
+    try { console.timeEnd("Checkout-Lat"); } catch { /* timer may not exist */ }
+    const isTimeout = e instanceof Error && e.message === "checkout_timeout";
     console.error("RPC_EXCEPTION_V2:", e, "PAYLOAD:", payload);
-    const msg = "حدث خطأ غير متوقع، حاول مرة أخرى";
+    const msg = isTimeout
+      ? "عذراً، الخادم مشغول حالياً، حاول مرة أخرى"
+      : "حدث خطأ غير متوقع، حاول مرة أخرى";
     toast.error(msg);
     return { ok: false, error: msg };
   }

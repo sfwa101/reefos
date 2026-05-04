@@ -345,7 +345,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                       ? `${blockedMessage.slice(0, 36)}…`
                       : blockedMessage
                     : o.submitting
-                      ? "جاري إرسال طلبك..."
+                      ? "جاري تأمين طلبك..."
                       : "إتمام عبر واتساب"}
                 </span>
               </span>
