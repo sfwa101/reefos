@@ -121,6 +121,20 @@ export interface PriceBreakdown {
    * for receipts and Hakim audits. Empty string when not triggered.
    */
   readonly lossPreventionReason?: string;
+  /**
+   * Phase 9.1 — emitted when net profit drops below
+   * `MIN_NET_PROFIT_RATIO` of the original line total. The cart UI
+   * surfaces this as a "بانتظار موافقة الإدارة" badge and the admin
+   * panel uses it to filter pending approvals. Always `false` when
+   * `adminOverride === true`.
+   */
+  readonly requiresAdminApproval: boolean;
+  /**
+   * Phase 9.1 — when true, NO further discounts (promo codes, future
+   * stacked rules) may be applied to this line. Set by the guardrail
+   * after a hard-lock decision; consumers must respect it.
+   */
+  readonly discountLocked: boolean;
   readonly appliedModifiers: ReadonlyArray<PricingModifier>;
   /** Strategy that produced this breakdown — for receipts & audit. */
   readonly strategyKey: string;
@@ -141,6 +155,13 @@ export const POINT_REDEMPTION_VALUE = 0.1;
 /** Maximum share of gross profit that can be returned to the customer
  *  via discounts + reward valuations. Above this, the guardrail kicks in. */
 export const MAX_INCENTIVE_SHARE_OF_PROFIT = 0.7;
+/**
+ * Hard floor — minimum acceptable net profit as a share of the
+ * original (pre-discount) line total. If the post-discount profit
+ * drops below this ratio, the guardrail LOCKS further discounts and
+ * raises `requiresAdminApproval`.
+ */
+export const MIN_NET_PROFIT_RATIO = 0.1;
 
 /* ===================================================================
  * Strategy & Discount interfaces (Strategy Pattern + DI)

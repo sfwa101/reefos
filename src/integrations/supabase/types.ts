@@ -56,6 +56,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_override_logs: {
+        Row: {
+          admin_user_id: string
+          cart_id: string | null
+          created_at: string
+          id: string
+          loss_prevention_reason: string | null
+          metadata: Json
+          order_id: string | null
+          original_grand_total: number | null
+          overridden_grand_total: number | null
+          product_id: string | null
+          reason: string
+        }
+        Insert: {
+          admin_user_id: string
+          cart_id?: string | null
+          created_at?: string
+          id?: string
+          loss_prevention_reason?: string | null
+          metadata?: Json
+          order_id?: string | null
+          original_grand_total?: number | null
+          overridden_grand_total?: number | null
+          product_id?: string | null
+          reason: string
+        }
+        Update: {
+          admin_user_id?: string
+          cart_id?: string | null
+          created_at?: string
+          id?: string
+          loss_prevention_reason?: string | null
+          metadata?: Json
+          order_id?: string | null
+          original_grand_total?: number | null
+          overridden_grand_total?: number | null
+          product_id?: string | null
+          reason?: string
+        }
+        Relationships: []
+      }
       affiliate_settings: {
         Row: {
           category: string
