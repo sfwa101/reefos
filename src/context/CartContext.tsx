@@ -425,53 +425,96 @@ export const useCartCount = () =>
   useCartSelector((lines) => lines.reduce((s, l) => s + l.qty, 0));
 
 /**
- * Cart grand total — Phase 2.I (Flip the Switch).
+ * Per-line evaluation — single source of truth for both totals and the
+ * errors hook (Phase 2.J). Returns `null` for legacy lines that bypass
+ * the engine entirely (Fail-Safe Guard).
+ */
+function evaluateLineForCart(
+  l: CartLine,
+  tier: CustomerTier,
+): { result: CartPricingResult; legacyTotal: number } | { result: null; legacyTotal: number } {
+  const legacyTotal = l.qty * (l.meta?.unitPrice ?? l.product.price);
+  const props = l.meta?.properties as { selection?: unknown } | undefined;
+  const hasNewShape =
+    (l.meta?.appliedModifiers && l.meta.appliedModifiers.length > 0) ||
+    props?.selection !== undefined;
+  if (!hasNewShape) return { result: null, legacyTotal };
+
+  const result = evaluateCartLineItem({
+    product: l.product,
+    quantity: l.qty,
+    selection: ((props?.selection ?? props) ?? {}) as never,
+    context: { customerTier: tier },
+  });
+  return { result, legacyTotal };
+}
+
+/**
+ * Cart grand total — Phase 2.I (Flip the Switch) + 2.J (tier wiring).
  *
  * Per-line decision tree:
- *   1. Fail-Safe Guard: legacy line (no `appliedModifiers` AND no
- *      structured `properties.selection`) → use legacy unit-price math.
- *      Prevents `engine_error` for items added BEFORE the migration.
- *   2. Otherwise call `evaluateCartLineItem`:
- *        • "ok"           → add `breakdown.grandTotal` (incl. deposit/discount)
- *        • "fallback"     → add legacy unit-price total (no strategy yet)
- *        • "engine_error" → skip + warn (Zero Silent Failure; UI banner in 2.J)
+ *   1. Fail-Safe Guard: legacy line → use legacy unit-price math.
+ *   2. Otherwise call engine with `customerTier` from auth context:
+ *        • "ok"           → add `breakdown.grandTotal`
+ *        • "fallback"     → add legacy unit-price total
+ *        • "engine_error" → skip (surfaced via `useCartErrors` banner)
  */
-export const useCartTotal = () =>
-  useCartSelector((lines) =>
-    lines.reduce((sum, l) => {
-      const legacyTotal = l.qty * (l.meta?.unitPrice ?? l.product.price);
-
-      // (1) Fail-Safe Guard for legacy cart lines that pre-date the engine.
-      const props = l.meta?.properties as
-        | { selection?: unknown }
-        | undefined;
-      const hasNewShape =
-        (l.meta?.appliedModifiers && l.meta.appliedModifiers.length > 0) ||
-        (props?.selection !== undefined);
-      if (!hasNewShape) {
-        return sum + legacyTotal;
-      }
-
-      // (2) Route through the new engine.
-      const r = evaluateCartLineItem({
-        product: l.product,
-        quantity: l.qty,
-        selection: ((props?.selection ?? props) ?? {}) as never,
-        // customerTier will be wired from AuthContext in a follow-up phase.
-      });
-
-      if (r.kind === "ok") return sum + r.breakdown.grandTotal;
-      if (r.kind === "fallback") return sum + legacyTotal;
-      // engine_error → surface to UI later; do not silently miscount.
+export const useCartTotal = () => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines) => {
+    const tier = getTier();
+    return lines.reduce((sum, l) => {
+      const { result, legacyTotal } = evaluateLineForCart(l, tier);
+      if (result === null) return sum + legacyTotal;
+      if (result.kind === "ok") return sum + result.breakdown.grandTotal;
+      if (result.kind === "fallback") return sum + legacyTotal;
+      // engine_error: do not silently miscount; banner blocks checkout.
       console.warn(
         "[cart] pricing engine error:",
-        r.code,
-        r.message,
+        result.code,
+        result.message,
         { productId: l.product.id },
       );
       return sum;
-    }, 0),
-  );
+    }, 0);
+  });
+};
+
+/* ===================================================================
+ * Phase 2.J — useCartErrors
+ * Returns the list of cart lines whose pricing failed validation
+ * (e.g. Sweets Type C without booking). The Cart page uses this to
+ * (a) render a warning banner and (b) block checkout until fixed.
+ * =================================================================== */
+
+export type CartLineError = {
+  readonly productId: string;
+  readonly productName: string;
+  readonly code: string;
+  readonly message: string;
+};
+
+export const useCartErrors = (): readonly CartLineError[] => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines) => {
+    const tier = getTier();
+    const out: CartLineError[] = [];
+    for (const l of lines) {
+      const { result } = evaluateLineForCart(l, tier);
+      if (result && result.kind === "engine_error") {
+        out.push({
+          productId: l.product.id,
+          productName: l.product.name,
+          code: result.code,
+          message: result.message,
+        });
+      }
+    }
+    return out;
+  });
+};
+
+export const useCartHasErrors = (): boolean => useCartErrors().length > 0;
 
 /** Per-product qty selector — ideal for ProductCard. */
 export const useCartLineQty = (productId: string) =>
