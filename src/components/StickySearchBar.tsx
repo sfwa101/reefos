@@ -30,14 +30,14 @@ const StickySearchBar = () => {
         dir="rtl"
       >
         <Link
-          to="/search"
+          to="/search" search={{ q: "" }}
           aria-label="بحث"
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition active:scale-[0.95]"
         >
           <Search className="h-5 w-5" strokeWidth={2.2} />
         </Link>
         <Link
-          to="/search"
+          to="/search" search={{ q: "" }}
           className="flex-1 truncate text-[13.5px] font-medium text-muted-foreground"
         >
           ابحث عن منتج، قسم، أو ماركة…
