@@ -17,6 +17,10 @@
  *   SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... \
  *     bun run scripts/db-backup/sync-seed.ts backup | restore
  */
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
+import { readFile, writeFile } from "node:fs/promises";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   CATALOG_TABLES,
   PK,
