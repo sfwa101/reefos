@@ -212,7 +212,7 @@ export const SavingsJarDialog = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/50 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/40 sm:items-center"
       onClick={onClose}
     >
       <motion.div
@@ -238,42 +238,36 @@ export const SavingsJarDialog = ({
           </div>
         </div>
 
-        <div
-          className="relative mb-4 overflow-hidden rounded-2xl p-5 text-white"
-          style={{
-            background:
-              "linear-gradient(135deg, hsl(220 25% 12%), hsl(150 35% 18%) 60%, hsl(45 55% 28%))",
-          }}
-        >
-          <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-[hsl(45_80%_55%)]/20 blur-2xl" />
+        <div className="relative mb-4 overflow-hidden rounded-2xl bg-card p-5 ring-1 ring-border/50 shadow-sm">
+          <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-primary/20 blur-2xl" />
           <div className="relative flex items-center gap-3">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
-              <PiggyBank className="h-7 w-7 text-white" strokeWidth={2.2} />
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <PiggyBank className="h-7 w-7" strokeWidth={2.2} />
             </div>
             <div className="flex-1">
-              <p className="text-[10px] text-white/70">الرصيد المُدّخَر</p>
-              <p className="font-display text-3xl font-extrabold tabular-nums">
+              <p className="text-[10px] text-muted-foreground">الرصيد المُدّخَر</p>
+              <p className="font-display text-3xl font-extrabold tabular-nums text-foreground">
                 {toLatin(Math.round(jar.balance))}{" "}
-                <span className="text-sm text-white/70">ج.م</span>
+                <span className="text-sm text-muted-foreground">ج.م</span>
               </p>
             </div>
           </div>
           {jar.goal && jar.goal > 0 && (
             <div className="relative mt-4">
-              <div className="flex items-center justify-between text-[10px] text-white/85">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <span className="flex items-center gap-1 font-bold">
                   <Target className="h-3 w-3" /> {jar.goal_label || "هدفك"}
                 </span>
-                <span className="font-extrabold tabular-nums">
+                <span className="font-extrabold tabular-nums text-foreground">
                   {toLatin(Math.round(jar.balance))} / {toLatin(Math.round(jar.goal))} ج
                 </span>
               </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-white/15">
+              <div className="mt-1 h-2 overflow-hidden rounded-full bg-foreground/10">
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${goalPct}%` }}
                   transition={{ duration: 0.8 }}
-                  className="h-full rounded-full bg-gradient-to-r from-[hsl(45_85%_60%)] to-white"
+                  className="h-full rounded-full bg-primary"
                 />
               </div>
             </div>
@@ -332,7 +326,7 @@ export const SavingsJarDialog = ({
               }`}
             >
               <span
-                className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-all ${
+                className={`absolute top-0.5 h-5 w-5 rounded-full bg-background shadow ring-1 ring-border/50 transition-all ${
                   autoSave ? "right-0.5" : "right-[calc(100%-1.375rem)]"
                 }`}
               />
