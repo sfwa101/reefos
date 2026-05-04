@@ -35,6 +35,7 @@ export const GameyaCreationSheet = ({
       _name: name.trim(),
       _cycle_amount: amount,
       _max_members: members,
+      _cycle_duration_months: members,
     });
     setBusy(false);
     if (error || !data) {
