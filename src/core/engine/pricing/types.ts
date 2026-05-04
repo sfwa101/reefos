@@ -55,9 +55,22 @@ export interface PricingContext {
   readonly currency: "EGP";
   /** Optional zone hint — strategies may apply cold-chain fees, etc. */
   readonly zoneAcceptsPerishables?: boolean;
-  /** Optional customer tier — used by discount rules. */
-  readonly customerTier?: "guest" | "member" | "vip";
+  /**
+   * Optional customer tier — used by discount + reward rules.
+   * Aligned with `src/lib/tiers.ts` (5-tier loyalty system).
+   * `guest` is reserved for unauthenticated visitors.
+   */
+  readonly customerTier?:
+    | "guest"
+    | "bronze"
+    | "silver"
+    | "gold"
+    | "platinum"
+    | "vip";
 }
+
+/** Customer tiers known to discount + reward rules. */
+export type CustomerTierKey = NonNullable<PricingContext["customerTier"]>;
 
 export interface PriceBreakdown {
   readonly unitPrice: number;
@@ -68,6 +81,20 @@ export interface PriceBreakdown {
   readonly feeTotal: number;
   readonly discountTotal: number;
   readonly grandTotal: number;
+  /**
+   * Loyalty points the customer earns for this line — emitted by reward
+   * rules (Phase 8). Always rounded to the nearest integer. Zero when
+   * the product opts out via `metadata.excludeFromLoyalty` or when no
+   * reward rule applies (e.g. guest checkout).
+   */
+  readonly pointsEarned: number;
+  /**
+   * Optional bonus-points badge metadata — set by reward rules when a
+   * line earns extra points beyond the base tier multiplier (e.g. an
+   * "Offer" product with `metadata.bonusPoints`). UI surfaces this as
+   * a "+50 نقطة هدية" chip inside the Cart.
+   */
+  readonly bonusPoints?: number;
   readonly appliedModifiers: ReadonlyArray<PricingModifier>;
   /** Strategy that produced this breakdown — for receipts & audit. */
   readonly strategyKey: string;
@@ -112,6 +139,39 @@ export interface IDiscountRule {
     breakdown: PriceBreakdown,
     context: PricingContext,
   ): ReadonlyArray<PricingModifier>;
+}
+
+/**
+ * Reward Rule — Phase 8.
+ * Computes loyalty points (and optional bonus chips) AFTER discounts
+ * have been applied. Reward rules NEVER mutate prices; they only emit
+ * non-monetary outcomes folded into `breakdown.pointsEarned`.
+ *
+ * Engine pipeline order:
+ *   strategy modifiers → discount rules → reward rules
+ *
+ * This keeps loyalty fully orthogonal to pricing and lets us add new
+ * earning programs (referral bonus, weekend ×2, …) without touching
+ * any strategy.
+ */
+export interface RewardOutcome {
+  /** Base earned points from this rule (non-negative integer). */
+  readonly points: number;
+  /** Optional extra "gift" points to advertise as a separate chip. */
+  readonly bonusPoints?: number;
+}
+
+export interface IRewardRule {
+  readonly key: string;
+  /** Cheap predicate; engine skips `apply()` when this returns false. */
+  isApplicable(
+    breakdown: PriceBreakdown,
+    context: PricingContext,
+  ): boolean;
+  apply(
+    breakdown: PriceBreakdown,
+    context: PricingContext,
+  ): RewardOutcome;
 }
 
 /* ===================================================================
