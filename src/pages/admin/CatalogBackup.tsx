@@ -102,7 +102,13 @@ const CatalogBackupPage = () => {
             push("warn", `· ${t}: لا صفوف (تخطٍ)`);
             continue;
           }
-          const { error } = await supabase.from(t).upsert(rows, { onConflict: PK[t] });
+          // Rows came from the same Supabase schema (round-trip), so the
+          // generated row types apply. The generic Record<string, unknown>
+          // shape we carry through SeedFile loses that link — cast at the
+          // single boundary instead of fragmenting the loop.
+          const { error } = await supabase
+            .from(t)
+            .upsert(rows as never, { onConflict: PK[t] });
           if (error) throw new Error(`${t}: ${error.message}`);
           setCounts((c) => ({ ...c, [t]: rows.length }));
           push("ok", `✔ ${t}: تم upsert لـ ${rows.length} صف`);

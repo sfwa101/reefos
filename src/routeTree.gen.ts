@@ -87,6 +87,7 @@ import { Route as AdminCharityRouteImport } from './routes/admin.charity'
 import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
 import { Route as AdminCategoryAffinityRouteImport } from './routes/admin.category-affinity'
 import { Route as AdminCategoriesRouteImport } from './routes/admin.categories'
+import { Route as AdminCatalogBackupRouteImport } from './routes/admin.catalog-backup'
 import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier-sessions'
 import { Route as AdminBusinessRulesRouteImport } from './routes/admin.business-rules'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
@@ -533,6 +534,11 @@ const AdminCategoriesRoute = AdminCategoriesRouteImport.update({
   path: '/categories',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminCatalogBackupRoute = AdminCatalogBackupRouteImport.update({
+  id: '/catalog-backup',
+  path: '/catalog-backup',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCashierSessionsRoute = AdminCashierSessionsRouteImport.update({
   id: '/cashier-sessions',
   path: '/cashier-sessions',
@@ -829,6 +835,7 @@ export interface FileRoutesByFullPath {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
+  '/admin/catalog-backup': typeof AdminCatalogBackupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
@@ -957,6 +964,7 @@ export interface FileRoutesByTo {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
+  '/admin/catalog-backup': typeof AdminCatalogBackupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
@@ -1092,6 +1100,7 @@ export interface FileRoutesById {
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
   '/admin/cashier-sessions': typeof AdminCashierSessionsRoute
+  '/admin/catalog-backup': typeof AdminCatalogBackupRoute
   '/admin/categories': typeof AdminCategoriesRoute
   '/admin/category-affinity': typeof AdminCategoryAffinityRoute
   '/admin/cfo': typeof AdminCfoRoute
@@ -1228,6 +1237,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/business-rules'
     | '/admin/cashier-sessions'
+    | '/admin/catalog-backup'
     | '/admin/categories'
     | '/admin/category-affinity'
     | '/admin/cfo'
@@ -1356,6 +1366,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/business-rules'
     | '/admin/cashier-sessions'
+    | '/admin/catalog-backup'
     | '/admin/categories'
     | '/admin/category-affinity'
     | '/admin/cfo'
@@ -1490,6 +1501,7 @@ export interface FileRouteTypes {
     | '/admin/branches'
     | '/admin/business-rules'
     | '/admin/cashier-sessions'
+    | '/admin/catalog-backup'
     | '/admin/categories'
     | '/admin/category-affinity'
     | '/admin/cfo'
@@ -2160,6 +2172,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/catalog-backup': {
+      id: '/admin/catalog-backup'
+      path: '/catalog-backup'
+      fullPath: '/admin/catalog-backup'
+      preLoaderRoute: typeof AdminCatalogBackupRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/cashier-sessions': {
       id: '/admin/cashier-sessions'
       path: '/cashier-sessions'
@@ -2688,6 +2707,7 @@ interface AdminRouteChildren {
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
   AdminCashierSessionsRoute: typeof AdminCashierSessionsRoute
+  AdminCatalogBackupRoute: typeof AdminCatalogBackupRoute
   AdminCategoriesRoute: typeof AdminCategoriesRoute
   AdminCategoryAffinityRoute: typeof AdminCategoryAffinityRoute
   AdminCfoRoute: typeof AdminCfoRoute
@@ -2762,6 +2782,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminBranchesRoute: AdminBranchesRoute,
   AdminBusinessRulesRoute: AdminBusinessRulesRoute,
   AdminCashierSessionsRoute: AdminCashierSessionsRoute,
+  AdminCatalogBackupRoute: AdminCatalogBackupRoute,
   AdminCategoriesRoute: AdminCategoriesRoute,
   AdminCategoryAffinityRoute: AdminCategoryAffinityRoute,
   AdminCfoRoute: AdminCfoRoute,
