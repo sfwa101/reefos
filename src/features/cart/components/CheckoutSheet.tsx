@@ -56,6 +56,8 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
     if (hasPricingErrors) return "يوجد منتجات تحتاج إلى استكمال بياناتها";
     if (o.logisticsBlocked)
       return o.logisticsQuote?.blockers[0]?.message ?? "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل";
+    if (o.giftMode && (!o.giftRecipientName.trim() || !o.giftRecipientPhone.trim() || !o.giftRecipientAddress.trim()))
+      return "أكمل بيانات مستلم الهدية";
     return null;
   })();
 
