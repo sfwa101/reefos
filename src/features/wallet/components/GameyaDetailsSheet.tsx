@@ -45,7 +45,7 @@ export const GameyaDetailsSheet = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/55 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-foreground/45 sm:items-center"
       onClick={onClose}
     >
       <motion.div
