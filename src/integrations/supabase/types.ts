@@ -1755,6 +1755,130 @@ export type Database = {
           },
         ]
       }
+      gam_eya_installments: {
+        Row: {
+          amount_due: number
+          amount_paid: number
+          created_at: string
+          cycle_index: number
+          due_date: string
+          gam_eya_id: string
+          id: string
+          paid_at: string | null
+          status: Database["public"]["Enums"]["gam_eya_installment_status"]
+          user_id: string
+        }
+        Insert: {
+          amount_due: number
+          amount_paid?: number
+          created_at?: string
+          cycle_index: number
+          due_date: string
+          gam_eya_id: string
+          id?: string
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["gam_eya_installment_status"]
+          user_id: string
+        }
+        Update: {
+          amount_due?: number
+          amount_paid?: number
+          created_at?: string
+          cycle_index?: number
+          due_date?: string
+          gam_eya_id?: string
+          id?: string
+          paid_at?: string | null
+          status?: Database["public"]["Enums"]["gam_eya_installment_status"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gam_eya_installments_gam_eya_id_fkey"
+            columns: ["gam_eya_id"]
+            isOneToOne: false
+            referencedRelation: "gam_eyas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gam_eya_members: {
+        Row: {
+          gam_eya_id: string
+          guarantor_id: string | null
+          id: string
+          is_trusted: boolean
+          joined_at: string
+          turn_number: number
+          user_id: string
+        }
+        Insert: {
+          gam_eya_id: string
+          guarantor_id?: string | null
+          id?: string
+          is_trusted?: boolean
+          joined_at?: string
+          turn_number: number
+          user_id: string
+        }
+        Update: {
+          gam_eya_id?: string
+          guarantor_id?: string | null
+          id?: string
+          is_trusted?: boolean
+          joined_at?: string
+          turn_number?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "gam_eya_members_gam_eya_id_fkey"
+            columns: ["gam_eya_id"]
+            isOneToOne: false
+            referencedRelation: "gam_eyas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      gam_eyas: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_cycle_index: number
+          cycle_amount: number
+          id: string
+          max_members: number
+          name: string
+          starts_at: string | null
+          status: Database["public"]["Enums"]["gam_eya_status"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_cycle_index?: number
+          cycle_amount: number
+          id?: string
+          max_members: number
+          name: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["gam_eya_status"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_cycle_index?: number
+          cycle_amount?: number
+          id?: string
+          max_members?: number
+          name?: string
+          starts_at?: string | null
+          status?: Database["public"]["Enums"]["gam_eya_status"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       geo_zones: {
         Row: {
           accent: string | null
@@ -5040,6 +5164,69 @@ export type Database = {
         }
         Relationships: []
       }
+      wallet_transfer_idempotency: {
+        Row: {
+          amount: number
+          created_at: string
+          idempotency_key: string
+          recipient_id: string
+          result: Json | null
+          sender_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          idempotency_key: string
+          recipient_id: string
+          result?: Json | null
+          sender_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          idempotency_key?: string
+          recipient_id?: string
+          result?: Json | null
+          sender_id?: string
+        }
+        Relationships: []
+      }
+      wallet_vaults: {
+        Row: {
+          created_at: string
+          current_balance: number
+          icon: string | null
+          id: string
+          locked_until: string | null
+          name: string
+          target_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          current_balance?: number
+          icon?: string | null
+          id?: string
+          locked_until?: string | null
+          name: string
+          target_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          current_balance?: number
+          icon?: string | null
+          id?: string
+          locked_until?: string | null
+          name?: string
+          target_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       warehouses: {
         Row: {
           address: string | null
@@ -5390,6 +5577,10 @@ export type Database = {
         Returns: string
       }
       is_driver: { Args: { _user_id: string }; Returns: boolean }
+      is_gam_eya_member: {
+        Args: { _circle: string; _user: string }
+        Returns: boolean
+      }
       is_product_available_in_zone: {
         Args: { _product_id: string; _zone_id: string }
         Returns: boolean
@@ -5577,6 +5768,15 @@ export type Database = {
         Args: { _amount: number; _note?: string; _recipient_phone: string }
         Returns: Json
       }
+      wallet_transfer_v2: {
+        Args: {
+          _amount: number
+          _idempotency_key: string
+          _note?: string
+          _recipient_phone: string
+        }
+        Returns: Json
+      }
     }
     Enums: {
       app_role:
@@ -5599,6 +5799,8 @@ export type Database = {
         | "out_for_delivery"
         | "delivered"
         | "cancelled"
+      gam_eya_installment_status: "pending" | "paid" | "late" | "waived"
+      gam_eya_status: "pending" | "active" | "completed" | "cancelled"
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
@@ -5773,6 +5975,8 @@ export const Constants = {
         "delivered",
         "cancelled",
       ],
+      gam_eya_installment_status: ["pending", "paid", "late", "waived"],
+      gam_eya_status: ["pending", "active", "completed", "cancelled"],
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
