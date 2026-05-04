@@ -27,6 +27,7 @@ type KycStatus = "pending" | "verified" | "rejected" | null;
 const Account = () => {
   const { resolvedMode } = useTheme();
   const { user, profile, signOut, isInitializing } = useAuth();
+  const { roles } = useUserRoles();
   const nav = useNavigate();
   const [points, setPoints] = useState(0);
   const [balance, setBalance] = useState(0);
@@ -125,6 +126,8 @@ const Account = () => {
         points={points}
         balance={balance}
         ordersCount={ordersCount}
+        roles={roles}
+        customerId={formatCustomerId(user.id)}
       />
 
       <AccountWalletRail balance={balance} points={points} />
