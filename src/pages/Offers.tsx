@@ -6,6 +6,7 @@ import PersonalizedDealsRail from "@/features/offers/components/PersonalizedDeal
 import FlashSalesGrid from "@/features/offers/components/FlashSalesGrid";
 import BundleDealsRail, { type BundleDeal } from "@/features/offers/components/BundleDealsRail";
 import SectionOffersRail from "@/features/offers/components/SectionOffersRail";
+import SponsoredRestaurantRail from "@/features/offers/components/SponsoredRestaurantRail";
 import TierExclusiveOffers, { type TierOffer } from "@/features/offers/components/TierExclusiveOffers";
 import { useOffersRails } from "@/features/offers/hooks/useOffersRails";
 import { useDailyCountdown } from "@/features/offers/hooks/useDailyCountdown";
@@ -44,9 +45,17 @@ const Offers = () => {
         return <BundleDealsRail key={rail.id} bundles={fallbackBundles} title={rail.title} />;
       case "personalized":
         return <PersonalizedDealsRail key={rail.id} items={personalized} title={rail.title} />;
-      case "category":
       case "restaurant":
       case "sponsored":
+        return (
+          <SponsoredRestaurantRail
+            key={rail.id}
+            title={rail.title}
+            subtitle={rail.subtitle}
+            restaurantId={rail.target_id}
+          />
+        );
+      case "category":
         return (
           <SectionOffersRail
             key={rail.id}
