@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Sparkles, TrendingUp, Phone, BadgeCheck } from "lucide-react";
+import { TrendingUp, Phone, BadgeCheck } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { TIER_VISUALS } from "../data";
+import RoleSwitcher from "./RoleSwitcher";
 import type { LucideIcon } from "lucide-react";
+import type { AppRole } from "@/hooks/useUserRole";
 
 type Props = {
   tierKey: string;
@@ -20,6 +22,8 @@ type Props = {
   points: number;
   balance: number;
   ordersCount: number;
+  roles: NonNullable<AppRole>[];
+  customerId: string;
 };
 
 const Stat = ({ value, label, divider }: { value: string; label: string; divider?: boolean }) => (
