@@ -192,6 +192,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const skipNextPushRef = useRef(false);
   const lastPushedSignatureRef = useRef("");
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Phase 4.4.R — Realtime cross-device sync.
+  // Holds the active Supabase channel for the signed-in user; rebound on
+  // login / user-switch and torn down on logout. Coalesce bursts of
+  // postgres_changes events into a single re-fetch via realtimeFetchTimerRef.
+  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
+    null,
+  );
+  const realtimeFetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const schedulePush = useCallback(() => {
     if (skipNextPushRef.current) {
@@ -308,17 +318,92 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
     };
 
+    /**
+     * Phase 4.4.R — Realtime cross-device sync.
+     * Re-fetches the canonical remote cart whenever ANY mutation lands on
+     * the user's rows in `cart_items`. We refetch (not patch) because:
+     *   • Push is delete+insert → events arrive bursty; a single SELECT is
+     *     simpler and race-free.
+     *   • Signature equality with `lastPushedSignatureRef` filters self-echo,
+     *     so the originating device never reapplies its own write.
+     */
+    const teardownRealtime = () => {
+      if (realtimeFetchTimerRef.current) {
+        clearTimeout(realtimeFetchTimerRef.current);
+        realtimeFetchTimerRef.current = null;
+      }
+      const ch = realtimeChannelRef.current;
+      if (ch) {
+        void supabase.removeChannel(ch);
+        realtimeChannelRef.current = null;
+      }
+    };
+
+    const subscribeRealtime = (uid: string) => {
+      teardownRealtime();
+      const channel = supabase
+        .channel(`cart:${uid}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "cart_items",
+            filter: `user_id=eq.${uid}`,
+          },
+          () => {
+            // Coalesce burst (delete+insert from a single push lands as 1+N events).
+            if (realtimeFetchTimerRef.current) {
+              clearTimeout(realtimeFetchTimerRef.current);
+            }
+            realtimeFetchTimerRef.current = setTimeout(async () => {
+              realtimeFetchTimerRef.current = null;
+              const currentUid = userIdRef.current;
+              if (!currentUid || currentUid !== uid) return;
+              try {
+                const remote = await fetchRemoteCart(currentUid);
+                const next = dedupeLines(remote, "max");
+                const nextSignature = cartSignature(next);
+                // Self-echo guard: ignore broadcasts caused by our own push.
+                if (nextSignature === lastPushedSignatureRef.current) return;
+                if (nextSignature === cartSignature(linesRef.current)) return;
+                // Apply remote authoritatively without re-pushing.
+                skipNextPushRef.current = true;
+                linesRef.current = next;
+                lastPushedSignatureRef.current = nextSignature;
+                emit();
+                safeStorage.set(STORAGE_KEY, JSON.stringify(next));
+                skipNextPushRef.current = false;
+              } catch (err) {
+                console.warn("[cart] realtime refetch failed:", err);
+              }
+            }, 250);
+          },
+        )
+        .subscribe();
+      realtimeChannelRef.current = channel;
+    };
+
+    // Wrap handleUser so realtime follows the auth lifecycle exactly.
+    const handleUserWithRealtime = async (uid: string | null) => {
+      await handleUser(uid);
+      if (cancelled) return;
+      if (uid) subscribeRealtime(uid);
+      else teardownRealtime();
+    };
+
     void supabase.auth.getUser().then(({ data }) => {
-      void handleUser(data.user?.id ?? null);
+      void handleUserWithRealtime(data.user?.id ?? null);
     });
 
     const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      void handleUser(session?.user?.id ?? null);
+      void handleUserWithRealtime(session?.user?.id ?? null);
     });
 
     return () => {
       cancelled = true;
       sub.subscription.unsubscribe();
+      teardownRealtime();
       if (pushTimerRef.current) clearTimeout(pushTimerRef.current);
     };
   }, [emit]);
