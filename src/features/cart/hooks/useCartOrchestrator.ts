@@ -82,6 +82,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   // Phase 12.8 — Gift mode + Smart Fakka (charity)
   const [giftMode, setGiftMode] = useState<boolean>(false);
   const [giftMessage, setGiftMessage] = useState<string>("");
+  const [giftRecipientName, setGiftRecipientName] = useState<string>("");
+  const [giftRecipientPhone, setGiftRecipientPhone] = useState<string>("");
+  const [giftRecipientAddress, setGiftRecipientAddress] = useState<string>("");
   const [charity, setCharity] = useState<number>(0);
   const [charityCauseId, setCharityCauseId] = useState<string>("food");
 
