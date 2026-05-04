@@ -4,7 +4,7 @@ import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
 
 export const Route = createFileRoute("/_app/store/subscription")({
   component: lazyStorePageWith(
-    () => import("@/pages/store/Subscriptions"),
+    () => import("@/modules/subscriptions/SubscriptionsPage"),
     <StorePageSkeleton productCount={4} hideCategories withHero />,
   ),
 });
