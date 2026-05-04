@@ -18,6 +18,8 @@ import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
 import { VendorGroupCard } from "@/features/cart/components/VendorGroupCard";
 import { SharedCartManager } from "@/features/cart/components/SharedCartManager";
 import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallbackDialog";
+import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
+import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
