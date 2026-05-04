@@ -36,6 +36,7 @@ const Stat = ({ value, label, divider }: { value: string; label: string; divider
 const AccountTierCard = ({
   tierKey, tierLabel, TierIcon, multiplier, pct, remaining, nextLabel,
   displayName, displayPhone, initials, isVerified, points, balance, ordersCount,
+  roles, customerId,
 }: Props) => {
   const v = TIER_VISUALS[tierKey] ?? TIER_VISUALS.bronze;
   return (
@@ -55,13 +56,8 @@ const AccountTierCard = ({
         <span aria-hidden className="pointer-events-none absolute -bottom-16 -left-12 h-40 w-40 rounded-full blur-3xl" style={{ background: v.glow }} />
 
         <div className="relative p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <span className="inline-flex h-6 w-6 items-center justify-center rounded-md bg-foreground/15 ring-1 ring-foreground/20">
-                <Sparkles className="h-3 w-3" strokeWidth={2.6} />
-              </span>
-              <span className="text-[10px] font-extrabold tracking-[0.2em] opacity-90">REEF · MEMBER</span>
-            </div>
+          <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
+            <RoleSwitcher roles={roles} customerId={customerId} />
             <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/15 px-2.5 py-1 text-[11px] font-extrabold ring-1 ring-foreground/25 backdrop-blur-md">
               <TierIcon className="h-3.5 w-3.5" /> {tierLabel}
             </span>
