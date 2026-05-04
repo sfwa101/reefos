@@ -4,7 +4,7 @@ import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
 
 export const Route = createFileRoute("/_app/store/meat")({
   component: lazyStorePageWith(
-    () => import("@/pages/store/Meat"),
+    () => import("@/modules/meat/MeatPage"),
     <StorePageSkeleton productCount={6} withHero />,
   ),
 });
