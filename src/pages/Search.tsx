@@ -191,49 +191,154 @@ const SearchPage = () => {
 
   return (
     <div className="space-y-5 pb-24">
-      <BackHeader title="ابحث" subtitle={q ? `${toLatin(total)} نتيجة` : "اكتب اسم منتج أو قسم"} />
-
-      <div className="glass-strong sticky top-2 z-10 flex items-center gap-2 rounded-2xl px-4 py-3 shadow-soft">
-        <SearchIcon className={`h-4 w-4 ${isDebouncing ? "animate-pulse text-primary" : "text-muted-foreground"}`} />
-        <input
-          autoFocus
-          value={inputVal}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="ابحث عن منتج، علامة، قسم…"
-          className="flex-1 bg-transparent text-sm outline-none"
-          dir="rtl"
-        />
-        {inputVal && (
-          <button onClick={() => setQuery("")} aria-label="مسح" className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/5">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        )}
-        {q && matches.length > 0 && (
+    <div className="-mx-4 pb-24" dir="rtl">
+      {/* Sticky glass header — sits flush under the fixed TopBar (h-14). */}
+      <div className="sticky top-14 z-40 border-b border-border/50 bg-background/90 px-4 py-3 backdrop-blur-xl">
+        <div className="flex items-center gap-2">
+          <div className="flex h-11 flex-1 items-center gap-2 rounded-full bg-secondary/70 px-3 ring-1 ring-border/50 focus-within:ring-2 focus-within:ring-primary/40">
+            <SearchIcon
+              className={`h-4 w-4 ${isDebouncing ? "animate-pulse text-primary" : "text-muted-foreground"}`}
+              strokeWidth={2.2}
+            />
+            <input
+              autoFocus
+              value={inputVal}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="ابحث عن منتج، علامة، قسم…"
+              className="flex-1 bg-transparent text-[13.5px] font-medium outline-none placeholder:text-muted-foreground"
+              dir="rtl"
+            />
+            {inputVal && (
+              <button
+                onClick={() => setQuery("")}
+                aria-label="مسح"
+                className="flex h-7 w-7 items-center justify-center rounded-full bg-foreground/10 text-foreground/70 transition active:scale-90"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
           <button
-            onClick={() => setFiltersOpen(true)}
-            aria-label="تصفية"
-            className={`relative flex h-8 items-center gap-1 rounded-full px-3 text-[11px] font-extrabold ${
-              filtersActive ? "bg-primary text-primary-foreground" : "bg-foreground/5 text-foreground"
-            }`}
+            type="button"
+            aria-label="مسح باركود"
+            onClick={() => window.dispatchEvent(new CustomEvent("reef:open-barcode"))}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition active:scale-95"
           >
-            <SlidersHorizontal className="h-3.5 w-3.5" />
-            تصفية
+            <ScanBarcode className="h-5 w-5" strokeWidth={2.2} />
           </button>
+          {q && matches.length > 0 && (
+            <button
+              onClick={() => setFiltersOpen(true)}
+              aria-label="تصفية"
+              className={`relative flex h-11 w-11 shrink-0 items-center justify-center rounded-full transition active:scale-95 ${
+                filtersActive ? "bg-primary text-primary-foreground" : "bg-foreground/10 text-foreground"
+              }`}
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+            </button>
+          )}
+        </div>
+        {q && (
+          <p className="mt-2 px-1 text-[11px] font-bold text-muted-foreground">
+            {toLatin(total)} نتيجة لـ <span className="text-foreground">"{q}"</span>
+          </p>
         )}
       </div>
 
-      {!q && (
-        <div className="space-y-3">
-          <p className="px-1 text-xs font-bold text-muted-foreground">اقتراحات شائعة</p>
-          <div className="flex flex-wrap gap-2">
-            {["دجاج", "حليب", "أرز", "خضار", "زيت زيتون", "عصير", "قهوة", "أدوات منزلية"].map((s) => (
-              <button key={s} onClick={() => setQuery(s)} className="rounded-full bg-foreground/5 px-4 py-2 text-xs font-bold">
-                {s}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+      <div className="space-y-6 px-4 pt-5">
+        {!q && (
+          <>
+            {history.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-3.5 w-3.5 text-muted-foreground" />
+                    <h2 className="font-display text-[13px] font-extrabold text-foreground">
+                      عمليات بحث سابقة
+                    </h2>
+                  </div>
+                  <button
+                    onClick={clearHistory}
+                    className="text-[11px] font-extrabold text-primary active:opacity-70"
+                  >
+                    مسح الكل
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {history.map((h) => (
+                    <span
+                      key={h}
+                      className="group inline-flex items-center gap-1 rounded-full bg-foreground/5 ps-1 pe-3 text-[12px] font-bold text-foreground ring-1 ring-border/40"
+                    >
+                      <button
+                        onClick={() => removeHistory(h)}
+                        aria-label={`حذف ${h}`}
+                        className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground active:bg-foreground/10"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                      <button onClick={() => setQuery(h)} className="py-1.5">
+                        {h}
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-1.5 px-1">
+                <Sparkles className="h-3.5 w-3.5 text-primary" />
+                <h2 className="font-display text-[13px] font-extrabold text-foreground">
+                  اقتراحات شائعة
+                </h2>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {["دجاج", "حليب", "أرز", "خضار", "زيت زيتون", "عصير", "قهوة", "طماطم"].map((s) => (
+                  <button
+                    key={s}
+                    onClick={() => setQuery(s)}
+                    className="rounded-full bg-primary/8 px-4 py-2 text-[12px] font-bold text-foreground ring-1 ring-primary/20 transition active:scale-[0.97]"
+                  >
+                    {s}
+                  </button>
+                ))}
+              </div>
+            </section>
+
+            {featuredCats.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex items-center gap-1.5 px-1">
+                  <TrendingUp className="h-3.5 w-3.5 text-primary" />
+                  <h2 className="font-display text-[13px] font-extrabold text-foreground">
+                    اكتشف الآن
+                  </h2>
+                </div>
+                <div className="grid grid-cols-3 gap-2.5">
+                  {featuredCats.slice(0, 9).map((c) => (
+                    <Link
+                      key={c.id}
+                      to={c.to}
+                      className="flex flex-col items-center gap-2 rounded-2xl bg-card p-3 ring-1 ring-border/50 transition active:scale-[0.97]"
+                    >
+                      <div
+                        className="flex h-12 w-12 items-center justify-center rounded-2xl text-xl shadow-sm"
+                        style={{
+                          background: `conic-gradient(from 180deg, hsl(${c.ringFrom}), hsl(${c.ringTo}))`,
+                        }}
+                      >
+                        <span aria-hidden>{c.emoji}</span>
+                      </div>
+                      <p className="line-clamp-1 text-center text-[11px] font-extrabold text-foreground">
+                        {c.name}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
 
       {/* Category pills */}
       {q && categories.length > 1 && (
