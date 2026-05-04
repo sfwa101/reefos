@@ -153,10 +153,20 @@ const Wallet = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -4 }}
             transition={{ duration: 0.2 }}
-            className="rounded-3xl bg-white/[0.04] backdrop-blur-md ring-1 ring-white/10 p-5 min-h-[180px]"
           >
-            <p className="text-[12px] font-bold opacity-60 mb-1.5">قادم في Phase 13.35</p>
-            <p className="text-[14px] opacity-90">
+            {dock === "gameyas" ? (
+              <GameyasDockContent userId={c.userId} />
+            ) : (
+              <div className="rounded-3xl bg-white/[0.04] backdrop-blur-md ring-1 ring-white/10 p-5 min-h-[180px]">
+                <p className="text-[12px] font-bold opacity-60 mb-1.5">قادم في Phase 13.36</p>
+                <p className="text-[14px] opacity-90">
+                  {dock === "ops" && "سجل العمليات الموحّد عبر الأصول الخمسة + فلترة ذكية."}
+                  {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
+                  {dock === "insights" && "مدير مالي شخصي يحلّل إنفاقك ويقترح الميزانيات."}
+                </p>
+              </div>
+            )}
+          </motion.div>
               {dock === "ops" && "سجل العمليات الموحّد عبر الأصول الخمسة + فلترة ذكية."}
               {dock === "gameyas" && "محرك الجمعيات الإسلامي بالضامن والـ KYC والتوقيع الإلكتروني."}
               {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
