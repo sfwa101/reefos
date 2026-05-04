@@ -111,13 +111,15 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
             e.stopPropagation();
             setSheetOpen(true);
           }}
-          className="relative block aspect-square w-full overflow-hidden bg-secondary/40 text-right"
+          className="relative block aspect-square w-full overflow-hidden rounded-t-2xl bg-secondary/40 text-right"
           aria-label={product.name}
         >
         <OptimizedImage
           src={product.image}
           alt={product.name}
-          className="h-full w-full object-cover"
+          aspect="aspect-square"
+          wrapperClassName="absolute inset-0 rounded-t-2xl"
+          className="h-full w-full object-cover object-center"
         />
         {badge && (
           <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.cls}`}>
@@ -174,12 +176,14 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
         <Link
           to="/product/$productId"
           params={{ productId: product.id }}
-          className="relative block aspect-square overflow-hidden bg-secondary/40"
+          className="relative block aspect-square w-full overflow-hidden rounded-t-2xl bg-secondary/40"
         >
           <OptimizedImage
             src={product.image}
             alt={product.name}
-            className="h-full w-full object-cover"
+            aspect="aspect-square"
+            wrapperClassName="absolute inset-0 rounded-t-2xl"
+            className="h-full w-full object-cover object-center"
           />
           {badge && (
             <span className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${badge.cls}`}>
