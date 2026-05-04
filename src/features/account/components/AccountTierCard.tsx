@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { TrendingUp, Phone, BadgeCheck } from "lucide-react";
 import { toLatin } from "@/lib/format";
