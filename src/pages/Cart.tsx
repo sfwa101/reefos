@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Check, Clock, Gift, Lock, ShoppingBag, Sparkles, Tag, Truck, Zap } from "lucide-react";
@@ -21,13 +22,41 @@ import { WhatsAppFallbackDialog } from "@/features/cart/components/WhatsAppFallb
 import { CartPricingErrorsBanner } from "@/features/cart/components/CartPricingErrorsBanner";
 import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
 import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
+import { CartLogisticsBanners } from "@/features/cart/components/CartLogisticsBanners";
 import { useCartHasErrors } from "@/context/CartContext";
+import { isPerishable } from "@/lib/products";
+import { computeLogisticsQuote } from "@/core/logistics/quote";
+import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
+import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
   const { sharedCartId } = useSharedCartContext();
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = useCartHasErrors();
+  const { data: deliveryMethod } = useDefaultDeliveryMethod();
+
+  // Logistics Engine quote — single source of truth for delivery fee,
+  // ETA, blockers (min-order) and warnings (perishables / surge).
+  const logisticsQuote = useMemo(() => {
+    if (!deliveryMethod) return null;
+    const hasPerishables = o.lines.some((l) => isPerishable(l.product));
+    return computeLogisticsQuote({
+      zone: legacyZoneToLogisticsZone(o.zone),
+      method: deliveryMethod,
+      subtotal: o.subtotal,
+      hasPerishables,
+    });
+  }, [deliveryMethod, o.zone, o.subtotal, o.lines]);
+
+  const logisticsBlocked = (logisticsQuote?.blockers.length ?? 0) > 0;
+  // Engine wins for delivery fee when a quote is available; legacy delivery
+  // is the safe fallback during the brief moment the method query is in-flight.
+  const effectiveDelivery = logisticsQuote?.deliveryFee ?? o.delivery;
+  const effectiveGrand =
+    logisticsQuote != null
+      ? Math.max(0, o.subtotal - o.discount + effectiveDelivery + o.tip)
+      : o.grand;
 
   const updateSplit = async (
     participantId: string,
@@ -47,7 +76,7 @@ const Cart = () => {
 
   if (o.lines.length === 0) {
     return (
-      <div>
+      <div className="px-4">
         <BackHeader title="سلتي" subtitle="جاهز للطلب" />
         <div className="mt-12 flex flex-col items-center gap-4 text-center">
           <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-primary-soft">
@@ -69,7 +98,7 @@ const Cart = () => {
   }
 
   return (
-    <div className="space-y-4 pb-28">
+    <div className="space-y-4 px-4 pb-28">
       <BackHeader title="سلتي" subtitle={`${toLatin(o.count)} منتج`} />
 
       {/* Smart Progress Bar */}
@@ -139,6 +168,8 @@ const Cart = () => {
 
       <CartAddressSelector user={o.user} addresses={o.addresses} addrId={o.addrId} setAddrId={o.setAddrId} guestNotes={o.guestNotes} setGuestNotes={o.setGuestNotes} />
 
+      <CartLogisticsBanners quote={logisticsQuote} />
+
       {o.isSharedMode && o.sharedCart && (
         <SharedCartManager
           cart={o.sharedCart}
@@ -207,7 +238,7 @@ const Cart = () => {
 
       <CartLoyaltyBar />
 
-      <CartSummary subtotal={o.subtotal} discount={o.discount} appliedPromo={o.appliedPromo} delivery={o.delivery} billSavings={o.billSavings} tip={o.tip} isSplit={o.isSplit} walletApplied={o.walletApplied} walletShortfall={o.walletShortfall} secondaryLabel={o.secondaryLabel} grand={o.grand} />
+      <CartSummary subtotal={o.subtotal} discount={o.discount} appliedPromo={o.appliedPromo} delivery={effectiveDelivery} billSavings={o.billSavings} tip={o.tip} isSplit={o.isSplit} walletApplied={o.walletApplied} walletShortfall={o.walletShortfall} secondaryLabel={o.secondaryLabel} grand={effectiveGrand} />
 
       <button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">تفريغ السلة</button>
 
@@ -231,11 +262,17 @@ const Cart = () => {
 
       <div className="relative">
         <CartCheckoutActions
-          grand={o.grand}
+          grand={effectiveGrand}
           minOrderTotal={o.minOrderTotal}
           submitting={o.submitting}
           onCheckout={
-            hasPricingErrors
+            logisticsBlocked
+              ? () =>
+                  toast.error(
+                    logisticsQuote?.blockers[0]?.message ??
+                      "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
+                  )
+              : hasPricingErrors
               ? () => toast.error("يوجد منتجات تحتاج إلى استكمال بياناتها قبل إتمام الطلب")
               : isLocked
               ? () => toast.error("السلة مقفلة بانتظار موافقات المشاركين")
@@ -258,6 +295,25 @@ const Cart = () => {
               أكمل بيانات المنتجات أولاً
             </p>
           </div>
+        )}
+        {!isLocked && !hasPricingErrors && logisticsBlocked && (
+          <button
+            type="button"
+            onClick={() =>
+              toast.error(
+                logisticsQuote?.blockers[0]?.message ??
+                  "لا يمكن إتمام الطلب — راجع تفاصيل التوصيل",
+              )
+            }
+            className="absolute inset-0 flex flex-col items-center justify-center gap-1 rounded-2xl bg-destructive/80 backdrop-blur-sm"
+          >
+            <Lock className="h-5 w-5 text-destructive-foreground" />
+            <p className="text-xs font-extrabold text-destructive-foreground">
+              {logisticsQuote?.blockers[0]?.code === "below_min_order"
+                ? `الحد الأدنى للمنطقة غير مكتمل`
+                : "غير متاح في منطقتك حالياً"}
+            </p>
+          </button>
         )}
       </div>
 

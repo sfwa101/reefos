@@ -144,7 +144,7 @@ const Profile = () => {
 
   if (loading && !forceReady) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 px-4">
         <BackHeader title="ملفي الذكي" subtitle="جاري تجهيز ملفك" accent="حسابي" />
         <div className="h-44 animate-pulse rounded-[2rem] bg-card shadow-soft" />
         <div className="h-72 animate-pulse rounded-[1.6rem] bg-card shadow-soft" />
@@ -154,7 +154,7 @@ const Profile = () => {
 
   if (!user) {
     return (
-      <div className="space-y-5">
+      <div className="space-y-5 px-4">
         <BackHeader title="ملفي الذكي" subtitle="سجّل الدخول لإدارة بياناتك" accent="حسابي" />
         <section className="rounded-[2rem] border border-border/60 bg-card p-6 text-center shadow-tile">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary-soft text-primary">
@@ -174,7 +174,7 @@ const Profile = () => {
   const fallbackPhone = extractPhoneFromPseudoEmail(user.email);
 
   return (
-    <div className="space-y-4 pb-6">
+    <div className="space-y-4 px-4 pb-6">
       <BackHeader title="ملفي الذكي" subtitle="بياناتك تُخصِّص لك المتجر بأكمله" accent="حسابي" />
 
       <ProfileHero form={form} fallbackPhone={fallbackPhone} initials={initials} completion={completion} AvatarIcon={AvatarIcon} />
