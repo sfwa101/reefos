@@ -25,6 +25,7 @@ import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSyn
 const Cart = () => {
   const { sharedCartId } = useSharedCartContext();
   const o = useCartOrchestrator({ sharedCartId });
+  const hasPricingErrors = useCartHasErrors();
 
   const updateSplit = async (
     participantId: string,
