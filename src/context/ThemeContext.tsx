@@ -10,7 +10,9 @@ export type ColorTheme =
   | "mint"
   | "peach"
   | "plum"
-  | "navy";
+  | "navy"
+  | "apple"
+  | "graphite";
 export type Mode = "light" | "dark" | "system";
 
 type ThemeCtx = {

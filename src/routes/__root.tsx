@@ -11,6 +11,7 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
 import { CompareProvider } from "@/context/CompareContext";
@@ -98,9 +99,9 @@ function RootShell({ children }: { children: React.ReactNode }) {
   // Pre-hydration: read persisted theme and apply class/attribute BEFORE first
   // paint to eliminate the green-flash (FOUC) when a non-default theme is set.
   // Mirrors exactly what ThemeContext does inside its useEffect.
-  const themeBootstrap = `(function(){try{var m=localStorage.getItem("reef-mode");var c=localStorage.getItem("reef-color");var resolved=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(m||"light");var r=document.documentElement;if(resolved==="dark")r.classList.add("dark");if(c&&c!=="sage")r.setAttribute("data-theme",c);}catch(e){}})();`;
+  const themeBootstrap = `(function(){try{var m=localStorage.getItem("reef-mode");var c=localStorage.getItem("reef-color");var l=localStorage.getItem("reef-locale")||"ar";var resolved=m==="system"?(matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"):(m||"light");var r=document.documentElement;if(resolved==="dark")r.classList.add("dark");if(c&&c!=="sage")r.setAttribute("data-theme",c);r.setAttribute("lang",l);r.setAttribute("dir",l==="ar"?"rtl":"ltr");}catch(e){}})();`;
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html suppressHydrationWarning>
       <head>
         <ScriptOnce>{themeBootstrap}</ScriptOnce>
         <HeadContent />
@@ -125,6 +126,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
+        <LocaleProvider>
         <UIProvider>
           <TooltipProvider>
             <AuthProvider>
@@ -145,6 +147,7 @@ function RootComponent() {
             </AuthProvider>
           </TooltipProvider>
         </UIProvider>
+        </LocaleProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );
