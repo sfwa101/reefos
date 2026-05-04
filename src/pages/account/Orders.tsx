@@ -14,13 +14,13 @@ type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
 type ItemRow = Database["public"]["Tables"]["order_items"]["Row"];
 type OrderWithItems = OrderRow & { order_items: ItemRow[] };
 
-const statusInfo: Record<string, { label: string; color: string; icon: any }> = {
-  delivered:        { label: "تم التسليم",  color: "bg-primary text-primary-foreground", icon: Check },
-  out_for_delivery: { label: "في الطريق",   color: "bg-accent text-accent-foreground",   icon: Truck },
-  preparing:        { label: "قيد التحضير", color: "bg-amber-500 text-white",            icon: Clock },
-  confirmed:        { label: "مؤكد",         color: "bg-blue-500 text-white",             icon: Check },
-  pending:          { label: "بانتظار",      color: "bg-foreground/15 text-foreground",   icon: Clock },
-  cancelled:        { label: "ملغي",         color: "bg-destructive text-destructive-foreground", icon: X },
+const statusInfo: Record<string, { label: string; color: string; icon: LucideIcon }> = {
+  delivered:        { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
+  out_for_delivery: { label: "في الطريق",   color: "bg-accent text-accent-foreground",          icon: Truck },
+  preparing:        { label: "قيد التحضير", color: "bg-warning/15 text-warning",                icon: Clock },
+  confirmed:        { label: "مؤكد",         color: "bg-info/15 text-info",                      icon: Check },
+  pending:          { label: "بانتظار",      color: "bg-foreground/10 text-foreground",          icon: Clock },
+  cancelled:        { label: "ملغي",         color: "bg-destructive/15 text-destructive",        icon: X },
 };
 
 const formatDate = (iso: string) => {
