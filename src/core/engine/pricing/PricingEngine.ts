@@ -121,6 +121,7 @@ function foldModifiers(
     feeTotal,
     discountTotal,
     grandTotal,
+    pointsEarned: 0,
     appliedModifiers: modifiers,
     strategyKey,
   };
