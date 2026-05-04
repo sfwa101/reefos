@@ -14,11 +14,14 @@ import { toLatin } from "@/lib/format";
 export const VaultsDockContent = ({
   userId,
   onOpenSettings,
+  data,
 }: {
   userId: string | null;
   onOpenSettings: () => void;
+  data?: ReturnType<typeof useWalletSavings>;
 }) => {
-  const { jar, jarTxs, loading } = useWalletSavings(userId);
+  const fallback = useWalletSavings(data ? null : userId);
+  const { jar, jarTxs, loading } = data ?? fallback;
 
   if (loading) {
     return (
