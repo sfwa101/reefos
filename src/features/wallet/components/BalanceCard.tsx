@@ -6,8 +6,16 @@ import {
   useSpring,
   useTransform,
 } from "framer-motion";
-import { CreditCard, Cpu, ShieldCheck, Wifi } from "lucide-react";
+import { CreditCard, Copy, Cpu, ShieldCheck, Wifi } from "lucide-react";
+import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
+
+/** Build an IBAN-style display id from the user UUID, e.g. REEF-A1B2-C3D4. */
+const buildAccountNumber = (userId: string | null | undefined): string => {
+  if (!userId) return "REEF-•••• ••••";
+  const clean = userId.replace(/-/g, "").toUpperCase();
+  return `REEF-${clean.slice(0, 4)}-${clean.slice(4, 8)}`;
+};
 
 /**
  * BalanceCard — Holographic Super-Card (Papara/Apple Pay grade).
