@@ -374,6 +374,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       },
       getSnapshot: () => linesRef.current,
       actions,
+      getTier: () => tierRef.current,
     }),
     [actions],
   );
