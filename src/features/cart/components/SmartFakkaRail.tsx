@@ -3,6 +3,13 @@ import { motion } from "framer-motion";
 import { Pencil } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { useFakkaCalculator } from "../hooks/useFakkaCalculator";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 type Props = {
   title: string;
