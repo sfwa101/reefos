@@ -209,9 +209,33 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     groupIsMixedScheduled,
   } = grouping;
 
-  const paymentLabel = paymentOptions.find((p) => p.id === payment)?.label ?? "";
-  const secondaryLabel = paymentOptions.find((p) => p.id === secondaryPayment)?.label ?? "";
+  const paymentLabel = findPaymentMethod(payment)?.label ?? "";
+  const secondaryLabel = findPaymentMethod(secondaryPayment)?.label ?? "";
   const selectedAddr = addresses.find((a) => a.id === addrId);
+
+  // Logistics Engine quote — single source of truth for delivery fee, ETA,
+  // blockers (min-order) and warnings (perishables / surge).
+  const { data: deliveryMethod } = useDefaultDeliveryMethod();
+  const logisticsQuote = useMemo(() => {
+    if (!deliveryMethod) return null;
+    const hasPerishables = lines.some((l) => isPerishable(l.product));
+    return computeLogisticsQuote({
+      zone: legacyZoneToLogisticsZone(zone),
+      method: deliveryMethod,
+      subtotal,
+      hasPerishables,
+    });
+  }, [deliveryMethod, zone, subtotal, lines]);
+
+  const logisticsBlocked = (logisticsQuote?.blockers.length ?? 0) > 0;
+  const effectiveDelivery = logisticsQuote?.deliveryFee ?? delivery;
+  const effectiveGrand =
+    logisticsQuote != null
+      ? Math.max(0, subtotal - discount + effectiveDelivery + tip)
+      : grand;
+  /** Engine-driven COD permission. Falls back to legacy zone flag while quote loads. */
+  const codAllowed = logisticsQuote ? logisticsQuote.zone.codAllowed : zone.codAllowed;
+
 
   const checkoutWA = async () => {
     if (submittingRef.current) {
