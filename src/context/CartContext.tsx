@@ -716,6 +716,79 @@ export const useCartErrors = (): readonly CartLineError[] => {
 
 export const useCartHasErrors = (): boolean => useCartErrors().length > 0;
 
+/* ===================================================================
+ * Phase 8 — Loyalty Rewards selectors.
+ * Fold every line's `breakdown.pointsEarned` (+ optional bonusPoints)
+ * into a single immutable summary the Cart UI renders as the gold
+ * "ستحصل على X نقطة" bar. All math goes through `pricingEngine` —
+ * UI never multiplies anything itself.
+ * =================================================================== */
+export interface CartLoyaltySummary {
+  /** Total base points across all lines (already multiplied by tier). */
+  readonly basePoints: number;
+  /** Sum of bonus chip points (offers / gifts) across all lines. */
+  readonly bonusPoints: number;
+  /** basePoints + bonusPoints. */
+  readonly totalPoints: number;
+  /** Tier used for the calculation — `null` for guests. */
+  readonly tier: CustomerTier;
+  /** Per-line bonus chips for in-cart "+50 نقطة هدية" badges. */
+  readonly bonusLines: ReadonlyArray<{
+    readonly productId: string;
+    readonly productName: string;
+    readonly bonusPoints: number;
+  }>;
+}
+
+const EMPTY_LOYALTY: CartLoyaltySummary = {
+  basePoints: 0,
+  bonusPoints: 0,
+  totalPoints: 0,
+  tier: "guest",
+  bonusLines: [],
+};
+
+export const useCartLoyalty = (): CartLoyaltySummary => {
+  const { getTier } = useCtx();
+  return useCartSelector((lines): CartLoyaltySummary => {
+    const tier = getTier();
+    if (lines.length === 0 || tier === "guest") {
+      return { ...EMPTY_LOYALTY, tier };
+    }
+    let basePoints = 0;
+    let bonusPoints = 0;
+    const bonusLines: Array<{
+      productId: string;
+      productName: string;
+      bonusPoints: number;
+    }> = [];
+
+    for (const l of lines) {
+      const { result } = evaluateLineForCart(l, tier);
+      if (!result || result.kind !== "ok") continue;
+      const b = result.breakdown;
+      basePoints += b.pointsEarned;
+      const lb = b.bonusPoints ?? 0;
+      if (lb > 0) {
+        bonusPoints += lb;
+        bonusLines.push({
+          productId: l.product.id,
+          productName: l.product.name,
+          bonusPoints: lb,
+        });
+      }
+    }
+    return {
+      basePoints,
+      bonusPoints,
+      totalPoints: basePoints + bonusPoints,
+      tier,
+      bonusLines,
+    };
+  });
+};
+
+
 /** Per-product qty selector — ideal for ProductCard. */
 export const useCartLineQty = (productId: string) =>
   useCartSelector(
