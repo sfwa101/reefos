@@ -1,4 +1,4 @@
-import { useDeferredValue, useEffect, useRef, useState } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -7,12 +7,6 @@ import { useLocation } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
-import {
-  Banknote,
-  CreditCard,
-  Smartphone,
-  Wallet as WalletIcon,
-} from "lucide-react";
 import {
   WA_NUMBER,
   type Addr,
@@ -32,13 +26,14 @@ import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules } from "@/context/CartContext";
+import { isPerishable } from "@/lib/products";
+import { computeLogisticsQuote } from "@/core/logistics/quote";
+import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
+import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
+import { PAYMENT_METHODS, findPaymentMethod } from "../data/paymentMethods";
 
-export const paymentOptions = [
-  { id: "wallet", label: "المحفظة الذكية", icon: WalletIcon, sub: "خصم فوري من رصيدك" },
-  { id: "cash", label: "كاش عند الاستلام", icon: Banknote, sub: "ادفع للمندوب" },
-  { id: "vodafone-cash", label: "فودافون كاش", icon: Smartphone, sub: "تحويل فوري" },
-  { id: "instapay", label: "إنستا باي", icon: CreditCard, sub: "تحويل بنكي" },
-];
+/** @deprecated Re-exported only for backward compatibility. Import PAYMENT_METHODS instead. */
+export const paymentOptions = PAYMENT_METHODS;
 
 /**
  * Single source of truth for the Cart UI: state, derived totals, fulfillment
