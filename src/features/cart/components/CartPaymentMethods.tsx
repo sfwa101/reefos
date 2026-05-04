@@ -152,6 +152,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                 .filter((p) => p.id !== "wallet")
                 .filter((p) => o.zone.codAllowed || p.id !== "cash")
                 .filter((p) => !o.sweetsRules.blockCOD || p.id !== "cash")
+                .filter((p) => !o.engineRules.blocksCOD || p.id !== "cash")
                 .map((m) => {
                   const Icon = m.icon;
                   const a = o.secondaryPayment === m.id;
