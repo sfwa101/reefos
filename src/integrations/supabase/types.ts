@@ -223,6 +223,45 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_transfers: {
+        Row: {
+          created_at: string
+          from_amount: number
+          from_asset: string
+          id: string
+          metadata: Json
+          rate: number | null
+          reason: string | null
+          to_amount: number
+          to_asset: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          from_amount: number
+          from_asset: string
+          id?: string
+          metadata?: Json
+          rate?: number | null
+          reason?: string | null
+          to_amount: number
+          to_asset: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          from_amount?: number
+          from_asset?: string
+          id?: string
+          metadata?: Json
+          rate?: number | null
+          reason?: string | null
+          to_amount?: number
+          to_asset?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       audit_logs: {
         Row: {
           action: string
@@ -1759,10 +1798,12 @@ export type Database = {
         Row: {
           amount_due: number
           amount_paid: number
+          covered_by_guarantor: boolean
           created_at: string
           cycle_index: number
           due_date: string
           gam_eya_id: string
+          grace_until: string | null
           id: string
           paid_at: string | null
           status: Database["public"]["Enums"]["gam_eya_installment_status"]
@@ -1771,10 +1812,12 @@ export type Database = {
         Insert: {
           amount_due: number
           amount_paid?: number
+          covered_by_guarantor?: boolean
           created_at?: string
           cycle_index: number
           due_date: string
           gam_eya_id: string
+          grace_until?: string | null
           id?: string
           paid_at?: string | null
           status?: Database["public"]["Enums"]["gam_eya_installment_status"]
@@ -1783,10 +1826,12 @@ export type Database = {
         Update: {
           amount_due?: number
           amount_paid?: number
+          covered_by_guarantor?: boolean
           created_at?: string
           cycle_index?: number
           due_date?: string
           gam_eya_id?: string
+          grace_until?: string | null
           id?: string
           paid_at?: string | null
           status?: Database["public"]["Enums"]["gam_eya_installment_status"]
@@ -1804,29 +1849,38 @@ export type Database = {
       }
       gam_eya_members: {
         Row: {
+          e_signature_blob: string | null
           gam_eya_id: string
           guarantor_id: string | null
+          guarantor_signed_at: string | null
           id: string
           is_trusted: boolean
           joined_at: string
+          kyc_tier_at_join: number | null
           turn_number: number
           user_id: string
         }
         Insert: {
+          e_signature_blob?: string | null
           gam_eya_id: string
           guarantor_id?: string | null
+          guarantor_signed_at?: string | null
           id?: string
           is_trusted?: boolean
           joined_at?: string
+          kyc_tier_at_join?: number | null
           turn_number: number
           user_id: string
         }
         Update: {
+          e_signature_blob?: string | null
           gam_eya_id?: string
           guarantor_id?: string | null
+          guarantor_signed_at?: string | null
           id?: string
           is_trusted?: boolean
           joined_at?: string
+          kyc_tier_at_join?: number | null
           turn_number?: number
           user_id?: string
         }
@@ -1844,11 +1898,19 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string
+          created_by_role: string | null
           current_cycle_index: number
           cycle_amount: number
+          cycle_duration_months: number | null
+          e_contract_url: string | null
           id: string
+          late_grace_days: number
+          max_amount_for_tier: number | null
           max_members: number
+          min_kyc_tier: number | null
           name: string
+          payout_frequency: string | null
+          reward_pool: number
           starts_at: string | null
           status: Database["public"]["Enums"]["gam_eya_status"]
           updated_at: string
@@ -1856,11 +1918,19 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by: string
+          created_by_role?: string | null
           current_cycle_index?: number
           cycle_amount: number
+          cycle_duration_months?: number | null
+          e_contract_url?: string | null
           id?: string
+          late_grace_days?: number
+          max_amount_for_tier?: number | null
           max_members: number
+          min_kyc_tier?: number | null
           name: string
+          payout_frequency?: string | null
+          reward_pool?: number
           starts_at?: string | null
           status?: Database["public"]["Enums"]["gam_eya_status"]
           updated_at?: string
@@ -1868,11 +1938,19 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string
+          created_by_role?: string | null
           current_cycle_index?: number
           cycle_amount?: number
+          cycle_duration_months?: number | null
+          e_contract_url?: string | null
           id?: string
+          late_grace_days?: number
+          max_amount_for_tier?: number | null
           max_members?: number
+          min_kyc_tier?: number | null
           name?: string
+          payout_frequency?: string | null
+          reward_pool?: number
           starts_at?: string | null
           status?: Database["public"]["Enums"]["gam_eya_status"]
           updated_at?: string
@@ -1948,6 +2026,27 @@ export type Database = {
           surge_active?: boolean
           updated_at?: string
           zone_code?: string
+        }
+        Relationships: []
+      }
+      gold_price_snapshots: {
+        Row: {
+          captured_at: string
+          id: string
+          price_egp_per_gram: number
+          source: string
+        }
+        Insert: {
+          captured_at?: string
+          id?: string
+          price_egp_per_gram: number
+          source?: string
+        }
+        Update: {
+          captured_at?: string
+          id?: string
+          price_egp_per_gram?: number
+          source?: string
         }
         Relationships: []
       }
@@ -3518,6 +3617,7 @@ export type Database = {
           dislikes: string[] | null
           full_name: string | null
           gender: string | null
+          hide_balance: boolean
           household_size: number | null
           id: string
           lifestyle_tags: string[] | null
@@ -3540,6 +3640,7 @@ export type Database = {
           dislikes?: string[] | null
           full_name?: string | null
           gender?: string | null
+          hide_balance?: boolean
           household_size?: number | null
           id: string
           lifestyle_tags?: string[] | null
@@ -3562,6 +3663,7 @@ export type Database = {
           dislikes?: string[] | null
           full_name?: string | null
           gender?: string | null
+          hide_balance?: boolean
           household_size?: number | null
           id?: string
           lifestyle_tags?: string[] | null
@@ -4854,6 +4956,33 @@ export type Database = {
           },
         ]
       }
+      user_trust_score: {
+        Row: {
+          created_at: string
+          is_trusted: boolean
+          score: number
+          tier: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          is_trusted?: boolean
+          score?: number
+          tier?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          is_trusted?: boolean
+          score?: number
+          tier?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vendor_payout_requests: {
         Row: {
           amount: number
@@ -5135,6 +5264,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      wallet_assets: {
+        Row: {
+          asset_type: string
+          balance: number
+          created_at: string
+          currency_code: string
+          id: string
+          metadata: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          asset_type: string
+          balance?: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          asset_type?: string
+          balance?: number
+          created_at?: string
+          currency_code?: string
+          id?: string
+          metadata?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       wallet_balances: {
         Row: {

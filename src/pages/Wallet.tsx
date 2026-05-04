@@ -1,49 +1,44 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
-  PieChart as PieIcon,
-  Users,
-  Wallet2,
-  Target,
   Send,
   Plus,
   ScanLine,
   Sparkles,
+  Users,
+  Target,
+  PieChart as PieIcon,
+  Wallet2,
+  ArrowDownUp,
 } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-import { toLatin } from "@/lib/format";
 
 import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
-import { BalanceCardsCarousel } from "@/features/wallet/components/BalanceCardsCarousel";
-import { ActionGrid, type WalletAction } from "@/features/wallet/components/ActionGrid";
-import { WalletTabs } from "@/features/wallet/components/WalletTabs";
-import { MiniStatGrid } from "@/features/wallet/components/MiniStatGrid";
-import { WalletTransactionList } from "@/features/wallet/components/WalletTransactionList";
-import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
-import {
-  SpendingDonut,
-  AIAdvisor,
-  BudgetTracker,
-} from "@/features/wallet/components/WalletAnalytics";
+import { useWalletAssets, type WalletAsset } from "@/features/wallet/hooks/useWalletAssets";
+import { useHideBalance } from "@/features/wallet/hooks/useHideBalance";
+import { NeoCardsCarousel } from "@/features/wallet/components/NeoCardsCarousel";
 import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialog";
 import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
 import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
-import { GameyasTab } from "@/features/wallet/components/GameyasTab";
-import { VaultsGrid } from "@/features/wallet/components/VaultsGrid";
-import { NetWorthCard } from "@/features/wallet/components/NetWorthCard";
 
 /**
- * Wallet — Phase 13.16 Halal Neo-Bank rebuild.
+ * Wallet — Phase 13.34 Neo-Bank rebuild (shell only).
  *
- * 4-segment hierarchy (Mobile-first, edge-safe `px-4 lg:px-8`):
- *   1. Holographic IBAN super-card carousel.
- *   2. Fintech action ribbon (Send · Topup · Cashback · QR Pay).
- *   3. Segmented control: العمليات · الجمعيات · حصّالاتي · تحليلات.
- *   4. Personal CFO panel (NetWorth + SpendingDonut + AIAdvisor).
+ * Hierarchy (mobile-first, edge-safe):
+ *   1. Stealth-aware greeting + active-asset badge.
+ *   2. Embla horizontal Super-Cards (5 assets) with shared layoutId.
+ *   3. Quick-action ribbon (Send · Topup · Convert · QR · Cashback).
+ *   4. Mini-app dock (Operations · Gameyas · Vaults · Insights) — placeholders.
+ *   5. Existing Topup/Transfer/POS sheets re-skinned in dark surface.
  */
 const Wallet = () => {
   const c = useWalletDashboard();
+  const { assets, loading: assetsLoading } = useWalletAssets(c.userId);
+  const { hidden, toggle: toggleHide } = useHideBalance(c.userId);
+  const [activeAsset, setActiveAsset] = useState<WalletAsset | null>(null);
+  const [dock, setDock] = useState<"ops" | "gameyas" | "vaults" | "insights">("ops");
 
-  if (c.loading) {
+  if (c.loading || assetsLoading) {
     return (
       <div className="flex h-60 items-center justify-center">
         <Loader2 className="h-6 w-6 animate-spin text-primary" />
@@ -51,36 +46,29 @@ const Wallet = () => {
     );
   }
 
-  const actions: WalletAction[] = [
-    {
-      id: "transfer",
-      label: "إرسال",
-      icon: Send,
-      onClick: () => c.setShowTransfer(true),
-      primary: true,
-    },
+  const ownerName = c.profile?.full_name || "عميل ريف";
+
+  const actions = [
+    { id: "send", label: "إرسال", icon: Send, onClick: () => c.setShowTransfer(true) },
     { id: "topup", label: "إيداع", icon: Plus, onClick: c.openTopup },
-    {
-      id: "cashback",
-      label: "كاش باك",
-      icon: Sparkles,
-      onClick: () => c.openAffiliateTab(),
-    },
+    { id: "convert", label: "تحويل أصول", icon: ArrowDownUp, onClick: () => {} },
     { id: "qr", label: "دفع QR", icon: ScanLine, onClick: () => c.setShowPos(true) },
+    { id: "cashback", label: "كاش باك", icon: Sparkles, onClick: () => c.openAffiliateTab() },
   ];
 
   return (
-    <div className="relative min-h-screen w-full bg-gradient-to-b from-background via-background/95 to-muted/20">
+    <div className="relative min-h-screen w-full bg-[oklch(0.16_0.02_260)] text-white">
+      {/* aurora background */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -top-16 left-1/2 h-64 w-64 -translate-x-1/2 rounded-full bg-primary/15 blur-3xl"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute top-40 right-0 h-48 w-48 rounded-full bg-accent/15 blur-3xl"
+        className="pointer-events-none absolute inset-x-0 top-0 h-[420px] opacity-90"
+        style={{
+          background:
+            "radial-gradient(60% 50% at 30% 0%, oklch(0.45 0.18 280 / 0.55), transparent 70%), radial-gradient(50% 40% at 80% 10%, oklch(0.55 0.18 165 / 0.40), transparent 70%)",
+        }}
       />
 
-      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-3 pb-32">
+      <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-4 pb-32">
         {/* HEADER */}
         <motion.section
           initial={{ opacity: 0, y: -8 }}
@@ -89,158 +77,122 @@ const Wallet = () => {
           className="flex items-end justify-between"
         >
           <div>
-            <h1 className="font-display text-3xl font-black tracking-tight text-foreground">
-              محفظتي
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              بنكك الرقمي الإسلامي · جمعيات · حصّالات · مدير مالي شخصي
+            <p className="text-[11px] font-bold tracking-[0.18em] uppercase opacity-60">
+              REEF · NEO BANK
             </p>
+            <h1 className="font-display text-[28px] font-black tracking-tight mt-0.5">
+              أهلاً، {ownerName.split(" ")[0]}
+            </h1>
           </div>
-          {c.tier && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-extrabold text-primary ring-1 ring-primary/20">
-              {c.tier.label} · {toLatin(c.tier.multiplier)}x
-            </span>
+          {activeAsset && (
+            <motion.span
+              layoutId="active-asset-badge"
+              className="inline-flex items-center gap-1 rounded-full bg-white/10 backdrop-blur-md px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-white/15"
+            >
+              {activeAsset.label}
+            </motion.span>
           )}
         </motion.section>
 
         {/* SUPER-CARDS CAROUSEL */}
         <div className="-mx-4 lg:-mx-8">
-          <BalanceCardsCarousel
-            name={c.profile?.full_name || "عميل ريف"}
-            balance={Number(c.balance?.balance ?? 0)}
-            trustLimit={c.trustLimit}
-            tierLabel={c.tier?.label}
-            totalCommission={c.totalCommission}
-            successfulRefs={c.successfulRefs}
-            referralCode={c.referralCode}
-            jar={c.jar}
-            userId={c.userId}
+          <NeoCardsCarousel
+            assets={assets}
+            hidden={hidden}
+            onToggleHide={toggleHide}
+            ownerName={ownerName}
+            onAssetChange={setActiveAsset}
           />
         </div>
 
-        {/* FINTECH ACTION RIBBON */}
-        <ActionGrid actions={actions} />
+        {/* QUICK-ACTION RIBBON */}
+        <div className="grid grid-cols-5 gap-2">
+          {actions.map((a) => (
+            <button
+              key={a.id}
+              type="button"
+              onClick={a.onClick}
+              className="group flex flex-col items-center gap-1.5 rounded-2xl bg-white/5 backdrop-blur-md px-2 py-3 ring-1 ring-white/10 active:scale-[0.96] transition"
+            >
+              <span className="grid place-items-center h-10 w-10 rounded-xl bg-white/10 text-white group-active:bg-primary/60 transition">
+                <a.icon className="h-[18px] w-[18px]" />
+              </span>
+              <span className="text-[10.5px] font-bold opacity-85">{a.label}</span>
+            </button>
+          ))}
+        </div>
 
-        {/* 4-SEGMENT NAV */}
-        <WalletTabs
-          tabs={[
-            { id: "balance", label: "العمليات", icon: Wallet2 },
+        {/* MINI-APP DOCK */}
+        <div className="grid grid-cols-4 gap-1.5 rounded-2xl bg-white/5 p-1.5 ring-1 ring-white/10">
+          {[
+            { id: "ops", label: "العمليات", icon: Wallet2 },
             { id: "gameyas", label: "الجمعيات", icon: Users },
             { id: "vaults", label: "حصّالاتي", icon: Target },
-            { id: "budgets", label: "تحليلات", icon: PieIcon },
-          ]}
-          active={c.tab}
-          onChange={(t) => c.setTab(t as typeof c.tab)}
-        />
+            { id: "insights", label: "تحليلات", icon: PieIcon },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => setDock(t.id as typeof dock)}
+              className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition ${
+                dock === t.id ? "bg-white text-[oklch(0.16_0.02_260)]" : "text-white/70"
+              }`}
+            >
+              <t.icon className="h-4 w-4" />
+              {t.label}
+            </button>
+          ))}
+        </div>
 
+        {/* DOCK CONTENT (placeholders for next phase) */}
         <AnimatePresence mode="wait">
-          {c.tab === "balance" && (
-            <motion.div
-              key="balance"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-5"
-            >
-              <MiniStatGrid
-                coupons={c.balance?.coupons ?? 0}
-                cashback={c.balance?.cashback ?? 0}
-                refs={c.successfulRefs}
-              />
-              <WalletTransactionList txs={c.txs} />
-            </motion.div>
-          )}
-
-          {c.tab === "gameyas" && (
-            <motion.div
-              key="gameyas"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <GameyasTab userId={c.userId} />
-            </motion.div>
-          )}
-
-          {c.tab === "vaults" && (
-            <motion.div
-              key="vaults"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-            >
-              <VaultsGrid userId={c.userId} />
-            </motion.div>
-          )}
-
-          {c.tab === "budgets" && (
-            <motion.div
-              key="budgets"
-              initial={{ opacity: 0, x: -10 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 10 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-5"
-            >
-              <NetWorthCard
-                walletBalance={Number(c.balance?.balance ?? 0)}
-                userId={c.userId}
-              />
-              <SpendingDonut stats={c.categoryStats} />
-              <AIAdvisor monthByCat={c.monthByCat} budgets={c.budgets} />
-              <BudgetTracker
-                userId={c.userId!}
-                monthByCat={c.monthByCat}
-                budgets={c.budgets}
-                onChange={c.setBudgets}
-              />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        <AnimatePresence>
-          {c.showTopup && (
-            <WalletTopupDialog
-              onClose={() => c.setShowTopup(false)}
-              phone="201080068689"
-              userId={c.userId!}
-            />
-          )}
-          {c.showJar && c.jar && (
-            <SavingsJarDialog
-              onClose={() => c.setShowJar(false)}
-              userId={c.userId!}
-              jar={c.jar}
-              txs={c.jarTxs}
-              onUpdate={(j, t) => {
-                c.setJar(j);
-                c.setJarTxs(t);
-              }}
-            />
-          )}
-          {c.showTransfer && (
-            <WalletTransferDialog
-              onClose={() => c.setShowTransfer(false)}
-              balance={Number(c.balance?.balance ?? 0)}
-              onDone={(newBal) =>
-                c.setBalance((b) => (b ? { ...b, balance: newBal } : b))
-              }
-            />
-          )}
-          {c.showPos && (
-            <WalletPosBarcode
-              onClose={() => c.setShowPos(false)}
-              customerCode={c.customerCode}
-              name={c.profile?.full_name || "عميل ريف"}
-              balance={Number(c.balance?.balance ?? 0)}
-              points={c.balance?.points ?? 0}
-            />
-          )}
+          <motion.div
+            key={dock}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -4 }}
+            transition={{ duration: 0.2 }}
+            className="rounded-3xl bg-white/[0.04] backdrop-blur-md ring-1 ring-white/10 p-5 min-h-[180px]"
+          >
+            <p className="text-[12px] font-bold opacity-60 mb-1.5">قادم في Phase 13.35</p>
+            <p className="text-[14px] opacity-90">
+              {dock === "ops" && "سجل العمليات الموحّد عبر الأصول الخمسة + فلترة ذكية."}
+              {dock === "gameyas" && "محرك الجمعيات الإسلامي بالضامن والـ KYC والتوقيع الإلكتروني."}
+              {dock === "vaults" && "حصّالاتك الذهبية والنقدية مع الادخار التلقائي عند كل عملية."}
+              {dock === "insights" && "مدير مالي شخصي يحلّل إنفاقك ويقترح الميزانيات."}
+            </p>
+          </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* SHEETS */}
+      <AnimatePresence>
+        {c.showTopup && (
+          <WalletTopupDialog
+            onClose={() => c.setShowTopup(false)}
+            phone="201080068689"
+            userId={c.userId!}
+          />
+        )}
+        {c.showTransfer && (
+          <WalletTransferDialog
+            onClose={() => c.setShowTransfer(false)}
+            balance={Number(c.balance?.balance ?? 0)}
+            onDone={(newBal) =>
+              c.setBalance((b) => (b ? { ...b, balance: newBal } : b))
+            }
+          />
+        )}
+        {c.showPos && (
+          <WalletPosBarcode
+            onClose={() => c.setShowPos(false)}
+            customerCode={c.customerCode}
+            name={ownerName}
+            balance={Number(c.balance?.balance ?? 0)}
+            points={c.balance?.points ?? 0}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };
