@@ -120,12 +120,34 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
     set(list.includes(id) ? list.filter((x) => x !== id) : [...list, id]);
 
   const confirm = () => {
+    // Phase 5.2 — prefer engine-emitted modifiers; fall back to legacy adapter.
+    const engineModifiers =
+      useEngine && breakdown
+        ? breakdown.appliedModifiers.map((m) => ({
+            id: m.id,
+            label: m.label,
+            kind: m.kind,
+            amount: m.amount,
+            percent: m.percent,
+            meta: m.meta ? { ...m.meta } : undefined,
+          }))
+        : null;
+
     add(product, qty, {
       variantId: weight.id,
       addonIds: addonIds.length ? addonIds : undefined,
       unitPrice,
-      // Stem-cell modifiers (Phase 2) — RPC/receipts can re-price polymorphically.
-      appliedModifiers: butcheryToModifiers(weight, prep, addonIds, rules, packagingId),
+      // Universal Commerce Engine — Phase 5.2 hydration.
+      appliedModifiers:
+        engineModifiers ??
+        butcheryToModifiers(weight, prep, addonIds, rules, packagingId),
+      properties: liveSelection
+        ? {
+            selection: liveSelection,
+            strategyKey: "meat",
+            engineDriven: engineModifiers !== null,
+          }
+        : undefined,
       bookingNote: [
         `الوزن: ${weight.label}`,
         `التحضير: ${prep.label}`,
