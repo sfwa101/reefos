@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { products, useProductsVersion } from "@/lib/products";
-import { getRestaurantById } from "@/lib/restaurants";
+import { products, useProductsVersion, type Product } from "@/lib/products";
+import { getRestaurant } from "@/lib/restaurants";
 import { ChefHat, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 
@@ -16,13 +16,13 @@ const SponsoredRestaurantRail = ({
   restaurantId,
 }: SponsoredRestaurantRailProps) => {
   const _pv = useProductsVersion();
-  const restaurant = restaurantId ? getRestaurantById(restaurantId) : undefined;
+  const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
 
-  const items = useMemo(() => {
+  const items = useMemo<Product[]>(() => {
     if (!restaurant) return [];
     return restaurant.productIds
-      .map((id) => products.find((p) => p.id === id))
-      .filter((p): p is NonNullable<typeof p> => Boolean(p))
+      .map((id: string) => products.find((p) => p.id === id))
+      .filter((p): p is Product => Boolean(p))
       .slice(0, 8);
   }, [restaurant, _pv]);
 
@@ -55,7 +55,7 @@ const SponsoredRestaurantRail = ({
       </div>
 
       <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1 no-scrollbar snap-x">
-        {items.map((p) => (
+        {items.map((p: Product) => (
           <Link
             key={p.id}
             to="/product/$productId"
