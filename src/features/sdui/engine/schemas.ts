@@ -53,6 +53,7 @@ export const BentoGridBlockSchema = z.object({
   id: z.string().min(1),
   props: z.object({
     title: z.string().max(80).optional(),
+    dense: z.boolean().optional(),
     items: z.array(BentoItemSchema).min(1).max(48),
   }),
 });
