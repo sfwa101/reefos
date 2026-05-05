@@ -11,6 +11,8 @@ import type { SduiBlock } from "./schemas";
 import { SduiHeroBlock } from "../blocks/SduiHeroBlock";
 import { SduiBentoBlock } from "../blocks/SduiBentoBlock";
 import { SduiSmartRail } from "../blocks/SduiSmartRail";
+import { SduiSectionHeader } from "../blocks/SduiSectionHeader";
+import { SduiProductRail } from "../blocks/SduiProductRail";
 
 export function renderBlock(block: SduiBlock): ReactElement | null {
   switch (block.type) {
@@ -20,9 +22,11 @@ export function renderBlock(block: SduiBlock): ReactElement | null {
       return <SduiBentoBlock block={block} />;
     case "smart_rail":
       return <SduiSmartRail block={block} />;
+    case "section_header":
+      return <SduiSectionHeader block={block} />;
+    case "product_rail":
+      return <SduiProductRail block={block} />;
     default: {
-      // Exhaustiveness guard — adding a new SduiBlock variant forces
-      // a compile error here until it's wired in.
       const _exhaustive: never = block;
       void _exhaustive;
       return null;
