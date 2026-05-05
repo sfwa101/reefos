@@ -134,7 +134,6 @@ const SearchPage = () => {
       if (full) out.push(full);
     }
     return out;
-    // `_pv` triggers re-eval whenever the global products cache mutates.
   }, [q, hits, catalog]);
 
   // Pull additional results from Supabase (server-side products that may not
