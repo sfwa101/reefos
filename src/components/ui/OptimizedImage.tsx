@@ -104,7 +104,9 @@ const OptimizedImageImpl = ({
 
       {!showFallback && (
         <img
-          src={src}
+          src={transformedSrc as string}
+          srcSet={srcSet}
+          sizes={cdnSizes ?? DEFAULT_SIZES}
           alt={alt}
           loading={priority ? "eager" : "lazy"}
           decoding="async"
