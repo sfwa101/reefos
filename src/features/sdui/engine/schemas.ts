@@ -74,16 +74,46 @@ export const SmartRailBlockSchema = z.object({
   }),
 });
 
+/** SECTION HEADER block — colorful pill heading for grouped sections. */
+export const SectionHeaderBlockSchema = z.object({
+  type: z.literal("section_header"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().min(1).max(80),
+    emoji: z.string().max(8).optional(),
+    tone: z.enum(BENTO_TONES).optional(),
+  }),
+});
+
+/** PRODUCT RAIL block — data-driven horizontal product list filtered by source + subCategory key. */
+export const ProductRailBlockSchema = z.object({
+  type: z.literal("product_rail"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().max(80).optional(),
+    source: z.string().min(1).max(40),
+    sub_category: z.string().max(80).optional(),
+    /** Optional fallback name keyword matcher (used when sub_category is missing on legacy rows). */
+    keywords: z.array(z.string().min(1).max(40)).max(12).optional(),
+    limit: z.number().int().min(1).max(40).default(12),
+    tone: z.enum(BENTO_TONES).optional(),
+  }),
+});
+
 export const BlockSchema = z.discriminatedUnion("type", [
   HeroBlockSchema,
   BentoGridBlockSchema,
   SmartRailBlockSchema,
+  SectionHeaderBlockSchema,
+  ProductRailBlockSchema,
 ]);
 
 export type SduiBlock = z.infer<typeof BlockSchema>;
 export type SduiHeroBlock = z.infer<typeof HeroBlockSchema>;
 export type SduiBentoBlock = z.infer<typeof BentoGridBlockSchema>;
 export type SduiRailBlock = z.infer<typeof SmartRailBlockSchema>;
+export type SduiSectionHeaderBlock = z.infer<typeof SectionHeaderBlockSchema>;
+export type SduiProductRailBlock = z.infer<typeof ProductRailBlockSchema>;
 
 /**
  * Defensive parser: never throws. Drops any block that fails validation
