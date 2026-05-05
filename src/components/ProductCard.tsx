@@ -93,7 +93,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
   // `content-visibility: auto` lets the browser skip painting offscreen cards.
   return (
     <article
-      className={`product-card group relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-soft ring-1 ring-border/50 ${widthCls} ${unavailable ? "opacity-95" : ""}`}
+      className={`product-card group relative flex flex-col overflow-hidden rounded-2xl border border-border/40 bg-card/40 backdrop-blur-xl shadow-[0_8px_24px_-12px_hsl(var(--foreground)/0.18)] ring-1 ring-foreground/[0.04] transition ease-apple hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-14px_hsl(var(--foreground)/0.26)] ${widthCls} ${unavailable ? "opacity-95" : ""}`}
       style={{ contentVisibility: "auto", containIntrinsicSize: "320px 260px" }}
     >
       {unavailable && (
