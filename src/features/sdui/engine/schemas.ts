@@ -22,6 +22,15 @@ export const BENTO_TONES = [
   "orange", "pink", "lime", "indigo", "fuchsia", "graphite",
 ] as const;
 
+/** Mesh motif IDs — these activate the legacy MeshBg + MotifIcon palette. */
+export const MOTIF_IDS = [
+  "village", "supermarket", "kitchen", "produce", "dairy", "meat",
+  "restaurants", "sweets", "baskets", "recipes", "pharmacy", "library",
+  "home", "gifts", "subs", "wholesale",
+  // legacy abstract overlays kept for backwards compat
+  "mesh", "rings", "grid", "glow", "wave",
+] as const;
+
 export const BentoItemSchema = z.object({
   key: z.string().min(1).max(64),
   title: z.string().min(1).max(80),
@@ -30,7 +39,7 @@ export const BentoItemSchema = z.object({
   to: z.string().min(1).max(200),
   size: z.enum(["wide", "tall", "half", "full"]).default("half"),
   tone: z.enum(BENTO_TONES).optional(),
-  motif: z.enum(["mesh", "rings", "grid", "glow", "wave"]).optional(),
+  motif: z.enum(MOTIF_IDS).optional(),
 });
 
 export const BentoGridBlockSchema = z.object({
