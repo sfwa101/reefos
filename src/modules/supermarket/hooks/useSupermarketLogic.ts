@@ -139,7 +139,7 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
       let current = flatSubs[0].id;
       for (const { id } of flatSubs) {
         const el = sectionRefs.current[id];
-        if (!el) continue;
+        if (!el || !el.isConnected) continue;
         const top = el.getBoundingClientRect().top;
         if (top - trigger <= 0) current = id;
         else break;
