@@ -95,10 +95,13 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
   // Note: `groupBySupermarketTaxonomy` already accepts a query parameter for
   // client-side narrowing; we pass an empty string because the server has
   // already filtered when `debouncedQuery` is present.
-  const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(
-    () => groupBySupermarketTaxonomy(pool, "") as SupermarketGroup[],
-    [pool],
-  );
+  const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(() => {
+    console.time("TaxonomyGrouping");
+    const result = groupBySupermarketTaxonomy(pool, "") as SupermarketGroup[];
+    console.timeEnd("TaxonomyGrouping");
+    console.debug("[Supermarket] pool size:", pool.length, "groups:", result.length);
+    return result;
+  }, [pool]);
 
   // Initialise active sub to the first available section once data lands.
   useEffect(() => {
