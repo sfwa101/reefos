@@ -55,8 +55,13 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
   const [recipientPhone, setRecipientPhone] = useState("");
   const [instructions, setInstructions] = useState("");
   const [saving, setSaving] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
 
   const { data: geo, loading: geoLoading } = useReverseGeocode(lat, lng);
+
+  useEffect(() => {
+    setMapReady(true);
+  }, []);
 
   // Auto-fill from reverse geocode (only when fields are empty/match previous geo)
   useEffect(() => {
@@ -122,13 +127,15 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
         {/* Map (top half) */}
         <div className="px-4 pt-3">
           <div className="h-[40vh] min-h-[260px] w-full">
-            <Suspense fallback={<MapFallback />}>
-              <RealMap
-                lat={lat}
-                lng={lng}
-                onPinChange={(la: Parameters<RealMapProps["onPinChange"]>[0], ln: Parameters<RealMapProps["onPinChange"]>[1]) => { setLat(la); setLng(ln); }}
-              />
-            </Suspense>
+            {mapReady ? (
+              <Suspense fallback={<MapFallback />}>
+                <RealMap
+                  lat={lat}
+                  lng={lng}
+                  onPinChange={(la: Parameters<RealMapProps["onPinChange"]>[0], ln: Parameters<RealMapProps["onPinChange"]>[1]) => { setLat(la); setLng(ln); }}
+                />
+              </Suspense>
+            ) : <MapFallback />}
           </div>
           {geoLoading && (
             <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
