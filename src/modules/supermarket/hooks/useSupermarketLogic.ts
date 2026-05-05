@@ -95,10 +95,13 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
   // Note: `groupBySupermarketTaxonomy` already accepts a query parameter for
   // client-side narrowing; we pass an empty string because the server has
   // already filtered when `debouncedQuery` is present.
-  const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(
-    () => groupBySupermarketTaxonomy(pool, "") as SupermarketGroup[],
-    [pool],
-  );
+  const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(() => {
+    console.time("TaxonomyGrouping");
+    const result = groupBySupermarketTaxonomy(pool, "") as SupermarketGroup[];
+    console.timeEnd("TaxonomyGrouping");
+    console.debug("[Supermarket] pool size:", pool.length, "groups:", result.length);
+    return result;
+  }, [pool]);
 
   // Initialise active sub to the first available section once data lands.
   useEffect(() => {
@@ -118,13 +121,18 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     return g?.subs.map((s) => s.sub) ?? [];
   }, [grouped, activeGroup]);
 
-  // ── Scrollspy — rAF-throttled, suppressed briefly after a user jump
+  // ── Scrollspy — throttled to 150ms to avoid layout thrashing on long feeds
   useEffect(() => {
     const flatSubs: { id: string }[] = [];
     for (const g of grouped) for (const { sub } of g.subs) flatSubs.push({ id: sub.id });
     if (flatSubs.length === 0) return;
 
+    let lastRun = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const THROTTLE_MS = 150;
+
     const compute = () => {
+      lastRun = Date.now();
       tickingRef.current = false;
       if (Date.now() < userJumpUntilRef.current) return;
       const trigger = SUPERMARKET_NAV.TOTAL + 16;
@@ -140,13 +148,27 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     };
 
     const onScroll = () => {
-      if (tickingRef.current) return;
-      tickingRef.current = true;
-      requestAnimationFrame(compute);
+      const now = Date.now();
+      const elapsed = now - lastRun;
+      if (elapsed >= THROTTLE_MS) {
+        if (tickingRef.current) return;
+        tickingRef.current = true;
+        requestAnimationFrame(compute);
+      } else if (!timer) {
+        timer = setTimeout(() => {
+          timer = null;
+          if (tickingRef.current) return;
+          tickingRef.current = true;
+          requestAnimationFrame(compute);
+        }, THROTTLE_MS - elapsed);
+      }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     compute();
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (timer) clearTimeout(timer);
+    };
   }, [grouped]);
 
   // Auto-center active chips in their respective rails.
@@ -198,11 +220,12 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
         (entries) => {
           for (const entry of entries) {
             if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+              console.debug("[Supermarket] sentinel hit → fetchNextPage()");
               void fetchNextPage();
             }
           }
         },
-        { rootMargin: "600px 0px" },
+        { rootMargin: "200px 0px" },
       );
       observerRef.current.observe(el);
     },
