@@ -18,13 +18,11 @@ import {
   type MotifId,
 } from "@/components/sections/MeshTile";
 
-const SIZE_CLASS: Record<"wide" | "tall" | "half" | "full", string> = {
-  // Phase 18.04 — Zero-gap protocol: all tiles share row-span-1.
-  // `tall` is intentionally collapsed to `half` to eliminate vertical gaps.
-  wide: "col-span-2 row-span-1 min-h-[128px]",
-  tall: "col-span-1 row-span-1 min-h-[128px]",
-  half: "col-span-1 row-span-1 min-h-[128px]",
-  full: "col-span-3 row-span-1 min-h-[140px]",
+const SIZE_CLASS: Record<"wide" | "half" | "full", string> = {
+  // Sovereign seed protocol: horizontal-only cells, no vertical spans.
+  wide: "col-span-2 row-span-1 h-full",
+  half: "col-span-1 row-span-1 h-full",
+  full: "col-span-3 row-span-1 h-full",
 };
 
 type Tone = NonNullable<NonNullable<Props["props"]["items"][number]["tone"]>>;
@@ -97,12 +95,13 @@ const SduiBentoBlockImpl = ({ block }: { block: Props }) => {
           {block.props.title}
         </h2>
       )}
-      <div className="grid grid-cols-3 grid-flow-row-dense gap-4">
+      <div className={`grid grid-cols-3 auto-rows-[132px] gap-3 ${block.props.dense === false ? "" : "grid-flow-row-dense"}`}>
         {block.props.items.map((item) => {
-          const rawMotif: RawMotif | undefined = item.motif;
+          const rawMotif: RawMotif | undefined = item.theme_config?.motif ?? item.motif;
           const isAbstract = !rawMotif || ABSTRACT_MOTIFS.has(rawMotif);
           const motifId = (!isAbstract ? rawMotif : undefined) as MotifId | undefined;
-          const tone: Tone = item.tone ?? "graphite";
+          const tone: Tone = item.theme_config?.tone ?? item.tone ?? "graphite";
+          const vector = item.theme_config?.vector;
 
           let bg: ReactNode;
           let icon: ReactNode = null;
@@ -114,6 +113,7 @@ const SduiBentoBlockImpl = ({ block }: { block: Props }) => {
               <>
                 <MeshBg motif={motifId} />
                 <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/[0.04]" />
+                {vector ? <AbstractOverlay motif={vector} /> : null}
               </>
             );
             icon = (
