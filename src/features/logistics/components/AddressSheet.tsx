@@ -7,15 +7,17 @@
  *
  * Stays inside the cart route — never navigates away.
  */
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Loader2, MapPin, Check, Building2, Home, Briefcase, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
-import RealMap from "./RealMap";
+import { ClientOnly } from "@tanstack/react-router";
 import type { BuildingType } from "@/core/logistics/types";
+
+const RealMap = lazy(() => import("./RealMap"));
 
 interface Props {
   open: boolean;
