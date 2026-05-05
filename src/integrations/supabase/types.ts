@@ -6160,8 +6160,6 @@ export type Database = {
         }
         Returns: Json
       }
-      show_limit: { Args: never; Returns: number }
-      show_trgm: { Args: { "": string }; Returns: string[] }
       submit_purchase_invoice: {
         Args: {
           _invoice_date?: string

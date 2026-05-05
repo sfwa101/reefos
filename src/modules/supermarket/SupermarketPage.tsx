@@ -4,7 +4,6 @@
 
 import SmartPairingWatcher from "@/components/store/SmartPairingWatcher";
 import { Search } from "lucide-react";
-import { Suspense, useEffect } from "react";
 import { useSupermarketLogic } from "./hooks/useSupermarketLogic";
 import { CategorySidebar } from "./components/CategorySidebar";
 import { ProductGrid } from "./components/ProductGrid";
@@ -24,27 +23,12 @@ const SupermarketPage = () => {
     registerSectionRef,
     jumpToSub,
     jumpToGroup,
-    loadMoreRef,
-    isFetchingNextPage,
-    hasNextPage,
-    isLoading,
   } = useSupermarketLogic();
-
-  useEffect(() => {
-    console.debug(
-      `[Pagination Telemetry] Loading: ${isLoading}, FetchingNext: ${isFetchingNextPage}, HasNext: ${hasNextPage}, Groups: ${grouped.length}`,
-    );
-  }, [isLoading, isFetchingNextPage, hasNextPage, grouped.length]);
 
   // Flat pool used by hero rails (Buy-it-again, Volume-deals).
   const pool = grouped.flatMap((g) => g.subs.flatMap((s) => s.items));
 
   return (
-    <Suspense
-      fallback={
-        <div className="p-6 text-center text-xs text-muted-foreground">جاري تحميل القسم…</div>
-      }
-    >
     <div>
       <SupermarketHero
         title="السوبرماركت"
@@ -85,17 +69,10 @@ const SupermarketPage = () => {
         }}
       />
 
-      <ProductGrid
-        grouped={grouped}
-        registerSectionRef={registerSectionRef}
-        loadMoreRef={loadMoreRef}
-        isFetchingNextPage={isFetchingNextPage}
-        hasNextPage={hasNextPage}
-      />
+      <ProductGrid grouped={grouped} registerSectionRef={registerSectionRef} />
 
       <SmartPairingWatcher />
     </div>
-    </Suspense>
   );
 };
 
