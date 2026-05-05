@@ -23,6 +23,9 @@ const SupermarketPage = () => {
     registerSectionRef,
     jumpToSub,
     jumpToGroup,
+    loadMoreRef,
+    isFetchingNextPage,
+    hasNextPage,
   } = useSupermarketLogic();
 
   // Flat pool used by hero rails (Buy-it-again, Volume-deals).
@@ -69,7 +72,13 @@ const SupermarketPage = () => {
         }}
       />
 
-      <ProductGrid grouped={grouped} registerSectionRef={registerSectionRef} />
+      <ProductGrid
+        grouped={grouped}
+        registerSectionRef={registerSectionRef}
+        loadMoreRef={loadMoreRef}
+        isFetchingNextPage={isFetchingNextPage}
+        hasNextPage={hasNextPage}
+      />
 
       <SmartPairingWatcher />
     </div>

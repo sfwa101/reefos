@@ -9,9 +9,18 @@ import { SupermarketProductCard } from "./SupermarketProductCard";
 interface ProductGridProps {
   readonly grouped: ReadonlyArray<SupermarketGroup>;
   readonly registerSectionRef: (id: string) => (el: HTMLElement | null) => void;
+  readonly loadMoreRef?: (el: HTMLElement | null) => void;
+  readonly isFetchingNextPage?: boolean;
+  readonly hasNextPage?: boolean;
 }
 
-const ProductGridImpl = ({ grouped, registerSectionRef }: ProductGridProps) => {
+const ProductGridImpl = ({
+  grouped,
+  registerSectionRef,
+  loadMoreRef,
+  isFetchingNextPage,
+  hasNextPage,
+}: ProductGridProps) => {
   if (grouped.length === 0) {
     return (
       <p className="rounded-2xl bg-foreground/5 p-6 text-center text-xs text-muted-foreground">
@@ -72,6 +81,19 @@ const ProductGridImpl = ({ grouped, registerSectionRef }: ProductGridProps) => {
           ))}
         </div>
       ))}
+      {loadMoreRef && (
+        <div
+          ref={loadMoreRef}
+          aria-hidden
+          className="flex h-16 items-center justify-center text-xs text-muted-foreground"
+        >
+          {isFetchingNextPage
+            ? "جاري التحميل…"
+            : hasNextPage
+              ? ""
+              : "اكتمل العرض"}
+        </div>
+      )}
       <div style={{ height: "60vh" }} />
     </div>
   );
