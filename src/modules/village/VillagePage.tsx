@@ -46,7 +46,7 @@ const VillagePage = () => {
 
       <section className="mt-5">
         <VillageProductGrid
-          items={items}
+          items={[...items]}
           isRoutineActive={isRoutineActive}
           onToggleRoutine={toggleRoutine}
         />
