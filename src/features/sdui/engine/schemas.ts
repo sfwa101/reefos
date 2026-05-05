@@ -87,16 +87,6 @@ export const SectionHeaderBlockSchema = z.object({
   }),
 });
 
-/** SECTION HEADER block — colorful pill heading for grouped sections. */
-export const SectionHeaderBlockSchema = z.object({
-  type: z.literal("section_header"),
-  id: z.string().min(1),
-  props: z.object({
-    title: z.string().min(1).max(80),
-    emoji: z.string().max(8).optional(),
-    tone: z.enum(BENTO_TONES).optional(),
-  }),
-});
 
 /** PRODUCT RAIL block — data-driven horizontal product list filtered by source + subCategory key. */
 export const ProductRailBlockSchema = z.object({
