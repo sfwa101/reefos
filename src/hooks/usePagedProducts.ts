@@ -18,6 +18,10 @@ export const PAGE_SIZE = 50;
 
 export type PagedProductsFilter = {
   source?: ProductSource;
+  /** Multi-source whitelist (e.g. supermarket vertical spans many sources). */
+  sources?: ReadonlyArray<ProductSource>;
+  /** Sources to exclude (e.g. wholesale, kitchen, restaurants). */
+  excludeSources?: ReadonlyArray<ProductSource>;
   subCategory?: string;
   /** Free-text search across name + brand + sub_category (server-side ilike). */
   q?: string;
@@ -93,6 +97,11 @@ export async function fetchProductsPage(
     .range(from, to);
 
   if (filter.source) q = q.eq("source", filter.source);
+  if (filter.sources && filter.sources.length > 0) q = q.in("source", filter.sources as string[]);
+  if (filter.excludeSources && filter.excludeSources.length > 0) {
+    const list = filter.excludeSources.map((s) => `"${s}"`).join(",");
+    q = q.not("source", "in", `(${list})`);
+  }
   if (filter.subCategory) q = q.eq("sub_category", filter.subCategory);
   if (filter.q && filter.q.trim()) {
     const term = `%${filter.q.trim()}%`;
@@ -112,7 +121,15 @@ export async function fetchProductsPage(
 }
 
 export const pagedProductsKey = (f: PagedProductsFilter) =>
-  ["catalog", "paged", f.source ?? null, f.subCategory ?? null, f.q?.trim() || null] as const;
+  [
+    "catalog",
+    "paged",
+    f.source ?? null,
+    f.sources ? [...f.sources].sort().join(",") : null,
+    f.excludeSources ? [...f.excludeSources].sort().join(",") : null,
+    f.subCategory ?? null,
+    f.q?.trim() || null,
+  ] as const;
 
 export function usePagedProducts(filter: PagedProductsFilter) {
   return useInfiniteQuery<

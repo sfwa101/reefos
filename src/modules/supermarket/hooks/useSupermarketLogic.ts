@@ -1,8 +1,10 @@
 // useSupermarketLogic — single source of state for the Supermarket module.
 // ----------------------------------------------------------------------
-// Owns: SWR-cached catalog, search query, taxonomy grouping, dual-rail
-// scrollspy, jump-to-section. Mirrors the behaviour of the legacy
-// `DualNavStore` but exposes a typed surface to dumb child components.
+// Pilot migration (Phase 21.1): server-driven, paginated catalog via
+// `usePagedProducts` (50 items / page). The legacy `ensureProductsLoaded`
+// + global in-memory cache + Realtime subscription is no longer touched
+// by this orchestrator. All filtering happens on the server when a search
+// term is present; otherwise pages stream in via IntersectionObserver.
 
 import {
   useCallback,
@@ -11,16 +13,28 @@ import {
   useRef,
   useState,
 } from "react";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { usePagedProducts } from "@/hooks/usePagedProducts";
+import type { Product, ProductSource } from "@/lib/products";
 import {
   groupBySupermarketTaxonomy,
   groupForSub,
-  supermarketPool,
   supermarketTaxonomy,
 } from "@/lib/supermarketTaxonomy";
 import { storeThemes } from "@/lib/storeThemes";
 import type { SupermarketGroup } from "../types";
 import { SUPERMARKET_NAV } from "../types";
+
+// Verticals that DON'T belong to the supermarket grid.
+const SUPERMARKET_EXCLUDED_SOURCES: ReadonlyArray<ProductSource> = [
+  "wholesale",
+  "kitchen",
+  "recipes",
+  "restaurants",
+  "sweets",
+  "baskets",
+  "village",
+  "library",
+];
 
 interface UseSupermarketLogicResult {
   readonly theme: typeof storeThemes.supermarket;
@@ -36,20 +50,40 @@ interface UseSupermarketLogicResult {
   readonly jumpToSub: (id: string) => void;
   readonly jumpToGroup: (groupId: string) => void;
   readonly isLoading: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly hasNextPage: boolean;
+  /** Attach to a sentinel <div /> at the bottom of the feed. */
+  readonly loadMoreRef: (el: HTMLElement | null) => void;
 }
 
 export function useSupermarketLogic(): UseSupermarketLogicResult {
   const theme = storeThemes.supermarket;
-  const { data: allProducts, isLoading } = useProductsQuery();
 
-  // Restrict the catalog to the supermarket vertical. The pool function
-  // is pure — `useMemo` keys on the catalog reference.
-  const pool = useMemo(
-    () => supermarketPool(allProducts ?? []),
-    [allProducts],
+  // ── Search (debounced for server-side ilike) ─────────────────────
+  const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedQuery(query.trim()), 250);
+    return () => clearTimeout(t);
+  }, [query]);
+
+  // ── Paginated catalog (server-side filter + range) ───────────────
+  const {
+    data,
+    isLoading,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  } = usePagedProducts({
+    excludeSources: SUPERMARKET_EXCLUDED_SOURCES,
+    q: debouncedQuery || undefined,
+  });
+
+  const pool = useMemo<Product[]>(
+    () => (data?.pages.flatMap((p) => p.items) ?? []),
+    [data],
   );
 
-  const [query, setQuery] = useState("");
   const [activeSub, setActiveSub] = useState<string>("");
 
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -58,9 +92,12 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
   const tickingRef = useRef(false);
   const userJumpUntilRef = useRef(0);
 
+  // Note: `groupBySupermarketTaxonomy` already accepts a query parameter for
+  // client-side narrowing; we pass an empty string because the server has
+  // already filtered when `debouncedQuery` is present.
   const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(
-    () => groupBySupermarketTaxonomy(pool, query) as SupermarketGroup[],
-    [pool, query],
+    () => groupBySupermarketTaxonomy(pool, "") as SupermarketGroup[],
+    [pool],
   );
 
   // Initialise active sub to the first available section once data lands.
@@ -81,7 +118,7 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     return g?.subs.map((s) => s.sub) ?? [];
   }, [grouped, activeGroup]);
 
-  // Scrollspy — rAF-throttled, suppressed briefly after a user jump.
+  // ── Scrollspy — rAF-throttled, suppressed briefly after a user jump
   useEffect(() => {
     const flatSubs: { id: string }[] = [];
     for (const g of grouped) for (const { sub } of g.subs) flatSubs.push({ id: sub.id });
@@ -148,6 +185,32 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     [grouped, jumpToSub],
   );
 
+  // ── IntersectionObserver sentinel for infinite scroll ────────────
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useCallback(
+    (el: HTMLElement | null) => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
+      if (!el) return;
+      observerRef.current = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+              void fetchNextPage();
+            }
+          }
+        },
+        { rootMargin: "600px 0px" },
+      );
+      observerRef.current.observe(el);
+    },
+    [hasNextPage, isFetchingNextPage, fetchNextPage],
+  );
+
+  useEffect(() => () => observerRef.current?.disconnect(), []);
+
   return {
     theme,
     query,
@@ -162,5 +225,8 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     jumpToSub,
     jumpToGroup,
     isLoading,
+    isFetchingNextPage,
+    hasNextPage: Boolean(hasNextPage),
+    loadMoreRef,
   };
 }
