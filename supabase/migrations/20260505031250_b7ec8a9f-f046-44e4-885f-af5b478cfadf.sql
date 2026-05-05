@@ -1,1 +1,0 @@
-UPDATE sdui_layouts SET active_version_id='599867d1-2942-411e-be3a-0a150dc7e057' WHERE slug='supermarket_hub';

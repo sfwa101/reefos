@@ -70,75 +70,7 @@ export const SmartRailBlockSchema = z.object({
   id: z.string().min(1),
   props: z.object({
     title: z.string().max(80).optional(),
-    sticky: z.boolean().optional(),
     items: z.array(RailItemSchema).min(1).max(24),
-  }),
-});
-
-/** SECTION HEADER block — colorful pill heading for grouped sections. */
-export const SectionHeaderBlockSchema = z.object({
-  type: z.literal("section_header"),
-  id: z.string().min(1),
-  props: z.object({
-    title: z.string().min(1).max(80),
-    emoji: z.string().max(8).optional(),
-    tone: z.enum(BENTO_TONES).optional(),
-    anchor: z.string().max(64).optional(),
-  }),
-});
-
-
-/** PRODUCT RAIL block — data-driven horizontal product list filtered by source + subCategory key. */
-export const ProductRailBlockSchema = z.object({
-  type: z.literal("product_rail"),
-  id: z.string().min(1),
-  props: z.object({
-    title: z.string().max(80).optional(),
-    source: z.string().min(1).max(40),
-    sub_category: z.string().max(80).optional(),
-    /** Optional fallback name keyword matcher (used when sub_category is missing on legacy rows). */
-    keywords: z.array(z.string().min(1).max(40)).max(12).optional(),
-    limit: z.number().int().min(1).max(40).default(12),
-    tone: z.enum(BENTO_TONES).optional(),
-  }),
-});
-
-/** STICKY HUB — 3-layer (main pills + sub icons + search) sticky header for store hubs. */
-export const StickyHubSectionSchema = z.object({
-  key: z.string().min(1).max(64),
-  title: z.string().min(1).max(60),
-  emoji: z.string().max(8).optional(),
-  anchor: z.string().min(1).max(64),
-  tone: z.enum(BENTO_TONES).optional(),
-  subs: z.array(z.object({
-    key: z.string().min(1).max(64),
-    title: z.string().min(1).max(60),
-    emoji: z.string().max(8).optional(),
-    anchor: z.string().min(1).max(64),
-  })).max(20).optional(),
-});
-
-export const StickyHubBlockSchema = z.object({
-  type: z.literal("sticky_hub"),
-  id: z.string().min(1),
-  props: z.object({
-    search_placeholder: z.string().max(80).optional(),
-    sections: z.array(StickyHubSectionSchema).min(1).max(20),
-  }),
-});
-
-/** PRODUCT GRID — vertical responsive grid (no horizontal scroll). */
-export const ProductGridBlockSchema = z.object({
-  type: z.literal("product_grid"),
-  id: z.string().min(1),
-  props: z.object({
-    title: z.string().max(80).optional(),
-    anchor: z.string().max(64).optional(),
-    source: z.string().min(1).max(40),
-    sub_category: z.string().max(80).optional(),
-    keywords: z.array(z.string().min(1).max(40)).max(12).optional(),
-    limit: z.number().int().min(1).max(60).default(24),
-    columns: z.number().int().min(2).max(3).default(2),
   }),
 });
 
@@ -146,20 +78,12 @@ export const BlockSchema = z.discriminatedUnion("type", [
   HeroBlockSchema,
   BentoGridBlockSchema,
   SmartRailBlockSchema,
-  SectionHeaderBlockSchema,
-  ProductRailBlockSchema,
-  StickyHubBlockSchema,
-  ProductGridBlockSchema,
 ]);
 
 export type SduiBlock = z.infer<typeof BlockSchema>;
 export type SduiHeroBlock = z.infer<typeof HeroBlockSchema>;
 export type SduiBentoBlock = z.infer<typeof BentoGridBlockSchema>;
 export type SduiRailBlock = z.infer<typeof SmartRailBlockSchema>;
-export type SduiSectionHeaderBlock = z.infer<typeof SectionHeaderBlockSchema>;
-export type SduiProductRailBlock = z.infer<typeof ProductRailBlockSchema>;
-export type SduiStickyHubBlock = z.infer<typeof StickyHubBlockSchema>;
-export type SduiProductGridBlock = z.infer<typeof ProductGridBlockSchema>;
 
 /**
  * Defensive parser: never throws. Drops any block that fails validation
