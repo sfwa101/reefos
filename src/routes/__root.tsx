@@ -7,7 +7,9 @@ import {
   ScriptOnce,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
+import { type QueryClient } from "@tanstack/react-query";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { queryPersister, PERSIST_BUSTER, PERSIST_MAX_AGE } from "@/lib/queryPersister";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
@@ -124,7 +126,21 @@ function RootComponent() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister: queryPersister,
+        maxAge: PERSIST_MAX_AGE,
+        buster: PERSIST_BUSTER,
+        // Only persist queries we explicitly opt-in via key prefix.
+        dehydrateOptions: {
+          shouldDehydrateQuery: (q) => {
+            const k0 = q.queryKey[0];
+            return k0 === "catalog" || k0 === "sdui" || k0 === "rails";
+          },
+        },
+      }}
+    >
       <ThemeProvider>
         <LocaleProvider>
         <UIProvider>
@@ -149,6 +165,6 @@ function RootComponent() {
         </UIProvider>
         </LocaleProvider>
       </ThemeProvider>
-    </QueryClientProvider>
+    </PersistQueryClientProvider>
   );
 }
