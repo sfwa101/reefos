@@ -17,6 +17,11 @@ export const HeroBlockSchema = z.object({
   }),
 });
 
+export const BENTO_TONES = [
+  "emerald", "rose", "amber", "violet", "sky", "teal",
+  "orange", "pink", "lime", "indigo", "fuchsia", "graphite",
+] as const;
+
 export const BentoItemSchema = z.object({
   key: z.string().min(1).max(64),
   title: z.string().min(1).max(80),
@@ -24,6 +29,8 @@ export const BentoItemSchema = z.object({
   emoji: z.string().max(8).optional(),
   to: z.string().min(1).max(200),
   size: z.enum(["wide", "tall", "half", "full"]).default("half"),
+  tone: z.enum(BENTO_TONES).optional(),
+  motif: z.enum(["mesh", "rings", "grid", "glow", "wave"]).optional(),
 });
 
 export const BentoGridBlockSchema = z.object({
