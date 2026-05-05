@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
 import {
   groupBySupermarketTaxonomy,
   groupForSub,
@@ -19,8 +19,15 @@ import {
   supermarketTaxonomy,
 } from "@/lib/supermarketTaxonomy";
 import { storeThemes } from "@/lib/storeThemes";
+import type { Product } from "@/lib/products";
 import type { SupermarketGroup } from "../types";
 import { SUPERMARKET_NAV } from "../types";
+
+interface UseSupermarketLogicResult2 {
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
+}
 
 interface UseSupermarketLogicResult {
   readonly theme: typeof storeThemes.supermarket;
