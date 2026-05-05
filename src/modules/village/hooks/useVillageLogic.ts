@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { products as allProducts, useProductsVersion, type Product } from "@/lib/products";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
+import type { Product } from "@/lib/products";
 import { villageMetaFor } from "@/lib/villageMeta";
 import {
   ROUTINE_KEY,
@@ -35,36 +35,41 @@ export interface UseVillageLogicResult {
   setTag: (v: VillageTagFilter) => void;
   subCat: string;
   setSubCat: (v: string) => void;
-  items: Product[];
+  items: ReadonlyArray<Product>;
   routines: RoutineRecord[];
   isRoutineActive: (productId: string) => boolean;
   toggleRoutine: (productId: string, discountPct: number, frequency: RoutineFrequency) => void;
+  isLoading: boolean;
+  hasNextPage: boolean;
+  isFetchingNextPage: boolean;
+  fetchNextPage: () => void;
 }
 
 export function useVillageLogic(): UseVillageLogicResult {
-  // Subscribe to the TanStack Query catalog so loader-warmed data triggers
-  // a render and SWR / background refetch is owned by React Query.
-  const { data: queryProducts } = useProductsQuery();
-  // Realtime channel mutates the in-memory `products` array; the version
-  // bump keeps us in sync with live updates between query refetches.
-  const productsVersion = useProductsVersion();
-
   const [query, setQuery] = useState("");
   const [tag, setTag] = useState<VillageTagFilter>("all");
   const [subCat, setSubCat] = useState<string>("all");
   const [routines, setRoutines] = useState<RoutineRecord[]>([]);
 
+  // Phase 22.1 — paginated, server-filtered catalog. Search term is pushed
+  // to the server (`name.ilike` / `brand.ilike`); local filters (tag,
+  // subCat, routines) still run client-side over the flattened pages.
+  const {
+    products: villageProducts,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteCatalog({
+    sources: ["village"],
+    q: query,
+    limit: 50,
+  });
+
   useEffect(() => {
     setRoutines(loadRoutines());
   }, []);
 
-  const villageProducts = useMemo<Product[]>(
-    () => (queryProducts ?? allProducts).filter((p) => p.source === "village"),
-    // queryProducts updates flow through; productsVersion captures realtime
-    // mutations to the shared in-memory array.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [queryProducts, productsVersion],
-  );
 
   const items = useMemo(() => {
     const q = query.trim();
@@ -107,5 +112,9 @@ export function useVillageLogic(): UseVillageLogicResult {
     routines,
     isRoutineActive,
     toggleRoutine,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   };
 }
