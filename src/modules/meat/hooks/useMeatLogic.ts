@@ -46,7 +46,6 @@ export function useMeatLogic() {
   const [activeMain, setActiveMain] = useState<string>(MEAT_GROUPS[0].id);
   const [activeSub, setActiveSub] = useState<string>(MEAT_GROUPS[0].subs[0].id);
   const [scrolled, setScrolled] = useState<boolean>(false);
-  const [query, setQuery] = useState<string>("");
 
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const groupRefs = useRef<Record<string, HTMLElement | null>>({});
