@@ -1,12 +1,13 @@
 import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
-import { products, registerProducts, useProductsVersion } from "@/lib/products";
+import { useProductsQuery } from "@/hooks/useProductsQuery";
+import type { Product } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import { Crown, Boxes, Truck, BadgePercent } from "lucide-react";
 import { useMemo } from "react";
 
 // Simulate bulk packs from regular products (5-6× quantity, ~13% off)
-function buildBulk() {
-  const bulk = products.map((p) => ({
+function buildBulk(items: Product[]): Product[] {
+  return items.map((p) => ({
     ...p,
     id: `bulk-${p.id}`,
     name: `عبوة وفر · ${p.name}`,
@@ -15,8 +16,6 @@ function buildBulk() {
     oldPrice: Math.round(p.price * 6),
     source: "wholesale" as const,
   }));
-  registerProducts(bulk);
-  return bulk;
 }
 
 const cats: StoreCategory[] = [
@@ -29,8 +28,8 @@ const cats: StoreCategory[] = [
 ];
 
 const Wholesale = () => {
-  const _pv = useProductsVersion();
-  const bulkProducts = useMemo(() => buildBulk(), [_pv]);
+  const { data: catalog = [] } = useProductsQuery();
+  const bulkProducts = useMemo(() => buildBulk(catalog), [catalog]);
   return (
   <SinglePageStore
     themeKey="wholesale"
