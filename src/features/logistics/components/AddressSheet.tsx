@@ -7,15 +7,17 @@
  *
  * Stays inside the cart route — never navigates away.
  */
-import { useEffect, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Loader2, MapPin, Check, Building2, Home, Briefcase, Star } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
-import RealMap from "./RealMap";
+import { ClientOnly } from "@tanstack/react-router";
 import type { BuildingType } from "@/core/logistics/types";
+
+const RealMap = lazy(() => import("./RealMap"));
 
 interface Props {
   open: boolean;
@@ -119,11 +121,15 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
         {/* Map (top half) */}
         <div className="px-4 pt-3">
           <div className="h-[40vh] min-h-[260px] w-full">
-            <RealMap
-              lat={lat}
-              lng={lng}
-              onPinChange={(la, ln) => { setLat(la); setLng(ln); }}
-            />
+            <ClientOnly fallback={<div className="h-full w-full animate-pulse rounded-xl bg-muted" />}>
+              <Suspense fallback={<div className="h-full w-full animate-pulse rounded-xl bg-muted" />}>
+                <RealMap
+                  lat={lat}
+                  lng={lng}
+                  onPinChange={(la, ln) => { setLat(la); setLng(ln); }}
+                />
+              </Suspense>
+            </ClientOnly>
           </div>
           {geoLoading && (
             <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
