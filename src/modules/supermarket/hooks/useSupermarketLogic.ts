@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
 import {
   groupBySupermarketTaxonomy,
   groupForSub,
@@ -19,6 +19,7 @@ import {
   supermarketTaxonomy,
 } from "@/lib/supermarketTaxonomy";
 import { storeThemes } from "@/lib/storeThemes";
+import type { Product } from "@/lib/products";
 import type { SupermarketGroup } from "../types";
 import { SUPERMARKET_NAV } from "../types";
 
@@ -36,21 +37,34 @@ interface UseSupermarketLogicResult {
   readonly jumpToSub: (id: string) => void;
   readonly jumpToGroup: (groupId: string) => void;
   readonly isLoading: boolean;
+  readonly hasNextPage: boolean;
+  readonly isFetchingNextPage: boolean;
+  readonly fetchNextPage: () => void;
+  readonly pool: ReadonlyArray<Product>;
 }
 
 export function useSupermarketLogic(): UseSupermarketLogicResult {
   const theme = storeThemes.supermarket;
-  const { data: allProducts, isLoading } = useProductsQuery();
-
-  // Restrict the catalog to the supermarket vertical. The pool function
-  // is pure — `useMemo` keys on the catalog reference.
-  const pool = useMemo(
-    () => supermarketPool(allProducts ?? []),
-    [allProducts],
-  );
-
   const [query, setQuery] = useState("");
   const [activeSub, setActiveSub] = useState<string>("");
+
+  const {
+    products,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteCatalog({
+    sources: ["supermarket"],
+    q: query,
+    limit: 50,
+  });
+
+  const pool = useMemo<ReadonlyArray<Product>>(
+    () => supermarketPool(products as Product[]),
+    [products],
+  );
+
 
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
   const mainBarRef = useRef<HTMLDivElement | null>(null);
@@ -59,9 +73,10 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
   const userJumpUntilRef = useRef(0);
 
   const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(
-    () => groupBySupermarketTaxonomy(pool, query) as SupermarketGroup[],
+    () => groupBySupermarketTaxonomy([...pool], query) as SupermarketGroup[],
     [pool, query],
   );
+
 
   // Initialise active sub to the first available section once data lands.
   useEffect(() => {
@@ -162,5 +177,9 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     jumpToSub,
     jumpToGroup,
     isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    pool,
   };
 }
