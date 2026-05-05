@@ -70,7 +70,20 @@ export const SmartRailBlockSchema = z.object({
   id: z.string().min(1),
   props: z.object({
     title: z.string().max(80).optional(),
+    sticky: z.boolean().optional(),
     items: z.array(RailItemSchema).min(1).max(24),
+  }),
+});
+
+/** SECTION HEADER block — colorful pill heading for grouped sections. */
+export const SectionHeaderBlockSchema = z.object({
+  type: z.literal("section_header"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().min(1).max(80),
+    emoji: z.string().max(8).optional(),
+    tone: z.enum(BENTO_TONES).optional(),
+    anchor: z.string().max(64).optional(),
   }),
 });
 
