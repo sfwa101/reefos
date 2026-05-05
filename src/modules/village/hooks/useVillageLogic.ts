@@ -112,5 +112,9 @@ export function useVillageLogic(): UseVillageLogicResult {
     routines,
     isRoutineActive,
     toggleRoutine,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   };
 }
