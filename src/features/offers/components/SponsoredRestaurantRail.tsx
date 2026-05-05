@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { products, useProductsVersion, type Product } from "@/lib/products";
+import { products, type Product } from "@/lib/products";
 import { getRestaurant } from "@/lib/restaurants";
 import { ChefHat, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
@@ -15,7 +15,6 @@ const SponsoredRestaurantRail = ({
   subtitle,
   restaurantId,
 }: SponsoredRestaurantRailProps) => {
-  const _pv = useProductsVersion();
   const restaurant = restaurantId ? getRestaurant(restaurantId) : undefined;
 
   const items = useMemo<Product[]>(() => {
@@ -24,7 +23,7 @@ const SponsoredRestaurantRail = ({
       .map((id: string) => products.find((p) => p.id === id))
       .filter((p): p is Product => Boolean(p))
       .slice(0, 8);
-  }, [restaurant, _pv]);
+  }, [restaurant]);
 
   if (!restaurant || items.length === 0) return null;
 

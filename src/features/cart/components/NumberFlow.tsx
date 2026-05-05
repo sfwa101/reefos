@@ -1,8 +1,6 @@
 import { useEffect } from "react";
 import { motion, useMotionValue, useTransform, animate } from "framer-motion";
 import { toLatin } from "@/lib/format";
-import { useProductsVersion } from "@/lib/products";
-
 /**
  * Animated tabular number used for prices/totals across the cart.
  * Subscribes to product version so prices re-animate when the catalog
@@ -15,7 +13,6 @@ export const NumberFlow = ({
   value: number;
   className?: string;
 }) => {
-  const _pv = useProductsVersion();
   const mv = useMotionValue(value);
   const display = useTransform(mv, (v) => toLatin(Math.round(v)));
   useEffect(() => {

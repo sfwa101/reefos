@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Clock, Star, Wallet, Plus } from "lucide-react";
 import { motion } from "framer-motion";
 import { getRestaurant } from "@/lib/restaurants";
-import { products as ALL_PRODUCTS, type Product, useProductsVersion } from "@/lib/products";
+import { products as ALL_PRODUCTS, type Product } from "@/lib/products";
 import { toLatin, fmtMoney } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { fireMiniConfetti } from "@/lib/confetti";
@@ -13,7 +13,6 @@ import RestaurantItemSheet from "@/components/restaurants/RestaurantItemSheet";
 const RestaurantDetail = () => {
   const { id } = useParams({ from: "/_app/restaurant/$id" });
   const navigate = useNavigate();
-  const _pv = useProductsVersion();
   const r = getRestaurant(id);
   const tabsRef = useRef<HTMLDivElement>(null);
   const sectionRefs = useRef<Record<string, HTMLElement | null>>({});
@@ -29,7 +28,7 @@ const RestaurantDetail = () => {
         .map((pid) => ALL_PRODUCTS.find((p) => p.id === pid))
         .filter((p): p is Product => !!p),
     }));
-  }, [r, _pv]);
+  }, [r]);
 
   // Scroll-spy: highlight the tab whose section is in view
   useEffect(() => {

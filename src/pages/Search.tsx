@@ -13,7 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { products, useProducts, useProductsVersion, type Product } from "@/lib/products";
+import { products, useProducts, type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,7 +78,6 @@ const SORTS: { id: SortId; label: string }[] = [
 ];
 
 const SearchPage = () => {
-  const _pv = useProductsVersion();
   const { q } = useSearch({ from: "/_app/search" });
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortId>("relevance");
@@ -136,7 +135,7 @@ const SearchPage = () => {
     }
     return out;
     // `_pv` triggers re-eval whenever the global products cache mutates.
-  }, [q, hits, catalog, _pv]);
+  }, [q, hits, catalog]);
 
   // Pull additional results from Supabase (server-side products that may not
   // be in the in-memory `products` cache yet). De-duplicated by id.
@@ -189,7 +188,7 @@ const SearchPage = () => {
       map.set(p.category, arr);
     }
     return Array.from(map.entries()).map(([category, items]) => ({ category, items }));
-  }, [filtered, _pv]);
+  }, [filtered]);
 
   const total = filtered.length;
   const filtersActive =

@@ -1,7 +1,7 @@
 import { useParams, Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { products, type Product, useProductsVersion } from "@/lib/products";
+import { products, type Product } from "@/lib/products";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
 import { ChevronLeft } from "lucide-react";
 
@@ -76,7 +76,6 @@ const SUBS: Record<string, SubDef> = {
 };
 
 const SubCategory = () => {
-  const _pv = useProductsVersion();
   const { slug } = useParams({ from: "/_app/sub/$slug" });
   const def = SUBS[slug];
 

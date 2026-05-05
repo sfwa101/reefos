@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { useProductsVersion } from "@/lib/products";
 import type { Product } from "@/lib/products";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,7 +22,6 @@ import { BundlesGrid } from "@/features/library/components/BundlesGrid";
 import { PrintWizard } from "@/features/library/components/PrintWizard";
 
 const SchoolLibrary = () => {
-  useProductsVersion(); // Subscribe to product cache invalidations
   const [tab, setTab] = useState<TabKey>("store");
   const [kycOpen, setKycOpen] = useState(false);
   const [borrowProduct, setBorrowProduct] = useState<Product | null>(null);
