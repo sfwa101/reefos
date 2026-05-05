@@ -73,9 +73,10 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
   const userJumpUntilRef = useRef(0);
 
   const grouped = useMemo<ReadonlyArray<SupermarketGroup>>(
-    () => groupBySupermarketTaxonomy(pool, query) as SupermarketGroup[],
+    () => groupBySupermarketTaxonomy([...pool], query) as SupermarketGroup[],
     [pool, query],
   );
+
 
   // Initialise active sub to the first available section once data lands.
   useEffect(() => {
