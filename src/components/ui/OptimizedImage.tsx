@@ -44,6 +44,9 @@ const OptimizedImageImpl = ({
   aspect,
   shimmer = true,
   priority = false,
+  cdnWidths,
+  cdnSizes,
+  cdnQuality = 70,
   onLoad,
   onError,
   ...rest
@@ -56,6 +59,13 @@ const OptimizedImageImpl = ({
     typeof src === "string" && src.trim() !== "" && !src.startsWith("data:image/svg+xml");
 
   const showFallback = errored || !hasUsableSrc;
+
+  // Pre-compute CDN-transformed src + responsive srcSet (no-op for non-Supabase URLs).
+  const widths = cdnWidths ?? DEFAULT_WIDTHS;
+  const transformedSrc = hasUsableSrc
+    ? cdnImage(src as string, { width: widths[Math.floor(widths.length / 2)], quality: cdnQuality })
+    : src;
+  const srcSet = hasUsableSrc ? cdnSrcSet(src as string, widths, cdnQuality) : undefined;
 
   return (
     <span
