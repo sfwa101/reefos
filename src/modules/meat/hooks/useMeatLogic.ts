@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import {
-  products,
-  useProductsVersion,
-  type Product,
-} from "@/lib/products";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
+import type { Product } from "@/lib/products";
 import { MEAT_GROUPS, groupOf } from "../constants";
 import { NAV_OFFSETS, type MeatMainGroup } from "../types";
 
@@ -24,33 +20,28 @@ const { HEADER_OFFSET, TIER1, TIER2, TRIGGER } = NAV_OFFSETS;
 /**
  * useMeatLogic — central hook for the Meat catalog page.
  *
- * Responsibilities:
- *  - Filter the global product catalog down to `source === "meat"` reactively
- *    (keyed off `useProductsVersion()` so realtime updates flow through).
- *  - Maintain `query` (search) state and derive the dual-tier feed.
- *  - Run the ScrollSpy that drives the active main group + active sub chip.
- *  - Provide imperative `jumpToGroup` / `jumpToSub` scroll helpers wired to
- *    refs registered by the page via `registerGroupRef` / `registerSectionRef`.
- *
- * NOTE on pricing: this page does NOT compute any prices inline. Per-product
- * price rendering is delegated to `<ProductCard>`. When the meat module is
- * later wired to `pricingEngine.calculate`, the integration point will be
- * inside `MeatProductCard` (or a future `useMeatLinePrice` hook) — not here.
+ * Phase 22.1: data layer migrated from the legacy `products.ts` cache to
+ * `useInfiniteCatalog({ sources: ["meat"] })`. Pages flatten into a single
+ * `meatProducts` array consumed by the existing dual-tier feed/grouping
+ * logic. The returned `hasNextPage / isFetchingNextPage / fetchNextPage`
+ * trio is wired through so the page can mount a sentinel later without
+ * another hook refactor.
  */
 export function useMeatLogic() {
-  // Subscribe to the TanStack Query catalog so loader-warmed data renders
-  // immediately on first paint (zero-wait nav) and SWR is owned by Query.
-  const { data: queryProducts } = useProductsQuery();
-  // Realtime channel mutates the in-memory `products` array between
-  // refetches; the version bump keeps the derived feed live.
-  const productsVersion = useProductsVersion();
-  const meatProducts = useMemo<ReadonlyArray<Product>>(
-    () => (queryProducts ?? products).filter((p) => p.source === "meat"),
-    // queryProducts + productsVersion together cover both fetch updates and
-    // in-memory realtime mutations.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [queryProducts, productsVersion],
-  );
+  const [query, setQuery] = useState<string>("");
+
+  const {
+    products: meatProducts,
+    isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useInfiniteCatalog({
+    sources: ["meat"],
+    q: query,
+    limit: 50,
+  });
+
 
   const [activeMain, setActiveMain] = useState<string>(MEAT_GROUPS[0].id);
   const [activeSub, setActiveSub] = useState<string>(MEAT_GROUPS[0].subs[0].id);
