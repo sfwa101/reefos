@@ -31,7 +31,7 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
-interface Props {
+export interface RealMapProps {
   lat: number | null;
   lng: number | null;
   onPinChange: (lat: number, lng: number) => void;
@@ -50,7 +50,7 @@ const Recenter = ({ lat, lng }: { lat: number | null; lng: number | null }) => {
   return null;
 };
 
-export const RealMap = ({ lat, lng, onPinChange, defaultCenter = [31.169, 31.989] }: Props) => {
+export const RealMap = ({ lat, lng, onPinChange, defaultCenter = [31.169, 31.989] }: RealMapProps) => {
   const markerRef = useRef<L.Marker>(null);
   const center: [number, number] = useMemo(
     () => (lat != null && lng != null ? [lat, lng] : defaultCenter),

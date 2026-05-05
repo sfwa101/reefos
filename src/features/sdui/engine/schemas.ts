@@ -37,9 +37,15 @@ export const BentoItemSchema = z.object({
   subtitle: z.string().max(120).optional(),
   emoji: z.string().max(8).optional(),
   to: z.string().min(1).max(200),
-  size: z.enum(["wide", "tall", "half", "full"]).default("half"),
+  size: z.enum(["wide", "half", "full"]).catch("half").default("half"),
   tone: z.enum(BENTO_TONES).optional(),
   motif: z.enum(MOTIF_IDS).optional(),
+  theme_config: z.object({
+    tone: z.enum(BENTO_TONES).optional(),
+    motif: z.enum(MOTIF_IDS).optional(),
+    glass: z.boolean().optional(),
+    vector: z.enum(["mesh", "rings", "grid", "glow", "wave"]).optional(),
+  }).optional(),
 });
 
 export const BentoGridBlockSchema = z.object({
@@ -47,6 +53,7 @@ export const BentoGridBlockSchema = z.object({
   id: z.string().min(1),
   props: z.object({
     title: z.string().max(80).optional(),
+    dense: z.boolean().optional(),
     items: z.array(BentoItemSchema).min(1).max(48),
   }),
 });
