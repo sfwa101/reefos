@@ -13,6 +13,8 @@ import { SduiBentoBlock } from "../blocks/SduiBentoBlock";
 import { SduiSmartRail } from "../blocks/SduiSmartRail";
 import { SduiSectionHeader } from "../blocks/SduiSectionHeader";
 import { SduiProductRail } from "../blocks/SduiProductRail";
+import { SduiStickyHub } from "../blocks/SduiStickyHub";
+import { SduiProductGrid } from "../blocks/SduiProductGrid";
 
 export function renderBlock(block: SduiBlock): ReactElement | null {
   switch (block.type) {
@@ -26,6 +28,10 @@ export function renderBlock(block: SduiBlock): ReactElement | null {
       return <SduiSectionHeader block={block} />;
     case "product_rail":
       return <SduiProductRail block={block} />;
+    case "sticky_hub":
+      return <SduiStickyHub block={block} />;
+    case "product_grid":
+      return <SduiProductGrid block={block} />;
     default: {
       const _exhaustive: never = block;
       void _exhaustive;
