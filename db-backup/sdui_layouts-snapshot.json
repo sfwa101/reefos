@@ -1,0 +1,25 @@
+{
+  "table": "sdui_layouts",
+  "exported_at": "2026-05-05T21:03:39.151Z",
+  "count": 2,
+  "rows": [
+    {
+      "id": "1cb44bd9-a64f-4e5c-b148-e897d9214c68",
+      "slug": "departments_hub",
+      "title": "مركز الأقسام",
+      "description": "الواجهة المركزية لكل أقسام ريف المدينة",
+      "active_version_id": "d8239b09-1574-4b38-a4f8-c1ab277deca3",
+      "created_at": "2026-05-05T00:28:42.769487+00:00",
+      "updated_at": "2026-05-05T00:28:42.769487+00:00"
+    },
+    {
+      "id": "a4582cd2-1588-44b5-9dfd-24d8246c2e4a",
+      "slug": "supermarket_hub",
+      "title": "السوبرماركت",
+      "description": "Supermarket SDUI hub",
+      "active_version_id": "599867d1-2942-411e-be3a-0a150dc7e057",
+      "created_at": "2026-05-05T02:25:12.327179+00:00",
+      "updated_at": "2026-05-05T03:12:48.796448+00:00"
+    }
+  ]
+}
