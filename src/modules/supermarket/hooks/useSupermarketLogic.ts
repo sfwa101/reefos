@@ -177,5 +177,9 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
     jumpToSub,
     jumpToGroup,
     isLoading,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+    pool,
   };
 }
