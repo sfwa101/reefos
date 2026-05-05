@@ -1,14 +1,23 @@
-// Catalog domain types + row mapper.
+// Catalog domain types + legacy compat layer.
 // ----------------------------------------------------
-// Phase 22.0 — The legacy in-memory `cache: Product[]`, eager
-// `ensureProductsLoaded()`, realtime full-table subscription, and
-// visibility/focus/online refetch listeners were DELETED. Catalog data
-// now flows exclusively through `useInfiniteCatalog` (paginated, server
-// side filtered) per call-site.
+// Phase 22.0 — The aggressive nuke removed:
+//   • realtime `postgres_changes` subscription on the whole table
+//   • `visibilitychange` / `focus` / `online` global refetch listeners
+//   • eager `ensureProductsLoaded()` at module-import time
 //
-// What remains here is the pure data contract: types, the DB→domain
-// row mapper, and perishability helpers. Nothing here touches global
-// state or the network at module scope.
+// Kept (as a temporary COMPAT shim) until every call-site migrates to
+// `useInfiniteCatalog`:
+//   • `cache: Product[]` mirror filled by a single lazy fetch
+//   • sync helpers: `getById`, `bySource`, `byBadge`, `bySourceAndCategory`
+//   • React hooks: `useProducts`, `useProduct`, `useProductsBySource`,
+//     `useProductsVersion`
+//   • `ensureProductsLoaded`, `refetchProducts`, `registerProducts`
+//
+// Anything new SHOULD use `useInfiniteCatalog`. These shims exist only
+// so the ~50 legacy consumers continue to compile during Phase 22.x.
+
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type ProductVariant = {
   id: string;
@@ -42,9 +51,7 @@ export type Product = {
   variants?: ProductVariant[];
   addons?: ProductAddon[];
   perishable?: boolean;
-  /** Polymorphic per-source metadata (pharmacy fields, meat prep, etc). */
   metadata?: Record<string, unknown>;
-  /** Long-form description (used on PDP). */
   description?: string;
 };
 
@@ -106,3 +113,108 @@ export const productAvailableInZone = (
   p: Product,
   zoneAcceptsPerishables: boolean,
 ): boolean => zoneAcceptsPerishables || !isPerishable(p);
+
+/* ============ LEGACY COMPAT SHIM ============
+ * Single lazy fetch (no eager kick-off, no realtime, no window listeners).
+ * Migration target: replace each consumer with `useInfiniteCatalog`. */
+
+const cache: Product[] = [];
+let hydrated = false;
+let hydratePromise: Promise<Product[]> | null = null;
+const listeners = new Set<() => void>();
+const isBrowser = typeof window !== "undefined";
+
+function notify(): void {
+  for (const fn of listeners) fn();
+}
+
+async function fetchAll(): Promise<Product[]> {
+  if (!isBrowser) return [];
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true })
+    .limit(2000);
+  if (error) {
+    console.error("[products] fetch failed:", error);
+    cache.length = 0;
+    hydrated = true;
+    notify();
+    return cache;
+  }
+  const list = ((data ?? []) as DbRow[]).map(rowToProduct);
+  cache.length = 0;
+  cache.push(...list);
+  hydrated = true;
+  notify();
+  return list;
+}
+
+export function ensureProductsLoaded(): Promise<Product[]> {
+  if (!isBrowser) return Promise.resolve([]);
+  if (hydrated) return Promise.resolve(cache);
+  if (!hydratePromise) hydratePromise = fetchAll();
+  return hydratePromise;
+}
+
+export async function refetchProducts(): Promise<void> {
+  hydratePromise = fetchAll();
+  await hydratePromise;
+}
+
+export const products: Product[] = cache;
+
+const extraProducts: Product[] = [];
+export const registerProducts = (items: Product[]): void => {
+  for (const item of items) {
+    if (!extraProducts.some((p) => p.id === item.id) && !cache.some((p) => p.id === item.id)) {
+      extraProducts.push(item);
+    }
+  }
+};
+
+export const getById = (id: string): Product | undefined =>
+  cache.find((p) => p.id === id) ?? extraProducts.find((p) => p.id === id);
+
+export const byBadge = (badge: Product["badge"]): Product[] =>
+  cache.filter((p) => p.badge === badge);
+
+export const bySource = (source: ProductSource): Product[] =>
+  cache.filter((p) => p.source === source);
+
+export const bySourceAndCategory = (source: ProductSource, category: string): Product[] =>
+  cache.filter((p) => p.source === source && p.category === category);
+
+export function useProducts(): { products: Product[]; loading: boolean } {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const fn = () => setTick((t) => t + 1);
+    listeners.add(fn);
+    void ensureProductsLoaded();
+    return () => { listeners.delete(fn); };
+  }, []);
+  return { products: cache, loading: !hydrated };
+}
+
+export function useProduct(id: string | undefined): Product | undefined {
+  const { products: all } = useProducts();
+  if (!id) return undefined;
+  return all.find((p) => p.id === id) ?? extraProducts.find((p) => p.id === id);
+}
+
+export function useProductsBySource(source: ProductSource): Product[] {
+  const { products: all } = useProducts();
+  return all.filter((p) => p.source === source);
+}
+
+export function useProductsVersion(): number {
+  const [version, setVersion] = useState(0);
+  useEffect(() => {
+    const fn = () => setVersion((v) => v + 1);
+    listeners.add(fn);
+    void ensureProductsLoaded();
+    return () => { listeners.delete(fn); };
+  }, []);
+  return version;
+}
