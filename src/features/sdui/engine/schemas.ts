@@ -70,6 +70,7 @@ export const SmartRailBlockSchema = z.object({
   id: z.string().min(1),
   props: z.object({
     title: z.string().max(80).optional(),
+    sticky: z.boolean().optional(),
     items: z.array(RailItemSchema).min(1).max(24),
   }),
 });
@@ -82,8 +83,10 @@ export const SectionHeaderBlockSchema = z.object({
     title: z.string().min(1).max(80),
     emoji: z.string().max(8).optional(),
     tone: z.enum(BENTO_TONES).optional(),
+    anchor: z.string().max(64).optional(),
   }),
 });
+
 
 /** PRODUCT RAIL block — data-driven horizontal product list filtered by source + subCategory key. */
 export const ProductRailBlockSchema = z.object({

@@ -11,6 +11,6 @@ export const Route = createFileRoute("/_app/store/supermarket")({
   },
   pendingComponent: () => <StorePageSkeleton productCount={8} withHero />,
   component: lazyRouteComponent(
-    () => import("@/modules/supermarket/SupermarketPage"),
+    () => import("@/pages/store/Supermarket"),
   ),
 });

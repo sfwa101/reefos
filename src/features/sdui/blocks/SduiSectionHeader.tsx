@@ -23,7 +23,7 @@ const TONE_BG: Record<string, string> = {
 const SduiSectionHeaderImpl = ({ block }: { block: Props }) => {
   const cls = TONE_BG[block.props.tone ?? "graphite"] ?? TONE_BG.graphite;
   return (
-    <section className="px-3 pt-2">
+    <section id={block.props.anchor} className="px-3 pt-2 scroll-mt-24">
       <div
         className={`flex items-center gap-2 rounded-2xl bg-gradient-to-br px-4 py-3 shadow-soft backdrop-blur-xl ${cls}`}
       >
