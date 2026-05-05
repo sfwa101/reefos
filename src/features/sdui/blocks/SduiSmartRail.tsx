@@ -22,7 +22,7 @@ const SduiSmartRailImpl = ({ block }: { block: Props }) => {
           <Link
             key={item.key}
             to={item.to}
-            className="snap-start shrink-0 inline-flex items-center gap-2 rounded-2xl border border-border/40 bg-card/40 backdrop-blur-xl px-3.5 py-2.5 ring-1 ring-foreground/[0.03] transition ease-apple hover:bg-card/70 active:scale-[0.97]"
+            className="snap-start shrink-0 inline-flex items-center gap-2 rounded-xl border border-border/40 bg-card/50 backdrop-blur-xl px-3.5 py-2.5 ring-1 ring-foreground/[0.04] transition ease-apple hover:bg-card/70 active:scale-[0.97]"
           >
             {item.emoji && (
               <span aria-hidden className="text-base">
