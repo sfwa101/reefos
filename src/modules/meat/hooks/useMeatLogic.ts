@@ -152,6 +152,7 @@ export function useMeatLogic() {
     scrolled,
     query,
     setQuery,
+    isLoading,
     // derived
     currentGroup,
     feed,
@@ -162,5 +163,9 @@ export function useMeatLogic() {
     // actions
     jumpToGroup,
     jumpToSub,
+    // pagination (sentinel-ready)
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
   } as const;
 }
