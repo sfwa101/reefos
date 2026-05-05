@@ -63,7 +63,18 @@ export type HomeOrchestrator = {
 };
 
 export const useHomeOrchestrator = (): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading } = useProductsBySourceQuery("home");
+  const { data: rawProducts = [], isLoading, error, isFetching, status, fetchStatus } =
+    useProductsBySourceQuery("home");
+
+  // [Phase 23.3] Deadlock telemetry — surfaces stuck Suspense / hung query.
+  console.debug("[Home Diagnostics] HomeOrchestrator", {
+    isLoading,
+    isFetching,
+    status,
+    fetchStatus,
+    rows: rawProducts.length,
+    error: error ? String((error as Error).message ?? error) : null,
+  });
 
   const catalog = useMemo(
     () => rawProducts.map(productToHGView),
