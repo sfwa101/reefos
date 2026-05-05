@@ -80,7 +80,7 @@ const SmartProductSheetImpl = ({ product, open, onClose }: Props) => {
       <div
         className="relative w-full max-w-lg overflow-hidden rounded-t-[28px] border border-white/10 bg-background/85 shadow-2xl backdrop-blur-xl"
         onClick={(e) => e.stopPropagation()}
-        style={{ maxHeight: "92vh" }}
+        style={{ height: "67vh", maxHeight: "67vh" }}
       >
         {/* Drag handle */}
         <div className="absolute left-1/2 top-2 z-10 h-1.5 w-12 -translate-x-1/2 rounded-full bg-foreground/20" />
