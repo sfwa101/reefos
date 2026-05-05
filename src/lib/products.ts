@@ -43,7 +43,7 @@ export type Product = {
   addons?: ProductAddon[];
   perishable?: boolean;
   /** Polymorphic per-source metadata (pharmacy fields, meat prep, etc). */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   /** Long-form description (used on PDP). */
   description?: string;
 };
@@ -81,7 +81,7 @@ function rowToProduct(row: DbRow): Product {
     addons: (row.addons as ProductAddon[] | null) ?? undefined,
     perishable: row.perishable ?? undefined,
     metadata: (row.metadata && typeof row.metadata === "object")
-      ? (row.metadata as Record<string, any>)
+      ? (row.metadata as Record<string, unknown>)
       : undefined,
     description: row.description ?? undefined,
   };
