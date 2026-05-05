@@ -97,7 +97,7 @@ const SduiBentoBlockImpl = ({ block }: { block: Props }) => {
           {block.props.title}
         </h2>
       )}
-      <div className="grid grid-cols-3 auto-rows-[120px] gap-3">
+      <div className="grid grid-cols-3 grid-flow-row-dense gap-4">
         {block.props.items.map((item) => {
           const rawMotif: RawMotif | undefined = item.motif;
           const isAbstract = !rawMotif || ABSTRACT_MOTIFS.has(rawMotif);
