@@ -28,6 +28,12 @@ type Props = ImgHTMLAttributes<HTMLImageElement> & {
   priority?: boolean;
   /** Class applied to the wrapping <span> (positioning, rounding, etc.). */
   wrapperClassName?: string;
+  /** Override the responsive widths used in srcSet (Supabase CDN). */
+  cdnWidths?: number[];
+  /** Override the `sizes` attribute. */
+  cdnSizes?: string;
+  /** Image quality for CDN transforms (20–100). Default: 70. */
+  cdnQuality?: number;
 };
 
 const OptimizedImageImpl = ({
