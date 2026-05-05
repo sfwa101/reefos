@@ -72,9 +72,32 @@ const HomePage = () => {
   }, []);
 
   // ─── DB sources ────────────────────────────────────────────────────
-  const { data: catalog = [] } = useProductsQuery();
-  const { products: buyAgain } = useBuyAgainProducts();
-  const { data: featuredCats = [] } = useFeaturedCategoriesQuery();
+  const productsQ = useProductsQuery();
+  const { data: catalog = [] } = productsQ;
+  const buyAgainHook = useBuyAgainProducts();
+  const { products: buyAgain } = buyAgainHook;
+  const featuredQ = useFeaturedCategoriesQuery();
+  const { data: featuredCats = [] } = featuredQ;
+
+  // [Phase 23.3] Deadlock telemetry for the root Home page.
+  console.debug("[Home Diagnostics] HomePage", {
+    products: {
+      status: productsQ.status,
+      fetchStatus: productsQ.fetchStatus,
+      isLoading: productsQ.isLoading,
+      rows: catalog.length,
+      error: productsQ.error ? String((productsQ.error as Error).message) : null,
+    },
+    buyAgain: { isLoading: buyAgainHook.isLoading, rows: buyAgain.length },
+    featured: {
+      status: featuredQ.status,
+      fetchStatus: featuredQ.fetchStatus,
+      rows: featuredCats.length,
+      error: featuredQ.error ? String((featuredQ.error as Error).message) : null,
+    },
+    user: user?.id ?? null,
+    zone: zone.shortName,
+  });
 
   // Zone-aware filter (perishables blocked in non-cold zones)
   const zoneSafe = useMemo<Product[]>(
