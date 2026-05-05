@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { products, useProductsVersion } from "@/lib/products";
+import { products } from "@/lib/products";
 import { Skeleton } from "@/components/ui/skeleton";
 import DynamicHeroBanner from "@/features/offers/components/DynamicHeroBanner";
 import PersonalizedDealsRail from "@/features/offers/components/PersonalizedDealsRail";
@@ -13,11 +13,10 @@ import { useDailyCountdown } from "@/features/offers/hooks/useDailyCountdown";
 import type { StorefrontRail } from "@/features/offers/types/rail";
 
 const Offers = () => {
-  const _pv = useProductsVersion();
   const countdown = useDailyCountdown();
   const { rails, loading } = useOffersRails();
 
-  const discounted = useMemo(() => products.filter((p) => p.oldPrice), [_pv]);
+  const discounted = useMemo(() => products.filter((p) => p.oldPrice), []);
   const flashSale = useMemo(() => discounted.slice(0, 4), [discounted]);
   const personalized = useMemo(() => discounted.slice(4, 10), [discounted]);
 
