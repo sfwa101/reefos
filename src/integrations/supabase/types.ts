@@ -4066,6 +4066,85 @@ export type Database = {
         }
         Relationships: []
       }
+      sdui_layout_versions: {
+        Row: {
+          blocks: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          layout_id: string
+          notes: string | null
+          status: string
+          version_number: number
+        }
+        Insert: {
+          blocks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          layout_id: string
+          notes?: string | null
+          status?: string
+          version_number?: number
+        }
+        Update: {
+          blocks?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          layout_id?: string
+          notes?: string | null
+          status?: string
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sdui_layout_versions_layout_id_fkey"
+            columns: ["layout_id"]
+            isOneToOne: false
+            referencedRelation: "sdui_layouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sdui_layouts: {
+        Row: {
+          active_version_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          slug: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          active_version_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          active_version_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          slug?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sdui_layouts_active_version_fk"
+            columns: ["active_version_id"]
+            isOneToOne: false
+            referencedRelation: "sdui_layout_versions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_cart_items: {
         Row: {
           added_by: string
