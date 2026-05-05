@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
-import { products, useProductsVersion } from "@/lib/products";
+import { products } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import BasketCard from "@/components/baskets/BasketCard";
 import { loadSubs, findFrequency, type SubscriptionRecord } from "@/lib/baskets";
@@ -18,7 +18,6 @@ const categories = [
 ];
 
 const Baskets = () => {
-  const _pv = useProductsVersion();
   const theme = storeThemes.baskets;
   const [active, setActive] = useState("all");
   const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
@@ -29,7 +28,7 @@ const Baskets = () => {
   const list = useMemo(() => {
     const all = products.filter((p) => p.source === "baskets");
     return active === "all" ? all : all.filter((p) => p.subCategory === active);
-  }, [active, _pv]);
+  }, [active]);
 
   return (
     <div className="space-y-5 pb-10">

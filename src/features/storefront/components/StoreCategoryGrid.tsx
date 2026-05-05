@@ -16,7 +16,6 @@ import { useMemo } from "react";
 import ProductCard from "@/components/ProductCard";
 import {
   bySource,
-  useProductsVersion,
   type ProductSource,
 } from "@/lib/products";
 
@@ -38,7 +37,6 @@ const StoreCategoryGrid = ({
   limit,
 }: StoreCategoryGridProps) => {
   // Re-render when the catalog cache mutates (realtime channel).
-  useProductsVersion();
 
   const items = useMemo(() => {
     let list = bySource(category);

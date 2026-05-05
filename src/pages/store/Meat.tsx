@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { products, useProductsVersion } from "@/lib/products";
+import { products } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import { Search } from "lucide-react";
 
@@ -82,7 +82,6 @@ const TIER2 = 44;
 const TRIGGER = 14;
 
 const Meat = () => {
-  const _pv = useProductsVersion();
   const theme = storeThemes.meat;
   const meatProducts = useMemo(
     () => products.filter((p) => p.source === "meat"),

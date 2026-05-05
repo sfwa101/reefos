@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { products, useProductsVersion } from "@/lib/products";
+import { products } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { Tag } from "lucide-react";
 
@@ -10,12 +10,11 @@ export type SectionOffersRailProps = {
 };
 
 const SectionOffersRail = ({ title, subtitle, targetId }: SectionOffersRailProps) => {
-  const _pv = useProductsVersion();
   const items = useMemo(() => {
     const pool = products.filter((p) => p.oldPrice);
     if (!targetId) return pool.slice(0, 8);
     return pool.filter((p) => p.category === targetId || p.id === targetId).slice(0, 8);
-  }, [_pv, targetId]);
+  }, [targetId]);
 
   if (items.length === 0) return null;
   return (

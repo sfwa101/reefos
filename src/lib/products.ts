@@ -9,8 +9,7 @@
 // `useInfiniteCatalog`:
 //   • `cache: Product[]` mirror filled by a single lazy fetch
 //   • sync helpers: `getById`, `bySource`, `byBadge`, `bySourceAndCategory`
-//   • React hooks: `useProducts`, `useProduct`, `useProductsBySource`,
-//     `useProductsVersion`
+//   • React hooks: `useProducts`, `useProduct`, `useProductsBySource`
 //   • `ensureProductsLoaded`, `refetchProducts`, `registerProducts`
 //
 // Anything new SHOULD use `useInfiniteCatalog`. These shims exist only
@@ -208,13 +207,3 @@ export function useProductsBySource(source: ProductSource): Product[] {
   return all.filter((p) => p.source === source);
 }
 
-export function useProductsVersion(): number {
-  const [version, setVersion] = useState(0);
-  useEffect(() => {
-    const fn = () => setVersion((v) => v + 1);
-    listeners.add(fn);
-    void ensureProductsLoaded();
-    return () => { listeners.delete(fn); };
-  }, []);
-  return version;
-}

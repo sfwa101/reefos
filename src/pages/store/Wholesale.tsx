@@ -1,5 +1,5 @@
 import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
-import { products, registerProducts, useProductsVersion } from "@/lib/products";
+import { products, registerProducts } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import { Crown, Boxes, Truck, BadgePercent } from "lucide-react";
 import { useMemo } from "react";
@@ -29,8 +29,7 @@ const cats: StoreCategory[] = [
 ];
 
 const Wholesale = () => {
-  const _pv = useProductsVersion();
-  const bulkProducts = useMemo(() => buildBulk(), [_pv]);
+  const bulkProducts = useMemo(() => buildBulk(), []);
   return (
   <SinglePageStore
     themeKey="wholesale"

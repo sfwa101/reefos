@@ -1,5 +1,5 @@
 import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
-import { products, useProductsVersion } from "@/lib/products";
+import { products } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import { Leaf } from "lucide-react";
 
@@ -13,7 +13,6 @@ const cats: StoreCategory[] = [
 ];
 
 const Produce = () => {
-  const _pv = useProductsVersion();
   const theme = storeThemes.produce;
   return (
     <SinglePageStore

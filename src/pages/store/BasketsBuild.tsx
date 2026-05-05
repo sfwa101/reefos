@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
-import { products, type Product, useProductsVersion } from "@/lib/products";
+import { products, type Product } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";
@@ -17,7 +17,6 @@ import { PackagePlus, Plus, Minus, Sparkles, Check, ShoppingCart } from "lucide-
 const BUILD_SOURCES: Product["source"][] = ["produce", "dairy", "village", "supermarket"];
 
 const BasketsBuild = () => {
-  const _pv = useProductsVersion();
   const navigate = useNavigate();
   const { add } = useCart();
   const [qty, setQty] = useState<Record<string, number>>({});
