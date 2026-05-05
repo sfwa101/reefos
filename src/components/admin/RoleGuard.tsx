@@ -13,15 +13,20 @@ export function useAdminRoles() {
 
   useEffect(() => {
     if (!user) { setRoles([]); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
+    let cancelled = false;
+    void supabase
       .from("user_roles")
       .select("role, is_active")
       .eq("user_id", user.id)
       .eq("is_active", true)
-      .then(({ data }: { data: { role: AppRole }[] | null }) => {
-        setRoles(data?.map(r => r.role) ?? []);
+      .then(({ data }) => {
+        if (cancelled) return;
+        const list = (data ?? [])
+          .map((r) => r.role as AppRole)
+          .filter((r): r is AppRole => Boolean(r));
+        setRoles(list);
       });
+    return () => { cancelled = true; };
   }, [user]);
 
   return {
