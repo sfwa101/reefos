@@ -220,11 +220,12 @@ export function useSupermarketLogic(): UseSupermarketLogicResult {
         (entries) => {
           for (const entry of entries) {
             if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+              console.debug("[Supermarket] sentinel hit → fetchNextPage()");
               void fetchNextPage();
             }
           }
         },
-        { rootMargin: "600px 0px" },
+        { rootMargin: "200px 0px" },
       );
       observerRef.current.observe(el);
     },
