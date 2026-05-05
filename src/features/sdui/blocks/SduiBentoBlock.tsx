@@ -1,11 +1,22 @@
 /**
- * SduiBentoBlock — Apple Glass + Vibrant Mesh Gradient bento grid.
- * Sizes: wide (col-span-2), tall (row-span-2), half (1×1), full (col-span-3).
- * Tones map to tokenized gradient surfaces; motifs add layered SVG depth.
+ * SduiBentoBlock — Pixel-perfect restoration of the legacy departments hub
+ * tiles. When the JSON `motif` is one of the canonical MotifIds (village,
+ * supermarket, …), we render the legacy `MeshBg` + `MotifIcon` palette so
+ * the new SDUI engine looks identical to the older hand-coded screen.
+ *
+ * Falls back to abstract motifs (mesh / rings / grid / glow / wave) +
+ * `tone` gradients when the JSON intentionally requests them.
  */
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import type { SduiBentoBlock as Props } from "../engine/schemas";
+import {
+  MeshBg,
+  MotifIcon,
+  motifInk,
+  motifChip,
+  type MotifId,
+} from "@/components/sections/MeshTile";
 
 const SIZE_CLASS: Record<"wide" | "tall" | "half" | "full", string> = {
   wide: "col-span-2 row-span-1 min-h-[124px]",
@@ -15,9 +26,13 @@ const SIZE_CLASS: Record<"wide" | "tall" | "half" | "full", string> = {
 };
 
 type Tone = NonNullable<NonNullable<Props["props"]["items"][number]["tone"]>>;
+type RawMotif = NonNullable<NonNullable<Props["props"]["items"][number]["motif"]>>;
+type AbstractMotif = "mesh" | "rings" | "grid" | "glow" | "wave";
 
-// Vibrant mesh-style gradients. Pure Tailwind tokens with arbitrary HSL —
-// matches the Apple Glass + colorful aesthetic.
+const ABSTRACT_MOTIFS: ReadonlySet<string> = new Set<AbstractMotif>([
+  "mesh", "rings", "grid", "glow", "wave",
+]);
+
 const TONE_GRADIENT: Record<Tone, string> = {
   emerald: "from-emerald-500/35 via-emerald-400/15 to-teal-500/25",
   rose:    "from-rose-500/35 via-pink-400/15 to-fuchsia-500/25",
@@ -33,24 +48,7 @@ const TONE_GRADIENT: Record<Tone, string> = {
   graphite:"from-foreground/[0.08] via-foreground/[0.03] to-foreground/[0.01]",
 };
 
-const TONE_GLOW: Record<Tone, string> = {
-  emerald: "bg-emerald-400/40",
-  rose:    "bg-rose-400/40",
-  amber:   "bg-amber-400/45",
-  violet:  "bg-violet-400/40",
-  sky:     "bg-sky-400/40",
-  teal:    "bg-teal-400/40",
-  orange:  "bg-orange-400/45",
-  pink:    "bg-pink-400/40",
-  lime:    "bg-lime-400/40",
-  indigo:  "bg-indigo-400/40",
-  fuchsia: "bg-fuchsia-400/40",
-  graphite:"bg-primary/20",
-};
-
-type Motif = "mesh" | "rings" | "grid" | "glow" | "wave";
-
-function MotifLayer({ motif }: { motif: Motif }) {
+function AbstractOverlay({ motif }: { motif: AbstractMotif }) {
   switch (motif) {
     case "rings":
       return (
@@ -75,11 +73,9 @@ function MotifLayer({ motif }: { motif: Motif }) {
       return (
         <svg aria-hidden className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 w-full opacity-50 mix-blend-overlay" viewBox="0 0 100 50" preserveAspectRatio="none">
           <path d="M0 30 Q 25 10 50 30 T 100 30 V 50 H 0 Z" fill="currentColor" className="text-foreground/30" />
-          <path d="M0 38 Q 25 22 50 38 T 100 38 V 50 H 0 Z" fill="currentColor" className="text-foreground/20" />
         </svg>
       );
     case "glow":
-      return null; // base layer already provides the glow blob
     case "mesh":
     default:
       return (
@@ -101,34 +97,70 @@ const SduiBentoBlockImpl = ({ block }: { block: Props }) => {
       )}
       <div className="grid grid-cols-3 auto-rows-[120px] gap-3">
         {block.props.items.map((item) => {
+          const rawMotif: RawMotif | undefined = item.motif;
+          const isAbstract = !rawMotif || ABSTRACT_MOTIFS.has(rawMotif);
+          const motifId = (!isAbstract ? rawMotif : undefined) as MotifId | undefined;
           const tone: Tone = item.tone ?? "graphite";
-          const motif: Motif = item.motif ?? "mesh";
+
+          let bg: ReactNode;
+          let icon: ReactNode = null;
+          let inkStyle: React.CSSProperties = {};
+          let chipStyle: React.CSSProperties = {};
+
+          if (motifId) {
+            bg = (
+              <>
+                <MeshBg motif={motifId} />
+                <div aria-hidden className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/30 via-transparent to-black/[0.04]" />
+              </>
+            );
+            icon = (
+              <MotifIcon motif={motifId} className="h-7 w-7" />
+            );
+            inkStyle = { color: motifInk(motifId) };
+            chipStyle = { background: motifChip(motifId) };
+          } else {
+            bg = (
+              <>
+                <div className={`absolute inset-0 bg-gradient-to-br ${TONE_GRADIENT[tone]}`} />
+                <AbstractOverlay motif={(rawMotif ?? "mesh") as AbstractMotif} />
+              </>
+            );
+          }
+
           return (
             <Link
               key={item.key}
               to={item.to}
-              className={`group relative flex flex-col justify-end overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br ${TONE_GRADIENT[tone]} backdrop-blur-xl ring-1 ring-foreground/[0.04] shadow-[0_8px_24px_-12px_hsl(var(--foreground)/0.18)] transition ease-apple hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-14px_hsl(var(--foreground)/0.28)] active:scale-[0.97] ${SIZE_CLASS[item.size]}`}
+              className={`group relative flex flex-col justify-end overflow-hidden rounded-[1.4rem] border border-border/40 ring-1 ring-foreground/[0.04] shadow-[0_6px_18px_-12px_hsl(var(--foreground)/0.22)] transition ease-apple hover:-translate-y-0.5 hover:shadow-[0_12px_28px_-14px_hsl(var(--foreground)/0.30)] active:scale-[0.97] ${SIZE_CLASS[item.size]}`}
+              style={inkStyle}
             >
-              <div
-                aria-hidden
-                className={`pointer-events-none absolute -top-8 -right-8 h-28 w-28 rounded-full ${TONE_GLOW[tone]} blur-3xl opacity-70 group-hover:opacity-100 transition`}
-              />
-              <MotifLayer motif={motif} />
+              {bg}
 
-              <div className="relative z-10 p-3.5">
-                {item.emoji && (
-                  <div className="mb-2 inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-background/55 backdrop-blur-md ring-1 ring-border/50 text-2xl shadow-sm">
+              <div className="relative z-10 flex h-full flex-col justify-between p-3">
+                {icon ? (
+                  <div
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl shadow-sm ring-1 ring-foreground/[0.06]"
+                    style={chipStyle}
+                  >
+                    {icon}
+                  </div>
+                ) : item.emoji ? (
+                  <div className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-background/55 backdrop-blur-md ring-1 ring-border/50 text-xl shadow-sm">
                     <span aria-hidden>{item.emoji}</span>
                   </div>
-                )}
-                <p className="font-display text-[13.5px] font-extrabold text-foreground drop-shadow-sm">
-                  {item.title}
-                </p>
-                {item.subtitle && (
-                  <p className="mt-0.5 text-[11px] font-medium text-foreground/70">
-                    {item.subtitle}
+                ) : <span />}
+
+                <div>
+                  <p className="font-display text-[13.5px] font-extrabold leading-tight drop-shadow-sm">
+                    {item.title}
                   </p>
-                )}
+                  {item.subtitle && (
+                    <p className="mt-0.5 text-[11px] font-medium opacity-80">
+                      {item.subtitle}
+                    </p>
+                  )}
+                </div>
               </div>
             </Link>
           );

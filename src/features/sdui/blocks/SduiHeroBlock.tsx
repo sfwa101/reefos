@@ -16,7 +16,7 @@ const SduiHeroBlockImpl = ({ block }: { block: Props }) => {
   const tone = block.props.tone ?? "graphite";
   return (
     <section
-      className={`relative overflow-hidden rounded-3xl border border-border/40 bg-gradient-to-br ${TONE_BG[tone]} backdrop-blur-xl px-5 py-6 mx-3`}
+      className={`relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-br ${TONE_BG[tone]} backdrop-blur-xl px-5 py-5 mx-3`}
     >
       <div
         aria-hidden
