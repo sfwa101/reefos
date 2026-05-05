@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import { products as allProducts, useProductsVersion, type Product } from "@/lib/products";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
+import type { Product } from "@/lib/products";
 import { villageMetaFor } from "@/lib/villageMeta";
 import {
   ROUTINE_KEY,
