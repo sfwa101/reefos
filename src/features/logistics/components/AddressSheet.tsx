@@ -121,11 +121,15 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
         {/* Map (top half) */}
         <div className="px-4 pt-3">
           <div className="h-[40vh] min-h-[260px] w-full">
-            <RealMap
-              lat={lat}
-              lng={lng}
-              onPinChange={(la, ln) => { setLat(la); setLng(ln); }}
-            />
+            <ClientOnly fallback={<div className="h-full w-full animate-pulse rounded-xl bg-muted" />}>
+              <Suspense fallback={<div className="h-full w-full animate-pulse rounded-xl bg-muted" />}>
+                <RealMap
+                  lat={lat}
+                  lng={lng}
+                  onPinChange={(la, ln) => { setLat(la); setLng(ln); }}
+                />
+              </Suspense>
+            </ClientOnly>
           </div>
           {geoLoading && (
             <p className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground">
