@@ -19,10 +19,12 @@ import {
 } from "@/components/sections/MeshTile";
 
 const SIZE_CLASS: Record<"wide" | "tall" | "half" | "full", string> = {
-  wide: "col-span-2 row-span-1 min-h-[124px]",
-  tall: "col-span-1 row-span-2 min-h-[256px]",
-  half: "col-span-1 row-span-1 min-h-[120px]",
-  full: "col-span-3 row-span-1 min-h-[124px]",
+  // Phase 18.04 — Zero-gap protocol: all tiles share row-span-1.
+  // `tall` is intentionally collapsed to `half` to eliminate vertical gaps.
+  wide: "col-span-2 row-span-1 min-h-[128px]",
+  tall: "col-span-1 row-span-1 min-h-[128px]",
+  half: "col-span-1 row-span-1 min-h-[128px]",
+  full: "col-span-3 row-span-1 min-h-[140px]",
 };
 
 type Tone = NonNullable<NonNullable<Props["props"]["items"][number]["tone"]>>;
@@ -95,7 +97,7 @@ const SduiBentoBlockImpl = ({ block }: { block: Props }) => {
           {block.props.title}
         </h2>
       )}
-      <div className="grid grid-cols-3 auto-rows-[120px] gap-3">
+      <div className="grid grid-cols-3 grid-flow-row-dense gap-4">
         {block.props.items.map((item) => {
           const rawMotif: RawMotif | undefined = item.motif;
           const isAbstract = !rawMotif || ABSTRACT_MOTIFS.has(rawMotif);
