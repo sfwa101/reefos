@@ -141,7 +141,7 @@ async function main() {
         is_active: true,
         sort_order: 0,
         perishable: ["produce", "meat", "dairy"].includes(meta.source),
-        fulfillment_type: "instant",
+        fulfillment_type: "internal_stock",
         created_at: now,
         updated_at: now,
       };
