@@ -1,6 +1,11 @@
 import { memo, useState, type ImgHTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 import reefLogo from "@/assets/reef-logo.webp";
+import { cdnImage, cdnSrcSet } from "@/lib/cdnImage";
+
+/** Default responsive widths used when callers don't specify their own. */
+const DEFAULT_WIDTHS = [160, 320, 640, 960];
+const DEFAULT_SIZES = "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 320px";
 
 /**
  * OptimizedImage
