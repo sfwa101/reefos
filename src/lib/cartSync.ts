@@ -11,7 +11,7 @@
 // External reads must replace local state; never replay rows through add().
 
 import { supabase } from "@/integrations/supabase/client";
-import { getById, type Product } from "@/lib/products";
+import { PRODUCT_COLUMNS, rowToProduct, type DbRow, type Product } from "@/lib/products";
 import type { CartLineMeta } from "@/context/CartContext";
 
 export type RemoteLine = {
@@ -48,6 +48,22 @@ const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
   return Array.from(map.values());
 };
 
+/** Fetch the products referenced by a remote cart in a single round-trip. */
+async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> {
+  const map = new Map<string, Product>();
+  if (ids.length === 0) return map;
+  const { data, error } = await supabase
+    .from("products")
+    .select(PRODUCT_COLUMNS)
+    .in("id", ids);
+  if (error || !data) return map;
+  for (const row of data as DbRow[]) {
+    const p = rowToProduct(row);
+    map.set(p.id, p);
+  }
+  return map;
+}
+
 /** Fetch the current user's persisted cart. Returns [] if not logged in. */
 export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
   const { data, error } = await supabase
@@ -57,9 +73,12 @@ export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
 
   if (error || !Array.isArray(data)) return [];
 
+  const ids = Array.from(new Set(data.map((r) => r.product_id).filter(Boolean)));
+  const productMap = await fetchProductsByIds(ids);
+
   const lines: LocalLine[] = [];
   for (const row of data) {
-    const product = getById(row.product_id);
+    const product = productMap.get(row.product_id);
     if (!product) continue; // product no longer exists — skip silently
     lines.push({
       product,
