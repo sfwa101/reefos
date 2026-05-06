@@ -105,6 +105,42 @@ export const ComputedColumnBlockSchema = z.object({
   }),
 });
 
+// ─── Phase T-B: Map / Logistics blocks ──────────────────────────────
+export const MapBlockSchema = z.object({
+  type: z.literal("map_block"),
+  id: z.string().min(1),
+  props: z.object({
+    center_lat: z.number().default(24.4667),
+    center_lng: z.number().default(39.6),
+    zoom: z.number().int().min(1).max(20).default(12),
+    height: z.number().int().positive().default(420),
+    children: z.array(z.lazy((): z.ZodTypeAny => z.union([
+      DriverPinLayerSchema,
+      GeofencePolygonLayerSchema,
+    ]))).default([]),
+  }),
+});
+
+export const DriverPinLayerSchema = z.object({
+  type: z.literal("driver_pin_layer"),
+  id: z.string().min(1),
+  props: z.object({
+    /** Filter source: 'all_idle' (admin) | 'assigned_to_order' (customer). */
+    source: z.enum(["all_idle", "assigned_to_order"]).default("all_idle"),
+    order_id: z.string().uuid().optional(),
+    refresh_ms: z.number().int().min(2_000).default(5_000),
+  }),
+});
+
+export const GeofencePolygonLayerSchema = z.object({
+  type: z.literal("geofence_polygon_layer"),
+  id: z.string().min(1),
+  props: z.object({
+    show_surge: z.boolean().default(true),
+    fill_opacity: z.number().min(0).max(1).default(0.2),
+  }),
+});
+
 // ─── Discriminated union ────────────────────────────────────────────
 export const AdminBlockSchema = z.discriminatedUnion("type", [
   FormFieldBlockSchema,
@@ -112,6 +148,9 @@ export const AdminBlockSchema = z.discriminatedUnion("type", [
   TableColumnBlockSchema,
   RpcButtonBlockSchema,
   ComputedColumnBlockSchema,
+  MapBlockSchema,
+  DriverPinLayerSchema,
+  GeofencePolygonLayerSchema,
 ]);
 
 export type AdminBlock = z.infer<typeof AdminBlockSchema>;
@@ -120,6 +159,9 @@ export type FieldGroupBlock = z.infer<typeof FieldGroupBlockSchema>;
 export type TableColumnBlock = z.infer<typeof TableColumnBlockSchema>;
 export type RpcButtonBlock = z.infer<typeof RpcButtonBlockSchema>;
 export type ComputedColumnBlock = z.infer<typeof ComputedColumnBlockSchema>;
+export type MapBlock = z.infer<typeof MapBlockSchema>;
+export type DriverPinLayer = z.infer<typeof DriverPinLayerSchema>;
+export type GeofencePolygonLayer = z.infer<typeof GeofencePolygonLayerSchema>;
 
 /** Defensive parser — drops invalid blocks instead of throwing. */
 export function parseAdminBlocks(raw: unknown): AdminBlock[] {

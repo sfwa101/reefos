@@ -1622,6 +1622,36 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_polygons: {
+        Row: {
+          area: unknown
+          created_at: string
+          id: string
+          is_active: boolean
+          surge_x: number
+          updated_at: string
+          zone_name: string
+        }
+        Insert: {
+          area: unknown
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          surge_x?: number
+          updated_at?: string
+          zone_name: string
+        }
+        Update: {
+          area?: unknown
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          surge_x?: number
+          updated_at?: string
+          zone_name?: string
+        }
+        Relationships: []
+      }
       delivery_settings: {
         Row: {
           disable_barcode_for_express: boolean
@@ -1898,6 +1928,36 @@ export type Database = {
           max_per_order?: number | null
           min_per_order?: number
           notes?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      driver_positions: {
+        Row: {
+          battery_pct: number | null
+          driver_id: string
+          heading_deg: number | null
+          position: unknown
+          speed_kmh: number | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          battery_pct?: number | null
+          driver_id: string
+          heading_deg?: number | null
+          position: unknown
+          speed_kmh?: number | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          battery_pct?: number | null
+          driver_id?: string
+          heading_deg?: number | null
+          position?: unknown
+          speed_kmh?: number | null
+          status?: string
           updated_at?: string
         }
         Relationships: []
@@ -7863,14 +7923,28 @@ export type Database = {
           warehouse_type: string
         }[]
       }
-      find_nearest_drivers: {
-        Args: { p_lat: number; p_lon: number; p_radius_meters: number }
-        Returns: {
-          current_location: unknown
-          distance_meters: number
-          driver_id: string
-        }[]
-      }
+      find_nearest_drivers:
+        | {
+            Args: { p_lat: number; p_lon: number; p_radius_meters: number }
+            Returns: {
+              current_location: unknown
+              distance_meters: number
+              driver_id: string
+            }[]
+          }
+        | {
+            Args: {
+              p_lat: number
+              p_limit?: number
+              p_lng: number
+              p_radius_m?: number
+            }
+            Returns: {
+              distance_m: number
+              driver_id: string
+              updated_at: string
+            }[]
+          }
       frequently_bought_together: {
         Args: { _limit?: number; _product_ids: string[] }
         Returns: {

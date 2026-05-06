@@ -12,6 +12,7 @@ import { FieldGroupBlock } from "./blocks/FieldGroupBlock";
 import { TableColumnBlock } from "./blocks/TableColumnBlock";
 import { RpcButtonBlock } from "./blocks/RpcButtonBlock";
 import { ComputedColumnBlock } from "./blocks/ComputedColumnBlock";
+import { MapBlockRenderer, DriverPinLayerBlock, GeofencePolygonLayerBlock } from "./blocks/MapBlock";
 
 export interface AdminBlockContext {
   /** Current record (form mode) or row (table cell mode). */
@@ -38,6 +39,12 @@ export function renderAdminBlock(
       return <RpcButtonBlock block={block} ctx={ctx} />;
     case "computed_column":
       return <ComputedColumnBlock block={block} ctx={ctx} />;
+    case "map_block":
+      return <MapBlockRenderer block={block} ctx={ctx} />;
+    case "driver_pin_layer":
+      return <DriverPinLayerBlock block={block} ctx={ctx} />;
+    case "geofence_polygon_layer":
+      return <GeofencePolygonLayerBlock block={block} ctx={ctx} />;
     default: {
       // Compile-time exhaustiveness — extending AdminBlock without
       // registering a renderer here will fail typecheck.
