@@ -74,6 +74,7 @@ const cartSignature = (lines: ReadonlyArray<CartLine>): string =>
  * Provider
  * ------------------------------------------------------------------------- */
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+  const { user } = useAuth();
   const tierRef = useRef<CustomerTier>("guest");
   const tierListenersRef = useRef<Set<() => void>>(new Set());
   const emitTier = useCallback(() => {
