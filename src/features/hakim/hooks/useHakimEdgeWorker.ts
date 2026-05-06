@@ -135,7 +135,8 @@ export const useHakimEdgeWorker = ({ getCart, enabled = true }: EdgeOptions = {}
 
   useEffect(() => {
     if (!enabled || typeof window === "undefined") return;
-    patchGlobals();
+    // Skip console monkey-patch in dev to avoid HMR echo storms.
+    if (!import.meta.env.DEV) patchGlobals();
 
     const tick = () => {
       try {

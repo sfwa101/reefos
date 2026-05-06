@@ -25,6 +25,7 @@ import { registerPWA } from "@/lib/pwa";
 import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
 import { SubdomainGuard } from "@/components/SubdomainGuard";
 import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
+import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 
 function NotFoundComponent() {
   return (
@@ -125,32 +126,34 @@ function RootComponent() {
   }, []);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <LocaleProvider>
-        <UIProvider>
-          <TooltipProvider>
-            <AuthProvider>
-              <LocationProvider>
-                <CartProvider>
-                  <SharedCartProvider>
-                    <CompareProvider>
-                      <FavoritesProvider>
-                        <LiveRulesBootstrap />
-                        <CatalogBootstrap />
-                        <SubdomainGuard />
-                        <Toaster />
-                        <Outlet />
-                      </FavoritesProvider>
-                    </CompareProvider>
-                  </SharedCartProvider>
-                </CartProvider>
-              </LocationProvider>
-            </AuthProvider>
-          </TooltipProvider>
-        </UIProvider>
-        </LocaleProvider>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <GlobalErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider>
+          <LocaleProvider>
+          <UIProvider>
+            <TooltipProvider>
+              <AuthProvider>
+                <LocationProvider>
+                  <CartProvider>
+                    <SharedCartProvider>
+                      <CompareProvider>
+                        <FavoritesProvider>
+                          <LiveRulesBootstrap />
+                          <CatalogBootstrap />
+                          <SubdomainGuard />
+                          <Toaster />
+                          <Outlet />
+                        </FavoritesProvider>
+                      </CompareProvider>
+                    </SharedCartProvider>
+                  </CartProvider>
+                </LocationProvider>
+              </AuthProvider>
+            </TooltipProvider>
+          </UIProvider>
+          </LocaleProvider>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </GlobalErrorBoundary>
   );
 }
