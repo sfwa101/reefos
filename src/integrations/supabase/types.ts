@@ -2621,6 +2621,7 @@ export type Database = {
         Row: {
           category: string
           created_at: string
+          deleted_at: string | null
           fixed_price: number
           id: string
           metadata: Json
@@ -2631,6 +2632,7 @@ export type Database = {
         Insert: {
           category: string
           created_at?: string
+          deleted_at?: string | null
           fixed_price: number
           id?: string
           metadata?: Json
@@ -2641,6 +2643,7 @@ export type Database = {
         Update: {
           category?: string
           created_at?: string
+          deleted_at?: string | null
           fixed_price?: number
           id?: string
           metadata?: Json
@@ -6428,6 +6431,7 @@ export type Database = {
       vendor_inventory: {
         Row: {
           created_at: string
+          deleted_at: string | null
           id: string
           is_active: boolean
           product_id: string
@@ -6438,6 +6442,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           product_id: string
@@ -6448,6 +6453,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           product_id?: string
@@ -8020,6 +8026,8 @@ export type Database = {
         Returns: Json
       }
       progress_to_next_level: { Args: { _user_id: string }; Returns: Json }
+      pull_catalog_sync: { Args: { p_last_sync?: string }; Returns: Json }
+      pull_wallet_sync: { Args: { p_last_sync?: string }; Returns: Json }
       push_notification: {
         Args: {
           p_body?: string
