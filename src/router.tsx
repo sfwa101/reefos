@@ -68,6 +68,10 @@ export const getRouter = () => {
     },
   });
 
+  // Phase T-P3 — Salsabil OS Edge: hydrate cache from IndexedDB so repeat
+  // boots paint instantly while a background revalidation refreshes data.
+  installEdgePersister(queryClient);
+
   const router = createRouter({
     routeTree,
     context: { queryClient },
