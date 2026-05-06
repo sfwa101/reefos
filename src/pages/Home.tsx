@@ -28,7 +28,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLocation } from "@/context/LocationContext";
 import { logBehavior } from "@/lib/behavior";
 import { isPerishable, type Product } from "@/lib/products";
-import { useProductsQuery } from "@/hooks/useProductsQuery";
+import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
 import { useBuyAgainProducts } from "@/hooks/useBuyAgainProducts";
 import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
 
@@ -72,32 +72,34 @@ const HomePage = () => {
   }, []);
 
   // ─── DB sources ────────────────────────────────────────────────────
-  const productsQ = useProductsQuery();
+  const productsQ = useHomeProductsQuery(48);
   const { data: catalog = [] } = productsQ;
   const buyAgainHook = useBuyAgainProducts();
   const { products: buyAgain } = buyAgainHook;
   const featuredQ = useFeaturedCategoriesQuery();
   const { data: featuredCats = [] } = featuredQ;
 
-  // [Phase 23.3] Deadlock telemetry for the root Home page.
-  console.debug("[Home Diagnostics] HomePage", {
-    products: {
-      status: productsQ.status,
-      fetchStatus: productsQ.fetchStatus,
-      isLoading: productsQ.isLoading,
-      rows: catalog.length,
-      error: productsQ.error ? String((productsQ.error as Error).message) : null,
-    },
-    buyAgain: { isLoading: buyAgainHook.isLoading, rows: buyAgain.length },
-    featured: {
-      status: featuredQ.status,
-      fetchStatus: featuredQ.fetchStatus,
-      rows: featuredCats.length,
-      error: featuredQ.error ? String((featuredQ.error as Error).message) : null,
-    },
-    user: user?.id ?? null,
-    zone: zone.shortName,
-  });
+  // [Phase 23.3] Deadlock telemetry — DEV-only to avoid prod overhead.
+  if (import.meta.env.DEV) {
+    console.debug("[Home Diagnostics] HomePage", {
+      products: {
+        status: productsQ.status,
+        fetchStatus: productsQ.fetchStatus,
+        isLoading: productsQ.isLoading,
+        rows: catalog.length,
+        error: productsQ.error ? String((productsQ.error as Error).message) : null,
+      },
+      buyAgain: { isLoading: buyAgainHook.isLoading, rows: buyAgain.length },
+      featured: {
+        status: featuredQ.status,
+        fetchStatus: featuredQ.fetchStatus,
+        rows: featuredCats.length,
+        error: featuredQ.error ? String((featuredQ.error as Error).message) : null,
+      },
+      user: user?.id ?? null,
+      zone: zone.shortName,
+    });
+  }
 
   // Zone-aware filter (perishables blocked in non-cold zones)
   const zoneSafe = useMemo<Product[]>(
