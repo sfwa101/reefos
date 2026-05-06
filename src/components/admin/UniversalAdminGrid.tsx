@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -269,13 +269,7 @@ export function UniversalAdminGrid<T = any>({
 
       <div className="px-4 lg:px-6 pt-3 pb-10 max-w-[1400px] mx-auto space-y-5">
         {metrics && metrics.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
-            {metrics.map((m) => {
-              const v = m.compute ? m.compute(filtered as any[]) : fmtNum(filtered.length);
-              const urg = m.urgent?.(filtered as any[]);
-              return <BentoTile key={m.key} metric={m} value={v} urgent={urg} />;
-            })}
-          </div>
+          <BentoMetricsRow metrics={metrics} filtered={filtered} />
         )}
 
         {topSlot}
@@ -417,5 +411,35 @@ export function UniversalAdminGrid<T = any>({
     </>
   );
 }
+
+/**
+ * Phase U — Memoized Bento metrics row.
+ * Computes m.compute(filtered) ONCE per [metrics, filtered] tuple instead of
+ * on every virtualizer scroll re-render of the parent grid.
+ */
+const BentoMetricsRow = memo(function BentoMetricsRow({
+  metrics,
+  filtered,
+}: {
+  metrics: BentoMetric[];
+  filtered: any[];
+}) {
+  const computed = useMemo(
+    () =>
+      metrics.map((m) => ({
+        metric: m,
+        value: m.compute ? m.compute(filtered) : fmtNum(filtered.length),
+        urgent: m.urgent?.(filtered),
+      })),
+    [metrics, filtered],
+  );
+  return (
+    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
+      {computed.map(({ metric, value, urgent }) => (
+        <BentoTile key={metric.key} metric={metric} value={value} urgent={urgent} />
+      ))}
+    </div>
+  );
+});
 
 export default UniversalAdminGrid;

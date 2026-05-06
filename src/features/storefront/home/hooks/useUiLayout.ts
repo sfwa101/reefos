@@ -6,7 +6,8 @@
  * Falls back to a sane default order when the row is missing so the
  * storefront NEVER renders blank. Public RLS read = anonymous-safe.
  */
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
@@ -29,59 +30,55 @@ function readPreviewMode(): LayoutStatus {
   }
 }
 
+async function fetchUiLayout(pageKey: string, status: LayoutStatus): Promise<UiLayout | null> {
+  let { data } = await supabase
+    .from("ui_layouts")
+    .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
+    .eq("page_key", pageKey)
+    .eq("status", status)
+    .eq("is_active", true)
+    .maybeSingle();
+
+  if (!data && status === "draft") {
+    const r = await supabase
+      .from("ui_layouts")
+      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
+      .eq("page_key", pageKey)
+      .eq("status", "published")
+      .eq("is_active", true)
+      .maybeSingle();
+    data = r.data;
+  }
+
+  return data ? (data as unknown as UiLayout) : null;
+}
+
 export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
-  const [layout, setLayout] = useState<UiLayout | null>(null);
-  const [loading, setLoading] = useState(true);
+  const status: LayoutStatus = statusOverride ?? readPreviewMode();
 
-  useEffect(() => {
-    let cancelled = false;
-    const status: LayoutStatus = statusOverride ?? readPreviewMode();
+  const query = useQuery({
+    queryKey: ["ui_layouts", pageKey, status],
+    queryFn: () => fetchUiLayout(pageKey, status),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
-    (async () => {
-      const fallback: UiLayout = {
-        id: "fallback",
-        page_key: pageKey,
-        section_order: DEFAULT_HOME_ORDER,
-        section_config: {},
-        section_titles: {},
-        is_active: true,
-        status: "published",
-      };
-      try {
-        // Try requested status first; if missing, fall back to published.
-        let { data } = await supabase
-          .from("ui_layouts")
-          .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-          .eq("page_key", pageKey)
-          .eq("status", status)
-          .eq("is_active", true)
-          .maybeSingle();
-
-        if (!data && status === "draft") {
-          const r = await supabase
-            .from("ui_layouts")
-            .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-            .eq("page_key", pageKey)
-            .eq("status", "published")
-            .eq("is_active", true)
-            .maybeSingle();
-          data = r.data;
-        }
-
-        if (cancelled) return;
-        setLayout(data ? (data as unknown as UiLayout) : fallback);
-      } catch {
-        if (!cancelled) setLayout(fallback);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
+  const layout = useMemo<UiLayout | null>(() => {
+    if (query.data) return query.data;
+    if (query.isLoading) return null;
+    // Fallback: never render blank.
+    return {
+      id: "fallback",
+      page_key: pageKey,
+      section_order: DEFAULT_HOME_ORDER,
+      section_config: {},
+      section_titles: {},
+      is_active: true,
+      status: "published",
     };
-  }, [pageKey, statusOverride]);
+  }, [query.data, query.isLoading, pageKey]);
 
-  return { layout, loading };
+  return { layout, loading: query.isLoading };
 };
 
 export { DEFAULT_HOME_ORDER };

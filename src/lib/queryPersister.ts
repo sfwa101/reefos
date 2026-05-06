@@ -23,6 +23,8 @@ const PERSISTABLE_PREFIXES: ReadonlyArray<string> = [
   "catalog",       // useHomeProductsQuery, useProductsQuery
   "categories",    // useFeaturedCategoriesQuery
   "geozones",      // useGeoZones
+  "sdui_layouts",  // SDUI block tree (Phase U)
+  "ui_layouts",    // section_order / section_config (Phase U)
 ];
 
 const isPersistableKey = (key: ReadonlyArray<unknown>): boolean => {

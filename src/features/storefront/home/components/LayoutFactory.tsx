@@ -15,7 +15,7 @@
  * push the key into the seed migration's `section_order`, and a future
  * Admin UI can re-order without code changes.
  */
-import type { ReactElement } from "react";
+import { memo, type ReactElement } from "react";
 import { BestSellersRail } from "./BestSellersRail";
 import { BundlesRail } from "./BundlesRail";
 import { CategoriesGrid } from "./CategoriesGrid";
@@ -43,11 +43,20 @@ type FactoryContext = {
 
 type SectionRenderer = (ctx: FactoryContext, cfg: SectionConfig) => ReactElement | null;
 
+// Phase U — memoized section wrappers. Each wrapper compares its specific
+// inputs and skips re-render when the parent re-renders without changes.
+const MemoCategoriesGrid = memo(CategoriesGrid);
+const MemoBestSellersRail = memo(BestSellersRail);
+const MemoBundlesRail = memo(BundlesRail);
+const MemoProductsGrid = memo(ProductsGrid);
+const MemoHeroBanner = memo(HeroBanner);
+const MemoSearchAndFilters = memo(SearchAndFilters);
+
 const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
-  HeroBanner: ({ theme }) => <HeroBanner theme={theme} />,
+  HeroBanner: ({ theme }) => <MemoHeroBanner theme={theme} />,
   SearchAndFilters: ({ orchestrator: o, theme }) =>
     o ? (
-      <SearchAndFilters
+      <MemoSearchAndFilters
         q={o.q}
         setQ={o.setQ}
         filtersActive={o.filtersActive}
@@ -60,12 +69,12 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
       />
     ) : null,
   CategoriesGrid: ({ orchestrator: o, theme }) =>
-    o ? <CategoriesGrid cat={o.cat} setCat={o.setCat} hue={theme.hue} /> : null,
+    o ? <MemoCategoriesGrid cat={o.cat} setCat={o.setCat} hue={theme.hue} /> : null,
   BundlesRail: ({ orchestrator: o, theme, showRails }) =>
-    showRails && o ? <BundlesRail catalog={o.catalog} hue={theme.hue} /> : null,
+    showRails && o ? <MemoBundlesRail catalog={o.catalog} hue={theme.hue} /> : null,
   BestSellersRail: ({ orchestrator: o, theme, showRails }) =>
     showRails && o ? (
-      <BestSellersRail
+      <MemoBestSellersRail
         items={o.bestSellers}
         hue={theme.hue}
         onOpen={(id) => o.setOpenId(id)}
@@ -73,7 +82,7 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
     ) : null,
   ProductsGrid: ({ orchestrator: o, theme }) =>
     o ? (
-      <ProductsGrid
+      <MemoProductsGrid
         cat={o.cat as CatId}
         filtered={o.filtered}
         hue={theme.hue}

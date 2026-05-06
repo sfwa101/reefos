@@ -1,14 +1,14 @@
 /**
  * useSduiLayout — fetches the active version's blocks for a given slug.
  *
- * Strategy:
- *   1. Read `sdui_layouts` by slug + join active version.
- *   2. Validate the JSONB blocks via Zod (Graceful Degradation).
- *   3. Return parsed blocks + loading + error.
+ * Phase U: migrated to React Query for cache+hydration coherency.
+ * staleTime 5min / gcTime 30min — matches Salsabil OS Edge persister whitelist.
+ * Zod parsing is memoized to avoid re-validating on every render.
  *
  * Anonymous-safe (RLS allows public read of published versions).
  */
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 
@@ -18,50 +18,42 @@ type State = {
   error: string | null;
 };
 
+async function fetchSduiBlocks(slug: string): Promise<unknown> {
+  const { data: layout, error: e1 } = await supabase
+    .from("sdui_layouts")
+    .select("id, active_version_id")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  if (e1) throw e1;
+  if (!layout?.active_version_id) return null;
+
+  const { data: version, error: e2 } = await supabase
+    .from("sdui_layout_versions")
+    .select("blocks")
+    .eq("id", layout.active_version_id)
+    .maybeSingle();
+
+  if (e2) throw e2;
+  return version?.blocks ?? null;
+}
+
 export function useSduiLayout(slug: string): State {
-  const [state, setState] = useState<State>({ blocks: [], loading: true, error: null });
+  const query = useQuery({
+    queryKey: ["sdui_layouts", slug],
+    queryFn: () => fetchSduiBlocks(slug),
+    staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const { data: layout, error: e1 } = await supabase
-          .from("sdui_layouts")
-          .select("id, active_version_id")
-          .eq("slug", slug)
-          .maybeSingle();
+  const blocks = useMemo<SduiBlock[]>(
+    () => (query.data ? parseBlocks(query.data) : []),
+    [query.data],
+  );
 
-        if (cancelled) return;
-        if (e1) throw e1;
-        if (!layout?.active_version_id) {
-          setState({ blocks: [], loading: false, error: null });
-          return;
-        }
-
-        const { data: version, error: e2 } = await supabase
-          .from("sdui_layout_versions")
-          .select("blocks")
-          .eq("id", layout.active_version_id)
-          .maybeSingle();
-
-        if (cancelled) return;
-        if (e2) throw e2;
-
-        const blocks = parseBlocks(version?.blocks);
-        setState({ blocks, loading: false, error: null });
-      } catch (err) {
-        if (cancelled) return;
-        setState({
-          blocks: [],
-          loading: false,
-          error: err instanceof Error ? err.message : "SDUI fetch failed",
-        });
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [slug]);
-
-  return state;
+  return {
+    blocks,
+    loading: query.isLoading,
+    error: query.error ? (query.error as Error).message : null,
+  };
 }

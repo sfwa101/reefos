@@ -21,13 +21,12 @@ import { PremiumProgressBar } from "@/features/cart/components/PremiumProgressBa
 import { CartIncentiveProgress } from "@/features/cart/components/CartIncentiveProgress";
 import { CartLoyaltyBar } from "@/features/cart/components/CartLoyaltyBar";
 import { RechargeDialog } from "@/features/cart/components/RechargeDialog";
-import { useCartHasErrors } from "@/context/CartContext";
 import type { SharedCartSplitType } from "@/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
   const { sharedCartId } = useSharedCartContext();
   const o = useCartOrchestrator({ sharedCartId });
-  const hasPricingErrors = useCartHasErrors();
+  const hasPricingErrors = o.hasPricingErrors;
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const navigate = useNavigate();
 
