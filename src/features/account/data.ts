@@ -93,6 +93,12 @@ export const SETTING_GROUPS: { title: string; items: SettingItem[] }[] = [
     ],
   },
   {
+    title: "كسب وشراكات",
+    items: [
+      { icon: Users2, label: "برنامج الشركاء", sub: "ادعُ أصدقاءك واكسب عمولة", to: "/affiliate" },
+    ],
+  },
+  {
     title: "التفضيلات والمساعدة",
     items: [
       { icon: Settings, label: "الإعدادات", sub: "اللغة، الوضع، الألوان", to: "/account/settings" },
