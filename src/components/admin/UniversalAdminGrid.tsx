@@ -1,5 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
+import { useInfiniteQuery } from "@tanstack/react-query";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search, ChevronLeft, Inbox, Rows3, Rows2, type LucideIcon } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,12 +14,16 @@ const DENSITY_ROW: Record<Density, string> = {
   compact: "px-3 lg:px-4 py-1.5",
   comfortable: "px-4 lg:px-5 py-3",
 };
+const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 };
 
 /**
- * UniversalAdminGrid — "Stem Cell" polymorphic component
- * ------------------------------------------------------
- * One core that becomes any admin screen (Bento KPI grid + searchable data table)
- * by injecting a `DataSource` descriptor. No business logic is duplicated.
+ * UniversalAdminGrid — Phase 26.1 OOM-safe rewrite.
+ * --------------------------------------------------
+ * • Server-paginated when `dataSource.table` is present (Supabase `.range()`).
+ * • Server-side search via `.ilike` / `.or` when `searchKeys` are provided.
+ * • Virtualized rows via @tanstack/react-virtual (no DOM blow-up at 10k+ rows).
+ * • Backward compatible with `fetcher` (client-side mode, still virtualized).
+ * The legacy `limit: 200` ceiling and full-array client filtering are gone.
  */
 
 // -------- Types --------
@@ -30,9 +36,7 @@ export type BentoMetric = {
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  /** computed from rows; fallback to formatted count */
   compute?: (rows: any[]) => string | number;
-  /** when urgent → pulses */
   urgent?: (rows: any[]) => boolean;
   to?: string;
 };
@@ -53,16 +57,13 @@ export type RowAction<T = any> = {
 };
 
 export type DataSource<T = any> = {
-  /** Supabase table name. If omitted, `fetcher` must be provided. */
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
+  /** Page size for server pagination. Default 50. */
   limit?: number;
-  /** Custom fetcher overrides table */
   fetcher?: () => Promise<T[]>;
-  /** client-side search predicate */
   searchKeys?: (keyof T | string)[];
-  /** map raw → normalized rows */
   map?: (row: any) => T;
 };
 
@@ -83,9 +84,7 @@ export type UniversalAdminGridProps<T = any> = {
   rowActions?: RowAction<T>[];
   searchPlaceholder?: string;
   empty?: EmptyState;
-  /** custom slot rendered above table */
   topSlot?: ReactNode;
-  /** custom slot rendered instead of table (rare) */
   renderList?: (rows: T[]) => ReactNode;
 };
 
@@ -131,57 +130,133 @@ function BentoTile({
   );
 }
 
+// -------- Debounce hook --------
+
+function useDebounced<T>(value: T, ms = 250): T {
+  const [v, setV] = useState(value);
+  useEffect(() => {
+    const id = setTimeout(() => setV(value), ms);
+    return () => clearTimeout(id);
+  }, [value, ms]);
+  return v;
+}
+
+const escapeIlike = (raw: string): string => raw.replace(/[%,()]/g, (m) => `\\${m}`);
+
 // -------- Main component --------
 
 export function UniversalAdminGrid<T = any>({
   title, subtitle, metrics, columns, dataSource, rowKey,
   onRowClick, rowActions, searchPlaceholder, empty, topSlot, renderList,
 }: UniversalAdminGridProps<T>) {
-  const [rows, setRows] = useState<T[]>([]);
-  const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [density, setDensity] = useState<Density>("comfortable");
+  const debouncedQ = useDebounced(q.trim(), 250);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        let data: any[] = [];
-        if (dataSource.fetcher) {
-          data = await dataSource.fetcher();
-        } else if (dataSource.table) {
-          let query: any = (supabase as any)
-            .from(dataSource.table)
-            .select(dataSource.select ?? "*");
-          if (dataSource.orderBy) {
-            query = query.order(dataSource.orderBy.column, { ascending: dataSource.orderBy.ascending ?? false });
-          }
-          if (dataSource.limit) query = query.limit(dataSource.limit);
-          const { data: res, error } = await query;
-          if (error) throw error;
-          data = res ?? [];
-        }
-        const mapped = dataSource.map ? data.map(dataSource.map) : (data as T[]);
-        if (!cancelled) setRows(mapped);
-      } catch (e) {
-        if (!cancelled) setRows([]);
-      } finally {
-        if (!cancelled) setLoading(false);
+  const limit = dataSource.limit ?? 50;
+  const useServer = !!dataSource.table && !dataSource.fetcher;
+  const searchKeys = (dataSource.searchKeys ?? []) as string[];
+
+  // ---- Server-paginated mode ----
+  const infinite = useInfiniteQuery({
+    enabled: useServer,
+    queryKey: [
+      "admin-grid",
+      dataSource.table,
+      dataSource.select ?? "*",
+      dataSource.orderBy?.column ?? "",
+      dataSource.orderBy?.ascending ?? false,
+      debouncedQ,
+      searchKeys.join(","),
+      limit,
+    ] as const,
+    initialPageParam: 0 as number,
+    queryFn: async ({ pageParam }) => {
+      const offset = pageParam as number;
+      let query: any = (supabase as any)
+        .from(dataSource.table!)
+        .select(dataSource.select ?? "*")
+        .range(offset, offset + limit - 1);
+      if (dataSource.orderBy) {
+        query = query.order(dataSource.orderBy.column, { ascending: dataSource.orderBy.ascending ?? false });
       }
-    })();
+      if (debouncedQ && searchKeys.length > 0) {
+        const safe = escapeIlike(debouncedQ);
+        const orExpr = searchKeys.map((k) => `${String(k)}.ilike.%${safe}%`).join(",");
+        query = query.or(orExpr);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      const items = (data ?? []) as any[];
+      return {
+        items,
+        nextOffset: items.length < limit ? null : offset + limit,
+      };
+    },
+    getNextPageParam: (last: any) => last.nextOffset,
+    staleTime: 30_000,
+    gcTime: 5 * 60_000,
+  });
+
+  // ---- Client (fetcher) mode ----
+  const [clientRows, setClientRows] = useState<any[]>([]);
+  const [clientLoading, setClientLoading] = useState(!useServer);
+  useEffect(() => {
+    if (useServer || !dataSource.fetcher) return;
+    let cancelled = false;
+    setClientLoading(true);
+    dataSource.fetcher()
+      .then((data) => { if (!cancelled) setClientRows(data ?? []); })
+      .catch(() => { if (!cancelled) setClientRows([]); })
+      .finally(() => { if (!cancelled) setClientLoading(false); });
     return () => { cancelled = true; };
-  }, [dataSource.table, dataSource.select, dataSource.limit, dataSource.orderBy?.column, dataSource.orderBy?.ascending]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [useServer, dataSource.fetcher]);
 
-  const filtered = useMemo(() => {
-    if (!q.trim() || !dataSource.searchKeys?.length) return rows;
-    const needle = q.trim().toLowerCase();
-    return rows.filter((row: any) =>
-      dataSource.searchKeys!.some((k) => String(row?.[k as string] ?? "").toLowerCase().includes(needle)),
+  // ---- Unified rows ----
+  const rawRows = useMemo<any[]>(() => {
+    if (useServer) return infinite.data?.pages.flatMap((p: any) => p.items) ?? [];
+    return clientRows;
+  }, [useServer, infinite.data, clientRows]);
+
+  const mapped = useMemo<T[]>(
+    () => (dataSource.map ? rawRows.map(dataSource.map) : (rawRows as T[])),
+    [rawRows, dataSource.map],
+  );
+
+  // Client-side filter only in fetcher mode (server mode pushes search to DB).
+  const filtered = useMemo<T[]>(() => {
+    if (useServer) return mapped;
+    if (!debouncedQ || searchKeys.length === 0) return mapped;
+    const needle = debouncedQ.toLowerCase();
+    return mapped.filter((row: any) =>
+      searchKeys.some((k) => String(row?.[k] ?? "").toLowerCase().includes(needle)),
     );
-  }, [rows, q, dataSource.searchKeys]);
+  }, [useServer, mapped, debouncedQ, searchKeys]);
 
+  const loading = useServer ? infinite.isLoading : clientLoading;
   const EmptyIcon = empty?.icon ?? Inbox;
+
+  // ---- Virtualization ----
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const rowHeight = DENSITY_HEIGHT[density];
+  const virtualizer = useVirtualizer({
+    count: filtered.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => rowHeight,
+    overscan: 8,
+  });
+
+  // Auto-fetch next page when nearing bottom (server mode).
+  const items = virtualizer.getVirtualItems();
+  useEffect(() => {
+    if (!useServer || !infinite.hasNextPage || infinite.isFetchingNextPage) return;
+    const last = items[items.length - 1];
+    if (!last) return;
+    if (last.index >= filtered.length - 5) {
+      void infinite.fetchNextPage();
+    }
+  }, [items, useServer, infinite, filtered.length]);
 
   return (
     <>
@@ -193,12 +268,11 @@ export function UniversalAdminGrid<T = any>({
       </div>
 
       <div className="px-4 lg:px-6 pt-3 pb-10 max-w-[1400px] mx-auto space-y-5">
-        {/* Bento metrics */}
         {metrics && metrics.length > 0 && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
             {metrics.map((m) => {
-              const v = m.compute ? m.compute(rows) : fmtNum(rows.length);
-              const urg = m.urgent?.(rows);
+              const v = m.compute ? m.compute(filtered as any[]) : fmtNum(filtered.length);
+              const urg = m.urgent?.(filtered as any[]);
               return <BentoTile key={m.key} metric={m} value={v} urgent={urg} />;
             })}
           </div>
@@ -206,10 +280,9 @@ export function UniversalAdminGrid<T = any>({
 
         {topSlot}
 
-        {/* Sticky search header + density toggle (Phase 20 D5) */}
-        {dataSource.searchKeys?.length || !renderList ? (
+        {searchKeys.length || !renderList ? (
           <div className="sticky top-[56px] lg:top-2 z-20 -mx-4 lg:mx-0 px-4 lg:px-0 py-2 glass-strong rounded-none lg:rounded-2xl flex items-center gap-2">
-            {dataSource.searchKeys?.length ? (
+            {searchKeys.length ? (
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
                 <input
@@ -249,7 +322,6 @@ export function UniversalAdminGrid<T = any>({
           </div>
         ) : null}
 
-        {/* Data list */}
         <section className="bg-surface rounded-3xl border border-border/50 shadow-soft overflow-hidden">
           {loading ? (
             <div className="p-4 space-y-2">
@@ -266,59 +338,78 @@ export function UniversalAdminGrid<T = any>({
           ) : renderList ? (
             renderList(filtered)
           ) : (
-            <div className="divide-y divide-border/40">
-              {filtered.map((row: any, idx) => {
-                const key = rowKey ? rowKey(row) : (row.id ?? idx);
-                return (
-                  <div
-                    key={key}
-                    role={onRowClick ? "button" : undefined}
-                    onClick={onRowClick ? () => onRowClick(row) : undefined}
-                    className={cn(
-                      DENSITY_ROW[density],
-                      "flex items-center gap-3 transition text-right group/row hover:bg-surface-muted/60 hover:shadow-[inset_2px_0_0_hsl(var(--primary))]",
-                      onRowClick && "cursor-pointer press",
-                    )}
-                  >
-                    {columns?.map((col) => (
-                      <div
-                        key={col.key}
-                        className={cn(
-                          "min-w-0",
-                          col.hideOnMobile && "hidden md:block",
-                          col.className ?? "flex-1",
-                        )}
-                      >
-                        {col.render ? col.render(row) : <span className="text-[13.5px]">{String(row?.[col.key] ?? "—")}</span>}
-                      </div>
-                    ))}
-                    {rowActions?.length ? (
-                      <div className="flex items-center gap-1 shrink-0">
-                        {rowActions.map((a) => {
-                          const AIcon = a.icon;
-                          return (
-                            <button
-                              key={a.label}
-                              onClick={(e) => { e.stopPropagation(); a.onClick(row); }}
-                              className={cn(
-                                "h-8 px-3 rounded-xl text-[12px] font-semibold press border",
-                                a.tone === "destructive" && "bg-destructive/10 text-destructive border-destructive/20",
-                                a.tone === "success" && "bg-success/10 text-success border-success/20",
-                                (!a.tone || a.tone === "default") && "bg-primary-soft text-primary border-primary/20",
-                              )}
-                            >
-                              {AIcon && <AIcon className="h-3.5 w-3.5 inline -mt-0.5 ml-1" />}
-                              {a.label}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    ) : onRowClick ? (
-                      <ChevronLeft className="h-4 w-4 text-foreground-tertiary shrink-0" />
-                    ) : null}
-                  </div>
-                );
-              })}
+            <div
+              ref={scrollRef}
+              className="divide-y divide-border/40 overflow-auto"
+              style={{ maxHeight: "min(72vh, 800px)" }}
+            >
+              <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
+                {items.map((vi) => {
+                  const row: any = filtered[vi.index];
+                  const key = rowKey ? rowKey(row) : (row?.id ?? vi.index);
+                  return (
+                    <div
+                      key={key}
+                      data-index={vi.index}
+                      ref={virtualizer.measureElement}
+                      style={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        transform: `translateY(${vi.start}px)`,
+                      }}
+                      role={onRowClick ? "button" : undefined}
+                      onClick={onRowClick ? () => onRowClick(row) : undefined}
+                      className={cn(
+                        DENSITY_ROW[density],
+                        "flex items-center gap-3 transition text-right group/row hover:bg-surface-muted/60 hover:shadow-[inset_2px_0_0_hsl(var(--primary))] border-b border-border/40",
+                        onRowClick && "cursor-pointer press",
+                      )}
+                    >
+                      {columns?.map((col) => (
+                        <div
+                          key={col.key}
+                          className={cn(
+                            "min-w-0",
+                            col.hideOnMobile && "hidden md:block",
+                            col.className ?? "flex-1",
+                          )}
+                        >
+                          {col.render ? col.render(row) : <span className="text-[13.5px]">{String(row?.[col.key] ?? "—")}</span>}
+                        </div>
+                      ))}
+                      {rowActions?.length ? (
+                        <div className="flex items-center gap-1 shrink-0">
+                          {rowActions.map((a) => {
+                            const AIcon = a.icon;
+                            return (
+                              <button
+                                key={a.label}
+                                onClick={(e) => { e.stopPropagation(); a.onClick(row); }}
+                                className={cn(
+                                  "h-8 px-3 rounded-xl text-[12px] font-semibold press border",
+                                  a.tone === "destructive" && "bg-destructive/10 text-destructive border-destructive/20",
+                                  a.tone === "success" && "bg-success/10 text-success border-success/20",
+                                  (!a.tone || a.tone === "default") && "bg-primary-soft text-primary border-primary/20",
+                                )}
+                              >
+                                {AIcon && <AIcon className="h-3.5 w-3.5 inline -mt-0.5 ml-1" />}
+                                {a.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      ) : onRowClick ? (
+                        <ChevronLeft className="h-4 w-4 text-foreground-tertiary shrink-0" />
+                      ) : null}
+                    </div>
+                  );
+                })}
+              </div>
+              {useServer && infinite.isFetchingNextPage && (
+                <div className="p-3 text-center text-[12px] text-foreground-tertiary">جاري التحميل…</div>
+              )}
             </div>
           )}
         </section>

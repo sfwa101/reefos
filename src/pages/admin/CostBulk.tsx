@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { refetchProducts } from "@/lib/products";
+
 
 type Row = {
   id: string;
@@ -101,7 +101,6 @@ export default function CostBulk() {
         if (error) throw error;
       }
       toast.success(`تم حفظ ${updates.length} منتج`);
-      await refetchProducts();
       await load();
     } catch (err) {
       toast.error("فشل الحفظ: " + (err as Error).message);

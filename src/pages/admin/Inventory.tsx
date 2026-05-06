@@ -5,7 +5,6 @@ import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
-import { refetchProducts } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
 type Row = {
@@ -96,7 +95,6 @@ export default function Inventory() {
       } else {
         toast.success(`تم حفظ ${dirtyCount} منتج`);
         setEdits({});
-        await refetchProducts();
         load();
       }
     } finally {
