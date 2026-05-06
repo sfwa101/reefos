@@ -233,21 +233,34 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         const guest: LocalLine[] = linesFromStore();
         const isInitialRestore = prevUid === undefined;
         const isFreshLogin = prevUid === null;
+        const alreadyMerged = mergedUidsRef.current.has(uid);
 
         let next: CartLine[];
         let shouldPush = false;
 
         if (isInitialRestore) {
+          // First mount with an existing session — trust remote, never merge
+          // the persisted local store (it may itself be the previously-synced
+          // remote and would double on every cold boot).
           next = remote;
-        } else if (isFreshLogin && guest.length > 0) {
+          mergedUidsRef.current.add(uid);
+        } else if (isFreshLogin && guest.length > 0 && !alreadyMerged) {
           next = mergeCarts(guest, remote);
           shouldPush = true;
+          mergedUidsRef.current.add(uid);
         } else {
           next = remote;
+          mergedUidsRef.current.add(uid);
         }
 
+        // Apply remote BEFORE pushing so the store reflects the merged truth
+        // and any subsequent realtime echo is a no-op via signature match.
         applyRemote(next);
-        if (shouldPush) await pushRemoteCart(uid, linesFromStore());
+        lastPushedSignatureRef.current = cartSignature(next);
+        if (shouldPush) {
+          skipNextPushRef.current = true;
+          await pushRemoteCart(uid, next);
+        }
       } catch (err) {
         console.warn("[cart] sync on login failed:", err);
       }
