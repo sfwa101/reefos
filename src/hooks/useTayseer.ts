@@ -91,7 +91,7 @@ export interface LedgerFilters {
 export function useLedgerQuery(filters: LedgerFilters = {}) {
   const pageSize = filters.pageSize ?? 50;
   return useInfiniteQuery({
-    queryKey: tayseerKeys.ledger(filters.walletId ?? "all", filters),
+    queryKey: tayseerKeys.ledger(filters.walletId ?? "all", { ...filters }),
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = (pageParam as number) * pageSize;
