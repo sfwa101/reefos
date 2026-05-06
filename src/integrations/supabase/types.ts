@@ -1209,6 +1209,65 @@ export type Database = {
           },
         ]
       }
+      conversation_participants: {
+        Row: {
+          conversation_id: string
+          joined_at: string
+          last_read_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          joined_at?: string
+          last_read_at?: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          joined_at?: string
+          last_read_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_participants_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          context_id: string | null
+          created_at: string
+          created_by: string | null
+          id: string
+          title: string | null
+          type: string
+        }
+        Insert: {
+          context_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title?: string | null
+          type: string
+        }
+        Update: {
+          context_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          title?: string | null
+          type?: string
+        }
+        Relationships: []
+      }
       coupon_redemptions: {
         Row: {
           coupon_id: string
@@ -3154,6 +3213,109 @@ export type Database = {
           name?: string
           trigger_kind?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      messages: {
+        Row: {
+          content: string | null
+          conversation_id: string
+          created_at: string
+          id: string
+          payload: Json | null
+          sender_id: string
+        }
+        Insert: {
+          content?: string | null
+          conversation_id: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          sender_id: string
+        }
+        Update: {
+          content?: string | null
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          payload?: Json | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mini_app_installations: {
+        Row: {
+          installed_at: string
+          mini_app_id: string
+          preferences: Json
+          user_id: string
+        }
+        Insert: {
+          installed_at?: string
+          mini_app_id: string
+          preferences?: Json
+          user_id: string
+        }
+        Update: {
+          installed_at?: string
+          mini_app_id?: string
+          preferences?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mini_app_installations_mini_app_id_fkey"
+            columns: ["mini_app_id"]
+            isOneToOne: false
+            referencedRelation: "mini_apps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mini_apps: {
+        Row: {
+          app_key: string
+          capabilities: Json
+          created_at: string
+          developer_id: string
+          id: string
+          manifest_url: string
+          name_i18n: Json
+          status: string
+          updated_at: string
+          version: string | null
+        }
+        Insert: {
+          app_key: string
+          capabilities?: Json
+          created_at?: string
+          developer_id: string
+          id?: string
+          manifest_url: string
+          name_i18n?: Json
+          status?: string
+          updated_at?: string
+          version?: string | null
+        }
+        Update: {
+          app_key?: string
+          capabilities?: Json
+          created_at?: string
+          developer_id?: string
+          id?: string
+          manifest_url?: string
+          name_i18n?: Json
+          status?: string
+          updated_at?: string
+          version?: string | null
         }
         Relationships: []
       }
@@ -7320,6 +7482,10 @@ export type Database = {
       }
       is_company_role: {
         Args: { _company_id: string; _role: string; _user_id: string }
+        Returns: boolean
+      }
+      is_conversation_participant: {
+        Args: { _conversation_id: string; _user_id: string }
         Returns: boolean
       }
       is_driver: { Args: { _user_id: string }; Returns: boolean }
