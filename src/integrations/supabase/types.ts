@@ -1913,6 +1913,7 @@ export type Database = {
           created_at: string
           current_lat: number | null
           current_lng: number | null
+          current_location: unknown
           current_zone: string | null
           driver_type: string
           full_name: string
@@ -1936,6 +1937,7 @@ export type Database = {
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          current_location?: unknown
           current_zone?: string | null
           driver_type?: string
           full_name: string
@@ -1959,6 +1961,7 @@ export type Database = {
           created_at?: string
           current_lat?: number | null
           current_lng?: number | null
+          current_location?: unknown
           current_zone?: string | null
           driver_type?: string
           full_name?: string
@@ -7389,6 +7392,10 @@ export type Database = {
       enablelongtransactions: { Args: never; Returns: string }
       ensure_referral_code: { Args: { _user_id?: string }; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      execute_trade_matching: {
+        Args: { p_security_id: string }
+        Returns: number
+      }
       executive_dashboard_stats: { Args: { _days?: number }; Returns: Json }
       explode_bom: {
         Args: { p_product_id: string; p_target_qty: number }
@@ -7403,6 +7410,14 @@ export type Database = {
           vendor_id: string
           warehouse_id: string
           warehouse_type: string
+        }[]
+      }
+      find_nearest_drivers: {
+        Args: { p_lat: number; p_lon: number; p_radius_meters: number }
+        Returns: {
+          current_location: unknown
+          distance_meters: number
+          driver_id: string
         }[]
       }
       frequently_bought_together: {
