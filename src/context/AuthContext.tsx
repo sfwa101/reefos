@@ -179,11 +179,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo<AuthCtx>(
     () => ({
-      session, user, profile, loading,
+      session, user, profile, loading, profileLoading,
       isInitializing: loading,
       signUpWithPhone, signInWithPhone, signOut, refreshProfile,
     }),
-    [session, user, profile, loading],
+    [session, user, profile, loading, profileLoading],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
