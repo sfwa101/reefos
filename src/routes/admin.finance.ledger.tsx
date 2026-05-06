@@ -86,6 +86,11 @@ function TayseerLedgerPage() {
         <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
       </div>
 
+      {/* CFO Transfer Console */}
+      <div className="px-4 py-4 border-b border-border/40">
+        <TransferForm />
+      </div>
+
       {/* Column header */}
       <div className="grid grid-cols-12 gap-2 px-4 py-2 text-[11px] uppercase tracking-wide text-foreground-tertiary border-b border-border/30 bg-background/60 sticky top-[57px] z-10">
         <div className="col-span-3 hidden md:block">Wallet</div>
