@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { refetchProducts } from "@/lib/products";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle,
@@ -202,7 +201,6 @@ export function ProductEditor({
       }
 
       toast.success(isNew ? "تم إنشاء المنتج" : "تم الحفظ");
-      await refetchProducts();
       onSaved();
     } catch (err) {
       toast.error("خطأ: " + (err as Error).message);
