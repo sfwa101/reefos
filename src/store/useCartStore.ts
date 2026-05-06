@@ -264,8 +264,17 @@ export const useCartTotalItems = (): number =>
   });
 
 /**
- * Returns the items dictionary as a flat array. Re-renders on any change.
- * Use sparingly — prefer the per-line selectors above.
+ * Returns the items dictionary as a flat array. Memoized by `items` identity:
+ * the array reference is stable until the dictionary changes, so consumers
+ * (and downstream useMemo selectors) only recompute on real cart mutations.
  */
-export const useCartLinesArray = (): CartLine[] =>
-  useCartStore(useShallow((s) => Object.values(s.items)));
+let _linesCacheItems: Record<string, CartLine> | null = null;
+let _linesCacheArr: CartLine[] = [];
+const linesArraySelector = (s: CartState): CartLine[] => {
+  if (s.items !== _linesCacheItems) {
+    _linesCacheItems = s.items;
+    _linesCacheArr = Object.values(s.items);
+  }
+  return _linesCacheArr;
+};
+export const useCartLinesArray = (): CartLine[] => useCartStore(linesArraySelector);
