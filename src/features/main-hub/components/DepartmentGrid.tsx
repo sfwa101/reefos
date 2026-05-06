@@ -8,7 +8,7 @@
  */
 import { Link } from "@tanstack/react-router";
 import { useMemo } from "react";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { useUI } from "@/context/UIContext";
 
 type Dept = {

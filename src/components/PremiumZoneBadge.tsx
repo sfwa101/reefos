@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { Zap, ChevronLeft } from "lucide-react";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 
 /**
  * Glassmorphism + green-glow "premium badge" replacing the plain zone alert.

@@ -3,7 +3,7 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";

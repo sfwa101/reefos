@@ -25,7 +25,7 @@ import { ChevronLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { logBehavior } from "@/lib/behavior";
 import { isPerishable, type Product } from "@/lib/products";
 import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
