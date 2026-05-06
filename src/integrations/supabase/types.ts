@@ -200,6 +200,30 @@ export type Database = {
           },
         ]
       }
+      admin_idempotency_keys: {
+        Row: {
+          created_at: string
+          entity_key: string
+          key: string
+          record_id: string | null
+          result: Json
+        }
+        Insert: {
+          created_at?: string
+          entity_key: string
+          key: string
+          record_id?: string | null
+          result: Json
+        }
+        Update: {
+          created_at?: string
+          entity_key?: string
+          key?: string
+          record_id?: string | null
+          result?: Json
+        }
+        Relationships: []
+      }
       admin_navigation: {
         Row: {
           created_at: string
@@ -6151,6 +6175,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_entity_upsert: {
+        Args: {
+          p_entity_key: string
+          p_idempotency_key?: string
+          p_payload?: Json
+          p_record_id?: string
+        }
+        Returns: Json
+      }
       admin_topup_wallet: {
         Args: {
           _amount: number
