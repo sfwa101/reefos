@@ -20,7 +20,7 @@
  * Architecture: pure orchestration shell. All business logic lives in
  * hooks (`features/main-hub`, `hooks/`). Cell-membrane respected.
  */
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
