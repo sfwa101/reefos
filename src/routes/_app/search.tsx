@@ -1,5 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Search from "@/pages/Search";
+import { lazyPage } from "@/routes/-lazyRoute";
+
+const Search = lazyPage(() => import("@/pages/Search"));
 
 export const Route = createFileRoute("/_app/search")({
   component: Search,

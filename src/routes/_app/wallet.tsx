@@ -1,3 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Wallet from "@/pages/Wallet";
+import { lazyPage } from "@/routes/-lazyRoute";
+
+const Wallet = lazyPage(() => import("@/pages/Wallet"));
 export const Route = createFileRoute("/_app/wallet")({ component: Wallet });
