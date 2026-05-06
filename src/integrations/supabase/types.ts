@@ -1112,6 +1112,36 @@ export type Database = {
         }
         Relationships: []
       }
+      commission_rules: {
+        Row: {
+          category: string
+          channel: string
+          created_at: string
+          fixed_fee: number
+          id: string
+          rate_pct: number
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          channel: string
+          created_at?: string
+          fixed_fee?: number
+          id?: string
+          rate_pct?: number
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          channel?: string
+          created_at?: string
+          fixed_fee?: number
+          id?: string
+          rate_pct?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       companies: {
         Row: {
           created_at: string
@@ -2097,6 +2127,45 @@ export type Database = {
         }
         Relationships: []
       }
+      escrow_payouts: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          order_id: string
+          release_date: string
+          released_at: string | null
+          status: string
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id: string
+          release_date: string
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          order_id?: string
+          release_date?: string
+          released_at?: string | null
+          status?: string
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       favorites: {
         Row: {
           created_at: string
@@ -2542,6 +2611,39 @@ export type Database = {
           surge_active?: boolean
           updated_at?: string
           zone_code?: string
+        }
+        Relationships: []
+      }
+      global_catalog: {
+        Row: {
+          category: string
+          created_at: string
+          fixed_price: number
+          id: string
+          metadata: Json
+          name: string
+          unit: string
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          fixed_price: number
+          id?: string
+          metadata?: Json
+          name: string
+          unit?: string
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          fixed_price?: number
+          id?: string
+          metadata?: Json
+          name?: string
+          unit?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -4868,6 +4970,24 @@ export type Database = {
           },
         ]
       }
+      routing_round_robin: {
+        Row: {
+          bucket_key: string
+          last_vendor_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          bucket_key: string
+          last_vendor_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bucket_key?: string
+          last_vendor_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       savings_jar: {
         Row: {
           auto_save_enabled: boolean
@@ -6243,6 +6363,47 @@ export type Database = {
         }
         Relationships: []
       }
+      vendor_inventory: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          product_id: string
+          stock_level: number
+          updated_at: string
+          vendor_id: string
+          vendor_price: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id: string
+          stock_level?: number
+          updated_at?: string
+          vendor_id: string
+          vendor_price?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          product_id?: string
+          stock_level?: number
+          updated_at?: string
+          vendor_id?: string
+          vendor_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendor_inventory_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "global_catalog"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       vendor_payout_requests: {
         Row: {
           amount: number
@@ -6362,6 +6523,27 @@ export type Database = {
           },
         ]
       }
+      vendor_trust_settings: {
+        Row: {
+          created_at: string
+          freeze_duration_days: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          freeze_duration_days?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          freeze_duration_days?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: []
+      }
       vendor_wallet_transactions: {
         Row: {
           amount: number
@@ -6471,6 +6653,7 @@ export type Database = {
           contact_email: string | null
           contact_phone: string | null
           created_at: string
+          current_location: unknown
           id: string
           is_active: boolean
           name: string
@@ -6488,6 +6671,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          current_location?: unknown
           id?: string
           is_active?: boolean
           name: string
@@ -6505,6 +6689,7 @@ export type Database = {
           contact_email?: string | null
           contact_phone?: string | null
           created_at?: string
+          current_location?: unknown
           id?: string
           is_active?: boolean
           name?: string
@@ -7249,6 +7434,10 @@ export type Database = {
         Returns: Json
       }
       calculate_bom_cost: { Args: { p_product_id: string }; Returns: number }
+      calculate_order_commission: {
+        Args: { p_order_id: string }
+        Returns: number
+      }
       category_affinity: {
         Args: { _user_id: string }
         Returns: {
@@ -7640,6 +7829,15 @@ export type Database = {
         }[]
       }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
+      open_escrow_for_order: {
+        Args: {
+          p_amount: number
+          p_currency?: string
+          p_order_id: string
+          p_vendor_id: string
+        }
+        Returns: string
+      }
       order_has_vendor_store: {
         Args: { _order_id: string; _user_id: string }
         Returns: boolean
@@ -7736,6 +7934,7 @@ export type Database = {
           run_at: string
         }[]
       }
+      process_escrow_release: { Args: never; Returns: number }
       process_group_buy_campaign: {
         Args: { _campaign_id: string }
         Returns: Json
@@ -7792,6 +7991,20 @@ export type Database = {
       }
       rotate_flash_sale: { Args: never; Returns: string }
       rotate_flash_sale_v2: { Args: never; Returns: Json }
+      route_order_intelligent: {
+        Args: {
+          p_customer_lat: number
+          p_customer_lon: number
+          p_product_list: Json
+          p_radius_m?: number
+        }
+        Returns: {
+          is_full_match: boolean
+          product_id: string
+          qty: number
+          vendor_id: string
+        }[]
+      }
       same_branch: { Args: { _branch_id: string }; Returns: boolean }
       scan_riba_suspicions: { Args: never; Returns: Json }
       settle_vendor_payout: {
