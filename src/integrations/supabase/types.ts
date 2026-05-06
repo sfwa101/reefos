@@ -1277,6 +1277,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          status: string
           title: string | null
           type: string
         }
@@ -1285,6 +1286,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          status?: string
           title?: string | null
           type: string
         }
@@ -1293,6 +1295,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          status?: string
           title?: string | null
           type?: string
         }
@@ -3324,6 +3327,7 @@ export type Database = {
       messages: {
         Row: {
           content: string | null
+          content_type: string
           conversation_id: string
           created_at: string
           id: string
@@ -3332,6 +3336,7 @@ export type Database = {
         }
         Insert: {
           content?: string | null
+          content_type?: string
           conversation_id: string
           created_at?: string
           id?: string
@@ -3340,6 +3345,7 @@ export type Database = {
         }
         Update: {
           content?: string | null
+          content_type?: string
           conversation_id?: string
           created_at?: string
           id?: string
@@ -3432,6 +3438,7 @@ export type Database = {
           id: string
           read: boolean
           title: string
+          type: string
           user_id: string
         }
         Insert: {
@@ -3441,6 +3448,7 @@ export type Database = {
           id?: string
           read?: boolean
           title: string
+          type?: string
           user_id: string
         }
         Update: {
@@ -3450,6 +3458,7 @@ export type Database = {
           id?: string
           read?: boolean
           title?: string
+          type?: string
           user_id?: string
         }
         Relationships: []
@@ -8011,6 +8020,15 @@ export type Database = {
         Returns: Json
       }
       progress_to_next_level: { Args: { _user_id: string }; Returns: Json }
+      push_notification: {
+        Args: {
+          p_body?: string
+          p_title: string
+          p_type: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       recompute_vendor_wallet: { Args: { _vendor_id: string }; Returns: Json }
       recompute_wallet_balance: { Args: { _user: string }; Returns: number }
       redeem_coupon: {
