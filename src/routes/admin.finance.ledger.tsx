@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import TransferForm from "@/pages/admin/finance/TransferForm";
 
 function TayseerLedgerPage() {
   const [walletId, setWalletId] = useState("");
@@ -83,6 +84,11 @@ function TayseerLedgerPage() {
         </div>
         <Input type="date" value={from} onChange={(e) => setFrom(e.target.value)} />
         <Input type="date" value={to} onChange={(e) => setTo(e.target.value)} />
+      </div>
+
+      {/* CFO Transfer Console */}
+      <div className="px-4 py-4 border-b border-border/40">
+        <TransferForm />
       </div>
 
       {/* Column header */}
