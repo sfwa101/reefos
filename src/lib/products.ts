@@ -1,31 +1,22 @@
-// Catalog domain types + legacy compat layer.
+// Catalog domain types + thin React-Query-backed compat layer.
 // ----------------------------------------------------
-// Phase 22.0 — The aggressive nuke removed:
-//   • realtime `postgres_changes` subscription on the whole table
-//   • `visibilitychange` / `focus` / `online` global refetch listeners
-//   • eager `ensureProductsLoaded()` at module-import time
+// Phase 26.2 — The legacy in-memory `cache[]` monolith is dead.
 //
-// Kept as a TEMPORARY COMPAT shim (Phase 25.3 trim) — surviving consumers:
-//   • cache[] mirror filled by a single lazy fetch
-//   • sync helpers: getById, bySource
-//   • ensureProductsLoaded, refetchProducts, registerProducts
+// `products`, `getById`, `bySource` are now LIVE PROXIES that read
+// from the TanStack Query cache (`["catalog","products"]`). The real
+// fetch + SWR + realtime invalidation is owned by `useProductsQuery`.
 //
-// Removed in Phase 25.3: useProducts/useProduct/useProductsBySource,
-// byBadge, bySourceAndCategory. Search now hits the server via
-// `useInfiniteCatalog`; cart sync resolves products via Supabase `.in`.
+// `bindCatalogSource()` is called once from `<CatalogBootstrap />`
+// inside the QueryClientProvider, wiring this module to the per-request
+// QueryClient (SSR-safe).
+//
+// Survivors are kept ONLY as a compatibility shim for ~17 legacy
+// synchronous consumers — they no longer hold their own state.
 
-import { supabase } from "@/integrations/supabase/client";
+import type { QueryClient } from "@tanstack/react-query";
 
-export type ProductVariant = {
-  id: string;
-  label: string;
-  priceDelta: number;
-};
-export type ProductAddon = {
-  id: string;
-  label: string;
-  price: number;
-};
+export type ProductVariant = { id: string; label: string; priceDelta: number };
+export type ProductAddon = { id: string; label: string; price: number };
 
 export type ProductSource =
   | "supermarket" | "kitchen" | "dairy" | "produce" | "recipes"
@@ -111,70 +102,71 @@ export const productAvailableInZone = (
   zoneAcceptsPerishables: boolean,
 ): boolean => zoneAcceptsPerishables || !isPerishable(p);
 
-/* ============ LEGACY COMPAT SHIM ============
- * Single lazy fetch (no eager kick-off, no realtime, no window listeners).
- * Migration target: replace each consumer with `useInfiniteCatalog`. */
+/* ============ React Query Bridge ============
+ * The real catalog lives in the per-request QueryClient under the
+ * key `["catalog","products"]`, owned by `useProductsQuery`. This
+ * module just reads from it. */
 
-const cache: Product[] = [];
-let hydrated = false;
-let hydratePromise: Promise<Product[]> | null = null;
-const listeners = new Set<() => void>();
-const isBrowser = typeof window !== "undefined";
+export const PRODUCTS_QUERY_KEY = ["catalog", "products"] as const;
 
-function notify(): void {
-  for (const fn of listeners) fn();
-}
-
-async function fetchAll(): Promise<Product[]> {
-  if (!isBrowser) return [];
-  const { data, error } = await supabase
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .limit(2000);
-  if (error) {
-    console.error("[products] fetch failed:", error);
-    cache.length = 0;
-    hydrated = true;
-    notify();
-    return cache;
-  }
-  const list = ((data ?? []) as DbRow[]).map(rowToProduct);
-  cache.length = 0;
-  cache.push(...list);
-  hydrated = true;
-  notify();
-  return list;
-}
-
-export function ensureProductsLoaded(): Promise<Product[]> {
-  if (!isBrowser) return Promise.resolve([]);
-  if (hydrated) return Promise.resolve(cache);
-  if (!hydratePromise) hydratePromise = fetchAll();
-  return hydratePromise;
-}
-
-export async function refetchProducts(): Promise<void> {
-  hydratePromise = fetchAll();
-  await hydratePromise;
-}
-
-export const products: Product[] = cache;
-
+let boundClient: QueryClient | null = null;
 const extraProducts: Product[] = [];
+
+/** Called once by <CatalogBootstrap/> inside <QueryClientProvider>. */
+export function bindCatalogSource(client: QueryClient): void {
+  boundClient = client;
+}
+
+function snapshot(): Product[] {
+  if (!boundClient) return extraProducts.length ? extraProducts.slice() : [];
+  const cached = boundClient.getQueryData<Product[]>(PRODUCTS_QUERY_KEY) ?? [];
+  return extraProducts.length ? [...cached, ...extraProducts] : cached;
+}
+
+/** Live proxy — every read forwards to the current Query cache snapshot.
+ *  Preserves `.length`, `.filter`, `.map`, iteration, indexed access. */
+export const products: Product[] = new Proxy([] as Product[], {
+  get(_t, prop, _recv) {
+    const arr = snapshot();
+    const value = Reflect.get(arr, prop, arr);
+    return typeof value === "function" ? value.bind(arr) : value;
+  },
+  has(_t, prop) {
+    return Reflect.has(snapshot(), prop);
+  },
+  ownKeys() {
+    return Reflect.ownKeys(snapshot());
+  },
+  getOwnPropertyDescriptor(_t, prop) {
+    return Reflect.getOwnPropertyDescriptor(snapshot(), prop);
+  },
+}) as Product[];
+
+export const getById = (id: string): Product | undefined => {
+  const arr = snapshot();
+  return arr.find((p) => p.id === id);
+};
+
+export const bySource = (source: ProductSource): Product[] =>
+  snapshot().filter((p) => p.source === source);
+
 export const registerProducts = (items: Product[]): void => {
   for (const item of items) {
-    if (!extraProducts.some((p) => p.id === item.id) && !cache.some((p) => p.id === item.id)) {
+    if (!extraProducts.some((p) => p.id === item.id) && !snapshot().some((p) => p.id === item.id)) {
       extraProducts.push(item);
     }
   }
 };
 
-export const getById = (id: string): Product | undefined =>
-  cache.find((p) => p.id === id) ?? extraProducts.find((p) => p.id === id);
+/** Triggers (or returns) the cached fetch via the bound QueryClient. */
+export async function ensureProductsLoaded(): Promise<Product[]> {
+  if (!boundClient) return [];
+  const { productsQueryOptions } = await import("@/hooks/useProductsQuery");
+  const data = await boundClient.ensureQueryData(productsQueryOptions());
+  return data;
+}
 
-export const bySource = (source: ProductSource): Product[] =>
-  cache.filter((p) => p.source === source);
-
-
+export async function refetchProducts(): Promise<void> {
+  if (!boundClient) return;
+  await boundClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+}

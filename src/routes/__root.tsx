@@ -24,6 +24,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { registerPWA } from "@/lib/pwa";
 import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
 import { SubdomainGuard } from "@/components/SubdomainGuard";
+import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
 
 function NotFoundComponent() {
   return (
@@ -136,6 +137,7 @@ function RootComponent() {
                     <CompareProvider>
                       <FavoritesProvider>
                         <LiveRulesBootstrap />
+                        <CatalogBootstrap />
                         <SubdomainGuard />
                         <Toaster />
                         <Outlet />
