@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-type Item = { to?: string; icon: any; label: string; color: string; onClick?: () => void };
+type Item = { to?: string; params?: Record<string, string>; icon: any; label: string; color: string; onClick?: () => void };
 type Group = { title: string; items: Item[] };
 
 export default function More() {
@@ -42,12 +42,12 @@ export default function More() {
       { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
       { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
-      { to: "/admin/warehouses", icon: Warehouse, label: "المخازن المتعددة", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
+      { to: "/admin/$entity", params: { entity: "warehouses" }, icon: Warehouse, label: "المخازن المتعددة", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
       { to: "/admin/branches", icon: Sparkles, label: "الفروع الدولية", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
       { to: "/admin/stores", icon: Store, label: "المتاجر", color: "from-primary to-primary-glow" },
-      { to: "/admin/vendors", icon: Truck, label: "التجار والموردون", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
-      { to: "/admin/vendor-settlements", icon: Receipt, label: "تسويات التجار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
+      { to: "/admin/$entity", params: { entity: "vendors" }, icon: Truck, label: "التجار والموردون", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
+      { to: "/admin/$entity", params: { entity: "vendor_settlements" }, icon: Receipt, label: "تسويات التجار", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/kyc", icon: ShieldCheck, label: "التحقق KYC", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/reviews", icon: Star, label: "التقييمات", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
     ]},
@@ -103,7 +103,7 @@ export default function More() {
     ]},
     { title: "التوصيل", items: [
       { to: "/admin/delivery", icon: Truck, label: "مهام التوصيل", color: "from-primary to-primary-glow" },
-      { to: "/admin/drivers", icon: Truck, label: "المناديب", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
+      { to: "/admin/$entity", params: { entity: "drivers" }, icon: Truck, label: "المناديب", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/driver-settlements", icon: Wallet, label: "تصفية العهدة", color: "from-[hsl(var(--success))] to-[hsl(var(--teal))]" },
       { to: "/admin/delivery-settings", icon: ShieldCheck, label: "إعدادات التحقق", color: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
       { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
@@ -149,7 +149,7 @@ export default function More() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {g.items.map(it => (
                     it.to ? (
-                      <Link key={it.label} to={it.to}
+                      <Link key={it.label} to={it.to} {...(it.params ? { params: it.params } : {})}
                         className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-muted/60 hover:bg-primary/10 transition press">
                         <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${it.color} flex items-center justify-center text-white shadow-sm shrink-0`}>
                           <it.icon className="h-[15px] w-[15px]" strokeWidth={2.5} />

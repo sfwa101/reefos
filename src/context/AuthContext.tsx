@@ -56,10 +56,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchProfile = useCallback(async (uid: string) => {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const client = supabase as any;
-      const { data } = await client.from("profiles").select("*").eq("id", uid).maybeSingle();
-      setProfile((data as Profile) ?? null);
+      const { data } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", uid)
+        .maybeSingle();
+      setProfile((data as unknown as Profile) ?? null);
     } catch {
       setProfile(null);
     }
