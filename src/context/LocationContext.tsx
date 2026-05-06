@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   DEFAULT_ZONE_ID,
   ZONES as STATIC_ZONES,
@@ -131,12 +131,22 @@ export const LocationOpsProvider = ({ children }: { children: ReactNode }) => {
   }
   const { resolveZone, zoneId } = staticCtx;
 
-  const { ops: zoneOps } = useSmartLogistics();
+  // Filter Realtime to the active zone only — surge updates for other zones
+  // no longer fan out re-renders into this tree.
+  const { ops: zoneOps } = useSmartLogistics(zoneId);
+
+  // Bind dynamic inputs to refs so getDynamicInfo identity stays stable.
+  const opsRef = useRef(zoneOps);
+  const resolveZoneRef = useRef(resolveZone);
+  const zoneIdRef = useRef(zoneId);
+  useEffect(() => { opsRef.current = zoneOps; }, [zoneOps]);
+  useEffect(() => { resolveZoneRef.current = resolveZone; }, [resolveZone]);
+  useEffect(() => { zoneIdRef.current = zoneId; }, [zoneId]);
 
   const getDynamicInfo = useCallback(
     (subtotal: number, overrideZoneId?: ZoneId): DynamicZoneInfo => {
-      const z = resolveZone(overrideZoneId ?? zoneId);
-      const ops = zoneOps[z.id];
+      const z = resolveZoneRef.current(overrideZoneId ?? zoneIdRef.current);
+      const ops = opsRef.current[z.id];
       const { fee, surge, loadFactor } = calculateDynamicDelivery(z, subtotal, ops);
       const eta = calculateDynamicETA(z, ops);
       return {
@@ -148,7 +158,7 @@ export const LocationOpsProvider = ({ children }: { children: ReactNode }) => {
         pressure: eta.pressure,
       };
     },
-    [resolveZone, zoneId, zoneOps],
+    [],
   );
 
   const opsValue = useMemo<LocationOpsCtx>(

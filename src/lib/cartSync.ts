@@ -22,21 +22,24 @@ export type RemoteLine = {
 
 export type LocalLine = { product: Product; qty: number; meta?: CartLineMeta };
 
-const lineKey = (line: LocalLine): string => {
-  const meta = (line.meta ?? {}) as CartLineMeta & { variant_id?: string };
+/** Stable line identity (excludes product id; combined with product_id at the row level). */
+export const computeLineKey = (meta?: CartLineMeta): string => {
+  const m = (meta ?? {}) as CartLineMeta & { variant_id?: string };
   return [
-    line.product.id,
-    meta.kind ?? "buy",
-    meta.variantId ?? meta.variant_id ?? "",
-    meta.bookingDate ?? "",
-    meta.bookingSlot ?? "",
-    meta.borrowDuration ?? "",
-    (meta.addonIds ?? []).slice().sort().join(","),
-    meta.printConfig
-      ? `${meta.printConfig.pages}-${meta.printConfig.copies}-${meta.printConfig.colorMode}-${meta.printConfig.sided}-${meta.printConfig.binding}-${meta.printConfig.fileName ?? ""}`
+    m.kind ?? "buy",
+    m.variantId ?? m.variant_id ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
       : "",
   ].join("|");
 };
+
+const lineKey = (line: LocalLine): string =>
+  `${line.product.id}|${computeLineKey(line.meta)}`;
 
 const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
   const map = new Map<string, LocalLine>();
@@ -68,7 +71,7 @@ async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> 
 export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
   const { data, error } = await supabase
     .from("cart_items")
-    .select("product_id, qty, meta")
+    .select("product_id, qty, meta, line_key")
     .eq("user_id", userId);
 
   if (error || !Array.isArray(data)) return [];
@@ -79,7 +82,7 @@ export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
   const lines: LocalLine[] = [];
   for (const row of data) {
     const product = productMap.get(row.product_id);
-    if (!product) continue; // product no longer exists — skip silently
+    if (!product) continue;
     lines.push({
       product,
       qty: Math.max(1, Number(row.qty) || 1),
@@ -90,35 +93,53 @@ export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
 }
 
 /**
- * Replace the user's remote cart with the given local lines.
- * Uses delete-then-insert for simplicity. Safe because the user owns the rows
- * via RLS, and the operation runs only when the user is authenticated.
+ * Idempotent upsert into cart_items keyed by (user_id, product_id, line_key).
+ * Replaces previous DELETE+INSERT pattern that self-echoed through Realtime.
+ * Lines absent from `lines` are deleted in a single follow-up DELETE.
  */
 export async function pushRemoteCart(
   userId: string,
   lines: LocalLine[],
 ): Promise<void> {
   const cleanLines = dedupeForPush(lines).filter((l) => l.qty > 0);
-  // 1) clear current rows
-  const del = await supabase.from("cart_items").delete().eq("user_id", userId);
-  if (del.error) {
-    console.warn("[cart] failed to clear remote cart:", del.error.message);
+
+  if (cleanLines.length === 0) {
+    const del = await supabase.from("cart_items").delete().eq("user_id", userId);
+    if (del.error) console.warn("[cart] failed to clear remote cart:", del.error.message);
     return;
   }
-  if (cleanLines.length === 0) return;
 
-  // 2) insert fresh rows
   const rows = cleanLines.map((l) => ({
     user_id: userId,
     product_id: l.product.id,
+    line_key: computeLineKey(l.meta),
     qty: l.qty,
-    // CartLineMeta is JSON-serializable (POJOs only — Modifier objects
-    // are plain shapes). The Database type widens to Json, so cast.
     meta: (l.meta ?? {}) as never,
   }));
-  const ins = await supabase.from("cart_items").insert(rows);
-  if (ins.error) {
-    console.warn("[cart] failed to insert remote cart:", ins.error.message);
+
+  // Upsert all rows in one round-trip.
+  const up = await supabase
+    .from("cart_items")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .upsert(rows as any, { onConflict: "user_id,product_id,line_key" });
+  if (up.error) {
+    console.warn("[cart] upsert failed:", up.error.message);
+    return;
+  }
+
+  // Delete any rows that are no longer in the local cart.
+  const keepKeys = rows.map((r) => `${r.product_id}::${r.line_key}`);
+  const { data: existing } = await supabase
+    .from("cart_items")
+    .select("id, product_id, line_key")
+    .eq("user_id", userId);
+  if (Array.isArray(existing) && existing.length > 0) {
+    const stale = existing
+      .filter((r) => !keepKeys.includes(`${r.product_id}::${(r as { line_key?: string }).line_key ?? ""}`))
+      .map((r) => r.id);
+    if (stale.length > 0) {
+      await supabase.from("cart_items").delete().in("id", stale);
+    }
   }
 }
 
