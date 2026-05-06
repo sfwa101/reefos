@@ -99,6 +99,7 @@ import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success'
 import { Route as AppOffersRouteImport } from './routes/_app/offers'
 import { Route as AppCartRouteImport } from './routes/_app/cart'
+import { Route as AppAffiliateRouteImport } from './routes/_app/affiliate'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
@@ -593,6 +594,11 @@ const AppCartRoute = AppCartRouteImport.update({
   path: '/cart',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAffiliateRoute = AppAffiliateRouteImport.update({
+  id: '/affiliate',
+  path: '/affiliate',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAccountRoute = AppAccountRouteImport.update({
   id: '/account',
   path: '/account',
@@ -815,6 +821,7 @@ export interface FileRoutesByFullPath {
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
+  '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
@@ -943,6 +950,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
   '/pos': typeof PosRoute
+  '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
@@ -1078,6 +1086,7 @@ export interface FileRoutesById {
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
+  '/_app/affiliate': typeof AppAffiliateRoute
   '/_app/cart': typeof AppCartRoute
   '/_app/offers': typeof AppOffersRoute
   '/_app/order-success': typeof AppOrderSuccessRoute
@@ -1214,6 +1223,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/vendor'
     | '/account'
+    | '/affiliate'
     | '/cart'
     | '/offers'
     | '/order-success'
@@ -1342,6 +1352,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/employee'
     | '/pos'
+    | '/affiliate'
     | '/cart'
     | '/offers'
     | '/order-success'
@@ -1476,6 +1487,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/vendor'
     | '/_app/account'
+    | '/_app/affiliate'
     | '/_app/cart'
     | '/_app/offers'
     | '/_app/order-success'
@@ -2244,6 +2256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCartRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/affiliate': {
+      id: '/_app/affiliate'
+      path: '/affiliate'
+      fullPath: '/affiliate'
+      preLoaderRoute: typeof AppAffiliateRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/account': {
       id: '/_app/account'
       path: '/account'
@@ -2573,6 +2592,7 @@ const AppAccountRouteWithChildren = AppAccountRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRouteWithChildren
+  AppAffiliateRoute: typeof AppAffiliateRoute
   AppCartRoute: typeof AppCartRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOrderSuccessRoute: typeof AppOrderSuccessRoute
@@ -2605,6 +2625,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRouteWithChildren,
+  AppAffiliateRoute: AppAffiliateRoute,
   AppCartRoute: AppCartRoute,
   AppOffersRoute: AppOffersRoute,
   AppOrderSuccessRoute: AppOrderSuccessRoute,
