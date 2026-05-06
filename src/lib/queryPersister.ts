@@ -45,7 +45,8 @@ export const installEdgePersister = (queryClient: QueryClient): void => {
   });
 
   void persistQueryClient({
-    queryClient,
+    // Cast around dual @tanstack/query-core copies in node_modules.
+    queryClient: queryClient as unknown as Parameters<typeof persistQueryClient>[0]["queryClient"],
     persister,
     maxAge: MAX_AGE,
     buster: BUSTER,
