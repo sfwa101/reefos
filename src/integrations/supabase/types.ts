@@ -5602,6 +5602,47 @@ export type Database = {
           },
         ]
       }
+      subscription_billing_runs: {
+        Row: {
+          amount: number
+          billed_at: string
+          id: string
+          next_due_at: string | null
+          notes: string | null
+          previous_due_at: string | null
+          status: string
+          subscription_id: string
+        }
+        Insert: {
+          amount?: number
+          billed_at?: string
+          id?: string
+          next_due_at?: string | null
+          notes?: string | null
+          previous_due_at?: string | null
+          status?: string
+          subscription_id: string
+        }
+        Update: {
+          amount?: number
+          billed_at?: string
+          id?: string
+          next_due_at?: string | null
+          notes?: string | null
+          previous_due_at?: string | null
+          status?: string
+          subscription_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscription_billing_runs_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscription_plans: {
         Row: {
           base_price: number
@@ -7026,6 +7067,32 @@ export type Database = {
         Args: { ""?: string; att_name: string; tbl: unknown }
         Returns: string
       }
+      _sdui_attr: {
+        Args: {
+          p_data_type: string
+          p_entity: string
+          p_key: string
+          p_label_ar: string
+          p_label_en: string
+          p_listable?: boolean
+          p_required?: boolean
+          p_searchable?: boolean
+          p_sort: number
+          p_widget: string
+        }
+        Returns: undefined
+      }
+      _sdui_register_entity: {
+        Args: {
+          p_icon: string
+          p_key: string
+          p_label_ar: string
+          p_label_en: string
+          p_sort: number
+          p_table: string
+        }
+        Returns: string
+      }
       _st_3dintersects: {
         Args: { geom1: unknown; geom2: unknown }
         Returns: boolean
@@ -7642,6 +7709,7 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       process_commission_vesting: { Args: never; Returns: Json }
+      process_due_subscriptions: { Args: never; Returns: Json }
       process_group_buy_campaign: {
         Args: { _campaign_id: string }
         Returns: Json
