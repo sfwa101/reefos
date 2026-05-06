@@ -73,8 +73,8 @@ export function calculateDynamicETA(
   return { label, minutes: adjusted, pressure };
 }
 
-/** Realtime hook: keeps a map of zone_code → ops metrics. */
-export function useSmartLogistics() {
+/** Realtime hook: keeps a map of zone_code → ops metrics. Filtered to a single zone. */
+export function useSmartLogistics(zoneCode?: string) {
   const [ops, setOps] = useState<OpsMap>({});
   const [loaded, setLoaded] = useState(false);
 
@@ -82,10 +82,12 @@ export function useSmartLogistics() {
     let active = true;
 
     const load = async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("geo_zones")
         .select("zone_code,current_load_factor,base_eta_minutes,surge_active")
         .eq("is_active", true);
+      if (zoneCode) q = q.eq("zone_code", zoneCode);
+      const { data, error } = await q;
       if (!active) return;
       if (error || !data) {
         setLoaded(true);
@@ -107,24 +109,36 @@ export function useSmartLogistics() {
     load();
 
     const channel = supabase
-      .channel("geo-zones-ops")
+      .channel(`geo-zones-ops${zoneCode ? `:${zoneCode}` : ""}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "geo_zones" },
+        zoneCode
+          ? { event: "*", schema: "public", table: "geo_zones", filter: `zone_code=eq.${zoneCode}` }
+          : { event: "*", schema: "public", table: "geo_zones" },
         (payload) => {
           const row = (payload.new ?? payload.old) as
             | (ZoneOpsMetrics & { is_active?: boolean })
             | undefined;
           if (!row?.zone_code) return;
-          setOps((prev) => ({
-            ...prev,
-            [row.zone_code]: {
+          setOps((prev) => {
+            const prevRow = prev[row.zone_code];
+            const nextRow: ZoneOpsMetrics = {
               zone_code: row.zone_code,
               current_load_factor: Number(row.current_load_factor ?? 1),
               base_eta_minutes: row.base_eta_minutes ?? null,
               surge_active: !!row.surge_active,
-            },
-          }));
+            };
+            // Skip no-op updates to avoid re-render storms.
+            if (
+              prevRow &&
+              prevRow.current_load_factor === nextRow.current_load_factor &&
+              prevRow.base_eta_minutes === nextRow.base_eta_minutes &&
+              prevRow.surge_active === nextRow.surge_active
+            ) {
+              return prev;
+            }
+            return { ...prev, [row.zone_code]: nextRow };
+          });
         },
       )
       .subscribe();
@@ -133,7 +147,7 @@ export function useSmartLogistics() {
       active = false;
       supabase.removeChannel(channel);
     };
-  }, []);
+  }, [zoneCode]);
 
   return { ops, loaded };
 }
