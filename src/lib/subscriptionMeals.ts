@@ -1,5 +1,9 @@
 // Images are served from Supabase Storage (product-images bucket).
-const STORAGE = "https://aqqxravppmtdbalsjyam.supabase.co/storage/v1/object/public/product-images";
+const SUPABASE_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
+  (typeof process !== "undefined" && process.env?.SUPABASE_URL) ||
+  "";
+const STORAGE = `${SUPABASE_URL}/storage/v1/object/public/product-images`;
 const pChicken = `${STORAGE}/p-grilled-chicken.jpg`;
 const pSalmon = `${STORAGE}/p-salmon.jpg`;
 const pRisotto = `${STORAGE}/p-risotto.jpg`;
