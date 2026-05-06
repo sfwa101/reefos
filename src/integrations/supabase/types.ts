@@ -94,6 +94,169 @@ export type Database = {
           },
         ]
       }
+      admin_actions: {
+        Row: {
+          args_schema_jsonb: Json
+          confirmation_required: boolean
+          confirmation_text_i18n: Json
+          created_at: string
+          entity_id: string
+          icon: string | null
+          id: string
+          is_destructive: boolean
+          key: string
+          label_i18n: Json
+          role_required: string
+          rpc_name: string
+          scope: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          args_schema_jsonb?: Json
+          confirmation_required?: boolean
+          confirmation_text_i18n?: Json
+          created_at?: string
+          entity_id: string
+          icon?: string | null
+          id?: string
+          is_destructive?: boolean
+          key: string
+          label_i18n?: Json
+          role_required?: string
+          rpc_name: string
+          scope?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          args_schema_jsonb?: Json
+          confirmation_required?: boolean
+          confirmation_text_i18n?: Json
+          created_at?: string
+          entity_id?: string
+          icon?: string | null
+          id?: string
+          is_destructive?: boolean
+          key?: string
+          label_i18n?: Json
+          role_required?: string
+          rpc_name?: string
+          scope?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_actions_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entity_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_form_schemas: {
+        Row: {
+          active: boolean
+          created_at: string
+          entity_id: string
+          id: string
+          mode: string
+          notes: string | null
+          schema_jsonb: Json
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          entity_id: string
+          id?: string
+          mode: string
+          notes?: string | null
+          schema_jsonb?: Json
+          updated_at?: string
+          version?: number
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          entity_id?: string
+          id?: string
+          mode?: string
+          notes?: string | null
+          schema_jsonb?: Json
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_form_schemas_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entity_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_navigation: {
+        Row: {
+          created_at: string
+          entity_id: string | null
+          icon: string | null
+          id: string
+          is_visible: boolean
+          label_i18n: Json
+          parent_id: string | null
+          role_required: string
+          route_override: string | null
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          entity_id?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label_i18n?: Json
+          parent_id?: string | null
+          role_required?: string
+          route_override?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          entity_id?: string | null
+          icon?: string | null
+          id?: string
+          is_visible?: boolean
+          label_i18n?: Json
+          parent_id?: string | null
+          role_required?: string
+          route_override?: string | null
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_navigation_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entity_definitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_navigation_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "admin_navigation"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       admin_override_logs: {
         Row: {
           admin_user_id: string
@@ -1583,6 +1746,116 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      entity_attributes: {
+        Row: {
+          created_at: string
+          data_type: string
+          entity_id: string
+          help_i18n: Json
+          id: string
+          is_filterable: boolean
+          is_listable: boolean
+          is_required: boolean
+          is_searchable: boolean
+          key: string
+          label_i18n: Json
+          options_jsonb: Json
+          role_visibility: string[]
+          sort_order: number
+          ui_widget: string
+          updated_at: string
+          validation_jsonb: Json
+        }
+        Insert: {
+          created_at?: string
+          data_type: string
+          entity_id: string
+          help_i18n?: Json
+          id?: string
+          is_filterable?: boolean
+          is_listable?: boolean
+          is_required?: boolean
+          is_searchable?: boolean
+          key: string
+          label_i18n?: Json
+          options_jsonb?: Json
+          role_visibility?: string[]
+          sort_order?: number
+          ui_widget: string
+          updated_at?: string
+          validation_jsonb?: Json
+        }
+        Update: {
+          created_at?: string
+          data_type?: string
+          entity_id?: string
+          help_i18n?: Json
+          id?: string
+          is_filterable?: boolean
+          is_listable?: boolean
+          is_required?: boolean
+          is_searchable?: boolean
+          key?: string
+          label_i18n?: Json
+          options_jsonb?: Json
+          role_visibility?: string[]
+          sort_order?: number
+          ui_widget?: string
+          updated_at?: string
+          validation_jsonb?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_attributes_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entity_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_definitions: {
+        Row: {
+          created_at: string
+          description: string | null
+          icon: string | null
+          id: string
+          is_system: boolean
+          key: string
+          label_i18n: Json
+          primary_key_col: string
+          sort_order: number
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          key: string
+          label_i18n?: Json
+          primary_key_col?: string
+          sort_order?: number
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          icon?: string | null
+          id?: string
+          is_system?: boolean
+          key?: string
+          label_i18n?: Json
+          primary_key_col?: string
+          sort_order?: number
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       favorites: {
         Row: {
