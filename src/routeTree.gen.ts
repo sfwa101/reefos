@@ -28,10 +28,7 @@ import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
 import { Route as AdminZakatRouteImport } from './routes/admin.zakat'
-import { Route as AdminWarehousesRouteImport } from './routes/admin.warehouses'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
-import { Route as AdminVendorsRouteImport } from './routes/admin.vendors'
-import { Route as AdminVendorSettlementsRouteImport } from './routes/admin.vendor-settlements'
 import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
 import { Route as AdminSystemSettingsRouteImport } from './routes/admin.system-settings'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
@@ -71,7 +68,6 @@ import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
-import { Route as AdminDriversRouteImport } from './routes/admin.drivers'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
 import { Route as AdminDriverCashSettlementsRouteImport } from './routes/admin.driver-cash-settlements'
 import { Route as AdminDiscountOverridesRouteImport } from './routes/admin.discount-overrides'
@@ -240,24 +236,9 @@ const AdminZakatRoute = AdminZakatRouteImport.update({
   path: '/zakat',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminWarehousesRoute = AdminWarehousesRouteImport.update({
-  id: '/warehouses',
-  path: '/warehouses',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminVendorsRoute = AdminVendorsRouteImport.update({
-  id: '/vendors',
-  path: '/vendors',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminVendorSettlementsRoute = AdminVendorSettlementsRouteImport.update({
-  id: '/vendor-settlements',
-  path: '/vendor-settlements',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
@@ -453,11 +434,6 @@ const AdminExpensesRoute = AdminExpensesRouteImport.update({
 const AdminExecutiveRoute = AdminExecutiveRouteImport.update({
   id: '/executive',
   path: '/executive',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminDriversRoute = AdminDriversRouteImport.update({
-  id: '/drivers',
-  path: '/drivers',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminDriverSettlementsRoute = AdminDriverSettlementsRouteImport.update({
@@ -870,7 +846,6 @@ export interface FileRoutesByFullPath {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
-  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
@@ -910,10 +885,7 @@ export interface FileRoutesByFullPath {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
-  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
-  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
@@ -1002,7 +974,6 @@ export interface FileRoutesByTo {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
-  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
@@ -1042,10 +1013,7 @@ export interface FileRoutesByTo {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
-  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
-  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
@@ -1141,7 +1109,6 @@ export interface FileRoutesById {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
-  '/admin/drivers': typeof AdminDriversRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
@@ -1181,10 +1148,7 @@ export interface FileRoutesById {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
-  '/admin/vendor-settlements': typeof AdminVendorSettlementsRoute
-  '/admin/vendors': typeof AdminVendorsRoute
   '/admin/wallets': typeof AdminWalletsRoute
-  '/admin/warehouses': typeof AdminWarehousesRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
@@ -1281,7 +1245,6 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
-    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/finance'
@@ -1321,10 +1284,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
-    | '/admin/vendor-settlements'
-    | '/admin/vendors'
     | '/admin/wallets'
-    | '/admin/warehouses'
     | '/admin/zakat'
     | '/driver/dashboard'
     | '/driver/map'
@@ -1413,7 +1373,6 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
-    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/finance'
@@ -1453,10 +1412,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
-    | '/admin/vendor-settlements'
-    | '/admin/vendors'
     | '/admin/wallets'
-    | '/admin/warehouses'
     | '/admin/zakat'
     | '/driver/dashboard'
     | '/driver/map'
@@ -1551,7 +1507,6 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
-    | '/admin/drivers'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/finance'
@@ -1591,10 +1546,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
-    | '/admin/vendor-settlements'
-    | '/admin/vendors'
     | '/admin/wallets'
-    | '/admin/warehouses'
     | '/admin/zakat'
     | '/driver/dashboard'
     | '/driver/map'
@@ -1795,32 +1747,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminZakatRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/warehouses': {
-      id: '/admin/warehouses'
-      path: '/warehouses'
-      fullPath: '/admin/warehouses'
-      preLoaderRoute: typeof AdminWarehousesRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/wallets': {
       id: '/admin/wallets'
       path: '/wallets'
       fullPath: '/admin/wallets'
       preLoaderRoute: typeof AdminWalletsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/vendors': {
-      id: '/admin/vendors'
-      path: '/vendors'
-      fullPath: '/admin/vendors'
-      preLoaderRoute: typeof AdminVendorsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/vendor-settlements': {
-      id: '/admin/vendor-settlements'
-      path: '/vendor-settlements'
-      fullPath: '/admin/vendor-settlements'
-      preLoaderRoute: typeof AdminVendorSettlementsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/topup-approvals': {
@@ -2094,13 +2025,6 @@ declare module '@tanstack/react-router' {
       path: '/executive'
       fullPath: '/admin/executive'
       preLoaderRoute: typeof AdminExecutiveRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/drivers': {
-      id: '/admin/drivers'
-      path: '/drivers'
-      fullPath: '/admin/drivers'
-      preLoaderRoute: typeof AdminDriversRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/driver-settlements': {
@@ -2805,7 +2729,6 @@ interface AdminRouteChildren {
   AdminDiscountOverridesRoute: typeof AdminDiscountOverridesRoute
   AdminDriverCashSettlementsRoute: typeof AdminDriverCashSettlementsRoute
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
-  AdminDriversRoute: typeof AdminDriversRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
@@ -2845,10 +2768,7 @@ interface AdminRouteChildren {
   AdminSupportRoute: typeof AdminSupportRoute
   AdminSystemSettingsRoute: typeof AdminSystemSettingsRoute
   AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
-  AdminVendorSettlementsRoute: typeof AdminVendorSettlementsRoute
-  AdminVendorsRoute: typeof AdminVendorsRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
-  AdminWarehousesRoute: typeof AdminWarehousesRoute
   AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
@@ -2881,7 +2801,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDiscountOverridesRoute: AdminDiscountOverridesRoute,
   AdminDriverCashSettlementsRoute: AdminDriverCashSettlementsRoute,
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
-  AdminDriversRoute: AdminDriversRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
   AdminExpensesRoute: AdminExpensesRoute,
   AdminFinanceRoute: AdminFinanceRouteWithChildren,
@@ -2921,10 +2840,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSupportRoute: AdminSupportRoute,
   AdminSystemSettingsRoute: AdminSystemSettingsRoute,
   AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
-  AdminVendorSettlementsRoute: AdminVendorSettlementsRoute,
-  AdminVendorsRoute: AdminVendorsRoute,
   AdminWalletsRoute: AdminWalletsRoute,
-  AdminWarehousesRoute: AdminWarehousesRoute,
   AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
@@ -2981,3 +2897,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
