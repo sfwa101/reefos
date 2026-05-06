@@ -1,6 +1,6 @@
 import {
   User, MapPin, CreditCard, Bell, Heart, ShoppingBag, Settings, HelpCircle,
-  ShieldCheck,
+  ShieldCheck, Users2,
   type LucideIcon,
 } from "lucide-react";
 
@@ -72,7 +72,8 @@ export type SettingItem = {
     | "/account/favorites"
     | "/account/notifications"
     | "/account/settings"
-    | "/account/help";
+    | "/account/help"
+    | "/affiliate";
 };
 
 export const SETTING_GROUPS: { title: string; items: SettingItem[] }[] = [
@@ -89,6 +90,12 @@ export const SETTING_GROUPS: { title: string; items: SettingItem[] }[] = [
     items: [
       { icon: ShieldCheck, label: "توثيق الحساب", sub: "الرقم القومي وصورة الهوية", to: "/account/verification" },
       { icon: Bell, label: "التنبيهات", sub: "العروض والوصول", to: "/account/notifications" },
+    ],
+  },
+  {
+    title: "كسب وشراكات",
+    items: [
+      { icon: Users2, label: "برنامج الشركاء", sub: "ادعُ أصدقاءك واكسب عمولة", to: "/affiliate" },
     ],
   },
   {
