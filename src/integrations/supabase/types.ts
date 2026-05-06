@@ -6184,6 +6184,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_schema_rollback: {
+        Args: { p_entity_id: string; p_mode: string }
+        Returns: Json
+      }
       admin_topup_wallet: {
         Args: {
           _amount: number
