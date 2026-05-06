@@ -715,6 +715,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          line_key: string
           meta: Json
           product_id: string
           qty: number
@@ -724,6 +725,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          line_key?: string
           meta?: Json
           product_id: string
           qty?: number
@@ -733,6 +735,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          line_key?: string
           meta?: Json
           product_id?: string
           qty?: number
