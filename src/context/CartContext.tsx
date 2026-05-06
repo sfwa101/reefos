@@ -30,6 +30,7 @@ import {
   type CartLineMeta,
   type CartActions,
 } from "@/store/useCartStore";
+import { useAuth } from "@/context/AuthContext";
 
 export type { CartLineMeta, CartActions };
 
