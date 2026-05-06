@@ -72,15 +72,20 @@ export function AdminTableEngine({ entityKey, filters, locale = "ar", onRowClick
     overscan: 8,
   });
 
-  // Auto-fetch next page when bottom is near
+  // Auto-fetch next page when bottom is near. Depend only on stable
+  // primitives (rows.length + paging flags) — never on getVirtualItems()
+  // (returns a new array each render → infinite effect loop).
+  const hasNextPage = list.hasNextPage;
+  const isFetchingNextPage = list.isFetchingNextPage;
+  const fetchNextPage = list.fetchNextPage;
   useEffect(() => {
     const items = virtualizer.getVirtualItems();
     const last = items[items.length - 1];
     if (!last) return;
-    if (last.index >= rows.length - 5 && list.hasNextPage && !list.isFetchingNextPage) {
-      list.fetchNextPage();
+    if (last.index >= rows.length - 5 && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
     }
-  }, [virtualizer.getVirtualItems(), rows.length, list]);
+  }, [rows.length, hasNextPage, isFetchingNextPage, fetchNextPage, virtualizer]);
 
   if (def.isLoading) {
     return <div className="rounded-2xl bg-card/60 backdrop-blur-xl border border-border/40 p-8 animate-pulse">…</div>;

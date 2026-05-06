@@ -54,7 +54,6 @@ const Auth = () => {
       const res = mode === "signin" ? await signInWithPhone(phone, password) : await signUpWithPhone(phone, password, fullName.trim());
       if (res.error) toast.error(res.error);
       else {
-        await new Promise((resolve) => setTimeout(resolve, 400));
         await supabase.auth.getSession();
         const { data: { user: u } } = await supabase.auth.getUser();
         const to = u ? await resolveRedirectPath(u.id) : "/";
