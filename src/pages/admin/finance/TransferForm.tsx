@@ -207,7 +207,14 @@ export default function TransferForm() {
                       step="0.01"
                       min="0"
                       placeholder="0.00"
-                      {...field}
+                      name={field.name}
+                      ref={field.ref}
+                      onBlur={field.onBlur}
+                      value={Number.isFinite(field.value) ? field.value : ""}
+                      onChange={(e) => {
+                        const v = e.target.value;
+                        field.onChange(v === "" ? undefined : Number(v));
+                      }}
                     />
                   </FormControl>
                   <FormMessage />
