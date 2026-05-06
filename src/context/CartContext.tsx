@@ -121,7 +121,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  /* ---- Auth + remote sync + realtime ---- */
+  /* ---- Remote sync + realtime — driven by AuthContext (single source of truth) ---- */
+  const uid = user?.id ?? null;
   useEffect(() => {
     let cancelled = false;
 
@@ -131,12 +132,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       emitTier();
     };
 
-    const fetchProfileTier = async (uid: string) => {
+    const fetchProfileTier = async (id: string) => {
       try {
         const { data, error } = await supabase
           .from("profiles")
           .select("loyalty_tier")
-          .eq("id", uid)
+          .eq("id", id)
           .maybeSingle();
         if (error || cancelled) return;
         const raw = (data as { loyalty_tier?: unknown } | null)?.loyalty_tier;
@@ -158,13 +159,64 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       skipNextPushRef.current = false;
     };
 
-    const handleUser = async (uid: string | null) => {
-      if (cancelled) return;
+    const teardownRealtime = () => {
+      if (realtimeFetchTimerRef.current) {
+        clearTimeout(realtimeFetchTimerRef.current);
+        realtimeFetchTimerRef.current = null;
+      }
+      const ch = realtimeChannelRef.current;
+      if (ch) {
+        void supabase.removeChannel(ch);
+        realtimeChannelRef.current = null;
+      }
+    };
+
+    const subscribeRealtime = (id: string) => {
+      teardownRealtime();
+      const channel = supabase
+        .channel(`cart:${id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "cart_items",
+            filter: `user_id=eq.${id}`,
+          },
+          () => {
+            if (realtimeFetchTimerRef.current) {
+              clearTimeout(realtimeFetchTimerRef.current);
+            }
+            realtimeFetchTimerRef.current = setTimeout(async () => {
+              realtimeFetchTimerRef.current = null;
+              const currentUid = userIdRef.current;
+              if (!currentUid || currentUid !== id) return;
+              try {
+                const remote = await fetchRemoteCart(currentUid);
+                const nextSignature = cartSignature(remote);
+                if (nextSignature === lastPushedSignatureRef.current) return;
+                if (nextSignature === cartSignature(linesFromStore())) return;
+                skipNextPushRef.current = true;
+                useCartStore.getState().replaceAll(remote);
+                lastPushedSignatureRef.current = nextSignature;
+                skipNextPushRef.current = false;
+              } catch (err) {
+                console.warn("[cart] realtime refetch failed:", err);
+              }
+            }, 250);
+          },
+        )
+        .subscribe();
+      realtimeChannelRef.current = channel;
+    };
+
+    const handleUser = async () => {
       const prevUid = userIdRef.current;
       userIdRef.current = uid;
 
       if (!uid) {
         setTier("guest");
+        teardownRealtime();
         return;
       }
 
@@ -173,6 +225,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
       try {
         const remote = await fetchRemoteCart(uid);
+        if (cancelled) return;
         const guest: LocalLine[] = linesFromStore();
         const isInitialRestore = prevUid === undefined;
         const isFreshLogin = prevUid === null;
@@ -194,80 +247,17 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       } catch (err) {
         console.warn("[cart] sync on login failed:", err);
       }
+
+      if (!cancelled) subscribeRealtime(uid);
     };
 
-    const teardownRealtime = () => {
-      if (realtimeFetchTimerRef.current) {
-        clearTimeout(realtimeFetchTimerRef.current);
-        realtimeFetchTimerRef.current = null;
-      }
-      const ch = realtimeChannelRef.current;
-      if (ch) {
-        void supabase.removeChannel(ch);
-        realtimeChannelRef.current = null;
-      }
-    };
-
-    const subscribeRealtime = (uid: string) => {
-      teardownRealtime();
-      const channel = supabase
-        .channel(`cart:${uid}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "cart_items",
-            filter: `user_id=eq.${uid}`,
-          },
-          () => {
-            if (realtimeFetchTimerRef.current) {
-              clearTimeout(realtimeFetchTimerRef.current);
-            }
-            realtimeFetchTimerRef.current = setTimeout(async () => {
-              realtimeFetchTimerRef.current = null;
-              const currentUid = userIdRef.current;
-              if (!currentUid || currentUid !== uid) return;
-              try {
-                const remote = await fetchRemoteCart(currentUid);
-                const nextSignature = cartSignature(remote);
-                if (nextSignature === lastPushedSignatureRef.current) return;
-                if (nextSignature === cartSignature(linesFromStore())) return;
-                skipNextPushRef.current = true;
-                useCartStore.getState().replaceAll(remote);
-                lastPushedSignatureRef.current = nextSignature;
-                skipNextPushRef.current = false;
-              } catch (err) {
-                console.warn("[cart] realtime refetch failed:", err);
-              }
-            }, 250);
-          },
-        )
-        .subscribe();
-      realtimeChannelRef.current = channel;
-    };
-
-    const handleUserWithRealtime = async (uid: string | null) => {
-      await handleUser(uid);
-      if (cancelled) return;
-      if (uid) subscribeRealtime(uid);
-      else teardownRealtime();
-    };
-
-    void supabase.auth.getUser().then(({ data }) => {
-      void handleUserWithRealtime(data.user?.id ?? null);
-    });
-
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      void handleUserWithRealtime(session?.user?.id ?? null);
-    });
+    void handleUser();
 
     return () => {
       cancelled = true;
-      sub.subscription.unsubscribe();
       teardownRealtime();
     };
-  }, [emitTier]);
+  }, [uid, emitTier]);
 
   const value = useMemo<CartCtxValue>(
     () => ({
