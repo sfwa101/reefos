@@ -3007,6 +3007,78 @@ export type Database = {
         }
         Relationships: []
       }
+      oracle_price_history: {
+        Row: {
+          id: string
+          price_usd: number
+          recorded_at: string
+          symbol: string
+        }
+        Insert: {
+          id?: string
+          price_usd: number
+          recorded_at?: string
+          symbol: string
+        }
+        Update: {
+          id?: string
+          price_usd?: number
+          recorded_at?: string
+          symbol?: string
+        }
+        Relationships: []
+      }
+      order_book: {
+        Row: {
+          amount: number
+          created_at: string
+          filled_amount: number
+          id: string
+          price: number
+          security_id: string
+          side: string
+          status: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          filled_amount?: number
+          id?: string
+          price: number
+          security_id: string
+          side: string
+          status?: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          filled_amount?: number
+          id?: string
+          price?: number
+          security_id?: string
+          side?: string
+          status?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_book_security_id_fkey"
+            columns: ["security_id"]
+            isOneToOne: false
+            referencedRelation: "securities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_book_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_items: {
         Row: {
           created_at: string
@@ -3493,6 +3565,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      price_oracles: {
+        Row: {
+          price_usd: number
+          symbol: string
+          updated_at: string
+        }
+        Insert: {
+          price_usd: number
+          symbol: string
+          updated_at?: string
+        }
+        Update: {
+          price_usd?: number
+          symbol?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       print_jobs: {
         Row: {
@@ -4508,6 +4598,75 @@ export type Database = {
           },
         ]
       }
+      securities: {
+        Row: {
+          company_name: string
+          created_at: string
+          id: string
+          status: string
+          symbol: string
+          total_supply: number
+          updated_at: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string
+          id?: string
+          status?: string
+          symbol: string
+          total_supply: number
+          updated_at?: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string
+          id?: string
+          status?: string
+          symbol?: string
+          total_supply?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      security_holdings: {
+        Row: {
+          amount: number
+          id: string
+          security_id: string
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          amount?: number
+          id?: string
+          security_id: string
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          id?: string
+          security_id?: string
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_holdings_security_id_fkey"
+            columns: ["security_id"]
+            isOneToOne: false
+            referencedRelation: "securities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "security_holdings_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_cart_items: {
         Row: {
           added_by: string
@@ -5104,6 +5263,58 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      trades: {
+        Row: {
+          execute_amount: number
+          execute_price: number
+          executed_at: string
+          id: string
+          maker_order_id: string
+          security_id: string
+          taker_order_id: string
+        }
+        Insert: {
+          execute_amount: number
+          execute_price: number
+          executed_at?: string
+          id?: string
+          maker_order_id: string
+          security_id: string
+          taker_order_id: string
+        }
+        Update: {
+          execute_amount?: number
+          execute_price?: number
+          executed_at?: string
+          id?: string
+          maker_order_id?: string
+          security_id?: string
+          taker_order_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trades_maker_order_id_fkey"
+            columns: ["maker_order_id"]
+            isOneToOne: false
+            referencedRelation: "order_book"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trades_security_id_fkey"
+            columns: ["security_id"]
+            isOneToOne: false
+            referencedRelation: "securities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trades_taker_order_id_fkey"
+            columns: ["taker_order_id"]
+            isOneToOne: false
+            referencedRelation: "order_book"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       ui_layout_history: {
         Row: {
@@ -7538,6 +7749,32 @@ export type Database = {
           _total_amount: number
         }
         Returns: Json
+      }
+      tayseer_place_limit_order: {
+        Args: {
+          p_amount: number
+          p_price: number
+          p_security_id: string
+          p_side: string
+          p_wallet_id: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          filled_amount: number
+          id: string
+          price: number
+          security_id: string
+          side: string
+          status: string
+          wallet_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "order_book"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       tayseer_transfer_funds: {
         Args: {
