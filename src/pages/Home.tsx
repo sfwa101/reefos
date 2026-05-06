@@ -20,12 +20,12 @@
  * Architecture: pure orchestration shell. All business logic lives in
  * hooks (`features/main-hub`, `hooks/`). Cell-membrane respected.
  */
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { logBehavior } from "@/lib/behavior";
 import { isPerishable, type Product } from "@/lib/products";
 import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
@@ -43,6 +43,8 @@ import FlashSalesRail from "@/components/FlashSalesRail";
 import SmartGreeting from "@/features/main-hub/components/SmartGreeting";
 import DynamicStoryCircles from "@/features/main-hub/components/DynamicStoryCircles";
 import StickySearchBar from "@/components/StickySearchBar";
+
+const HomeBelowFold = lazy(() => import("./HomeBelowFold"));
 
 const cv = { contentVisibility: "auto" as const, containIntrinsicSize: "1px 360px" };
 const RAIL_LIMIT = 12;
@@ -251,57 +253,15 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* RAIL 4 — Premium Brands */}
-      {premiumBrandsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="علامات تجارية نثق بها"
-            subtitle="منتجات مختارة من أفضل العلامات"
-            accent="✨ بريميوم"
-            products={premiumBrandsRail}
-            seeAllTo="/sections"
-          />
-        </section>
-      )}
-
-      {/* RAIL 5 — New Arrivals */}
-      {newArrivalsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="جديد السوق"
-            subtitle="أحدث ما وصل إلى رفوفنا"
-            accent="🆕 وصل حديثاً"
-            products={newArrivalsRail}
-            seeAllTo="/sections"
-          />
-        </section>
-      )}
-
-      {/* RAIL 6 — Bulk Savings */}
-      {bulkRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="توفير الجملة"
-            subtitle="اشترِ بالكرتونة ووفّر أكثر"
-            accent="📦 سعر الجملة"
-            products={bulkRail}
-            seeAllTo="/store/wholesale"
-          />
-        </section>
-      )}
-
-      {/* RAIL 7 — Quick Meals */}
-      {quickMealsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="وجبات سريعة"
-            subtitle="جاهزة في 30 دقيقة"
-            accent="⏱️ سريع وشهي"
-            products={quickMealsRail}
-            seeAllTo="/store/kitchen"
-          />
-        </section>
-      )}
+      {/* RAILS 4-7 — below-the-fold, lazy-loaded chunk */}
+      <Suspense fallback={null}>
+        <HomeBelowFold
+          premiumBrandsRail={premiumBrandsRail}
+          newArrivalsRail={newArrivalsRail}
+          bulkRail={bulkRail}
+          quickMealsRail={quickMealsRail}
+        />
+      </Suspense>
 
       {/* Explore — DB-driven featured categories grid */}
       {featuredCats.length > 0 && (

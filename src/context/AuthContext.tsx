@@ -23,6 +23,7 @@ type AuthCtx = {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;
   isInitializing: boolean;
   signUpWithPhone: (phone: string, password: string, fullName: string) => Promise<{ error?: string }>;
   signInWithPhone: (phone: string, password: string) => Promise<{ error?: string }>;
@@ -53,8 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const fetchProfile = useCallback(async (uid: string) => {
+    setProfileLoading(true);
     try {
       const { data } = await supabase
         .from("profiles")
@@ -64,6 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile((data as unknown as Profile) ?? null);
     } catch {
       setProfile(null);
+    } finally {
+      setProfileLoading(false);
     }
   }, []);
 
@@ -174,11 +179,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo<AuthCtx>(
     () => ({
-      session, user, profile, loading,
+      session, user, profile, loading, profileLoading,
       isInitializing: loading,
       signUpWithPhone, signInWithPhone, signOut, refreshProfile,
     }),
-    [session, user, profile, loading],
+    [session, user, profile, loading, profileLoading],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

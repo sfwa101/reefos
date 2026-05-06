@@ -5,7 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { memo, useEffect, useRef, useState } from "react";
 import { useIsFavorite, useToggleFavorite } from "@/context/FavoritesContext";
 import { toLatin } from "@/lib/format";
-import { useLocation } from "@/context/LocationContext";
+import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import {
   fulfillmentMeta,
   fulfillmentTypeFor,

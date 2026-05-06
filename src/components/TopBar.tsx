@@ -3,7 +3,7 @@ import { Check, ChevronDown, MapPin, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useCartTotal } from "@/context/CartContext";
-import { useLocation as useDeliveryLocation } from "@/context/LocationContext";
+import { useLocationStatic as useDeliveryLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toLatin } from "@/lib/format";
