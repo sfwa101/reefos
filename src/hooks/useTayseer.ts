@@ -133,7 +133,7 @@ export function useTransferMutation() {
         transfer_amount: input.transfer_amount,
         transfer_currency: input.transfer_currency,
         idempotency_key: input.idempotency_key,
-        transfer_description: input.transfer_description ?? null,
+        transfer_description: input.transfer_description ?? undefined,
       });
       if (error) throw error;
       return data as string; // transaction_group_id
