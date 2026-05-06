@@ -22,21 +22,24 @@ export type RemoteLine = {
 
 export type LocalLine = { product: Product; qty: number; meta?: CartLineMeta };
 
-const lineKey = (line: LocalLine): string => {
-  const meta = (line.meta ?? {}) as CartLineMeta & { variant_id?: string };
+/** Stable line identity (excludes product id; combined with product_id at the row level). */
+export const computeLineKey = (meta?: CartLineMeta): string => {
+  const m = (meta ?? {}) as CartLineMeta & { variant_id?: string };
   return [
-    line.product.id,
-    meta.kind ?? "buy",
-    meta.variantId ?? meta.variant_id ?? "",
-    meta.bookingDate ?? "",
-    meta.bookingSlot ?? "",
-    meta.borrowDuration ?? "",
-    (meta.addonIds ?? []).slice().sort().join(","),
-    meta.printConfig
-      ? `${meta.printConfig.pages}-${meta.printConfig.copies}-${meta.printConfig.colorMode}-${meta.printConfig.sided}-${meta.printConfig.binding}-${meta.printConfig.fileName ?? ""}`
+    m.kind ?? "buy",
+    m.variantId ?? m.variant_id ?? "",
+    m.bookingDate ?? "",
+    m.bookingSlot ?? "",
+    m.borrowDuration ?? "",
+    (m.addonIds ?? []).slice().sort().join(","),
+    m.printConfig
+      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
       : "",
   ].join("|");
 };
+
+const lineKey = (line: LocalLine): string =>
+  `${line.product.id}|${computeLineKey(line.meta)}`;
 
 const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
   const map = new Map<string, LocalLine>();
