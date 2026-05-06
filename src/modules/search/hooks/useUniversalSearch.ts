@@ -1,17 +1,21 @@
 /**
- * useUniversalSearch — federated, in-memory search with MiniSearch.
+ * useUniversalSearch — federated search powered by the SERVER catalog.
  *
- * Indexes products + restaurants from the existing in-memory caches.
- * Returns ranked hits and exposes `searchByBarcode` for instant lookup.
+ * Phase 25.3: switched off the legacy in-memory `useProducts()` cache.
+ * Products are fetched from Supabase via `useInfiniteCatalog` with the
+ * user's query pushed down as an `.ilike` filter. We then re-rank the
+ * (already filtered) server slice with MiniSearch so Arabic
+ * normalization, alias expansion, and prefix/fuzzy scoring still apply
+ * to the visible result set.
  */
 import { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import MiniSearch, { type SearchResult } from "minisearch";
-import { useProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
+import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
 import { restaurants, type Restaurant } from "@/lib/restaurants";
 import { normalizeArabic, expandKeywords } from "@/core/search/utils/arabicLogic";
 import type { SearchableEntity, SearchHit } from "../types";
 
-/** Extract aliases stored on metadata (string[] or comma-separated string). */
 function extractAliases(metadata: unknown): readonly string[] {
   if (!metadata || typeof metadata !== "object") return [];
   const a = (metadata as Record<string, unknown>).aliases;
@@ -20,7 +24,6 @@ function extractAliases(metadata: unknown): readonly string[] {
   return [];
 }
 
-/** Map a product → searchable entity (normalized text + alias-expanded keywords). */
 function toProductEntity(p: Product): SearchableEntity {
   const barcode =
     p.metadata && typeof p.metadata === "object"
@@ -76,11 +79,23 @@ export interface UseUniversalSearchResult {
   readonly total: number;
   readonly searchByBarcode: (code: string) => SearchableEntity | undefined;
   readonly entityCount: number;
+  /** Raw server-fetched products — exposed so callers can render full
+   *  product cards without re-fetching. */
+  readonly products: readonly Product[];
 }
 
 export function useUniversalSearch(query: string): UseUniversalSearchResult {
-  const { products, loading } = useProducts();
   const deferredQuery = useDeferredValue(query);
+  const term = normalizeArabic(deferredQuery).trim();
+
+  // Push the query down to Postgres. When the term is empty, we still
+  // pass an empty string so the hook is mounted but returns no rows
+  // (cache key changes, no waterfall).
+  const { products, isLoading } = useInfiniteCatalog({
+    sources: [],
+    q: term.length >= 2 ? deferredQuery : "",
+    limit: 50,
+  });
 
   const entities = useMemo<SearchableEntity[]>(() => {
     const list: SearchableEntity[] = [];
@@ -109,7 +124,6 @@ export function useUniversalSearch(query: string): UseUniversalSearchResult {
   }, [entities]);
 
   const hits = useMemo<readonly SearchHit[]>(() => {
-    const term = normalizeArabic(deferredQuery);
     const mini = indexRef.current;
     if (!term || term.length < 2 || !mini) return [];
     const results = mini.search(term, MINI_OPTIONS.searchOptions) as SearchResult[];
@@ -125,7 +139,7 @@ export function useUniversalSearch(query: string): UseUniversalSearchResult {
       href: String(r.href),
       score: typeof r.score === "number" ? r.score : 0,
     }));
-  }, [deferredQuery]);
+  }, [deferredQuery, entities, term]);
 
   const searchByBarcode = useMemo(
     () => (code: string) => barcodeMapRef.current.get(code.trim()),
@@ -134,9 +148,10 @@ export function useUniversalSearch(query: string): UseUniversalSearchResult {
 
   return {
     hits,
-    loading,
+    loading: isLoading,
     total: hits.length,
     searchByBarcode,
     entityCount: entities.length,
+    products,
   };
 }

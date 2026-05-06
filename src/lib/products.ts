@@ -5,17 +5,15 @@
 //   • `visibilitychange` / `focus` / `online` global refetch listeners
 //   • eager `ensureProductsLoaded()` at module-import time
 //
-// Kept (as a temporary COMPAT shim) until every call-site migrates to
-// `useInfiniteCatalog`:
-//   • `cache: Product[]` mirror filled by a single lazy fetch
-//   • sync helpers: `getById`, `bySource`, `byBadge`, `bySourceAndCategory`
-//   • React hooks: `useProducts`, `useProduct`, `useProductsBySource`
-//   • `ensureProductsLoaded`, `refetchProducts`, `registerProducts`
+// Kept as a TEMPORARY COMPAT shim (Phase 25.3 trim) — surviving consumers:
+//   • cache[] mirror filled by a single lazy fetch
+//   • sync helpers: getById, bySource
+//   • ensureProductsLoaded, refetchProducts, registerProducts
 //
-// Anything new SHOULD use `useInfiniteCatalog`. These shims exist only
-// so the ~50 legacy consumers continue to compile during Phase 22.x.
+// Removed in Phase 25.3: useProducts/useProduct/useProductsBySource,
+// byBadge, bySourceAndCategory. Search now hits the server via
+// `useInfiniteCatalog`; cart sync resolves products via Supabase `.in`.
 
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export type ProductVariant = {
@@ -176,34 +174,7 @@ export const registerProducts = (items: Product[]): void => {
 export const getById = (id: string): Product | undefined =>
   cache.find((p) => p.id === id) ?? extraProducts.find((p) => p.id === id);
 
-export const byBadge = (badge: Product["badge"]): Product[] =>
-  cache.filter((p) => p.badge === badge);
-
 export const bySource = (source: ProductSource): Product[] =>
   cache.filter((p) => p.source === source);
 
-export const bySourceAndCategory = (source: ProductSource, category: string): Product[] =>
-  cache.filter((p) => p.source === source && p.category === category);
-
-export function useProducts(): { products: Product[]; loading: boolean } {
-  const [, setTick] = useState(0);
-  useEffect(() => {
-    const fn = () => setTick((t) => t + 1);
-    listeners.add(fn);
-    void ensureProductsLoaded();
-    return () => { listeners.delete(fn); };
-  }, []);
-  return { products: cache, loading: !hydrated };
-}
-
-export function useProduct(id: string | undefined): Product | undefined {
-  const { products: all } = useProducts();
-  if (!id) return undefined;
-  return all.find((p) => p.id === id) ?? extraProducts.find((p) => p.id === id);
-}
-
-export function useProductsBySource(source: ProductSource): Product[] {
-  const { products: all } = useProducts();
-  return all.filter((p) => p.source === source);
-}
 
