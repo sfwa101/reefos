@@ -90,6 +90,14 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "icon", href: "/icon-192.png", type: "image/png" },
+      // Phase T-P3 — preconnect to the Supabase edge so the catalog
+      // fetch fired by the home loader resolves DNS/TLS during HTML parse.
+      ...(import.meta.env.VITE_SUPABASE_URL
+        ? [
+            { rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL as string, crossOrigin: "anonymous" },
+            { rel: "dns-prefetch", href: import.meta.env.VITE_SUPABASE_URL as string },
+          ]
+        : []),
     ],
   }),
   shellComponent: RootShell,
