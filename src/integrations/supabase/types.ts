@@ -2536,6 +2536,57 @@ export type Database = {
         }
         Relationships: []
       }
+      ledger_entries: {
+        Row: {
+          amount: number
+          counterparty_wallet_id: string | null
+          created_at: string
+          currency: string
+          description: string | null
+          id: string
+          idempotency_key: string
+          transaction_group_id: string
+          wallet_id: string
+        }
+        Insert: {
+          amount: number
+          counterparty_wallet_id?: string | null
+          created_at?: string
+          currency: string
+          description?: string | null
+          id?: string
+          idempotency_key: string
+          transaction_group_id: string
+          wallet_id: string
+        }
+        Update: {
+          amount?: number
+          counterparty_wallet_id?: string | null
+          created_at?: string
+          currency?: string
+          description?: string | null
+          id?: string
+          idempotency_key?: string
+          transaction_group_id?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ledger_entries_counterparty_wallet_id_fkey"
+            columns: ["counterparty_wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ledger_entries_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loyalty_tier_rules: {
         Row: {
           created_at: string
@@ -5617,6 +5668,36 @@ export type Database = {
         }
         Relationships: []
       }
+      wallets: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       warehouses: {
         Row: {
           address: string | null
@@ -6174,6 +6255,17 @@ export type Database = {
           _total_amount: number
         }
         Returns: Json
+      }
+      tayseer_transfer_funds: {
+        Args: {
+          idempotency_key: string
+          receiver_wallet_id: string
+          sender_wallet_id: string
+          transfer_amount: number
+          transfer_currency: string
+          transfer_description?: string
+        }
+        Returns: string
       }
       user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
       user_store_ids: { Args: { _user_id: string }; Returns: string[] }
