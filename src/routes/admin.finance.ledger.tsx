@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import TransferForm from "@/pages/admin/finance/TransferForm";
 
 function TayseerLedgerPage() {
   const [walletId, setWalletId] = useState("");
