@@ -179,7 +179,7 @@ const SearchPage = () => {
   }, [matches, activeCat, sort, maxPrice, priceCeiling]);
 
   const grouped = useMemo(() => {
-    const map = new Map<string, typeof products>();
+    const map = new Map<string, Product[]>();
     for (const p of filtered) {
       const arr = map.get(p.category) ?? [];
       arr.push(p);
