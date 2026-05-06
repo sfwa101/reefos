@@ -25,7 +25,7 @@ import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
-import { useCartCheckoutRules } from "@/context/CartContext";
+import { useCartCheckoutRules, useCartHasErrors } from "@/context/CartContext";
 import { isPerishable } from "@/lib/products";
 import { computeLogisticsQuote } from "@/core/logistics/quote";
 import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
@@ -179,6 +179,9 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   // Phase 6 — engine-driven checkout guardrails (deposit / COD block).
   const engineRules = useCartCheckoutRules();
+  // Phase U — single source of truth for pricing errors; consumed by Cart page
+  // via `o.hasPricingErrors` so the Cart shell no longer subscribes separately.
+  const hasPricingErrors = useCartHasErrors();
 
   useEffect(() => {
     if (sweetsRules.blockCOD && payment === "cash") {
@@ -517,7 +520,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setWaFallback(null);
   };
 
-  return {
+  return useMemo(() => ({
     // cart context passthrough
     lines,
     count,
