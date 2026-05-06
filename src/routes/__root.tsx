@@ -137,6 +137,7 @@ function RootComponent() {
                     <CompareProvider>
                       <FavoritesProvider>
                         <LiveRulesBootstrap />
+                        <CatalogBootstrap />
                         <SubdomainGuard />
                         <Toaster />
                         <Outlet />
