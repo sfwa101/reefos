@@ -3359,6 +3359,36 @@ export type Database = {
           },
         ]
       }
+      media_assets: {
+        Row: {
+          blurhash_base64: string | null
+          bucket_path: string
+          created_at: string
+          entity_id: string
+          entity_type: string
+          file_size_bytes: number | null
+          id: string
+        }
+        Insert: {
+          blurhash_base64?: string | null
+          bucket_path: string
+          created_at?: string
+          entity_id: string
+          entity_type: string
+          file_size_bytes?: number | null
+          id?: string
+        }
+        Update: {
+          blurhash_base64?: string | null
+          bucket_path?: string
+          created_at?: string
+          entity_id?: string
+          entity_type?: string
+          file_size_bytes?: number | null
+          id?: string
+        }
+        Relationships: []
+      }
       mega_events: {
         Row: {
           active_date: string | null
@@ -7407,6 +7437,15 @@ export type Database = {
       }
     }
     Views: {
+      admin_kpi_snapshots: {
+        Row: {
+          refreshed_at: string | null
+          snapshot_id: number | null
+          total_disputed_escrow_funds: number | null
+          total_users: number | null
+        }
+        Relationships: []
+      }
       geography_columns: {
         Row: {
           coord_dimension: number | null
@@ -8047,6 +8086,7 @@ export type Database = {
           stock: number
         }[]
       }
+      mint_loyalty_points: { Args: { p_order_id: string }; Returns: string }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
       open_escrow_for_order: {
         Args: {
