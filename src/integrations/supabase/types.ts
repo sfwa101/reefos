@@ -575,6 +575,51 @@ export type Database = {
         }
         Relationships: []
       }
+      bom_components: {
+        Row: {
+          child_product_id: string
+          created_at: string
+          id: string
+          parent_product_id: string
+          quantity: number
+          uom: string
+          waste_pct: number
+        }
+        Insert: {
+          child_product_id: string
+          created_at?: string
+          id?: string
+          parent_product_id: string
+          quantity: number
+          uom: string
+          waste_pct?: number
+        }
+        Update: {
+          child_product_id?: string
+          created_at?: string
+          id?: string
+          parent_product_id?: string
+          quantity?: number
+          uom?: string
+          waste_pct?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bom_components_child_product_id_fkey"
+            columns: ["child_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bom_components_parent_product_id_fkey"
+            columns: ["parent_product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       branches: {
         Row: {
           code: string
@@ -2932,6 +2977,44 @@ export type Database = {
         }
         Relationships: []
       }
+      manufacturing_orders: {
+        Row: {
+          created_at: string
+          id: string
+          product_id: string
+          scheduled_date: string
+          status: string
+          target_quantity: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          product_id: string
+          scheduled_date: string
+          status?: string
+          target_quantity: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          product_id?: string
+          scheduled_date?: string
+          status?: string
+          target_quantity?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manufacturing_orders_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mega_events: {
         Row: {
           active_date: string | null
@@ -5148,6 +5231,91 @@ export type Database = {
           },
         ]
       }
+      subscription_plans: {
+        Row: {
+          base_price: number
+          created_at: string
+          frequency: string
+          id: string
+          name_i18n: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          frequency: string
+          id?: string
+          name_i18n?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          frequency?: string
+          id?: string
+          name_i18n?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          delivery_address_id: string
+          id: string
+          next_billing_date: string
+          plan_id: string
+          status: string
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          created_at?: string
+          delivery_address_id: string
+          id?: string
+          next_billing_date: string
+          plan_id: string
+          status?: string
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          created_at?: string
+          delivery_address_id?: string
+          id?: string
+          next_billing_date?: string
+          plan_id?: string
+          status?: string
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_delivery_address_id_fkey"
+            columns: ["delivery_address_id"]
+            isOneToOne: false
+            referencedRelation: "addresses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "subscription_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       suppliers: {
         Row: {
           address: string | null
@@ -6783,6 +6951,10 @@ export type Database = {
       ensure_referral_code: { Args: { _user_id?: string }; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       executive_dashboard_stats: { Args: { _days?: number }; Returns: Json }
+      explode_bom: {
+        Args: { p_product_id: string; p_target_qty: number }
+        Returns: Json
+      }
       financial_snapshot: { Args: { _days?: number }; Returns: Json }
       find_allocation_warehouse: {
         Args: { _product_id: string; _qty: number; _zone: string }
