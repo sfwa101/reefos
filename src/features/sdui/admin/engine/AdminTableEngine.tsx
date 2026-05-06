@@ -13,6 +13,7 @@ import { useEntityList, type EntityListFilters } from "../hooks/useEntityList";
 import { AdminBlockRenderer } from "../components/AdminBlockRenderer";
 import { AdminEmptyState } from "../components/AdminEmptyState";
 import { parseAdminBlocks, type AdminBlock, type TableColumnBlock } from "../schemas";
+import type { EntityAttributeRow } from "../hooks/useEntityDefinition";
 
 const ROW_HEIGHT = 56;
 
@@ -24,9 +25,7 @@ interface Props {
 }
 
 function autoColumnsFromAttributes(
-  attrs: ReturnType<typeof useEntityDefinition>["data"] extends infer T
-    ? T extends { attributes: infer A } ? A : never
-    : never,
+  attrs: EntityAttributeRow[] | undefined,
 ): AdminBlock[] {
   if (!attrs) return [];
   return attrs.slice(0, 6).map<TableColumnBlock>((a) => ({

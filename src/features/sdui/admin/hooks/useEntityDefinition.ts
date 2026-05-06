@@ -5,6 +5,31 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+export interface EntityAttributeRow {
+  id: string;
+  key: string;
+  label_i18n: Record<string, string>;
+  data_type: string;
+  ui_widget: string | null;
+  validation: Record<string, unknown> | null;
+  options: unknown;
+  sort_order: number;
+  role_visibility: string[] | null;
+  help_i18n: Record<string, string> | null;
+  is_listable?: boolean;
+  is_searchable?: boolean;
+  is_filterable?: boolean;
+  is_required?: boolean;
+}
+
+export interface FormSchemaRow {
+  id: string;
+  mode: string;
+  version: number;
+  is_active: boolean;
+  blocks: unknown;
+}
+
 export interface EntityDefinitionPayload {
   definition: {
     id: string;
@@ -15,25 +40,8 @@ export interface EntityDefinitionPayload {
     is_system: boolean;
     sort_order: number;
   };
-  attributes: Array<{
-    id: string;
-    key: string;
-    label_i18n: Record<string, string>;
-    data_type: string;
-    ui_widget: string | null;
-    validation: Record<string, unknown> | null;
-    options: unknown;
-    sort_order: number;
-    role_visibility: string[] | null;
-    help_i18n: Record<string, string> | null;
-  }>;
-  formSchemas: Array<{
-    id: string;
-    mode: string;
-    version: number;
-    is_active: boolean;
-    blocks: unknown;
-  }>;
+  attributes: EntityAttributeRow[];
+  formSchemas: FormSchemaRow[];
 }
 
 export function useEntityDefinition(entityKey: string | undefined) {
@@ -54,15 +62,46 @@ export function useEntityDefinition(entityKey: string | undefined) {
         supabase.from("entity_attributes")
           .select("*").eq("entity_id", def.id).order("sort_order"),
         supabase.from("admin_form_schemas")
-          .select("*").eq("entity_id", def.id).eq("is_active", true),
+          .select("*").eq("entity_id", def.id).eq("active", true),
       ]);
       if (attrs.error) throw attrs.error;
       if (schemas.error) throw schemas.error;
 
+      const attributes: EntityAttributeRow[] = (attrs.data ?? []).map((a) => {
+        const row = a as Record<string, unknown>;
+        return {
+          id: row.id as string,
+          key: row.key as string,
+          label_i18n: (row.label_i18n as Record<string, string>) ?? {},
+          data_type: row.data_type as string,
+          ui_widget: (row.ui_widget as string | null) ?? null,
+          validation: (row.validation_jsonb as Record<string, unknown> | null) ?? null,
+          options: row.options_jsonb,
+          sort_order: (row.sort_order as number) ?? 0,
+          role_visibility: (row.role_visibility as string[] | null) ?? null,
+          help_i18n: (row.help_i18n as Record<string, string> | null) ?? null,
+          is_listable: row.is_listable as boolean | undefined,
+          is_searchable: row.is_searchable as boolean | undefined,
+          is_filterable: row.is_filterable as boolean | undefined,
+          is_required: row.is_required as boolean | undefined,
+        };
+      });
+
+      const formSchemas: FormSchemaRow[] = (schemas.data ?? []).map((s) => {
+        const row = s as Record<string, unknown>;
+        return {
+          id: row.id as string,
+          mode: row.mode as string,
+          version: (row.version as number) ?? 1,
+          is_active: (row.active as boolean) ?? false,
+          blocks: row.schema_jsonb,
+        };
+      });
+
       return {
         definition: def as EntityDefinitionPayload["definition"],
-        attributes: (attrs.data ?? []) as EntityDefinitionPayload["attributes"],
-        formSchemas: (schemas.data ?? []) as EntityDefinitionPayload["formSchemas"],
+        attributes,
+        formSchemas,
       };
     },
   });
