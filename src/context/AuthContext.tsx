@@ -54,8 +54,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(false);
 
   const fetchProfile = useCallback(async (uid: string) => {
+    setProfileLoading(true);
     try {
       const { data } = await supabase
         .from("profiles")
@@ -65,6 +67,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setProfile((data as unknown as Profile) ?? null);
     } catch {
       setProfile(null);
+    } finally {
+      setProfileLoading(false);
     }
   }, []);
 
