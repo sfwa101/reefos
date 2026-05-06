@@ -44,8 +44,8 @@ const schema = z
       .string()
       .trim()
       .regex(uuidRe, "Receiver must be a valid wallet UUID"),
-    transfer_amount: z.coerce
-      .number({ invalid_type_error: "Amount is required" })
+    transfer_amount: z
+      .number({ message: "Amount is required" })
       .positive("Amount must be greater than zero")
       .max(1_000_000_000, "Amount exceeds safe limit"),
     transfer_currency: z
