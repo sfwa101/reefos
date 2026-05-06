@@ -650,7 +650,31 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setCharity,
     charityCauseId,
     setCharityCauseId,
-  };
+    // Phase U — consolidated pricing-errors flag
+    hasPricingErrors,
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [
+    lines, count, user, zone,
+    addresses, addrId, selectedAddr, guestNotes,
+    guestName, guestPhone, guestAddress, customerName,
+    promo, appliedPromo, tip,
+    payment, secondaryPayment, paymentLabel, secondaryLabel,
+    walletBalance, trustLimit, walletApplied, walletShortfall, trustUsed,
+    isWalletPay, isSplit, showRecharge, saveChange, donateChange,
+    showChangeJar, roundedCash, changeRemainder,
+    subtotal, discount, delivery, grand, billSavings, minOrderTotal, progress,
+    sweetsBuckets, sweetsRules, engineRules,
+    aggregateDeposit, payOnDelivery, payDeposit, anyWaitForAll,
+    hasBooking, hasNonBookingItems, hasInstantSweets, hasFreshSweets,
+    vendorGroups, instantGroups, scheduledGroups, showFulfillmentSections,
+    isMultiVendor, totalCashback, groupIsMixedScheduled, crossSell,
+    submitting, waFallback,
+    isSharedMode, sharedCartId, shared,
+    logisticsQuote, logisticsBlocked, effectiveDelivery, effectiveGrand, codAllowed,
+    giftMode, giftMessage, giftRecipientName, giftRecipientPhone, giftRecipientAddress,
+    charity, charityCauseId,
+    hasPricingErrors,
+  ]);
 };
 
 export type CartOrchestrator = ReturnType<typeof useCartOrchestrator>;
