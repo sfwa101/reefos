@@ -44,6 +44,8 @@ import SmartGreeting from "@/features/main-hub/components/SmartGreeting";
 import DynamicStoryCircles from "@/features/main-hub/components/DynamicStoryCircles";
 import StickySearchBar from "@/components/StickySearchBar";
 
+const HomeBelowFold = lazy(() => import("./HomeBelowFold"));
+
 const cv = { contentVisibility: "auto" as const, containIntrinsicSize: "1px 360px" };
 const RAIL_LIMIT = 12;
 
