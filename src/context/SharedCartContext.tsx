@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 const STORAGE_KEY = "reef.activeSharedCartId";
 
@@ -23,12 +23,12 @@ export const SharedCartProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const setSharedCartId = (id: string | null) => {
+  const setSharedCartId = useCallback((id: string | null) => {
     setSharedCartIdState(id);
     if (typeof window === "undefined") return;
     if (id) window.localStorage.setItem(STORAGE_KEY, id);
     else window.localStorage.removeItem(STORAGE_KEY);
-  };
+  }, []);
 
   // Cross-tab sync
   useEffect(() => {
@@ -40,8 +40,13 @@ export const SharedCartProvider = ({ children }: { children: ReactNode }) => {
     return () => window.removeEventListener("storage", onStorage);
   }, []);
 
+  const value = useMemo<Ctx>(
+    () => ({ sharedCartId, setSharedCartId }),
+    [sharedCartId, setSharedCartId],
+  );
+
   return (
-    <SharedCartCtx.Provider value={{ sharedCartId, setSharedCartId }}>
+    <SharedCartCtx.Provider value={value}>
       {children}
     </SharedCartCtx.Provider>
   );

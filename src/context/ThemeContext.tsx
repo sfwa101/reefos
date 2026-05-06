@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 
 export type ColorTheme =
   | "sage"
@@ -80,11 +80,12 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem("reef-color", c);
   };
 
-  return (
-    <Ctx.Provider value={{ mode, setMode, resolvedMode, colorTheme, setColorTheme }}>
-      {children}
-    </Ctx.Provider>
+  const value = useMemo<ThemeCtx>(
+    () => ({ mode, setMode, resolvedMode, colorTheme, setColorTheme }),
+    [mode, resolvedMode, colorTheme],
   );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
 export const useTheme = () => {
