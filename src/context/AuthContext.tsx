@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -170,11 +170,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (user) await fetchProfile(user.id);
   };
 
-  return (
-    <Ctx.Provider value={{ session, user, profile, loading, isInitializing: loading, signUpWithPhone, signInWithPhone, signOut, refreshProfile }}>
-      {children}
-    </Ctx.Provider>
+  const value = useMemo<AuthCtx>(
+    () => ({
+      session, user, profile, loading,
+      isInitializing: loading,
+      signUpWithPhone, signInWithPhone, signOut, refreshProfile,
+    }),
+    [session, user, profile, loading],
   );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
 const humanize = (msg: string): string => {
