@@ -73,21 +73,36 @@ const cartSignature = (lines: ReadonlyArray<CartLine>): string =>
 /* ---------------------------------------------------------------------------
  * Provider
  * ------------------------------------------------------------------------- */
+const MERGE_MARKER_PREFIX = "reef-cart-merged:";
+const isMerged = (uid: string): boolean => {
+  try {
+    return sessionStorage.getItem(MERGE_MARKER_PREFIX + uid) === "1";
+  } catch {
+    return false;
+  }
+};
+const markMerged = (uid: string): void => {
+  try {
+    sessionStorage.setItem(MERGE_MARKER_PREFIX + uid, "1");
+  } catch {
+    /* ignore */
+  }
+};
+
 export const CartProvider = ({ children }: { children: ReactNode }) => {
-  const { user } = useAuth();
+  const { user, isInitializing } = useAuth();
   const tierRef = useRef<CustomerTier>("guest");
   const tierListenersRef = useRef<Set<() => void>>(new Set());
   const emitTier = useCallback(() => {
     tierListenersRef.current.forEach((l) => l());
   }, []);
 
-  const userIdRef = useRef<string | null | undefined>(undefined);
+  const userIdRef = useRef<string | null>(null);
   const skipNextPushRef = useRef(false);
   const lastPushedSignatureRef = useRef("");
-  // HOTFIX: track which uids we have already merged a guest cart into so we
-  // never re-merge (which would exponentially double quantities if uid
-  // briefly toggles or the effect re-runs).
-  const mergedUidsRef = useRef<Set<string>>(new Set());
+  // Track which auth events asked for a merge. Realtime SIGNED_IN events
+  // (set this true) opt-in to mergeCarts; INITIAL_SESSION never does.
+  const pendingMergeForUidRef = useRef<string | null>(null);
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
     null,
@@ -115,7 +130,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }, 600);
     };
 
-    // Subscribe to *items* slice only; tier/index changes don't trigger push.
     const unsub = useCartStore.subscribe((state, prev) => {
       if (state.items !== prev.items) schedulePush();
     });
@@ -125,9 +139,26 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  /* ---- Remote sync + realtime — driven by AuthContext (single source of truth) ---- */
+  /* ---- Listen to true SIGNED_IN events (manual login transitions only) ---- */
+  useEffect(() => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.id) {
+        // A real login (not INITIAL_SESSION rehydrate). Opt this uid into merge.
+        pendingMergeForUidRef.current = session.user.id;
+      }
+      if (event === "SIGNED_OUT") {
+        pendingMergeForUidRef.current = null;
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
+
+  /* ---- Remote sync + realtime — gated on resolved auth ---- */
   const uid = user?.id ?? null;
   useEffect(() => {
+    // Gate: never run while AuthContext is still resolving the session.
+    if (isInitializing) return;
+
     let cancelled = false;
 
     const setTier = (next: CustomerTier) => {
@@ -198,6 +229,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
               try {
                 const remote = await fetchRemoteCart(currentUid);
                 const nextSignature = cartSignature(remote);
+                // Ignore self-echoes via signature match.
                 if (nextSignature === lastPushedSignatureRef.current) return;
                 if (nextSignature === cartSignature(linesFromStore())) return;
                 skipNextPushRef.current = true;
@@ -215,7 +247,6 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const handleUser = async () => {
-      const prevUid = userIdRef.current;
       userIdRef.current = uid;
 
       if (!uid) {
@@ -230,31 +261,25 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       try {
         const remote = await fetchRemoteCart(uid);
         if (cancelled) return;
-        const guest: LocalLine[] = linesFromStore();
-        const isInitialRestore = prevUid === undefined;
-        const isFreshLogin = prevUid === null;
-        const alreadyMerged = mergedUidsRef.current.has(uid);
+
+        const merged = isMerged(uid);
+        const wantsMerge = pendingMergeForUidRef.current === uid && !merged;
 
         let next: CartLine[];
         let shouldPush = false;
 
-        if (isInitialRestore) {
-          // First mount with an existing session — trust remote, never merge
-          // the persisted local store (it may itself be the previously-synced
-          // remote and would double on every cold boot).
-          next = remote;
-          mergedUidsRef.current.add(uid);
-        } else if (isFreshLogin && guest.length > 0 && !alreadyMerged) {
+        if (wantsMerge) {
+          const guest: LocalLine[] = linesFromStore();
           next = mergeCarts(guest, remote);
-          shouldPush = true;
-          mergedUidsRef.current.add(uid);
+          shouldPush = guest.length > 0;
+          markMerged(uid);
+          pendingMergeForUidRef.current = null;
         } else {
+          // Cold boot / refresh / INITIAL_SESSION → trust remote, never merge.
           next = remote;
-          mergedUidsRef.current.add(uid);
+          markMerged(uid);
         }
 
-        // Apply remote BEFORE pushing so the store reflects the merged truth
-        // and any subsequent realtime echo is a no-op via signature match.
         applyRemote(next);
         lastPushedSignatureRef.current = cartSignature(next);
         if (shouldPush) {
@@ -274,7 +299,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       cancelled = true;
       teardownRealtime();
     };
-  }, [uid, emitTier]);
+  }, [uid, isInitializing, emitTier]);
 
   const value = useMemo<CartCtxValue>(
     () => ({
