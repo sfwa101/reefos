@@ -1,0 +1,1 @@
+COMMENT ON SCHEMA public IS 'force_type_sync_phase_i';
