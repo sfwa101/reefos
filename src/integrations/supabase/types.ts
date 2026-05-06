@@ -7241,6 +7241,7 @@ export type Database = {
         }
         Returns: Json
       }
+      calculate_bom_cost: { Args: { p_product_id: string }; Returns: number }
       category_affinity: {
         Args: { _user_id: string }
         Returns: {
@@ -7709,7 +7710,13 @@ export type Database = {
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
       process_commission_vesting: { Args: never; Returns: Json }
-      process_due_subscriptions: { Args: never; Returns: Json }
+      process_due_subscriptions: {
+        Args: never
+        Returns: {
+          processed_count: number
+          run_at: string
+        }[]
+      }
       process_group_buy_campaign: {
         Args: { _campaign_id: string }
         Returns: Json
