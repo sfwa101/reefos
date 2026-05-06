@@ -96,6 +96,7 @@ import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
 import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advance-approvals'
+import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -113,6 +114,7 @@ import { Route as AdminMarketingBannersRouteImport } from './routes/admin.market
 import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.ledger'
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
+import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
@@ -580,6 +582,11 @@ const AdminAdvanceApprovalsRoute = AdminAdvanceApprovalsRouteImport.update({
   path: '/advance-approvals',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminEntityRoute = AdminEntityRouteImport.update({
+  id: '/$entity',
+  path: '/$entity',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -667,6 +674,11 @@ const AdminCustomersCustomerIdRoute =
     path: '/$customerId',
     getParentRoute: () => AdminCustomersRoute,
   } as any)
+const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AdminEntityRoute,
+} as any)
 const AppSubSlugRoute = AppSubSlugRouteImport.update({
   id: '/sub/$slug',
   path: '/sub/$slug',
@@ -833,6 +845,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
@@ -942,6 +955,7 @@ export interface FileRoutesByFullPath {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -963,6 +977,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
@@ -1073,6 +1088,7 @@ export interface FileRoutesByTo {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -1100,6 +1116,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
@@ -1210,6 +1227,7 @@ export interface FileRoutesById {
   '/_app/store/village': typeof AppStoreVillageRoute
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
+  '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -1238,6 +1256,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
@@ -1347,6 +1366,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -1368,6 +1388,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
@@ -1478,6 +1499,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -1504,6 +1526,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
     | '/admin/allocation'
@@ -1614,6 +1637,7 @@ export interface FileRouteTypes {
     | '/_app/store/village'
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
+    | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -2247,6 +2271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAdvanceApprovalsRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/$entity': {
+      id: '/admin/$entity'
+      path: '/$entity'
+      fullPath: '/admin/$entity'
+      preLoaderRoute: typeof AdminEntityRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/wallet': {
       id: '/_app/wallet'
       path: '/wallet'
@@ -2365,6 +2396,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/customers/$customerId'
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof AdminCustomersRoute
+    }
+    '/admin/$entity/$id': {
+      id: '/admin/$entity/$id'
+      path: '/$id'
+      fullPath: '/admin/$entity/$id'
+      preLoaderRoute: typeof AdminEntityIdRouteImport
+      parentRoute: typeof AdminEntityRoute
     }
     '/_app/sub/$slug': {
       id: '/_app/sub/$slug'
@@ -2675,6 +2713,18 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface AdminEntityRouteChildren {
+  AdminEntityIdRoute: typeof AdminEntityIdRoute
+}
+
+const AdminEntityRouteChildren: AdminEntityRouteChildren = {
+  AdminEntityIdRoute: AdminEntityIdRoute,
+}
+
+const AdminEntityRouteWithChildren = AdminEntityRoute._addFileChildren(
+  AdminEntityRouteChildren,
+)
+
 interface AdminCustomersRouteChildren {
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
 }
@@ -2730,6 +2780,7 @@ const AdminMarketingRouteWithChildren = AdminMarketingRoute._addFileChildren(
 )
 
 interface AdminRouteChildren {
+  AdminEntityRoute: typeof AdminEntityRouteWithChildren
   AdminAdvanceApprovalsRoute: typeof AdminAdvanceApprovalsRoute
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
@@ -2805,6 +2856,7 @@ interface AdminRouteChildren {
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
+  AdminEntityRoute: AdminEntityRouteWithChildren,
   AdminAdvanceApprovalsRoute: AdminAdvanceApprovalsRoute,
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
@@ -2929,3 +2981,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

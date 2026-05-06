@@ -11,3 +11,5 @@ export { useEntityRecord } from "./hooks/useEntityRecord";
 export { useEntityMutation } from "./hooks/useEntityMutation";
 export { useAdminNavigation } from "./hooks/useAdminNavigation";
 export { useAdminAction } from "./hooks/useAdminAction";
+export { useSchemaRollback } from "./hooks/useSchemaRollback";
+export { AdminErrorBoundary } from "./components/AdminErrorBoundary";
