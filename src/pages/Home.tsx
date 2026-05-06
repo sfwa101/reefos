@@ -253,57 +253,15 @@ const HomePage = () => {
         </section>
       )}
 
-      {/* RAIL 4 — Premium Brands */}
-      {premiumBrandsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="علامات تجارية نثق بها"
-            subtitle="منتجات مختارة من أفضل العلامات"
-            accent="✨ بريميوم"
-            products={premiumBrandsRail}
-            seeAllTo="/sections"
-          />
-        </section>
-      )}
-
-      {/* RAIL 5 — New Arrivals */}
-      {newArrivalsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="جديد السوق"
-            subtitle="أحدث ما وصل إلى رفوفنا"
-            accent="🆕 وصل حديثاً"
-            products={newArrivalsRail}
-            seeAllTo="/sections"
-          />
-        </section>
-      )}
-
-      {/* RAIL 6 — Bulk Savings */}
-      {bulkRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="توفير الجملة"
-            subtitle="اشترِ بالكرتونة ووفّر أكثر"
-            accent="📦 سعر الجملة"
-            products={bulkRail}
-            seeAllTo="/store/wholesale"
-          />
-        </section>
-      )}
-
-      {/* RAIL 7 — Quick Meals */}
-      {quickMealsRail.length > 0 && (
-        <section style={cv}>
-          <ProductCarousel
-            title="وجبات سريعة"
-            subtitle="جاهزة في 30 دقيقة"
-            accent="⏱️ سريع وشهي"
-            products={quickMealsRail}
-            seeAllTo="/store/kitchen"
-          />
-        </section>
-      )}
+      {/* RAILS 4-7 — below-the-fold, lazy-loaded chunk */}
+      <Suspense fallback={null}>
+        <HomeBelowFold
+          premiumBrandsRail={premiumBrandsRail}
+          newArrivalsRail={newArrivalsRail}
+          bulkRail={bulkRail}
+          quickMealsRail={quickMealsRail}
+        />
+      </Suspense>
 
       {/* Explore — DB-driven featured categories grid */}
       {featuredCats.length > 0 && (
