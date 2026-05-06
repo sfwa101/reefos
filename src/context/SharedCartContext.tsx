@@ -10,10 +10,18 @@ type Ctx = {
 const SharedCartCtx = createContext<Ctx | null>(null);
 
 export const SharedCartProvider = ({ children }: { children: ReactNode }) => {
-  const [sharedCartId, setSharedCartIdState] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    return window.localStorage.getItem(STORAGE_KEY);
-  });
+  // Start empty; hydrate from localStorage post-mount to avoid blocking first paint.
+  const [sharedCartId, setSharedCartIdState] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const v = window.localStorage.getItem(STORAGE_KEY);
+      if (v) setSharedCartIdState(v);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   const setSharedCartId = (id: string | null) => {
     setSharedCartIdState(id);
