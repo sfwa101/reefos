@@ -1,13 +1,19 @@
 /**
- * Tayseer Transfer Console
- * ------------------------
- * CFO-grade form to execute live double-entry transfers via the
- * `tayseer_transfer_funds` RPC. Strictly consumes useTransferMutation.
+ * Tayseer Transfer Console — Hyper-Scale edition.
+ * ------------------------------------------------
+ * Async debounced wallet pickers with profile + balance preview.
+ * Mutation logic & error mapping unchanged from v1.
  */
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, ArrowRightLeft, ShieldCheck } from "lucide-react";
+import {
+  Loader2,
+  ArrowRightLeft,
+  ShieldCheck,
+  AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
 
 import { useTransferMutation } from "@/hooks/useTayseer";
@@ -30,20 +36,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-
-const uuidRe =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+import { WalletCombobox } from "@/components/finance/WalletCombobox";
+import type { WalletSearchResult } from "@/hooks/useWalletSearch";
 
 const schema = z
   .object({
-    sender_wallet_id: z
-      .string()
-      .trim()
-      .regex(uuidRe, "Sender must be a valid wallet UUID"),
-    receiver_wallet_id: z
-      .string()
-      .trim()
-      .regex(uuidRe, "Receiver must be a valid wallet UUID"),
     transfer_amount: z
       .number({ message: "Amount is required" })
       .positive("Amount must be greater than zero")
@@ -60,10 +57,6 @@ const schema = z
       .max(280, "Keep description under 280 chars")
       .optional()
       .or(z.literal("")),
-  })
-  .refine((d) => d.sender_wallet_id !== d.receiver_wallet_id, {
-    message: "Sender and Receiver wallets must differ",
-    path: ["receiver_wallet_id"],
   });
 
 type FormValues = z.infer<typeof schema>;
@@ -74,7 +67,6 @@ function generateIdempotencyKey(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
   }
-  // RFC4122 v4 fallback
   return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === "x" ? r : (r & 0x3) | 0x8;
@@ -84,12 +76,13 @@ function generateIdempotencyKey(): string {
 
 export default function TransferForm() {
   const mutation = useTransferMutation();
+  const [sender, setSender] = useState<WalletSearchResult | null>(null);
+  const [receiver, setReceiver] = useState<WalletSearchResult | null>(null);
+  const [touched, setTouched] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
-      sender_wallet_id: "",
-      receiver_wallet_id: "",
       transfer_amount: 0,
       transfer_currency: "SAR",
       transfer_description: "",
@@ -97,12 +90,39 @@ export default function TransferForm() {
     mode: "onBlur",
   });
 
+  // ---- Wallet-level guards
+  const senderInactive = !!sender && sender.status !== "active";
+  const receiverInactive = !!receiver && receiver.status !== "active";
+  const sameWallet = !!sender && !!receiver && sender.id === receiver.id;
+  const currencyMismatch =
+    !!sender && !!receiver && sender.currency !== receiver.currency;
+  const missingWallet = !sender || !receiver;
+
+  const blockingReason =
+    missingWallet
+      ? "Select both a sender and a receiver wallet."
+      : sameWallet
+        ? "Sender and receiver must differ."
+        : senderInactive
+          ? `Sender wallet is ${sender!.status}.`
+          : receiverInactive
+            ? `Receiver wallet is ${receiver!.status}.`
+            : currencyMismatch
+              ? `Currency mismatch (${sender!.currency} → ${receiver!.currency}).`
+              : null;
+
   const onSubmit = (values: FormValues) => {
+    setTouched(true);
+    if (blockingReason || !sender || !receiver) {
+      toast.error("Cannot execute", { description: blockingReason ?? "Validation failed" });
+      return;
+    }
+
     const idempotency_key = generateIdempotencyKey();
     mutation.mutate(
       {
-        sender_wallet_id: values.sender_wallet_id,
-        receiver_wallet_id: values.receiver_wallet_id,
+        sender_wallet_id: sender.id,
+        receiver_wallet_id: receiver.id,
         transfer_amount: values.transfer_amount,
         transfer_currency: values.transfer_currency,
         idempotency_key,
@@ -114,12 +134,13 @@ export default function TransferForm() {
             description: `Group: ${String(groupId).slice(0, 8)}…`,
           });
           form.reset({
-            sender_wallet_id: "",
-            receiver_wallet_id: "",
             transfer_amount: 0,
             transfer_currency: values.transfer_currency,
             transfer_description: "",
           });
+          setSender(null);
+          setReceiver(null);
+          setTouched(false);
         },
         onError: (err: unknown) => {
           const raw =
@@ -139,6 +160,7 @@ export default function TransferForm() {
   };
 
   const isPending = mutation.isPending;
+  const submitDisabled = isPending || !!blockingReason;
 
   return (
     <div className="rounded-2xl border border-border/50 bg-card/80 backdrop-blur shadow-sm">
@@ -148,50 +170,65 @@ export default function TransferForm() {
           <h2 className="font-display text-base font-semibold">Tayseer Transfer Console</h2>
           <p className="text-[11px] text-foreground-tertiary flex items-center gap-1">
             <ShieldCheck className="h-3 w-3" />
-            Atomic · Idempotent · Double-entry
+            Atomic · Idempotent · Double-entry · Async lookup
           </p>
         </div>
       </div>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="p-5 space-y-4">
-          <FormField
-            control={form.control}
-            name="sender_wallet_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sender Wallet ID</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="00000000-0000-0000-0000-000000000000"
-                    className="font-mono text-xs"
-                    autoComplete="off"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* Sender */}
+          <FormItem>
+            <FormLabel>Sender Wallet</FormLabel>
+            <WalletCombobox
+              value={sender}
+              onChange={setSender}
+              placeholder="Search sender by name, phone, or UUID…"
+              excludeId={receiver?.id}
+              invalid={touched && (!sender || senderInactive)}
+            />
+            {touched && !sender && (
+              <p className="text-[11px] text-destructive">Sender wallet is required.</p>
             )}
-          />
+            {senderInactive && (
+              <p className="text-[11px] text-destructive">
+                Wallet status is {sender!.status} — transfers blocked.
+              </p>
+            )}
+          </FormItem>
 
-          <FormField
-            control={form.control}
-            name="receiver_wallet_id"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Receiver Wallet ID</FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="00000000-0000-0000-0000-000000000000"
-                    className="font-mono text-xs"
-                    autoComplete="off"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
+          {/* Receiver */}
+          <FormItem>
+            <FormLabel>Receiver Wallet</FormLabel>
+            <WalletCombobox
+              value={receiver}
+              onChange={setReceiver}
+              placeholder="Search receiver by name, phone, or UUID…"
+              excludeId={sender?.id}
+              invalid={touched && (!receiver || receiverInactive || sameWallet)}
+            />
+            {touched && !receiver && (
+              <p className="text-[11px] text-destructive">Receiver wallet is required.</p>
             )}
-          />
+            {receiverInactive && (
+              <p className="text-[11px] text-destructive">
+                Wallet status is {receiver!.status} — transfers blocked.
+              </p>
+            )}
+            {sameWallet && (
+              <p className="text-[11px] text-destructive">Sender and receiver must differ.</p>
+            )}
+          </FormItem>
+
+          {currencyMismatch && (
+            <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/10 p-2.5 text-amber-700 dark:text-amber-400">
+              <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+              <p className="text-[11.5px]">
+                Currency mismatch: sender holds <b>{sender!.currency}</b>, receiver holds{" "}
+                <b>{receiver!.currency}</b>. RPC will reject this transfer.
+              </p>
+            </div>
+          )}
 
           <div className="grid grid-cols-3 gap-3">
             <FormField
@@ -271,16 +308,33 @@ export default function TransferForm() {
             )}
           />
 
+          {blockingReason && touched && (
+            <p className="text-[11.5px] text-destructive flex items-center gap-1">
+              <AlertTriangle className="h-3.5 w-3.5" />
+              {blockingReason}
+            </p>
+          )}
+
           <div className="flex items-center justify-end gap-2 pt-2">
             <Button
               type="button"
               variant="ghost"
-              onClick={() => form.reset()}
+              onClick={() => {
+                form.reset();
+                setSender(null);
+                setReceiver(null);
+                setTouched(false);
+              }}
               disabled={isPending}
             >
               Reset
             </Button>
-            <Button type="submit" disabled={isPending} className="min-w-[140px]">
+            <Button
+              type="submit"
+              disabled={submitDisabled}
+              className="min-w-[140px]"
+              onClick={() => setTouched(true)}
+            >
               {isPending ? (
                 <>
                   <Loader2 className="h-4 w-4 mr-2 animate-spin" />
