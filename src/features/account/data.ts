@@ -72,7 +72,8 @@ export type SettingItem = {
     | "/account/favorites"
     | "/account/notifications"
     | "/account/settings"
-    | "/account/help";
+    | "/account/help"
+    | "/affiliate";
 };
 
 export const SETTING_GROUPS: { title: string; items: SettingItem[] }[] = [
