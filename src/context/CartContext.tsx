@@ -84,6 +84,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const userIdRef = useRef<string | null | undefined>(undefined);
   const skipNextPushRef = useRef(false);
   const lastPushedSignatureRef = useRef("");
+  // HOTFIX: track which uids we have already merged a guest cart into so we
+  // never re-merge (which would exponentially double quantities if uid
+  // briefly toggles or the effect re-runs).
+  const mergedUidsRef = useRef<Set<string>>(new Set());
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
     null,
