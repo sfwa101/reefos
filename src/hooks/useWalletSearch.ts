@@ -6,18 +6,20 @@
  *    OR by user_id (so the CFO can paste either).
  *  - Otherwise, search profiles by full_name / phone (ILIKE) and join to wallets.
  *
- * No client-side full scans. All filtering happens server-side.
+ * profiles.id == auth user id (== wallets.user_id). No client-side full scans.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { Wallet, WalletStatus } from "@/hooks/useTayseer";
 
+export interface WalletProfileLite {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+}
+
 export interface WalletSearchResult extends Wallet {
-  profile?: {
-    user_id: string;
-    full_name: string | null;
-    phone: string | null;
-  } | null;
+  profile: WalletProfileLite | null;
 }
 
 const UUID_RE =
@@ -25,42 +27,49 @@ const UUID_RE =
 
 const PAGE_SIZE = 12;
 
+async function fetchProfilesForUserIds(
+  userIds: string[],
+): Promise<Map<string, WalletProfileLite>> {
+  if (userIds.length === 0) return new Map();
+  const { data, error } = await supabase
+    .from("profiles")
+    .select("id,full_name,phone")
+    .in("id", userIds);
+  if (error) throw error;
+  return new Map(
+    (data ?? []).map((p) => [
+      p.id as string,
+      { id: p.id as string, full_name: p.full_name, phone: p.phone },
+    ]),
+  );
+}
+
 async function searchByUuid(term: string): Promise<WalletSearchResult[]> {
   const { data, error } = await supabase
     .from("wallets")
-    .select(
-      "id,user_id,balance,currency,status,created_at,updated_at," +
-        "profile:profiles!wallets_user_id_fkey(user_id,full_name,phone)",
-    )
+    .select("id,user_id,balance,currency,status,created_at,updated_at")
     .or(`id.eq.${term},user_id.eq.${term}`)
     .limit(PAGE_SIZE);
+  if (error) throw error;
 
-  if (error) {
-    // Fallback if no FK relationship is exposed
-    const { data: bare, error: e2 } = await supabase
-      .from("wallets")
-      .select("id,user_id,balance,currency,status,created_at,updated_at")
-      .or(`id.eq.${term},user_id.eq.${term}`)
-      .limit(PAGE_SIZE);
-    if (e2) throw e2;
-    return (bare ?? []).map((w) => ({ ...(w as Wallet), profile: null }));
-  }
-  return (data ?? []) as unknown as WalletSearchResult[];
+  const wallets = (data ?? []) as Wallet[];
+  const profileMap = await fetchProfilesForUserIds(
+    wallets.map((w) => w.user_id),
+  );
+  return wallets.map((w) => ({ ...w, profile: profileMap.get(w.user_id) ?? null }));
 }
 
 async function searchByName(term: string): Promise<WalletSearchResult[]> {
-  // 1) Find matching profiles
   const { data: profiles, error: pErr } = await supabase
     .from("profiles")
-    .select("user_id,full_name,phone")
+    .select("id,full_name,phone")
     .or(`full_name.ilike.%${term}%,phone.ilike.%${term}%`)
     .limit(PAGE_SIZE);
   if (pErr) throw pErr;
 
-  const userIds = (profiles ?? []).map((p) => p.user_id).filter(Boolean);
+  const userIds = (profiles ?? []).map((p) => p.id as string);
   if (userIds.length === 0) return [];
 
-  // 2) Pull wallets for those users
   const { data: wallets, error: wErr } = await supabase
     .from("wallets")
     .select("id,user_id,balance,currency,status,created_at,updated_at")
@@ -69,13 +78,24 @@ async function searchByName(term: string): Promise<WalletSearchResult[]> {
   if (wErr) throw wErr;
 
   const profileMap = new Map(
-    (profiles ?? []).map((p) => [p.user_id, p] as const),
+    (profiles ?? []).map((p) => [
+      p.id as string,
+      {
+        id: p.id as string,
+        full_name: p.full_name,
+        phone: p.phone,
+      } satisfies WalletProfileLite,
+    ]),
   );
-  return (wallets ?? []).map((w) => ({
-    ...(w as Wallet),
-    status: (w as { status: string }).status as WalletStatus,
-    profile: profileMap.get((w as Wallet).user_id) ?? null,
-  })) as WalletSearchResult[];
+
+  return (wallets ?? []).map((w) => {
+    const wallet = w as Wallet & { status: string };
+    return {
+      ...wallet,
+      status: wallet.status as WalletStatus,
+      profile: profileMap.get(wallet.user_id) ?? null,
+    };
+  });
 }
 
 export function useWalletSearch(searchTerm: string) {
