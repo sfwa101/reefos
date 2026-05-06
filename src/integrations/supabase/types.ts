@@ -3879,9 +3879,13 @@ export type Database = {
           charity_amount: number
           charity_cause_id: string | null
           created_at: string
+          delivery_lat: number | null
+          delivery_lng: number | null
           delivery_zone: string | null
           discount: number
+          dispatched_at: string | null
           donate_change: boolean
+          driver_id: string | null
           gift_message: string | null
           id: string
           is_gift: boolean
@@ -3910,9 +3914,13 @@ export type Database = {
           charity_amount?: number
           charity_cause_id?: string | null
           created_at?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_zone?: string | null
           discount?: number
+          dispatched_at?: string | null
           donate_change?: boolean
+          driver_id?: string | null
           gift_message?: string | null
           id?: string
           is_gift?: boolean
@@ -3941,9 +3949,13 @@ export type Database = {
           charity_amount?: number
           charity_cause_id?: string | null
           created_at?: string
+          delivery_lat?: number | null
+          delivery_lng?: number | null
           delivery_zone?: string | null
           discount?: number
+          dispatched_at?: string | null
           donate_change?: boolean
+          driver_id?: string | null
           gift_message?: string | null
           id?: string
           is_gift?: boolean
@@ -7737,6 +7749,15 @@ export type Database = {
       allocation_overview: { Args: { _order_id: string }; Returns: Json }
       approve_advance_request: { Args: { _request_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
+      assign_nearest_driver: {
+        Args: { p_order_id: string; p_radius_m?: number }
+        Returns: {
+          distance_m: number
+          driver_id: string
+          order_id: string
+          queued: boolean
+        }[]
+      }
       auto_route_order_to_branch: {
         Args: {
           _order_id: string
