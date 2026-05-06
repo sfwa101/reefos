@@ -1112,6 +1112,103 @@ export type Database = {
         }
         Relationships: []
       }
+      companies: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          tax_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          tax_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      company_credit_lines: {
+        Row: {
+          approved_limit: number
+          company_id: string
+          created_at: string
+          id: string
+          net_terms_days: number
+          updated_at: string
+          used_amount: number
+        }
+        Insert: {
+          approved_limit?: number
+          company_id: string
+          created_at?: string
+          id?: string
+          net_terms_days?: number
+          updated_at?: string
+          used_amount?: number
+        }
+        Update: {
+          approved_limit?: number
+          company_id?: string
+          created_at?: string
+          id?: string
+          net_terms_days?: number
+          updated_at?: string
+          used_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_credit_lines_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: true
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      company_members: {
+        Row: {
+          company_id: string
+          created_at: string
+          id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          id?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "company_members_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coupon_redemptions: {
         Row: {
           coupon_id: string
@@ -3667,6 +3764,41 @@ export type Database = {
         }
         Relationships: []
       }
+      pricing_tiers: {
+        Row: {
+          created_at: string
+          id: string
+          min_quantity: number
+          price: number
+          product_id: string
+          tier_name: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          min_quantity: number
+          price: number
+          product_id: string
+          tier_name?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          min_quantity?: number
+          price?: number
+          product_id?: string
+          tier_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pricing_tiers_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       print_jobs: {
         Row: {
           binding: string
@@ -4338,6 +4470,83 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_order_lines: {
+        Row: {
+          id: string
+          po_id: string
+          product_id: string
+          quantity: number
+          unit_price: number
+        }
+        Insert: {
+          id?: string
+          po_id: string
+          product_id: string
+          quantity: number
+          unit_price: number
+        }
+        Update: {
+          id?: string
+          po_id?: string
+          product_id?: string
+          quantity?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_order_lines_po_id_fkey"
+            columns: ["po_id"]
+            isOneToOne: false
+            referencedRelation: "purchase_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purchase_order_lines_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purchase_orders: {
+        Row: {
+          company_id: string
+          created_at: string
+          created_by: string
+          id: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          created_by: string
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purchase_orders_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
             referencedColumns: ["id"]
           },
         ]
@@ -7073,6 +7282,7 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_user_companies: { Args: { p_user_id: string }; Returns: Json }
       get_user_daily_transfer_limit: {
         Args: { _user_id?: string }
         Returns: number
@@ -7103,6 +7313,14 @@ export type Database = {
       i18n_text: {
         Args: { _fallback: string; _i18n: Json; _locale?: string }
         Returns: string
+      }
+      is_company_member: {
+        Args: { _company_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_company_role: {
+        Args: { _company_id: string; _role: string; _user_id: string }
+        Returns: boolean
       }
       is_driver: { Args: { _user_id: string }; Returns: boolean }
       is_gam_eya_member: {
