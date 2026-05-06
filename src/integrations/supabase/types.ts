@@ -2130,6 +2130,47 @@ export type Database = {
         }
         Relationships: []
       }
+      escrow_disputes: {
+        Row: {
+          created_at: string
+          escrow_id: string
+          id: string
+          initiator_id: string
+          reason_text: string
+          resolution_notes: string | null
+          resolved_at: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          escrow_id: string
+          id?: string
+          initiator_id: string
+          reason_text: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          escrow_id?: string
+          id?: string
+          initiator_id?: string
+          reason_text?: string
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "escrow_disputes_escrow_id_fkey"
+            columns: ["escrow_id"]
+            isOneToOne: false
+            referencedRelation: "escrow_payouts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       escrow_payouts: {
         Row: {
           amount: number
@@ -3053,6 +3094,42 @@ export type Database = {
           },
         ]
       }
+      kyc_documents: {
+        Row: {
+          created_at: string
+          document_hash: string
+          document_type: string
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_hash: string
+          document_type: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_hash?: string
+          document_type?: string
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: []
+      }
       kyc_limits: {
         Row: {
           created_at: string
@@ -3430,6 +3507,39 @@ export type Database = {
           status?: string
           updated_at?: string
           version?: string | null
+        }
+        Relationships: []
+      }
+      mini_programs: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          manifest_url: string
+          name: string
+          required_permissions: Json
+          updated_at: string
+          version: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manifest_url: string
+          name: string
+          required_permissions?: Json
+          updated_at?: string
+          version?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          manifest_url?: string
+          name?: string
+          required_permissions?: Json
+          updated_at?: string
+          version?: string
         }
         Relationships: []
       }
@@ -6275,6 +6385,32 @@ export type Database = {
         }
         Relationships: []
       }
+      user_mini_programs: {
+        Row: {
+          installed_at: string
+          mini_program_id: string
+          user_id: string
+        }
+        Insert: {
+          installed_at?: string
+          mini_program_id: string
+          user_id: string
+        }
+        Update: {
+          installed_at?: string
+          mini_program_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_mini_programs_mini_program_id_fkey"
+            columns: ["mini_program_id"]
+            isOneToOne: false
+            referencedRelation: "mini_programs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_payout_requests: {
         Row: {
           amount: number
@@ -7524,6 +7660,7 @@ export type Database = {
         }[]
       }
       cfo_dashboard_stats: { Args: never; Returns: Json }
+      check_kyc_status: { Args: { p_user_id: string }; Returns: boolean }
       close_pos_shift: {
         Args: { _actual_balance: number; _shift_id: string }
         Returns: {
