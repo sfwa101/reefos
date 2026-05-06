@@ -24,17 +24,22 @@ export type DynamicZoneInfo = {
 };
 
 /* ---------------------------------------------------------------------------
- * Phase T-P1 — Split contexts to kill the re-render storm.
- *  - StaticCtx: zoneId / zone / zones / setters. Only changes on user action.
- *  - OpsCtx:    Realtime ops + dynamic helpers. Re-renders on every tick.
- * Consumers should subscribe ONLY to the slice they need.
+ * Phase T-P3 — Provider split:
+ *   - LocationProvider     (root)  : static zone + setters only. Lightweight.
+ *   - LocationOpsProvider  (_app)  : Realtime PostGIS / surge / ETA. Heavy.
+ *
+ * Public routes (/auth, etc.) mount only LocationProvider, so the main
+ * bundle no longer pulls useSmartLogistics' Realtime channel + spatial RPCs
+ * onto the cold-start critical path.
  * ------------------------------------------------------------------------- */
+
 type LocationStaticCtx = {
   zoneId: ZoneId;
   zone: DeliveryZone;
   zones: DeliveryZone[];
   setZoneId: (id: ZoneId) => void;
   setFromAddress: (city?: string | null, district?: string | null) => void;
+  resolveZone: (id: ZoneId) => DeliveryZone;
 };
 
 type LocationOpsCtx = {
@@ -42,7 +47,7 @@ type LocationOpsCtx = {
   getDynamicInfo: (subtotal: number, zoneId?: ZoneId) => DynamicZoneInfo;
 };
 
-type LocationCtxFull = LocationStaticCtx & LocationOpsCtx;
+type LocationCtxFull = Omit<LocationStaticCtx, "resolveZone"> & LocationOpsCtx;
 
 const StaticCtx = createContext<LocationStaticCtx | null>(null);
 const OpsCtx = createContext<LocationOpsCtx | null>(null);
@@ -50,13 +55,13 @@ const OpsCtx = createContext<LocationOpsCtx | null>(null);
 const STORAGE_KEY = "reef-zone-v1";
 const VALID_ZONE_CODES: ZoneId[] = ["A", "B", "C", "D", "M", "E"];
 
+const EMPTY_OPS: Record<string, ZoneOpsMetrics> = Object.freeze({});
+
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const [zoneId, setZoneIdState] = useState<ZoneId>(DEFAULT_ZONE_ID);
 
   const { data: liveZones } = useGeoZones();
   const zones: DeliveryZone[] = liveZones ?? STATIC_ZONES;
-
-  const { ops: zoneOps } = useSmartLogistics();
 
   useEffect(() => {
     try {
@@ -100,6 +105,34 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     [zones],
   );
 
+  const staticValue = useMemo<LocationStaticCtx>(
+    () => ({
+      zoneId,
+      zone: resolveZone(zoneId),
+      zones,
+      setZoneId,
+      setFromAddress,
+      resolveZone,
+    }),
+    [zoneId, zones, resolveZone, setZoneId, setFromAddress],
+  );
+
+  return <StaticCtx.Provider value={staticValue}>{children}</StaticCtx.Provider>;
+};
+
+/**
+ * Heavy ops layer — mount only inside the authenticated app shell so
+ * public routes (auth, error pages) don't pay for Realtime + PostGIS.
+ */
+export const LocationOpsProvider = ({ children }: { children: ReactNode }) => {
+  const staticCtx = useContext(StaticCtx);
+  if (!staticCtx) {
+    throw new Error("LocationOpsProvider must be nested inside LocationProvider");
+  }
+  const { resolveZone, zoneId } = staticCtx;
+
+  const { ops: zoneOps } = useSmartLogistics();
+
   const getDynamicInfo = useCallback(
     (subtotal: number, overrideZoneId?: ZoneId): DynamicZoneInfo => {
       const z = resolveZone(overrideZoneId ?? zoneId);
@@ -118,27 +151,12 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     [resolveZone, zoneId, zoneOps],
   );
 
-  const staticValue = useMemo<LocationStaticCtx>(
-    () => ({
-      zoneId,
-      zone: resolveZone(zoneId),
-      zones,
-      setZoneId,
-      setFromAddress,
-    }),
-    [zoneId, zones, resolveZone, setZoneId, setFromAddress],
-  );
-
   const opsValue = useMemo<LocationOpsCtx>(
     () => ({ zoneOps, getDynamicInfo }),
     [zoneOps, getDynamicInfo],
   );
 
-  return (
-    <StaticCtx.Provider value={staticValue}>
-      <OpsCtx.Provider value={opsValue}>{children}</OpsCtx.Provider>
-    </StaticCtx.Provider>
-  );
+  return <OpsCtx.Provider value={opsValue}>{children}</OpsCtx.Provider>;
 };
 
 export const useLocationStatic = (): LocationStaticCtx => {
@@ -147,19 +165,50 @@ export const useLocationStatic = (): LocationStaticCtx => {
   return v;
 };
 
+/**
+ * Returns Realtime ops if LocationOpsProvider is mounted; otherwise a
+ * no-op stub. Lets shared components (e.g. ProductCard) call it from
+ * both public and authenticated trees without crashing.
+ */
 export const useLocationOps = (): LocationOpsCtx => {
   const v = useContext(OpsCtx);
-  if (!v) throw new Error("useLocationOps must be used within LocationProvider");
-  return v;
+  const staticCtx = useContext(StaticCtx);
+  return useMemo<LocationOpsCtx>(() => {
+    if (v) return v;
+    const resolveZone = staticCtx?.resolveZone;
+    const fallbackZoneId = staticCtx?.zoneId ?? DEFAULT_ZONE_ID;
+    return {
+      zoneOps: EMPTY_OPS,
+      getDynamicInfo: (subtotal, overrideZoneId) => {
+        const z = resolveZone
+          ? resolveZone(overrideZoneId ?? fallbackZoneId)
+          : STATIC_ZONES[0];
+        const { fee, surge, loadFactor } = calculateDynamicDelivery(z, subtotal, undefined);
+        const eta = calculateDynamicETA(z, undefined);
+        return {
+          fee,
+          surge,
+          loadFactor,
+          etaLabel: eta.label,
+          etaMinutes: eta.minutes,
+          pressure: eta.pressure,
+        };
+      },
+    };
+  }, [v, staticCtx]);
 };
 
 /**
- * Backward-compatible aggregate hook. Existing consumers continue to work.
- * Prefer `useLocationStatic` / `useLocationOps` in new code to avoid
- * re-rendering on Realtime ops ticks when only static fields are needed.
+ * Backward-compatible aggregate hook. Existing call sites continue to work
+ * even on routes without LocationOpsProvider — ops fall back to the stub.
  */
 export const useLocation = (): LocationCtxFull => {
   const s = useLocationStatic();
   const o = useLocationOps();
-  return useMemo(() => ({ ...s, ...o }), [s, o]);
+  return useMemo(() => {
+    const { resolveZone: _resolveZone, ...rest } = s;
+    void _resolveZone;
+    return { ...rest, ...o };
+  }, [s, o]);
 };
+
