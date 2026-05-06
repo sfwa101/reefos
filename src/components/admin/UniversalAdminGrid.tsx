@@ -269,13 +269,7 @@ export function UniversalAdminGrid<T = any>({
 
       <div className="px-4 lg:px-6 pt-3 pb-10 max-w-[1400px] mx-auto space-y-5">
         {metrics && metrics.length > 0 && (
-          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 lg:gap-4">
-            {metrics.map((m) => {
-              const v = m.compute ? m.compute(filtered as any[]) : fmtNum(filtered.length);
-              const urg = m.urgent?.(filtered as any[]);
-              return <BentoTile key={m.key} metric={m} value={v} urgent={urg} />;
-            })}
-          </div>
+          <BentoMetricsRow metrics={metrics} filtered={filtered} />
         )}
 
         {topSlot}
