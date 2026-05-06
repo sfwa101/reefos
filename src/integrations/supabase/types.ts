@@ -7070,6 +7070,10 @@ export type Database = {
         Args: { ""?: string; att_name: string; tbl: unknown }
         Returns: string
       }
+      _resolve_wallet: {
+        Args: { p_currency: string; p_user_id: string }
+        Returns: string
+      }
       _sdui_attr: {
         Args: {
           p_data_type: string
@@ -8434,6 +8438,10 @@ export type Database = {
         Returns: string
       }
       unlockrows: { Args: { "": string }; Returns: number }
+      update_driver_location: {
+        Args: { p_lat: number; p_lon: number }
+        Returns: undefined
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
