@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTheme, type Mode } from "@/context/ThemeContext";
 
 /**
@@ -54,28 +54,29 @@ export const UIProvider = ({ children }: { children: ReactNode }) => {
     document.documentElement.setAttribute("data-view-mode", viewMode);
   }, [viewMode]);
 
-  const setViewMode = (v: ViewMode) => {
+  const setViewMode = useCallback((v: ViewMode) => {
     setViewModeState(v);
     if (typeof window !== "undefined") localStorage.setItem(STORAGE_KEY, v);
-  };
+  }, []);
 
-  const toggleSimplified = () =>
-    setViewMode(viewMode === "simplified" ? "standard" : "simplified");
-
-  return (
-    <Ctx.Provider
-      value={{
-        theme: mode,
-        setTheme: setMode,
-        resolvedTheme: resolvedMode,
-        viewMode,
-        setViewMode,
-        toggleSimplified,
-      }}
-    >
-      {children}
-    </Ctx.Provider>
+  const toggleSimplified = useCallback(
+    () => setViewMode(viewMode === "simplified" ? "standard" : "simplified"),
+    [viewMode, setViewMode],
   );
+
+  const value = useMemo<UICtx>(
+    () => ({
+      theme: mode,
+      setTheme: setMode,
+      resolvedTheme: resolvedMode,
+      viewMode,
+      setViewMode,
+      toggleSimplified,
+    }),
+    [mode, setMode, resolvedMode, viewMode, setViewMode, toggleSimplified],
+  );
+
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
 export const useUI = () => {

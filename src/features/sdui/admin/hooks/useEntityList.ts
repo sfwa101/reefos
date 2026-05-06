@@ -27,10 +27,13 @@ export function useEntityList(
     queryFn: async ({ pageParam }) => {
       const from = pageParam * ENTITY_PAGE_SIZE;
       const to = from + ENTITY_PAGE_SIZE - 1;
+      // P0: only request `exact` count on the first page; subsequent infinite
+      // scroll pages skip the count entirely (massive p99 win on huge tables).
+      const selectOpts = pageParam === 0 ? { count: "exact" as const } : undefined;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let q: any = supabase
         .from(tableName as never)
-        .select("*", { count: "exact" })
+        .select("*", selectOpts)
         .range(from, to);
 
       if (filters.eq) {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, type ReactNode, useCallback } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode, useCallback } from "react";
 import { DICTIONARIES, LOCALE_DIR, type Locale } from "@/features/settings/locales";
 
 type LocaleCtx = {
@@ -38,7 +38,8 @@ export const LocaleProvider = ({ children }: { children: ReactNode }) => {
     [locale],
   );
 
-  return <Ctx.Provider value={{ locale, setLocale, t }}>{children}</Ctx.Provider>;
+  const value = useMemo<LocaleCtx>(() => ({ locale, setLocale, t }), [locale, setLocale, t]);
+  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 };
 
 export const useTranslation = () => {
