@@ -3852,6 +3852,33 @@ export type Database = {
           },
         ]
       }
+      partner_tiers: {
+        Row: {
+          b2c_first_order_pct: number
+          b2c_recurring_pct: number
+          created_at: string
+          duration_months: number
+          id: string
+          name: string
+        }
+        Insert: {
+          b2c_first_order_pct?: number
+          b2c_recurring_pct?: number
+          created_at?: string
+          duration_months?: number
+          id?: string
+          name: string
+        }
+        Update: {
+          b2c_first_order_pct?: number
+          b2c_recurring_pct?: number
+          created_at?: string
+          duration_months?: number
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           brand: string | null
@@ -4555,14 +4582,18 @@ export type Database = {
           hide_balance: boolean
           household_size: number | null
           id: string
+          is_b2b_commissioner: boolean
           lifestyle_tags: string[] | null
           likes: string[] | null
           loyalty_lifetime_spend: number
           loyalty_points: number
           loyalty_tier: Database["public"]["Enums"]["loyalty_tier"]
           occupation: string | null
+          partner_tier_id: string | null
           phone: string | null
           preferred_locale: string | null
+          referral_code: string | null
+          referred_by: string | null
           updated_at: string
         }
         Insert: {
@@ -4578,14 +4609,18 @@ export type Database = {
           hide_balance?: boolean
           household_size?: number | null
           id: string
+          is_b2b_commissioner?: boolean
           lifestyle_tags?: string[] | null
           likes?: string[] | null
           loyalty_lifetime_spend?: number
           loyalty_points?: number
           loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
           occupation?: string | null
+          partner_tier_id?: string | null
           phone?: string | null
           preferred_locale?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
         Update: {
@@ -4601,14 +4636,18 @@ export type Database = {
           hide_balance?: boolean
           household_size?: number | null
           id?: string
+          is_b2b_commissioner?: boolean
           lifestyle_tags?: string[] | null
           likes?: string[] | null
           loyalty_lifetime_spend?: number
           loyalty_points?: number
           loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
           occupation?: string | null
+          partner_tier_id?: string | null
           phone?: string | null
           preferred_locale?: string | null
+          referral_code?: string | null
+          referred_by?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -4617,6 +4656,20 @@ export type Database = {
             columns: ["branch_id"]
             isOneToOne: false
             referencedRelation: "branches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_partner_tier_id_fkey"
+            columns: ["partner_tier_id"]
+            isOneToOne: false
+            referencedRelation: "partner_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_referred_by_fkey"
+            columns: ["referred_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
@@ -6647,6 +6700,7 @@ export type Database = {
       }
       vendors: {
         Row: {
+          account_manager_id: string | null
           address: string | null
           branch_id: string | null
           commission_pct: number
@@ -6665,6 +6719,7 @@ export type Database = {
           vendor_type: string
         }
         Insert: {
+          account_manager_id?: string | null
           address?: string | null
           branch_id?: string | null
           commission_pct?: number
@@ -6683,6 +6738,7 @@ export type Database = {
           vendor_type?: string
         }
         Update: {
+          account_manager_id?: string | null
           address?: string | null
           branch_id?: string | null
           commission_pct?: number
@@ -6701,6 +6757,13 @@ export type Database = {
           vendor_type?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "vendors_account_manager_id_fkey"
+            columns: ["account_manager_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "vendors_branch_id_fkey"
             columns: ["branch_id"]
@@ -7527,6 +7590,10 @@ export type Database = {
           p_radius_meters?: number
         }
         Returns: Json
+      }
+      distribute_affiliate_commission: {
+        Args: { p_order_id: string; p_total_platform_fee: number }
+        Returns: undefined
       }
       donate_to_campaign: {
         Args: {
