@@ -149,7 +149,7 @@ export default function More() {
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {g.items.map(it => (
                     it.to ? (
-                      <Link key={it.label} to={it.to}
+                      <Link key={it.label} to={it.to} {...(it.params ? { params: it.params } : {})}
                         className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-muted/60 hover:bg-primary/10 transition press">
                         <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${it.color} flex items-center justify-center text-white shadow-sm shrink-0`}>
                           <it.icon className="h-[15px] w-[15px]" strokeWidth={2.5} />
