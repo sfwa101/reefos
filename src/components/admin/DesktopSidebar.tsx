@@ -31,7 +31,7 @@ const groups = [
   { title: "المخزون واللوجستيات", items: [
     { to: "/admin/inventory", icon: Warehouse, label: "المخزون والأسعار" },
     { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون" },
-    { to: "/admin/warehouses", icon: Warehouse, label: "المخازن المتعددة" },
+    { to: "/admin/$entity/warehouses", icon: Warehouse, label: "المخازن المتعددة", dynamic: true },
     { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)" },
     { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع" },
     { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي" },
@@ -44,7 +44,7 @@ const groups = [
     { to: "/admin/reviews", icon: Star, label: "التقييمات" },
   ]},
   { title: "الشركاء والتجار", items: [
-    { to: "/admin/vendors", icon: Truck, label: "التجار والموردون" },
+    { to: "/admin/$entity/vendors", icon: Truck, label: "التجار والموردون", dynamic: true },
     { to: "/admin/suppliers", icon: Truck, label: "الموردون" },
     { to: "/admin/partners", icon: Star, label: "شركاء المنتجات" },
     { to: "/admin/purchases", icon: Receipt, label: "فواتير المشتريات" },
@@ -64,7 +64,7 @@ const groups = [
   ]},
   { title: "تسويات وعمليات نقدية", items: [
     { to: "/admin/cashier-sessions", icon: ClipboardList, label: "ورديات الكاشير" },
-    { to: "/admin/vendor-settlements", icon: Receipt, label: "تسويات التجار" },
+    { to: "/admin/$entity/vendor_settlements", icon: Receipt, label: "تسويات التجار", dynamic: true },
     { to: "/admin/driver-cash-settlements", icon: HandCoins, label: "تسويات المناديب" },
     { to: "/admin/driver-settlements", icon: Wallet, label: "تصفية العهدة" },
     { to: "/admin/store-settlements", icon: PiggyBank, label: "تسويات الفروع" },
@@ -98,7 +98,7 @@ const groups = [
   ]},
   { title: "التوصيل والمناديب", items: [
     { to: "/admin/delivery", icon: Truck, label: "مهام التوصيل" },
-    { to: "/admin/drivers", icon: Truck, label: "المناديب" },
+    { to: "/admin/$entity/drivers", icon: Truck, label: "المناديب", dynamic: true },
     { to: "/admin/delivery/zones", icon: MapPin, label: "المناطق" },
     { to: "/admin/delivery-settings", icon: Sliders, label: "إعدادات التوصيل" },
   ]},
@@ -133,17 +133,31 @@ export function DesktopSidebar() {
             <p className="text-[10px] uppercase tracking-wider font-semibold text-foreground-tertiary px-3 mb-1.5">{g.title}</p>
             <ul className="space-y-0.5">
               {g.items.map((it) => {
-                const active = it.exact ? pathname === it.to : pathname === it.to || pathname.startsWith(it.to + "/");
+                const isDynamic = "dynamic" in it && it.dynamic;
+                const entityKey = isDynamic ? it.to.replace("/admin/$entity/", "") : "";
+                const resolvedPath = isDynamic ? `/admin/${entityKey}` : it.to;
+                const active = "exact" in it && it.exact ? pathname === resolvedPath : pathname === resolvedPath || pathname.startsWith(resolvedPath + "/");
                 return (
                   <li key={it.to}>
-                    <Link to={it.to} className={cn(
-                      "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-base press",
-                      active ? "bg-sidebar-accent text-foreground font-semibold shadow-sm"
-                             : "text-foreground-secondary hover:bg-sidebar-accent/60 hover:text-foreground"
-                    )}>
-                      <it.icon className={cn("h-[18px] w-[18px]", active && "text-primary")} strokeWidth={active ? 2.5 : 2} />
-                      {it.label}
-                    </Link>
+                    {isDynamic ? (
+                      <Link to="/admin/$entity" params={{ entity: entityKey }} className={cn(
+                        "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-base press",
+                        active ? "bg-sidebar-accent text-foreground font-semibold shadow-sm"
+                               : "text-foreground-secondary hover:bg-sidebar-accent/60 hover:text-foreground"
+                      )}>
+                        <it.icon className={cn("h-[18px] w-[18px]", active && "text-primary")} strokeWidth={active ? 2.5 : 2} />
+                        {it.label}
+                      </Link>
+                    ) : (
+                      <Link to={it.to} className={cn(
+                        "flex items-center gap-2.5 px-3 py-2 rounded-xl text-sm transition-base press",
+                        active ? "bg-sidebar-accent text-foreground font-semibold shadow-sm"
+                               : "text-foreground-secondary hover:bg-sidebar-accent/60 hover:text-foreground"
+                      )}>
+                        <it.icon className={cn("h-[18px] w-[18px]", active && "text-primary")} strokeWidth={active ? 2.5 : 2} />
+                        {it.label}
+                      </Link>
+                    )}
                   </li>
                 );
               })}
