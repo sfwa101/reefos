@@ -23,6 +23,7 @@ type AuthCtx = {
   user: User | null;
   profile: Profile | null;
   loading: boolean;
+  profileLoading: boolean;
   isInitializing: boolean;
   signUpWithPhone: (phone: string, password: string, fullName: string) => Promise<{ error?: string }>;
   signInWithPhone: (phone: string, password: string) => Promise<{ error?: string }>;
