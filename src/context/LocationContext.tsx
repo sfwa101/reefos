@@ -23,24 +23,31 @@ export type DynamicZoneInfo = {
   pressure: "normal" | "elevated" | "high";
 };
 
-type LocationCtx = {
+/* ---------------------------------------------------------------------------
+ * Phase T-P1 — Split contexts to kill the re-render storm.
+ *  - StaticCtx: zoneId / zone / zones / setters. Only changes on user action.
+ *  - OpsCtx:    Realtime ops + dynamic helpers. Re-renders on every tick.
+ * Consumers should subscribe ONLY to the slice they need.
+ * ------------------------------------------------------------------------- */
+type LocationStaticCtx = {
   zoneId: ZoneId;
   zone: DeliveryZone;
-  /** All known zones (live from DB, falls back to static). */
   zones: DeliveryZone[];
-  /** Manually set the active zone (e.g. from address selection). */
   setZoneId: (id: ZoneId) => void;
-  /** Convenience: derive + set zone from a free-form (city, district) pair. */
   setFromAddress: (city?: string | null, district?: string | null) => void;
-  /** Realtime ops metrics keyed by zone_code. */
+};
+
+type LocationOpsCtx = {
   zoneOps: Record<string, ZoneOpsMetrics>;
-  /** Compute dynamic fee + ETA for the active zone given a cart subtotal. */
   getDynamicInfo: (subtotal: number, zoneId?: ZoneId) => DynamicZoneInfo;
 };
 
-const Ctx = createContext<LocationCtx | null>(null);
-const STORAGE_KEY = "reef-zone-v1";
+type LocationCtxFull = LocationStaticCtx & LocationOpsCtx;
 
+const StaticCtx = createContext<LocationStaticCtx | null>(null);
+const OpsCtx = createContext<LocationOpsCtx | null>(null);
+
+const STORAGE_KEY = "reef-zone-v1";
 const VALID_ZONE_CODES: ZoneId[] = ["A", "B", "C", "D", "M", "E"];
 
 export const LocationProvider = ({ children }: { children: ReactNode }) => {
@@ -49,7 +56,6 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
   const { data: liveZones } = useGeoZones();
   const zones: DeliveryZone[] = liveZones ?? STATIC_ZONES;
 
-  // Realtime surge / load metrics
   const { ops: zoneOps } = useSmartLogistics();
 
   useEffect(() => {
@@ -112,24 +118,48 @@ export const LocationProvider = ({ children }: { children: ReactNode }) => {
     [resolveZone, zoneId, zoneOps],
   );
 
-  const value = useMemo<LocationCtx>(
+  const staticValue = useMemo<LocationStaticCtx>(
     () => ({
       zoneId,
       zone: resolveZone(zoneId),
       zones,
       setZoneId,
       setFromAddress,
-      zoneOps,
-      getDynamicInfo,
     }),
-    [zoneId, zones, resolveZone, setZoneId, setFromAddress, zoneOps, getDynamicInfo],
+    [zoneId, zones, resolveZone, setZoneId, setFromAddress],
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  const opsValue = useMemo<LocationOpsCtx>(
+    () => ({ zoneOps, getDynamicInfo }),
+    [zoneOps, getDynamicInfo],
+  );
+
+  return (
+    <StaticCtx.Provider value={staticValue}>
+      <OpsCtx.Provider value={opsValue}>{children}</OpsCtx.Provider>
+    </StaticCtx.Provider>
+  );
 };
 
-export const useLocation = () => {
-  const v = useContext(Ctx);
-  if (!v) throw new Error("useLocation must be used within LocationProvider");
+export const useLocationStatic = (): LocationStaticCtx => {
+  const v = useContext(StaticCtx);
+  if (!v) throw new Error("useLocationStatic must be used within LocationProvider");
   return v;
+};
+
+export const useLocationOps = (): LocationOpsCtx => {
+  const v = useContext(OpsCtx);
+  if (!v) throw new Error("useLocationOps must be used within LocationProvider");
+  return v;
+};
+
+/**
+ * Backward-compatible aggregate hook. Existing consumers continue to work.
+ * Prefer `useLocationStatic` / `useLocationOps` in new code to avoid
+ * re-rendering on Realtime ops ticks when only static fields are needed.
+ */
+export const useLocation = (): LocationCtxFull => {
+  const s = useLocationStatic();
+  const o = useLocationOps();
+  return useMemo(() => ({ ...s, ...o }), [s, o]);
 };
