@@ -1,6 +1,6 @@
 import {
   User, MapPin, CreditCard, Bell, Heart, ShoppingBag, Settings, HelpCircle,
-  ShieldCheck,
+  ShieldCheck, Users2,
   type LucideIcon,
 } from "lucide-react";
 
