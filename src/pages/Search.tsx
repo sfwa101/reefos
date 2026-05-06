@@ -13,7 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { products, useProducts, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
@@ -121,12 +121,11 @@ const SearchPage = () => {
   // We then map the product hits back to full `Product` objects via the
   // in-memory cache so the rest of the page (filters, sort, group-by-cat,
   // ProductCard rendering) keeps its existing contract unchanged.
-  const { products: catalog } = useProducts();
-  const { hits } = useUniversalSearch(q);
+  const { hits, products: serverProducts } = useUniversalSearch(q);
 
   const localMatches = useMemo<Product[]>(() => {
     if (!q.trim()) return [];
-    const byId = new Map(catalog.map((p) => [p.id, p] as const));
+    const byId = new Map(serverProducts.map((p) => [p.id, p] as const));
     const out: Product[] = [];
     for (const h of hits) {
       if (h.kind !== "product") continue;
@@ -134,7 +133,7 @@ const SearchPage = () => {
       if (full) out.push(full);
     }
     return out;
-  }, [q, hits, catalog]);
+  }, [q, hits, serverProducts]);
 
   // Pull additional results from Supabase (server-side products that may not
   // be in the in-memory `products` cache yet). De-duplicated by id.
