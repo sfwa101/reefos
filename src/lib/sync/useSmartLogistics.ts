@@ -137,3 +137,33 @@ export function useSmartLogistics() {
 
   return { ops, loaded };
 }
+
+/* ── Phase T-B: nearest-driver lookup via PostGIS RPC ───────────── */
+export type NearestDriver = {
+  driver_id: string;
+  distance_m: number;
+  updated_at: string;
+};
+
+/**
+ * Calls `find_nearest_drivers` RPC. Used by the dispatch engine to
+ * assign a real driver instead of falling through to the null queue.
+ */
+export async function findNearestDrivers(
+  lat: number,
+  lng: number,
+  radiusMeters = 5_000,
+  limit = 5,
+): Promise<NearestDriver[]> {
+  const { data, error } = await supabase.rpc("find_nearest_drivers", {
+    p_lat: lat,
+    p_lng: lng,
+    p_radius_m: radiusMeters,
+    p_limit: limit,
+  });
+  if (error) {
+    console.error("[findNearestDrivers] failed", error.message);
+    return [];
+  }
+  return (data ?? []) as NearestDriver[];
+}
