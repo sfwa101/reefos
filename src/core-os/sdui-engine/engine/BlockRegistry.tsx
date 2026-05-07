@@ -12,6 +12,10 @@ import { SduiHeroBlock } from "../blocks/SduiHeroBlock";
 import { SduiBentoBlock } from "../blocks/SduiBentoBlock";
 import { SduiSmartRail } from "../blocks/SduiSmartRail";
 import { SduiModifierBlock } from "../blocks/SduiModifierBlock";
+import { SduiAppGridBlock } from "../blocks/SduiAppGridBlock";
+import { SduiOmniSearchBlock } from "../blocks/SduiOmniSearchBlock";
+import { SduiUnifiedStatusBlock } from "../blocks/SduiUnifiedStatusBlock";
+import { SduiBarqTrackingBlock } from "../blocks/SduiBarqTrackingBlock";
 
 export function renderBlock(block: SduiBlock): ReactElement | null {
   switch (block.type) {
@@ -23,6 +27,14 @@ export function renderBlock(block: SduiBlock): ReactElement | null {
       return <SduiSmartRail block={block} />;
     case "modifier_group":
       return <SduiModifierBlock block={block} />;
+    case "app_grid":
+      return <SduiAppGridBlock block={block} />;
+    case "omni_search":
+      return <SduiOmniSearchBlock block={block} />;
+    case "unified_status":
+      return <SduiUnifiedStatusBlock />;
+    case "barq_tracking":
+      return <SduiBarqTrackingBlock block={block} />;
     default: {
       // Exhaustiveness guard — adding a new SduiBlock variant forces
       // a compile error here until it's wired in.

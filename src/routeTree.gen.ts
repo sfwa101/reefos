@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as PosRouteImport } from './routes/pos'
+import { Route as KhalilRouteImport } from './routes/khalil'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -151,6 +152,11 @@ const VendorRoute = VendorRouteImport.update({
 const PosRoute = PosRouteImport.update({
   id: '/pos',
   path: '/pos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KhalilRoute = KhalilRouteImport.update({
+  id: '/khalil',
+  path: '/khalil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeeRoute = EmployeeRouteImport.update({
@@ -818,6 +824,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
+  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
@@ -949,6 +956,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
+  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
@@ -1083,6 +1091,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
+  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
@@ -1220,6 +1229,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
+    | '/khalil'
     | '/pos'
     | '/vendor'
     | '/account'
@@ -1351,6 +1361,7 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/employee'
+    | '/khalil'
     | '/pos'
     | '/affiliate'
     | '/cart'
@@ -1484,6 +1495,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
+    | '/khalil'
     | '/pos'
     | '/vendor'
     | '/_app/account'
@@ -1620,6 +1632,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
+  KhalilRoute: typeof KhalilRoute
   PosRoute: typeof PosRoute
   VendorRoute: typeof VendorRouteWithChildren
 }
@@ -1638,6 +1651,13 @@ declare module '@tanstack/react-router' {
       path: '/pos'
       fullPath: '/pos'
       preLoaderRoute: typeof PosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/khalil': {
+      id: '/khalil'
+      path: '/khalil'
+      fullPath: '/khalil'
+      preLoaderRoute: typeof KhalilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employee': {
@@ -2912,6 +2932,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
+  KhalilRoute: KhalilRoute,
   PosRoute: PosRoute,
   VendorRoute: VendorRouteWithChildren,
 }

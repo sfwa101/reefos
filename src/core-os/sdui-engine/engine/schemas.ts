@@ -138,11 +138,50 @@ export const ModifierGroupBlockSchema = z.object({
   ]),
 });
 
+/* Phase VIII — Khalil Super-App blocks */
+export const AppGridBlockSchema = z.object({
+  type: z.literal("app_grid"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().max(80).optional(),
+    /** App registry IDs to render. Use ["*"] for all visible apps. */
+    appIds: z.array(z.string().min(1).max(64)).min(1).max(24),
+  }),
+});
+
+export const OmniSearchBlockSchema = z.object({
+  type: z.literal("omni_search"),
+  id: z.string().min(1),
+  props: z.object({
+    placeholder: z.string().max(120).optional(),
+    scopes: z.array(z.enum(["reef", "asrab", "nabd"])).min(1),
+  }),
+});
+
+export const UnifiedStatusBlockSchema = z.object({
+  type: z.literal("unified_status"),
+  id: z.string().min(1),
+  props: z.object({}).optional().default({}),
+});
+
+export const BarqTrackingBlockSchema = z.object({
+  type: z.literal("barq_tracking"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().max(80).optional(),
+    subtitle: z.string().max(120).optional(),
+  }),
+});
+
 export const BlockSchema = z.discriminatedUnion("type", [
   HeroBlockSchema,
   BentoGridBlockSchema,
   SmartRailBlockSchema,
   ModifierGroupBlockSchema,
+  AppGridBlockSchema,
+  OmniSearchBlockSchema,
+  UnifiedStatusBlockSchema,
+  BarqTrackingBlockSchema,
 ]);
 
 export type SduiModifierGroupBlock = z.infer<typeof ModifierGroupBlockSchema>;
@@ -151,6 +190,10 @@ export type SduiBlock = z.infer<typeof BlockSchema>;
 export type SduiHeroBlock = z.infer<typeof HeroBlockSchema>;
 export type SduiBentoBlock = z.infer<typeof BentoGridBlockSchema>;
 export type SduiRailBlock = z.infer<typeof SmartRailBlockSchema>;
+export type SduiAppGridBlock = z.infer<typeof AppGridBlockSchema>;
+export type SduiOmniSearchBlock = z.infer<typeof OmniSearchBlockSchema>;
+export type SduiUnifiedStatusBlock = z.infer<typeof UnifiedStatusBlockSchema>;
+export type SduiBarqTrackingBlock = z.infer<typeof BarqTrackingBlockSchema>;
 
 /**
  * Defensive parser: never throws. Drops any block that fails validation
