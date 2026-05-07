@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 import { appRegistry } from "@/core-os/app-registry";
 
-const STORAGE_KEY = "salsabil.dev.khalilAsDefault";
+const STORAGE_KEY = "salsabil.dev.maeenAsDefault";
+const LEGACY_STORAGE_KEYS = [
+  "salsabil.dev.khalilAsDefault",
+  "salsabil.dev.diwanAsDefault",
+];
 const GOD_MODE_KEY = "salsabil.dev.godMode";
 
 type NexusLink = {
