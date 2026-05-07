@@ -95,12 +95,19 @@ const VisionGenesisUploader = ({ onApprove }: Props) => {
     }
   };
 
-  const approve = () => {
+  const approve = async () => {
     if (!payload) return;
-    console.log("[Genesis] Approve & Mint USA →", payload);
-    onApprove?.(payload);
-    toast.success("تم اعتماد الأصل (سيتم الحفظ في المرحلة 3)");
-    reset();
+    try {
+      await mintMutation.mutateAsync({
+        asset: payload.asset,
+        skus: payload.skus,
+        financial_contract: payload.financial_contract,
+      });
+      onApprove?.(payload);
+      reset();
+    } catch {
+      // toast handled in hook
+    }
   };
 
   return (
