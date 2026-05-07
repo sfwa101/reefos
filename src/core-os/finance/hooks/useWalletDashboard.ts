@@ -223,6 +223,7 @@ export const useWalletDashboard = () => {
     categoryStats,
     monthByCat,
     totalSavings,
+    appSpend,
     referralCode,
     referrals,
     jar,
