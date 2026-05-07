@@ -2,8 +2,8 @@
 ### Reef Almadina Super-App · Sovereign Scaling Manifesto
 
 > **Status:** Permanent architectural record. Not a backlog — a constitution for deferred high-level optimizations.
-> **Audience:** Future engineers (human + AI) inheriting the platform post Phase L.
-> **Last updated:** Phase L complete (Settlement Engine + Real-Time Triggers live).
+ > **Audience:** Future engineers (human + AI) inheriting the platform post Phase L.
+> **Last updated:** Phase VIII-Dev v3 — Al-Diwan Sovereign Hub live, Salsabil Dev-Node hardened, God-Mode QA fabric in place. (Earlier baseline: Phase L — Settlement Engine + Real-Time Triggers.)
 
 ---
 
