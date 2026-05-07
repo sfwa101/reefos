@@ -98,6 +98,45 @@ export const ProductCard = ({
     toast.success(inCompare ? "أُزيل من المقارنة" : "أُضيف للمقارنة");
   };
 
+  if (variant === "minimal") {
+    return (
+      <article
+        onClick={onOpen}
+        className="group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card text-right shadow-soft ring-1 ring-border/50 transition active:scale-[0.98]"
+        style={{ contentVisibility: "auto", containIntrinsicSize: "200px 260px" }}
+      >
+        <div className="relative aspect-square overflow-hidden bg-secondary/40">
+          <OptimizedImage
+            src={p.image}
+            alt={p.name}
+            width={512}
+            height={512}
+            className="h-full w-full object-cover object-center"
+            wrapperClassName="absolute inset-0"
+          />
+        </div>
+        <div className="flex flex-1 flex-col gap-2 p-3">
+          <h3 className="line-clamp-1 text-[13px] font-bold leading-tight text-foreground">
+            {p.name}
+          </h3>
+          <div className="mt-auto flex items-end justify-between">
+            <span className="font-display text-lg font-extrabold tabular-nums">
+              {toLatin(p.price.toLocaleString("en-US"))}
+              <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
+            </span>
+            <button
+              onClick={handleAdd}
+              aria-label="أضف إلى السلة"
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
+            >
+              <Plus className="h-4 w-4" strokeWidth={3} />
+            </button>
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article
       onClick={onOpen}
