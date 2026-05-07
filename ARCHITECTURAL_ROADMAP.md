@@ -289,3 +289,25 @@ Classical PIMs (Akeneo, Pimcore, even Shopify's product/variant model) hard-code
 - ✅ **Staged**: `docs/migrations-staging/20260507_salsabil_universal_engine.sql` (4 tables, 3 enums, RLS, validation triggers, GIN indexes on jsonb).
 - ⏳ **Application & AI-Genesis Admin UI**: Phase 7 Part 2.
 - 🛡️ **Live `products` table left intact** — zero downtime cutover planned.
+
+---
+
+## 🛰️ Phase 7 Part 2 — Zero-Touch AI Genesis (Vision Portal) ✅
+
+The polymorphic schema is staged; populating it now happens in **one tap**. An admin snaps a photo (product, supplier invoice, service flyer, contract) and Hakim Vision returns the entire Universal Salsabil Asset payload — Asset + SKUs + Financial Contract — ready to mint.
+
+### Components shipped
+| Layer | File | Role |
+|---|---|---|
+| Edge Function | `supabase/functions/vision_genesis/index.ts` | Auth-gated multimodal call to `google/gemini-2.5-pro` via Lovable AI Gateway. Forces the `generate_usa_payload` tool call and sanitizes enums + numeric ranges. |
+| Client Adapter | `src/core-os/hakim-ai/hooks/useVisionGenesis.ts` | TanStack mutation: File → base64 → invoke. Typed errors (`rate_limited`, `credits_exhausted`, `ai_error`, …). |
+| Admin UI | `src/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader.tsx` | Drag & drop + native camera capture. "Genesis Review Board" renders Asset, SKUs, Financial Contract. **Approve & Mint USA** logs the payload (DB insert deferred to Part 3 for zero-downtime cutover). |
+
+### Tool-call schema (anti-hallucination)
+- `asset.asset_type` ∈ `{physical, digital, service, rental, milestone_project}`
+- `financial_contract.pricing_model` ∈ `{flat, tiered_wholesale, subscription, deposit_and_rental, milestone_installments}`
+- All free-form fields length-capped, numeric prices clamped ≥ 0, currency restricted to `EGP|USD|EUR`.
+
+### Next (Part 3)
+- Wire **Approve & Mint USA** to a server function inserting into `salsabil_assets` + `salsabil_skus` + `salsabil_financial_contracts` atomically.
+- Dual-write shim from legacy `products` to the new tables.
