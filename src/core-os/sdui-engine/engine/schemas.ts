@@ -116,6 +116,23 @@ export const ModifierGroupBlockSchema = z.object({
       max: z.number().int().optional(),
       step: z.number().int().positive().optional(),
       accent: z.enum(ACCENTS).optional(),
+    z.object({
+      kind: z.literal("visual"),
+      id: z.string().min(1),
+      title: z.string().min(1).max(80),
+      mode: z.enum(["single", "multi"]),
+      required: z.boolean().optional(),
+      icon: z.string().max(8).optional(),
+      accent: z.enum(ACCENTS).optional(),
+      options: z.array(
+        z.object({
+          id: z.string().min(1).max(64),
+          label: z.string().min(1).max(120),
+          color: z.string().max(64).optional(),
+          image: z.string().url().max(512).optional(),
+          disabled: z.boolean().optional(),
+        }),
+      ).min(1).max(48),
     }),
   ]),
 });
