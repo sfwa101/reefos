@@ -4,7 +4,8 @@ import BackHeader from "@/components/BackHeader";
 import { products } from "@/lib/products";
 import { storeThemes } from "@/lib/storeThemes";
 import BasketCard from "@/components/baskets/BasketCard";
-import { loadSubs, findFrequency, type SubscriptionRecord } from "@/lib/baskets";
+import { findFrequency } from "@/lib/baskets";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { Sparkles, PackagePlus, ShoppingBasket, CalendarClock, ChevronLeft } from "lucide-react";
 
@@ -20,10 +21,10 @@ const categories = [
 const Baskets = () => {
   const theme = storeThemes.baskets;
   const [active, setActive] = useState("all");
-  const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
+  const { subs } = useSubscriptions();
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => { setSubs(loadSubs()); setMounted(true); }, []);
+  useEffect(() => { setMounted(true); }, []);
 
   const list = useMemo(() => {
     const all = products.filter((p) => p.source === "baskets");
