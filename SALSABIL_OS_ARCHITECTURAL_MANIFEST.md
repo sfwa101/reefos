@@ -52,7 +52,7 @@ The shared kernel that powers every app in the Salsabil family.
 | `barq-logistics/` | **BARQ (برق)** — geo zones, smart routing, delivery quotes |
 | `modifier-engine/` | **Universal Modifier Atoms** — vertical-agnostic product configurators |
 | `capabilities/` | **Scoped Capability Atoms** — search/scope primitives reused by every app |
-| `ui/` | **OS-level UI atoms** — `SalsabilStatusBar` (hydration-safe identity + wallet ribbon) |
+| `ui/` | **OS-level UI atoms** — `SalsabilStatusBar` (hydration-safe identity + wallet ribbon). **Phase 3 adoption:** Apple-tier mobile primitives — `useLongPress` (Quick-Peek pointer hook, 400ms + 15ms haptic) and `vaul` Drawer with `snapPoints={[0.8, 1]}` for in-context product overlays (`ProductPeekSheet`). Both are kernel-grade primitives reusable across every app shell. |
 
 ## 🏘️ Family of Apps: `src/apps/`
 | App | ID | Route | Status | Scope |
