@@ -42,9 +42,11 @@ const labelFor = (kind: string, source: string | null): string => {
 export const InsightsDockContent = ({
   userId,
   data,
+  appSpend = [],
 }: {
   userId: string | null;
   data?: ReturnType<typeof useWalletTransactions>;
+  appSpend?: AppSpend[];
 }) => {
   const fallback = useWalletTransactions(data ? null : userId);
   const { rows, loading } = data ?? fallback;
