@@ -345,3 +345,13 @@ The USAEditor is now a true human-in-the-loop control surface — pure manual cr
 - **Co-Pilot Handshake**: `VisionGenesisUploader` gained a `handoffOnly` prop. In the Editor's Genesis tab the uploader runs in handoff mode — instead of minting, it returns the parsed `USAGenesisPayload` to the Editor, which auto-fills local state, stores the AI draft (preserving `traits`, `skus`, `contract_rules`), and switches the active tab to "أساسي". A dismissible draft banner signals the AI's contribution.
 - **Smart Save Action**: A unified "حفظ" button calls `useMintUSA` when `isNew` (merging manual fields with any AI draft side-data) and `useUpdateUSA` otherwise. Loader copy adapts ("جاري سكّ الأصل…" vs "جاري الحفظ والتزامن…").
 - **Files**: `src/apps/reef-al-madina/features/admin/usa-editor/USAEditor.tsx`, `src/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader.tsx`.
+
+## Phase 8 Part 2 — Decentralized Inventory Matrix
+
+Salsabil stock is no longer a single integer — it is a SKU × Location/Vendor matrix powering multi-vendor logistics:
+
+- **Schema**: Added unique index `uq_salsabil_inventory_sku_location` on `(sku_id, COALESCE(location_code, ''))` so each location/vendor holds at most one row per SKU.
+- **RPC**: `public.upsert_inventory_matrix(p_sku_id uuid, p_location_id text, p_inventory_type text, p_availability jsonb)` — `SECURITY DEFINER`, `search_path=public`, admin-gated via `has_role`. Inserts or updates the matrix row keyed by `(sku_id, location_code)` and stores stock as JSONB (e.g. `{"count": 50}`), keeping room for duration/capacity/binary inventory types.
+- **Hook**: `src/core-os/hakim-ai/hooks/useInventoryMatrix.ts` — `useInventoryMatrix(skuId)` query + `useUpdateInventory` mutation invalidating `["salsabil_inventory", sku_id]`.
+- **UI**: `src/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel.tsx` — SKU selector, dynamic rows pairing "موقع المخزن/البائع" text input with a numeric quantity, add/remove controls, bulk save.
+- **USAEditor wiring**: The "المخزون" tab now branches on `assetType` — physical assets render the matrix panel, non-physical show a localized "coming soon" notice for capacity/time-slot inventory, and unsaved drafts prompt to mint first.
