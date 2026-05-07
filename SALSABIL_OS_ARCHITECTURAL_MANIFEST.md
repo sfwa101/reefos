@@ -104,6 +104,17 @@ Master flag for admin QA. Sources, in order: `window.__SALSABIL_GOD_MODE__`, `wi
 
 ---
 
+## 🗄️ Database Schema Principles (Phase 4 codification)
+
+The DB layer is governed by four invariants — Phase 4's Hakim Predictive Cart work is the first to fully exercise all four:
+
+1. **Single source of truth, no localStorage shadows.** Any state that needs to survive a device switch lives in Postgres under RLS. The legacy `localStorage["reef-subscriptions-v1"]` store and `src/lib/buyAgain.ts` are being decommissioned in favour of `public.saved_baskets` and `public.order_items` respectively.
+2. **Polymorphic tables over forked schemas.** When several persisted concepts share a shape (manual basket, predicted basket, recurring subscription), they live in one table discriminated by a `source` enum (e.g. `saved_baskets.source`). We do not maintain parallel `subscriptions` / `predictions` tables.
+3. **Materialized views feed AI context, never the UI directly.** Aggregations used by Hakim (e.g. `public.user_product_frequency` over `orders ⨝ order_items`) are materialized for cheap repeated reads, indexed uniquely on their natural key to support `REFRESH ... CONCURRENTLY`, and have `select` revoked from `authenticated` — only `SECURITY DEFINER` functions and service-role callers (the Hakim edge function) may read them. UI hooks must never query a materialized view directly.
+4. **RLS is the perimeter, edge functions are the lens.** Per-user tables enforce `auth.uid() = user_id` for every CRUD path. Cross-user aggregations live behind edge functions / `SECURITY DEFINER` RPCs that scope reads explicitly.
+
+---
+
 ## 🌳 Physical Tree (depth ≤ 10)
 
 ```

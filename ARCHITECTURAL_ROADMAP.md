@@ -195,3 +195,30 @@ Reef Al Madina ceases to be a customer of Fawry/Basata and becomes their **compe
 - **Single source of truth** per vertical — no parallel page implementations.
 - **Detail logic stays in `apps/reef-al-madina/features/product-detail/`** — both the route page and the peek sheet compose the same blocks.
 - **Kernel-grade primitives** (`useLongPress`, vaul snap-points) are documented in the manifest and available to every app shell.
+
+---
+
+## Phase 4 — Hakim Predictive Cart 🚧 (in progress, opened 2026-05-07)
+
+**Vision:** a 1-tap, AI-populated cart. Hakim infers the user's recurring basket from purchase history + temporal context (time of day, weekday/weekend, season) and surfaces it as a single accept-or-edit suggestion in Cart and Home empty states.
+
+### Part 1 — DB Sovereignty (current)
+Lay the database primitives required for prediction and for cross-device subscription persistence. **No prediction logic ships in Part 1** — only the storage and aggregation layer.
+
+1. **`public.saved_baskets`** — single home for *all* persistent baskets (`source ∈ {'manual', 'predicted', 'subscription'}`). Replaces the legacy `localStorage["reef-subscriptions-v1"]` store. RLS-scoped per `user_id`. Items stored as `jsonb` to stay forward-compatible with line-meta evolution (variants, print configs, booking slots).
+2. **`public.user_product_frequency`** — *materialized view* over `orders ⨝ order_items` exposing `qty_total`, `order_count`, `last_ordered_at`, and `avg_interval_days` per `(user_id, product_id)`. Unique index enables `REFRESH MATERIALIZED VIEW CONCURRENTLY` from a future pg_cron job. Access is revoked from `authenticated` — only service-role / SECURITY DEFINER callers (the Hakim edge function) read it.
+3. **Code cleanup** — `src/lib/buyAgain.ts` deleted (DB-backed `useBuyAgainProducts` is the sole source). `src/lib/baskets.ts` annotated with the migration TODO; logic untouched until Part 2.
+
+Migration is **staged** at `docs/migrations-staging/20260507_hakim_predictive_cart.sql` and not yet applied to the live DB.
+
+### Part 2 — Subscription migration & predictive surfaces (next)
+- One-time client-side sync: read `localStorage["reef-subscriptions-v1"]` → upsert into `saved_baskets` (`source = 'subscription'`) → mark migrated.
+- `useReplaceCart(lines)` action + confirmation toast for the 1-tap apply UX.
+- `predict_basket(_user_id, _context jsonb)` edge function: pulls from `user_product_frequency` + `frequently_bought_together` + temporal context, calls Lovable AI, persists the suggestion as `source = 'predicted'`.
+- pg_cron job: `REFRESH MATERIALIZED VIEW CONCURRENTLY public.user_product_frequency` nightly.
+- `PredictiveBasketCard` in Cart empty state and Home — "Hakim suggests your weekly basket · 1-tap" with a diff vs. current cart.
+
+### Architectural invariants
+- **DB is the single source of truth for persistent baskets** — no localStorage shadow stores survive Phase 4.
+- **Materialized views feed AI context, never the UI directly** — RLS-bypassing reads are confined to SECURITY DEFINER callers.
+- **One table, one shape** — `saved_baskets` is polymorphic via `source`; we do not fork a separate `subscriptions`/`predictions`/`manual_baskets` schema.

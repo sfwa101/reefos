@@ -284,7 +284,13 @@ export const STORAGE = {
   giftMeta: "reef-gift-meta-v1",
 } as const;
 
-/* ===== Subscription store (localStorage) ===== */
+/* ===== Subscription store (localStorage) =====
+ * @TODO: PHASE 4 - Migrate localStorage subscriptions to supabase saved_baskets table
+ * Target: public.saved_baskets (source = 'subscription'). Once migrated,
+ * loadSubs/saveSubs become a thin RLS-backed query layer and can be
+ * consumed cross-device by Hakim. See migration
+ * 20260507030000_hakim_predictive_cart.sql.
+ */
 
 export type SubscriptionRecord = {
   id: string;
