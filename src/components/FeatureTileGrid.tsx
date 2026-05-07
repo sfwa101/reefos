@@ -1,4 +1,5 @@
 import { ChevronLeft } from "lucide-react";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface FeatureTile {
   id: string;
@@ -29,11 +30,14 @@ const FeatureTileGrid = ({ tiles, onSelect }: FeatureTileGridProps) => {
             style={{ animationDelay: `${idx * 60}ms` }}
             aria-label={tile.title}
           >
-            <img
+            <OptimizedImage
               src={tile.image}
               alt=""
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105"
+              width={tile.size === "lg" ? 800 : 400}
+              height={tile.size === "lg" ? 560 : 280}
+              priority={idx < 2}
+              wrapperClassName="absolute inset-0"
+              className="h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105"
             />
             <div className="relative z-10 flex h-full flex-col justify-end p-4">
               <div className="flex items-end justify-between gap-2">

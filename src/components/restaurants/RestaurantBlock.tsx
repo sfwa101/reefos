@@ -9,6 +9,7 @@ import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import type { Restaurant } from "@/lib/restaurants";
 import RestaurantItemSheet from "./RestaurantItemSheet";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const resolve = (ids: string[]): Product[] =>
   ids.map((id) => ALL_PRODUCTS.find((p) => p.id === id)).filter((p): p is Product => !!p);
