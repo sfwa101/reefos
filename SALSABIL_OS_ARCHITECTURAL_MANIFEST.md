@@ -6,6 +6,18 @@
 
 ---
 
+## ⚖️ The Catalog Deduplication Rule (Phase 8 Part 3)
+
+Multiple vendors selling identical physical items **MUST** map to the same
+USA ID, utilizing the Inventory Matrix (`salsabil_inventory_matrix`) to
+differentiate locations / vendors / price tiers — **never** creating
+duplicate USA rows. Enforcement is performed pre-mint by the Sovereign
+Matchmaker (`useAssetMatchmaker` → `match_universal_asset` RPC over
+pgvector cosine similarity, threshold ≥ 0.85). A vendor adding stock to an
+existing item adds an inventory matrix row, not a new asset.
+
+---
+
 ## 🧭 Phase 2 Snapshot — What changed since Phase 1
 
 | Axis | Before (Phase 1) | After (Phase 2 — current) |
