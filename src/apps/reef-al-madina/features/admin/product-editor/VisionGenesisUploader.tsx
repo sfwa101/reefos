@@ -13,6 +13,7 @@ import {
   type USAGenesisPayload,
   type VisionGenesisError,
 } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
+import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 
 const ERROR_MESSAGES: Record<VisionGenesisError, string> = {
   rate_limited: "تم تجاوز حد الطلبات، حاول بعد قليل.",
