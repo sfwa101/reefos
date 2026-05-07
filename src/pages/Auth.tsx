@@ -47,13 +47,18 @@ const Auth = () => {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (toLatin(phone).replace(/\D/g, "").length < 10) { toast.error("أدخل رقم هاتف صحيح"); return; }
-    // Sovereign simplicity: 6+ chars, no complexity required per Emperor's decree.
-    if (password.length < 6) { toast.error("اختر كلمة سر من ٦ أحرف على الأقل — أي حروف أو أرقام"); return; }
+    // 🛡️ SOVEREIGN SIMPLICITY (HARD-CODED): only length >= 6. NO complexity, NO regex, NO symbols.
+    if (password.length < 6) { toast.error("6 أرقام على الأقل"); return; }
     if (mode === "signup" && fullName.trim().length < 2) { toast.error("أدخل اسمك الكامل"); return; }
     setBusy(true);
     try {
       const res = mode === "signin" ? await signInWithPhone(phone, password) : await signUpWithPhone(phone, password, fullName.trim());
-      if (res.error) toast.error(res.error);
+      if (res.error) {
+        const low = res.error.toLowerCase();
+        if (low.includes("weak") || low.includes("pwned") || low.includes("compromise")) {
+          toast.error("جرّب رقماً سرياً مختلفاً (٦ أرقام على الأقل)");
+        } else toast.error(res.error);
+      }
       else {
         await supabase.auth.getSession();
         const { data: { user: u } } = await supabase.auth.getUser();
@@ -89,7 +94,7 @@ const Auth = () => {
           </div>
           <div className="relative">
             <Lock className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-muted-foreground" />
-            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="كلمة السر" type={showPwd ? "text" : "password"} autoComplete={mode === "signin" ? "current-password" : "new-password"} className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 text-sm font-medium outline-none focus:border-primary" />
+            <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="كلمة السر (٦ أرقام)" type={showPwd ? "text" : "password"} inputMode="numeric" pattern="[0-9]*" autoComplete={mode === "signin" ? "current-password" : "new-password"} minLength={6} className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 text-sm font-medium outline-none focus:border-primary" />
             <button type="button" onClick={() => setShowPwd((v) => !v)} className="absolute inset-y-0 left-3 flex items-center text-muted-foreground" aria-label="إظهار كلمة السر">
               {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
