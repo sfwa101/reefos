@@ -120,17 +120,17 @@ export const DevOSNavigator = () => {
               transition={{ type: "spring", stiffness: 360, damping: 28 }}
               className="absolute bottom-16 left-0 flex w-56 flex-col items-stretch gap-2 rounded-[28px] border border-white/15 bg-black/50 p-2.5 shadow-2xl backdrop-blur-xl"
             >
-              {/* Al-Diwan sovereign hub — top, pulsing */}
+              {/* Maeen sovereign hub — top, pulsing */}
               <Link
-                to="/diwan"
+                to="/maeen"
                 onClick={() => setOpen(false)}
                 className="relative flex h-11 items-center justify-center gap-2 rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-400 to-orange-600 px-3 shadow-md transition active:scale-95"
-                title="Al-Diwan — Unified Empire Gateway"
+                title="معين — Unified Empire Gateway"
               >
                 <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/30" />
                 <Brain className="relative h-4 w-4 text-white drop-shadow" />
                 <span className="relative text-[11px] font-extrabold tracking-wide text-white drop-shadow">
-                  Al-Diwan · Sovereign Hub
+                  معين · Sovereign Hub
                 </span>
               </Link>
 
@@ -178,19 +178,19 @@ export const DevOSNavigator = () => {
                 <span className="text-[11px] font-bold text-white">Admin Nexus</span>
               </button>
 
-              {/* Khalil-as-default toggle */}
+              {/* Maeen-as-default toggle */}
               <label
                 className="flex cursor-pointer items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-[11px] font-bold text-white"
-                title="Set Khalil as Default Home"
+                title="Set Maeen as Default Home"
               >
                 <input
                   type="checkbox"
-                  checked={khalilDefault}
-                  onChange={(e) => setKhalilDefault(e.target.checked)}
+                  checked={maeenDefault}
+                  onChange={(e) => setMaeenDefault(e.target.checked)}
                   className="h-4 w-4 accent-amber-400"
                 />
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                <span className="leading-tight">Khalil as Default (Home)</span>
+                <span className="leading-tight">Maeen as Default (Home)</span>
               </label>
 
               {/* Absolute Manager Mode (God Mode) toggle */}
