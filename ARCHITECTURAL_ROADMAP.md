@@ -311,3 +311,10 @@ The polymorphic schema is staged; populating it now happens in **one tap**. An a
 ### Next (Part 3)
 - Wire **Approve & Mint USA** to a server function inserting into `salsabil_assets` + `salsabil_skus` + `salsabil_financial_contracts` atomically.
 - Dual-write shim from legacy `products` to the new tables.
+
+## Phase 7 — Part 3: Atomic Minting & Dual-Write Shim ✅
+
+- **Migration applied**: 4 polymorphic tables live (`salsabil_assets`, `salsabil_skus`, `salsabil_financial_contracts`, `salsabil_inventory_matrix`) with RLS (public read on active rows, admin-only writes), GIN indexes on jsonb traits/attributes, validation trigger on financial contracts.
+- **Atomic Minting RPC**: `public.mint_universal_asset(payload jsonb) RETURNS uuid` — `SECURITY DEFINER`, gated by `has_role(auth.uid(),'admin')`. In a single transaction it inserts the asset, all SKUs, the financial contract on the first SKU, and (if `asset_type = physical`) mirrors a row into the legacy `products` table under `category = 'usa-genesis'` with metadata `{usa_asset_id, usa_sku_id}` for backward-compat. `EXECUTE` revoked from `PUBLIC`, granted only to `authenticated`.
+- **Client Hook**: `src/core-os/hakim-ai/hooks/useMintUSA.ts` wraps the RPC in a TanStack mutation, invalidates `salsabil_assets` and `products` caches on success, surfaces success/error toasts in Arabic.
+- **UI Wired**: `VisionGenesisUploader.approve()` now calls `mintUSA.mutateAsync()`, shows a "جاري سكّ الأصل…" loader on the approve button, and resets cleanly on success.
