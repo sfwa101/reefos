@@ -1,43 +1,68 @@
 /**
- * HakimPredictiveBasket — 1-tap predictive cart UI (Phase 4.4 skeleton)
- * ----------------------------------------------------------------------
- * Sits at the top of the Cart (and later Home empty state). Surfaces a
- * single "Hakim's Weekly Basket" suggestion the user can accept with one
- * tap — replacing the current cart entirely.
- *
- * Part 5 will swap `mockSuggestion` for the `predict_basket(_user_id)`
- * edge-function call against `user_product_frequency`. The component
- * contract (lines + 1-tap apply) stays identical.
+ * HakimPredictiveBasket — 1-tap predictive cart UI (Phase 5)
+ * -----------------------------------------------------------
+ * Live wiring to the `predict_basket` edge function via
+ * `usePredictBasket()`. Shows a skeleton during fetch, gracefully
+ * hides on empty/error, and feeds the predicted lines into the
+ * 1-tap `replaceCart` action.
  */
 import { useMemo } from "react";
 import { Sparkles, ShoppingBasket } from "lucide-react";
-import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
 import { useReplaceCart } from "@/hooks/useReplaceCart";
+import { usePredictBasket, type PredictedBasketLine } from "@/core-os/hakim-ai/hooks/usePredictBasket";
+import { Skeleton } from "@/components/ui/skeleton";
 import { toLatin } from "@/lib/format";
 import type { CartLine } from "@/store/useCartStore";
+import type { Product } from "@/lib/products";
 
-const SUGGESTED_QTY: Record<string, number> = {
-  // best-effort — we just take the first N capped products and map qty=1
+const FALLBACK_IMG =
+  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
+
+const lineToCartLine = (l: PredictedBasketLine): CartLine => {
+  const product: Product = {
+    id: l.product_id,
+    name: l.name,
+    unit: l.unit,
+    price: l.price,
+    image: l.image || FALLBACK_IMG,
+    category: l.category,
+    source: "supermarket",
+  } as Product;
+  return { product, qty: l.quantity };
 };
 
 export function HakimPredictiveBasket({ className = "" }: { className?: string }) {
-  // Mock: pull the first 6 items the home query already cached.
-  const { data: catalog = [] } = useHomeProductsQuery(48, "home");
+  const { data, isLoading, isError } = usePredictBasket();
   const replaceCart = useReplaceCart();
 
-  const suggestion = useMemo(() => {
-    const picks = catalog.slice(0, 6).map((p) => ({
-      product: p,
-      qty: SUGGESTED_QTY[p.id] ?? 1,
-    })) as CartLine[];
-    const total = picks.reduce((s, l) => s + l.product.price * l.qty, 0);
-    return { lines: picks, total };
-  }, [catalog]);
+  const lines = useMemo(() => (data?.basket ?? []).map(lineToCartLine), [data]);
+  const total = useMemo(
+    () => lines.reduce((s, l) => s + l.product.price * l.qty, 0),
+    [lines],
+  );
 
-  if (suggestion.lines.length === 0) return null;
+  if (isLoading) {
+    return (
+      <section
+        className={`relative overflow-hidden rounded-[1.75rem] bg-gradient-to-br from-violet-600 via-fuchsia-600 to-rose-500 p-4 text-white shadow-tile ${className}`}
+      >
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-11 w-11 rounded-2xl bg-white/30" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-3 w-24 rounded-full bg-white/30" />
+            <Skeleton className="h-4 w-40 rounded-full bg-white/30" />
+          </div>
+        </div>
+        <Skeleton className="mt-3 h-7 w-full rounded-full bg-white/20" />
+        <Skeleton className="mt-3 h-10 w-full rounded-2xl bg-white/40" />
+      </section>
+    );
+  }
+
+  if (isError || !data || data.empty || lines.length === 0) return null;
 
   const handleApply = () => {
-    replaceCart(suggestion.lines, { message: "تم استبدال السلة بسلة الحكيم" });
+    replaceCart(lines, { message: "تم استبدال السلة بسلة الحكيم" });
   };
 
   return (
@@ -53,20 +78,20 @@ export function HakimPredictiveBasket({ className = "" }: { className?: string }
         </div>
         <div className="min-w-0 flex-1">
           <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-extrabold">
-            الحكيم AI · تجربة
+            الحكيم AI · تنبؤ ذكي
           </span>
           <h3 className="mt-1.5 font-display text-base font-extrabold leading-tight">
-            سلة الحكيم الأسبوعية
+            {data.headline}
           </h3>
           <p className="text-[11px] opacity-90">
-            {toLatin(suggestion.lines.length)} منتجات مختارة لك · تقدير {toLatin(Math.round(suggestion.total))} ج.م
+            {toLatin(lines.length)} منتجات · تقدير {toLatin(Math.round(total))} ج.م
+            {data.confidence ? ` · ثقة ${toLatin(Math.round(data.confidence * 100))}%` : ""}
           </p>
         </div>
       </div>
 
-      {/* Mini line preview */}
       <div className="relative mt-3 flex items-center gap-1.5 overflow-x-auto pb-1">
-        {suggestion.lines.slice(0, 6).map((l) => (
+        {lines.slice(0, 6).map((l) => (
           <div
             key={l.product.id}
             className="flex shrink-0 items-center gap-1.5 rounded-full bg-white/15 px-2 py-1 text-[10.5px] font-bold backdrop-blur"
