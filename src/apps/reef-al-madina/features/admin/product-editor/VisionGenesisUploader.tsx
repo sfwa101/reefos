@@ -99,6 +99,11 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
 
   const approve = async () => {
     if (!payload) return;
+    if (handoffOnly) {
+      onApprove?.(payload);
+      reset();
+      return;
+    }
     try {
       await mintMutation.mutateAsync({
         asset: payload.asset,
