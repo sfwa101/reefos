@@ -29,15 +29,14 @@ const HomeRedirector = ({ children }: { children: ReactNode }) => {
     // client-side surfaces (Reef, Khalil, etc.) for QA and testing.
     // Also honor the dev "Absolute Manager Mode" flag and "Khalil-as-Default".
     const godMode = isGodMode();
-    const khalilDefault =
+    const maeenDefault =
       typeof window !== "undefined" &&
-      (window.localStorage.getItem("salsabil.dev.khalilAsDefault") === "1" ||
-        window.localStorage.getItem("salsabil.dev.diwanAsDefault") === "1");
+      window.localStorage.getItem("salsabil.dev.maeenAsDefault") === "1";
     const isAdminish = roles.some((r) =>
       ["admin", "branch_manager", "store_manager", "finance"].includes(r),
     );
     fired.current = true;
-    if (godMode || khalilDefault || isAdminish) return;
+    if (godMode || maeenDefault || isAdminish) return;
     const saved = readActiveView();
     const view = pickDefaultView(roles, saved);
     if (view !== "customer" && VIEW_PATHS[view] !== "/") {
