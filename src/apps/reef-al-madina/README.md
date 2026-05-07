@@ -1,0 +1,10 @@
+# Reef Al Madina (ريف المدينة)
+
+Primary retail super-app of Salsabil OS. Houses storefront, supermarket, meat, pharmacy, recipes, sweets, library, baskets, group-buy, POS, vendor, driver, account, and the main-hub launcher.
+
+All features here consume the OS kernel under `@/core-os/*`:
+- **Tayseer** (`@/core-os/finance`) — wallet, balance, savings, charity
+- **Hakim AI** (`@/core-os/hakim-ai`) — central intelligence brain
+- **SDUI Engine** (`@/core-os/sdui-engine`) — server-driven layouts
+- **Barq Logistics** (`@/core-os/barq-logistics`) — geo + delivery (formerly Mrsool/Rawafid)
+- **System Editor** (`@/core-os/system-editor`) — visual layout editor
