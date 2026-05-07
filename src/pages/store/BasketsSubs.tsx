@@ -1,40 +1,32 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import {
-  loadSubs,
-  saveSubs,
   findFrequency,
   hoursToDelivery,
   isLocked,
   LOCK_WINDOW_HOURS,
   type SubscriptionRecord,
 } from "@/lib/baskets";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { Pause, Play, Trash2, Clock, Lock, CalendarClock, Wallet, Sparkles, ShoppingBasket } from "lucide-react";
 
 const BasketsSubs = () => {
-  const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
-  useEffect(() => { setSubs(loadSubs()); }, []);
+  const { subs, isAuthed, updateSubscription, deleteSubscription } = useSubscriptions();
 
-  const update = (next: SubscriptionRecord[]) => { setSubs(next); saveSubs(next); };
-
-  const togglePause = (id: string) => {
-    update(subs.map((s) => s.id === id ? { ...s, paused: !s.paused } : s));
+  const togglePause = async (s: SubscriptionRecord) => {
+    await updateSubscription({ ...s, paused: !s.paused });
     toast.success("تم تحديث الاشتراك");
   };
-  const remove = (id: string) => {
-    update(subs.filter((s) => s.id !== id));
+  const remove = async (id: string) => {
+    await deleteSubscription(id);
     toast.success("تم إلغاء الاشتراك");
   };
-  const skipNext = (id: string) => {
-    update(subs.map((s) => {
-      if (s.id !== id) return s;
-      const f = findFrequency(s.frequency);
-      const nd = new Date(new Date(s.nextDelivery).getTime() + f.cadenceDays * 86400000).toISOString();
-      return { ...s, nextDelivery: nd };
-    }));
+  const skipNext = async (s: SubscriptionRecord) => {
+    const f = findFrequency(s.frequency);
+    const nd = new Date(new Date(s.nextDelivery).getTime() + f.cadenceDays * 86400000).toISOString();
+    await updateSubscription({ ...s, nextDelivery: nd });
     toast.success("تم تأجيل التوصيلة القادمة");
   };
 
@@ -145,14 +137,14 @@ const BasketsSubs = () => {
                 {/* Actions */}
                 <div className="grid grid-cols-3 gap-1.5 border-t border-border/50 p-2">
                   <button
-                    onClick={() => togglePause(s.id)}
+                    onClick={() => togglePause(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >
                     {s.paused ? <><Play className="h-3.5 w-3.5" /> استئناف</> : <><Pause className="h-3.5 w-3.5" /> إيقاف</>}
                   </button>
                   <button
-                    onClick={() => skipNext(s.id)}
+                    onClick={() => skipNext(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >

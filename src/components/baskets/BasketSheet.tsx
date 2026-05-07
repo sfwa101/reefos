@@ -12,9 +12,10 @@ import { fireMiniConfetti } from "@/lib/confetti";
 import { toLatin } from "@/lib/format";
 import {
   basketContents, basketMarketing, hydrateBasket, sumBasketRetail,
-  subFrequencies, findFrequency, loadSubs, saveSubs,
-  type SubFrequencyId, type SubscriptionRecord,
+  subFrequencies, findFrequency,
+  type SubFrequencyId,
 } from "@/lib/baskets";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import SmartSwapSheet from "./SmartSwapSheet";
 import AnimatedNumber from "./AnimatedNumber";
 
@@ -31,6 +32,7 @@ type Props = { product: Product; open: boolean; onClose: () => void };
 const BasketSheet = ({ product, open, onClose }: Props) => {
   const { add } = useCart();
   const { profile } = useAuth();
+  const { createSubscription, isAuthed } = useSubscriptions();
   const marketing = basketMarketing[product.id];
   const baseContents = basketContents[product.id] ?? [];
   const hasContents = baseContents.length > 0;
@@ -129,9 +131,11 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
     }
 
     if (mode === "subscribe") {
-      const subs = loadSubs();
-      const next: SubscriptionRecord = {
-        id: `sub-${Date.now()}`,
+      if (!isAuthed) {
+        toast.error("سجّل دخول لحفظ الاشتراك على جميع أجهزتك");
+        return;
+      }
+      void createSubscription({
         basketId: product.id,
         basketName: product.name,
         basketImage: product.image,
@@ -140,10 +144,8 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
         nextDelivery: new Date(Date.now() + freqObj.cadenceDays * 86400000).toISOString(),
         swaps,
         paused: false,
-        createdAt: new Date().toISOString(),
         giftMode: gift,
-      };
-      saveSubs([next, ...subs]);
+      });
       // Add ONE delivery to cart now, then redirect to Subscriptions dashboard.
       add(product, 1, {
         unitPrice: subscribePrice,

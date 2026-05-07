@@ -21,6 +21,7 @@ import { PremiumProgressBar } from "@/apps/reef-al-madina/features/cart/componen
 import { CartIncentiveProgress } from "@/apps/reef-al-madina/features/cart/components/CartIncentiveProgress";
 import { CartLoyaltyBar } from "@/apps/reef-al-madina/features/cart/components/CartLoyaltyBar";
 import { RechargeDialog } from "@/apps/reef-al-madina/features/cart/components/RechargeDialog";
+import { HakimPredictiveBasket } from "@/apps/reef-al-madina/features/cart/components/HakimPredictiveBasket";
 import type { SharedCartSplitType } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
@@ -50,7 +51,8 @@ const Cart = () => {
     return (
       <div className="px-4">
         <BackHeader title="سلتي" subtitle="جاهز للطلب" />
-        <div className="mt-12 flex flex-col items-center gap-4 text-center">
+        <HakimPredictiveBasket className="mt-4" />
+        <div className="mt-8 flex flex-col items-center gap-4 text-center">
           <div className="flex h-24 w-24 items-center justify-center rounded-[28px] bg-primary-soft">
             <ShoppingBag className="h-10 w-10 text-primary" strokeWidth={2} />
           </div>
