@@ -1,50 +1,13 @@
 /**
- * Phase 20 — Server-Driven UI types
- * ---------------------------------
- * Mirrors the `public.ui_layouts` table. The Admin ERP can edit
- * `section_order` (which sections render and in what order) and
- * `section_config` (per-section style/behaviour overrides) without
- * any code change — true Elementor-tier customisation.
+ * Reef SDUI types — re-export shim (Phase VIII-Restoration · V-1 Part A).
+ * The canonical owner of these types is now the kernel:
+ *   `@/core-os/sdui-engine/types`
+ * This file remains as a backward-compatibility re-export so existing
+ * Reef feature imports do not need to change in lockstep.
  */
-
-export type SectionKey =
-  | "HeroBanner"
-  | "CategoriesGrid"
-  | "FlashDeals"
-  | "BestSellersRail"
-  | "BundlesRail"
-  | "ProductsGrid"
-  | "SearchAndFilters"
-  // Phase 26 — Main Hub stem cells
-  | "MainSearchHeader"
-  | "StoryCircles"
-  | "PromotionSlider"
-  | "DepartmentGrid";
-
-export type SectionConfig = {
-  /** when false, the section is hidden even if listed in `section_order` */
-  enabled?: boolean;
-  /** Per-section style overrides — interpreted by individual sections. */
-  variant?: string;
-  padding?: "sm" | "md" | "lg";
-  tone?: "primary" | "accent" | "info" | "success" | "warning" | "teal";
-  sticky?: boolean;
-  hue?: string;
-  showTimer?: boolean;
-  density?: "compact" | "comfortable" | "spacious";
-};
-
-export type LayoutStatus = "draft" | "published";
-
-export type UiLayout = {
-  id: string;
-  page_key: string;
-  section_order: SectionKey[];
-  section_config: Partial<Record<SectionKey, SectionConfig>>;
-  /** Per-section custom display titles (Arabic). */
-  section_titles?: Partial<Record<SectionKey, string>>;
-  is_active: boolean;
-  status?: LayoutStatus;
-  version?: number;
-  title?: string | null;
-};
+export type {
+  SectionKey,
+  SectionConfig,
+  LayoutStatus,
+  UiLayout,
+} from "@/core-os/sdui-engine/types";

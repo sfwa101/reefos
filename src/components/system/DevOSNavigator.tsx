@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 import { appRegistry } from "@/core-os/app-registry";
 
-const STORAGE_KEY = "salsabil.dev.khalilAsDefault";
+const STORAGE_KEY = "salsabil.dev.maeenAsDefault";
+const LEGACY_STORAGE_KEYS = [
+  "salsabil.dev.khalilAsDefault",
+  "salsabil.dev.diwanAsDefault",
+];
 const GOD_MODE_KEY = "salsabil.dev.godMode";
 
 type NexusLink = {
@@ -50,9 +54,18 @@ export const DevOSNavigator = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [nexusOpen, setNexusOpen] = useState(false);
-  const [khalilDefault, setKhalilDefault] = useState<boolean>(() => {
+  const [maeenDefault, setMaeenDefault] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
+    if (window.localStorage.getItem(STORAGE_KEY) === "1") return true;
+    // One-shot migration from legacy "khalil"/"diwan" keys.
+    const migrated = LEGACY_STORAGE_KEYS.some(
+      (k) => window.localStorage.getItem(k) === "1",
+    );
+    if (migrated) {
+      window.localStorage.setItem(STORAGE_KEY, "1");
+      LEGACY_STORAGE_KEYS.forEach((k) => window.localStorage.removeItem(k));
+    }
+    return migrated;
   });
   const [godMode, setGodMode] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -61,8 +74,8 @@ export const DevOSNavigator = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, khalilDefault ? "1" : "0");
-  }, [khalilDefault]);
+    window.localStorage.setItem(STORAGE_KEY, maeenDefault ? "1" : "0");
+  }, [maeenDefault]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -70,14 +83,14 @@ export const DevOSNavigator = () => {
     const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
     w.__SALSABIL_GOD_MODE__ = godMode;
     w.SALSABIL_GOD_MODE = godMode;
-  }, [godMode, location.pathname]);
+  }, [godMode]);
 
   useEffect(() => {
-    if (!khalilDefault) return;
+    if (!maeenDefault) return;
     if (location.pathname === "/") {
-      navigate({ to: "/diwan", replace: true });
+      navigate({ to: "/maeen", replace: true });
     }
-  }, [khalilDefault, location.pathname, navigate]);
+  }, [maeenDefault, location.pathname, navigate]);
 
   // Close nexus when capsule collapses.
   useEffect(() => {
@@ -89,10 +102,10 @@ export const DevOSNavigator = () => {
   return (
     <div
       dir="ltr"
-      className="pointer-events-none fixed z-[60]"
+      className="pointer-events-none fixed z-[80]"
       style={{
         left: "max(16px, env(safe-area-inset-left))",
-        bottom: "calc(80px + env(safe-area-inset-bottom))",
+        bottom: "calc(120px + env(safe-area-inset-bottom))",
       }}
     >
       <div className="pointer-events-auto relative">
@@ -107,17 +120,17 @@ export const DevOSNavigator = () => {
               transition={{ type: "spring", stiffness: 360, damping: 28 }}
               className="absolute bottom-16 left-0 flex w-56 flex-col items-stretch gap-2 rounded-[28px] border border-white/15 bg-black/50 p-2.5 shadow-2xl backdrop-blur-xl"
             >
-              {/* Al-Diwan sovereign hub — top, pulsing */}
+              {/* Maeen sovereign hub — top, pulsing */}
               <Link
-                to="/diwan"
+                to="/maeen"
                 onClick={() => setOpen(false)}
                 className="relative flex h-11 items-center justify-center gap-2 rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-400 to-orange-600 px-3 shadow-md transition active:scale-95"
-                title="Al-Diwan — Unified Empire Gateway"
+                title="معين — Unified Empire Gateway"
               >
                 <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/30" />
                 <Brain className="relative h-4 w-4 text-white drop-shadow" />
                 <span className="relative text-[11px] font-extrabold tracking-wide text-white drop-shadow">
-                  Al-Diwan · Sovereign Hub
+                  معين · Sovereign Hub
                 </span>
               </Link>
 
@@ -165,19 +178,19 @@ export const DevOSNavigator = () => {
                 <span className="text-[11px] font-bold text-white">Admin Nexus</span>
               </button>
 
-              {/* Khalil-as-default toggle */}
+              {/* Maeen-as-default toggle */}
               <label
                 className="flex cursor-pointer items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-[11px] font-bold text-white"
-                title="Set Khalil as Default Home"
+                title="Set Maeen as Default Home"
               >
                 <input
                   type="checkbox"
-                  checked={khalilDefault}
-                  onChange={(e) => setKhalilDefault(e.target.checked)}
+                  checked={maeenDefault}
+                  onChange={(e) => setMaeenDefault(e.target.checked)}
                   className="h-4 w-4 accent-amber-400"
                 />
                 <Sparkles className="h-3.5 w-3.5 text-amber-300" />
-                <span className="leading-tight">Khalil as Default (Home)</span>
+                <span className="leading-tight">Maeen as Default (Home)</span>
               </label>
 
               {/* Absolute Manager Mode (God Mode) toggle */}

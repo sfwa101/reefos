@@ -168,8 +168,8 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
-        {/* Dev-Node mounted at the root so cache/provider failures cannot hide it. */}
-        {import.meta.env.DEV && <DevOSNavigator />}
+        {/* Dev-Node mounted at the root — visible in all builds (Phase VIII Restoration). */}
+        <DevOSNavigator />
       </QueryClientProvider>
     </GlobalErrorBoundary>
   );
