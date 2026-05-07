@@ -349,10 +349,10 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
           <button
             type="button"
             onClick={approve}
-            disabled={mintMutation.isPending}
+            disabled={!handoffOnly && mintMutation.isPending}
             className="w-full h-12 rounded-2xl bg-emerald-600 text-white text-[13px] font-extrabold press inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            {mintMutation.isPending ? (
+            {!handoffOnly && mintMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 جاري سكّ الأصل…
@@ -360,7 +360,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
             ) : (
               <>
                 <Check className="h-4 w-4" />
-                اعتماد وسكّ الأصل العالمي
+                {handoffOnly ? "تعبئة النموذج بالاقتراح" : "اعتماد وسكّ الأصل العالمي"}
               </>
             )}
           </button>
