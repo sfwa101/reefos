@@ -355,3 +355,22 @@ Salsabil stock is no longer a single integer — it is a SKU × Location/Vendor 
 - **Hook**: `src/core-os/hakim-ai/hooks/useInventoryMatrix.ts` — `useInventoryMatrix(skuId)` query + `useUpdateInventory` mutation invalidating `["salsabil_inventory", sku_id]`.
 - **UI**: `src/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel.tsx` — SKU selector, dynamic rows pairing "موقع المخزن/البائع" text input with a numeric quantity, add/remove controls, bulk save.
 - **USAEditor wiring**: The "المخزون" tab now branches on `assetType` — physical assets render the matrix panel, non-physical show a localized "coming soon" notice for capacity/time-slot inventory, and unsaved drafts prompt to mint first.
+
+---
+
+## 🧬 Phase 8 Part 3 — The Sovereign Matchmaker (Vector Dedup)
+
+**Strategy:** Vendor Catalog Deduplication via pgvector.
+
+**Cost-saving measure:** We use cheap text embeddings and native Postgres
+vector similarity to prevent duplicate USAs, ensuring a clean Amazon-style
+multi-vendor catalog. Future AI calls will utilize this semantic cache to
+bypass LLM processing.
+
+**Components shipped:**
+- Migration: `vector` extension enabled, `salsabil_assets.semantic_embedding vector(768)`, HNSW index with `vector_cosine_ops`.
+- RPC: `public.match_universal_asset(p_embedding vector(768), p_threshold float)` — `SECURITY DEFINER`, returns `(id, name, similarity)` ordered by cosine distance.
+- Edge function: `supabase/functions/generate_embedding` — proxies Lovable AI Gateway `google/text-embedding-004` (768-dim) with 429/402 surfaced.
+- Client hook: `src/core-os/hakim-ai/hooks/useAssetMatchmaker.ts` — `checkDuplicates(name, description, threshold=0.85)`.
+
+**Doctrine:** Pre-flight matchmaker runs BEFORE every USA mint; if matches ≥ threshold are returned, the Admin is presented with merge-into-existing UX instead of creating a duplicate row.

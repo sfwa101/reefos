@@ -5295,6 +5295,7 @@ export type Database = {
           is_active: boolean
           media: Json
           name: string
+          semantic_embedding: string | null
           traits: Json
           updated_at: string
         }
@@ -5308,6 +5309,7 @@ export type Database = {
           is_active?: boolean
           media?: Json
           name: string
+          semantic_embedding?: string | null
           traits?: Json
           updated_at?: string
         }
@@ -5321,6 +5323,7 @@ export type Database = {
           is_active?: boolean
           media?: Json
           name?: string
+          semantic_embedding?: string | null
           traits?: Json
           updated_at?: string
         }
@@ -8448,6 +8451,14 @@ export type Database = {
           name: string
           price: number
           stock: number
+        }[]
+      }
+      match_universal_asset: {
+        Args: { p_embedding: string; p_threshold?: number }
+        Returns: {
+          id: string
+          name: string
+          similarity: number
         }[]
       }
       mint_loyalty_points: { Args: { p_order_id: string }; Returns: string }
