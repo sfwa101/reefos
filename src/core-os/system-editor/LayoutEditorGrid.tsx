@@ -23,7 +23,7 @@ import {
 import { SECTION_REGISTRY, type PageKey } from "@/core-os/sdui-engine/registry";
 import type {
   SectionConfig, SectionKey,
-} from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
+} from "@/core-os/sdui-engine/types";
 
 const PAGE_TABS: { key: PageKey; label: string; previewPath: string }[] = [
   { key: "main_hub", label: "الرئيسية (Hero)", previewPath: "/" },

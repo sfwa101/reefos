@@ -98,7 +98,7 @@ import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success'
 import { Route as AppOffersRouteImport } from './routes/_app/offers'
-import { Route as AppDiwanRouteImport } from './routes/_app.diwan'
+import { Route as AppMaeenRouteImport } from './routes/_app.maeen'
 import { Route as AppCartRouteImport } from './routes/_app/cart'
 import { Route as AppAffiliateRouteImport } from './routes/_app/affiliate'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
@@ -590,9 +590,9 @@ const AppOffersRoute = AppOffersRouteImport.update({
   path: '/offers',
   getParentRoute: () => AppRoute,
 } as any)
-const AppDiwanRoute = AppDiwanRouteImport.update({
-  id: '/diwan',
-  path: '/diwan',
+const AppMaeenRoute = AppMaeenRouteImport.update({
+  id: '/maeen',
+  path: '/maeen',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCartRoute = AppCartRouteImport.update({
@@ -829,7 +829,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AppAccountRouteWithChildren
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
-  '/diwan': typeof AppDiwanRoute
+  '/maeen': typeof AppMaeenRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
   '/search': typeof AppSearchRoute
@@ -959,7 +959,7 @@ export interface FileRoutesByTo {
   '/pos': typeof PosRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
-  '/diwan': typeof AppDiwanRoute
+  '/maeen': typeof AppMaeenRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
   '/search': typeof AppSearchRoute
@@ -1096,7 +1096,7 @@ export interface FileRoutesById {
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/affiliate': typeof AppAffiliateRoute
   '/_app/cart': typeof AppCartRoute
-  '/_app/diwan': typeof AppDiwanRoute
+  '/_app/maeen': typeof AppMaeenRoute
   '/_app/offers': typeof AppOffersRoute
   '/_app/order-success': typeof AppOrderSuccessRoute
   '/_app/search': typeof AppSearchRoute
@@ -1234,7 +1234,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/affiliate'
     | '/cart'
-    | '/diwan'
+    | '/maeen'
     | '/offers'
     | '/order-success'
     | '/search'
@@ -1364,7 +1364,7 @@ export interface FileRouteTypes {
     | '/pos'
     | '/affiliate'
     | '/cart'
-    | '/diwan'
+    | '/maeen'
     | '/offers'
     | '/order-success'
     | '/search'
@@ -1500,7 +1500,7 @@ export interface FileRouteTypes {
     | '/_app/account'
     | '/_app/affiliate'
     | '/_app/cart'
-    | '/_app/diwan'
+    | '/_app/maeen'
     | '/_app/offers'
     | '/_app/order-success'
     | '/_app/search'
@@ -2261,11 +2261,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOffersRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/diwan': {
-      id: '/_app/diwan'
-      path: '/diwan'
-      fullPath: '/diwan'
-      preLoaderRoute: typeof AppDiwanRouteImport
+    '/_app/maeen': {
+      id: '/_app/maeen'
+      path: '/maeen'
+      fullPath: '/maeen'
+      preLoaderRoute: typeof AppMaeenRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/cart': {
@@ -2613,7 +2613,7 @@ interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRouteWithChildren
   AppAffiliateRoute: typeof AppAffiliateRoute
   AppCartRoute: typeof AppCartRoute
-  AppDiwanRoute: typeof AppDiwanRoute
+  AppMaeenRoute: typeof AppMaeenRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOrderSuccessRoute: typeof AppOrderSuccessRoute
   AppSearchRoute: typeof AppSearchRoute
@@ -2647,7 +2647,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRouteWithChildren,
   AppAffiliateRoute: AppAffiliateRoute,
   AppCartRoute: AppCartRoute,
-  AppDiwanRoute: AppDiwanRoute,
+  AppMaeenRoute: AppMaeenRoute,
   AppOffersRoute: AppOffersRoute,
   AppOrderSuccessRoute: AppOrderSuccessRoute,
   AppSearchRoute: AppSearchRoute,
@@ -2939,3 +2939,12 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}

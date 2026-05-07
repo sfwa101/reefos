@@ -8,7 +8,7 @@
  *
  * No arbitrary HTML, no string-eval — only props the registry approves.
  */
-import type { SectionKey } from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
+import type { SectionKey } from "./types";
 
 export type PageKey = "main_hub" | "home" | "sections" | "offers";
 
