@@ -1,6 +1,6 @@
 # 🏛️ SALSABIL OS — ARCHITECTURAL MANIFEST
 
-> **Generated:** Phase VIII-Dev v3 — Al-Diwan Sovereign Hub + Dev-Node hardening
+> **Generated:** Phase VIII-Dev v3 (Restoration active) — **Maeen (معين)** Sovereign Hub + Dev-Node hardened + Kernel Purification (Phase 2)
 > **Architecture:** Umbrella OS with kernel (`core-os/`) + Family of Apps (`apps/`) + Dev-Layer (`components/system/`)
 > **Last update:** 2026-05-07
 
