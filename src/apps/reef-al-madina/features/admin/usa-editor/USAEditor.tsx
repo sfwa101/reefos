@@ -342,7 +342,25 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
             </TabsContent>
 
             <TabsContent value="inventory" className="m-0">
-              <Placeholder icon={Boxes} title="مصفوفة المخزون متعدد الأبعاد" hint="عدّ مخزون، فترات زمنية، أو طاقة استيعابية حسب الموقع." />
+              {!asset ? (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[13px] font-display">احفظ الأصل أولاً</p>
+                  <p className="text-[11px] text-foreground-tertiary mt-1">
+                    إدارة المخزون متاحة بعد سكّ الأصل وتوليد SKUs.
+                  </p>
+                </div>
+              ) : assetType !== "physical" ? (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[13px] font-display">نوع غير مادي</p>
+                  <p className="text-[11px] text-foreground-tertiary mt-1 leading-relaxed">
+                    إدارة طاقة الاستيعاب أو الفترات الزمنية ستتوفر في التحديث القادم.
+                  </p>
+                </div>
+              ) : (
+                <InventoryMatrixPanel assetId={asset.id} />
+              )}
             </TabsContent>
 
             <TabsContent value="genesis" className="m-0">
