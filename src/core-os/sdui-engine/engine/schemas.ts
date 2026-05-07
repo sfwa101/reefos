@@ -67,11 +67,67 @@ export const SmartRailBlockSchema = z.object({
   }),
 });
 
+/**
+ * Modifier Group block — exposes the Universal Modifier Engine to SDUI.
+ * Lets the System Editor attach modifier "Puzzle Pieces" (single/multi
+ * choice, text input, quantity) to ANY product across the OS family.
+ */
+export const ModifierOptionBlockSchema = z.object({
+  id: z.string().min(1).max(64),
+  label: z.string().min(1).max(120),
+  price: z.number().nonnegative().optional(),
+  hint: z.string().max(80).optional(),
+  disabled: z.boolean().optional(),
+});
+
+const ACCENTS = ["primary", "rose", "violet", "emerald", "amber"] as const;
+
+export const ModifierGroupBlockSchema = z.object({
+  type: z.literal("modifier_group"),
+  id: z.string().min(1),
+  props: z.discriminatedUnion("kind", [
+    z.object({
+      kind: z.literal("selection"),
+      id: z.string().min(1),
+      title: z.string().min(1).max(80),
+      mode: z.enum(["single", "multi"]),
+      layout: z.enum(["list", "grid"]).optional(),
+      required: z.boolean().optional(),
+      icon: z.string().max(8).optional(),
+      accent: z.enum(ACCENTS).optional(),
+      options: z.array(ModifierOptionBlockSchema).min(1).max(48),
+    }),
+    z.object({
+      kind: z.literal("text"),
+      id: z.string().min(1),
+      title: z.string().min(1).max(80),
+      placeholder: z.string().max(160).optional(),
+      hint: z.string().max(80).optional(),
+      rows: z.number().int().min(1).max(8).optional(),
+      required: z.boolean().optional(),
+      icon: z.string().max(8).optional(),
+      accent: z.enum(ACCENTS).optional(),
+    }),
+    z.object({
+      kind: z.literal("quantity"),
+      id: z.string().min(1),
+      title: z.string().min(1).max(80),
+      min: z.number().int().optional(),
+      max: z.number().int().optional(),
+      step: z.number().int().positive().optional(),
+      accent: z.enum(ACCENTS).optional(),
+    }),
+  ]),
+});
+
 export const BlockSchema = z.discriminatedUnion("type", [
   HeroBlockSchema,
   BentoGridBlockSchema,
   SmartRailBlockSchema,
+  ModifierGroupBlockSchema,
 ]);
+
+export type SduiModifierGroupBlock = z.infer<typeof ModifierGroupBlockSchema>;
 
 export type SduiBlock = z.infer<typeof BlockSchema>;
 export type SduiHeroBlock = z.infer<typeof HeroBlockSchema>;
