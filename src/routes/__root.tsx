@@ -154,6 +154,7 @@ function RootComponent() {
                           <SubdomainGuard />
                           <Toaster />
                           <Outlet />
+                          {import.meta.env.DEV && <DevOSNavigator />}
                         </FavoritesProvider>
                       </CompareProvider>
                     </SharedCartProvider>
