@@ -32,6 +32,7 @@ type Props = { product: Product; open: boolean; onClose: () => void };
 const BasketSheet = ({ product, open, onClose }: Props) => {
   const { add } = useCart();
   const { profile } = useAuth();
+  const { createSubscription, isAuthed } = useSubscriptions();
   const marketing = basketMarketing[product.id];
   const baseContents = basketContents[product.id] ?? [];
   const hasContents = baseContents.length > 0;
