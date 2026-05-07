@@ -25,7 +25,7 @@ function getHost(): string {
 // Preview / localhost / lovable subdomains keep /admin reachable so that
 // staff can QA the admin surface without switching subdomains.
 const CUSTOMER_HOSTS = new Set(["reefam.com", "www.reefam.com"]);
-const OS_WHITELIST_PATHS = ["/khalil", "/admin/design", "/asrab", "/nabd"];
+const OS_WHITELIST_PATHS = ["/diwan", "/khalil", "/admin/design", "/asrab", "/nabd"];
 
 function isWhitelistedOsPath(path: string): boolean {
   return OS_WHITELIST_PATHS.some((allowed) => path === allowed || path.startsWith(`${allowed}/`));

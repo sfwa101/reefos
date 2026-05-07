@@ -4,8 +4,8 @@ import KhalilHub from "@/apps/khalil/pages/Hub";
 export const Route = createFileRoute("/_app/diwan")({
   head: () => ({
     meta: [
-      { title: "خليل — منصة سلسبيل" },
-      { name: "description", content: "بوابة سلسبيل الموحّدة لكل التطبيقات." },
+      { title: "الديوان — منصة سلسبيل" },
+      { name: "description", content: "بوابة الإمبراطورية الموحّدة لكل التطبيقات." },
     ],
   }),
   component: KhalilHub,

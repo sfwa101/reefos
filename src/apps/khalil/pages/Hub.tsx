@@ -57,7 +57,7 @@ const KhalilHub = () => {
         <div className="mx-auto max-w-2xl space-y-2">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-extrabold tracking-tight text-foreground">
-              خليل
+              الديوان
             </h1>
             <span className="text-[11px] font-bold text-muted-foreground">
               Salsabil OS
