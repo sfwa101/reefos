@@ -796,8 +796,10 @@ export type Database = {
           created_at: string
           icon: string | null
           id: string
+          mini_program_id: string | null
           name: string
           name_i18n: Json | null
+          node_type: string | null
           parent_id: string | null
           sort_order: number
         }
@@ -805,8 +807,10 @@ export type Database = {
           created_at?: string
           icon?: string | null
           id?: string
+          mini_program_id?: string | null
           name: string
           name_i18n?: Json | null
+          node_type?: string | null
           parent_id?: string | null
           sort_order?: number
         }
@@ -814,12 +818,21 @@ export type Database = {
           created_at?: string
           icon?: string | null
           id?: string
+          mini_program_id?: string | null
           name?: string
           name_i18n?: Json | null
+          node_type?: string | null
           parent_id?: string | null
           sort_order?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "categories_mini_program_id_fkey"
+            columns: ["mini_program_id"]
+            isOneToOne: false
+            referencedRelation: "mini_programs"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "categories_parent_id_fkey"
             columns: ["parent_id"]
