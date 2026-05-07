@@ -54,9 +54,18 @@ export const DevOSNavigator = () => {
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [nexusOpen, setNexusOpen] = useState(false);
-  const [khalilDefault, setKhalilDefault] = useState<boolean>(() => {
+  const [maeenDefault, setMaeenDefault] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem(STORAGE_KEY) === "1";
+    if (window.localStorage.getItem(STORAGE_KEY) === "1") return true;
+    // One-shot migration from legacy "khalil"/"diwan" keys.
+    const migrated = LEGACY_STORAGE_KEYS.some(
+      (k) => window.localStorage.getItem(k) === "1",
+    );
+    if (migrated) {
+      window.localStorage.setItem(STORAGE_KEY, "1");
+      LEGACY_STORAGE_KEYS.forEach((k) => window.localStorage.removeItem(k));
+    }
+    return migrated;
   });
   const [godMode, setGodMode] = useState<boolean>(() => {
     if (typeof window === "undefined") return false;
@@ -65,8 +74,8 @@ export const DevOSNavigator = () => {
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, khalilDefault ? "1" : "0");
-  }, [khalilDefault]);
+    window.localStorage.setItem(STORAGE_KEY, maeenDefault ? "1" : "0");
+  }, [maeenDefault]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -74,14 +83,14 @@ export const DevOSNavigator = () => {
     const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
     w.__SALSABIL_GOD_MODE__ = godMode;
     w.SALSABIL_GOD_MODE = godMode;
-  }, [godMode, location.pathname]);
+  }, [godMode]);
 
   useEffect(() => {
-    if (!khalilDefault) return;
+    if (!maeenDefault) return;
     if (location.pathname === "/") {
-      navigate({ to: "/diwan", replace: true });
+      navigate({ to: "/maeen", replace: true });
     }
-  }, [khalilDefault, location.pathname, navigate]);
+  }, [maeenDefault, location.pathname, navigate]);
 
   // Close nexus when capsule collapses.
   useEffect(() => {
@@ -93,10 +102,10 @@ export const DevOSNavigator = () => {
   return (
     <div
       dir="ltr"
-      className="pointer-events-none fixed z-[60]"
+      className="pointer-events-none fixed z-[80]"
       style={{
         left: "max(16px, env(safe-area-inset-left))",
-        bottom: "calc(80px + env(safe-area-inset-bottom))",
+        bottom: "calc(120px + env(safe-area-inset-bottom))",
       }}
     >
       <div className="pointer-events-auto relative">
