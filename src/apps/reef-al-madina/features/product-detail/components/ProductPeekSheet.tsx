@@ -115,11 +115,6 @@ const ProductPeekSheet = ({ productId, isOpen, onClose }: ProductPeekSheetProps)
                 </span>
               ) : null}
             </div>
-            {product.tagline && (
-              <p className="mt-2 text-[13px] leading-relaxed text-foreground/80">
-                {product.tagline}
-              </p>
-            )}
           </div>
         </div>
 
