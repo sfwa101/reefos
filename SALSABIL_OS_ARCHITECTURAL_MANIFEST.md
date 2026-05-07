@@ -771,3 +771,8 @@ Source of truth: `src/core-os/app-registry/index.ts`.
 Reef internal departments source of truth: `sdui_layouts.slug = 'departments_hub'`.
 
 **UI atom standard**: `src/components/ui/OptimizedImage.tsx` is the **mandatory** image primitive across every app and module. Raw `<img>` tags are forbidden in product/feature surfaces; legacy `LazyImg` was purged in Phase 6.
+
+
+## 🚨 AUTH WARNING — SOVEREIGN SIMPLICITY (HARD-CODED)
+
+**Password complexity is strictly DISABLED across the OS.** Only `length >= 6` is enforced (numeric preferred — the input forces the numeric keypad via `inputMode="numeric"` + `pattern="[0-9]*"`). No regex, no symbols, no HIBP, no complexity checks. Supabase auth is configured with `password_hibp_enabled: false`. **Do not re-enable complexity during environment migrations or remixes.** Single source of truth: `src/pages/Auth.tsx`.
