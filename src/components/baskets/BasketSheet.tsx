@@ -131,9 +131,11 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
     }
 
     if (mode === "subscribe") {
-      const subs = loadSubs();
-      const next: SubscriptionRecord = {
-        id: `sub-${Date.now()}`,
+      if (!isAuthed) {
+        toast.error("سجّل دخول لحفظ الاشتراك على جميع أجهزتك");
+        return;
+      }
+      void createSubscription({
         basketId: product.id,
         basketName: product.name,
         basketImage: product.image,
@@ -142,10 +144,8 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
         nextDelivery: new Date(Date.now() + freqObj.cadenceDays * 86400000).toISOString(),
         swaps,
         paused: false,
-        createdAt: new Date().toISOString(),
         giftMode: gift,
-      };
-      saveSubs([next, ...subs]);
+      });
       // Add ONE delivery to cart now, then redirect to Subscriptions dashboard.
       add(product, 1, {
         unitPrice: subscribePrice,
