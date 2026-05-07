@@ -1,39 +1,23 @@
 /**
- * Khalil Super-App Hub — Phase VIII Launcher Shell.
- * -------------------------------------------------
- * 100% SDUI. Pulls layout `khalil_hub` from Supabase and renders via
- * SduiRenderer. Active-delivery detection injects a live "Barq Tracking"
- * block at the top through HakimGenerativeOverlay (cognitive interception).
+ * Maeen Super-App Hub — Phase VIII Launcher Shell (UI-only).
+ * ----------------------------------------------------------
+ * 100% SDUI. All DB reads are delegated to kernel adapters
+ * (`core-os/maeen/*`) — this component never imports `supabase`.
  */
 import { useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
 import { useSduiLayout } from "@/core-os/sdui-engine/hooks/useSduiLayout";
 import { SduiRenderer } from "@/core-os/sdui-engine/components/SduiRenderer";
 import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 import { SalsabilStatusBar } from "@/core-os/ui/SalsabilStatusBar";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useActiveDelivery } from "@/core-os/maeen/useActiveDelivery";
 
 const SLUG = "khalil_hub";
 const TRACKING_BLOCK_ID = "hakim_barq_live";
 
-const KhalilHub = () => {
+const MaeenHub = () => {
   const { user } = useAuth();
-
-  // Detect active delivery (status not in terminal set).
-  const { data: hasActiveDelivery } = useQuery({
-    queryKey: ["khalil", "active-delivery", user?.id ?? "_anon"],
-    enabled: Boolean(user?.id),
-    staleTime: 60_000,
-    queryFn: async () => {
-      const { count } = await supabase
-        .from("orders")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", user!.id)
-        .in("status", ["pending", "confirmed", "preparing", "out_for_delivery"]);
-      return (count ?? 0) > 0;
-    },
-  });
+  const { data: hasActiveDelivery } = useActiveDelivery(user?.id);
 
   useEffect(() => {
     if (hasActiveDelivery) {
@@ -57,7 +41,7 @@ const KhalilHub = () => {
         <div className="mx-auto max-w-2xl space-y-2">
           <div className="flex items-center justify-between">
             <h1 className="text-lg font-extrabold tracking-tight text-foreground">
-              الديوان
+              معين
             </h1>
             <span className="text-[11px] font-bold text-muted-foreground">
               Salsabil OS
@@ -79,7 +63,7 @@ const KhalilHub = () => {
             blocks={blocks}
             empty={
               <div className="rounded-3xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">
-                لم يتم تكوين تخطيط خليل بعد.
+                لم يتم تكوين تخطيط معين بعد.
               </div>
             }
           />
@@ -89,4 +73,4 @@ const KhalilHub = () => {
   );
 };
 
-export default KhalilHub;
+export default MaeenHub;
