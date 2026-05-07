@@ -1,40 +1,32 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import {
-  loadSubs,
-  saveSubs,
   findFrequency,
   hoursToDelivery,
   isLocked,
   LOCK_WINDOW_HOURS,
   type SubscriptionRecord,
 } from "@/lib/baskets";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { Pause, Play, Trash2, Clock, Lock, CalendarClock, Wallet, Sparkles, ShoppingBasket } from "lucide-react";
 
 const BasketsSubs = () => {
-  const [subs, setSubs] = useState<SubscriptionRecord[]>([]);
-  useEffect(() => { setSubs(loadSubs()); }, []);
+  const { subs, isAuthed, updateSubscription, deleteSubscription } = useSubscriptions();
 
-  const update = (next: SubscriptionRecord[]) => { setSubs(next); saveSubs(next); };
-
-  const togglePause = (id: string) => {
-    update(subs.map((s) => s.id === id ? { ...s, paused: !s.paused } : s));
+  const togglePause = async (s: SubscriptionRecord) => {
+    await updateSubscription({ ...s, paused: !s.paused });
     toast.success("تم تحديث الاشتراك");
   };
-  const remove = (id: string) => {
-    update(subs.filter((s) => s.id !== id));
+  const remove = async (id: string) => {
+    await deleteSubscription(id);
     toast.success("تم إلغاء الاشتراك");
   };
-  const skipNext = (id: string) => {
-    update(subs.map((s) => {
-      if (s.id !== id) return s;
-      const f = findFrequency(s.frequency);
-      const nd = new Date(new Date(s.nextDelivery).getTime() + f.cadenceDays * 86400000).toISOString();
-      return { ...s, nextDelivery: nd };
-    }));
+  const skipNext = async (s: SubscriptionRecord) => {
+    const f = findFrequency(s.frequency);
+    const nd = new Date(new Date(s.nextDelivery).getTime() + f.cadenceDays * 86400000).toISOString();
+    await updateSubscription({ ...s, nextDelivery: nd });
     toast.success("تم تأجيل التوصيلة القادمة");
   };
 
