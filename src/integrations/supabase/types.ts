@@ -5284,6 +5284,177 @@ export type Database = {
         }
         Relationships: []
       }
+      salsabil_assets: {
+        Row: {
+          asset_type: Database["public"]["Enums"]["salsabil_asset_type"]
+          category_path: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          media: Json
+          name: string
+          traits: Json
+          updated_at: string
+        }
+        Insert: {
+          asset_type?: Database["public"]["Enums"]["salsabil_asset_type"]
+          category_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          media?: Json
+          name: string
+          traits?: Json
+          updated_at?: string
+        }
+        Update: {
+          asset_type?: Database["public"]["Enums"]["salsabil_asset_type"]
+          category_path?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          media?: Json
+          name?: string
+          traits?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      salsabil_financial_contracts: {
+        Row: {
+          base_price: number
+          contract_rules: Json
+          created_at: string
+          currency: string
+          id: string
+          is_active: boolean
+          pricing_model: Database["public"]["Enums"]["salsabil_pricing_model"]
+          sku_id: string
+          updated_at: string
+          valid_from: string | null
+          valid_to: string | null
+        }
+        Insert: {
+          base_price?: number
+          contract_rules?: Json
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          pricing_model?: Database["public"]["Enums"]["salsabil_pricing_model"]
+          sku_id: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Update: {
+          base_price?: number
+          contract_rules?: Json
+          created_at?: string
+          currency?: string
+          id?: string
+          is_active?: boolean
+          pricing_model?: Database["public"]["Enums"]["salsabil_pricing_model"]
+          sku_id?: string
+          updated_at?: string
+          valid_from?: string | null
+          valid_to?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_financial_contracts_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_inventory_matrix: {
+        Row: {
+          availability_data: Json
+          id: string
+          inventory_type: Database["public"]["Enums"]["salsabil_inventory_type"]
+          location_code: string | null
+          sku_id: string
+          updated_at: string
+        }
+        Insert: {
+          availability_data?: Json
+          id?: string
+          inventory_type?: Database["public"]["Enums"]["salsabil_inventory_type"]
+          location_code?: string | null
+          sku_id: string
+          updated_at?: string
+        }
+        Update: {
+          availability_data?: Json
+          id?: string
+          inventory_type?: Database["public"]["Enums"]["salsabil_inventory_type"]
+          location_code?: string | null
+          sku_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_inventory_matrix_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_skus"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_skus: {
+        Row: {
+          asset_id: string
+          attributes: Json
+          barcode: string | null
+          created_at: string
+          id: string
+          is_active: boolean
+          sku_code: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          attributes?: Json
+          barcode?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          sku_code: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          attributes?: Json
+          barcode?: string | null
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          sku_code?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_skus_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       saved_baskets: {
         Row: {
           created_at: string
@@ -8280,6 +8451,7 @@ export type Database = {
         }[]
       }
       mint_loyalty_points: { Args: { p_order_id: string }; Returns: string }
+      mint_universal_asset: { Args: { payload: Json }; Returns: string }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
       open_escrow_for_order: {
         Args: {
@@ -9203,6 +9375,19 @@ export type Database = {
         | "WEEKLY_BIG"
         | "MONTHLY_PANTRY"
       salsabil_app_id: "reef" | "khalil" | "asrab" | "nabd"
+      salsabil_asset_type:
+        | "physical"
+        | "digital"
+        | "service"
+        | "rental"
+        | "milestone_project"
+      salsabil_inventory_type: "count" | "time_slots" | "capacity"
+      salsabil_pricing_model:
+        | "flat"
+        | "tiered_wholesale"
+        | "subscription"
+        | "deposit_and_rental"
+        | "milestone_installments"
       scheduled_transfer_frequency: "weekly" | "monthly"
       scheduled_transfer_purpose: "gam_eya" | "savings" | "p2p" | "vault"
       shared_cart_approval: "pending" | "approved" | "rejected"
@@ -9398,6 +9583,21 @@ export const Constants = {
         "MONTHLY_PANTRY",
       ],
       salsabil_app_id: ["reef", "khalil", "asrab", "nabd"],
+      salsabil_asset_type: [
+        "physical",
+        "digital",
+        "service",
+        "rental",
+        "milestone_project",
+      ],
+      salsabil_inventory_type: ["count", "time_slots", "capacity"],
+      salsabil_pricing_model: [
+        "flat",
+        "tiered_wholesale",
+        "subscription",
+        "deposit_and_rental",
+        "milestone_installments",
+      ],
       scheduled_transfer_frequency: ["weekly", "monthly"],
       scheduled_transfer_purpose: ["gam_eya", "savings", "p2p", "vault"],
       shared_cart_approval: ["pending", "approved", "rejected"],
