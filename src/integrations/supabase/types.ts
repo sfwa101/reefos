@@ -9309,6 +9309,15 @@ export type Database = {
         }
         Returns: string
       }
+      upsert_inventory_matrix: {
+        Args: {
+          p_availability: Json
+          p_inventory_type: string
+          p_location_id: string
+          p_sku_id: string
+        }
+        Returns: string
+      }
       user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
       user_store_ids: { Args: { _user_id: string }; Returns: string[] }
       user_total_spent: { Args: { _user_id: string }; Returns: number }
