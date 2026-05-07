@@ -170,6 +170,22 @@ export const DevOSNavigator = () => {
                   className="h-3 w-3 accent-amber-400"
                 />
               </label>
+
+              {/* Absolute Manager Mode (God Mode) toggle */}
+              <label
+                className={`flex cursor-pointer flex-col items-center gap-1 rounded-2xl px-1.5 py-1.5 text-[8px] font-bold text-white/90 transition ${
+                  godMode ? "bg-gradient-to-br from-amber-500/40 to-rose-500/40 ring-1 ring-amber-300/60" : "bg-white/5"
+                }`}
+                title="Absolute Manager Mode — bypass RBAC UI guards"
+              >
+                <Crown className={`h-3 w-3 ${godMode ? "text-amber-200" : "text-white/70"}`} />
+                <input
+                  type="checkbox"
+                  checked={godMode}
+                  onChange={(e) => setGodMode(e.target.checked)}
+                  className="h-3 w-3 accent-amber-400"
+                />
+              </label>
             </motion.div>
           )}
         </AnimatePresence>
