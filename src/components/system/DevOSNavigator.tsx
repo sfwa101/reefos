@@ -70,12 +70,12 @@ export const DevOSNavigator = () => {
     const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
     w.__SALSABIL_GOD_MODE__ = godMode;
     w.SALSABIL_GOD_MODE = godMode;
-  }, [godMode]);
+  }, [godMode, location.pathname]);
 
   useEffect(() => {
     if (!khalilDefault) return;
     if (location.pathname === "/") {
-      navigate({ to: "/khalil", replace: true });
+      navigate({ to: "/diwan", replace: true });
     }
   }, [khalilDefault, location.pathname, navigate]);
 
@@ -107,17 +107,17 @@ export const DevOSNavigator = () => {
               transition={{ type: "spring", stiffness: 360, damping: 28 }}
               className="absolute bottom-16 left-0 flex w-56 flex-col items-stretch gap-2 rounded-[28px] border border-white/15 bg-black/50 p-2.5 shadow-2xl backdrop-blur-xl"
             >
-              {/* Khalil cognitive hub — top, pulsing */}
+              {/* Al-Diwan sovereign hub — top, pulsing */}
               <Link
-                to="/khalil"
+                to="/diwan"
                 onClick={() => setOpen(false)}
                 className="relative flex h-11 items-center justify-center gap-2 rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-400 to-orange-600 px-3 shadow-md transition active:scale-95"
-                title="Khalil — Cognitive Hub"
+                title="Al-Diwan — Unified Empire Gateway"
               >
                 <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/30" />
                 <Brain className="relative h-4 w-4 text-white drop-shadow" />
                 <span className="relative text-[11px] font-extrabold tracking-wide text-white drop-shadow">
-                  Khalil · Cognitive Hub
+                  Al-Diwan · Sovereign Hub
                 </span>
               </Link>
 
@@ -206,16 +206,31 @@ export const DevOSNavigator = () => {
           whileTap={{ scale: 0.9 }}
           animate={{ rotate: open ? 45 : 0 }}
           transition={{ type: "spring", stiffness: 400, damping: 24 }}
-          className="relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br from-slate-900 via-slate-800 to-black shadow-2xl ring-1 ring-amber-400/30 backdrop-blur-md"
+          className={`relative flex h-12 w-12 items-center justify-center rounded-full border border-white/20 bg-gradient-to-br shadow-2xl backdrop-blur-md ${
+            godMode
+              ? "from-amber-600 via-rose-700 to-amber-900 ring-2 ring-amber-300/80"
+              : "from-slate-900 via-slate-800 to-black ring-1 ring-amber-400/30"
+          }`}
           aria-label="Salsabil Dev Node"
         >
           {open ? (
             <X className="h-5 w-5 text-white" />
+          ) : godMode ? (
+            <Crown className="h-5 w-5 text-amber-200 drop-shadow" />
           ) : (
             <Brain className="h-5 w-5 text-amber-300" />
           )}
           {!open && (
-            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.9)]" />
+            <span
+              className={`absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full shadow-[0_0_8px_rgba(52,211,153,0.9)] ${
+                godMode
+                  ? "animate-ping bg-amber-300 shadow-[0_0_10px_rgba(252,211,77,0.95)]"
+                  : "bg-emerald-400"
+              }`}
+            />
+          )}
+          {godMode && !open && (
+            <span className="absolute -top-1 -right-1 h-2.5 w-2.5 rounded-full bg-amber-400 shadow-[0_0_10px_rgba(252,211,77,0.95)]" />
           )}
         </motion.button>
 

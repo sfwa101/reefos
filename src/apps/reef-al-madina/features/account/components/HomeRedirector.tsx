@@ -31,7 +31,8 @@ const HomeRedirector = ({ children }: { children: ReactNode }) => {
     const godMode = isGodMode();
     const khalilDefault =
       typeof window !== "undefined" &&
-      window.localStorage.getItem("salsabil.dev.khalilAsDefault") === "1";
+      (window.localStorage.getItem("salsabil.dev.khalilAsDefault") === "1" ||
+        window.localStorage.getItem("salsabil.dev.diwanAsDefault") === "1");
     const isAdminish = roles.some((r) =>
       ["admin", "branch_manager", "store_manager", "finance"].includes(r),
     );
