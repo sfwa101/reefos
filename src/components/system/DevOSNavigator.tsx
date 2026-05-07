@@ -111,52 +111,58 @@ export const DevOSNavigator = () => {
               <Link
                 to="/khalil"
                 onClick={() => setOpen(false)}
-                className="relative flex h-10 w-10 items-center justify-center rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-400 to-orange-600 shadow-md transition active:scale-95"
+                className="relative flex h-11 items-center justify-center gap-2 rounded-2xl border border-amber-200/40 bg-gradient-to-br from-amber-400 to-orange-600 px-3 shadow-md transition active:scale-95"
                 title="Khalil — Cognitive Hub"
               >
-                <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/40" />
+                <span className="absolute inset-0 animate-ping rounded-2xl bg-amber-300/30" />
                 <Brain className="relative h-4 w-4 text-white drop-shadow" />
+                <span className="relative text-[11px] font-extrabold tracking-wide text-white drop-shadow">
+                  Khalil · Cognitive Hub
+                </span>
               </Link>
 
-              <span className="h-px w-8 bg-white/15" />
+              <span className="h-px w-full bg-white/15" />
 
-              {/* App tiles */}
-              {apps.map((app, i) => {
-                const Icon = app.icon;
-                const active =
-                  app.route === "/"
-                    ? location.pathname === "/"
-                    : location.pathname.startsWith(app.route);
-                return (
-                  <motion.div
-                    key={app.id}
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.04 * i }}
-                  >
-                    <Link
-                      to={app.route}
-                      onClick={() => setOpen(false)}
-                      className={`flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br ${app.accent} shadow transition active:scale-95 ${
-                        active ? "ring-2 ring-white/80" : ""
-                      }`}
-                      title={app.name}
+              {/* App tiles — horizontal row */}
+              <div className="flex flex-wrap items-center justify-start gap-1.5">
+                {apps.map((app, i) => {
+                  const Icon = app.icon;
+                  const active =
+                    app.route === "/"
+                      ? location.pathname === "/"
+                      : location.pathname.startsWith(app.route);
+                  return (
+                    <motion.div
+                      key={app.id}
+                      initial={{ opacity: 0, x: -8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.04 * i }}
                     >
-                      <Icon className="h-4 w-4 text-white drop-shadow" />
-                    </Link>
-                  </motion.div>
-                );
-              })}
+                      <Link
+                        to={app.route}
+                        onClick={() => setOpen(false)}
+                        className={`flex h-9 w-9 items-center justify-center rounded-xl border border-white/15 bg-gradient-to-br ${app.accent} shadow transition active:scale-95 ${
+                          active ? "ring-2 ring-white/80" : ""
+                        }`}
+                        title={app.name}
+                      >
+                        <Icon className="h-4 w-4 text-white drop-shadow" />
+                      </Link>
+                    </motion.div>
+                  );
+                })}
+              </div>
 
-              <span className="h-px w-8 bg-white/15" />
+              <span className="h-px w-full bg-white/15" />
 
               {/* Admin Nexus trigger */}
               <button
                 onClick={() => setNexusOpen(true)}
-                className="flex h-10 w-10 items-center justify-center rounded-2xl border border-white/15 bg-gradient-to-br from-slate-700 to-slate-900 shadow transition hover:from-slate-600 active:scale-95"
+                className="flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-white/15 bg-gradient-to-br from-slate-700 to-slate-900 px-3 shadow transition hover:from-slate-600 active:scale-95"
                 title="Admin Nexus"
               >
                 <Shield className="h-4 w-4 text-white drop-shadow" />
+                <span className="text-[11px] font-bold text-white">Admin Nexus</span>
               </button>
 
               {/* Khalil-as-default toggle */}
