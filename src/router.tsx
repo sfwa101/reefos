@@ -1,7 +1,6 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
-import { installEdgePersister } from "./lib/queryPersister";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -68,9 +67,8 @@ export const getRouter = () => {
     },
   });
 
-  // Phase T-P3 — Salsabil OS Edge: hydrate cache from IndexedDB so repeat
-  // boots paint instantly while a background revalidation refreshes data.
-  installEdgePersister(queryClient);
+  // Phase VIII-FIX — offline-first persistence is temporarily disabled so
+  // route/data changes propagate immediately during OS route synchronization.
 
   const router = createRouter({
     routeTree,

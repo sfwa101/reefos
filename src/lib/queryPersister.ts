@@ -15,7 +15,7 @@ import type { QueryClient } from "@tanstack/react-query";
 
 // Bump this whenever the persisted shape changes (rowToProduct, etc.)
 // to invalidate stale snapshots on every device.
-const BUSTER = "reef-edge-v1";
+const BUSTER = "salsabil-os-v2-dev";
 const KEY_BASE = "reef.queryCache.v1";
 const MAX_AGE = 24 * 60 * 60 * 1000; // 24h
 

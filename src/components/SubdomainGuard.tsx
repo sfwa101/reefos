@@ -25,6 +25,11 @@ function getHost(): string {
 // Preview / localhost / lovable subdomains keep /admin reachable so that
 // staff can QA the admin surface without switching subdomains.
 const CUSTOMER_HOSTS = new Set(["reefam.com", "www.reefam.com"]);
+const OS_WHITELIST_PATHS = ["/khalil", "/admin/design", "/asrab", "/nabd"];
+
+function isWhitelistedOsPath(path: string): boolean {
+  return OS_WHITELIST_PATHS.some((allowed) => path === allowed || path.startsWith(`${allowed}/`));
+}
 
 export const SubdomainGuard = (): null => {
   const location = useLocation();
@@ -37,12 +42,13 @@ export const SubdomainGuard = (): null => {
     const adminHost = host.startsWith("admin.");
     const customerHost = CUSTOMER_HOSTS.has(host);
     const onAdminPath = path === "/admin" || path.startsWith("/admin/");
+    const whitelistedOsPath = isWhitelistedOsPath(path);
 
-    if (adminHost && !onAdminPath) {
+    if (adminHost && !onAdminPath && !whitelistedOsPath) {
       void navigate({ to: "/admin", replace: true });
       return;
     }
-    if (customerHost && onAdminPath) {
+    if (customerHost && onAdminPath && !whitelistedOsPath) {
       // Only the production customer apex hides the admin surface.
       void navigate({ to: "/", replace: true });
     }

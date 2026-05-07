@@ -2,6 +2,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { pickDefaultView, readActiveView, VIEW_PATHS } from "@/lib/defaultView";
+import { isGodMode } from "@/lib/godMode";
 
 /**
  * On first visit to `/`, if the user has a non-customer role and no
@@ -27,9 +28,7 @@ const HomeRedirector = ({ children }: { children: ReactNode }) => {
     // Suppress auto-redirect for admins / managers so they can freely browse
     // client-side surfaces (Reef, Khalil, etc.) for QA and testing.
     // Also honor the dev "Absolute Manager Mode" flag and "Khalil-as-Default".
-    const godMode =
-      typeof window !== "undefined" &&
-      window.localStorage.getItem("salsabil.dev.godMode") === "1";
+    const godMode = isGodMode();
     const khalilDefault =
       typeof window !== "undefined" &&
       window.localStorage.getItem("salsabil.dev.khalilAsDefault") === "1";
