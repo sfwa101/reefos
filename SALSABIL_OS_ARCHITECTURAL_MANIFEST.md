@@ -1,0 +1,817 @@
+# 🏛️ Salsabil OS — Architectural Manifest
+
+> Recursive physical map of the Salsabil OS ecosystem.
+> Generated for strategic development planning. Read-only artifact.
+
+---
+
+## 🧬 CORE — Engines (Pricing • Logistics • Orders • Search • Data)
+
+```
+src/core/
+├── data/
+│   └── restaurantQueries.ts  // Restaurants data layer
+├── engine/
+│   ├── offers/
+│   │   └── frequency.ts
+│   └── pricing/
+│       ├── __tests__/
+│       │   ├── PricingEngine.test.ts
+│       │   └── cartPricingAdapter.test.ts
+│       ├── config/
+│       │   ├── liveRulesCache.ts
+│       │   └── useLiveRules.ts
+│       ├── discounts/
+│       │   ├── BulkQuantityDiscount.ts
+│       │   └── LoyaltyTierDiscount.ts
+│       ├── guardrails/
+│       │   └── LossPreventionRule.ts
+│       ├── hooks/
+│       │   └── useLivePrice.ts
+│       ├── rewards/
+│       │   └── PointsEarningRule.ts
+│       ├── strategies/
+│       │   ├── FlashPriceResolver.ts
+│       │   ├── MeatPricingStrategy.ts
+│       │   ├── SupermarketPricingStrategy.ts
+│       │   ├── SweetsPricingStrategy.ts
+│       │   └── WholesalePricingStrategy.ts
+│       ├── utils/
+│       │   └── exclusions.ts
+│       ├── PricingEngine.ts  // Central Pricing Strategy Engine
+│       ├── bootstrap.ts
+│       ├── cartPricingAdapter.ts  // Cart ↔ Pricing bridge
+│       └── types.ts
+├── logistics/
+│   ├── index.ts
+│   ├── quote.ts  // Logistics quote calculator
+│   └── types.ts
+├── orders/
+│   └── types.ts
+└── search/
+    └── utils/
+        └── arabicLogic.ts  // Arabic search normalizer
+```
+
+## 🏛️ FEATURES — Mini-Programs, Main-Hub, Tayseer/Wallet, SDUI, etc.
+
+```
+src/features/
+├── account/
+│   ├── components/
+│   │   ├── AccountActionGrid.tsx
+│   │   ├── AccountSettingRow.tsx
+│   │   ├── AccountTierCard.tsx
+│   │   ├── AccountWalletRail.tsx
+│   │   ├── HomeRedirector.tsx
+│   │   └── RoleSwitcher.tsx
+│   ├── lib/
+│   │   └── customerId.ts
+│   ├── profile/
+│   │   ├── components/
+│   │   │   ├── AvatarTab.tsx
+│   │   │   ├── BudgetTab.tsx
+│   │   │   ├── IdentityTab.tsx
+│   │   │   ├── LifestyleTab.tsx
+│   │   │   ├── Primitives.tsx
+│   │   │   ├── ProfileHero.tsx
+│   │   │   ├── ProfileSaveBar.tsx
+│   │   │   └── ProfileTabsNav.tsx
+│   │   ├── data.ts
+│   │   ├── types.ts
+│   │   └── utils.ts
+│   └── data.ts
+├── admin/
+│   ├── components/
+│   │   ├── LayoutEditorGrid.tsx
+│   │   └── PurchaseInvoiceBuilder.tsx
+│   ├── hooks/
+│   │   └── useLayoutEditor.ts
+│   ├── marketing/
+│   │   ├── BannersPanel.tsx
+│   │   ├── CouponsPanel.tsx
+│   │   ├── FlashPanel.tsx
+│   │   ├── PanelErrorBoundary.tsx
+│   │   ├── shared.tsx
+│   │   └── types.ts
+│   └── product-editor/
+│       ├── BasicInfoForm.tsx
+│       ├── OptionsBuilder.tsx
+│       ├── PricingAndInventory.tsx
+│       ├── SmartTagSuggester.tsx
+│       ├── SpecsForm.tsx
+│       ├── primitives.tsx
+│       └── types.ts
+├── affiliate/
+│   ├── components/
+│   │   └── AffiliateDashboard.tsx
+│   └── hooks/
+│       └── useAffiliateEngine.ts
+├── cart/
+│   ├── components/
+│   │   ├── CartAddressSelector.tsx
+│   │   ├── CartCheckoutActions.tsx
+│   │   ├── CartCrossSellRail.tsx
+│   │   ├── CartIncentiveProgress.tsx
+│   │   ├── CartLineItem.tsx
+│   │   ├── CartLogisticsBanners.tsx
+│   │   ├── CartLoyaltyBar.tsx
+│   │   ├── CartPaymentMethods.tsx
+│   │   ├── CartPricingErrorsBanner.tsx
+│   │   ├── CartSummary.tsx
+│   │   ├── CheckoutSheet.tsx
+│   │   ├── ExclusionBadge.tsx
+│   │   ├── NumberFlow.tsx
+│   │   ├── PremiumProgressBar.tsx
+│   │   ├── RechargeDialog.tsx
+│   │   ├── SharedCartManager.tsx
+│   │   ├── SmartFakkaRail.tsx
+│   │   ├── VendorGroupCard.tsx
+│   │   └── WhatsAppFallbackDialog.tsx
+│   ├── data/
+│   │   └── paymentMethods.ts
+│   ├── hooks/
+│   │   ├── useCartCalculations.ts
+│   │   ├── useCartCheckoutRpc.ts
+│   │   ├── useCartIncentives.ts
+│   │   ├── useCartOrchestrator.ts  // Cart Orchestrator (single source)
+│   │   ├── useCartValidation.ts
+│   │   ├── useCartVendorGrouping.ts
+│   │   ├── useCartWhatsApp.ts
+│   │   ├── useFakkaCalculator.ts
+│   │   ├── useSharedCartAdapter.ts
+│   │   └── useSharedCartSync.ts
+│   └── types/
+│       └── cart.types.ts
+├── driver/
+│   ├── components/
+│   │   ├── ActiveTasksFeed.tsx
+│   │   ├── DriverDutyToggle.tsx
+│   │   ├── DriverEarningsBar.tsx
+│   │   ├── DriverSurgeBanner.tsx
+│   │   └── TaskActionCard.tsx
+│   ├── hooks/
+│   │   ├── useActiveDriverTracking.ts
+│   │   └── useDriverEngine.ts  // Driver Engine
+│   ├── store/
+│   │   └── useDriverTelemetry.ts
+│   └── types/
+│       └── driver.types.ts
+├── group-buy/
+│   ├── components/
+│   │   ├── GroupBuyPledgeDialog.tsx
+│   │   └── GroupBuyTicker.tsx
+│   ├── hooks/
+│   │   └── useGroupBuyEngine.ts
+│   └── types/
+│       └── group-buy.types.ts
+├── hakim/
+│   ├── components/
+│   │   └── HakimPulseMonitor.tsx
+│   └── hooks/
+│       └── useHakimEdgeWorker.ts  // Hakim AI client
+├── library/  // Library Mini-Program
+│   ├── components/
+│   │   ├── BorrowCard.tsx
+│   │   ├── BorrowSheet.tsx
+│   │   ├── BundlesGrid.tsx
+│   │   ├── KYCGateDialog.tsx
+│   │   └── PrintWizard.tsx
+│   └── data.ts
+├── logistics/
+│   ├── adapters/
+│   │   └── legacyZoneToLogisticsZone.ts
+│   ├── components/
+│   │   ├── AddressSheet.tsx
+│   │   └── RealMap.tsx  // Mrsool Map Layer
+│   └── hooks/
+│       └── useDefaultDeliveryMethod.ts
+├── main-hub/
+│   └── components/
+│       ├── DepartmentGrid.tsx  // Home Department Grid
+│       ├── DynamicStoryCircles.tsx  // Primary Home Launcher (DB-driven)
+│       ├── MainSearchHeader.tsx
+│       ├── PromotionSlider.tsx
+│       ├── SmartGreeting.tsx
+│       └── StoryCircles.tsx  // Legacy hardcoded launcher (dead)
+├── meat/  // Meat Mini-Program (specialty UI)
+│   └── components/
+│       ├── CutBuilder.tsx
+│       ├── Panel.tsx
+│       └── PrepOptions.tsx
+├── offers/
+│   ├── components/
+│   │   ├── BundleDealsRail.tsx
+│   │   ├── DynamicHeroBanner.tsx
+│   │   ├── FlashSalesGrid.tsx
+│   │   ├── FulfillmentBadge.tsx
+│   │   ├── PersonalizedDealsRail.tsx
+│   │   ├── SectionOffersRail.tsx
+│   │   ├── SponsoredRestaurantRail.tsx
+│   │   └── TierExclusiveOffers.tsx
+│   ├── hooks/
+│   │   ├── useDailyCountdown.ts
+│   │   └── useOffersRails.ts
+│   └── types/
+│       └── rail.ts
+├── pharmacy/  // Pharmacy Mini-Program
+│   ├── components/
+│   │   ├── CategoryRail.tsx
+│   │   ├── EmptyState.tsx
+│   │   ├── LazyImg.tsx
+│   │   ├── ProductCards.tsx
+│   │   ├── ProductOverlay.tsx
+│   │   ├── ScannerOverlay.tsx
+│   │   └── SmartBar.tsx
+│   ├── data.ts
+│   └── types.ts
+├── pos/
+│   ├── components/
+│   │   ├── PosBarcodeCart.tsx
+│   │   ├── PosQuickPay.tsx
+│   │   └── PosShiftManager.tsx
+│   ├── hooks/
+│   │   └── usePosEngine.ts
+│   └── types/
+│       └── pos.types.ts
+├── product-detail/
+│   ├── PharmacyMedicalBlock.tsx
+│   ├── ProductGallery.tsx
+│   ├── StickyAddCTA.tsx
+│   └── VillageBlocks.tsx
+├── recipes/  // Recipes Mini-Program
+│   ├── components/
+│   │   ├── DailyBrowser.tsx
+│   │   ├── RecipeModal.tsx
+│   │   └── WeeklyPlanner.tsx
+│   └── data.ts
+├── sdui/
+│   ├── admin/
+│   │   ├── blocks/
+│   │   │   ├── ComputedColumnBlock.tsx
+│   │   │   ├── FieldGroupBlock.tsx
+│   │   │   ├── FormFieldBlock.tsx
+│   │   │   ├── MapBlock.tsx
+│   │   │   ├── MapCanvas.tsx
+│   │   │   ├── RpcButtonBlock.tsx
+│   │   │   └── TableColumnBlock.tsx
+│   │   ├── components/
+│   │   │   ├── AdminBlockRenderer.tsx
+│   │   │   ├── AdminEmptyState.tsx
+│   │   │   └── AdminErrorBoundary.tsx
+│   │   ├── engine/
+│   │   │   ├── AdminFormEngine.tsx
+│   │   │   └── AdminTableEngine.tsx
+│   │   ├── hooks/
+│   │   │   ├── useAdminAction.ts
+│   │   │   ├── useAdminNavigation.ts
+│   │   │   ├── useEntityDefinition.ts
+│   │   │   ├── useEntityList.ts
+│   │   │   ├── useEntityMutation.ts
+│   │   │   ├── useEntityRecord.ts
+│   │   │   └── useSchemaRollback.ts
+│   │   ├── index.ts
+│   │   ├── registry.tsx
+│   │   └── schemas.ts
+│   ├── blocks/
+│   │   ├── SduiBentoBlock.tsx
+│   │   ├── SduiHeroBlock.tsx
+│   │   └── SduiSmartRail.tsx
+│   ├── components/
+│   │   └── SduiRenderer.tsx
+│   ├── engine/
+│   │   ├── BlockRegistry.tsx
+│   │   └── schemas.ts
+│   ├── hooks/
+│   │   └── useSduiLayout.ts
+│   ├── SectionFrame.tsx  // Cellular SDUI Engine — section frame
+│   └── registry.ts
+├── settings/
+│   ├── data.ts
+│   └── locales.ts
+├── storefront/
+│   ├── components/
+│   │   └── StoreCategoryGrid.tsx
+│   └── home/
+│       ├── components/
+│       │   ├── BestSellersRail.tsx
+│       │   ├── BundleCard.tsx
+│       │   ├── BundlesRail.tsx
+│       │   ├── CategoriesGrid.tsx
+│       │   ├── CompareBar.tsx
+│       │   ├── DetailSheet.tsx
+│       │   ├── FiltersSheet.tsx
+│       │   ├── HeroBanner.tsx
+│       │   ├── LayoutFactory.tsx
+│       │   ├── ProductCard.tsx
+│       │   ├── ProductsGrid.tsx
+│       │   ├── RailHeader.tsx
+│       │   └── SearchAndFilters.tsx
+│       ├── hooks/
+│       │   ├── useHomeOrchestrator.ts
+│       │   └── useUiLayout.ts
+│       ├── types/
+│       │   └── sdui.types.ts
+│       ├── dictionaries.ts
+│       ├── mapper.ts
+│       └── types.ts
+├── sweets/
+│   └── components/
+│       ├── FulfillmentSelector.tsx
+│       ├── SweetsCustomizationForm.tsx
+│       └── VariantPicker.tsx
+├── vendor/
+│   ├── components/
+│   │   ├── VendorInventoryGrid.tsx
+│   │   ├── VendorLiveOrdersFeed.tsx
+│   │   └── VendorSettlementDashboard.tsx
+│   ├── hooks/
+│   │   ├── useVendorOperations.ts
+│   │   └── useVendorSettlement.ts
+│   └── types/
+│       └── vendor-ops.types.ts
+└── wallet/  // Tayseer Financial Engine
+    ├── components/
+    │   ├── ActionGrid.tsx
+    │   ├── BalanceCard.tsx
+    │   ├── BalanceCardsCarousel.tsx
+    │   ├── GameyaCreationSheet.tsx
+    │   ├── GameyaDetailsSheet.tsx
+    │   ├── GameyasDockContent.tsx
+    │   ├── GameyasTab.tsx
+    │   ├── InsightsDockContent.tsx
+    │   ├── JoinGameyaSheet.tsx
+    │   ├── MiniStatGrid.tsx
+    │   ├── NeoCardsCarousel.tsx
+    │   ├── NeoSuperCard.tsx
+    │   ├── NetWorthCard.tsx
+    │   ├── OperationsDockContent.tsx
+    │   ├── VaultsDockContent.tsx
+    │   ├── VaultsGrid.tsx
+    │   ├── WalletAffiliateHub.tsx
+    │   ├── WalletAnalytics.tsx
+    │   ├── WalletAssetConvertSheet.tsx
+    │   ├── WalletBalanceCard.tsx
+    │   ├── WalletCharityHub.tsx
+    │   ├── WalletPosBarcode.tsx
+    │   ├── WalletSavingsJars.tsx
+    │   ├── WalletTabs.tsx
+    │   ├── WalletTopupDialog.tsx
+    │   ├── WalletTransactionList.tsx
+    │   ├── WalletTransferDialog.tsx
+    │   └── WithdrawDialog.tsx
+    ├── hooks/
+    │   ├── useAffiliateEngine.ts
+    │   ├── useGameyas.ts
+    │   ├── useHideBalance.ts
+    │   ├── useTransferLogic.ts
+    │   ├── useWalletAssets.ts
+    │   ├── useWalletBalance.ts
+    │   ├── useWalletDashboard.ts
+    │   ├── useWalletSavings.ts
+    │   └── useWalletTransactions.ts
+    ├── lib/
+    │   └── walletAdvisor.ts
+    └── types/
+        └── wallet.types.ts
+```
+
+## 📦 MODULES — Isolated Vertical Implementations
+
+```
+src/modules/
+├── kitchen/
+│   ├── components/
+│   │   ├── DailyView.tsx
+│   │   ├── KitchenHero.tsx
+│   │   ├── KitchenTabs.tsx
+│   │   ├── MealRow.tsx
+│   │   └── WeeklyView.tsx
+│   ├── hooks/
+│   │   └── useKitchenLogic.ts
+│   ├── KitchenPage.tsx  // Kitchen Vertical entry
+│   └── types.ts
+├── meat/
+│   ├── components/
+│   │   ├── MeatFeed.tsx
+│   │   ├── MeatHero.tsx
+│   │   ├── MeatSearchBar.tsx
+│   │   ├── MeatStickyNav.tsx
+│   │   └── MeatSubSection.tsx
+│   ├── hooks/
+│   │   └── useMeatLogic.ts
+│   ├── MeatPage.tsx  // Meat Vertical entry
+│   ├── constants.ts
+│   └── types.ts
+├── restaurants/
+│   ├── components/
+│   │   ├── BrandTabs.tsx
+│   │   ├── MealRow.tsx
+│   │   ├── RestaurantSection.tsx
+│   │   ├── RestaurantsHero.tsx
+│   │   ├── RestaurantsSearchBar.tsx
+│   │   └── RestaurantsStates.tsx
+│   ├── hooks/
+│   │   └── useRestaurantsLogic.ts
+│   ├── RestaurantsPage.tsx  // Restaurants Vertical entry
+│   └── types.ts
+├── search/
+│   ├── components/
+│   │   ├── BarcodeScannerSheet.tsx
+│   │   ├── RequestProductForm.tsx
+│   │   └── SearchOverlay.tsx  // Universal Search Overlay
+│   ├── hooks/
+│   │   ├── useBarcodeScanner.ts
+│   │   ├── useSearchHistory.ts
+│   │   └── useUniversalSearch.ts
+│   ├── index.ts
+│   └── types.ts
+├── subscriptions/
+│   ├── components/
+│   │   ├── DailyMealPicker.tsx
+│   │   ├── FeaturesList.tsx
+│   │   ├── FrequencyDurationPicker.tsx
+│   │   ├── MealPickerSheet.tsx
+│   │   ├── PlanPicker.tsx
+│   │   ├── PreferencesPanel.tsx
+│   │   ├── SubscriptionHero.tsx
+│   │   └── SummaryCTA.tsx
+│   ├── hooks/
+│   │   └── useSubscriptionsLogic.ts
+│   ├── SubscriptionsPage.tsx  // Subscriptions Vertical entry
+│   ├── constants.ts
+│   └── types.ts
+├── supermarket/
+│   ├── components/
+│   │   ├── CategorySidebar.tsx
+│   │   ├── ProductGrid.tsx
+│   │   ├── SupermarketHero.tsx
+│   │   └── SupermarketProductCard.tsx
+│   ├── hooks/
+│   │   └── useSupermarketLogic.ts
+│   ├── SupermarketPage.tsx  // Supermarket Vertical entry
+│   └── types.ts
+└── village/
+    ├── components/
+    │   ├── VillageFilterChips.tsx
+    │   ├── VillageHero.tsx
+    │   ├── VillageProductCard.tsx
+    │   ├── VillageProductGrid.tsx
+    │   └── VillageSearchBar.tsx
+    ├── hooks/
+    │   └── useVillageLogic.ts
+    ├── VillagePage.tsx  // Village Vertical entry
+    └── types.ts
+```
+
+## 🗺️ ROUTES — TanStack Router Bindings
+
+```
+src/routes/
+├── _app/
+│   ├── account.addresses.tsx
+│   ├── account.favorites.tsx
+│   ├── account.help.tsx
+│   ├── account.index.tsx
+│   ├── account.notifications.tsx
+│   ├── account.orders.tsx
+│   ├── account.payments.tsx
+│   ├── account.profile.tsx
+│   ├── account.settings.tsx
+│   ├── account.tsx
+│   ├── account.verification.tsx
+│   ├── affiliate.tsx
+│   ├── cart.tsx
+│   ├── index.tsx  // Home route (/) loader
+│   ├── offers.tsx
+│   ├── order-success.tsx
+│   ├── product.$productId.tsx
+│   ├── restaurant.$id.tsx
+│   ├── search.tsx
+│   ├── sections.tsx  // Categories Center route
+│   ├── store.baskets-build.tsx
+│   ├── store.baskets-subs.tsx
+│   ├── store.baskets.tsx
+│   ├── store.dairy.tsx
+│   ├── store.home-compare.tsx
+│   ├── store.home.tsx
+│   ├── store.kitchen.tsx
+│   ├── store.library.tsx
+│   ├── store.meat.tsx
+│   ├── store.pharmacy.tsx
+│   ├── store.produce.tsx
+│   ├── store.recipes.tsx
+│   ├── store.restaurants.tsx
+│   ├── store.subscription.tsx
+│   ├── store.supermarket.tsx
+│   ├── store.sweets.tsx
+│   ├── store.village.tsx
+│   ├── store.wholesale.tsx
+│   ├── sub.$slug.tsx
+│   └── wallet.tsx
+├── -lazyRoute.tsx
+├── __root.tsx  // Root layout (TanStack)
+├── _app.tsx  // Authed App Shell layout
+├── admin.$entity.$id.tsx
+├── admin.$entity.tsx
+├── admin.advance-approvals.tsx
+├── admin.affiliate-settings.tsx
+├── admin.allocation.tsx
+├── admin.analytics.tsx
+├── admin.audit-log.tsx
+├── admin.branches.tsx
+├── admin.business-rules.tsx
+├── admin.cashier-sessions.tsx
+├── admin.catalog-backup.tsx
+├── admin.categories.tsx
+├── admin.category-affinity.tsx
+├── admin.cfo.tsx
+├── admin.charity.tsx
+├── admin.commission-ledger.tsx
+├── admin.cost-bulk.tsx
+├── admin.cross-branch-transfers.tsx
+├── admin.customers.$customerId.tsx
+├── admin.customers.tsx
+├── admin.dashboard.tsx
+├── admin.delivery-settings.tsx
+├── admin.delivery.tsx
+├── admin.delivery.zones.tsx
+├── admin.design.tsx
+├── admin.discount-overrides.tsx
+├── admin.driver-cash-settlements.tsx
+├── admin.driver-settlements.tsx
+├── admin.executive.tsx
+├── admin.expenses.tsx
+├── admin.finance.ledger.tsx
+├── admin.finance.tsx
+├── admin.hakim-anomalies.tsx
+├── admin.hakim-chat.tsx
+├── admin.hakim-insights.tsx
+├── admin.hakim.tsx
+├── admin.index.tsx
+├── admin.inventory-locations.tsx
+├── admin.inventory.tsx
+├── admin.kyc.tsx
+├── admin.low-stock.tsx
+├── admin.marketing.banners.tsx
+├── admin.marketing.notifications.tsx
+├── admin.marketing.promos.tsx
+├── admin.marketing.referrals.tsx
+├── admin.marketing.tsx
+├── admin.more.tsx
+├── admin.offers.tsx
+├── admin.orders.$orderId.tsx
+├── admin.orders.index.tsx
+├── admin.partner-ledgers.tsx
+├── admin.partners.tsx
+├── admin.payments-schedule.tsx
+├── admin.payouts.tsx
+├── admin.personalized-picks.tsx
+├── admin.print-jobs.tsx
+├── admin.product-batches.tsx
+├── admin.product-units.tsx
+├── admin.products.tsx
+├── admin.profit-observation.tsx
+├── admin.purchases.tsx
+├── admin.reviews.tsx
+├── admin.riba-audit.tsx
+├── admin.role-permissions.tsx
+├── admin.savings.tsx
+├── admin.settings.tsx
+├── admin.staff-advances.tsx
+├── admin.staff-attendance.tsx
+├── admin.staff.tsx
+├── admin.store-settlements.tsx
+├── admin.stores.tsx
+├── admin.suppliers.tsx
+├── admin.support.tsx
+├── admin.system-settings.tsx
+├── admin.topup-approvals.tsx
+├── admin.tsx
+├── admin.wallets.tsx
+├── admin.zakat.tsx
+├── auth.tsx
+├── driver.dashboard.tsx
+├── driver.index.tsx
+├── driver.map.tsx
+├── driver.tsx
+├── driver.wallet.tsx
+├── employee.tsx
+├── pos.tsx
+├── vendor.dashboard.tsx
+├── vendor.index.tsx
+├── vendor.orders.tsx
+├── vendor.products.tsx
+├── vendor.tsx
+└── vendor.wallet.tsx
+```
+
+## 🧠 CONTEXT — Nervous System (React Context Providers)
+
+```
+src/context/
+├── AuthContext.tsx  // Auth nervous system
+├── CartContext.tsx  // Cart context bridge
+├── CompareContext.tsx
+├── FavoritesContext.tsx
+├── LocaleContext.tsx
+├── LocationContext.tsx  // Location/Geo ops
+├── SharedCartContext.tsx  // Shared/Group cart
+├── ThemeContext.tsx
+└── UIContext.tsx  // UI mode (simplified/standard)
+```
+
+## 💾 STORE — Zustand State Stores
+
+```
+src/store/
+└── useCartStore.ts  // Zustand cart store (SoT)
+```
+
+## ⚙️ LIB — Edge Protocols, Sync Engines, Utilities
+
+```
+src/lib/
+├── sync/
+│   └── useSmartLogistics.ts  // Smart Logistics realtime sync
+├── baskets.ts
+├── behavior.ts
+├── butcheryPrep.ts
+├── buyAgain.ts
+├── cartSync.ts  // Cart ↔ DB sync engine
+├── catalogSeedShared.ts
+├── confetti.ts
+├── defaultView.ts
+├── favorites.ts
+├── format.ts
+├── geoZones.ts  // PostGIS zone helpers
+├── kitchenMenu.ts
+├── library.ts
+├── megaSeed.ts  // Legacy mega seed (deprecated)
+├── personalize.ts
+├── pricingAdapters.ts
+├── pricingEngine.ts  // Pricing utilities
+├── productEnrichment.ts
+├── productImages.ts
+├── products.ts  // Legacy product mock (deprecated)
+├── pwa.ts
+├── queryPersister.ts  // IndexedDB React-Query persister
+├── restaurants.ts
+├── smartPairs.ts
+├── storeThemes.ts
+├── subscriptionMeals.ts
+├── supermarketTaxonomy.ts
+├── sweetsFulfillment.ts
+├── tiers.ts
+├── utils.ts
+├── villageMeta.ts
+├── volumeDeals.ts
+└── whatsapp.ts
+```
+
+## ☁️ SUPABASE — Migrations, Edge Functions, Schema
+
+```
+supabase/
+├── functions/
+│   ├── generate-product-image/
+│   │   └── index.ts  // AI product image gen
+│   ├── hakim-advisor/
+│   │   └── index.ts  // Hakim Advisor edge function
+│   ├── hakim-chat/
+│   │   └── index.ts  // Hakim Chat edge function
+│   ├── hakim-pulse/
+│   │   └── index.ts  // Hakim Pulse edge function
+│   └── tayseer-oracle/
+│       └── index.ts  // Tayseer Oracle edge function
+├── migrations/
+│   ├── 20260427143528_25e2d4ff-0f7a-46a6-b0be-22aec7fe9bda.sql
+│   ├── 20260427143648_e9eed136-28a9-428d-be9f-2cc4dcc536bc.sql
+│   ├── 20260427150358_17c862e0-9334-47a4-82c3-dbabade73b73.sql
+│   ├── 20260427150417_72c8f08f-30a5-43c9-8193-b7c693a16669.sql
+│   ├── 20260427151849_fae5bc79-86bb-40e4-9ef0-8232eb409244.sql
+│   ├── 20260427151907_b1e0d66a-0993-469c-b30c-4e6aa736c15b.sql
+│   ├── 20260427205510_a5f2fddf-8fb9-4eed-a3a8-6d4b1aebdce4.sql
+│   ├── 20260428230616_21bb76a6-e303-469b-82c8-5b7bb661100d.sql
+│   ├── 20260429023147_e6e3f80b-bc2b-480c-9cf0-410731728fc0.sql
+│   ├── 20260429031040_4747d902-b60d-4587-9567-efcbb2901c49.sql
+│   ├── 20260429031059_247864d0-ab0d-4c2c-86a2-e735c9e677c4.sql
+│   ├── 20260429031531_1b8c0262-f9e7-424a-90b2-012084f31fd5.sql
+│   ├── 20260429160313_239fe893-499d-495c-b566-241b8cce1464.sql
+│   ├── 20260429162737_b01a56f4-5b30-44e8-a81a-0b0ba5f7875e.sql
+│   ├── 20260429162752_bf66d327-1c4f-4940-8e7a-453bd7860724.sql
+│   ├── 20260429165056_afcc330c-3b46-4025-b5d9-bca0f79197d8.sql
+│   ├── 20260429230900_19ad3bff-b02a-4029-abcf-25bf9217d135.sql
+│   ├── 20260429233139_30c6f4e0-ea36-4f59-9c0d-86e6d9adc026.sql
+│   ├── 20260430003338_ae1dd4b6-2043-4d3f-9341-5086bf4341de.sql
+│   ├── 20260430004955_3b0ebe1e-221f-4314-a3f2-c6e6afd782dd.sql
+│   ├── 20260430010109_579eeb68-4ad2-445e-8d40-75c62e97cccf.sql
+│   ├── 20260430012210_25cde20b-5dab-4f99-9cd6-c63136d91bef.sql
+│   ├── 20260430012235_ed2d9323-9271-4bd7-ac52-c2de6c6efc5a.sql
+│   ├── 20260430013043_0e475716-59b0-4b35-9e54-0b89365f6549.sql
+│   ├── 20260430015312_7d4212ac-68de-4485-9774-22d49e7acdc9.sql
+│   ├── 20260430020919_4b3b07a2-b82a-473c-ae37-56d33f64170d.sql
+│   ├── 20260430021909_1517aee8-322c-42e2-9e48-8195fed1aa0c.sql
+│   ├── 20260430022643_38371325-1872-456b-a05e-38ff3da4b421.sql
+│   ├── 20260430023947_21192ccb-07a4-4332-be71-5f58ff553551.sql
+│   ├── 20260430025259_e1e421b8-4b52-45bb-bda5-f8c8f2c343e1.sql
+│   ├── 20260430030930_c55c9df5-e64e-4f8d-9403-b487876da494.sql
+│   ├── 20260430032339_c7f779d6-ea74-4305-bd10-0293581edae4.sql
+│   ├── 20260430032934_816ffcfe-cfcb-4261-b690-4e595de7c7d6.sql
+│   ├── 20260430033525_346c821e-98ae-4ea9-ab3a-3423f319b6fb.sql
+│   ├── 20260430033858_c1dfe4c6-0dbb-4a7f-b7e6-ad30b4b10913.sql
+│   ├── 20260430033948_ef7b5766-5ace-4357-8f93-815c619d149c.sql
+│   ├── 20260430120236_af5d1e04-840b-475d-8533-802a9c87b9a5.sql
+│   ├── 20260430123526_5973f0fb-1ab9-40b1-b77a-f21567a7e080.sql
+│   ├── 20260430143408_33b969b0-5406-4a7f-91cc-8bd45928a41b.sql
+│   ├── 20260430152451_1f84aaa2-3f3e-4b71-aaed-6d1cf4c86160.sql
+│   ├── 20260501005000_71cb9409-29b9-47e0-8d80-c5c9af9e23fb.sql
+│   ├── 20260501133158_20f114ea-6e27-4091-ba04-41eefcc6a49b.sql
+│   ├── 20260501140244_a42a7b72-6a8e-4b47-ac72-b0696cc59b17.sql
+│   ├── 20260501145305_2444f51a-af54-4d3e-9176-976489729410.sql
+│   ├── 20260501150945_7c9bbab6-7aa8-4a41-a049-11d54b10f447.sql
+│   ├── 20260501151028_f7127c93-34c6-4d78-8bd3-e3f9f621e383.sql
+│   ├── 20260501151832_6fb2e5a7-b78c-4feb-bf85-4ed87944f4e4.sql
+│   ├── 20260501152353_d1f5f570-1888-4333-9faa-fa84383889ab.sql
+│   ├── 20260501153506_d5539bf4-73d7-4e51-8765-fda2724405ce.sql
+│   ├── 20260501154002_eaa8eef1-7c92-4772-80a4-279d3f0f68be.sql
+│   ├── 20260501154554_58937563-f4b0-489f-9be8-167701f5efe8.sql
+│   ├── 20260501162651_4f83b2a5-8361-4197-80ff-d019d8543dea.sql
+│   ├── 20260501163741_e92c6e72-7004-4098-ab81-59ce31a0f4ab.sql
+│   ├── 20260501174438_67e0f210-9356-4573-851e-d2b6b8746b7e.sql
+│   ├── 20260501175714_266de725-6b10-445a-9007-d3add32e018b.sql
+│   ├── 20260501180304_da405920-fa92-4bb6-94f9-57d9c0b195e9.sql
+│   ├── 20260501183209_34cf6c80-2b44-45a2-83a8-087c65e1f5f4.sql
+│   ├── 20260501184503_mega_seed_products.sql
+│   ├── 20260501185925_c9510bb2-1f96-4642-80f9-8559d2192c57.sql
+│   ├── 20260501190322_4810561d-df8e-4b30-ace3-a12eabdd8633.sql
+│   ├── 20260501190539_26412cf5-fca5-4943-9fe6-8a8116a199b2.sql
+│   ├── 20260501192811_be2e6b7a-f4e5-40bc-853f-3e6f5a6e169c.sql
+│   ├── 20260501193541_ca001279-92af-4367-a3a7-440ddfd86c77.sql
+│   ├── 20260501194228_1562432f-490d-44f3-8dfa-43ac6e3ed1ac.sql
+│   ├── 20260501194956_8198ca98-d9b9-4c77-9803-7d92e675835f.sql
+│   ├── 20260501204910_0bfcb725-f3a7-4275-84f2-77679968c344.sql
+│   ├── 20260502122110_c718d790-bdef-4ac1-a24e-d6b595e39924.sql
+│   ├── 20260502151226_e26e5b91-97cf-4bc0-b84d-abe0666ef6b3.sql
+│   ├── 20260503001046_6dcf133c-f2cf-4a61-8768-a83f766cc0a8.sql
+│   ├── 20260503224408_e47851fd-de48-4621-bf3c-8bd217c94544.sql
+│   ├── 20260504020327_4cea2270-25c9-4e81-94f1-0abf1be2f819.sql
+│   ├── 20260504022734_40c95329-2f7d-482d-9f37-806d545dfae4.sql
+│   ├── 20260504030737_b1f326a0-1eb8-4b3e-b88d-61e34615d9d7.sql
+│   ├── 20260504032347_28dc8a19-e508-4a5e-a5de-5d07b87ac939.sql
+│   ├── 20260504033326_9c4e73bc-f725-4119-af4f-f8d1963aee45.sql
+│   ├── 20260504083042_e48fe177-dab9-4216-9b94-1447435ba27a.sql
+│   ├── 20260504144116_005f2d34-3802-4084-b18b-10bc07678445.sql
+│   ├── 20260504145036_e16d1bcc-680b-4524-9e92-98c46347631a.sql
+│   ├── 20260504154434_3bad3091-29d4-4e52-9a33-b8b4b9eaf6d4.sql
+│   ├── 20260504154519_65cab3f8-9b47-4916-b6a1-c70fa4a971ff.sql
+│   ├── 20260504155218_346c963d-19d2-42f6-9655-017d8550d84b.sql
+│   ├── 20260504155632_e6ecba6a-6bfc-422b-982f-1e2e489c502c.sql
+│   ├── 20260504161903_231625b9-5a01-4a69-9e84-8ab343dcb7f2.sql
+│   ├── 20260504171554_25dde47a-c7f7-44a4-b407-c06f3d6feca2.sql
+│   ├── 20260504171617_778ada08-802c-4759-8b38-cd78505937b3.sql
+│   ├── 20260504194810_36e5bd41-ba32-4f76-8d3d-80ae44712dfc.sql
+│   ├── 20260504202718_487ff1b1-5cde-46a0-8e9a-383ec4787f3d.sql
+│   ├── 20260504203452_c12de8be-1794-4f9f-8057-ae29fef40365.sql
+│   ├── 20260504204415_7b2678c1-4d56-4709-842a-00b7fdf18eb0.sql
+│   ├── 20260504205706_4a791bea-2978-433e-b3ea-6901d1fad350.sql
+│   ├── 20260504210144_0e48d852-6fd3-4736-805c-f938e99102ae.sql
+│   ├── 20260504213816_846134f9-0a35-4f81-b3b8-7f18d0dad89d.sql
+│   ├── 20260504214855_e1e3ce4b-ea5b-4394-aaa6-d3e1e947cbcc.sql
+│   ├── 20260505002844_62cabe46-0009-4784-a4d4-4a5dd7f8ecde.sql
+│   ├── 20260506115809_c2d2d238-1066-48b9-8056-2ea36af5993e.sql
+│   ├── 20260506125548_393e2829-7d34-4c4c-9edf-e16e5da7f721.sql
+│   ├── 20260506132321_9febb610-4231-4498-9dd2-3aaba420e0a9.sql
+│   ├── 20260506132918_ab2dc917-455a-48e3-9cde-6ff330c6e96b.sql
+│   ├── 20260506133400_71ae1566-4766-4520-97e8-295e8e6541b1.sql
+│   ├── 20260506133650_953b10b8-f52a-488e-afd0-0e37cbc12b40.sql
+│   ├── 20260506134012_627fb691-1ed3-45ca-b30e-0c3a1f9508d8.sql
+│   ├── 20260506134235_10234d85-17d5-42f6-8ef4-abfeb0d7aca8.sql
+│   ├── 20260506134423_73ac7e2d-186e-4f26-a5b0-36a1261a6c8a.sql
+│   ├── 20260506141216_ffb4567b-2744-494e-98b0-49d1640b8e0d.sql
+│   ├── 20260506141355_bb43dbcc-e6fb-4795-9a70-4498a8517d05.sql
+│   ├── 20260506141811_edb79db9-7dcb-44bb-954d-5baf6193b047.sql
+│   ├── 20260506144801_776d8b4f-9d24-406d-8353-b9f654c97963.sql
+│   ├── 20260506152839_571002b3-18d3-4160-8d27-3513f97a5d8b.sql
+│   ├── 20260506194731_de903950-1747-410c-820c-70e961db4722.sql
+│   ├── 20260506195345_a46d48e2-bedb-487e-bbb9-3e47bdf0a994.sql
+│   ├── 20260506200940_9a0f59f7-699e-4c77-8ffd-2a025f1b678a.sql
+│   ├── 20260506204341_aa7e7e92-a344-4f8a-b35f-fd53d012ef38.sql
+│   ├── 20260506210552_cc1fb6b7-8cc1-4208-b432-77f950ff8333.sql
+│   ├── 20260506213454_3711a83c-b75b-49a1-afee-3631bd642440.sql
+│   ├── 20260506214406_9fe7bf57-0ca2-49b8-90c4-769afa953e78.sql
+│   ├── 20260506214939_138069bc-7483-4b85-a805-1308d832db87.sql
+│   ├── 20260506215437_ec565918-aa3c-4a71-bc9d-3e2bf2f14d4f.sql
+│   ├── 20260506215827_5b0c8de6-d0bc-4f2b-a1fd-e552501168fe.sql
+│   ├── 20260506220215_767c3749-a105-4a22-8faa-46914b6c97fd.sql
+│   ├── 20260506223805_fc5d8c5f-cb13-419d-816f-6631f85cdf42.sql
+│   ├── 20260506224414_b44eb2e5-0d50-4e84-a89e-449d74db12e0.sql
+│   ├── 20260506233914_c0d00ee8-f883-4bec-be01-8f4a47bdf30b.sql
+│   ├── 20260507001051_448a3303-cd0a-4d55-aff5-18de648717e8.sql
+│   └── 20260507004450_03c00ef5-58c5-4b9f-81f9-88eaad54359b.sql
+└── config.toml  // Supabase project + functions config
+```
+
+---
+
+**Legend** — `// comment` beside a node identifies its strategic role within the OS.
