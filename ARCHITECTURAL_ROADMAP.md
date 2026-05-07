@@ -2,8 +2,8 @@
 ### Reef Almadina Super-App · Sovereign Scaling Manifesto
 
 > **Status:** Permanent architectural record. Not a backlog — a constitution for deferred high-level optimizations.
-> **Audience:** Future engineers (human + AI) inheriting the platform post Phase L.
-> **Last updated:** Phase L complete (Settlement Engine + Real-Time Triggers live).
+ > **Audience:** Future engineers (human + AI) inheriting the platform post Phase L.
+> **Last updated:** Phase VIII-Dev v3 — Al-Diwan Sovereign Hub live, Salsabil Dev-Node hardened, God-Mode QA fabric in place. (Earlier baseline: Phase L — Settlement Engine + Real-Time Triggers.)
 
 ---
 
@@ -107,3 +107,31 @@ Expose a **narrow, versioned bridge** (`postMessage` protocol) for sandboxed app
 > The current Phase A→L architecture is the **floor**. This document is the **ceiling**. Engineers operate in the space between, and the trajectory is always upward.
 
 — *Strategic Archive · Reef Almadina Super-App*
+
+---
+
+## 5. 👑 Sovereign OS Layer — Phase VIII (current)
+
+**Status:** Live. Recorded so future phases never regress it.
+
+### 5.1 Al-Diwan Sovereign Hub (`/diwan`)
+- File: `src/routes/_app.diwan.tsx` → `src/apps/khalil/pages/Hub.tsx` (folder kept for git history; public identity is **الديوان**).
+- 100% SDUI, layout slug `khalil_hub`. Active-delivery detection injects a live `barq_tracking` block via `HakimGenerativeOverlay`.
+- Registry id `diwan`, route `/diwan`, accent `from-amber-500 to-orange-600`. Exposed in `appRegistry` as the canonical empire gateway.
+
+### 5.2 Salsabil Dev-Node (`src/components/system/DevOSNavigator.tsx`)
+- DEV-only FAB (bottom-left, above TabBar) mounted **outside the provider tree** in `__root.tsx` so a broken provider can never hide it.
+- Capsule contains: Al-Diwan launcher (pulsing), `appRegistry`-driven app switcher, Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Khalil-as-Default` toggle, and **God Mode** toggle.
+- God Mode state is reflected on the FAB (Crown icon, amber/rose gradient, pulsing dot) and `window.SALSABIL_GOD_MODE` is re-synced on every route change.
+
+### 5.3 God Mode QA Fabric (`src/lib/godMode.ts`)
+- Sources: `window.__SALSABIL_GOD_MODE__`, `window.SALSABIL_GOD_MODE`, `localStorage["salsabil.dev.godMode"]`.
+- Bypasses: `useDriverEngine`, `useVendorOperations`, `HomeRedirector` default-view redirect.
+- Never modifies production data — only short-circuits client-side state hooks.
+
+### 5.4 Routing & Cache Hardening
+- `SubdomainGuard` whitelist: `["/diwan", "/khalil", "/admin/design", "/asrab", "/nabd"]` — the admin-host redirector must never swallow OS surfaces.
+- Phase VIII-FIX cache posture remains in force: `installEdgePersister` disabled, `registerPWA` disabled, `public/sw.js` is a kill switch, `queryPersister` BUSTER = `"salsabil-os-v2-dev"`. Re-enable only after the OS surface stabilises and a new BUSTER bump is scheduled.
+
+### 5.5 Hydration Discipline
+- `SalsabilStatusBar` and any other identity/wallet atoms must render a neutral placeholder (`—` / `…`) until `mounted` flips client-side. Server output and first client render must be byte-identical.
