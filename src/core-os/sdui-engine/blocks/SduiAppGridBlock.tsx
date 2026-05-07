@@ -16,7 +16,9 @@ function Impl({ block }: { block: Props }) {
   const apps =
     ids.length === 1 && ids[0] === "*"
       ? all
-      : ids.map((id) => all.find((a) => a.id === id)).filter(Boolean) as typeof all;
+      : ids
+          .map((id: string) => all.find((a) => a.id === id))
+          .filter((a): a is (typeof all)[number] => Boolean(a));
 
   if (apps.length === 0) return null;
 

@@ -12,7 +12,7 @@ const SCOPE_MAP: Record<string, OmniScope> = {
 
 function Impl({ block }: { block: Props }) {
   const scopes = useMemo(
-    () => block.props.scopes.map((s) => SCOPE_MAP[s]).filter(Boolean),
+    () => block.props.scopes.map((s: string) => SCOPE_MAP[s]).filter(Boolean),
     [block.props.scopes],
   );
   return (
