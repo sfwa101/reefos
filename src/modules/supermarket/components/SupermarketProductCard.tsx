@@ -1,116 +1,126 @@
 // SupermarketProductCard
 // ----------------------------------------------------------------------
-// Wholesale-aware wrapper around the shared `<ProductCard />`.
-//
-// Why a wrapper instead of mutating ProductCard:
-//   • Keeps the legacy ProductCard untouched (used by ~30 other surfaces).
-//   • Lets the supermarket vertical opt into the central PricingEngine
-//     via `useLivePrice` with a `WholesaleSelection` payload.
-//   • Renders an inline "سعر الجملة" badge the moment the user crosses
-//     a tier threshold (≥6 by default, or whatever the catalog defines).
-//
-// Failure mode: if the engine is unsupported / errors, we silently fall
-// back to the static `volumeBadge` UI — graceful degradation.
+// Wholesale-aware wrapper around the shared `<ProductCard />`. Adds the
+// Phase 3 gesture layer:
+//   • Minimal visual variant (image + title + price + add).
+//   • Tap → opens `ProductPeekSheet` (vaul snap-points 80%/100%) instead of
+//     navigating to the legacy product route.
+//   • Long-press → opens a Radix `Popover` "Quick Peek" with fast actions
+//     (favourite, compare, full details) — vibrates 15ms on activation.
 
-import { memo, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
+
 import ProductCard from "@/components/ProductCard";
+import ProductPeekSheet from "@/apps/reef-al-madina/features/product-detail/components/ProductPeekSheet";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useLongPress } from "@/hooks/useLongPress";
 import type { Product } from "@/lib/products";
 import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
 import type { WholesaleSelection } from "@/core/engine/pricing/strategies/WholesalePricingStrategy";
 import { volumeDealFor } from "@/lib/volumeDeals";
-import { Minus, Plus, Sparkles } from "lucide-react";
+import { Eye, Heart, Scale, Sparkles } from "lucide-react";
+import { useIsFavorite, useToggleFavorite } from "@/context/FavoritesContext";
 
 interface SupermarketProductCardProps {
   readonly product: Product;
 }
 
-const fmt = (n: number) =>
-  `${Math.round(n).toLocaleString("ar-EG")} ج`;
+const fmt = (n: number) => `${Math.round(n).toLocaleString("ar-EG")} ج`;
 
 const SupermarketProductCardImpl = ({ product }: SupermarketProductCardProps) => {
-  // Local quantity for the live wholesale preview. Cart additions still
-  // happen through the existing ProductCard "+" affordance with qty=1
-  // — this control is purely a discovery tool for the bulk discount.
-  const [previewQty, setPreviewQty] = useState<number>(1);
+  const [peekOpen, setPeekOpen] = useState(false);
+  const [popOpen, setPopOpen] = useState(false);
+  const fav = useIsFavorite(product.id);
+  const toggleFav = useToggleFavorite();
 
-  // Selection is referentially memoised — useLivePrice keys on identity.
   const selection = useMemo<WholesaleSelection>(
-    () => ({
-      quantity: previewQty,
-      applyVolumeDeals: true,
-    }),
-    [previewQty],
+    () => ({ quantity: 1, applyVolumeDeals: true }),
+    [],
   );
+  const { supported, breakdown } = useLivePrice<WholesaleSelection>(product, selection);
 
-  const { supported, breakdown } = useLivePrice<WholesaleSelection>(
-    product,
-    selection,
-  );
-
-  // Static deal (legacy badge) — always passed to the underlying card so
-  // the visual treatment matches the rest of the storefront.
   const staticDeal = volumeDealFor(product);
   const volumeBadge = staticDeal
     ? { buy: staticDeal.buy, save: staticDeal.save }
     : undefined;
 
-  // Engine-driven savings: only show the live block when the user has
-  // actually engaged the stepper and crossed a threshold.
-  const engineDiscount =
-    supported && breakdown && previewQty > 1 && breakdown.discountTotal > 0
+  const wholesaleHint =
+    supported && breakdown && breakdown.discountTotal > 0
       ? breakdown.discountTotal
       : 0;
-  const showLiveBlock = engineDiscount > 0;
 
-  const dec = () => setPreviewQty((q) => Math.max(1, q - 1));
-  const inc = () => setPreviewQty((q) => Math.min(99, q + 1));
+  const openPeek = useCallback(() => setPeekOpen(true), []);
+  const longPress = useLongPress(() => setPopOpen(true), { delay: 400 });
 
   return (
-    <div className="relative">
-      <ProductCard product={product} volumeBadge={volumeBadge} />
-
-      {/* Wholesale stepper — appears only when the SKU has any deal path */}
-      {(staticDeal || supported) && (
-        <div className="mt-1.5 flex items-center justify-between rounded-xl bg-foreground/5 px-2 py-1.5">
-          <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              aria-label="نقص الكمية"
-              onClick={dec}
-              className="grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground/70 active:scale-95"
-            >
-              <Minus className="h-3 w-3" strokeWidth={2.6} />
-            </button>
-            <span className="min-w-[1.5rem] text-center text-[11px] font-extrabold tabular-nums">
-              {previewQty.toLocaleString("ar-EG")}
-            </span>
-            <button
-              type="button"
-              aria-label="زيادة الكمية"
-              onClick={inc}
-              className="grid h-6 w-6 place-items-center rounded-full bg-background/80 text-foreground/70 active:scale-95"
-            >
-              <Plus className="h-3 w-3" strokeWidth={2.6} />
-            </button>
-          </div>
-
-          {showLiveBlock && breakdown ? (
-            <div className="flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300">
+    <Popover open={popOpen} onOpenChange={setPopOpen}>
+      <PopoverTrigger asChild>
+        <div {...longPress} className="relative">
+          <ProductCard
+            product={product}
+            variant="minimal"
+            volumeBadge={volumeBadge}
+            onOpen={openPeek}
+          />
+          {wholesaleHint > 0 && (
+            <span className="pointer-events-none absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-emerald-500/90 px-2 py-0.5 text-[10px] font-extrabold text-white shadow-pill">
               <Sparkles className="h-3 w-3" strokeWidth={2.6} />
-              <span>سعر الجملة · وفّر {fmt(engineDiscount)}</span>
-            </div>
-          ) : (
-            <span className="text-[10px] font-medium text-muted-foreground">
-              جرّب الكمية للجملة
+              وفّر {fmt(wholesaleHint)}
             </span>
           )}
         </div>
-      )}
-    </div>
+      </PopoverTrigger>
+      <PopoverContent
+        side="top"
+        align="center"
+        sideOffset={8}
+        className="w-56 p-2"
+      >
+        <div className="flex flex-col gap-1 text-right">
+          <p className="line-clamp-1 px-2 pb-1 text-[12px] font-bold text-foreground">
+            {product.name}
+          </p>
+          <button
+            type="button"
+            onClick={() => {
+              setPopOpen(false);
+              openPeek();
+            }}
+            className="flex items-center justify-end gap-2 rounded-lg px-2 py-2 text-[13px] font-medium hover:bg-accent/40 active:scale-[0.99]"
+          >
+            <span>التفاصيل الكاملة</span>
+            <Eye className="h-4 w-4" />
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              void toggleFav(product.id);
+              setPopOpen(false);
+            }}
+            className="flex items-center justify-end gap-2 rounded-lg px-2 py-2 text-[13px] font-medium hover:bg-accent/40 active:scale-[0.99]"
+          >
+            <span>{fav ? "إزالة من المفضلة" : "أضف للمفضلة"}</span>
+            <Heart className={`h-4 w-4 ${fav ? "fill-destructive text-destructive" : ""}`} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setPopOpen(false)}
+            className="flex items-center justify-end gap-2 rounded-lg px-2 py-2 text-[13px] font-medium hover:bg-accent/40 active:scale-[0.99]"
+          >
+            <span>قارن</span>
+            <Scale className="h-4 w-4" />
+          </button>
+        </div>
+      </PopoverContent>
+
+      <ProductPeekSheet
+        productId={peekOpen ? product.id : null}
+        isOpen={peekOpen}
+        onClose={() => setPeekOpen(false)}
+      />
+    </Popover>
   );
 };
 
-// React.memo — supermarket grids render hundreds of cards; shallow product
-// reference equality is the right key (catalog mutations swap the ref).
 export const SupermarketProductCard = memo(SupermarketProductCardImpl);
 SupermarketProductCard.displayName = "SupermarketProductCard";
