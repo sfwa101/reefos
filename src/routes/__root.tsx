@@ -88,7 +88,6 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "manifest", href: "/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "icon", href: "/icon-192.png", type: "image/png" },
       // Phase T-P3 — preconnect to the Supabase edge so the catalog
