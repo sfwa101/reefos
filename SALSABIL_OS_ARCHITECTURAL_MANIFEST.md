@@ -57,13 +57,18 @@ Master flag for admin QA. Sources, in order: `window.__SALSABIL_GOD_MODE__`, `wi
 - The Dev-Node FAB flips to its **Crown / amber-rose** identity so the operator always sees they are in elevated mode.
 
 ## 🔐 Universal Identity Gate
-`src/context/AuthContext.tsx` → **Salsabil OS National ID** — wraps the whole app tree in `__root.tsx`. Session, profile and Tayseer wallet identity persist across every app under `src/apps/*`. The `SalsabilStatusBar` atom renders a hydration-safe `—` / `…` placeholder on first paint to eliminate the SSR/CSR mismatch previously triggered by wallet + verification reads.
+`src/context/AuthContext.tsx` → **Salsabil OS National ID** — wraps the whole app tree in `__root.tsx`. Session, profile and Tayseer wallet identity persist across every app under `src/apps/*`. The `SalsabilStatusBar` atom renders a hydration-safe `—` / `…` placeholder on first paint and now reads its wallet balance through a **TanStack Query** (`["wallet", "status-bar", userId]`, 60s `staleTime`) — a single cached fetch shared across every shell mount instead of N parallel `supabase.from("wallets")` calls.
 
 ## 🧊 Cache & PWA Posture (Phase VIII-FIX, still in force)
 - `installEdgePersister` is **disabled** in `src/router.tsx` to guarantee fresh network data during the OS rollout.
 - `registerPWA()` is disabled and `__root.tsx` actively **unregisters** any existing service workers.
 - `public/sw.js` is a **Kill Switch** that clears all caches and unregisters itself.
 - `src/lib/queryPersister.ts` BUSTER = `"salsabil-os-v2-dev"`.
+
+## 🧬 Kernel Purification (Phase 2 — current)
+- **V-1 (Type ownership):** SDUI types live in `src/core-os/sdui-engine/types.ts`. The legacy reef path is a thin re-export shim only.
+- **V-2 (App→DB boundary):** the Maeen Hub no longer calls `supabase.from(...)` directly. Active-delivery detection is exposed by the kernel adapter `src/core-os/maeen/useActiveDelivery.ts` and consumed via TanStack Query. UI components never touch Supabase.
+- **R-4 (Network bleed):** `SalsabilStatusBar` wallet read is cached via TanStack Query — stable key, single in-flight request per session.
 
 ---
 
