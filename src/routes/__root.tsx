@@ -21,7 +21,6 @@ import { LocationProvider } from "@/context/LocationContext";
 import { SharedCartProvider } from "@/context/SharedCartContext";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
-import { registerPWA } from "@/lib/pwa";
 import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
 import { SubdomainGuard } from "@/components/SubdomainGuard";
 import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
@@ -131,7 +130,13 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    registerPWA();
+    // Phase VIII-FIX — PWA registration is temporarily disabled to prevent
+    // stale service-worker shells from masking the synchronized route tree.
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      void navigator.serviceWorker.getRegistrations?.().then((regs) => {
+        regs.forEach((r) => void r.unregister());
+      });
+    }
     return undefined;
   }, []);
 
