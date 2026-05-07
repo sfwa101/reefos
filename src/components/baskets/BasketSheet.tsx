@@ -12,9 +12,10 @@ import { fireMiniConfetti } from "@/lib/confetti";
 import { toLatin } from "@/lib/format";
 import {
   basketContents, basketMarketing, hydrateBasket, sumBasketRetail,
-  subFrequencies, findFrequency, loadSubs, saveSubs,
-  type SubFrequencyId, type SubscriptionRecord,
+  subFrequencies, findFrequency,
+  type SubFrequencyId,
 } from "@/lib/baskets";
+import { useSubscriptions } from "@/hooks/useSubscriptions";
 import SmartSwapSheet from "./SmartSwapSheet";
 import AnimatedNumber from "./AnimatedNumber";
 
