@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [fetchProfile]);
 
-  const signUpWithPhone: AuthCtx["signUpWithPhone"] = async (phone, password, fullName) => {
+  const signUpWithPhone = useCallback<AuthCtx["signUpWithPhone"]>(async (phone, password, fullName) => {
     const email = phoneToEmail(phone);
     const normalized = normalizePhone(phone);
     const { data, error } = await supabase.auth.signUp({
@@ -167,23 +167,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (error) return { error: humanize(error.message) };
     if (data.session?.user) await ensureProfile(data.session.user, fullName);
     return {};
-  };
+  }, [ensureProfile]);
 
-  const signInWithPhone: AuthCtx["signInWithPhone"] = async (phone, password) => {
+  const signInWithPhone = useCallback<AuthCtx["signInWithPhone"]>(async (phone, password) => {
     const email = phoneToEmail(phone);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { error: humanize(error.message) };
     if (data.user) await ensureProfile(data.user);
     return {};
-  };
+  }, [ensureProfile]);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     await supabase.auth.signOut();
-  };
+  }, []);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) await fetchProfile(user.id);
-  };
+  }, [user, fetchProfile]);
 
   const value = useMemo<AuthCtx>(
     () => ({
@@ -191,7 +191,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isInitializing: loading,
       signUpWithPhone, signInWithPhone, signOut, refreshProfile,
     }),
-    [session, user, profile, loading, profileLoading],
+    [session, user, profile, loading, profileLoading, signUpWithPhone, signInWithPhone, signOut, refreshProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
