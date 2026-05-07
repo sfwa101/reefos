@@ -9,6 +9,7 @@ import {
   isMealOpenNow, minutesUntilClose,
   type Recipe, type RecipeSection,
 } from "@/apps/reef-al-madina/features/recipes/data";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface Props {
   activeMeal: RecipeSection;
@@ -104,7 +105,14 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
 
               <button onClick={() => onOpen(r)} className="flex w-full text-right">
                 <div className="relative h-32 w-32 shrink-0">
-                  <img src={r.image} alt={r.name} loading="lazy" className="h-full w-full object-cover" />
+                  <OptimizedImage
+                    src={r.image}
+                    alt={r.name}
+                    width={256}
+                    height={256}
+                    wrapperClassName="absolute inset-0"
+                    className="h-full w-full object-cover"
+                  />
                   {m.soldToday && (
                     <span className="absolute bottom-1.5 right-1.5 flex items-center gap-1 rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-bold text-white">
                       <TrendingUp className="h-3 w-3" /> {toLatin(m.soldToday)} اليوم

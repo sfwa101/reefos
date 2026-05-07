@@ -4,6 +4,7 @@ import { memo } from "react";
 import { Calendar, Check, Minus, Plus, Sparkles } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { DAYS, RECIPES, SECTIONS, type RecipeSection } from "@/apps/reef-al-madina/features/recipes/data";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export type DayPlan = Partial<Record<RecipeSection, string>>;
 
@@ -72,7 +73,13 @@ function WeeklyPlannerImpl({
                         isSel ? "ring-2 ring-primary" : "bg-background/60"
                       }`}
                     >
-                      <img src={r.image} alt={r.name} loading="lazy" className="h-20 w-full object-cover" />
+                      <OptimizedImage
+                        src={r.image}
+                        alt={r.name}
+                        width={256}
+                        height={160}
+                        className="h-20 w-full object-cover"
+                      />
                       <div className="p-2">
                         <p className="line-clamp-2 text-[11px] font-bold leading-tight">{r.name}</p>
                         <p className="mt-1 text-[10px] font-extrabold text-primary tabular-nums">{toLatin(price)} ج.م</p>

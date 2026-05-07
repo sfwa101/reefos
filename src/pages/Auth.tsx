@@ -47,7 +47,8 @@ const Auth = () => {
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (toLatin(phone).replace(/\D/g, "").length < 10) { toast.error("أدخل رقم هاتف صحيح"); return; }
-    if (password.length < 6) { toast.error("كلمة السر يجب أن تكون 6 أحرف على الأقل"); return; }
+    // Sovereign simplicity: 6+ chars, no complexity required per Emperor's decree.
+    if (password.length < 6) { toast.error("اختر كلمة سر من ٦ أحرف على الأقل — أي حروف أو أرقام"); return; }
     if (mode === "signup" && fullName.trim().length < 2) { toast.error("أدخل اسمك الكامل"); return; }
     setBusy(true);
     try {

@@ -3,6 +3,7 @@ import { products, type Product } from "@/lib/products";
 import { getRestaurant } from "@/lib/restaurants";
 import { ChefHat, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export type SponsoredRestaurantRailProps = {
   title: string;
@@ -63,7 +64,13 @@ const SponsoredRestaurantRail = ({
           >
             <div className="aspect-square overflow-hidden rounded-xl bg-muted">
               {p.image ? (
-                <img src={p.image} alt={p.name} className="h-full w-full object-cover" loading="lazy" />
+                <OptimizedImage
+                  src={p.image}
+                  alt={p.name}
+                  width={300}
+                  height={300}
+                  className="h-full w-full object-cover"
+                />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                   <ChefHat className="h-6 w-6" />

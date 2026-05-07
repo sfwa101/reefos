@@ -1,6 +1,6 @@
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { CheckCircle2, Minus, Plus, Sparkle, Star } from "lucide-react";
-import { LazyImg } from "./LazyImg";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import type { RxProduct } from "../types";
 
 export const RecCard = ({ p, onOpen }: { p: RxProduct; onOpen: () => void }) => (
@@ -9,7 +9,14 @@ export const RecCard = ({ p, onOpen }: { p: RxProduct; onOpen: () => void }) => 
     className="group relative flex w-[180px] shrink-0 snap-start flex-col overflow-hidden rounded-[20px] bg-card text-right ring-1 ring-border/50 shadow-soft transition active:scale-[0.98]"
   >
     <div className="relative aspect-square w-full overflow-hidden bg-muted">
-      <LazyImg src={p.image} alt={p.name} className="absolute inset-0 h-full w-full object-cover" />
+      <OptimizedImage
+        src={p.image}
+        alt={p.name}
+        width={360}
+        height={360}
+        wrapperClassName="absolute inset-0"
+        className="h-full w-full object-cover"
+      />
       <span className="absolute right-2 top-2 inline-flex items-center gap-0.5 rounded-full bg-primary/95 px-2 py-0.5 text-[9px] font-extrabold text-primary-foreground">
         <Sparkle className="h-2.5 w-2.5" /> AI
       </span>
@@ -37,7 +44,14 @@ export const DetailedProductCard = ({ p, onOpen }: { p: RxProduct; onOpen: () =>
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-[20px] bg-card ring-1 ring-border/50 shadow-soft">
       <button onClick={onOpen} className="relative aspect-square w-full overflow-hidden bg-muted">
-        <LazyImg src={p.image} alt={p.name} className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+        <OptimizedImage
+          src={p.image}
+          alt={p.name}
+          width={512}
+          height={512}
+          wrapperClassName="absolute inset-0"
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
         {discount > 0 && (
           <span className="absolute right-2 top-2 rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-extrabold text-white shadow-sm">
             −{discount}%

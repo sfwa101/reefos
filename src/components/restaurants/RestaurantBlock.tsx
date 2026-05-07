@@ -9,6 +9,7 @@ import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import type { Restaurant } from "@/lib/restaurants";
 import RestaurantItemSheet from "./RestaurantItemSheet";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const resolve = (ids: string[]): Product[] =>
   ids.map((id) => ALL_PRODUCTS.find((p) => p.id === id)).filter((p): p is Product => !!p);
@@ -180,10 +181,12 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
               style={{ scrollSnapAlign: "start" }}
             >
               <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded-xl bg-secondary/40">
-                <img
+                <OptimizedImage
                   src={p.image}
                   alt={p.name}
-                  loading="lazy"
+                  width={280}
+                  height={280}
+                  wrapperClassName="absolute inset-0"
                   className="h-full w-full object-cover"
                 />
                 {/* "+" button overlay (bottom-right of image) */}

@@ -249,3 +249,9 @@ Migration is **staged** at `docs/migrations-staging/20260507_hakim_predictive_ca
 - ✅ **Anti-Hallucination Sanitizer**: every returned `product_id` is validated against the hydrated candidate set; unknown ids are silently dropped, qty is clamped to `[1, 20]`, and the response is enriched server-side with `name/unit/price/image/category` so the client never re-fetches.
 - ✅ **Client Adapter** (`src/core-os/hakim-ai/hooks/usePredictBasket.ts`): TanStack `useQuery` wrapping `supabase.functions.invoke("predict_basket")`. 5-min `staleTime`, gated on auth, no retry on `rate_limited` / `credits_exhausted`.
 - ✅ **UI Wiring**: `HakimPredictiveBasket.tsx` now consumes `usePredictBasket()` directly. Skeleton during fetch, hides on empty/error, renders the dynamic `headline`, predicted lines (with reasons → tooltipable), confidence %, and feeds the live prediction into `useReplaceCart` for the 1-tap apply.
+
+## Phase 6 — Auth Simplification & Global Image Optimization ✅
+- **Auth**: `src/pages/Auth.tsx` formalized — password is `length >= 6`, any characters (including digits-only). Welcoming Arabic toast. Comment: "Sovereign simplicity: 6+ chars, no complexity required per Emperor's decree."
+- **Image Engine Unification**: `OptimizedImage` (`src/components/ui/OptimizedImage.tsx`) is now the **mandatory** image atom (lazy + async decode + fetchpriority + skeleton + branded fallback + CLS-safe).
+- **LazyImg purged**: `src/apps/reef-al-madina/features/pharmacy/components/LazyImg.tsx` deleted; consumers (`ProductCards.tsx`, `ProductOverlay.tsx`) migrated.
+- **Raw `<img>` stragglers killed (7)**: `RestaurantBlock`, `BasketCard`, `SponsoredRestaurantRail`, `BorrowCard`, `DailyBrowser`, `WeeklyPlanner`, `FeatureTileGrid`. Above-the-fold tiles use `priority` / `fetchpriority="high"`; all carry explicit `width`/`height` for zero-CLS.

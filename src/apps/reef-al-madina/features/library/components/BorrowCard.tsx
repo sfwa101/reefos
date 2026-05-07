@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import type { Product } from "@/lib/products";
 import { fmtMoney } from "@/lib/format";
 import { PALETTE } from "../data";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 export const BorrowCard = ({
   product, onBorrow,
@@ -12,7 +13,14 @@ export const BorrowCard = ({
     onClick={() => onBorrow(product)}
     className="group flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-right shadow-soft ring-1 ring-border/50 transition hover:-translate-y-0.5 active:scale-[0.98]"
   >
-    <img src={product.image} alt={product.name} loading="lazy" className="h-20 w-16 rounded-xl object-cover ring-1 ring-border/50" />
+    <OptimizedImage
+      src={product.image}
+      alt={product.name}
+      width={128}
+      height={160}
+      wrapperClassName="h-20 w-16 shrink-0 rounded-xl ring-1 ring-border/50"
+      className="h-full w-full object-cover"
+    />
     <div className="flex-1">
       <p className="font-display text-sm font-extrabold leading-tight">{product.name}</p>
       <p className="mt-1 text-[11px] text-muted-foreground">{product.unit}</p>
