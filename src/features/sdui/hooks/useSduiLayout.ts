@@ -7,8 +7,8 @@
  *
  * Anonymous-safe (RLS allows public read of published versions).
  */
-import { useMemo } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useEffect, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 
@@ -39,12 +39,37 @@ async function fetchSduiBlocks(slug: string): Promise<unknown> {
 }
 
 export function useSduiLayout(slug: string): State {
+  const queryClient = useQueryClient();
+
   const query = useQuery({
     queryKey: ["sdui_layouts", slug],
     queryFn: () => fetchSduiBlocks(slug),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
+
+  // Realtime cache invalidation — admin edits to the active layout flow live.
+  useEffect(() => {
+    const channel = supabase
+      .channel(`sdui-updates-${slug}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "sdui_layouts",
+          filter: `slug=eq.${slug}`,
+        },
+        () => {
+          void queryClient.invalidateQueries({ queryKey: ["sdui_layouts", slug] });
+        },
+      )
+      .subscribe();
+
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [slug, queryClient]);
 
   const blocks = useMemo<SduiBlock[]>(
     () => (query.data ? parseBlocks(query.data) : []),
