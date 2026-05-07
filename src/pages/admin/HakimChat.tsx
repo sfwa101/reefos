@@ -5,7 +5,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldAlert, Sparkles, Send, Calendar, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { HakimPulseMonitor } from "@/features/hakim/components/HakimPulseMonitor";
+import { HakimPulseMonitor } from "@/core-os/hakim-ai/components/HakimPulseMonitor";
 
 type Msg = { role: "user" | "assistant"; content: string; id?: string };
 type Session = { id: string; title: string | null; updated_at: string };

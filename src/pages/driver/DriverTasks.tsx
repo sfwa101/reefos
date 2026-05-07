@@ -8,10 +8,10 @@
  * Mobile-first: stack of full-width cards, generous spacing, no horizontal
  * scrolling. Surge banner is rendered above the feed only when relevant.
  */
-import { useDriverEngine } from "@/features/driver/hooks/useDriverEngine";
-import { ActiveTasksFeed } from "@/features/driver/components/ActiveTasksFeed";
-import { DriverEarningsBar } from "@/features/driver/components/DriverEarningsBar";
-import { DriverSurgeBanner } from "@/features/driver/components/DriverSurgeBanner";
+import { useDriverEngine } from "@/apps/reef-al-madina/features/driver/hooks/useDriverEngine";
+import { ActiveTasksFeed } from "@/apps/reef-al-madina/features/driver/components/ActiveTasksFeed";
+import { DriverEarningsBar } from "@/apps/reef-al-madina/features/driver/components/DriverEarningsBar";
+import { DriverSurgeBanner } from "@/apps/reef-al-madina/features/driver/components/DriverSurgeBanner";
 
 export default function DriverTasks() {
   const engine = useDriverEngine();

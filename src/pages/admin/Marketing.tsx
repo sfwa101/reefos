@@ -3,13 +3,13 @@ import { Image as ImageIcon, Tag, Zap } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { PanelErrorBoundary } from "@/features/admin/marketing/PanelErrorBoundary";
+import { PanelErrorBoundary } from "@/apps/reef-al-madina/features/admin/marketing/PanelErrorBoundary";
 import { PrintReportButton } from "@/components/admin/PrintReportButton";
 
 // Lazy-loaded panels (each tab loads independently)
-const BannersPanel = lazy(() => import("@/features/admin/marketing/BannersPanel"));
-const FlashPanel = lazy(() => import("@/features/admin/marketing/FlashPanel"));
-const CouponsPanel = lazy(() => import("@/features/admin/marketing/CouponsPanel"));
+const BannersPanel = lazy(() => import("@/apps/reef-al-madina/features/admin/marketing/BannersPanel"));
+const FlashPanel = lazy(() => import("@/apps/reef-al-madina/features/admin/marketing/FlashPanel"));
+const CouponsPanel = lazy(() => import("@/apps/reef-al-madina/features/admin/marketing/CouponsPanel"));
 
 type TabKey = "banners" | "coupons" | "flash";
 

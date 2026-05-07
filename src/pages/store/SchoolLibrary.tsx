@@ -14,12 +14,12 @@ import type { Product } from "@/lib/products";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PALETTE, libraryProducts, type TabKey } from "@/features/library/data";
-import { BorrowCard } from "@/features/library/components/BorrowCard";
-import { KYCGateDialog } from "@/features/library/components/KYCGateDialog";
-import { BorrowSheet } from "@/features/library/components/BorrowSheet";
-import { BundlesGrid } from "@/features/library/components/BundlesGrid";
-import { PrintWizard } from "@/features/library/components/PrintWizard";
+import { PALETTE, libraryProducts, type TabKey } from "@/apps/reef-al-madina/features/library/data";
+import { BorrowCard } from "@/apps/reef-al-madina/features/library/components/BorrowCard";
+import { KYCGateDialog } from "@/apps/reef-al-madina/features/library/components/KYCGateDialog";
+import { BorrowSheet } from "@/apps/reef-al-madina/features/library/components/BorrowSheet";
+import { BundlesGrid } from "@/apps/reef-al-madina/features/library/components/BundlesGrid";
+import { PrintWizard } from "@/apps/reef-al-madina/features/library/components/PrintWizard";
 
 const SchoolLibrary = () => {
   const [tab, setTab] = useState<TabKey>("store");

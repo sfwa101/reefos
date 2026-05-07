@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode, useCallback } from "react";
-import { DICTIONARIES, LOCALE_DIR, type Locale } from "@/features/settings/locales";
+import { DICTIONARIES, LOCALE_DIR, type Locale } from "@/apps/reef-al-madina/features/settings/locales";
 
 type LocaleCtx = {
   locale: Locale;

@@ -13,22 +13,22 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { categories, idToLabel, useRxProducts } from "@/features/pharmacy/data";
-import type { CatId, RxProduct } from "@/features/pharmacy/types";
-import { SmartBar } from "@/features/pharmacy/components/SmartBar";
-import { CategoryRail } from "@/features/pharmacy/components/CategoryRail";
+import { categories, idToLabel, useRxProducts } from "@/apps/reef-al-madina/features/pharmacy/data";
+import type { CatId, RxProduct } from "@/apps/reef-al-madina/features/pharmacy/types";
+import { SmartBar } from "@/apps/reef-al-madina/features/pharmacy/components/SmartBar";
+import { CategoryRail } from "@/apps/reef-al-madina/features/pharmacy/components/CategoryRail";
 import {
   DetailedProductCard,
   RecCard,
-} from "@/features/pharmacy/components/ProductCards";
-import { EmptyState } from "@/features/pharmacy/components/EmptyState";
+} from "@/apps/reef-al-madina/features/pharmacy/components/ProductCards";
+import { EmptyState } from "@/apps/reef-al-madina/features/pharmacy/components/EmptyState";
 
 // Heavy modals — lazy-loaded to keep the initial chunk lean.
 const ProductOverlay = lazy(
-  () => import("@/features/pharmacy/components/ProductOverlay"),
+  () => import("@/apps/reef-al-madina/features/pharmacy/components/ProductOverlay"),
 );
 const ScannerOverlay = lazy(
-  () => import("@/features/pharmacy/components/ScannerOverlay"),
+  () => import("@/apps/reef-al-madina/features/pharmacy/components/ScannerOverlay"),
 );
 
 const Pharmacy = () => {

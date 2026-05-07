@@ -1,5 +1,5 @@
-import { useVendorOperations } from "@/features/vendor/hooks/useVendorOperations";
-import { VendorInventoryGrid } from "@/features/vendor/components/VendorInventoryGrid";
+import { useVendorOperations } from "@/apps/reef-al-madina/features/vendor/hooks/useVendorOperations";
+import { VendorInventoryGrid } from "@/apps/reef-al-madina/features/vendor/components/VendorInventoryGrid";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { AlertTriangle, Package } from "lucide-react";
 

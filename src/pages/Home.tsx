@@ -40,8 +40,8 @@ import LoyaltyProgress from "@/components/LoyaltyProgress";
 import InactivityNudger from "@/components/InactivityNudger";
 import FlashSalesRail from "@/components/FlashSalesRail";
 
-import SmartGreeting from "@/features/main-hub/components/SmartGreeting";
-import DynamicStoryCircles from "@/features/main-hub/components/DynamicStoryCircles";
+import SmartGreeting from "@/apps/reef-al-madina/features/main-hub/components/SmartGreeting";
+import DynamicStoryCircles from "@/apps/reef-al-madina/features/main-hub/components/DynamicStoryCircles";
 import StickySearchBar from "@/components/StickySearchBar";
 
 const HomeBelowFold = lazy(() => import("./HomeBelowFold"));

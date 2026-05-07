@@ -12,11 +12,11 @@ import {
   empty, META_SCHEMA,
   type ProductRow, type ProductMetadata,
   type ProductVariantRow, type ProductAddonRow,
-} from "@/features/admin/product-editor/types";
-import BasicInfoForm from "@/features/admin/product-editor/BasicInfoForm";
-import PricingAndInventory, { type MarginInfo } from "@/features/admin/product-editor/PricingAndInventory";
-import SpecsForm from "@/features/admin/product-editor/SpecsForm";
-import OptionsBuilder from "@/features/admin/product-editor/OptionsBuilder";
+} from "@/apps/reef-al-madina/features/admin/product-editor/types";
+import BasicInfoForm from "@/apps/reef-al-madina/features/admin/product-editor/BasicInfoForm";
+import PricingAndInventory, { type MarginInfo } from "@/apps/reef-al-madina/features/admin/product-editor/PricingAndInventory";
+import SpecsForm from "@/apps/reef-al-madina/features/admin/product-editor/SpecsForm";
+import OptionsBuilder from "@/apps/reef-al-madina/features/admin/product-editor/OptionsBuilder";
 
 // Re-export for backward compatibility with existing imports.
 export type { ProductRow, ProductMetadata, ProductVariantRow, ProductAddonRow };

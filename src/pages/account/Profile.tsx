@@ -6,16 +6,16 @@ import BackHeader from "@/components/BackHeader";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 
-import { AVATAR_GALLERY } from "@/features/account/profile/data";
-import { EMPTY_FORM, type DbProfile, type PageState, type ProfileForm, type SaveState, type TabKey } from "@/features/account/profile/types";
-import { buildForm, extractPhoneFromPseudoEmail } from "@/features/account/profile/utils";
-import { ProfileHero } from "@/features/account/profile/components/ProfileHero";
-import { ProfileTabsNav } from "@/features/account/profile/components/ProfileTabsNav";
-import { ProfileSaveBar } from "@/features/account/profile/components/ProfileSaveBar";
-import { IdentityTab } from "@/features/account/profile/components/IdentityTab";
-import { LifestyleTab } from "@/features/account/profile/components/LifestyleTab";
-import { BudgetTab } from "@/features/account/profile/components/BudgetTab";
-import { AvatarTab } from "@/features/account/profile/components/AvatarTab";
+import { AVATAR_GALLERY } from "@/apps/reef-al-madina/features/account/profile/data";
+import { EMPTY_FORM, type DbProfile, type PageState, type ProfileForm, type SaveState, type TabKey } from "@/apps/reef-al-madina/features/account/profile/types";
+import { buildForm, extractPhoneFromPseudoEmail } from "@/apps/reef-al-madina/features/account/profile/utils";
+import { ProfileHero } from "@/apps/reef-al-madina/features/account/profile/components/ProfileHero";
+import { ProfileTabsNav } from "@/apps/reef-al-madina/features/account/profile/components/ProfileTabsNav";
+import { ProfileSaveBar } from "@/apps/reef-al-madina/features/account/profile/components/ProfileSaveBar";
+import { IdentityTab } from "@/apps/reef-al-madina/features/account/profile/components/IdentityTab";
+import { LifestyleTab } from "@/apps/reef-al-madina/features/account/profile/components/LifestyleTab";
+import { BudgetTab } from "@/apps/reef-al-madina/features/account/profile/components/BudgetTab";
+import { AvatarTab } from "@/apps/reef-al-madina/features/account/profile/components/AvatarTab";
 
 const Profile = () => {
   const { user, profile, loading, refreshProfile } = useAuth();

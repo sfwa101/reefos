@@ -1,5 +1,5 @@
-import { useVendorOperations } from "@/features/vendor/hooks/useVendorOperations";
-import { VendorLiveOrdersFeed } from "@/features/vendor/components/VendorLiveOrdersFeed";
+import { useVendorOperations } from "@/apps/reef-al-madina/features/vendor/hooks/useVendorOperations";
+import { VendorLiveOrdersFeed } from "@/apps/reef-al-madina/features/vendor/components/VendorLiveOrdersFeed";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { Activity, CheckCircle2, Clock } from "lucide-react";
 

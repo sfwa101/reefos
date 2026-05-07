@@ -1,16 +1,16 @@
 import { useMemo } from "react";
 import { products } from "@/lib/products";
 import { Skeleton } from "@/components/ui/skeleton";
-import DynamicHeroBanner from "@/features/offers/components/DynamicHeroBanner";
-import PersonalizedDealsRail from "@/features/offers/components/PersonalizedDealsRail";
-import FlashSalesGrid from "@/features/offers/components/FlashSalesGrid";
-import BundleDealsRail, { type BundleDeal } from "@/features/offers/components/BundleDealsRail";
-import SectionOffersRail from "@/features/offers/components/SectionOffersRail";
-import SponsoredRestaurantRail from "@/features/offers/components/SponsoredRestaurantRail";
-import TierExclusiveOffers, { type TierOffer } from "@/features/offers/components/TierExclusiveOffers";
-import { useOffersRails } from "@/features/offers/hooks/useOffersRails";
-import { useDailyCountdown } from "@/features/offers/hooks/useDailyCountdown";
-import type { StorefrontRail } from "@/features/offers/types/rail";
+import DynamicHeroBanner from "@/apps/reef-al-madina/features/offers/components/DynamicHeroBanner";
+import PersonalizedDealsRail from "@/apps/reef-al-madina/features/offers/components/PersonalizedDealsRail";
+import FlashSalesGrid from "@/apps/reef-al-madina/features/offers/components/FlashSalesGrid";
+import BundleDealsRail, { type BundleDeal } from "@/apps/reef-al-madina/features/offers/components/BundleDealsRail";
+import SectionOffersRail from "@/apps/reef-al-madina/features/offers/components/SectionOffersRail";
+import SponsoredRestaurantRail from "@/apps/reef-al-madina/features/offers/components/SponsoredRestaurantRail";
+import TierExclusiveOffers, { type TierOffer } from "@/apps/reef-al-madina/features/offers/components/TierExclusiveOffers";
+import { useOffersRails } from "@/apps/reef-al-madina/features/offers/hooks/useOffersRails";
+import { useDailyCountdown } from "@/apps/reef-al-madina/features/offers/hooks/useDailyCountdown";
+import type { StorefrontRail } from "@/apps/reef-al-madina/features/offers/types/rail";
 
 const Offers = () => {
   const countdown = useDailyCountdown();

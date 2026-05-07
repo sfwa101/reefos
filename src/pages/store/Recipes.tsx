@@ -10,12 +10,12 @@ import type { Product } from "@/lib/products";
 import {
   DAYS, RECIPES, SECTIONS, getMealForHour,
   type Recipe, type RecipeSection,
-} from "@/features/recipes/data";
-import DailyBrowser from "@/features/recipes/components/DailyBrowser";
-import WeeklyPlanner, { type DayPlan } from "@/features/recipes/components/WeeklyPlanner";
+} from "@/apps/reef-al-madina/features/recipes/data";
+import DailyBrowser from "@/apps/reef-al-madina/features/recipes/components/DailyBrowser";
+import WeeklyPlanner, { type DayPlan } from "@/apps/reef-al-madina/features/recipes/components/WeeklyPlanner";
 
 // Heavy modal — lazy-loaded only when a recipe card is opened.
-const RecipeModal = lazy(() => import("@/features/recipes/components/RecipeModal"));
+const RecipeModal = lazy(() => import("@/apps/reef-al-madina/features/recipes/components/RecipeModal"));
 
 const FILTERS_LIST = ["كل الوصفات", "سريعة", "عائلية", "للأطفال", "صحية", "نباتية"];
 

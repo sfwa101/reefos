@@ -14,13 +14,13 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { LOCALE_LABEL, type Locale } from "@/features/settings/locales";
+import { LOCALE_LABEL, type Locale } from "@/apps/reef-al-madina/features/settings/locales";
 import {
   MODE_OPTIONS,
   THEMES,
   THEME_GROUP_TKEYS,
   type ThemeGroupKey,
-} from "@/features/settings/data";
+} from "@/apps/reef-al-madina/features/settings/data";
 
 const SwatchButton = ({
   id,
