@@ -1,7 +1,13 @@
-// Note + quantity stepper for the sweets sheet. Pure UI.
-
-import { MessageSquare } from "lucide-react";
-import { toLatin } from "@/lib/format";
+/**
+ * SweetsCustomizationForm — now a thin wrapper around the Universal
+ * Modifier Engine (Salsabil OS Kernel). Same external API; the "brain"
+ * is delegated to ModifierOrchestrator (TextInputAtom + QuantityAtom).
+ */
+import { useMemo } from "react";
+import {
+  ModifierOrchestrator,
+  type ModifierGroupSchema,
+} from "@/core-os/modifier-engine";
 
 type Props = {
   note: string;
@@ -13,40 +19,42 @@ type Props = {
 
 export const SweetsCustomizationForm = ({
   note, onNoteChange, qty, onQtyChange, isBooking,
-}: Props) => (
-  <>
-    <section>
-      <div className="mb-2 flex items-center gap-2">
-        <MessageSquare className="h-4 w-4 text-violet-600" />
-        <h3 className="text-sm font-extrabold">
-          ملاحظة خاصة{" "}
-          <span className="text-[10px] font-bold text-muted-foreground">(اختياري)</span>
-        </h3>
-      </div>
-      <textarea
-        rows={2}
-        value={note}
-        onChange={(e) => onNoteChange(e.target.value)}
-        placeholder={isBooking ? "مثال: اكتب «عيد ميلاد سعيد - أحمد» على التورتة" : "أي طلب خاص؟"}
-        className="w-full rounded-[14px] bg-foreground/5 px-3 py-2.5 text-sm outline-none ring-1 ring-border/40 transition focus:ring-violet-500"
-      />
-    </section>
+}: Props) => {
+  const groups = useMemo<ModifierGroupSchema[]>(
+    () => [
+      {
+        kind: "text",
+        id: "note",
+        title: "ملاحظة خاصة",
+        hint: "(اختياري)",
+        icon: "💬",
+        accent: "violet",
+        rows: 2,
+        placeholder: isBooking
+          ? "مثال: اكتب «عيد ميلاد سعيد - أحمد» على التورتة"
+          : "أي طلب خاص؟",
+      },
+      {
+        kind: "quantity",
+        id: "qty",
+        title: "الكمية",
+        min: 1,
+        accent: "violet",
+      },
+    ],
+    [isBooking],
+  );
 
-    <section className="flex items-center justify-between rounded-2xl bg-foreground/5 p-3">
-      <span className="text-sm font-extrabold">الكمية</span>
-      <div className="flex items-center gap-2 rounded-full bg-background p-0.5 shadow-pill">
-        <button
-          onClick={() => onQtyChange(Math.max(1, qty - 1))}
-          className="flex h-8 w-8 items-center justify-center rounded-full text-foreground active:scale-90"
-          aria-label="إنقاص"
-        >−</button>
-        <span className="w-7 text-center text-sm font-extrabold tabular-nums">{toLatin(qty)}</span>
-        <button
-          onClick={() => onQtyChange(qty + 1)}
-          className="flex h-8 w-8 items-center justify-center rounded-full bg-violet-600 text-white active:scale-90"
-          aria-label="زيادة"
-        >+</button>
-      </div>
-    </section>
-  </>
-);
+  const state = { note, qty };
+
+  return (
+    <ModifierOrchestrator
+      groups={groups}
+      state={state}
+      onChange={(id, value) => {
+        if (id === "note") onNoteChange(value as string);
+        else if (id === "qty") onQtyChange(value as number);
+      }}
+    />
+  );
+};
