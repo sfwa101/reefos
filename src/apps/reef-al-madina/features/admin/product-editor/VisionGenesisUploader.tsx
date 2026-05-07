@@ -44,9 +44,11 @@ const PRICING_LABELS: Record<USAGenesisPayload["financial_contract"]["pricing_mo
 
 interface Props {
   readonly onApprove?: (payload: USAGenesisPayload) => void;
+  /** When true, approval hands the payload to the parent (co-pilot mode) instead of minting directly. */
+  readonly handoffOnly?: boolean;
 }
 
-const VisionGenesisUploader = ({ onApprove }: Props) => {
+const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [hint, setHint] = useState("");
