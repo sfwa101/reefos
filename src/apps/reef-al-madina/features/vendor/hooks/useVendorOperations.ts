@@ -40,6 +40,13 @@ export function useVendorOperations() {
 
   // Load vendor account ids
   useEffect(() => {
+    if (isGodMode()) {
+      setVendorIds(MOCK_VENDOR_IDS);
+      setProducts(MOCK_VENDOR_PRODUCTS);
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     if (!user) { setVendorIds([]); return; }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any).rpc("user_vendor_ids", { _user_id: user.id }).then(({ data, error }: { data: string[]; error: { message: string } | null }) => {
