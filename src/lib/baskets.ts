@@ -284,12 +284,15 @@ export const STORAGE = {
   giftMeta: "reef-gift-meta-v1",
 } as const;
 
-/* ===== Subscription store (localStorage) =====
- * @TODO: PHASE 4 - Migrate localStorage subscriptions to supabase saved_baskets table
- * Target: public.saved_baskets (source = 'subscription'). Once migrated,
- * loadSubs/saveSubs become a thin RLS-backed query layer and can be
- * consumed cross-device by Hakim. See migration
- * 20260507030000_hakim_predictive_cart.sql.
+/* ===== Subscription store (LEGACY localStorage — deprecated) =====
+ * Phase 4.4 — DB sovereignty achieved. Subscriptions now live in
+ * `public.saved_baskets` (source = 'subscription'). Use the
+ * `useSubscriptions()` hook (src/hooks/useSubscriptions.ts) which is
+ * backed by `src/lib/savedBaskets.ts` and runs a one-shot legacy
+ * migration of any remaining `reef-subscriptions-v1` rows.
+ *
+ * `loadSubs` / `saveSubs` below are retained ONLY as fallback readers
+ * for the migration shim and MUST NOT be used by new code.
  */
 
 export type SubscriptionRecord = {
