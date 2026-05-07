@@ -105,7 +105,7 @@ export const DevOSNavigator = () => {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 12, scale: 0.92 }}
               transition={{ type: "spring", stiffness: 360, damping: 28 }}
-              className="absolute bottom-16 left-0 flex w-14 flex-col items-center gap-2 rounded-[28px] border border-white/15 bg-black/40 p-2 shadow-2xl backdrop-blur-xl"
+              className="absolute bottom-16 left-0 flex w-56 flex-col items-stretch gap-2 rounded-[28px] border border-white/15 bg-black/50 p-2.5 shadow-2xl backdrop-blur-xl"
             >
               {/* Khalil cognitive hub — top, pulsing */}
               <Link
