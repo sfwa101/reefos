@@ -116,6 +116,7 @@ export const ModifierGroupBlockSchema = z.object({
       max: z.number().int().optional(),
       step: z.number().int().positive().optional(),
       accent: z.enum(ACCENTS).optional(),
+    }),
     z.object({
       kind: z.literal("visual"),
       id: z.string().min(1),
