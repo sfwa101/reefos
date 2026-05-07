@@ -18,6 +18,39 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { isGodMode } from "@/lib/godMode";
+
+const MOCK_DRIVER_ID = "god-mode-driver";
+const MOCK_DRIVER_TASKS: import("../types/driver.types").DriverTask[] = [
+  {
+    id: "mock-task-1",
+    order_id: "mock-order-1",
+    status: "pending",
+    service_type: "express",
+    delivery_zone: "JAMASA",
+    customer_barcode: null,
+    cod_amount: 250,
+    commission_amount: 35,
+    driver_lat: null,
+    driver_lng: null,
+  },
+  {
+    id: "mock-task-2",
+    order_id: "mock-order-2",
+    status: "out_for_delivery",
+    service_type: "standard",
+    delivery_zone: "MANSOURA",
+    customer_barcode: null,
+    cod_amount: 0,
+    commission_amount: 22,
+    driver_lat: null,
+    driver_lng: null,
+  },
+];
+const MOCK_DRIVER_ORDERS: Record<string, import("../types/driver.types").OrderInfo> = {
+  "mock-order-1": { id: "mock-order-1", total: 250, user_id: "mock-user-1", full_name: "عميل تجريبي ١", phone: "01000000001" },
+  "mock-order-2": { id: "mock-order-2", total: 480, user_id: "mock-user-2", full_name: "عميل تجريبي ٢", phone: "01000000002" },
+};
 import type {
   DriverEarnings,
   DriverEvent,
