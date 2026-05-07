@@ -2,7 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
+import { isGodMode } from "@/lib/godMode";
 import type { VendorLiveOrderItem, VendorProduct } from "../types/vendor-ops.types";
+
+const MOCK_VENDOR_IDS = ["god-mode-vendor"];
+const MOCK_VENDOR_PRODUCTS: VendorProduct[] = [
+  { id: "mock-prod-1", vendor_id: "god-mode-vendor", name: "منتج تجريبي ١", price: 50, stock: 12, is_active: true, image_url: null, image: null, category: "general" } as unknown as VendorProduct,
+  { id: "mock-prod-2", vendor_id: "god-mode-vendor", name: "منتج تجريبي ٢", price: 75, stock: 3, is_active: true, image_url: null, image: null, category: "general" } as unknown as VendorProduct,
+];
 
 const READY_KEY = "vendor.readyItems.v1";
 
