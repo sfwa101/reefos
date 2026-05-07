@@ -228,3 +228,9 @@ Migration is **staged** at `docs/migrations-staging/20260507_hakim_predictive_ca
 - ✅ **DB migration applied**: `saved_baskets` (RLS-clean, polymorphic source) + `user_product_frequency` materialized view live in production.
 - ✅ **Fatal Lag Fix**: `useHomeOrchestrator` now consumes `useHomeProductsQuery(48, "home")` — server-side capped at 48 rows by `source`. Eliminated the legacy `fetchAllProducts` (2000-row) path on the home screen.
 - ✅ **Module Restoration**: `appRegistry` now publishes Baskets (`/store/baskets`), Meat (`/store/meat`), and Village (`/store/village`). `DepartmentGrid` exposes Baskets as a top-level tile.
+
+## Phase 4 — Hakim Predictive Cart (Part 3 — Executed 2026-05-07)
+
+- ✅ **OS Registry Purge**: removed `baskets`, `meat`, `village` from `src/core-os/app-registry/index.ts`. The OS registry now contains ONLY true Sovereign Super-Apps: `reef`, `asrab`, `nabd`, `maeen`. Internal Reef departments are surfaced exclusively via the SDUI `departments_hub` layout.
+- ✅ **SDUI Sections Reunification**: injected the "سلال الريف → /store/baskets" tile into the active `departments_hub` v4 (id `14afb38a-…`) `hub-main-departments` bento (now 6 tiles). Admin-editable, no code change required for future tile edits.
+- ✅ **Meat Route Optimization**: `src/routes/_app/store.meat.tsx` loader switched from `productsQueryOptions()` (2000-row warm) to `homeProductsQueryOptions(48, "meat")`. The fatal memory crunch on Meat entry is eliminated. Village still warms the legacy cache and is queued for the same treatment.

@@ -753,16 +753,19 @@ supabase/
 
 ```
 
-## Family of Apps — Registry (post Phase 4.2)
+## Family of Apps — Registry (post Phase 4.3)
+
+Only Sovereign Super-Apps appear here. Internal Reef departments (Baskets,
+Meat, Village, Pharmacy, Kitchen, Recipes, Sweets, Wholesale, Library,
+Restaurants, …) are routes inside Reef Al-Madina and are surfaced via the
+SDUI `departments_hub` layout — **not** the OS registry.
 
 | App | Route | Status |
 |---|---|---|
 | ريف المدينة | `/` | live |
-| سلال الريف | `/store/baskets` | live |
-| اللحوم | `/store/meat` | live |
-| ريف القرية | `/store/village` | live |
 | أسراب طيبة | `/asrab` | soon |
 | نبض الحياة | `/nabd` | soon |
 | معين | `/maeen` | live |
 
 Source of truth: `src/core-os/app-registry/index.ts`.
+Reef internal departments source of truth: `sdui_layouts.slug = 'departments_hub'`.
