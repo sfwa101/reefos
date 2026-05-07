@@ -137,14 +137,14 @@ const BasketsSubs = () => {
                 {/* Actions */}
                 <div className="grid grid-cols-3 gap-1.5 border-t border-border/50 p-2">
                   <button
-                    onClick={() => togglePause(s.id)}
+                    onClick={() => togglePause(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >
                     {s.paused ? <><Play className="h-3.5 w-3.5" /> استئناف</> : <><Pause className="h-3.5 w-3.5" /> إيقاف</>}
                   </button>
                   <button
-                    onClick={() => skipNext(s.id)}
+                    onClick={() => skipNext(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >
