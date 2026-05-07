@@ -31,31 +31,36 @@ export function useTrackBehavior(): void {
     if (!user?.id) return;
     const userId = user.id;
 
-    const makeHandler = <E extends SalsabilEventName>(eventType: E) => {
-      return (payload: SalsabilEvents[E]) => {
-        const appId = (payload as { appId?: string }).appId ?? "reef";
-        void supabase
-          .from("user_behavior_events")
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const makeHandler = (eventType: SalsabilEventName) => {
+      return (payload: unknown) => {
+        const appId = (payload as { appId?: string })?.appId ?? "reef";
+        void (supabase
+          .from("user_behavior_events") as unknown as {
+            insert: (row: Record<string, unknown>) => Promise<unknown>;
+          })
           .insert({
             user_id: userId,
             event_type: eventType,
             app_id: appId,
-            payload: payload as unknown as Record<string, unknown>,
-          } as any)
+            payload: payload as Record<string, unknown>,
+          })
           .then(() => undefined, () => undefined);
       };
     };
 
-    const handlers = TRACKED_EVENTS.map((evt) => {
-      const h = makeHandler(evt);
-      eventBus.on(evt, h as Parameters<typeof eventBus.on>[1]);
-      return [evt, h] as const;
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const handlers: Array<readonly [SalsabilEventName, (p: any) => void]> =
+      TRACKED_EVENTS.map((evt) => {
+        const h = makeHandler(evt);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        eventBus.on(evt, h as any);
+        return [evt, h] as const;
+      });
 
     return () => {
       for (const [evt, h] of handlers) {
-        eventBus.off(evt, h as Parameters<typeof eventBus.off>[1]);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        eventBus.off(evt, h as any);
       }
     };
   }, [user?.id]);
