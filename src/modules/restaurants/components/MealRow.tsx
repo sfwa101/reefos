@@ -2,6 +2,10 @@ import { memo, useCallback, type MouseEvent } from "react";
 import { Clock, Plus, Star } from "lucide-react";
 import { toast } from "sonner";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
+// Variant / extras for restaurant meals are routed through the
+// Universal Modifier Engine when the product carries a `modifiers`
+// schema. Quick-add (this row) bypasses extras for one-tap UX.
+// See: @/core-os/modifier-engine
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/products";
