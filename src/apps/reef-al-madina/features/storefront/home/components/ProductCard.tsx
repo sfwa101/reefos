@@ -65,6 +65,9 @@ export const ProductCard = ({
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch { /* ignore */ }
+    }
     const product = getById(p.id);
     if (!product) {
       toast.error("المنتج غير متاح حالياً");
