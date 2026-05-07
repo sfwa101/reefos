@@ -15,7 +15,7 @@
  */
 import { useMemo, useState } from "react";
 
-import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
+import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
 import type { Product } from "@/lib/products";
 
 import { BESTSELLER_IDS } from "../dictionaries";
