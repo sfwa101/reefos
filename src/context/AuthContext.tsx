@@ -1,3 +1,11 @@
+/**
+ * Salsabil OS — National ID Provider
+ * ----------------------------------
+ * This is the universal identity gate for ALL apps in the Salsabil OS family
+ * (Reef Al Madina, Khalil, Asrab Taiba, Nabd Al Hayah). It wraps the entire
+ * app tree in __root.tsx so session, profile, and Tayseer wallet identity
+ * persist seamlessly across every module under `src/apps/*`.
+ */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
