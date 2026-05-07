@@ -67,7 +67,9 @@ export const DevOSNavigator = () => {
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(GOD_MODE_KEY, godMode ? "1" : "0");
-    (window as unknown as { __SALSABIL_GOD_MODE__?: boolean }).__SALSABIL_GOD_MODE__ = godMode;
+    const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
+    w.__SALSABIL_GOD_MODE__ = godMode;
+    w.SALSABIL_GOD_MODE = godMode;
   }, [godMode]);
 
   useEffect(() => {
