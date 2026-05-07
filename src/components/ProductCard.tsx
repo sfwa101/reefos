@@ -18,9 +18,13 @@ import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ProductCardProps {
   product: Product;
-  variant?: "grid" | "carousel" | "wide";
+  variant?: "grid" | "carousel" | "wide" | "minimal";
   /** Optional bulk-discount hint rendered as an overlay chip on the image. */
   volumeBadge?: { buy: number; save: number };
+  /** When provided, the entire card surface (image + title) calls this
+   *  instead of navigating via <Link>. Used by gesture surfaces (e.g. the
+   *  Supermarket Quick-Peek grid) that open a `ProductPeekSheet`. */
+  onOpen?: () => void;
 }
 
 const badgeStyle: Record<string, { label: string; cls: string }> = {
