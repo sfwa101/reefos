@@ -7,7 +7,7 @@
  */
 import { useEffect, useState } from "react";
 import { Power, Compass, Gauge, BatteryMedium, AlertTriangle } from "lucide-react";
-import { useDriverTelemetry, type DriverStatus } from "@/features/driver/store/useDriverTelemetry";
+import { useDriverTelemetry, type DriverStatus } from "@/apps/reef-al-madina/features/driver/store/useDriverTelemetry";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Sparkles } from "lucide-react";
-import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
+import { useWalletTransactions } from "@/core-os/finance/hooks/useWalletTransactions";
 import { toLatin } from "@/lib/format";
 
 type Slice = { key: string; name: string; value: number; tone: string };

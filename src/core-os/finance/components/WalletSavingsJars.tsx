@@ -12,8 +12,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
-import { formatDate } from "@/features/wallet/lib/walletAdvisor";
-import type { SavingsJar, SavingsTx } from "@/features/wallet/types/wallet.types";
+import { formatDate } from "@/core-os/finance/lib/walletAdvisor";
+import type { SavingsJar, SavingsTx } from "@/core-os/finance/types/wallet.types";
 
 /* ================= SAVINGS TILE (collapsed surface) ================= */
 export const SavingsJarTile = ({

@@ -4,8 +4,8 @@ import { Button } from "@/components/ui/button";
 import {
   AdminFormEngine,
   useEntityDefinition,
-} from "@/features/sdui/admin";
-import { AdminErrorBoundary } from "@/features/sdui/admin/components/AdminErrorBoundary";
+} from "@/core-os/sdui-engine/admin";
+import { AdminErrorBoundary } from "@/core-os/sdui-engine/admin/components/AdminErrorBoundary";
 
 export const Route = createFileRoute("/admin/$entity/$id")({
   component: AdminEntityRecordPage,

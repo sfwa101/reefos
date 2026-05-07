@@ -3,7 +3,7 @@ import { Copy, PiggyBank, Target, Users, Wallet2 } from "lucide-react";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { BalanceCard } from "./BalanceCard";
-import type { SavingsJar } from "@/features/wallet/types/wallet.types";
+import type { SavingsJar } from "@/core-os/finance/types/wallet.types";
 
 /**
  * BalanceCardsCarousel — Native-style horizontal snap carousel of

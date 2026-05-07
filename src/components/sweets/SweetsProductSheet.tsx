@@ -19,9 +19,9 @@ import {
 } from "@/lib/sweetsFulfillment";
 import { sweetsBookingToModifiers } from "@/lib/pricingAdapters";
 import { mod, type Modifier } from "@/lib/pricingEngine";
-import { VariantPicker } from "@/features/sweets/components/VariantPicker";
-import { FulfillmentSelector } from "@/features/sweets/components/FulfillmentSelector";
-import { SweetsCustomizationForm } from "@/features/sweets/components/SweetsCustomizationForm";
+import { VariantPicker } from "@/apps/reef-al-madina/features/sweets/components/VariantPicker";
+import { FulfillmentSelector } from "@/apps/reef-al-madina/features/sweets/components/FulfillmentSelector";
+import { SweetsCustomizationForm } from "@/apps/reef-al-madina/features/sweets/components/SweetsCustomizationForm";
 
 type Props = {
   product: Product;

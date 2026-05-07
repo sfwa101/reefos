@@ -26,13 +26,13 @@ import { useUiLayout } from "../hooks/useUiLayout";
 import type { SectionConfig, SectionKey } from "../types/sdui.types";
 import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
 import type { CatId } from "../types";
-import { SectionFrame } from "@/features/sdui/SectionFrame";
+import { SectionFrame } from "@/core-os/sdui-engine/SectionFrame";
 
 // Phase 26 — Main Hub stem cells (orchestrator-free, self-contained)
-import { MainSearchHeader } from "@/features/main-hub/components/MainSearchHeader";
-import { StoryCircles } from "@/features/main-hub/components/StoryCircles";
-import { PromotionSlider } from "@/features/main-hub/components/PromotionSlider";
-import { DepartmentGrid } from "@/features/main-hub/components/DepartmentGrid";
+import { MainSearchHeader } from "@/apps/reef-al-madina/features/main-hub/components/MainSearchHeader";
+import { StoryCircles } from "@/apps/reef-al-madina/features/main-hub/components/StoryCircles";
+import { PromotionSlider } from "@/apps/reef-al-madina/features/main-hub/components/PromotionSlider";
+import { DepartmentGrid } from "@/apps/reef-al-madina/features/main-hub/components/DepartmentGrid";
 
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */

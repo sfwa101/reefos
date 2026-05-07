@@ -1,8 +1,8 @@
 import { useUserRole } from "@/hooks/useUserRole";
-import { usePosEngine } from "@/features/pos/hooks/usePosEngine";
-import { PosShiftManager } from "@/features/pos/components/PosShiftManager";
-import { PosBarcodeCart } from "@/features/pos/components/PosBarcodeCart";
-import { PosQuickPay } from "@/features/pos/components/PosQuickPay";
+import { usePosEngine } from "@/apps/reef-al-madina/features/pos/hooks/usePosEngine";
+import { PosShiftManager } from "@/apps/reef-al-madina/features/pos/components/PosShiftManager";
+import { PosBarcodeCart } from "@/apps/reef-al-madina/features/pos/components/PosBarcodeCart";
+import { PosQuickPay } from "@/apps/reef-al-madina/features/pos/components/PosQuickPay";
 import { ShieldAlert, Loader2, WifiOff } from "lucide-react";
 
 export default function POSPage() {

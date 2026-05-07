@@ -9,8 +9,8 @@
  * zero deploys; corrupted JSON degrades gracefully (bad blocks are
  * dropped, screen never crashes).
  */
-import { useSduiLayout } from "@/features/sdui/hooks/useSduiLayout";
-import { SduiRenderer } from "@/features/sdui/components/SduiRenderer";
+import { useSduiLayout } from "@/core-os/sdui-engine/hooks/useSduiLayout";
+import { SduiRenderer } from "@/core-os/sdui-engine/components/SduiRenderer";
 import BackHeader from "@/components/BackHeader";
 
 const Sections = () => {

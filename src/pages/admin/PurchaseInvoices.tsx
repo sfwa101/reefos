@@ -11,7 +11,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { PurchaseInvoiceBuilder } from "@/features/admin/components/PurchaseInvoiceBuilder";
+import { PurchaseInvoiceBuilder } from "@/apps/reef-al-madina/features/admin/components/PurchaseInvoiceBuilder";
 
 type Invoice = {
   id: string;

@@ -10,7 +10,7 @@
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { DriverStatus } from "@/features/driver/store/useDriverTelemetry";
+import type { DriverStatus } from "@/apps/reef-al-madina/features/driver/store/useDriverTelemetry";
 
 export type DriverLivePosition = {
   driverId: string;

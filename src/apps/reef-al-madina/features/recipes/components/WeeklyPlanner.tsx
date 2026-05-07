@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { Calendar, Check, Minus, Plus, Sparkles } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { DAYS, RECIPES, SECTIONS, type RecipeSection } from "@/features/recipes/data";
+import { DAYS, RECIPES, SECTIONS, type RecipeSection } from "@/apps/reef-al-madina/features/recipes/data";
 
 export type DayPlan = Partial<Record<RecipeSection, string>>;
 

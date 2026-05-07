@@ -12,7 +12,7 @@ import {
   calculateDynamicDelivery,
   calculateDynamicETA,
   type ZoneOpsMetrics,
-} from "@/lib/sync/useSmartLogistics";
+} from "@/core-os/barq-logistics/useSmartLogistics";
 
 export type DynamicZoneInfo = {
   fee: number;

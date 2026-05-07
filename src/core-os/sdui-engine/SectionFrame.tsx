@@ -8,7 +8,7 @@
  * mapped to safe Tailwind classes.
  */
 import type { ReactNode } from "react";
-import type { SectionConfig } from "@/features/storefront/home/types/sdui.types";
+import type { SectionConfig } from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
 import { PADDING_CLASS, TONE_CLASS } from "./registry";
 import { cn } from "@/lib/utils";
 

@@ -4,9 +4,9 @@ import { Banknote, Copy, Lock, Share2, Sparkles, Users, Wallet } from "lucide-re
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
-import type { ReferralRow } from "@/features/wallet/types/wallet.types";
-import { useAffiliateEngine } from "@/features/wallet/hooks/useAffiliateEngine";
-import { WithdrawDialog } from "@/features/wallet/components/WithdrawDialog";
+import type { ReferralRow } from "@/core-os/finance/types/wallet.types";
+import { useAffiliateEngine } from "@/core-os/finance/hooks/useAffiliateEngine";
+import { WithdrawDialog } from "@/core-os/finance/components/WithdrawDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { openWhatsApp } from "@/lib/whatsapp";
 

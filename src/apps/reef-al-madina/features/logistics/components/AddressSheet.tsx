@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 import { ClientOnly } from "@tanstack/react-router";
-import type { BuildingType } from "@/core/logistics/types";
+import type { BuildingType } from "@/core-os/barq-logistics/core/types";
 
 const RealMap = lazy(() => import("./RealMap"));
 

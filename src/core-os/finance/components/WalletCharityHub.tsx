@@ -8,7 +8,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import {
   CATEGORY_LABELS,
   type CharityCampaign,
-} from "@/features/wallet/types/wallet.types";
+} from "@/core-os/finance/types/wallet.types";
 
 /**
  * WalletCharityHub — directs wallet funds to verified community auditors

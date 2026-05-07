@@ -10,11 +10,11 @@ import BackHeader from "@/components/BackHeader";
 import { useUI } from "@/context/UIContext";
 import { storeThemes } from "@/lib/storeThemes";
 
-import { CompareBar } from "@/features/storefront/home/components/CompareBar";
-import { DetailSheet } from "@/features/storefront/home/components/DetailSheet";
-import { FiltersSheet } from "@/features/storefront/home/components/FiltersSheet";
-import { LayoutFactory } from "@/features/storefront/home/components/LayoutFactory";
-import { useHomeOrchestrator } from "@/features/storefront/home/hooks/useHomeOrchestrator";
+import { CompareBar } from "@/apps/reef-al-madina/features/storefront/home/components/CompareBar";
+import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
+import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
+import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
+import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 
 const HomeStore = () => {
   const theme = storeThemes.homeTools;

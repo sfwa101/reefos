@@ -8,7 +8,7 @@ import {
   type SharedCart,
   type SharedCartParticipant,
   type SharedCartSplitType,
-} from "@/features/cart/hooks/useSharedCartSync";
+} from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 
 type Props = {
   cart: SharedCart;

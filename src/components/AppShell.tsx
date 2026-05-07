@@ -7,7 +7,7 @@ import CartPanel from "@/components/desktop/CartPanel";
 import GlobalApprovalBanner from "@/components/GlobalApprovalBanner";
 import BarcodeScannerModal from "@/components/BarcodeScannerModal";
 import { useCartLines } from "@/context/CartContext";
-import { useHakimEdgeWorker } from "@/features/hakim/hooks/useHakimEdgeWorker";
+import { useHakimEdgeWorker } from "@/core-os/hakim-ai/hooks/useHakimEdgeWorker";
 
 // Routes where the bottom TabBar should be HIDDEN to make room for a sticky CTA.
 const HIDE_TABBAR_ROUTES = [

@@ -10,7 +10,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import type { DeliveryMethod } from "@/core/logistics/types";
+import type { DeliveryMethod } from "@/core-os/barq-logistics/core/types";
 
 const FALLBACK_STANDARD: DeliveryMethod = {
   id: "fallback-standard",

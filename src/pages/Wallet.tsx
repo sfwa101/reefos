@@ -15,20 +15,20 @@ import {
   EyeOff,
 } from "lucide-react";
 
-import { useWalletDashboard } from "@/features/wallet/hooks/useWalletDashboard";
-import { useWalletAssets, type WalletAsset } from "@/features/wallet/hooks/useWalletAssets";
-import { useHideBalance } from "@/features/wallet/hooks/useHideBalance";
-import { useWalletTransactions } from "@/features/wallet/hooks/useWalletTransactions";
-import { NeoCardsCarousel } from "@/features/wallet/components/NeoCardsCarousel";
-import { WalletTopupDialog } from "@/features/wallet/components/WalletTopupDialog";
-import { WalletTransferDialog } from "@/features/wallet/components/WalletTransferDialog";
-import { WalletPosBarcode } from "@/features/wallet/components/WalletPosBarcode";
-import { GameyasDockContent } from "@/features/wallet/components/GameyasDockContent";
-import { OperationsDockContent } from "@/features/wallet/components/OperationsDockContent";
-import { VaultsDockContent } from "@/features/wallet/components/VaultsDockContent";
-import { InsightsDockContent } from "@/features/wallet/components/InsightsDockContent";
-import { SavingsJarDialog } from "@/features/wallet/components/WalletSavingsJars";
-import { WalletAssetConvertSheet } from "@/features/wallet/components/WalletAssetConvertSheet";
+import { useWalletDashboard } from "@/core-os/finance/hooks/useWalletDashboard";
+import { useWalletAssets, type WalletAsset } from "@/core-os/finance/hooks/useWalletAssets";
+import { useHideBalance } from "@/core-os/finance/hooks/useHideBalance";
+import { useWalletTransactions } from "@/core-os/finance/hooks/useWalletTransactions";
+import { NeoCardsCarousel } from "@/core-os/finance/components/NeoCardsCarousel";
+import { WalletTopupDialog } from "@/core-os/finance/components/WalletTopupDialog";
+import { WalletTransferDialog } from "@/core-os/finance/components/WalletTransferDialog";
+import { WalletPosBarcode } from "@/core-os/finance/components/WalletPosBarcode";
+import { GameyasDockContent } from "@/core-os/finance/components/GameyasDockContent";
+import { OperationsDockContent } from "@/core-os/finance/components/OperationsDockContent";
+import { VaultsDockContent } from "@/core-os/finance/components/VaultsDockContent";
+import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockContent";
+import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
+import { WalletAssetConvertSheet } from "@/core-os/finance/components/WalletAssetConvertSheet";
 
 const Wallet = () => {
   const c = useWalletDashboard();

@@ -1,6 +1,6 @@
 import { ArrowDownRight, ArrowUpRight, Gift } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { CATEGORY_LABELS } from "@/features/wallet/types/wallet.types";
+import { CATEGORY_LABELS } from "@/core-os/finance/types/wallet.types";
 
 /** Icon for a transaction kind. */
 export const iconFor = (kind: string) =>

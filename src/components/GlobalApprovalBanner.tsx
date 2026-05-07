@@ -8,7 +8,7 @@ import { useSharedCartContext } from "@/context/SharedCartContext";
 import {
   computeParticipantShares,
   useSharedCartSync,
-} from "@/features/cart/hooks/useSharedCartSync";
+} from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 
 /**
  * Phase 7 — Global Approval Banner

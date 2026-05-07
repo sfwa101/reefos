@@ -15,7 +15,7 @@ import type {
   SectionConfig,
   SectionKey,
   UiLayout,
-} from "@/features/storefront/home/types/sdui.types";
+} from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
 import {
   DEFAULT_PAGE_ORDER,
   PAGE_LABELS,
@@ -23,7 +23,7 @@ import {
   sanitizeSectionConfig,
   sectionsForPage,
   type PageKey,
-} from "@/features/sdui/registry";
+} from "@/core-os/sdui-engine/registry";
 
 /** Localized section labels — sourced from the registry. */
 export const SECTION_LABELS: Record<SectionKey, string> = Object.fromEntries(

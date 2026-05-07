@@ -10,8 +10,8 @@ import {
   BUDGETABLE_CATEGORIES,
   CATEGORY_LABELS,
   type CategoryStat,
-} from "@/features/wallet/types/wallet.types";
-import { monthAdvisor, progressTone } from "@/features/wallet/lib/walletAdvisor";
+} from "@/core-os/finance/types/wallet.types";
+import { monthAdvisor, progressTone } from "@/core-os/finance/lib/walletAdvisor";
 
 /* ================= SPENDING DONUT ================= */
 export const SpendingDonut = ({ stats }: { stats: CategoryStat[] }) => (

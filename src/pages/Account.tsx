@@ -8,12 +8,12 @@ import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { tierProgress } from "@/lib/tiers";
 import { useUserRoles } from "@/hooks/useUserRoles";
-import { formatCustomerId } from "@/features/account/lib/customerId";
-import AccountActionGrid from "@/features/account/components/AccountActionGrid";
-import AccountTierCard from "@/features/account/components/AccountTierCard";
-import AccountWalletRail from "@/features/account/components/AccountWalletRail";
-import AccountSettingRow from "@/features/account/components/AccountSettingRow";
-import { SETTING_GROUPS } from "@/features/account/data";
+import { formatCustomerId } from "@/apps/reef-al-madina/features/account/lib/customerId";
+import AccountActionGrid from "@/apps/reef-al-madina/features/account/components/AccountActionGrid";
+import AccountTierCard from "@/apps/reef-al-madina/features/account/components/AccountTierCard";
+import AccountWalletRail from "@/apps/reef-al-madina/features/account/components/AccountWalletRail";
+import AccountSettingRow from "@/apps/reef-al-madina/features/account/components/AccountSettingRow";
+import { SETTING_GROUPS } from "@/apps/reef-al-madina/features/account/data";
 
 const formatPhone = (raw: string): string => {
   const d = raw.replace(/\D/g, "");

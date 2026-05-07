@@ -27,9 +27,9 @@ import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules, useCartHasErrors } from "@/context/CartContext";
 import { isPerishable } from "@/lib/products";
-import { computeLogisticsQuote } from "@/core/logistics/quote";
-import { useDefaultDeliveryMethod } from "@/features/logistics/hooks/useDefaultDeliveryMethod";
-import { legacyZoneToLogisticsZone } from "@/features/logistics/adapters/legacyZoneToLogisticsZone";
+import { computeLogisticsQuote } from "@/core-os/barq-logistics/core/quote";
+import { useDefaultDeliveryMethod } from "@/apps/reef-al-madina/features/logistics/hooks/useDefaultDeliveryMethod";
+import { legacyZoneToLogisticsZone } from "@/apps/reef-al-madina/features/logistics/adapters/legacyZoneToLogisticsZone";
 import { PAYMENT_METHODS, findPaymentMethod } from "../data/paymentMethods";
 
 /** @deprecated Re-exported only for backward compatibility. Import PAYMENT_METHODS instead. */

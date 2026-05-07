@@ -3,6 +3,6 @@ import { lazyPage } from "@/routes/-lazyRoute";
 
 export const Route = createFileRoute("/_app/affiliate")({
   component: lazyPage(
-    () => import("@/features/affiliate/components/AffiliateDashboard"),
+    () => import("@/apps/reef-al-madina/features/affiliate/components/AffiliateDashboard"),
   ),
 });

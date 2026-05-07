@@ -8,7 +8,7 @@ import {
   FILTERS, MARKETING, MEAL_WINDOWS, SECTIONS,
   isMealOpenNow, minutesUntilClose,
   type Recipe, type RecipeSection,
-} from "@/features/recipes/data";
+} from "@/apps/reef-al-madina/features/recipes/data";
 
 interface Props {
   activeMeal: RecipeSection;

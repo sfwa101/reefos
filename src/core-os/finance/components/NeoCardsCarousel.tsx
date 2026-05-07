@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { NeoSuperCard } from "./NeoSuperCard";
-import type { WalletAsset } from "@/features/wallet/hooks/useWalletAssets";
+import type { WalletAsset } from "@/core-os/finance/hooks/useWalletAssets";
 
 type Props = {
   assets: WalletAsset[];

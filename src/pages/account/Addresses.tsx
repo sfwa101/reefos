@@ -9,7 +9,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
-import AddressSheet from "@/features/logistics/components/AddressSheet";
+import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
 
 type Addr = {
   id: string;

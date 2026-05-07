@@ -25,7 +25,7 @@ import {
   useVendorSettlement,
   type VendorLedgerRow,
   type VendorPayoutRequestRow,
-} from "@/features/vendor/hooks/useVendorSettlement";
+} from "@/apps/reef-al-madina/features/vendor/hooks/useVendorSettlement";
 
 const KIND_LABELS: Record<VendorLedgerRow["kind"], string> = {
   credit_sale: "بيع",

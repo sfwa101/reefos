@@ -19,11 +19,11 @@ import {
   SECTION_LABELS,
   PAGE_LABELS,
   useLayoutEditor,
-} from "@/features/admin/hooks/useLayoutEditor";
-import { SECTION_REGISTRY, type PageKey } from "@/features/sdui/registry";
+} from "@/apps/reef-al-madina/features/admin/hooks/useLayoutEditor";
+import { SECTION_REGISTRY, type PageKey } from "@/core-os/sdui-engine/registry";
 import type {
   SectionConfig, SectionKey,
-} from "@/features/storefront/home/types/sdui.types";
+} from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
 
 const PAGE_TABS: { key: PageKey; label: string; previewPath: string }[] = [
   { key: "main_hub", label: "الرئيسية (Hero)", previewPath: "/" },

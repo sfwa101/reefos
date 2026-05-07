@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
-import { useCartIncentives } from "@/features/cart/hooks/useCartIncentives";
+import { useCartIncentives } from "@/apps/reef-al-madina/features/cart/hooks/useCartIncentives";
 import { toLatin } from "@/lib/format";
 
 interface Props {

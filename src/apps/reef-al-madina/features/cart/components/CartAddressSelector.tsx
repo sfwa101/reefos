@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Check, MapPin, Plus } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import type { Addr } from "../types/cart.types";
-import AddressSheet from "@/features/logistics/components/AddressSheet";
+import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
 
 type Props = {
   user: User | null;

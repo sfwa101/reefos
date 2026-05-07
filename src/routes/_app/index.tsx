@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { lazyPage } from "@/routes/-lazyRoute";
-import HomeRedirector from "@/features/account/components/HomeRedirector";
+import HomeRedirector from "@/apps/reef-al-madina/features/account/components/HomeRedirector";
 import { homeProductsQueryOptions } from "@/hooks/useProductsQuery";
 
 const HomePage = lazyPage(() => import("@/pages/Home"));

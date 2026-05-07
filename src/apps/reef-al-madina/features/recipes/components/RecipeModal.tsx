@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { type Product, getById } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
-import { RECIPE_CONTENT, type Recipe, type ToolItem } from "@/features/recipes/data";
+import { RECIPE_CONTENT, type Recipe, type ToolItem } from "@/apps/reef-al-madina/features/recipes/data";
 
 export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
   const { add } = useCart();

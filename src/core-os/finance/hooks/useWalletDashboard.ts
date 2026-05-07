@@ -8,7 +8,7 @@ import {
   type CategoryStat,
   type ReferralRow,
   type WalletTab,
-} from "@/features/wallet/types/wallet.types";
+} from "@/core-os/finance/types/wallet.types";
 import { useWalletBalance } from "./useWalletBalance";
 import { useWalletTransactions } from "./useWalletTransactions";
 import { useWalletSavings } from "./useWalletSavings";

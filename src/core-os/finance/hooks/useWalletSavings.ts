@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { SavingsJar, SavingsTx } from "@/features/wallet/types/wallet.types";
+import type { SavingsJar, SavingsTx } from "@/core-os/finance/types/wallet.types";
 
 const DEFAULT_JAR: SavingsJar = {
   balance: 0,
