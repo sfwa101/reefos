@@ -64,13 +64,13 @@ const REGISTRY: MiniAppManifest[] = [
     visibility_logic: () => true,
   },
   {
-    id: "khalil-store",
-    name: "خليل ستور",
-    tagline: "اكتشف المزيد",
+    id: "khalil",
+    name: "خليل",
+    tagline: "المركز الإدراكي",
     icon: Sparkles,
-    route: "/khalil/store",
+    route: "/khalil",
     accent: "from-amber-500 to-orange-600",
-    status: "soon",
+    status: "live",
     visibility_logic: () => true,
   },
 ];
