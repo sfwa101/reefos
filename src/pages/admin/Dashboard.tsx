@@ -306,7 +306,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-4 gap-3">
             {[
               { icon: ShoppingBag, label: "الطلبات", to: "/admin/orders", tone: "from-primary to-primary-glow" },
-              { icon: Package, label: "المنتجات", to: "/admin/products", tone: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+              { icon: Package, label: "الأصول", to: "/admin/assets", tone: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
               { icon: Users, label: "العملاء", to: "/admin/customers", tone: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
               { icon: Wallet, label: "المحافظ", to: "/admin/wallets", tone: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
             ].map((a) => (
@@ -374,7 +374,7 @@ export default function Dashboard() {
             className="lg:col-span-2"
             title="أعلى الفئات مبيعاً"
             subtitle="آخر ٧ أيام"
-            action={<SectionLink to="/admin/products" label="المنتجات" />}
+            action={<SectionLink to="/admin/assets" label="الأصول" />}
           >
             {topCats.length === 0 ? (
               <EmptyState icon={ShoppingBag} title="لا توجد بيانات فئات بعد" />
