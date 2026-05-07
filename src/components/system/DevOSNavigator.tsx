@@ -22,10 +22,13 @@ import {
   ScanLine,
   ShieldCheck,
   ChevronLeft,
+  Wand2,
+  Crown,
 } from "lucide-react";
 import { appRegistry } from "@/core-os/app-registry";
 
 const STORAGE_KEY = "salsabil.dev.khalilAsDefault";
+const GOD_MODE_KEY = "salsabil.dev.godMode";
 
 type NexusLink = {
   label: string;
@@ -36,6 +39,7 @@ type NexusLink = {
 
 const NEXUS_LINKS: NexusLink[] = [
   { label: "Master Admin", to: "/admin", icon: ShieldCheck, accent: "from-violet-500 to-fuchsia-600" },
+  { label: "System Editor", to: "/admin/design", icon: Wand2, accent: "from-pink-500 to-rose-600" },
   { label: "Driver Hub", to: "/driver", icon: Truck, accent: "from-sky-500 to-cyan-600" },
   { label: "Vendor Portal", to: "/vendor", icon: Store, accent: "from-emerald-500 to-teal-600" },
   { label: "POS Terminal", to: "/pos", icon: ScanLine, accent: "from-amber-500 to-orange-600" },
@@ -50,11 +54,21 @@ export const DevOSNavigator = () => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(STORAGE_KEY) === "1";
   });
+  const [godMode, setGodMode] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(GOD_MODE_KEY) === "1";
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, khalilDefault ? "1" : "0");
   }, [khalilDefault]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(GOD_MODE_KEY, godMode ? "1" : "0");
+    (window as unknown as { __SALSABIL_GOD_MODE__?: boolean }).__SALSABIL_GOD_MODE__ = godMode;
+  }, [godMode]);
 
   useEffect(() => {
     if (!khalilDefault) return;
@@ -153,6 +167,22 @@ export const DevOSNavigator = () => {
                   type="checkbox"
                   checked={khalilDefault}
                   onChange={(e) => setKhalilDefault(e.target.checked)}
+                  className="h-3 w-3 accent-amber-400"
+                />
+              </label>
+
+              {/* Absolute Manager Mode (God Mode) toggle */}
+              <label
+                className={`flex cursor-pointer flex-col items-center gap-1 rounded-2xl px-1.5 py-1.5 text-[8px] font-bold text-white/90 transition ${
+                  godMode ? "bg-gradient-to-br from-amber-500/40 to-rose-500/40 ring-1 ring-amber-300/60" : "bg-white/5"
+                }`}
+                title="Absolute Manager Mode — bypass RBAC UI guards"
+              >
+                <Crown className={`h-3 w-3 ${godMode ? "text-amber-200" : "text-white/70"}`} />
+                <input
+                  type="checkbox"
+                  checked={godMode}
+                  onChange={(e) => setGodMode(e.target.checked)}
                   className="h-3 w-3 accent-amber-400"
                 />
               </label>
