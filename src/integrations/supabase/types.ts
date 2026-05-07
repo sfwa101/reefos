@@ -9290,6 +9290,15 @@ export type Database = {
         Args: { p_lat: number; p_lon: number }
         Returns: undefined
       }
+      update_universal_asset: {
+        Args: {
+          p_asset_id: string
+          p_base_price: number
+          p_description: string
+          p_name: string
+        }
+        Returns: string
+      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
