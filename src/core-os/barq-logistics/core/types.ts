@@ -135,6 +135,12 @@ export interface QuoteInput {
   subtotal: number;
   /** Optional: cart contains perishables (meat/dairy/produce). */
   hasPerishables?: boolean;
+  /**
+   * Optional Hakim AI forecasting multiplier (≥1). Applied on top of the
+   * zone surge factor to anticipate predicted demand spikes (e.g. holidays,
+   * weather, beach-day surges in Jamasa). Defaults to 1.0 (no forecast).
+   */
+  forecastMultiplier?: number;
 }
 
 /* ===================================================================
