@@ -25,6 +25,7 @@ import { registerPWA } from "@/lib/pwa";
 import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
 import { SubdomainGuard } from "@/components/SubdomainGuard";
 import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
+import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBootstrap";
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 
 function NotFoundComponent() {
@@ -148,6 +149,7 @@ function RootComponent() {
                         <FavoritesProvider>
                           <LiveRulesBootstrap />
                           <CatalogBootstrap />
+                          <BehaviorTrackerBootstrap />
                           <SubdomainGuard />
                           <Toaster />
                           <Outlet />
