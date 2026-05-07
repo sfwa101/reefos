@@ -26,11 +26,11 @@ The shared kernel that powers every app in the Salsabil family.
 | App | ID | Route | Status | Scope |
 |---|---|---|---|---|
 | `reef-al-madina/` | `reef` | `/` | ✅ Live | Retail super-app — supermarket, meat, pharmacy, recipes, sweets, library, baskets |
-| `khalil/` (Hub source) | `diwan` | `/diwan` | ✅ Live | **الديوان — Sovereign Empire Gateway**. Unified launcher (SDUI `khalil_hub` layout). Renamed from "Khalil" in Phase VIII-Dev v3. |
+| `khalil/` (Hub source) | `maeen` | `/maeen` | ✅ Live | **معين — Sovereign Empire Gateway**. Unified launcher (SDUI `khalil_hub` layout). Renamed Khalil → Al-Diwan → **Maeen** in Phase VIII-Dev v3 Restoration. |
 | `asrab/` | `asrab` | `/asrab` | 🟡 Soon | Real Estate & Travel super-app |
 | `nabd/` | `nabd` | `/nabd` | 🟡 Soon | Health Sector — telemedicine, clinics, labs |
 
-> **Naming note:** the on-disk folder `src/apps/khalil/` is preserved for git history; the public identity, route, registry id, and UI label are **الديوان / Al-Diwan**. Legacy `/khalil` localStorage flags are still honoured for back-compat.
+> **Naming note:** the on-disk folder `src/apps/khalil/` is preserved for git history; the public identity, route, registry id, and UI label are **معين / Maeen**. A one-shot localStorage migration in `DevOSNavigator` folds legacy `khalilAsDefault` / `diwanAsDefault` flags into `salsabil.dev.maeenAsDefault`.
 
 ## 🛰️ Routing Layer: `src/routes/` (TanStack Start, file-based)
 | Route file | URL | Notes |
