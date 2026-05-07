@@ -45,7 +45,6 @@ import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
 import { Route as AdminProfitObservationRouteImport } from './routes/admin.profit-observation'
-import { Route as AdminProductsRouteImport } from './routes/admin.products'
 import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
 import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
@@ -88,6 +87,7 @@ import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier
 import { Route as AdminBusinessRulesRouteImport } from './routes/admin.business-rules'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
+import { Route as AdminAssetsRouteImport } from './routes/admin.assets'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
@@ -323,11 +323,6 @@ const AdminProfitObservationRoute = AdminProfitObservationRouteImport.update({
   path: '/profit-observation',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminProductsRoute = AdminProductsRouteImport.update({
-  id: '/products',
-  path: '/products',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminProductUnitsRoute = AdminProductUnitsRouteImport.update({
   id: '/product-units',
   path: '/product-units',
@@ -538,6 +533,11 @@ const AdminBranchesRoute = AdminBranchesRouteImport.update({
 const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
   id: '/audit-log',
   path: '/audit-log',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminAssetsRoute = AdminAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
@@ -840,6 +840,7 @@ export interface FileRoutesByFullPath {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -882,7 +883,6 @@ export interface FileRoutesByFullPath {
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
-  '/admin/products': typeof AdminProductsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -970,6 +970,7 @@ export interface FileRoutesByTo {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1012,7 +1013,6 @@ export interface FileRoutesByTo {
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
-  '/admin/products': typeof AdminProductsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -1107,6 +1107,7 @@ export interface FileRoutesById {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1149,7 +1150,6 @@ export interface FileRoutesById {
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/product-units': typeof AdminProductUnitsRoute
-  '/admin/products': typeof AdminProductsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -1245,6 +1245,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1287,7 +1288,6 @@ export interface FileRouteTypes {
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
-    | '/admin/products'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1375,6 +1375,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1417,7 +1418,6 @@ export interface FileRouteTypes {
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
-    | '/admin/products'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1511,6 +1511,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1553,7 +1554,6 @@ export interface FileRouteTypes {
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/product-units'
-    | '/admin/products'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1890,13 +1890,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProfitObservationRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/products': {
-      id: '/admin/products'
-      path: '/products'
-      fullPath: '/admin/products'
-      preLoaderRoute: typeof AdminProductsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/product-units': {
       id: '/admin/product-units'
       path: '/product-units'
@@ -2189,6 +2182,13 @@ declare module '@tanstack/react-router' {
       path: '/audit-log'
       fullPath: '/admin/audit-log'
       preLoaderRoute: typeof AdminAuditLogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/assets': {
+      id: '/admin/assets'
+      path: '/assets'
+      fullPath: '/admin/assets'
+      preLoaderRoute: typeof AdminAssetsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/analytics': {
@@ -2751,6 +2751,7 @@ interface AdminRouteChildren {
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAssetsRoute: typeof AdminAssetsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
@@ -2793,7 +2794,6 @@ interface AdminRouteChildren {
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
   AdminProductBatchesRoute: typeof AdminProductBatchesRoute
   AdminProductUnitsRoute: typeof AdminProductUnitsRoute
-  AdminProductsRoute: typeof AdminProductsRoute
   AdminProfitObservationRoute: typeof AdminProfitObservationRoute
   AdminPurchasesRoute: typeof AdminPurchasesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -2823,6 +2823,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAssetsRoute: AdminAssetsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
   AdminBusinessRulesRoute: AdminBusinessRulesRoute,
@@ -2865,7 +2866,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPrintJobsRoute: AdminPrintJobsRoute,
   AdminProductBatchesRoute: AdminProductBatchesRoute,
   AdminProductUnitsRoute: AdminProductUnitsRoute,
-  AdminProductsRoute: AdminProductsRoute,
   AdminProfitObservationRoute: AdminProfitObservationRoute,
   AdminPurchasesRoute: AdminPurchasesRoute,
   AdminReviewsRoute: AdminReviewsRoute,

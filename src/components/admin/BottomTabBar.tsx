@@ -1,11 +1,11 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { Home, ShoppingBag, Package, Users, MoreHorizontal } from "lucide-react";
+import { Home, ShoppingBag, Layers, Users, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const tabs = [
   { to: "/admin",            icon: Home,           label: "الرئيسية", exact: true },
   { to: "/admin/orders",     icon: ShoppingBag,    label: "الطلبات" },
-  { to: "/admin/products",   icon: Package,        label: "المنتجات" },
+  { to: "/admin/assets",     icon: Layers,         label: "الأصول" },
   { to: "/admin/customers",  icon: Users,          label: "العملاء" },
   { to: "/admin/more",       icon: MoreHorizontal, label: "المزيد" },
 ];

@@ -82,10 +82,10 @@ export function DesktopTopbar() {
 
       <div className="flex items-center gap-1.5">
         <Link
-          to="/admin/products"
+          to="/admin/assets"
           className="hidden md:inline-flex items-center gap-1.5 h-10 px-3 rounded-2xl bg-foreground text-background text-[12.5px] font-semibold press shadow-soft hover:opacity-90"
         >
-          <Plus className="h-4 w-4" strokeWidth={2.5} /> منتج جديد
+          <Plus className="h-4 w-4" strokeWidth={2.5} /> أصل جديد
         </Link>
         <Link
           to="/admin/marketing/notifications"

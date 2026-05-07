@@ -20,7 +20,7 @@ const groups = [
   ]},
   { title: "العمليات", items: [
     { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
-    { to: "/admin/products", icon: Package, label: "المنتجات" },
+    { to: "/admin/assets", icon: Layers, label: "الأصول العالمية" },
     { to: "/admin/categories", icon: FolderTree, label: "الفئات" },
     { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات" },
     { to: "/admin/offers", icon: Gift, label: "العروض والكوبونات" },

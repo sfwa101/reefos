@@ -318,3 +318,13 @@ The polymorphic schema is staged; populating it now happens in **one tap**. An a
 - **Atomic Minting RPC**: `public.mint_universal_asset(payload jsonb) RETURNS uuid` — `SECURITY DEFINER`, gated by `has_role(auth.uid(),'admin')`. In a single transaction it inserts the asset, all SKUs, the financial contract on the first SKU, and (if `asset_type = physical`) mirrors a row into the legacy `products` table under `category = 'usa-genesis'` with metadata `{usa_asset_id, usa_sku_id}` for backward-compat. `EXECUTE` revoked from `PUBLIC`, granted only to `authenticated`.
 - **Client Hook**: `src/core-os/hakim-ai/hooks/useMintUSA.ts` wraps the RPC in a TanStack mutation, invalidates `salsabil_assets` and `products` caches on success, surfaces success/error toasts in Arabic.
 - **UI Wired**: `VisionGenesisUploader.approve()` now calls `mintUSA.mutateAsync()`, shows a "جاري سكّ الأصل…" loader on the approve button, and resets cleanly on success.
+
+## Phase 7 Part 4 — The Sovereign Purge & USA Nexus
+
+The legacy Product UI was eradicated to enforce extreme architectural purity (no active customers → no backward-compat tax):
+
+- **Purged**: `src/components/admin/ProductEditor.tsx`, `src/pages/admin/Products.tsx`, `src/routes/admin.products.tsx`.
+- **Sidebar/Topbar/BottomTab/HakimFAB/Dashboard** rewired from `/admin/products` to `/admin/assets`.
+- **New gateway route**: `src/routes/admin.assets.tsx` → `lazyPage(@/pages/admin/UsaLedger)`.
+- **USA Ledger** (`src/pages/admin/UsaLedger.tsx`): pure `UniversalAdminGrid` reading `salsabil_assets` with embedded joins to `salsabil_skus` and `salsabil_financial_contracts`. BentoMetrics: total · physical · service. Columns: name · type badge · base price · SKU count · created date.
+- **USAEditor** (`src/apps/reef-al-madina/features/admin/usa-editor/USAEditor.tsx`): RTL slide-over `Sheet` with four tabs — أساسي · العقود المالية · المخزون · التكوين الذكي. The Genesis tab natively embeds `VisionGenesisUploader`, making AI-creation the primary path. Update RPCs for the other tabs land in Part 5.

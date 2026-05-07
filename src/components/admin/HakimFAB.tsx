@@ -31,7 +31,7 @@ export function HakimFAB() {
   const contextHint = (() => {
     if (pathname === "/admin") return "اللوحة الرئيسية";
     if (pathname.startsWith("/admin/orders")) return "صفحة الطلبات";
-    if (pathname.startsWith("/admin/products")) return "صفحة المنتجات";
+    if (pathname.startsWith("/admin/assets")) return "بوابة الأصول العالمية";
     if (pathname.startsWith("/admin/customers")) return "صفحة العملاء";
     if (pathname.startsWith("/admin/inventory")) return "صفحة المخزون";
     if (pathname.startsWith("/admin/finance")) return "التقارير المالية";
