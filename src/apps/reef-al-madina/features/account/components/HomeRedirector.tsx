@@ -23,9 +23,23 @@ const HomeRedirector = ({ children }: { children: ReactNode }) => {
       fired.current = true;
       return;
     }
+    // Phase VIII — Absolute Authority Override:
+    // Suppress auto-redirect for admins / managers so they can freely browse
+    // client-side surfaces (Reef, Khalil, etc.) for QA and testing.
+    // Also honor the dev "Absolute Manager Mode" flag and "Khalil-as-Default".
+    const godMode =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("salsabil.dev.godMode") === "1";
+    const khalilDefault =
+      typeof window !== "undefined" &&
+      window.localStorage.getItem("salsabil.dev.khalilAsDefault") === "1";
+    const isAdminish = roles.some((r) =>
+      ["admin", "branch_manager", "store_manager", "finance"].includes(r),
+    );
+    fired.current = true;
+    if (godMode || khalilDefault || isAdminish) return;
     const saved = readActiveView();
     const view = pickDefaultView(roles, saved);
-    fired.current = true;
     if (view !== "customer" && VIEW_PATHS[view] !== "/") {
       navigate({ to: VIEW_PATHS[view], replace: true });
     }
