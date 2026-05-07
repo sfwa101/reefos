@@ -177,3 +177,21 @@ Transform Reef Al Madina from a retail app into a **financial aggregator** that 
 Reef Al Madina ceases to be a customer of Fawry/Basata and becomes their **competitor at the village level** — every Reef vendor terminal is a payment acceptance node, every Maeen user is a wallet, and every transaction settles internally on the existing double-entry ledger.
 
 **Architectural prerequisite:** Phase L settlement engine + Phase J ledger invariant (already live). No DB schema work blocks this — only the Edge Oracles and the POS UI.
+
+---
+
+## Phase 3 — Apple-tier Gestures, Haptics, Bottom-Sheet Peek ✅ (closed 2026-05-07)
+
+**Outcome:** the Supermarket vertical now has a single source of truth and a gesture-driven, minimalist, haptic UX. Drift between `src/pages/store/Supermarket.tsx` (legacy `DualNavStore`) and `src/modules/supermarket/SupermarketPage.tsx` is eliminated — the legacy page was deleted.
+
+### Delivered
+1. **Gesture primitive** — `src/hooks/useLongPress.ts` (pointer events, 400ms hold, 8px move-tolerance, 15ms `navigator.vibrate` haptic on activation). Zero-dep, works on iOS Safari, Android Chrome, desktop.
+2. **Bottom-sheet peek** — `src/apps/reef-al-madina/features/product-detail/components/ProductPeekSheet.tsx`. Built on `vaul` via the existing `Drawer` wrapper with `snapPoints={[0.8, 1]}`, drag-to-dismiss, composes existing `ProductGallery` + `StickyAddCTA` (no detail-logic duplication).
+3. **`ProductCard` minimal variant** — added `variant="minimal"` to BOTH the shared `@/components/ProductCard` and the home `apps/reef-al-madina/.../ProductCard`. Renders only image · 1-line title · price · add. Add-to-cart now triggers a 10ms haptic on every variant.
+4. **Supermarket integration** — `SupermarketProductCard` now renders the minimal variant, opens `ProductPeekSheet` on tap (replacing route navigation), and opens a Radix `Popover` Quick Peek on long-press (favourite, compare, full details).
+5. **Decommission** — `src/pages/store/Supermarket.tsx` deleted; the `_app/store/supermarket` route is the single entry point.
+
+### Architectural invariants reinforced
+- **Single source of truth** per vertical — no parallel page implementations.
+- **Detail logic stays in `apps/reef-al-madina/features/product-detail/`** — both the route page and the peek sheet compose the same blocks.
+- **Kernel-grade primitives** (`useLongPress`, vaul snap-points) are documented in the manifest and available to every app shell.

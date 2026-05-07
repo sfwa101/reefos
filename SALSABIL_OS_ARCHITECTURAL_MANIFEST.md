@@ -24,6 +24,20 @@ Outstanding architectural debt is captured in `ARCHITECTURAL_ROADMAP.md` §6 (Ha
 
 ---
 
+## 🧭 Phase 3 Snapshot — Apple-tier Gestures, Haptics, Bottom-Sheet Peek
+
+| Axis | Before (Phase 2) | After (Phase 3 — current) |
+|---|---|---|
+| **Gesture primitive** | None — only `onClick` + `active:scale-95` everywhere | `src/hooks/useLongPress.ts` — pointer-event long-press (≥400ms, 8px move-tolerance) with 15ms `navigator.vibrate` haptic |
+| **Product detail surface (Supermarket)** | Tap → full-page route navigation `/product/$id` | Tap → in-context **`ProductPeekSheet`** (vaul `snapPoints={[0.8, 1]}`), drag-to-dismiss, no scroll-spy disruption |
+| **Quick Peek** | Not available | Long-press → Radix `Popover` w/ fast actions (favourite, compare, full details) |
+| **`ProductCard` variants** | `grid \| carousel \| wide` | + `minimal` — image · 1-line title · price · add (Apple-tier density). Live in **both** `@/components/ProductCard` and `apps/reef-al-madina/.../home/components/ProductCard` |
+| **Haptics** | Zero `navigator.vibrate` calls in repo | 10ms thud on add-to-cart (every variant) · 15ms thud on long-press · 15ms thud on peek-sheet add |
+| **Supermarket page** | Two parallel implementations: `src/modules/supermarket/SupermarketPage.tsx` (active) AND legacy `src/pages/store/Supermarket.tsx` (DualNavStore) | Single source of truth: legacy page **decommissioned** (deleted) |
+| **Detail composition** | `pages/ProductDetail.tsx` was the only consumer of `ProductGallery` + `StickyAddCTA` | `ProductPeekSheet` now reuses both — zero duplication of detail logic |
+
+---
+
 ## 🧬 OS Kernel: `src/core-os/`
 The shared kernel that powers every app in the Salsabil family.
 
@@ -38,7 +52,7 @@ The shared kernel that powers every app in the Salsabil family.
 | `barq-logistics/` | **BARQ (برق)** — geo zones, smart routing, delivery quotes |
 | `modifier-engine/` | **Universal Modifier Atoms** — vertical-agnostic product configurators |
 | `capabilities/` | **Scoped Capability Atoms** — search/scope primitives reused by every app |
-| `ui/` | **OS-level UI atoms** — `SalsabilStatusBar` (hydration-safe identity + wallet ribbon) |
+| `ui/` | **OS-level UI atoms** — `SalsabilStatusBar` (hydration-safe identity + wallet ribbon). **Phase 3 adoption:** Apple-tier mobile primitives — `useLongPress` (Quick-Peek pointer hook, 400ms + 15ms haptic) and `vaul` Drawer with `snapPoints={[0.8, 1]}` for in-context product overlays (`ProductPeekSheet`). Both are kernel-grade primitives reusable across every app shell. |
 
 ## 🏘️ Family of Apps: `src/apps/`
 | App | ID | Route | Status | Scope |

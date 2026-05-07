@@ -18,9 +18,13 @@ import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ProductCardProps {
   product: Product;
-  variant?: "grid" | "carousel" | "wide";
+  variant?: "grid" | "carousel" | "wide" | "minimal";
   /** Optional bulk-discount hint rendered as an overlay chip on the image. */
   volumeBadge?: { buy: number; save: number };
+  /** When provided, the entire card surface (image + title) calls this
+   *  instead of navigating via <Link>. Used by gesture surfaces (e.g. the
+   *  Supermarket Quick-Peek grid) that open a `ProductPeekSheet`. */
+  onOpen?: () => void;
 }
 
 const badgeStyle: Record<string, { label: string; cls: string }> = {
@@ -30,7 +34,7 @@ const badgeStyle: Record<string, { label: string; cls: string }> = {
   new: { label: "جديد", cls: "bg-primary-soft text-primary" },
 };
 
-const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCardProps) => {
+const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: ProductCardProps) => {
   // Granular subscriptions — only this card re-renders when its qty/fav flips.
   const { add, setQty } = useCartActions();
   const qty = useCartLineQty(product.id);
@@ -62,6 +66,9 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch { /* ignore */ }
+    }
     if (opensSheet) {
       setSheetOpen(true);
       return;
@@ -91,6 +98,70 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCard
   // NOTE: switched from `glass-strong` (heavy backdrop-filter on every card —
   // a major scrolling bottleneck on low-end devices) to a flat surface card.
   // `content-visibility: auto` lets the browser skip painting offscreen cards.
+  if (variant === "minimal") {
+    const handleSurface = (e: React.MouseEvent) => {
+      if (!onOpen) return;
+      e.preventDefault();
+      e.stopPropagation();
+      onOpen();
+    };
+    return (
+      <article
+        onClick={handleSurface}
+        className={`product-card group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card text-right shadow-soft ring-1 ring-border/50 transition active:scale-[0.98] ${widthCls}`}
+        style={{ contentVisibility: "auto", containIntrinsicSize: "200px 260px" }}
+      >
+        <div className="relative aspect-square overflow-hidden bg-secondary/40">
+          <OptimizedImage
+            src={product.image}
+            alt={product.name}
+            aspect="aspect-square"
+            wrapperClassName="absolute inset-0"
+            className="h-full w-full object-cover object-center"
+          />
+          {volumeBadge && (
+            <span
+              className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[9.5px] font-extrabold text-primary-foreground shadow-pill tabular-nums"
+              style={{ background: "linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%)" }}
+            >
+              ×{toLatin(volumeBadge.buy)} · وفّر {toLatin(volumeBadge.save)}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-1 flex-col gap-2 p-3">
+          <h3 className="line-clamp-1 text-[13px] font-bold leading-tight text-foreground">
+            {product.name}
+          </h3>
+          <div className="mt-auto flex items-end justify-between">
+            <span className="font-display text-lg font-extrabold tabular-nums">
+              {toLatin(Number(product?.price) || 0)}
+              <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
+            </span>
+            {qty === 0 ? (
+              <button
+                onClick={handleAdd}
+                aria-label="أضف إلى السلة"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
+              >
+                <Plus className="h-4 w-4" strokeWidth={3} />
+              </button>
+            ) : (
+              <div className="flex h-9 items-center gap-1 rounded-full bg-primary text-primary-foreground shadow-pill">
+                <button onClick={handleDec} aria-label="إنقاص" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
+                  <Minus className="h-3.5 w-3.5" strokeWidth={3} />
+                </button>
+                <span className="min-w-[1ch] text-center text-sm font-extrabold tabular-nums">{toLatin(qty)}</span>
+                <button onClick={handleInc} aria-label="زيادة" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
+                  <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </article>
+    );
+  }
+
   return (
     <article
       className={`product-card group relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-soft ring-1 ring-border/50 ${widthCls} ${unavailable ? "opacity-95" : ""}`}
