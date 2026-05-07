@@ -70,7 +70,7 @@ export const DevOSNavigator = () => {
     const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
     w.__SALSABIL_GOD_MODE__ = godMode;
     w.SALSABIL_GOD_MODE = godMode;
-  }, [godMode]);
+  }, [godMode, location.pathname]);
 
   useEffect(() => {
     if (!khalilDefault) return;
