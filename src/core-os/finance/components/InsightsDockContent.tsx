@@ -190,6 +190,75 @@ export const InsightsDockContent = ({
           </div>
         </div>
       </section>
+
+      {/* Tayseer Liquidity Advisor — Phase VII */}
+      <TayseerLiquidityAdvisor appSpend={appSpend} monthTotal={total} />
     </motion.div>
+  );
+};
+
+/**
+ * TayseerLiquidityAdvisor — flags high burn rate per app and suggests
+ * a rebalanced budget. Reads `appSpend` telemetry (Phase VII-A).
+ * Threshold: >65% of monthly outflow concentrated in a single app
+ * (or >2,500 EGP raw spend in Reef) triggers a savings recommendation.
+ */
+const TayseerLiquidityAdvisor = ({
+  appSpend,
+  monthTotal,
+}: {
+  appSpend: AppSpend[];
+  monthTotal: number;
+}) => {
+  const reef = appSpend.find((a) => a.app_id === "reef")?.total ?? 0;
+  const reefShare = monthTotal > 0 ? Math.round((reef / monthTotal) * 100) : 0;
+  const highBurn = reefShare >= 65 || reef >= 2500;
+  const suggestedSaving = Math.round(reef * 0.12);
+
+  if (appSpend.length === 0 && reef === 0) return null;
+
+  return (
+    <section className="relative overflow-hidden rounded-3xl bg-card text-card-foreground p-4 ring-1 ring-border/50 shadow-sm">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <div className={`grid h-9 w-9 place-items-center rounded-xl ${highBurn ? "bg-amber-500/15 text-amber-600" : "bg-primary/10 text-primary"}`}>
+            {highBurn ? <TrendingDown className="h-4 w-4" /> : <WalletIcon className="h-4 w-4" />}
+          </div>
+          <div>
+            <p className="text-[11px] font-extrabold tracking-wide text-muted-foreground">
+              مستشار السيولة — تيسير
+            </p>
+            <p className="text-[13px] font-black">
+              {highBurn ? "معدّل صرف مرتفع" : "إنفاق متوازن"}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {appSpend.length > 0 && (
+        <ul className="grid grid-cols-2 gap-2 mb-3">
+          {appSpend.slice(0, 4).map((row) => (
+            <li
+              key={row.app_id}
+              className="rounded-xl bg-muted/40 ring-1 ring-border/40 px-2.5 py-1.5"
+            >
+              <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-wider">
+                {row.app_id}
+              </p>
+              <p className="text-[12.5px] font-black tabular-nums">
+                {toLatin(Math.round(row.total))}
+                <span className="ms-1 text-[10px] font-bold text-muted-foreground">ج.م</span>
+              </p>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="text-[12.5px] font-bold leading-relaxed text-foreground/90">
+        {highBurn
+          ? `إنفاقك في «ريف» يشكّل ${toLatin(reefShare)}٪ من ميزانية الشهر. أقترح تحويل ${toLatin(suggestedSaving)} ج.م تلقائياً إلى حصّالتك للحفاظ على سيولتك.`
+          : "توزيعك جيّد عبر تطبيقات سلسبيل — استمرّ على هذا النهج وراقب فرص الادّخار."}
+      </p>
+    </section>
   );
 };
