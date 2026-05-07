@@ -21,6 +21,7 @@ import { PremiumProgressBar } from "@/apps/reef-al-madina/features/cart/componen
 import { CartIncentiveProgress } from "@/apps/reef-al-madina/features/cart/components/CartIncentiveProgress";
 import { CartLoyaltyBar } from "@/apps/reef-al-madina/features/cart/components/CartLoyaltyBar";
 import { RechargeDialog } from "@/apps/reef-al-madina/features/cart/components/RechargeDialog";
+import { HakimPredictiveBasket } from "@/apps/reef-al-madina/features/cart/components/HakimPredictiveBasket";
 import type { SharedCartSplitType } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
