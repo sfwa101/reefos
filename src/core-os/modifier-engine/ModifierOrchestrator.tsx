@@ -83,6 +83,20 @@ export const ModifierOrchestrator = ({ groups, state, onChange }: Props): ReactN
                 onChange={(v) => onChange(group.id, v)}
               />
             );
+          case "visual":
+            return (
+              <section key={group.id}>
+                <GroupHeader icon={group.icon} title={group.title} />
+                <VisualPickerAtom
+                  group={group}
+                  value={
+                    (state[group.id] as string | string[]) ??
+                    (group.mode === "multi" ? [] : "")
+                  }
+                  onChange={(v) => onChange(group.id, v)}
+                />
+              </section>
+            );
           default: {
             const _exhaustive: never = group;
             void _exhaustive;
