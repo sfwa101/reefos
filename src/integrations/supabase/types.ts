@@ -3891,6 +3891,7 @@ export type Database = {
       orders: {
         Row: {
           address_id: string | null
+          app_id: Database["public"]["Enums"]["salsabil_app_id"]
           change_remainder: number
           charity_amount: number
           charity_cause_id: string | null
@@ -3926,6 +3927,7 @@ export type Database = {
         }
         Insert: {
           address_id?: string | null
+          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
           change_remainder?: number
           charity_amount?: number
           charity_cause_id?: string | null
@@ -3961,6 +3963,7 @@ export type Database = {
         }
         Update: {
           address_id?: string | null
+          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
           change_remainder?: number
           charity_amount?: number
           charity_cause_id?: string | null
@@ -6463,6 +6466,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_behavior_events: {
+        Row: {
+          app_id: Database["public"]["Enums"]["salsabil_app_id"]
+          created_at: string
+          event_type: string
+          id: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
+          created_at?: string
+          event_type: string
+          id?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
+          created_at?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: []
       }
       user_behavior_logs: {
         Row: {
@@ -9120,6 +9150,7 @@ export type Database = {
         | "SEMI_WEEKLY_FRESH"
         | "WEEKLY_BIG"
         | "MONTHLY_PANTRY"
+      salsabil_app_id: "reef" | "khalil" | "asrab" | "nabd"
       scheduled_transfer_frequency: "weekly" | "monthly"
       scheduled_transfer_purpose: "gam_eya" | "savings" | "p2p" | "vault"
       shared_cart_approval: "pending" | "approved" | "rejected"
@@ -9314,6 +9345,7 @@ export const Constants = {
         "WEEKLY_BIG",
         "MONTHLY_PANTRY",
       ],
+      salsabil_app_id: ["reef", "khalil", "asrab", "nabd"],
       scheduled_transfer_frequency: ["weekly", "monthly"],
       scheduled_transfer_purpose: ["gam_eya", "savings", "p2p", "vault"],
       shared_cart_approval: ["pending", "approved", "rejected"],

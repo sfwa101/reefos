@@ -16,7 +16,7 @@ import type { QueryClient } from "@tanstack/react-query";
 // Bump this whenever the persisted shape changes (rowToProduct, etc.)
 // to invalidate stale snapshots on every device.
 const BUSTER = "reef-edge-v1";
-const KEY = "reef.queryCache.v1";
+const KEY_BASE = "reef.queryCache.v1";
 const MAX_AGE = 24 * 60 * 60 * 1000; // 24h
 
 const PERSISTABLE_PREFIXES: ReadonlyArray<string> = [
@@ -36,27 +36,44 @@ export const installEdgePersister = (queryClient: QueryClient): void => {
   if (typeof window === "undefined") return;
   if (typeof indexedDB === "undefined") return;
 
-  const persister = createAsyncStoragePersister({
-    storage: {
-      getItem: (k) => get<string>(k).then((v) => v ?? null),
-      setItem: (k, v) => set(k, v),
-      removeItem: (k) => del(k),
-    },
-    key: KEY,
-    throttleTime: 1500,
-  });
+  // Phase VII-A — namespace by Supabase user id so AI-personalized layouts
+  // and per-user catalog slices never leak between accounts on the same
+  // device. Resolves the user lazily; until known, persist under "_anon".
+  const resolveUserId = async (): Promise<string> => {
+    try {
+      // Lazy import to avoid pulling the supabase client into SSR boot.
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data } = await supabase.auth.getSession();
+      return data.session?.user.id ?? "_anon";
+    } catch {
+      return "_anon";
+    }
+  };
 
-  void persistQueryClient({
-    // Cast around dual @tanstack/query-core copies in node_modules.
-    queryClient: queryClient as unknown as Parameters<typeof persistQueryClient>[0]["queryClient"],
-    persister,
-    maxAge: MAX_AGE,
-    buster: BUSTER,
-    dehydrateOptions: {
-      shouldDehydrateQuery: (q) => {
-        if (q.state.status !== "success") return false;
-        return isPersistableKey(q.queryKey);
+  void resolveUserId().then((userId) => {
+    const KEY = `${KEY_BASE}.${userId}`;
+
+    const persister = createAsyncStoragePersister({
+      storage: {
+        getItem: (k) => get<string>(k).then((v) => v ?? null),
+        setItem: (k, v) => set(k, v),
+        removeItem: (k) => del(k),
       },
-    },
+      key: KEY,
+      throttleTime: 1500,
+    });
+
+    void persistQueryClient({
+      queryClient: queryClient as unknown as Parameters<typeof persistQueryClient>[0]["queryClient"],
+      persister,
+      maxAge: MAX_AGE,
+      buster: `${BUSTER}:${userId}`,
+      dehydrateOptions: {
+        shouldDehydrateQuery: (q) => {
+          if (q.state.status !== "success") return false;
+          return isPersistableKey(q.queryKey);
+        },
+      },
+    });
   });
 };

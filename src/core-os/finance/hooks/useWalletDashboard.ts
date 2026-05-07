@@ -34,8 +34,11 @@ type OrderItemRow = {
   quantity: number;
   product_id: string;
   created_at: string;
+  order_id: string;
   products: ProductsRel;
 };
+
+export type AppSpend = { app_id: string; total: number };
 
 export const useWalletDashboard = () => {
   // ===== Tab + dialog UI state =====
@@ -58,6 +61,7 @@ export const useWalletDashboard = () => {
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referrals, setReferrals] = useState<ReferralRow[]>([]);
   const [budgets, setBudgets] = useState<Record<string, number>>({});
+  const [appSpend, setAppSpend] = useState<AppSpend[]>([]);
   const [extrasLoading, setExtrasLoading] = useState(true);
 
   useEffect(() => {
@@ -73,9 +77,13 @@ export const useWalletDashboard = () => {
 
       const orderIdRes = await supabase
         .from("orders")
-        .select("id")
+        // Phase VII-A — capture app_id so wallet can group spend per app.
+        .select("id, app_id")
         .eq("user_id", userId);
-      const orderIds = (orderIdRes.data ?? []).map((o) => o.id);
+      const orderRows = (orderIdRes.data ?? []) as Array<{ id: string; app_id?: string | null }>;
+      const orderIds = orderRows.map((o) => o.id);
+      const orderApp: Record<string, string> = {};
+      orderRows.forEach((o) => { orderApp[o.id] = o.app_id ?? "reef"; });
 
       const [
         { data: items },
@@ -86,7 +94,7 @@ export const useWalletDashboard = () => {
         supabase
           .from("order_items")
           .select(
-            "price,quantity,product_id,created_at,products(category, old_price, price)",
+            "price,quantity,product_id,created_at,order_id,products(category, old_price, price)",
           )
           .in("order_id", orderIds.length ? orderIds : ["00000000-0000-0000-0000-000000000000"]),
         supabase
@@ -118,11 +126,14 @@ export const useWalletDashboard = () => {
 
       const byCat: Record<string, number> = {};
       const monthCat: Record<string, number> = {};
+      const byApp: Record<string, number> = {};
       let savings = 0;
       for (const it of (items ?? []) as unknown as OrderItemRow[]) {
         const cat = it.products?.category || "other";
         const lineTotal = Number(it.price) * Number(it.quantity);
         byCat[cat] = (byCat[cat] || 0) + lineTotal;
+        const appKey = orderApp[it.order_id] ?? "reef";
+        byApp[appKey] = (byApp[appKey] || 0) + lineTotal;
         const ts = it.created_at ? new Date(it.created_at) : null;
         if (ts && ts >= monthStart) monthCat[cat] = (monthCat[cat] || 0) + lineTotal;
         const op = it.products?.old_price;
@@ -131,6 +142,11 @@ export const useWalletDashboard = () => {
           savings += (Number(op) - Number(pp)) * Number(it.quantity);
         }
       }
+      setAppSpend(
+        Object.entries(byApp)
+          .map(([app_id, total]) => ({ app_id, total: Math.round(total) }))
+          .sort((a, b) => b.total - a.total),
+      );
       const stats = Object.entries(byCat)
         .sort((a, b) => b[1] - a[1])
         .slice(0, 6)
@@ -207,6 +223,7 @@ export const useWalletDashboard = () => {
     categoryStats,
     monthByCat,
     totalSavings,
+    appSpend,
     referralCode,
     referrals,
     jar,
