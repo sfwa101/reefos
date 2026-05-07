@@ -34,8 +34,11 @@ type OrderItemRow = {
   quantity: number;
   product_id: string;
   created_at: string;
+  order_id: string;
   products: ProductsRel;
 };
+
+export type AppSpend = { app_id: string; total: number };
 
 export const useWalletDashboard = () => {
   // ===== Tab + dialog UI state =====
