@@ -15,7 +15,7 @@
  */
 import { useMemo, useState } from "react";
 
-import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
+import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
 import type { Product } from "@/lib/products";
 
 import { BESTSELLER_IDS } from "../dictionaries";
@@ -64,7 +64,7 @@ export type HomeOrchestrator = {
 
 export const useHomeOrchestrator = (): HomeOrchestrator => {
   const { data: rawProducts = [], isLoading, error, isFetching, status, fetchStatus } =
-    useProductsBySourceQuery("home");
+    useHomeProductsQuery(48, "home");
 
   // [Phase 23.3] Deadlock telemetry — surfaces stuck Suspense / hung query.
   console.debug("[Home Diagnostics] HomeOrchestrator", {

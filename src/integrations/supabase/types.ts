@@ -5284,6 +5284,39 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_baskets: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          items: Json
+          name: string
+          source: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          items?: Json
+          name: string
+          source?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          items?: Json
+          name?: string
+          source?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       savings_jar: {
         Row: {
           auto_save_enabled: boolean
@@ -7605,6 +7638,25 @@ export type Database = {
           type?: string | null
         }
         Relationships: []
+      }
+      user_product_frequency: {
+        Row: {
+          avg_interval_days: number | null
+          last_ordered_at: string | null
+          order_count: number | null
+          product_id: string | null
+          qty_total: number | null
+          user_id: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Functions: {

@@ -222,3 +222,9 @@ Migration is **staged** at `docs/migrations-staging/20260507_hakim_predictive_ca
 - **DB is the single source of truth for persistent baskets** — no localStorage shadow stores survive Phase 4.
 - **Materialized views feed AI context, never the UI directly** — RLS-bypassing reads are confined to SECURITY DEFINER callers.
 - **One table, one shape** — `saved_baskets` is polymorphic via `source`; we do not fork a separate `subscriptions`/`predictions`/`manual_baskets` schema.
+
+## Phase 4 — Hakim Predictive Cart (Part 2 — Executed 2026-05-07)
+
+- ✅ **DB migration applied**: `saved_baskets` (RLS-clean, polymorphic source) + `user_product_frequency` materialized view live in production.
+- ✅ **Fatal Lag Fix**: `useHomeOrchestrator` now consumes `useHomeProductsQuery(48, "home")` — server-side capped at 48 rows by `source`. Eliminated the legacy `fetchAllProducts` (2000-row) path on the home screen.
+- ✅ **Module Restoration**: `appRegistry` now publishes Baskets (`/store/baskets`), Meat (`/store/meat`), and Village (`/store/village`). `DepartmentGrid` exposes Baskets as a top-level tile.

@@ -10,7 +10,7 @@
  */
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ShoppingBasket, Plane, HeartPulse, Sparkles } from "lucide-react";
+import { ShoppingBasket, Plane, HeartPulse, Sparkles, Beef, Store } from "lucide-react";
 import type { SalsabilAppId } from "@/core-os/event-bus";
 
 export type MiniAppVisibilityCtx = {
@@ -40,6 +40,36 @@ const REGISTRY: MiniAppManifest[] = [
     icon: ShoppingBasket,
     route: "/",
     accent: "from-emerald-500 to-teal-600",
+    status: "live",
+    visibility_logic: () => true,
+  },
+  {
+    id: "baskets",
+    name: "سلال الريف",
+    tagline: "سلال جاهزة وتوفير ذكي",
+    icon: ShoppingBasket,
+    route: "/store/baskets",
+    accent: "from-lime-500 to-emerald-600",
+    status: "live",
+    visibility_logic: () => true,
+  },
+  {
+    id: "meat",
+    name: "اللحوم",
+    tagline: "تقطيع حسب الطلب",
+    icon: Beef,
+    route: "/store/meat",
+    accent: "from-rose-600 to-red-700",
+    status: "live",
+    visibility_logic: () => true,
+  },
+  {
+    id: "village",
+    name: "ريف القرية",
+    tagline: "منتجات بلدية أصلية",
+    icon: Store,
+    route: "/store/village",
+    accent: "from-amber-500 to-yellow-600",
     status: "live",
     visibility_logic: () => true,
   },

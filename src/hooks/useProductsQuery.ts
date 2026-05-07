@@ -64,14 +64,19 @@ export function useProductQuery(id: string | undefined) {
   });
 }
 
-/* ── Phase 25.1 — Cold-start fast path ──────────────────────────── */
-async function fetchHomeProducts(limit: number): Promise<Product[]> {
-  const { data, error } = await supabase
+/* ── Phase 25.1 / 4.2 — Cold-start fast path (source-aware, capped) ── */
+async function fetchHomeProducts(
+  limit: number,
+  source?: ProductSource,
+): Promise<Product[]> {
+  let q = supabase
     .from("products")
     .select(PRODUCT_COLUMNS)
     .eq("is_active", true)
     .order("sort_order", { ascending: true })
     .limit(limit);
+  if (source) q = q.eq("source", source);
+  const { data, error } = await q;
   if (error) {
     console.error("[useHomeProductsQuery] fetch failed:", error);
     return [];
@@ -79,14 +84,14 @@ async function fetchHomeProducts(limit: number): Promise<Product[]> {
   return ((data ?? []) as DbRow[]).map(rowToProduct);
 }
 
-export const homeProductsQueryOptions = (limit = 48) =>
+export const homeProductsQueryOptions = (limit = 48, source?: ProductSource) =>
   queryOptions({
-    queryKey: ["catalog", "home-products", limit] as const,
-    queryFn: () => fetchHomeProducts(limit),
+    queryKey: ["catalog", "home-products", source ?? "all", limit] as const,
+    queryFn: () => fetchHomeProducts(limit, source),
     staleTime: STALE_MS,
     gcTime: GC_MS,
   });
 
-export function useHomeProductsQuery(limit = 48) {
-  return useQuery(homeProductsQueryOptions(limit));
+export function useHomeProductsQuery(limit = 48, source?: ProductSource) {
+  return useQuery(homeProductsQueryOptions(limit, source));
 }
