@@ -255,3 +255,37 @@ Migration is **staged** at `docs/migrations-staging/20260507_hakim_predictive_ca
 - **Image Engine Unification**: `OptimizedImage` (`src/components/ui/OptimizedImage.tsx`) is now the **mandatory** image atom (lazy + async decode + fetchpriority + skeleton + branded fallback + CLS-safe).
 - **LazyImg purged**: `src/apps/reef-al-madina/features/pharmacy/components/LazyImg.tsx` deleted; consumers (`ProductCards.tsx`, `ProductOverlay.tsx`) migrated.
 - **Raw `<img>` stragglers killed (7)**: `RestaurantBlock`, `BasketCard`, `SponsoredRestaurantRail`, `BorrowCard`, `DailyBrowser`, `WeeklyPlanner`, `FeatureTileGrid`. Above-the-fold tiles use `priority` / `fetchpriority="high"`; all carry explicit `width`/`height` for zero-CLS.
+
+---
+
+## 🌌 Phase 7 — The Limitless Polymorphic Engine (Staged 2026-05-07)
+
+The Emperor rejected incremental patches to `products`. Phase 7 introduces the **Salsabil Universal Asset & Contract Engine** — a polymorphic schema that lets a single OS sell ANYTHING through one canonical pipeline:
+
+- 🛒 **Retail** (physical & digital goods)
+- 🍱 **Services & Rentals** (time-slot inventory, deposits)
+- 🏗️ **Real-Estate Finishings** (milestone installments, escrow)
+- 📦 **Subscriptions** (recurring contracts, trials)
+- 🎟️ **Capacity-bound experiences** (events, classes)
+
+### Why this replaces traditional PIMs
+Classical PIMs (Akeneo, Pimcore, even Shopify's product/variant model) hard-code the assumption that "a product has a price and a stock count". Salsabil's god-tier model decomposes commerce into four orthogonal primitives — entity, sale unit, money flow, and availability — so a kitchen-finishing project, a borrowed library book, a wholesale rice tier, and a fresh tomato all share one cart, one checkout, one Hakim brain, and one analytics surface.
+
+### The four primitives
+| Table | Role | Key columns |
+|---|---|---|
+| `salsabil_assets` | WHAT it is | `asset_type` enum, `traits` jsonb, `media` jsonb |
+| `salsabil_skus` | exact unit of sale | `sku_code`, `barcode`, `attributes` jsonb |
+| `salsabil_financial_contracts` | HOW money flows | `pricing_model` enum, `base_price`, `contract_rules` jsonb |
+| `salsabil_inventory_matrix` | WHAT'S available | `inventory_type` enum, `availability_data` jsonb |
+
+### Pricing models supported on Day 1
+`flat` · `tiered_wholesale` · `subscription` · `deposit_and_rental` · `milestone_installments`
+
+### Inventory types
+`count` · `time_slots` · `capacity`
+
+### Migration status
+- ✅ **Staged**: `docs/migrations-staging/20260507_salsabil_universal_engine.sql` (4 tables, 3 enums, RLS, validation triggers, GIN indexes on jsonb).
+- ⏳ **Application & AI-Genesis Admin UI**: Phase 7 Part 2.
+- 🛡️ **Live `products` table left intact** — zero downtime cutover planned.
