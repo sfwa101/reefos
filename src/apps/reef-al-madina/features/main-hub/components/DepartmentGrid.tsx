@@ -24,6 +24,7 @@ type Dept = {
 
 const DEPARTMENTS: Dept[] = [
   { id: "supermarket", title: "السوبرماركت",   subtitle: "كل احتياجاتك اليومية", emoji: "🛒", to: "/store/supermarket", tint: "142 50% 92%", featured: true },
+  { id: "baskets",     title: "سلال الريف",    subtitle: "سلال جاهزة وتوفير",     emoji: "🧺", to: "/store/baskets",      tint: "90 55% 90%" },
   { id: "produce",     title: "خضار وفاكهة",   subtitle: "طازج من المزرعة",      emoji: "🥬", to: "/store/produce",      tint: "100 55% 90%", perishable: true },
   { id: "dairy",       title: "الألبان",       subtitle: "كل صباح",                emoji: "🥛", to: "/store/dairy",        tint: "210 70% 94%", perishable: true },
   { id: "meat",        title: "الجزارة",       subtitle: "تقطيع حسب الطلب",       emoji: "🥩", to: "/store/meat",         tint: "8 70% 92%",   perishable: true },
