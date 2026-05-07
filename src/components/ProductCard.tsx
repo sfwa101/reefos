@@ -66,6 +66,9 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
   const handleAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      try { navigator.vibrate(10); } catch { /* ignore */ }
+    }
     if (opensSheet) {
       setSheetOpen(true);
       return;
