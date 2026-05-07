@@ -776,3 +776,15 @@ Reef internal departments source of truth: `sdui_layouts.slug = 'departments_hub
 ## 🚨 AUTH WARNING — SOVEREIGN SIMPLICITY (HARD-CODED)
 
 **Password complexity is strictly DISABLED across the OS.** Only `length >= 6` is enforced (numeric preferred — the input forces the numeric keypad via `inputMode="numeric"` + `pattern="[0-9]*"`). No regex, no symbols, no HIBP, no complexity checks. Supabase auth is configured with `password_hibp_enabled: false`. **Do not re-enable complexity during environment migrations or remixes.** Single source of truth: `src/pages/Auth.tsx`.
+
+
+## 🌌 The Universal Salsabil Asset (USA) — replaces "Product"
+
+Effective Phase 7, the term **Product** is deprecated across Salsabil OS in favor of the **Universal Salsabil Asset (USA)**. A USA is a polymorphic entity decomposed into four orthogonal primitives:
+
+1. **Asset** (`salsabil_assets`) — the WHAT: identity, category, behavioral `traits` (requires_shipping, requires_calendar, requires_signature, cold_chain…), and media gallery.
+2. **SKU** (`salsabil_skus`) — the exact unit of sale: barcode + free-form `attributes` (color/size, duration_days, floor/unit, etc.).
+3. **Financial Contract** (`salsabil_financial_contracts`) — HOW money flows: `flat` · `tiered_wholesale` · `subscription` · `deposit_and_rental` · `milestone_installments`.
+4. **Inventory Matrix** (`salsabil_inventory_matrix`) — WHAT'S available: `count` · `time_slots` · `capacity`.
+
+A tomato, a borrowed novel, a 12-month wholesale rice tier, a kitchen-finishing project with 20/40/40 milestones, and a Friday-night cooking class are all USAs. They share one cart, one checkout, one Hakim brain, one ledger, and one analytics surface. **Anywhere code or docs say "Product", it now means USA.**
