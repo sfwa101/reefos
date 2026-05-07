@@ -47,9 +47,11 @@ export const toCompareItem = (p: HGProduct): CompareItem => ({
 export const ProductCard = ({
   p,
   onOpen,
+  variant = "standard",
 }: {
   p: HGProduct;
   onOpen: () => void;
+  variant?: "standard" | "minimal";
 }) => {
   const { add } = useCartActions();
   const qty = useCartLineQty(p.id);
