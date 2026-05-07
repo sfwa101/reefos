@@ -752,3 +752,17 @@ supabase/
     └── 20260507004450_03c00ef5-58c5-4b9f-81f9-88eaad54359b.sql
 
 ```
+
+## Family of Apps — Registry (post Phase 4.2)
+
+| App | Route | Status |
+|---|---|---|
+| ريف المدينة | `/` | live |
+| سلال الريف | `/store/baskets` | live |
+| اللحوم | `/store/meat` | live |
+| ريف القرية | `/store/village` | live |
+| أسراب طيبة | `/asrab` | soon |
+| نبض الحياة | `/nabd` | soon |
+| معين | `/maeen` | live |
+
+Source of truth: `src/core-os/app-registry/index.ts`.
