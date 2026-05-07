@@ -56,10 +56,32 @@ export type QuantityGroupSchema = {
   accent?: "rose" | "violet" | "emerald" | "amber" | "primary";
 };
 
+export type VisualPickerOptionSchema = {
+  id: string;
+  label: string;
+  /** CSS color value (e.g. "#fff", "oklch(...)"). */
+  color?: string;
+  /** Image URL for textures, cuts, finishes. */
+  image?: string;
+  disabled?: boolean;
+};
+
+export type VisualPickerGroupSchema = {
+  kind: "visual";
+  id: string;
+  title: string;
+  mode: "single" | "multi";
+  required?: boolean;
+  icon?: string;
+  accent?: "rose" | "violet" | "emerald" | "amber" | "primary";
+  options: VisualPickerOptionSchema[];
+};
+
 export type ModifierGroupSchema =
   | SelectionGroupSchema
   | TextInputGroupSchema
-  | QuantityGroupSchema;
+  | QuantityGroupSchema
+  | VisualPickerGroupSchema;
 
 /** Map of group.id → user selection. */
 export type ModifierState = Record<

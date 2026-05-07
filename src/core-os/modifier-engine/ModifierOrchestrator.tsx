@@ -14,6 +14,7 @@ import type { ModifierGroupSchema, ModifierState } from "./types";
 import { SelectionAtom } from "./atoms/SelectionAtom";
 import { TextInputAtom } from "./atoms/TextInputAtom";
 import { QuantityAtom } from "./atoms/QuantityAtom";
+import { VisualPickerAtom } from "./atoms/VisualPickerAtom";
 
 type Props = {
   groups: ModifierGroupSchema[];
@@ -81,6 +82,20 @@ export const ModifierOrchestrator = ({ groups, state, onChange }: Props): ReactN
                 value={(state[group.id] as number) ?? group.min ?? 1}
                 onChange={(v) => onChange(group.id, v)}
               />
+            );
+          case "visual":
+            return (
+              <section key={group.id}>
+                <GroupHeader icon={group.icon} title={group.title} />
+                <VisualPickerAtom
+                  group={group}
+                  value={
+                    (state[group.id] as string | string[]) ??
+                    (group.mode === "multi" ? [] : "")
+                  }
+                  onChange={(v) => onChange(group.id, v)}
+                />
+              </section>
             );
           default: {
             const _exhaustive: never = group;
