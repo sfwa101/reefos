@@ -87,6 +87,7 @@ import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier
 import { Route as AdminBusinessRulesRouteImport } from './routes/admin.business-rules'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
+import { Route as AdminAssetsRouteImport } from './routes/admin.assets'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
@@ -534,6 +535,11 @@ const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
   path: '/audit-log',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAssetsRoute = AdminAssetsRouteImport.update({
+  id: '/assets',
+  path: '/assets',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -834,6 +840,7 @@ export interface FileRoutesByFullPath {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -963,6 +970,7 @@ export interface FileRoutesByTo {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1099,6 +1107,7 @@ export interface FileRoutesById {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
+  '/admin/assets': typeof AdminAssetsRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1236,6 +1245,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1365,6 +1375,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1500,6 +1511,7 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
+    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -2172,6 +2184,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditLogRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/assets': {
+      id: '/admin/assets'
+      path: '/assets'
+      fullPath: '/admin/assets'
+      preLoaderRoute: typeof AdminAssetsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/analytics'
@@ -2732,6 +2751,7 @@ interface AdminRouteChildren {
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
+  AdminAssetsRoute: typeof AdminAssetsRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
@@ -2803,6 +2823,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
+  AdminAssetsRoute: AdminAssetsRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
   AdminBusinessRulesRoute: AdminBusinessRulesRoute,
