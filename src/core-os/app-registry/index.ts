@@ -1,16 +1,16 @@
 /**
  * Salsabil OS — Mini-App Registry (Phase VIII)
  * --------------------------------------------
- * Single source of truth for every Mini-App that runs inside the Khalil
- * Super-App shell. The registry is data-driven: Khalil Hub renders its
- * cards from SDUI (server-driven), but resolves icon/route/visibility
- * through this registry so app metadata lives next to its code.
+ * Single source of truth for every Sovereign Super-App that runs inside the
+ * Salsabil OS shell. Internal departments of a Super-App (e.g. Reef's
+ * Baskets / Meat / Village) MUST NOT be registered here — they are routes
+ * inside Reef Al-Madina, not sibling Super-Apps.
  *
- * Adding a new app = append a manifest entry. Zero hardcoding in the UI.
+ * Adding a new Super-App = append a manifest entry. Zero hardcoding in the UI.
  */
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
-import { ShoppingBasket, Plane, HeartPulse, Sparkles, Beef, Store } from "lucide-react";
+import { ShoppingBasket, Plane, HeartPulse, Sparkles } from "lucide-react";
 import type { SalsabilAppId } from "@/core-os/event-bus";
 
 export type MiniAppVisibilityCtx = {
@@ -40,36 +40,6 @@ const REGISTRY: MiniAppManifest[] = [
     icon: ShoppingBasket,
     route: "/",
     accent: "from-emerald-500 to-teal-600",
-    status: "live",
-    visibility_logic: () => true,
-  },
-  {
-    id: "baskets",
-    name: "سلال الريف",
-    tagline: "سلال جاهزة وتوفير ذكي",
-    icon: ShoppingBasket,
-    route: "/store/baskets",
-    accent: "from-lime-500 to-emerald-600",
-    status: "live",
-    visibility_logic: () => true,
-  },
-  {
-    id: "meat",
-    name: "اللحوم",
-    tagline: "تقطيع حسب الطلب",
-    icon: Beef,
-    route: "/store/meat",
-    accent: "from-rose-600 to-red-700",
-    status: "live",
-    visibility_logic: () => true,
-  },
-  {
-    id: "village",
-    name: "ريف القرية",
-    tagline: "منتجات بلدية أصلية",
-    icon: Store,
-    route: "/store/village",
-    accent: "from-amber-500 to-yellow-600",
     status: "live",
     visibility_logic: () => true,
   },
