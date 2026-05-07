@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { emitSalsabilEvent } from "@/core-os/event-bus";
 
 /**
  * useHakimEdgeWorker — local-first autonomous agent.
@@ -150,6 +151,12 @@ export const useHakimEdgeWorker = ({ getCart, enabled = true }: EdgeOptions = {}
           ) {
             lastReportedAbandonRef.current = Date.now();
             const totalQty = cart.items.reduce((s, i) => s + (i.quantity || 0), 0);
+            // Push to Salsabil Event Bus (Phase VII-A) — Hakim & analytics subscribe
+            emitSalsabilEvent("cart.abandoned", {
+              items: cart.items.length,
+              totalQuantity: totalQty,
+              idleMinutes: Math.round(idleMs / 60000),
+            });
             report(
               "cart_abandonment",
               "warning",
