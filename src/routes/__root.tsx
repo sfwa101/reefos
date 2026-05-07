@@ -27,6 +27,7 @@ import { SubdomainGuard } from "@/components/SubdomainGuard";
 import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
 import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBootstrap";
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
+import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 
 function NotFoundComponent() {
   return (
@@ -153,6 +154,7 @@ function RootComponent() {
                           <SubdomainGuard />
                           <Toaster />
                           <Outlet />
+                          {import.meta.env.DEV && <DevOSNavigator />}
                         </FavoritesProvider>
                       </CompareProvider>
                     </SharedCartProvider>
