@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { Bot, Calculator, CheckCircle2, Plus, Sparkle, Star, X } from "lucide-react";
 import { toast } from "sonner";
-import { LazyImg } from "./LazyImg";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 import type { RxProduct } from "../types";
 
 const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) => {
@@ -53,7 +53,15 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
         </button>
 
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-          <LazyImg src={p.image} alt={p.name} className="absolute inset-0 h-full w-full object-cover" />
+          <OptimizedImage
+            src={p.image}
+            alt={p.name}
+            width={800}
+            height={600}
+            priority
+            wrapperClassName="absolute inset-0"
+            className="h-full w-full object-cover"
+          />
           <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
           <div className="absolute right-3 bottom-3 inline-flex items-center gap-1 rounded-full bg-background/95 px-2.5 py-1 text-[10px] font-extrabold text-foreground ring-1 ring-border/40">
             <Sparkle className="h-3 w-3 text-primary" /> منتج موصى به AI

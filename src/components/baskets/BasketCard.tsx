@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { basketMarketing, sumBasketRetail, hydrateBasket } from "@/lib/baskets";
 import { toLatin } from "@/lib/format";
 import BasketSheet from "./BasketSheet";
+import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const toneClass = (tone?: string) =>
   tone === "amber" ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 ring-amber-500/40"
@@ -33,7 +34,15 @@ const BasketCard = ({ product }: { product: Product }) => {
         className="group relative block w-full overflow-hidden rounded-3xl bg-card text-right shadow-tile ring-1 ring-border/60 transition active:scale-[0.99]"
       >
         <div className="relative aspect-[5/3] w-full overflow-hidden">
-          <img src={product.image} alt={product.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <OptimizedImage
+            src={product.image}
+            alt={product.name}
+            width={640}
+            height={384}
+            priority
+            wrapperClassName="absolute inset-0"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/15 to-transparent" />
           {m && (
             <span className={`absolute right-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold shadow-pill ring-1 ${toneClass(m.badgeTone)}`}>
