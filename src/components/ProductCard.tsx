@@ -34,7 +34,7 @@ const badgeStyle: Record<string, { label: string; cls: string }> = {
   new: { label: "جديد", cls: "bg-primary-soft text-primary" },
 };
 
-const ProductCardImpl = ({ product, variant = "grid", volumeBadge }: ProductCardProps) => {
+const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: ProductCardProps) => {
   // Granular subscriptions — only this card re-renders when its qty/fav flips.
   const { add, setQty } = useCartActions();
   const qty = useCartLineQty(product.id);
