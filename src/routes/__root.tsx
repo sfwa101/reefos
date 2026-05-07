@@ -158,7 +158,6 @@ function RootComponent() {
                           <SubdomainGuard />
                           <Toaster />
                           <Outlet />
-                          {import.meta.env.DEV && <DevOSNavigator />}
                         </FavoritesProvider>
                       </CompareProvider>
                     </SharedCartProvider>
@@ -169,6 +168,8 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
+        {/* Dev-Node mounted at the root so cache/provider failures cannot hide it. */}
+        {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
     </GlobalErrorBoundary>
   );
