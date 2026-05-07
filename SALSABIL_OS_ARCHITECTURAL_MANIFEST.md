@@ -1,8 +1,26 @@
 # 🏛️ SALSABIL OS — ARCHITECTURAL MANIFEST
 
-> **Generated:** Phase VIII-Dev v3 (Restoration active) — **Maeen (معين)** Sovereign Hub + Dev-Node hardened + Kernel Purification (Phase 2)
+> **Generated:** Phase VIII-Dev v3 — **Restoration + Kernel Purification (Phase 2) complete**
 > **Architecture:** Umbrella OS with kernel (`core-os/`) + Family of Apps (`apps/`) + Dev-Layer (`components/system/`)
-> **Last update:** 2026-05-07
+> **Last update:** 2026-05-07 (Phase 2 close-out)
+
+---
+
+## 🧭 Phase 2 Snapshot — What changed since Phase 1
+
+| Axis | Before (Phase 1) | After (Phase 2 — current) |
+|---|---|---|
+| **Identity** | Khalil → Diwan rename half-applied | **Maeen (معين)** is the canonical sovereign hub: route `/maeen`, registry id `maeen`, FAB label `معين · Sovereign Hub`, single localStorage key `salsabil.dev.maeenAsDefault` |
+| **Dev-Node FAB** | Stripped from preview build via `import.meta.env.DEV` | **Always rendered** in `__root.tsx` (`z-[80]`, `bottom 120px`) outside the provider tree |
+| **SDUI types** | Owned by `apps/reef-al-madina/.../sdui.types.ts` and back-imported by the kernel | **Kernel-owned** in `src/core-os/sdui-engine/types.ts`; reef path is a thin re-export shim |
+| **Maeen Hub data** | Hub component called `supabase.from("orders")` directly | **Kernel adapter** `src/core-os/maeen/useActiveDelivery.ts` (TanStack Query, 60s `staleTime`); Hub is presentation-only |
+| **Wallet bar** | `SalsabilStatusBar` issued one raw `supabase.from("wallets")` per mount → N parallel fetches across shells | TanStack Query `["wallet","status-bar", userId]`, single in-flight request per session, hydration-safe `—` / `…` placeholders |
+| **Subdomain whitelist** | Carried dead `/khalil`, `/diwan` entries | `["/maeen", "/admin/design", "/asrab", "/nabd"]` |
+| **Cache / PWA** | Aggressive persister + service worker | `installEdgePersister` disabled, `registerPWA` disabled, `public/sw.js` is a kill switch, `queryPersister` BUSTER bumped to `salsabil-os-v2-dev` |
+
+Outstanding architectural debt is captured in `ARCHITECTURAL_ROADMAP.md` §6 (Hakim AI cross-app behavioral engine, Tayseer POS sovereign payment aggregator).
+
+
 
 ---
 
