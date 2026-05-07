@@ -11,7 +11,6 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
 import { Route as PosRouteImport } from './routes/pos'
-import { Route as KhalilRouteImport } from './routes/khalil'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -99,6 +98,7 @@ import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
 import { Route as AppOrderSuccessRouteImport } from './routes/_app/order-success'
 import { Route as AppOffersRouteImport } from './routes/_app/offers'
+import { Route as AppKhalilRouteImport } from './routes/_app.khalil'
 import { Route as AppCartRouteImport } from './routes/_app/cart'
 import { Route as AppAffiliateRouteImport } from './routes/_app/affiliate'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
@@ -152,11 +152,6 @@ const VendorRoute = VendorRouteImport.update({
 const PosRoute = PosRouteImport.update({
   id: '/pos',
   path: '/pos',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const KhalilRoute = KhalilRouteImport.update({
-  id: '/khalil',
-  path: '/khalil',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeeRoute = EmployeeRouteImport.update({
@@ -595,6 +590,11 @@ const AppOffersRoute = AppOffersRouteImport.update({
   path: '/offers',
   getParentRoute: () => AppRoute,
 } as any)
+const AppKhalilRoute = AppKhalilRouteImport.update({
+  id: '/khalil',
+  path: '/khalil',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppCartRoute = AppCartRouteImport.update({
   id: '/cart',
   path: '/cart',
@@ -824,12 +824,12 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
+  '/khalil': typeof AppKhalilRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
   '/search': typeof AppSearchRoute
@@ -956,10 +956,10 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
+  '/khalil': typeof AppKhalilRoute
   '/offers': typeof AppOffersRoute
   '/order-success': typeof AppOrderSuccessRoute
   '/search': typeof AppSearchRoute
@@ -1091,12 +1091,12 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
   '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/affiliate': typeof AppAffiliateRoute
   '/_app/cart': typeof AppCartRoute
+  '/_app/khalil': typeof AppKhalilRoute
   '/_app/offers': typeof AppOffersRoute
   '/_app/order-success': typeof AppOrderSuccessRoute
   '/_app/search': typeof AppSearchRoute
@@ -1229,12 +1229,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/khalil'
     | '/pos'
     | '/vendor'
     | '/account'
     | '/affiliate'
     | '/cart'
+    | '/khalil'
     | '/offers'
     | '/order-success'
     | '/search'
@@ -1361,10 +1361,10 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/employee'
-    | '/khalil'
     | '/pos'
     | '/affiliate'
     | '/cart'
+    | '/khalil'
     | '/offers'
     | '/order-success'
     | '/search'
@@ -1495,12 +1495,12 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/khalil'
     | '/pos'
     | '/vendor'
     | '/_app/account'
     | '/_app/affiliate'
     | '/_app/cart'
+    | '/_app/khalil'
     | '/_app/offers'
     | '/_app/order-success'
     | '/_app/search'
@@ -1632,7 +1632,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
-  KhalilRoute: typeof KhalilRoute
   PosRoute: typeof PosRoute
   VendorRoute: typeof VendorRouteWithChildren
 }
@@ -1651,13 +1650,6 @@ declare module '@tanstack/react-router' {
       path: '/pos'
       fullPath: '/pos'
       preLoaderRoute: typeof PosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/khalil': {
-      id: '/khalil'
-      path: '/khalil'
-      fullPath: '/khalil'
-      preLoaderRoute: typeof KhalilRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employee': {
@@ -2269,6 +2261,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppOffersRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/khalil': {
+      id: '/_app/khalil'
+      path: '/khalil'
+      fullPath: '/khalil'
+      preLoaderRoute: typeof AppKhalilRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/cart': {
       id: '/_app/cart'
       path: '/cart'
@@ -2614,6 +2613,7 @@ interface AppRouteChildren {
   AppAccountRoute: typeof AppAccountRouteWithChildren
   AppAffiliateRoute: typeof AppAffiliateRoute
   AppCartRoute: typeof AppCartRoute
+  AppKhalilRoute: typeof AppKhalilRoute
   AppOffersRoute: typeof AppOffersRoute
   AppOrderSuccessRoute: typeof AppOrderSuccessRoute
   AppSearchRoute: typeof AppSearchRoute
@@ -2647,6 +2647,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAccountRoute: AppAccountRouteWithChildren,
   AppAffiliateRoute: AppAffiliateRoute,
   AppCartRoute: AppCartRoute,
+  AppKhalilRoute: AppKhalilRoute,
   AppOffersRoute: AppOffersRoute,
   AppOrderSuccessRoute: AppOrderSuccessRoute,
   AppSearchRoute: AppSearchRoute,
@@ -2932,10 +2933,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
-  KhalilRoute: KhalilRoute,
   PosRoute: PosRoute,
   VendorRoute: VendorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
