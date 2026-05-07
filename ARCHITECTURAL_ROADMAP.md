@@ -336,3 +336,12 @@ The USA Nexus is now write-enabled with full legacy-shim coherence:
 - **RPC**: `public.update_universal_asset(p_asset_id, p_name, p_description, p_base_price)` — `SECURITY DEFINER`, `search_path=public`, `EXECUTE` revoked from `PUBLIC` and granted to `authenticated`. Internally enforces `has_role(auth.uid(),'admin')` and atomically updates the asset, its first active financial contract, and the mirrored row in the legacy `products` table (id `usa_<uuid>`).
 - **Hook**: `src/core-os/hakim-ai/hooks/useUpdateUSA.ts` — TanStack mutation invalidating `salsabil_assets`, `products`, `admin-grid`, and `admin/list/products` query keys; success toast "تم تحديث الأصل وتزامنه بنجاح".
 - **USAEditor**: "أساسي" tab now hosts live name/description inputs; "العقود المالية" tab hosts the active base-price input bound to the asset's currency. A unified "حفظ التعديلات" button shows a Loader2 spinner while `isPending` and is disabled on empty name. The Genesis and Inventory tabs remain reserved for upcoming SKU/contract orchestration.
+
+## Phase 8 Part 1 — AI Co-Pilot & Manual Entry Symbiosis
+
+The USAEditor is now a true human-in-the-loop control surface — pure manual creation, AI-prefilled drafts, and edit-before-mint review all coexist:
+
+- **Unified Creation State**: When `isNew` is true the Basic and Financials tabs render full editable inputs (name, description, asset_type select, pricing_model select, currency, base_price). No asset row required.
+- **Co-Pilot Handshake**: `VisionGenesisUploader` gained a `handoffOnly` prop. In the Editor's Genesis tab the uploader runs in handoff mode — instead of minting, it returns the parsed `USAGenesisPayload` to the Editor, which auto-fills local state, stores the AI draft (preserving `traits`, `skus`, `contract_rules`), and switches the active tab to "أساسي". A dismissible draft banner signals the AI's contribution.
+- **Smart Save Action**: A unified "حفظ" button calls `useMintUSA` when `isNew` (merging manual fields with any AI draft side-data) and `useUpdateUSA` otherwise. Loader copy adapts ("جاري سكّ الأصل…" vs "جاري الحفظ والتزامن…").
+- **Files**: `src/apps/reef-al-madina/features/admin/usa-editor/USAEditor.tsx`, `src/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader.tsx`.

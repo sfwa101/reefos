@@ -44,9 +44,11 @@ const PRICING_LABELS: Record<USAGenesisPayload["financial_contract"]["pricing_mo
 
 interface Props {
   readonly onApprove?: (payload: USAGenesisPayload) => void;
+  /** When true, approval hands the payload to the parent (co-pilot mode) instead of minting directly. */
+  readonly handoffOnly?: boolean;
 }
 
-const VisionGenesisUploader = ({ onApprove }: Props) => {
+const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [hint, setHint] = useState("");
@@ -97,6 +99,11 @@ const VisionGenesisUploader = ({ onApprove }: Props) => {
 
   const approve = async () => {
     if (!payload) return;
+    if (handoffOnly) {
+      onApprove?.(payload);
+      reset();
+      return;
+    }
     try {
       await mintMutation.mutateAsync({
         asset: payload.asset,
@@ -342,10 +349,10 @@ const VisionGenesisUploader = ({ onApprove }: Props) => {
           <button
             type="button"
             onClick={approve}
-            disabled={mintMutation.isPending}
+            disabled={!handoffOnly && mintMutation.isPending}
             className="w-full h-12 rounded-2xl bg-emerald-600 text-white text-[13px] font-extrabold press inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            {mintMutation.isPending ? (
+            {!handoffOnly && mintMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 جاري سكّ الأصل…
@@ -353,7 +360,7 @@ const VisionGenesisUploader = ({ onApprove }: Props) => {
             ) : (
               <>
                 <Check className="h-4 w-4" />
-                اعتماد وسكّ الأصل العالمي
+                {handoffOnly ? "تعبئة النموذج بالاقتراح" : "اعتماد وسكّ الأصل العالمي"}
               </>
             )}
           </button>
