@@ -14,6 +14,7 @@ import type {
   LogisticsWarning,
   QuoteInput,
 } from "./types";
+import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 
@@ -26,8 +27,13 @@ export function computeLogisticsQuote(input: QuoteInput): LogisticsQuote {
     subtotal >= zone.freeDeliveryThreshold &&
     method.feeMultiplier <= 1; // VIP never goes free
 
-  // 2. Surge factor (only applied when surge_active flag is set)
-  const surgeFactor = zone.surgeActive ? Math.max(1, zone.currentLoadFactor) : 1;
+  // 2. Surge factor (live load × Hakim forecasting multiplier)
+  const liveSurge = zone.surgeActive ? Math.max(1, zone.currentLoadFactor) : 1;
+  const forecast = Math.max(
+    1,
+    input.forecastMultiplier ?? HakimGenerativeOverlay.getZoneSurgeMultiplier(zone.zoneCode),
+  );
+  const surgeFactor = liveSurge * forecast;
   const surgeApplied = surgeFactor > 1;
 
   // 3. Fee pipeline: base × method × surge + surcharge
