@@ -196,6 +196,7 @@ export const DevOSNavigator = () => {
                 <Crown className={`h-3.5 w-3.5 ${godMode ? "text-amber-200" : "text-white/70"}`} />
                 <span className="leading-tight">God Mode (Bypass RBAC)</span>
               </label>
+            </motion.div>
           )}
         </AnimatePresence>
 
