@@ -108,6 +108,14 @@ export const useDriverEngine = (): DriverEngine => {
 
   /* ─── core load: tasks + joined order/profile data ─── */
   const load = useCallback(async () => {
+    // God Mode bypass — inject mock driver profile for admin QA.
+    if (isGodMode()) {
+      setDriverId(MOCK_DRIVER_ID);
+      setTasks(MOCK_DRIVER_TASKS);
+      setOrders(MOCK_DRIVER_ORDERS);
+      setLoading(false);
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const sb = supabase as any;
     const auth = await supabase.auth.getUser();
