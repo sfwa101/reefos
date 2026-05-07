@@ -175,7 +175,7 @@ const Wallet = () => {
                 data={savingsData}
               />
             ) : (
-              <InsightsDockContent userId={c.userId} data={txnsData} />
+              <InsightsDockContent userId={c.userId} data={txnsData} appSpend={c.appSpend} />
             )}
           </motion.div>
         </AnimatePresence>

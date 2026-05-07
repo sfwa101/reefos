@@ -7,10 +7,11 @@
  *
  * Anonymous-safe (RLS allows public read of published versions).
  */
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
+import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 
 type State = {
   blocks: SduiBlock[];
@@ -71,10 +72,29 @@ export function useSduiLayout(slug: string): State {
     };
   }, [slug, queryClient]);
 
-  const blocks = useMemo<SduiBlock[]>(
-    () => (query.data ? parseBlocks(query.data) : []),
-    [query.data],
+  // Subscribe to Hakim's transient overlay so re-orderings cause a re-render
+  // WITHOUT touching the persisted query cache.
+  const [overlayTick, setOverlayTick] = useState(0);
+  useEffect(
+    () => HakimGenerativeOverlay.subscribe(() => setOverlayTick((t) => t + 1)),
+    [],
   );
+
+  const blocks = useMemo<SduiBlock[]>(() => {
+    if (!query.data) return [];
+    // 1. Try the augmented payload first.
+    try {
+      const augmented = HakimGenerativeOverlay.applyToLayout(query.data, slug);
+      const parsed = parseBlocks(augmented);
+      if (parsed.length > 0) return parsed;
+    } catch {
+      /* fall through to stable layout */
+    }
+    // 2. Fallback: original payload (Zod safety guarantee).
+    return parseBlocks(query.data);
+    // overlayTick triggers recompute when intent scores change.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query.data, slug, overlayTick]);
 
   return {
     blocks,
