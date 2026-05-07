@@ -1,47 +1,41 @@
 /**
  * SalsabilStatusBar — Phase VIII Global Identity & Wallet ribbon.
  * ---------------------------------------------------------------
- * Lightweight, OS-level status strip used by the Khalil shell and
- * available to every injected Mini-App. Shows:
- *   • National ID verification status (from profile)
- *   • Tayseer wallet balance (live)
- *
- * Pure presentational atom — no business logic. Reads from existing
- * AuthContext + a single wallet RPC. Safe under SSR (renders skeleton).
+ * Hydration-safe `—` / `…` placeholder until client mount, then a
+ * **TanStack-Query-cached** wallet read keyed by user id. Every shell
+ * that renders this bar shares the same in-flight request — no more
+ * N parallel `supabase.from("wallets")` fetches across navigation.
  */
 import { useEffect, useState } from "react";
 import { Wallet, ShieldCheck, ShieldAlert } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toLatin } from "@/lib/format";
 
 export const SalsabilStatusBar = () => {
   const { user, profile } = useAuth();
-  const [balance, setBalance] = useState<number | null>(null);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  useEffect(() => {
-    if (!user) {
-      setBalance(null);
-      return;
-    }
-    let alive = true;
-    (async () => {
-      const { data } = await supabase
+  const { data: balance } = useQuery({
+    queryKey: ["wallet", "status-bar", user?.id ?? "_anon"],
+    enabled: mounted && Boolean(user?.id),
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    queryFn: async (): Promise<number> => {
+      const { data, error } = await supabase
         .from("wallets")
         .select("balance")
-        .eq("user_id", user.id)
+        .eq("user_id", user!.id)
         .maybeSingle();
-      if (alive) setBalance(data?.balance ?? 0);
-    })();
-    return () => {
-      alive = false;
-    };
-  }, [user]);
+      if (error) throw error;
+      return data?.balance ?? 0;
+    },
+  });
 
   const verified = mounted && Boolean(profile?.full_name && profile?.phone);
 

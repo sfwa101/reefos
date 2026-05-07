@@ -114,15 +114,15 @@ Expose a **narrow, versioned bridge** (`postMessage` protocol) for sandboxed app
 
 **Status:** Live. Recorded so future phases never regress it.
 
-### 5.1 Al-Diwan Sovereign Hub (`/diwan`)
-- File: `src/routes/_app.diwan.tsx` → `src/apps/khalil/pages/Hub.tsx` (folder kept for git history; public identity is **الديوان**).
-- 100% SDUI, layout slug `khalil_hub`. Active-delivery detection injects a live `barq_tracking` block via `HakimGenerativeOverlay`.
-- Registry id `diwan`, route `/diwan`, accent `from-amber-500 to-orange-600`. Exposed in `appRegistry` as the canonical empire gateway.
+### 5.1 Maeen Sovereign Hub (`/maeen`)
+- File: `src/routes/_app.maeen.tsx` → `src/apps/khalil/pages/Hub.tsx` (folder kept for git history; public identity is **معين / Maeen**).
+- 100% SDUI, layout slug `khalil_hub`. Active-delivery detection lives in the kernel adapter `src/core-os/maeen/useActiveDelivery.ts` (TanStack Query, 60s `staleTime`) and injects a live `barq_tracking` block via `HakimGenerativeOverlay`.
+- Registry id `maeen`, route `/maeen`, accent `from-amber-500 to-orange-600`.
 
 ### 5.2 Salsabil Dev-Node (`src/components/system/DevOSNavigator.tsx`)
-- DEV-only FAB (bottom-left, above TabBar) mounted **outside the provider tree** in `__root.tsx` so a broken provider can never hide it.
-- Capsule contains: Al-Diwan launcher (pulsing), `appRegistry`-driven app switcher, Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Khalil-as-Default` toggle, and **God Mode** toggle.
-- God Mode state is reflected on the FAB (Crown icon, amber/rose gradient, pulsing dot) and `window.SALSABIL_GOD_MODE` is re-synced on every route change.
+- FAB (bottom-left, `z-[80]`, `bottom 120px`) mounted **outside the provider tree** in `__root.tsx`. **Always rendered** — the `import.meta.env.DEV` gate was removed in Phase VIII-Restoration.
+- Capsule: Maeen launcher (pulsing), `appRegistry`-driven app switcher, Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Maeen-as-Default` toggle, **God Mode** toggle.
+- One-shot localStorage migration folds legacy `khalilAsDefault` / `diwanAsDefault` into `salsabil.dev.maeenAsDefault`.
 
 ### 5.3 God Mode QA Fabric (`src/lib/godMode.ts`)
 - Sources: `window.__SALSABIL_GOD_MODE__`, `window.SALSABIL_GOD_MODE`, `localStorage["salsabil.dev.godMode"]`.
@@ -130,8 +130,50 @@ Expose a **narrow, versioned bridge** (`postMessage` protocol) for sandboxed app
 - Never modifies production data — only short-circuits client-side state hooks.
 
 ### 5.4 Routing & Cache Hardening
-- `SubdomainGuard` whitelist: `["/diwan", "/khalil", "/admin/design", "/asrab", "/nabd"]` — the admin-host redirector must never swallow OS surfaces.
-- Phase VIII-FIX cache posture remains in force: `installEdgePersister` disabled, `registerPWA` disabled, `public/sw.js` is a kill switch, `queryPersister` BUSTER = `"salsabil-os-v2-dev"`. Re-enable only after the OS surface stabilises and a new BUSTER bump is scheduled.
+- `SubdomainGuard` whitelist: `["/maeen", "/admin/design", "/asrab", "/nabd"]`.
+- Phase VIII-FIX cache posture in force: `installEdgePersister` disabled, `registerPWA` disabled, `public/sw.js` is a kill switch, `queryPersister` BUSTER = `"salsabil-os-v2-dev"`.
 
 ### 5.5 Hydration Discipline
-- `SalsabilStatusBar` and any other identity/wallet atoms must render a neutral placeholder (`—` / `…`) until `mounted` flips client-side. Server output and first client render must be byte-identical.
+- `SalsabilStatusBar` renders neutral placeholders (`—` / `…`) until `mounted` flips client-side. Wallet read is now wrapped in TanStack Query (`["wallet", "status-bar", userId]`) — single in-flight request per session, shared across every shell that mounts the bar.
+
+### 5.6 Kernel Purification (Phase 2)
+- **V-1:** SDUI types canonicalised in `src/core-os/sdui-engine/types.ts`. No `core-os → apps/*` type imports remain.
+- **V-2:** Maeen Hub no longer touches Supabase directly. All DB reads flow through kernel adapters (`core-os/maeen/*`). UI components are presentation-only.
+- **R-4:** Wallet status-bar fetch cached via TanStack Query — N→1 collapse on multi-shell navigation.
+
+---
+
+## 6. 💸 Phase P+: Sovereign Payment Gateway & Behavioral AI (Deferred Mega-Feature)
+
+**Trigger metric:** Maeen MAU > 50k OR Reef checkout volume > 5k/day OR first request for Vodafone Cash / Instapay acceptance.
+
+### 6.1 Hakim AI — Cross-App Behavioral Engine
+Evolve `core-os/hakim-ai/` from passive advisor into an **Amazon-style complement generator** spanning every app in the family.
+
+- **Behavioral fabric:** every interaction across Reef / Maeen / Asrab / Nabd streams through `core-os/event-bus` into a unified `user_behavior_stream` table (append-only, partitioned by month).
+- **Complement model:** lightweight collaborative-filtering model (item-item co-occurrence + tier/vertical priors) computed nightly into a `hakim_complements` matrix; served via a single RPC `hakim_complements(user_id, anchor_item_id, k)`.
+- **SDUI mutation:** `HakimGenerativeOverlay` extends from "inject one block" to **rewriting any SDUI layout in-flight** — re-ranking rails, swapping section variants, and injecting personalised `smart_rail` blocks based on the live complement vector. The Admin-authored layout becomes the *baseline*; Hakim becomes the *delta*.
+- **Privacy posture:** complements computed per `customerId` (already pseudonymous); no raw PII enters the model. Opt-out flag on profile disables Hakim mutations entirely (falls back to baseline SDUI).
+- **Trigger to build:** ≥ 100k events/day OR ≥ 3 apps live with overlapping users.
+
+### 6.2 Tayseer POS — Sovereign Payment Aggregator
+Transform Reef Al Madina from a retail app into a **financial aggregator** that replaces Fawry / Basata at the point of sale.
+
+#### 6.2.1 Offline Dynamic QR (Vodafone Cash / Instapay)
+- Each cashier shift mints a per-transaction **dynamic QR** (EMVCo-style payload) signed by an **Edge-Function Oracle** (`supabase/functions/tayseer-qr-oracle/`). The oracle proxies the merchant's Vodafone Cash / Instapay merchant API, returning a short-lived signed payload.
+- POS device caches the last N pre-signed QR templates so the cashier can collect payment **even when offline**; settlement reconciles when connectivity returns.
+- Webhook listener (`/api/public/tayseer-payment-callback`) verifies provider signature, marks the order paid, and emits a `payment.confirmed` event.
+
+#### 6.2.2 Push-to-Pay (Internal Wallets)
+- For Tayseer-on-Tayseer transfers (customer ↔ vendor ↔ driver), bypass external rails entirely: a **single ledger transaction** debits the payer wallet and credits the payee wallet, gated by the Phase J `assert_ledger_balanced` invariant.
+- Push notification surfaces the request on the payer's device; one-tap approve commits the transaction in < 200ms.
+- Falls back to QR + provider rail when payer balance is insufficient.
+
+#### 6.2.3 Auto-Calculated Ledger Commissions
+- Every external-rail acceptance writes **three ledger entries** atomically: gross to merchant, commission to platform (configured per-vertical in `payment_rules`), and provider fee to a `cogs:payment_rails` account.
+- A nightly settlement job collapses all platform commissions per merchant into a single payable row, ready for the existing Phase L settlement engine.
+
+#### 6.2.4 Vision
+Reef Al Madina ceases to be a customer of Fawry/Basata and becomes their **competitor at the village level** — every Reef vendor terminal is a payment acceptance node, every Maeen user is a wallet, and every transaction settles internally on the existing double-entry ledger.
+
+**Architectural prerequisite:** Phase L settlement engine + Phase J ledger invariant (already live). No DB schema work blocks this — only the Edge Oracles and the POS UI.
