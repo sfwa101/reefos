@@ -54,11 +54,21 @@ export const DevOSNavigator = () => {
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(STORAGE_KEY) === "1";
   });
+  const [godMode, setGodMode] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem(GOD_MODE_KEY) === "1";
+  });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, khalilDefault ? "1" : "0");
   }, [khalilDefault]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(GOD_MODE_KEY, godMode ? "1" : "0");
+    (window as unknown as { __SALSABIL_GOD_MODE__?: boolean }).__SALSABIL_GOD_MODE__ = godMode;
+  }, [godMode]);
 
   useEffect(() => {
     if (!khalilDefault) return;
