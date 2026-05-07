@@ -55,6 +55,7 @@ const VisionGenesisUploader = ({ onApprove }: Props) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const mutation = useVisionGenesis();
+  const mintMutation = useMintUSA();
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
