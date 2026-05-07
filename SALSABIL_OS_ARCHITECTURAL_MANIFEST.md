@@ -35,17 +35,17 @@ The shared kernel that powers every app in the Salsabil family.
 ## 🛰️ Routing Layer: `src/routes/` (TanStack Start, file-based)
 | Route file | URL | Notes |
 |---|---|---|
-| `__root.tsx` | — | Global providers, `SubdomainGuard`, hydration-safe shell. Mounts `<DevOSNavigator />` outside the provider tree (DEV only) so cache/provider failures cannot hide it. |
+| `__root.tsx` | — | Global providers, `SubdomainGuard`, hydration-safe shell. Mounts `<DevOSNavigator />` outside the provider tree (always rendered, including preview builds) so cache/provider failures cannot hide it. |
 | `_app.tsx` | — | Customer `AppShell` layout (TopBar, TabBar, CartPanel, Hakim edge worker). |
-| `_app.diwan.tsx` | `/diwan` | Al-Diwan Sovereign Hub (was `_app.khalil.tsx`). |
+| `_app.maeen.tsx` | `/maeen` | **Maeen Sovereign Hub** (was `_app.diwan.tsx`, originally `_app.khalil.tsx`). |
 | `admin.design.tsx` | `/admin/design` | System Editor (SDUI Layout Editor Grid). |
 | `driver.*`, `vendor.*`, `pos.tsx`, `admin.*` | various | Internal portals reachable from the Dev-Node Admin Nexus. |
 
 ## 🛠️ Dev-Layer: `src/components/system/`
 | File | Role |
 |---|---|
-| `DevOSNavigator.tsx` | **Salsabil Dev-Node** — circular FAB (bottom-left, above TabBar) that expands into a blurred capsule. Contains: Al-Diwan launcher (pulsing), App switcher (driven by `appRegistry`), Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Khalil-as-Default` toggle, and **God Mode toggle**. God Mode flips the FAB to an amber/rose gradient with a `Crown` icon and a pulsing amber dot; `window.SALSABIL_GOD_MODE` is re-synced on every route change. DEV-only — tree-shaken from production. |
-| `SubdomainGuard.tsx` | Hostname-based redirector. `OS_WHITELIST_PATHS = ["/diwan", "/khalil", "/admin/design", "/asrab", "/nabd"]` bypasses the admin-host auto-redirect so OS surfaces remain reachable. |
+| `DevOSNavigator.tsx` | **Salsabil Dev-Node** — circular FAB (bottom-left, `z-[80]`, `bottom 120px` above TabBar/BottomCTA) that expands into a blurred capsule. Contains: **Maeen** launcher (pulsing), App switcher (driven by `appRegistry`), Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Maeen-as-Default` toggle, and **God Mode toggle**. God Mode flips the FAB to an amber/rose gradient with a `Crown` icon and a pulsing amber dot; `window.SALSABIL_GOD_MODE` is re-synced on every route change. **Always rendered** (preview + prod) — Phase VIII-Restoration removed the `import.meta.env.DEV` gate. |
+| `SubdomainGuard.tsx` | Hostname-based redirector. `OS_WHITELIST_PATHS = ["/maeen", "/admin/design", "/asrab", "/nabd"]` bypasses the admin-host auto-redirect so OS surfaces remain reachable. |
 | `CatalogBootstrap.tsx`, `BehaviorTrackerBootstrap.tsx`, `LiveRulesBootstrap.tsx` | One-shot bootstrap atoms for catalog cache, behaviour tracking, and live pricing rules. |
 | `GlobalErrorBoundary.tsx` | Top-level React error boundary. |
 
