@@ -14,6 +14,7 @@ import type { ModifierGroupSchema, ModifierState } from "./types";
 import { SelectionAtom } from "./atoms/SelectionAtom";
 import { TextInputAtom } from "./atoms/TextInputAtom";
 import { QuantityAtom } from "./atoms/QuantityAtom";
+import { VisualPickerAtom } from "./atoms/VisualPickerAtom";
 
 type Props = {
   groups: ModifierGroupSchema[];
