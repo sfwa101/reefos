@@ -141,8 +141,10 @@ export const HakimGenerativeOverlay = {
   },
 
   /** Test-only: clear all in-memory state. */
+  /** Test-only: clear all in-memory state. */
   _resetForTest(): void {
     intentScores.clear();
     zoneSurge.clear();
+    injectedBlocks.clear();
   },
 };
