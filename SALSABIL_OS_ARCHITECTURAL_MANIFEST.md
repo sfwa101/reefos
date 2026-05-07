@@ -769,3 +769,5 @@ SDUI `departments_hub` layout — **not** the OS registry.
 
 Source of truth: `src/core-os/app-registry/index.ts`.
 Reef internal departments source of truth: `sdui_layouts.slug = 'departments_hub'`.
+
+**UI atom standard**: `src/components/ui/OptimizedImage.tsx` is the **mandatory** image primitive across every app and module. Raw `<img>` tags are forbidden in product/feature surfaces; legacy `LazyImg` was purged in Phase 6.
