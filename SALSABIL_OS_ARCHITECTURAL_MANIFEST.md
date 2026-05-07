@@ -1,7 +1,8 @@
 # 🏛️ SALSABIL OS — ARCHITECTURAL MANIFEST
 
-> **Generated:** Phase V.3 — Meta Restructure complete
-> **Architecture:** Umbrella OS with kernel (`core-os/`) + Family of Apps (`apps/`)
+> **Generated:** Phase VIII-Dev v3 — Al-Diwan Sovereign Hub + Dev-Node hardening
+> **Architecture:** Umbrella OS with kernel (`core-os/`) + Family of Apps (`apps/`) + Dev-Layer (`components/system/`)
+> **Last update:** 2026-05-07
 
 ---
 
@@ -10,22 +11,59 @@ The shared kernel that powers every app in the Salsabil family.
 
 | Module | Purpose |
 |---|---|
+| `app-registry/` | **Mini-App Manifest** — single source of truth for every app (id, route, icon, accent, visibility predicate) |
+| `event-bus/` | **Salsabil Event Fabric** — push-based behaviour stream shared across apps |
 | `finance/` | **Tayseer Engine** — wallet, balance, savings jars, charity, affiliate |
-| `hakim-ai/` | **Hakim** — central AI brain (advisor, anomalies, insights) |
-| `sdui-engine/` | **Server-Driven UI** — layout runtime + Realtime cache invalidation |
-| `system-editor/` | **Visual Layout Editor** — drag/drop SDUI authoring |
+| `hakim-ai/` | **Hakim** — central AI brain (advisor, anomalies, insights, generative overlay) |
+| `sdui-engine/` | **Server-Driven UI** — layout runtime + Realtime cache invalidation + block registry |
+| `system-editor/` | **Visual Layout Editor** — drag/drop SDUI authoring (`/admin/design`) |
 | `barq-logistics/` | **BARQ (برق)** — geo zones, smart routing, delivery quotes |
+| `modifier-engine/` | **Universal Modifier Atoms** — vertical-agnostic product configurators |
+| `capabilities/` | **Scoped Capability Atoms** — search/scope primitives reused by every app |
+| `ui/` | **OS-level UI atoms** — `SalsabilStatusBar` (hydration-safe identity + wallet ribbon) |
 
 ## 🏘️ Family of Apps: `src/apps/`
-| App | Status | Scope |
+| App | ID | Route | Status | Scope |
+|---|---|---|---|---|
+| `reef-al-madina/` | `reef` | `/` | ✅ Live | Retail super-app — supermarket, meat, pharmacy, recipes, sweets, library, baskets |
+| `khalil/` (Hub source) | `diwan` | `/diwan` | ✅ Live | **الديوان — Sovereign Empire Gateway**. Unified launcher (SDUI `khalil_hub` layout). Renamed from "Khalil" in Phase VIII-Dev v3. |
+| `asrab/` | `asrab` | `/asrab` | 🟡 Soon | Real Estate & Travel super-app |
+| `nabd/` | `nabd` | `/nabd` | 🟡 Soon | Health Sector — telemedicine, clinics, labs |
+
+> **Naming note:** the on-disk folder `src/apps/khalil/` is preserved for git history; the public identity, route, registry id, and UI label are **الديوان / Al-Diwan**. Legacy `/khalil` localStorage flags are still honoured for back-compat.
+
+## 🛰️ Routing Layer: `src/routes/` (TanStack Start, file-based)
+| Route file | URL | Notes |
 |---|---|---|
-| `reef-al-madina/` | ✅ Live | Retail super-app — supermarket, meat, pharmacy, recipes, sweets, library, baskets |
-| `khalil/` | 🟡 Placeholder | WeChat-style universal hub + mini-programs |
-| `asrab/` | 🟡 Placeholder | Real Estate & Travel super-app |
-| `nabd/` | 🟡 Placeholder | Health Sector — telemedicine, clinics, labs |
+| `__root.tsx` | — | Global providers, `SubdomainGuard`, hydration-safe shell. Mounts `<DevOSNavigator />` outside the provider tree (DEV only) so cache/provider failures cannot hide it. |
+| `_app.tsx` | — | Customer `AppShell` layout (TopBar, TabBar, CartPanel, Hakim edge worker). |
+| `_app.diwan.tsx` | `/diwan` | Al-Diwan Sovereign Hub (was `_app.khalil.tsx`). |
+| `admin.design.tsx` | `/admin/design` | System Editor (SDUI Layout Editor Grid). |
+| `driver.*`, `vendor.*`, `pos.tsx`, `admin.*` | various | Internal portals reachable from the Dev-Node Admin Nexus. |
+
+## 🛠️ Dev-Layer: `src/components/system/`
+| File | Role |
+|---|---|
+| `DevOSNavigator.tsx` | **Salsabil Dev-Node** — circular FAB (bottom-left, above TabBar) that expands into a blurred capsule. Contains: Al-Diwan launcher (pulsing), App switcher (driven by `appRegistry`), Admin Nexus overlay (Master Admin / System Editor / Driver / Vendor / POS), `Khalil-as-Default` toggle, and **God Mode toggle**. God Mode flips the FAB to an amber/rose gradient with a `Crown` icon and a pulsing amber dot; `window.SALSABIL_GOD_MODE` is re-synced on every route change. DEV-only — tree-shaken from production. |
+| `SubdomainGuard.tsx` | Hostname-based redirector. `OS_WHITELIST_PATHS = ["/diwan", "/khalil", "/admin/design", "/asrab", "/nabd"]` bypasses the admin-host auto-redirect so OS surfaces remain reachable. |
+| `CatalogBootstrap.tsx`, `BehaviorTrackerBootstrap.tsx`, `LiveRulesBootstrap.tsx` | One-shot bootstrap atoms for catalog cache, behaviour tracking, and live pricing rules. |
+| `GlobalErrorBoundary.tsx` | Top-level React error boundary. |
+
+## 🦸 God Mode (Absolute Manager Mode) — `src/lib/godMode.ts`
+Master flag for admin QA. Sources, in order: `window.__SALSABIL_GOD_MODE__`, `window.SALSABIL_GOD_MODE`, `localStorage["salsabil.dev.godMode"]`. When active:
+- `useDriverEngine` returns a mocked driver profile + tasks + orders.
+- `useVendorOperations` injects mocked vendor IDs + products (bypasses `user_vendor_ids` RPC).
+- `HomeRedirector` skips the role-based default-view redirect.
+- The Dev-Node FAB flips to its **Crown / amber-rose** identity so the operator always sees they are in elevated mode.
 
 ## 🔐 Universal Identity Gate
-`src/context/AuthContext.tsx` → **Salsabil OS National ID** — wraps the whole app tree in `__root.tsx`. Session, profile and Tayseer wallet identity persist across every app under `src/apps/*`.
+`src/context/AuthContext.tsx` → **Salsabil OS National ID** — wraps the whole app tree in `__root.tsx`. Session, profile and Tayseer wallet identity persist across every app under `src/apps/*`. The `SalsabilStatusBar` atom renders a hydration-safe `—` / `…` placeholder on first paint to eliminate the SSR/CSR mismatch previously triggered by wallet + verification reads.
+
+## 🧊 Cache & PWA Posture (Phase VIII-FIX, still in force)
+- `installEdgePersister` is **disabled** in `src/router.tsx` to guarantee fresh network data during the OS rollout.
+- `registerPWA()` is disabled and `__root.tsx` actively **unregisters** any existing service workers.
+- `public/sw.js` is a **Kill Switch** that clears all caches and unregisters itself.
+- `src/lib/queryPersister.ts` BUSTER = `"salsabil-os-v2-dev"`.
 
 ---
 
