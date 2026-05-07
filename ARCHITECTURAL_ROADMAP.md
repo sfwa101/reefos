@@ -328,3 +328,11 @@ The legacy Product UI was eradicated to enforce extreme architectural purity (no
 - **New gateway route**: `src/routes/admin.assets.tsx` → `lazyPage(@/pages/admin/UsaLedger)`.
 - **USA Ledger** (`src/pages/admin/UsaLedger.tsx`): pure `UniversalAdminGrid` reading `salsabil_assets` with embedded joins to `salsabil_skus` and `salsabil_financial_contracts`. BentoMetrics: total · physical · service. Columns: name · type badge · base price · SKU count · created date.
 - **USAEditor** (`src/apps/reef-al-madina/features/admin/usa-editor/USAEditor.tsx`): RTL slide-over `Sheet` with four tabs — أساسي · العقود المالية · المخزون · التكوين الذكي. The Genesis tab natively embeds `VisionGenesisUploader`, making AI-creation the primary path. Update RPCs for the other tabs land in Part 5.
+
+## Phase 7 Part 5 — The Mutation Engine
+
+The USA Nexus is now write-enabled with full legacy-shim coherence:
+
+- **RPC**: `public.update_universal_asset(p_asset_id, p_name, p_description, p_base_price)` — `SECURITY DEFINER`, `search_path=public`, `EXECUTE` revoked from `PUBLIC` and granted to `authenticated`. Internally enforces `has_role(auth.uid(),'admin')` and atomically updates the asset, its first active financial contract, and the mirrored row in the legacy `products` table (id `usa_<uuid>`).
+- **Hook**: `src/core-os/hakim-ai/hooks/useUpdateUSA.ts` — TanStack mutation invalidating `salsabil_assets`, `products`, `admin-grid`, and `admin/list/products` query keys; success toast "تم تحديث الأصل وتزامنه بنجاح".
+- **USAEditor**: "أساسي" tab now hosts live name/description inputs; "العقود المالية" tab hosts the active base-price input bound to the asset's currency. A unified "حفظ التعديلات" button shows a Loader2 spinner while `isPending` and is disabled on empty name. The Genesis and Inventory tabs remain reserved for upcoming SKU/contract orchestration.
