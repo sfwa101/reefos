@@ -167,34 +167,35 @@ export const DevOSNavigator = () => {
 
               {/* Khalil-as-default toggle */}
               <label
-                className="flex cursor-pointer flex-col items-center gap-1 rounded-2xl bg-white/5 px-1.5 py-1.5 text-[8px] font-bold text-white/90"
+                className="flex cursor-pointer items-center gap-2 rounded-2xl bg-white/5 px-3 py-2 text-[11px] font-bold text-white"
                 title="Set Khalil as Default Home"
               >
-                <Sparkles className="h-3 w-3 text-amber-300" />
                 <input
                   type="checkbox"
                   checked={khalilDefault}
                   onChange={(e) => setKhalilDefault(e.target.checked)}
-                  className="h-3 w-3 accent-amber-400"
+                  className="h-4 w-4 accent-amber-400"
                 />
+                <Sparkles className="h-3.5 w-3.5 text-amber-300" />
+                <span className="leading-tight">Khalil as Default (Home)</span>
               </label>
 
               {/* Absolute Manager Mode (God Mode) toggle */}
               <label
-                className={`flex cursor-pointer flex-col items-center gap-1 rounded-2xl px-1.5 py-1.5 text-[8px] font-bold text-white/90 transition ${
+                className={`flex cursor-pointer items-center gap-2 rounded-2xl px-3 py-2 text-[11px] font-bold text-white transition ${
                   godMode ? "bg-gradient-to-br from-amber-500/40 to-rose-500/40 ring-1 ring-amber-300/60" : "bg-white/5"
                 }`}
                 title="Absolute Manager Mode — bypass RBAC UI guards"
               >
-                <Crown className={`h-3 w-3 ${godMode ? "text-amber-200" : "text-white/70"}`} />
                 <input
                   type="checkbox"
                   checked={godMode}
                   onChange={(e) => setGodMode(e.target.checked)}
-                  className="h-3 w-3 accent-amber-400"
+                  className="h-4 w-4 accent-amber-400"
                 />
+                <Crown className={`h-3.5 w-3.5 ${godMode ? "text-amber-200" : "text-white/70"}`} />
+                <span className="leading-tight">God Mode (Bypass RBAC)</span>
               </label>
-            </motion.div>
           )}
         </AnimatePresence>
 
