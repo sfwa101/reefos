@@ -95,16 +95,18 @@ export const SmartGreeting = () => {
   const { profile } = useAuth();
   const slot = useMemo(() => slotFromHour(new Date().getHours()), []);
   const g = greetings[slot];
+  const hi = useMemo(() => pickFromSlot(g.hi), [g.hi]);
+  const rotatedSub = useMemo(() => pickFromSlot(g.sub), [g.sub]);
   const name = firstName(profile?.full_name);
 
   // Admin-controlled override (single source of truth: app_settings).
   const { value: adminSub } = useSystemSetting<AdminSubline>("greeting_subline", null);
-  const sub = adminSub?.enabled && adminSub?.text ? adminSub.text : g.sub;
+  const sub = adminSub?.enabled && adminSub?.text ? adminSub.text : rotatedSub;
 
   return (
     <header dir="rtl" className="px-1 pt-1 animate-float-up">
       <h1 className="font-display text-2xl font-black leading-tight text-foreground">
-        {g.hi}
+        {hi}
         {name ? `، ${name}` : ""} <span aria-hidden>{g.emoji}</span>
       </h1>
       <p className="mt-1 text-[13px] font-medium text-muted-foreground">{sub}</p>
