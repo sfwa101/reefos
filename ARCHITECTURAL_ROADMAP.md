@@ -1206,3 +1206,59 @@ every render, h3 swallowed it into the catastrophic-500 envelope.
 **Outcome:** SSR boots cleanly. The "مساء الخير، حسن" greeting is back,
 the Pastel Minimalist hub is live, and the Theme Authority Lock now fails
 safe instead of fatal.
+
+---
+
+## Phase 26 — The Sovereign Minimalism & Theme Liberation
+
+**Date:** 2026-05-08
+**Status:** ✅ Shipped
+
+The chrome is purged of every clutter and every auto-mutating signal.
+Theme is now exclusively manual; the Hub is reduced to its five
+sovereign sections.
+
+### Strikes
+
+1. **TopBar overhaul** (`src/components/TopBar.tsx`) — `SovereignPersonaSwitcher`
+   removed (now lives inside `/account`). Three-zone layout: cart (left) ·
+   centered address pill (dynamic-only label, no static "اختر عنوان") ·
+   Apple-style hamburger (right) that navigates to `/account`.
+2. **TabBar overhaul** (`src/components/TabBar.tsx`) — Account tab replaced
+   with a primary Cart tab. Account is reachable via the hamburger only.
+3. **Theme Liberation** (`src/core-os/theme/hooks/useSovereignTheme.ts`) —
+   Persona overlay and Spirit/dormancy color mutation are deleted from the
+   color path. Only base tenant DNA + the user's `profiles.theme_preference`
+   drive the palette. Dormancy still triggers the spiritual overlay but
+   never repaints the chrome.
+4. **Golden SDUI Home** — `reef_home` section_order locked to:
+   `SmartGreeting → MainSearchHeader → StoryCircles →
+   OfferNeighborhoodPool → PredictiveRefillRail`.
+   `AmanahTierProgress` is removed from the Home (still available for
+   other pages via the registry).
+5. **Component polish** — `SmartGreeting` now emits time-aware Islamic
+   salutations (حياك الله، أنار الله يومك، …) and reads its sub-line from
+   the admin-controlled `app_settings.greeting_subline` JSONB.
+   `MainSearchHeader` is flat (non-typewriter), with a sticky pill that
+   gains blur + border only when pinned.
+6. **New stem cells** — `OfferNeighborhoodPool` (Neighborhood Pulse,
+   admin-controlled via `app_settings.neighborhood_pulse`) and
+   `PredictiveRefillRail` (predictive consumable restock, fed by
+   `useBuyAgainProducts`) registered in the SDUI registry & LayoutFactory.
+
+**Files touched:**
+
+- `src/components/TopBar.tsx`, `src/components/TabBar.tsx`
+- `src/core-os/theme/hooks/useSovereignTheme.ts`
+- `src/apps/reef-al-madina/features/main-hub/components/SmartGreeting.tsx`
+- `src/apps/reef-al-madina/features/main-hub/components/MainSearchHeader.tsx`
+- `src/apps/reef-al-madina/features/main-hub/components/OfferNeighborhoodPool.tsx` (new)
+- `src/apps/reef-al-madina/features/main-hub/components/PredictiveRefillRail.tsx` (new)
+- `src/apps/reef-al-madina/features/storefront/home/components/LayoutFactory.tsx`
+- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts`
+- `src/core-os/sdui-engine/types.ts`, `src/core-os/sdui-engine/registry.ts`
+- DB migration: `ui_layouts` row for `reef_home`
+
+**Outcome:** Liquid Silk. The Emperor holds absolute manual authority over
+the theme; the Home breathes in five clean sections; the chrome no longer
+mutates behind his back.
