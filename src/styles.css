@@ -215,6 +215,20 @@
   --tier-platinum: 210 28% 62%;
   --surface-mint: 145 25% 18%;
 
+  /* Phase 31 — Department tints (dark variants, deep & saturated lows) */
+  --dept-fresh: 142 30% 18%;
+  --dept-leaf: 90 28% 18%;
+  --dept-greens: 100 28% 18%;
+  --dept-dairy: 210 30% 20%;
+  --dept-meat: 8 32% 20%;
+  --dept-kitchen: 30 35% 20%;
+  --dept-sweets: 330 28% 20%;
+  --dept-village: 36 32% 18%;
+  --dept-pharmacy: 200 30% 20%;
+  --dept-library: 50 32% 18%;
+  --dept-home: 265 28% 22%;
+  --dept-restaurants: 20 32% 20%;
+
   --border: 220 8% 22%;
   --input: 220 8% 22%;
   --ring: 138 50% 55%;
