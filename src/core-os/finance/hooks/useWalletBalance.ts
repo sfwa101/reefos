@@ -50,7 +50,8 @@ export const useWalletBalance = () => {
           .eq("id", user.id)
           .maybeSingle(),
         supabase.rpc("user_trust_limit", { _user_id: user.id }),
-        supabase.rpc("user_total_spent", { _user_id: user.id }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any).rpc("user_total_spent", { _user_id: user.id }),
       ]);
 
       if (!mounted) return;
