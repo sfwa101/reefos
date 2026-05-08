@@ -12,15 +12,7 @@ import {
 } from "@/lib/sovereignCatalog";
 
 
-type Row = {
-  id: string;
-  name: string;
-  source: string;
-  category: string;
-  price: number;
-  cost_price: number | null;
-  affiliate_commission_pct: number;
-};
+type Row = SkuAdminRow;
 
 type EditState = { cost: string; aff: string };
 
