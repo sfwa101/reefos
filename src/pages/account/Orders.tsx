@@ -1,26 +1,61 @@
 import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
-import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, MessageCircle, X, type LucideIcon } from "lucide-react";
+import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney, toLatin } from "@/lib/format";
-import type { Database } from "@/integrations/supabase/types";
 import { useCart } from "@/context/CartContext";
 import { getById } from "@/lib/products";
 import { toast } from "sonner";
 
-type OrderRow = Database["public"]["Tables"]["orders"]["Row"];
-type ItemRow = Database["public"]["Tables"]["order_items"]["Row"];
-type OrderWithItems = OrderRow & { order_items: ItemRow[] };
+/**
+ * Phase 14 Part 1 — Customer Order History rewritten to read exclusively
+ * from the Sovereign Matrix:
+ *   salsabil_master_orders
+ *     └─ salsabil_fulfillment_nodes (per-vendor leg, status, totals)
+ *         └─ salsabil_fulfillment_items (qty, price, sku → asset)
+ * Zero reads of legacy `orders` / `order_items`.
+ */
+
+type SovereignItem = {
+  id: string;
+  quantity: number;
+  price_at_time: number;
+  sku_id: string | null;
+  salsabil_skus: {
+    asset_id: string | null;
+    salsabil_assets: {
+      name: string | null;
+      media: unknown;
+    } | null;
+  } | null;
+};
+
+type SovereignNode = {
+  id: string;
+  status: string;
+  total_amount: number;
+  vendor_id: string | null;
+  salsabil_fulfillment_items: SovereignItem[];
+};
+
+type SovereignOrder = {
+  id: string;
+  status: string;
+  total_amount: number;
+  created_at: string;
+  salsabil_fulfillment_nodes: SovereignNode[];
+};
 
 const statusInfo: Record<string, { label: string; color: string; icon: LucideIcon }> = {
-  delivered:        { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
-  out_for_delivery: { label: "في الطريق",   color: "bg-accent text-accent-foreground",          icon: Truck },
-  preparing:        { label: "قيد التحضير", color: "bg-warning/15 text-warning",                icon: Clock },
-  confirmed:        { label: "مؤكد",         color: "bg-info/15 text-info",                      icon: Check },
-  pending:          { label: "بانتظار",      color: "bg-foreground/10 text-foreground",          icon: Clock },
-  cancelled:        { label: "ملغي",         color: "bg-destructive/15 text-destructive",        icon: X },
+  delivered:                { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
+  out_for_delivery:         { label: "في الطريق",   color: "bg-accent text-accent-foreground",          icon: Truck },
+  preparing:                { label: "قيد التحضير", color: "bg-warning/15 text-warning",                icon: Clock },
+  confirmed:                { label: "مؤكد",         color: "bg-info/15 text-info",                      icon: Check },
+  pending:                  { label: "بانتظار",      color: "bg-foreground/10 text-foreground",          icon: Clock },
+  requires_admin_routing:   { label: "بحاجة توجيه",  color: "bg-warning/15 text-warning",                icon: Clock },
+  cancelled:                { label: "ملغي",         color: "bg-destructive/15 text-destructive",        icon: X },
 };
 
 const formatDate = (iso: string) => {
@@ -35,46 +70,85 @@ const formatDate = (iso: string) => {
   return d.toLocaleDateString("en-GB") + " " + time;
 };
 
+/** Roll up node statuses into a single headline status for the master order. */
+const aggregateStatus = (nodes: SovereignNode[]): string => {
+  if (nodes.length === 0) return "pending";
+  const statuses = nodes.map((n) => n.status);
+  if (statuses.every((s) => s === "delivered")) return "delivered";
+  if (statuses.every((s) => s === "cancelled")) return "cancelled";
+  if (statuses.some((s) => s === "out_for_delivery")) return "out_for_delivery";
+  if (statuses.some((s) => s === "preparing" || s === "assigned")) return "preparing";
+  if (statuses.some((s) => s === "confirmed")) return "confirmed";
+  return statuses[0] ?? "pending";
+};
+
+const firstMedia = (media: unknown): string | null => {
+  if (Array.isArray(media) && media.length > 0 && typeof media[0] === "string") {
+    return media[0];
+  }
+  return null;
+};
+
+const assetIdToLegacyProductId = (assetId: string) =>
+  `usa_${assetId.replace(/-/g, "")}`;
+
 const Orders = () => {
   const { user } = useAuth();
   const { add } = useCart();
   const navigate = useNavigate();
-  const [orders, setOrders] = useState<OrderWithItems[]>([]);
+  const [orders, setOrders] = useState<SovereignOrder[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data } = await supabase
-        .from("orders")
-        .select("*, order_items(*)")
-        .eq("user_id", user.id)
+      const { data, error } = await supabase
+        .from("salsabil_master_orders")
+        .select(`
+          id, status, total_amount, created_at,
+          salsabil_fulfillment_nodes (
+            id, status, total_amount, vendor_id,
+            salsabil_fulfillment_items (
+              id, quantity, price_at_time, sku_id,
+              salsabil_skus ( asset_id, salsabil_assets ( name, media ) )
+            )
+          )
+        `)
+        .eq("customer_id", user.id)
         .order("created_at", { ascending: false });
-      setOrders((data as OrderWithItems[]) ?? []);
+      if (!error) setOrders((data as unknown as SovereignOrder[]) ?? []);
       setLoading(false);
     })();
   }, [user]);
 
-  const reorder = (o: OrderWithItems) => {
-    if (!o.order_items?.length) return;
+  const reorder = (o: SovereignOrder) => {
+    const allItems = o.salsabil_fulfillment_nodes.flatMap(
+      (n) => n.salsabil_fulfillment_items,
+    );
+    if (allItems.length === 0) return;
     let added = 0;
-    for (const it of o.order_items) {
-      const pid = it.product_id ?? "";
-      const p = pid ? getById(pid) : undefined;
+    for (const it of allItems) {
+      const assetId = it.salsabil_skus?.asset_id ?? null;
+      const legacyId = assetId ? assetIdToLegacyProductId(assetId) : "";
+      const p = legacyId ? getById(legacyId) : undefined;
+      const name = it.salsabil_skus?.salsabil_assets?.name ?? "منتج";
+      const image = firstMedia(it.salsabil_skus?.salsabil_assets?.media) ?? "";
       if (p) {
         add(p, it.quantity);
         added++;
       } else {
-        // Fallback: synthesize a minimal product so the user can still re-order custom items
-        add({
-          id: pid || `custom-${it.id}`,
-          name: it.product_name,
-          unit: "",
-          price: Number(it.price),
-          image: it.product_image ?? "",
-          category: "إعادة طلب",
-          source: "supermarket",
-        }, it.quantity);
+        add(
+          {
+            id: legacyId || `custom-${it.id}`,
+            name,
+            unit: "",
+            price: Number(it.price_at_time),
+            image,
+            category: "إعادة طلب",
+            source: "supermarket",
+          },
+          it.quantity,
+        );
         added++;
       }
     }
@@ -121,10 +195,15 @@ const Orders = () => {
 
       <div className="space-y-3">
         {orders.map((o) => {
-          const info = statusInfo[o.status] ?? statusInfo.pending;
+          const headline = aggregateStatus(o.salsabil_fulfillment_nodes);
+          const info = statusInfo[headline] ?? statusInfo.pending;
           const Icon = info.icon;
-          const itemCount = o.order_items?.reduce((s, it) => s + it.quantity, 0) ?? 0;
+          const items = o.salsabil_fulfillment_nodes.flatMap(
+            (n) => n.salsabil_fulfillment_items,
+          );
+          const itemCount = items.reduce((s, it) => s + it.quantity, 0);
           const shortId = o.id.slice(0, 8).toUpperCase();
+          const vendorCount = o.salsabil_fulfillment_nodes.length;
           return (
             <div key={o.id} className="glass-strong rounded-2xl p-4 shadow-soft">
               <div className="flex items-start justify-between">
@@ -135,6 +214,7 @@ const Orders = () => {
                   </div>
                   <p className="mt-0.5 text-[11px] text-muted-foreground tabular-nums">
                     {formatDate(o.created_at)} · {toLatin(itemCount)} منتجات
+                    {vendorCount > 1 ? ` · ${toLatin(vendorCount)} بائعين` : ""}
                   </p>
                 </div>
                 <span className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-bold ${info.color}`}>
@@ -142,32 +222,29 @@ const Orders = () => {
                 </span>
               </div>
 
-              {o.order_items && o.order_items.length > 0 && (
+              {items.length > 0 && (
                 <div className="mt-3 flex gap-1.5 overflow-x-auto no-scrollbar">
-                  {o.order_items.slice(0, 5).map((it) => (
-                    it.product_image ? (
-                      <img key={it.id} src={it.product_image} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                  {items.slice(0, 5).map((it) => {
+                    const img = firstMedia(it.salsabil_skus?.salsabil_assets?.media);
+                    const name = it.salsabil_skus?.salsabil_assets?.name ?? "منتج";
+                    return img ? (
+                      <img key={it.id} src={img} alt="" className="h-10 w-10 shrink-0 rounded-lg object-cover" />
                     ) : (
                       <div key={it.id} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-foreground/5 text-[10px] font-bold">
-                        {it.product_name.slice(0, 2)}
+                        {name.slice(0, 2)}
                       </div>
-                    )
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
               <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
-                <span className="font-display text-base font-extrabold text-primary tabular-nums">{fmtMoney(Number(o.total))}</span>
-                <div className="flex gap-2">
-                  {o.whatsapp_sent && (
-                    <span className="flex items-center gap-1 rounded-full bg-success/15 px-2 py-1 text-[10px] font-bold text-success">
-                      <MessageCircle className="h-3 w-3" /> واتساب
-                    </span>
-                  )}
-                  <button onClick={() => reorder(o)} className="flex items-center gap-1 rounded-full bg-foreground/5 px-3 py-1.5 text-[11px] font-bold">
-                    <RotateCcw className="h-3 w-3" /> أعد الطلب
-                  </button>
-                </div>
+                <span className="font-display text-base font-extrabold text-primary tabular-nums">
+                  {fmtMoney(Number(o.total_amount))}
+                </span>
+                <button onClick={() => reorder(o)} className="flex items-center gap-1 rounded-full bg-foreground/5 px-3 py-1.5 text-[11px] font-bold">
+                  <RotateCcw className="h-3 w-3" /> أعد الطلب
+                </button>
               </div>
             </div>
           );

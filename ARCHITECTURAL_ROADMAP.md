@@ -526,3 +526,18 @@ circular reverse logistics. Activates after Barq stabilization.
 - **Client Adapter:** `useAestheticProcessor` — TanStack mutation handling file→base64 conversion, style selection, and AI failure modes (rate limit, credits exhausted, parse error).
 - **Genesis Integration:** `VisionGenesisUploader` now intercepts approval — purifies → uploads to `product-images` bucket → injects public URL into `payload.asset.media[0]` BEFORE invoking `mint_universal_asset`. Shows live "حكيم يقوم بتحسين الصورة وإزالة الخلفية…" feedback.
 - **Outcome:** SDUI visual harmony guaranteed across the catalog. No raw, unstyled merchant photos ever reach the Sovereign storefront.
+
+## Phase 14 Part 1 — The UI Massacre: Customer Surface
+
+**Mandate:** Begin the great migration of the frontend off the legacy `orders` / `order_items` tables onto the Sovereign Matrix (`salsabil_master_orders` → `salsabil_fulfillment_nodes` → `salsabil_fulfillment_items` → `salsabil_skus` → `salsabil_assets`).
+
+### DB Purge — Burn the Ships
+- **Migration:** `purge_legacy_checkout_rpcs` — `DROP FUNCTION place_order_atomic`, `DROP FUNCTION place_order_atomic_v2`. Both functions had zero live src/ callers; they are now permanently eradicated. The Sovereign checkout RPC is the single source of truth for order placement.
+
+### Customer Surface Migration
+- **`pages/account/Orders.tsx`** — fully rewritten. Drops `Database["public"]["Tables"]["orders"]` types entirely. Now joins master orders → fulfillment nodes → items → skus → assets in a single Supabase query. Aggregates per-vendor node statuses into a headline status for the order card. Reorder pipeline maps `sku.asset_id` back to the legacy `usa_<uuid>` mirror to integrate with the existing cart.
+- **`hooks/useBuyAgainProducts.ts`** — fully rewritten. Replaces the legacy two-step `orders → order_items` scan with a three-step Sovereign scan (`master_orders → fulfillment_nodes → fulfillment_items + sku join`). Resolves asset_ids → legacy product mirror ids → live catalog rows.
+- **`components/store/BuyItAgainRail.tsx`** — same Sovereign join applied; legacy `order_items` read removed.
+
+### Outcome
+The customer-facing "Orders" and "Buy It Again" surfaces no longer touch a single byte of the legacy `orders`/`order_items` tables. Phase 14 Part 2 will complete the same massacre on the admin cockpit, vendor ops, driver tasks, and wallet dashboard.
