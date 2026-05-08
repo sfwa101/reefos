@@ -16,19 +16,12 @@ import { useEffect, useMemo, useState } from "react";
 import { type Product } from "@/lib/products";
 import ProductCard from "@/components/ProductCard";
 import { toLatin } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
 import { useUniversalSearch, useSearchHistory } from "@/modules/search";
 import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
 
-
-const FALLBACK_IMG =
-  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
-
-// Live Supabase search — merges with the local in-memory `products` array.
-// Returns DB-only matches (already-cached products are skipped to avoid dupes).
+// Live Sovereign search — merges with in-memory `products`.
+// Returns DB-only matches (cached products are skipped to avoid dupes).
 function useSupabaseProductSearch(term: string, knownIds: Set<string>) {
   const [remote, setRemote] = useState<Product[]>([]);
   useEffect(() => {
@@ -37,28 +30,11 @@ function useSupabaseProductSearch(term: string, knownIds: Set<string>) {
     let cancelled = false;
     const handle = setTimeout(async () => {
       try {
-        const like = `%${t}%`;
-                const { data, error } = await __sb.from("products")
-          .select("id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge")
-          .eq("is_active", true)
-          .or(`name.ilike.${like},brand.ilike.${like},category.ilike.${like},sub_category.ilike.${like}`)
-          .limit(40);
+        const rows = await searchSovereignAssets({ q: t, limit: 40 });
         if (cancelled) return;
-        if (error) { setRemote([]); return; }
-                const mapped: Product[] = (data ?? []).map((r: any) => ({
-          id: String(r.id),
-          name: r.name,
-          brand: r.brand ?? undefined,
-          unit: r.unit ?? "",
-          price: Number(r.price ?? 0),
-          oldPrice: r.old_price != null ? Number(r.old_price) : undefined,
-          image: r.image_url || r.image || FALLBACK_IMG,
-          rating: r.rating != null ? Number(r.rating) : undefined,
-          category: r.category ?? "",
-          subCategory: r.sub_category ?? undefined,
-          source: (r.source as Product["source"]) ?? "supermarket",
-          badge: (r.badge as Product["badge"]) ?? undefined,
-        }));
+        const mapped = rows
+          .map(assetToProduct)
+          .filter((p): p is Product => p != null);
         setRemote(mapped.filter((p) => !knownIds.has(p.id)));
       } catch {
         if (!cancelled) setRemote([]);
