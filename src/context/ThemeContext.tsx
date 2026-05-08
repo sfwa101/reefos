@@ -62,6 +62,37 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  // Hydrate from profile.theme_preference on first auth — only if the user
+  // has never explicitly set a local choice on this device.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        const uid = u.user?.id;
+        if (!uid || cancelled) return;
+        const { data } = await supabase
+          .from("profiles")
+          .select("theme_preference")
+          .eq("id", uid)
+          .maybeSingle();
+        const remote = (data as { theme_preference?: string | null } | null)?.theme_preference;
+        if (cancelled || !remote) return;
+        // Only hydrate if local store wasn't explicitly changed by user.
+        if (remote !== colorTheme) {
+          setColorThemeState(remote as ColorTheme);
+          localStorage.setItem("reef-color", remote);
+        }
+      } catch {
+        /* non-blocking */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const resolvedMode = mode === "system" ? systemMode : mode;
 
   useEffect(() => {
