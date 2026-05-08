@@ -16,7 +16,7 @@
 import { useMemo, useState } from "react";
 
 import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
-import type { Product } from "@/lib/products";
+import type { Product, ProductSource } from "@/lib/products";
 
 import { BESTSELLER_IDS } from "../dictionaries";
 import { productToHGView } from "../mapper";
@@ -62,8 +62,8 @@ export type HomeOrchestrator = {
   resetFilters: () => void;
 };
 
-export const useHomeOrchestrator = (): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, "home");
+export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
+  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, source);
   // [Phase 28] Diagnostic console.debug removed — was firing on every render
   // and inflating React commit time on mobile during scroll.
 
