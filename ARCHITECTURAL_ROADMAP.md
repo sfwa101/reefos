@@ -374,3 +374,9 @@ bypass LLM processing.
 - Client hook: `src/core-os/hakim-ai/hooks/useAssetMatchmaker.ts` — `checkDuplicates(name, description, threshold=0.85)`.
 
 **Doctrine:** Pre-flight matchmaker runs BEFORE every USA mint; if matches ≥ threshold are returned, the Admin is presented with merge-into-existing UX instead of creating a duplicate row.
+
+## Phase 8 Part 4 — Visual Deduplication & Sovereign Override (2026-05-08)
+- `USAEditor.handleSave` now intercepts new mints with `useAssetMatchmaker.checkDuplicates`. When matches ≥ threshold are returned, minting pauses and a `DuplicateAdvisor` panel is rendered above the Save button.
+- Two Sovereign Action buttons: **قبول نصيحة حكيم** (clears the form) and **تخطي حكيم وسكّ كأصل جديد** (sets `hasOverriddenAI=true` and forces minting).
+- `mint_universal_asset` RPC now accepts an optional `payload.semantic_embedding` (jsonb 768-dim array) and persists it into `salsabil_assets.semantic_embedding`. `useMintUSA` forwards the embedding produced by the matchmaker — zero-waste reuse, no duplicate token spend.
+- **Doctrine:** AI is strictly an advisor. The Admin retains absolute final authority via the Force-Mint override.
