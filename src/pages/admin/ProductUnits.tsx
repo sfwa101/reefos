@@ -23,10 +23,16 @@ type ValidatePricing = { ok: boolean; message?: string } | null;
 // Wrapping the client in a precise interface keeps every call site checked.
 type ProductUnitsDb = {
   from(table: "units_of_measure"): {
-    select(s: string): { order(c: string): Promise<{ data: UoM[] | null }> };
+    select(s: string): {
+      order(c: string): { limit(n: number): Promise<{ data: UoM[] | null }> };
+    };
   };
   from(table: "product_units"): {
-    select(s: string): { eq(c: string, v: string): { order(c: string): Promise<{ data: PU[] | null }> } };
+    select(s: string): {
+      eq(c: string, v: string): {
+        order(c: string): { limit(n: number): Promise<{ data: PU[] | null }> };
+      };
+    };
     delete(): { eq(c: string, v: string): Promise<{ error: { message: string } | null }> };
     upsert(payload: PU[], opts: { onConflict: string }): Promise<{ error: { message: string } | null }>;
   };
