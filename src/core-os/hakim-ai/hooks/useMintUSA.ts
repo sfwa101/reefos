@@ -33,7 +33,6 @@ export function useMintUSA() {
       qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
       qc.invalidateQueries({ queryKey: ["products"] });
       qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
-      console.log("[Mint] USA minted:", assetId);
     },
     onError: (err) => {
       toast.error(err.message?.includes("unauthorized")
