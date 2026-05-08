@@ -83,40 +83,30 @@ const GridMode = memo(function GridMode({
       variants={containerVariants}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-3 gap-3"
+      className="grid grid-cols-3 grid-flow-dense gap-3"
     >
       {items.map((d) => (
         <motion.div
           key={d.id}
           variants={cardVariants}
           whileTap={d.unavailable ? undefined : { scale: 0.96 }}
-          className={cn(
-            "relative",
-            d.featured ? "col-span-2 row-span-2" : "",
-          )}
+          className="relative"
         >
           <Link
             to={d.to}
             onClick={d.unavailable ? undefined : haptic}
             className={cn(
-              "group relative flex h-full w-full flex-col justify-end overflow-hidden rounded-[28px] shadow-soft ring-1 ring-border/40 transition ease-apple",
+              "group relative flex h-full min-h-[120px] w-full flex-col justify-end overflow-hidden rounded-[28px] shadow-soft ring-1 ring-border/40 transition ease-apple",
               d.unavailable
                 ? "opacity-50 pointer-events-none"
                 : "hover:-translate-y-0.5 hover:shadow-tile",
-              d.featured ? "min-h-[180px]" : "min-h-[112px]",
             )}
-            style={{ background: tintBg(d.tintVar) }}
+            style={{ backgroundColor: tintBg(d.tintVar) }}
           >
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -top-6 -right-6 h-24 w-24 rounded-full opacity-50 blur-2xl"
-              style={{ background: `hsl(var(--${d.tintVar}))` }}
-            />
             <div className="relative z-10 p-3.5">
               <div
                 className={cn(
-                  "mb-2 inline-flex items-center justify-center rounded-2xl bg-card/80 backdrop-blur-xl shadow-sm ring-1 ring-border/50",
-                  d.featured ? "h-14 w-14 text-3xl" : "h-10 w-10 text-xl",
+                  "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-card/90 text-xl shadow-sm ring-1 ring-border/50",
                 )}
               >
                 <span aria-hidden>{d.emoji}</span>
