@@ -20,7 +20,10 @@ const MAX = 12;
 const assetIdToLegacyProductId = (assetId: string) =>
   `usa_${assetId.replace(/-/g, "")}`;
 
-export const useBuyAgainProducts = (): {
+export const useBuyAgainProducts = (
+  /** When false, the network query is parked — used to defer fetch past first paint. */
+  enabled: boolean = true,
+): {
   products: Product[];
   isLoading: boolean;
 } => {
@@ -29,7 +32,7 @@ export const useBuyAgainProducts = (): {
 
   const { data: ids = [], isLoading: idsLoading } = useQuery({
     queryKey: ["buy-again-sovereign", user?.id ?? "anon"] as const,
-    enabled: Boolean(user?.id),
+    enabled: enabled && Boolean(user?.id),
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     queryFn: async (): Promise<string[]> => {
