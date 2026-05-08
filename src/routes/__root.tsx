@@ -11,6 +11,7 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { SovereignThemeProvider } from "@/core-os/theme/SovereignThemeProvider";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
@@ -143,6 +144,7 @@ function RootComponent() {
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
+          <SovereignThemeProvider tenantId="reef">
           <LocaleProvider>
           <UIProvider>
             <TooltipProvider>
@@ -167,6 +169,7 @@ function RootComponent() {
             </TooltipProvider>
           </UIProvider>
           </LocaleProvider>
+          </SovereignThemeProvider>
         </ThemeProvider>
         {/* Dev-Node mounted at the root — visible in all builds (Phase VIII Restoration). */}
         <DevOSNavigator />

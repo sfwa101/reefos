@@ -5371,6 +5371,36 @@ export type Database = {
           },
         ]
       }
+      salsabil_theme_matrix: {
+        Row: {
+          created_at: string
+          dna_payload: Json
+          id: string
+          is_active: boolean
+          tenant_id: string
+          theme_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          dna_payload?: Json
+          id?: string
+          is_active?: boolean
+          tenant_id?: string
+          theme_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          dna_payload?: Json
+          id?: string
+          is_active?: boolean
+          tenant_id?: string
+          theme_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       salsabil_vendor_members: {
         Row: {
           created_at: string

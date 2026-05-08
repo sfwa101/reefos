@@ -673,3 +673,18 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 3. **System Editor Boundary Repaired** — Relocated `useLayoutEditor` from `src/apps/reef-al-madina/features/admin/hooks/` into `src/core-os/system-editor/hooks/`. `LayoutEditorGrid.tsx` updated to consume the kernel path. The empty Reef admin/hooks directory was removed.
 
 **Status:** The Core-OS is now strictly independent of the Reef app layer. Zero illegal `core-os/ → apps/` imports remain. The kernel is sealed and ready for Phase 17 — the Sovereign Theme & SDUI Template Matrix.
+
+---
+
+## Phase 17 Part 1 — The Sovereign DNA Engine (Dynamic Theme Matrix)
+
+**Mission:** Tear down the Level-1 hardcoded CSS color walls and replace them with a Level-4 reactive, database-driven theme matrix. The app's visual identity now lives in the Sovereign Matrix — not in `styles.css`.
+
+### Strikes Executed
+
+1. **Theme Matrix Schema** — New table `public.salsabil_theme_matrix` (`tenant_id`, `theme_name`, `is_active`, `dna_payload jsonb`) with a partial unique index enforcing one active theme per tenant. RLS: public-read (UI must boot for anon visitors), admin-only writes via `has_role(auth.uid(),'admin')`. Seeded with the **Imperial Sage** (Reef Al Madina baseline) DNA payload as the active default.
+2. **Sovereign Theme Hook** — `src/core-os/theme/hooks/useSovereignTheme.ts`. TanStack Query subscription on `["sovereign-theme", tenantId]`, parses `dna_payload.colors` into inline CSS variables on `document.documentElement.style`, projects `effects.radius` and `effects.glass` the same way. Any token added to the DB flows to the UI without code changes.
+3. **Sovereign Theme Provider** — `src/core-os/theme/SovereignThemeProvider.tsx`. Mounted in `__root.tsx` inside the legacy `ThemeProvider` shell with `tenantId="reef"`. Exposes the active theme + tenant via context for future per-section overrides; will fully supersede `ThemeContext` in Phase 17 Part 2.
+4. **CSS Cleansing (Soft)** — `src/styles.css` `:root` / `.dark` color blocks marked as **SSR / first-paint fallbacks only**. Inline CSS variables injected by the provider override them via natural inline-style > stylesheet specificity. Authors must now change the DB row, not the stylesheet, to re-skin the app.
+
+**Status:** The app boots from a DB-driven JSON DNA payload. Reef Al Madina is the first tenant on the Sovereign Theme Matrix. Level-1 Stem Cell Visuals are online — ready for Phase 17 Part 2 (multi-tenant resolver + dark/occasion overlays).
