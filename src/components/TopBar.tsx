@@ -106,7 +106,7 @@ const TopBar = () => {
                   animate={{ width: "auto", opacity: 1, marginRight: 2, paddingRight: 14 }}
                   exit={{ width: 0, opacity: 0, marginRight: 0, paddingRight: 0 }}
                   transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tabular-nums"
+                  className="overflow-hidden whitespace-nowrap font-display text-[15px] font-extrabold tabular-nums tracking-tight"
                 >
                   {fmtCompact(total)}
                 </motion.span>
