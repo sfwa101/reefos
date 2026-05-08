@@ -836,3 +836,19 @@ A customer's master order is a **Sovereign artifact**. To deliver it across many
 **RLS — not application code — is the trust boundary.** The `current_user_is_vendor_member()` SECURITY DEFINER helper gates SELECT/UPDATE on nodes (and SELECT on items via node membership) so a vendor can NEVER read another vendor's slice, even with a crafted query. Admins retain global ALL.
 
 The Vendor Portal consumes this through `useUpdateFulfillmentStatus` and a `UniversalAdminGrid` view of `/vendor/orders` — tenants see and act on only their own slice.
+
+## The Great Benaa OS Vision (The 25-Point Blueprint)
+
+**Imperial Mandate (enshrined Phase 11.1):**
+
+> Salsabil OS is not a single app; it is the **genetic kernel** for a 25-sector SaaS ERP — codename **Benaa**. We have annihilated the concept of "silos". Inventory, Finance, HR, and Sales all flow through the **Universal Asset Engine** and the **Decentralized Matrix**. The ultimate endgame is **"Hakim The Engineer"** — an autonomous AI agent directly connected to LLM APIs, capable of auto-generating entire Benaa modules, UI screens via SDUI, and backend logic in seconds without human IDE intervention.
+
+### Architectural Implications
+
+1. **Single Genetic Kernel.** Every Benaa vertical (retail, restaurants, pharmacy, logistics, manufacturing, healthcare, education, real estate, agriculture, hospitality, automotive, legal, construction, professional services, NGOs, government, media, energy, telecom, finance, insurance, transport, tourism, sports, entertainment) is a tenant projection over the same Sovereign tables — never a fork.
+2. **Universal Asset Engine (USA) as DNA.** Products, services, contracts, properties, vehicles, lessons, appointments, prescriptions — all are *Assets* with sector-specific `asset_data` jsonb. One catalog table; infinite shapes.
+3. **Decentralized Matrix as the World.** Stock, availability, pricing overrides, and capacity for any asset in any tenant location live in `salsabil_inventory_matrix` keyed by `(asset_id, location_code = vendor_id)`. The matrix is the physics layer.
+4. **RLS is the Trust Boundary.** All tenant isolation is enforced at the database via SECURITY DEFINER helpers (`current_user_is_vendor_member`, `has_role`). Application code is presentation; the database is sovereignty.
+5. **SDUI is the Skin.** Every screen in every Benaa module is generated server-side from layout JSON in `sdui_layouts`. Hakim writes the layout; the renderer obeys.
+6. **Tayseer as Native Treasury.** Every tenant gets a Tayseer wallet by default. Settlements, payouts, employee salaries, vendor commissions, customer refunds — all flow through one ledger primitive.
+7. **Hakim The Engineer.** The terminal endgame: an autonomous LLM-driven agent that reads natural-language module specs from the Emperor, auto-generates migrations, RPCs, RLS, SDUI layouts, and TypeScript hooks, and ships them through this very pipeline — no IDE, no human compiler. This manifest is its constitution.
