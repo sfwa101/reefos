@@ -169,9 +169,8 @@ export default function OrderDetail() {
   async function setStatus(next: string) {
     if (!order) return;
     setUpdating(true);
-    const updates: Record<string, unknown> = { status: next };
+    const updates: { status: string; delivered_at?: string } = { status: next };
     if (next === "delivered") updates.delivered_at = new Date().toISOString();
-    // Cascade the new status to every child node of this master order.
     const { error: nodeErr } = await supabase
       .from("salsabil_fulfillment_nodes")
       .update(updates)
