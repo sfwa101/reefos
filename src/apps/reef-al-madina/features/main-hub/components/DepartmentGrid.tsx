@@ -149,7 +149,7 @@ const StackedMode = memo(function StackedMode({
   };
 
   return (
-    <div className="relative mx-auto h-[420px] w-full max-w-sm select-none">
+    <div className="relative mx-auto h-[420px] w-full max-w-sm select-none overflow-hidden">
       <AnimatePresence initial={false}>
         {items.map((d, i) => {
           // Visual offset relative to active card; cards behind are stacked up.
@@ -160,30 +160,26 @@ const StackedMode = memo(function StackedMode({
             <motion.div
               key={d.id}
               drag={isTop ? "y" : false}
-              dragElastic={0.18}
+              dragElastic={0.2}
               dragConstraints={{ top: 0, bottom: 0 }}
+              dragMomentum={false}
               onDragEnd={isTop ? onDragEnd : undefined}
               animate={{
                 scale: 1 - offset * 0.05,
-                y: -offset * 22,
+                y: offset * 10,
                 opacity: 1 - offset * 0.18,
                 zIndex: total - offset,
               }}
               transition={{ type: "spring", stiffness: 280, damping: 30 }}
-              className="absolute inset-x-4 top-2 h-[360px] overflow-hidden rounded-[36px] shadow-tile ring-1 ring-border/50"
-              style={{ background: tintBg(d.tintVar) }}
+              className="absolute inset-x-4 top-2 h-[340px] overflow-hidden rounded-[36px] shadow-tile ring-1 ring-border/50"
+              style={{ backgroundColor: tintBg(d.tintVar) }}
             >
-              <div
-                aria-hidden
-                className="pointer-events-none absolute -top-10 -right-10 h-48 w-48 rounded-full opacity-60 blur-3xl"
-                style={{ background: `hsl(var(--${d.tintVar}))` }}
-              />
               <div className="relative z-10 flex h-full flex-col justify-between p-6">
                 <div className="flex items-center justify-between">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-card/80 text-4xl shadow-sm ring-1 ring-border/50 backdrop-blur-xl">
+                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-card/90 text-4xl shadow-sm ring-1 ring-border/50">
                     <span aria-hidden>{d.emoji}</span>
                   </div>
-                  <span className="rounded-full bg-card/70 px-3 py-1 text-[11px] font-bold text-muted-foreground backdrop-blur-md">
+                  <span className="rounded-full bg-card/80 px-3 py-1 text-[11px] font-bold text-muted-foreground">
                     {active + 1} / {total}
                   </span>
                 </div>
@@ -198,7 +194,7 @@ const StackedMode = memo(function StackedMode({
                     to={d.to}
                     onClick={haptic}
                     className={cn(
-                      "mt-4 inline-flex items-center justify-center rounded-2xl bg-foreground px-5 py-2.5 text-sm font-bold text-background shadow-pill transition active:scale-95",
+                      "mt-4 inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pill transition active:scale-95",
                       d.unavailable && "pointer-events-none opacity-40",
                     )}
                   >
