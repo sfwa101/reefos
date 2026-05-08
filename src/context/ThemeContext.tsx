@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type ColorTheme =
   | "sage"
@@ -61,6 +62,37 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
+  // Hydrate from profile.theme_preference on first auth — only if the user
+  // has never explicitly set a local choice on this device.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const { data: u } = await supabase.auth.getUser();
+        const uid = u.user?.id;
+        if (!uid || cancelled) return;
+        const { data } = await supabase
+          .from("profiles")
+          .select("theme_preference")
+          .eq("id", uid)
+          .maybeSingle();
+        const remote = (data as { theme_preference?: string | null } | null)?.theme_preference;
+        if (cancelled || !remote) return;
+        // Only hydrate if local store wasn't explicitly changed by user.
+        if (remote !== colorTheme) {
+          setColorThemeState(remote as ColorTheme);
+          localStorage.setItem("reef-color", remote);
+        }
+      } catch {
+        /* non-blocking */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const resolvedMode = mode === "system" ? systemMode : mode;
 
   useEffect(() => {
@@ -78,6 +110,17 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const setColorTheme = (c: ColorTheme) => {
     setColorThemeState(c);
     localStorage.setItem("reef-color", c);
+    // Persist to profile so the Emperor's choice survives across sessions/devices.
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const uid = data.user?.id;
+        if (!uid) return;
+        await supabase.from("profiles").update({ theme_preference: c }).eq("id", uid);
+      } catch {
+        /* non-blocking */
+      }
+    })();
   };
 
   const value = useMemo<ThemeCtx>(
