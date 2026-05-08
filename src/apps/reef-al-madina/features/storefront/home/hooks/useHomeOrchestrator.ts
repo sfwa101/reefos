@@ -16,7 +16,7 @@
 import { useMemo, useState } from "react";
 
 import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
-import type { Product } from "@/lib/products";
+import type { Product, ProductSource } from "@/lib/products";
 
 import { BESTSELLER_IDS } from "../dictionaries";
 import { productToHGView } from "../mapper";
