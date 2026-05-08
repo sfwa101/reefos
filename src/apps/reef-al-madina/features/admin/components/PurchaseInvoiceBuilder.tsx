@@ -63,7 +63,7 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
       setLoadingRefs(true);
       const [s, p] = await Promise.all([
         supabase.from("suppliers").select("id,name").eq("is_active", true).order("name"),
-        supabase.from("products").select("id,name,cost_price,stock").eq("is_active", true).order("name").limit(800),
+        (supabase as any).from("products").select("id,name,cost_price,stock").eq("is_active", true).order("name").limit(800),
       ]);
       if (cancel) return;
       setSuppliers((s.data ?? []) as Supplier[]);

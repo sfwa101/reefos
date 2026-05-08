@@ -86,7 +86,7 @@ export default function Inventory() {
         if (patch.price !== undefined && patch.price !== "") upd.price = Number(patch.price);
         if (patch.stock !== undefined && patch.stock !== "") upd.stock = Number(patch.stock);
         if (Object.keys(upd).length === 0) return Promise.resolve({ error: null });
-        return supabase.from("products").update(upd).eq("id", id);
+        return (supabase as any).from("products").update(upd).eq("id", id);
       });
       const results = await Promise.all(tasks);
       const errs = results.filter((r) => r.error);
