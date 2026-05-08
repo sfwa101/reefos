@@ -1,8 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
+import { createFileRoute } from "@tanstack/react-router";
+import SduiCategoryPage from "@/apps/reef-al-madina/features/storefront/components/SduiCategoryPage";
 
 export const Route = createFileRoute("/_app/store/kitchen")({
-  // Skeleton stays in the critical bundle → instant paint on slow chunks.
-  pendingComponent: () => <StorePageSkeleton productCount={6} withHero />,
-  component: lazyRouteComponent(() => import("@/modules/kitchen/KitchenPage")),
+  component: () => (
+    <SduiCategoryPage themeKey="kitchen" pageKey="category_kitchen" title="المطبخ الجاهز" />
+  ),
 });

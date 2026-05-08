@@ -1,11 +1,8 @@
-import { createFileRoute, lazyRouteComponent } from "@tanstack/react-router";
-import StorePageSkeleton from "@/components/skeletons/StorePageSkeleton";
+import { createFileRoute } from "@tanstack/react-router";
+import SduiCategoryPage from "@/apps/reef-al-madina/features/storefront/components/SduiCategoryPage";
 
 export const Route = createFileRoute("/_app/store/subscription")({
-  pendingComponent: () => (
-    <StorePageSkeleton productCount={4} hideCategories withHero />
-  ),
-  component: lazyRouteComponent(
-    () => import("@/modules/subscriptions/SubscriptionsPage"),
+  component: () => (
+    <SduiCategoryPage themeKey="subscriptions" pageKey="category_subscriptions" title="الاشتراكات" />
   ),
 });
