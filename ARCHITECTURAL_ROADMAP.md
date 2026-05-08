@@ -1451,3 +1451,31 @@ table — now flows through a single engine: `ui_layouts` → `useUiLayout`
 disable any section on any page without a code deploy. The legacy
 hardcoded JSX page model is retired. **100% SDUI Level-4 coverage
 achieved across all customer surfaces.**
+
+---
+
+## Phase 31 — The Aesthetic Ascendancy (Departments Stem Cell)
+
+**Surface:** `DepartmentGrid.tsx` (rendered inside `departments_hub` and Reef home).
+
+**Strikes:**
+1. **Token Compliance Purge.** All raw HSL tints (`"142 50% 92%"`, …) extracted
+   from JS arrays into `src/styles.css` as `--dept-*` variables with
+   light + dark equivalents. `bg-white/70` swapped for `bg-card/80`
+   + `backdrop-blur-xl` → true theme-aware glassmorphism.
+2. **Dual-Mode UX.** Local `ViewMode` toggle (`grid` | `stacked`) injected
+   into the stem cell. Toggle pill (LayoutGrid / Layers icons) matches
+   `BackHeader` styling and triggers `navigator.vibrate(15)` on switch.
+3. **Mode 1 — Premium Squircles Grid.** `framer-motion` staggered reveal
+   (`staggerChildren: 0.05`, spring 260/24), `whileTap={{ scale: 0.96 }}`,
+   15 ms haptic on press, `rounded-[28px]` continuous curves.
+4. **Mode 2 — iOS App Switcher Stack.** Vertical 3D card stack —
+   `scale: 1 - i*0.05`, `y: -i*22`, `opacity: 1 - i*0.18`. `drag="y"`
+   with elastic constraints + velocity-based cycle (swipe up/down or
+   tap السابق/التالي). Only top 5 cards mounted for perf.
+5. **Tokens.** 12 new `--dept-*` HSL variables in `:root` and `.dark`,
+   no hardcoded colors remain in the component.
+
+**Result:** Departments stem cell is now Apple-tier — liquid-smooth
+animations, zero token violations, dark-mode parity, and admin-driven
+through the same `ui_layouts` pipeline as every other Sovereign surface.
