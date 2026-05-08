@@ -753,3 +753,11 @@ No code mutations. Pure doctrinal expansion.
   Time as Asset, Halal Firewall, Digital Waqf, Amanah Graph, Fara'id Engine,
   Zakat Purifier).
 - UI Switcher deferred to Part 2 per the Emperor's command.
+
+## Phase 18 — Archival Protocol: Doctrine 9 (Sovereign Identity & Modesty Protocol)
+
+Enshrined **Doctrine 9** in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`:
+Algorithmic Hydration from National ID, Salsabil Short-ID (last 6 digits),
+Corporate DNA via CR number, and the Modesty Protocol (real-photo KYC for
+males, Sovereign Avatar Library for females). Binding clause extended to
+reject any non-compliant identity/KYC feature at architectural review.
