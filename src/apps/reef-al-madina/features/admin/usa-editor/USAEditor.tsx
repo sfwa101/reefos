@@ -7,11 +7,12 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2 } from "lucide-react";
+import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
+import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
 import { toast } from "sonner";
 
