@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { TrendingUp, Phone, BadgeCheck } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { TIER_VISUALS } from "../data";
-import RoleSwitcher from "./RoleSwitcher";
+import SovereignPersonaSwitcher from "@/components/ui/SovereignPersonaSwitcher";
 import type { LucideIcon } from "lucide-react";
 import type { AppRole } from "@/hooks/useUserRole";
 
@@ -61,7 +61,7 @@ const AccountTierCard = ({
 
         <div className="relative p-5">
           <div className="flex items-center justify-between" onClick={(e) => e.stopPropagation()} onMouseDown={(e) => e.stopPropagation()}>
-            <RoleSwitcher roles={roles} customerId={customerId} />
+            <SovereignPersonaSwitcher variant="chip" />
             <span className="inline-flex items-center gap-1.5 rounded-full bg-foreground/15 px-2.5 py-1 text-[11px] font-extrabold ring-1 ring-foreground/25 backdrop-blur-md">
               <TierIcon className="h-3.5 w-3.5" /> {tierLabel}
             </span>
