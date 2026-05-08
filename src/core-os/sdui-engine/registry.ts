@@ -33,7 +33,8 @@ export type AllowedOverride =
   | "density"
   | "title"
   | "showTimer"
-  | "sticky";
+  | "sticky"
+  | "variant";
 
 export type SectionMeta = {
   key: SectionKey;
