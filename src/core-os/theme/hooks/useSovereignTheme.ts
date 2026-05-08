@@ -155,9 +155,19 @@ export function useSovereignTheme(tenantId: string = "reef") {
 
   // Inject only the base DNA. The user-locked theme is applied separately
   // (data-theme attribute via ThemeContext) — we never overwrite it here.
+  // We also bail out if a `data-theme` attribute is already present on
+  // <html> (manual Emperor selection via Settings) to end the Theme War.
   useEffect(() => {
-    if (userThemeLock) return; // user has chosen — leave their theme alone
+    if (userThemeLock) {
+      clearDna();
+      return;
+    }
+    if (typeof document !== "undefined" && document.documentElement.hasAttribute("data-theme")) {
+      clearDna();
+      return;
+    }
     injectDna(baseDna);
+    return () => clearDna();
   }, [baseDna, userThemeLock]);
 
   return {
