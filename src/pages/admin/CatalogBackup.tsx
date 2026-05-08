@@ -25,9 +25,6 @@ import {
   type CatalogTable,
   type SeedFile,
 } from "@/lib/catalogSeedShared";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
 
 type Counts = Partial<Record<CatalogTable, number>>;
 type LogLine = { level: "ok" | "warn" | "err"; text: string };
@@ -51,7 +48,7 @@ const CatalogBackupPage = () => {
     const tables = {} as Record<CatalogTable, Record<string, unknown>[]>;
     try {
       for (const t of CATALOG_TABLES) {
-        const { data, error } = await __sb
+        const { data, error } = await (supabase as any)
           .from(t)
           .select("*")
           .order(PK[t], { ascending: true });
@@ -110,7 +107,7 @@ const CatalogBackupPage = () => {
           // generated row types apply. The generic Record<string, unknown>
           // shape we carry through SeedFile loses that link — cast at the
           // single boundary instead of fragmenting the loop.
-          const { error } = await __sb
+          const { error } = await (supabase as any)
             .from(t)
             .upsert(rows as never, { onConflict: PK[t] });
           if (error) throw new Error(`${t}: ${error.message}`);

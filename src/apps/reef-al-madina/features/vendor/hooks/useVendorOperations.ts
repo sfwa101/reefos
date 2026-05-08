@@ -4,9 +4,6 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
 import type { VendorLiveOrderItem, VendorProduct } from "../types/vendor-ops.types";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
 
 const MOCK_VENDOR_IDS = ["god-mode-vendor"];
 const MOCK_VENDOR_PRODUCTS: VendorProduct[] = [
