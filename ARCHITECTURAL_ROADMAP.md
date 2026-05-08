@@ -380,3 +380,11 @@ bypass LLM processing.
 - Two Sovereign Action buttons: **قبول نصيحة حكيم** (clears the form) and **تخطي حكيم وسكّ كأصل جديد** (sets `hasOverriddenAI=true` and forces minting).
 - `mint_universal_asset` RPC now accepts an optional `payload.semantic_embedding` (jsonb 768-dim array) and persists it into `salsabil_assets.semantic_embedding`. `useMintUSA` forwards the embedding produced by the matchmaker — zero-waste reuse, no duplicate token spend.
 - **Doctrine:** AI is strictly an advisor. The Admin retains absolute final authority via the Force-Mint override.
+
+## Phase 8 Patch — Integrity Protocol (2026-05-08)
+- **G1 (BLOCKER fixed):** `sync_inventory_to_legacy()` AFTER trigger on `salsabil_inventory_matrix` recomputes `SUM((availability_data->>'count')::int)` for every asset and writes it into `products.stock` (`'usa_'||asset_id`). Mint now seeds `stock = 0` so trigger-driven values are authoritative.
+- **G2 (BLOCKER fixed):** `useInventoryMatrix.UpsertInventoryInput.inventory_type` constrained to `"count" | "time_slots" | "capacity"` to match the DB enum exactly.
+- **G4 (HIGH fixed):** `mint_universal_asset` now fans out the financial contract to **every** SKU inside the loop — multi-variant assets no longer leave non-first SKUs without pricing.
+- **G14 (CRITICAL fixed):** Vision Genesis hands its captured `File` back to the Editor, which uploads it to the public `product-images` bucket and injects the public URL into `payload.asset.media`. The mint RPC persists `media` into `salsabil_assets.media` and mirrors `media[0]` into legacy `products.image`.
+- **G9, G11, G12 cleanups:** `setHasOverriddenAI(false)` after every successful mint; removed unused `Placeholder` component, removed `Wrench` import, removed `console.log` from `useMintUSA`.
+- **Status:** USA Engine declared 100% production-stable. Ready for Phase 9 Vendor Gateway.
