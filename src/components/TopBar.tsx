@@ -15,6 +15,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
+import SovereignPersonaSwitcher from "@/components/ui/SovereignPersonaSwitcher";
 
 /**
  * TopBar — Phase 12.3.
@@ -102,8 +103,10 @@ const TopBar = () => {
             <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.4} />
           </button>
 
-          <Link
-            to="/cart"
+          <div className="flex items-center gap-2">
+            {user && <SovereignPersonaSwitcher variant="pill" />}
+            <Link
+              to="/cart"
             aria-label="السلة"
             className="relative inline-flex h-11 min-w-11 items-center justify-start overflow-hidden rounded-full bg-primary/10 text-primary backdrop-blur-md ring-1 ring-primary/15 transition active:scale-[0.97]"
             dir="ltr"
