@@ -1,11 +1,11 @@
 /**
  * SduiOfferNeighborhoodPool — الجوار الجغرافي.
  *
- * "Live Pulse" card revealing how many neighbors in the user's city are
- * currently ordering. Joins them into a Group-Buy campaign for free
- * delivery + bonus discount. Read-only resolver (no writes) — the join
- * action navigates into the Group-Buy flow where the engine handles
- * pledges and tier transitions.
+ * Live "neighborhood pulse" card: counts master orders placed in the
+ * user's city in the last 60 minutes (excluding self) and offers a
+ * one-tap join into a group-buy. Pure read-side; gracefully hides if
+ * the user has no default address. Tagged with sovereign vectors
+ * (Honest Margin transparency + Eithar altruism toggle).
  */
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
@@ -21,7 +21,6 @@ type NeighborState = { city: string | null; count: number };
 
 async function fetchNeighborPulse(userId: string | null): Promise<NeighborState> {
   if (!userId) return { city: null, count: 0 };
-  // Resolve the user's city from their default address.
   const { data: addr } = await supabase
     .from("addresses")
     .select("city")
@@ -29,17 +28,17 @@ async function fetchNeighborPulse(userId: string | null): Promise<NeighborState>
     .order("is_default", { ascending: false })
     .limit(1)
     .maybeSingle();
-  const city = (addr?.city as string | undefined) ?? null;
+  const city = (addr?.city as string | undefined)?.trim() || null;
   if (!city) return { city: null, count: 0 };
 
-  // Count active neighborhood orders in the same city in the last 60 min.
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  // Match by delivery_info JSONB → city, exclude self.
   const { count } = await supabase
-    .from("orders")
-    .select("id, addresses!inner(city)", { count: "exact", head: true })
+    .from("salsabil_master_orders")
+    .select("id", { count: "exact", head: true })
     .gte("created_at", since)
-    .neq("user_id", userId)
-    .eq("addresses.city", city);
+    .neq("customer_id", userId)
+    .filter("delivery_info->>city", "eq", city);
 
   return { city, count: count ?? 0 };
 }
@@ -52,19 +51,20 @@ export const SduiOfferNeighborhoodPool = ({
   const { title, subtitle, campaign_id, honest_margin, amanah_lock, allow_eithar } = block.props;
   const { user } = useAuth();
   const [state, setState] = useState<NeighborState>({ city: null, count: 0 });
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
-    fetchNeighborPulse(user?.id ?? null).then((r) => {
-      if (!cancelled) setState(r);
-    });
+    fetchNeighborPulse(user?.id ?? null)
+      .then((r) => !cancelled && setState(r))
+      .finally(() => !cancelled && setLoaded(true));
     return () => {
       cancelled = true;
     };
   }, [user?.id]);
 
   if (amanah_lock) return <AmanahLockShield tier={amanah_lock} title={title} />;
-  if (!state.city) return null;
+  if (!loaded || !state.city) return null;
 
   const count = Math.max(state.count, 0);
   const headline =
@@ -107,7 +107,7 @@ export const SduiOfferNeighborhoodPool = ({
           {allow_eithar && <EitharToggle offerId={block.id} />}
           <Link
             to="/offers"
-            search={campaign_id ? { campaign: campaign_id } : undefined}
+            search={campaign_id ? ({ campaign: campaign_id } as never) : undefined}
             className="ms-auto inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-pill transition active:scale-95"
           >
             انضم للجوار
