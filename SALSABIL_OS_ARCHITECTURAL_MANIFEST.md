@@ -803,3 +803,19 @@ A tomato, a borrowed novel, a 12-month wholesale rice tier, a kitchen-finishing 
 
 ## Core Doctrine — The Sovereign Override Rule
 AI acts as a smart advisor (e.g., detecting duplicates, flagging rules), but the Human Admin always retains the final absolute authority to override, force-execute, or resolve edge cases. Every advisory surface (matchmaker, validator, classifier) MUST expose an unconditional human override path.
+
+## The Benaa SaaS & Multi-Tenant Doctrine
+
+**The Emperor's Vision:** Salsabil acts as a Multi-Tenant ERP engine. Vendors are treated as isolated tenants (Companies) with their own sub-members (Employees). This architecture paves the way for **"Benaa"**, a future B2B SaaS spin-off with integrated Taysir wallets — a sovereign rival to Odoo, native to the Arabic enterprise.
+
+### Core Tenancy Primitives (Phase 9)
+- **`salsabil_vendors`** — the Tenant entity (a company/restaurant/store), holding business identity, branding, and activation state.
+- **`salsabil_vendor_members`** — the membership join: maps `auth.users` → `vendor_id` with a sub-role (`owner`, `manager`, `staff`). One user MAY belong to multiple tenants.
+- **`is_vendor_member()`** SECURITY DEFINER helper underpins all RLS — vendors see only their own rows, owners alone manage memberships, admins retain global oversight.
+
+### The Dynamic Visibility Rule
+Storefront presentation adapts by sector:
+- **Food / Restaurants** → Expose the Vendor identity (logo, brand name, story) on the storefront for brand loyalty and discovery.
+- **Retail / Supermarket** → Obscure the Vendor identity. Orders route invisibly via the **Decentralized Inventory Matrix** and the **Global USA**, preventing price manipulation, visual pollution, and catalog fragmentation. The customer sees one canonical asset; the system silently fulfils from the cheapest/closest vendor.
+
+This rule is enforced at the presentation layer — never at the data layer — so a single USA can simultaneously serve a branded restaurant menu and a white-labeled supermarket shelf without duplication.
