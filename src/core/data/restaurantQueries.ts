@@ -8,7 +8,18 @@ import {
   type UseQueryResult,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { RestoProduct } from "@/modules/restaurants/types";
+export interface RestoProduct {
+  readonly id: string;
+  readonly name: string;
+  readonly brand: string | null;
+  readonly price: number;
+  readonly image: string | null;
+  readonly rating: number | null;
+  readonly source: string | null;
+  readonly fulfillment_type: string | null;
+  readonly description: string | null;
+  readonly metadata: Record<string, unknown> | null;
+}
 import { fetchRestaurantAssets } from "@/lib/sovereignCatalog";
 
 const RESTAURANTS_QUERY_KEY = ["restaurants"] as const;
