@@ -1,0 +1,160 @@
+/**
+ * useDispatchRadar — Driver-side Radar for Sovereign Dispatch Offers.
+ *
+ * Phase 12.3 — Smart Dispatch Acceptance.
+ * ---------------------------------------
+ * Subscribes to `salsabil_dispatch_offers` filtered by the current driver_id.
+ * Surfaces the closest pending non-expired offer and exposes an `acceptOffer`
+ * mutation that calls the `accept_dispatch_offer` RPC. On success, the driver
+ * task caches and the radar are invalidated so the new fulfillment node
+ * appears immediately in the driver surface.
+ */
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+
+export type DispatchOffer = {
+  id: string;
+  node_id: string;
+  driver_id: string;
+  status: "pending" | "accepted" | "missed" | "expired" | string;
+  expires_at: string;
+  created_at: string;
+};
+
+export type UseDispatchRadarResult = {
+  driverId: string | null;
+  offers: DispatchOffer[];
+  activeOffer: DispatchOffer | null;
+  loading: boolean;
+  dismissedIds: string[];
+  dismissOffer: (offerId: string) => void;
+  acceptOffer: (offerId: string) => Promise<boolean>;
+  accepting: boolean;
+};
+
+export function useDispatchRadar(): UseDispatchRadarResult {
+  const qc = useQueryClient();
+  const [driverId, setDriverId] = useState<string | null>(null);
+  const [dismissedIds, setDismissedIds] = useState<string[]>([]);
+  const [accepting, setAccepting] = useState(false);
+
+  // resolve driver id once
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const auth = await supabase.auth.getUser();
+      const uid = auth.data.user?.id;
+      if (!uid) return;
+      const { data } = await supabase
+        .from("drivers")
+        .select("id")
+        .eq("user_id", uid)
+        .maybeSingle();
+      if (!cancelled) setDriverId((data?.id as string | undefined) ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const offersQuery = useQuery({
+    queryKey: ["dispatch-radar", driverId ?? "_anon"],
+    enabled: !!driverId,
+    refetchInterval: 15_000,
+    queryFn: async (): Promise<DispatchOffer[]> => {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await supabase
+        .from("salsabil_dispatch_offers")
+        .select("id,node_id,driver_id,status,expires_at,created_at")
+        .eq("driver_id", driverId!)
+        .eq("status", "pending")
+        .gt("expires_at", nowIso)
+        .order("created_at", { ascending: true });
+      if (error) throw error;
+      return (data ?? []) as DispatchOffer[];
+    },
+  });
+
+  // Realtime subscription on offers for this driver
+  useEffect(() => {
+    if (!driverId) return;
+    const ch = supabase
+      .channel(`dispatch-radar-${driverId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "salsabil_dispatch_offers",
+          filter: `driver_id=eq.${driverId}`,
+        },
+        () => {
+          qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(ch);
+    };
+  }, [driverId, qc]);
+
+  const visibleOffers = useMemo(
+    () =>
+      (offersQuery.data ?? []).filter(
+        (o) =>
+          !dismissedIds.includes(o.id) &&
+          new Date(o.expires_at).getTime() > Date.now(),
+      ),
+    [offersQuery.data, dismissedIds],
+  );
+
+  const activeOffer = visibleOffers[0] ?? null;
+
+  const dismissOffer = useCallback((offerId: string) => {
+    setDismissedIds((prev) => (prev.includes(offerId) ? prev : [...prev, offerId]));
+  }, []);
+
+  const acceptOffer = useCallback(
+    async (offerId: string): Promise<boolean> => {
+      if (!driverId) return false;
+      setAccepting(true);
+      const { data, error } = await supabase.rpc("accept_dispatch_offer", {
+        p_offer_id: offerId,
+        p_driver_id: driverId,
+      });
+      setAccepting(false);
+      if (error) {
+        toast.error(error.message);
+        return false;
+      }
+      const ok = data === true;
+      if (!ok) {
+        toast.error("فات الأوان — تم تخصيص الطلب لمندوب آخر");
+        dismissOffer(offerId);
+        qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
+        return false;
+      }
+      toast.success("تم قبول الطلب! اتجه للاستلام.");
+      qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
+      // Driver task caches use a variety of keys; invalidate broadly.
+      qc.invalidateQueries({ queryKey: ["driver"] });
+      qc.invalidateQueries({ queryKey: ["driver-engine"] });
+      qc.invalidateQueries({ queryKey: ["maeen", "active-delivery"] });
+      return true;
+    },
+    [driverId, dismissOffer, qc],
+  );
+
+  return {
+    driverId,
+    offers: visibleOffers,
+    activeOffer,
+    loading: offersQuery.isLoading,
+    dismissedIds,
+    dismissOffer,
+    acceptOffer,
+    accepting,
+  };
+}

@@ -479,3 +479,26 @@ bypass LLM processing.
 ## Hakim AI — Vision Processing Pipeline Mandate (DEFERRED)
 
 - **Emperor's mandate (logged 2026-05-08):** Immediately after Barq stabilization, Hakim must ship the Vision Processing Pipeline — automated **Background Removal & Aesthetic Pastel Background Generator** (via Remove.bg API or Gemini Vision API) running on every merchant USA upload. All vendor-uploaded assets must pass through this filter to enforce the strict Salsabil visual harmony standard before they reach catalog or SDUI surfaces.
+
+---
+
+## Phase 12 Part 3 — Driver Radar UI & Dispatch Acceptance
+
+- **`useDispatchRadar.ts`**: Realtime hook subscribing to
+  `salsabil_dispatch_offers` filtered by current driver. Polls every 15s as a
+  safety net, exposes `activeOffer` + `acceptOffer` mutation calling
+  `accept_dispatch_offer` RPC. Invalidates driver caches on success.
+- **`IncomingOfferModal.tsx`**: Global overlay mounted in `DriverShell`.
+  Live countdown bound to `expires_at`, urgency styling under 10s,
+  Accept/Ignore actions. Ignore is local-only until expiry.
+- **Admin Allocation Monitor**: New "عقد التوصيل بدون مندوب — البث الذكي"
+  panel listing fulfillment nodes where `driver_id IS NULL`, with row-level
+  "بث ذكي" action calling `broadcast_smart_dispatch` and clear flagging of
+  `requires_admin_routing` (cold-chain firewall fallout).
+
+## Phase 14 Mandate (Enshrined) — Sovereign Relay Network
+
+Documented in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Public intercity
+transport (Microbuses, Taxis) become Middle-Mile Trunk Lines between Benaa
+Hubs; Last-Mile completed by local riders. Enables eco 48h SLA windows and
+circular reverse logistics. Activates after Barq stabilization.

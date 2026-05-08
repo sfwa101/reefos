@@ -4,8 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Package, RefreshCcw, MapPin, AlertTriangle } from "lucide-react";
+import { Loader2, Package, RefreshCcw, MapPin, AlertTriangle, Radio, Snowflake } from "lucide-react";
 import { toast } from "sonner";
+
+type UnassignedNode = {
+  id: string;
+  master_order_id: string | null;
+  status: string;
+  total_amount: number | null;
+  created_at: string;
+  vendor_id: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+};
 
 type SubOrderRow = {
   sub_order_id: string;
@@ -31,6 +42,41 @@ export default function AllocationMonitor() {
   const [allocation, setAllocation] = useState<SubOrderRow[]>([]);
   const [reallocating, setReallocating] = useState(false);
   const [zoneInput, setZoneInput] = useState("M");
+  const [unassigned, setUnassigned] = useState<UnassignedNode[]>([]);
+  const [loadingNodes, setLoadingNodes] = useState(false);
+  const [broadcastingId, setBroadcastingId] = useState<string | null>(null);
+
+  async function loadUnassignedNodes() {
+    setLoadingNodes(true);
+    const { data } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id,master_order_id,status,total_amount,created_at,vendor_id,pickup_lat,pickup_lng")
+      .is("driver_id", null)
+      .in("status", ["pending", "confirmed", "preparing", "ready_for_pickup", "requires_admin_routing"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setUnassigned((data ?? []) as UnassignedNode[]);
+    setLoadingNodes(false);
+  }
+
+  async function broadcast(nodeId: string) {
+    setBroadcastingId(nodeId);
+    const { data, error } = await supabase.rpc("broadcast_smart_dispatch", {
+      p_node_id: nodeId,
+    });
+    setBroadcastingId(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const count = Number(data ?? 0);
+    if (count === 0) {
+      toast.warning("لا يوجد مندوبون متاحون — قد يتطلب توجيه يدوي");
+    } else {
+      toast.success(`تم بث العرض إلى ${count} مندوب`);
+    }
+    await loadUnassignedNodes();
+  }
 
   async function loadOrders() {
     setLoading(true);
@@ -95,6 +141,7 @@ export default function AllocationMonitor() {
 
   useEffect(() => {
     loadOrders();
+    loadUnassignedNodes();
   }, []);
 
   return (
@@ -209,6 +256,67 @@ export default function AllocationMonitor() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Radio className="h-4 w-4" /> عقد التوصيل بدون مندوب — البث الذكي
+          </CardTitle>
+          <Button size="sm" variant="outline" onClick={loadUnassignedNodes} disabled={loadingNodes}>
+            <RefreshCcw className={`h-4 w-4 ${loadingNodes ? "animate-spin" : ""}`} />
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {loadingNodes ? (
+            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+          ) : unassigned.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              كل العقد لديها مندوب 🎉
+            </p>
+          ) : (
+            unassigned.map((n) => {
+              const needsManual = n.status === "requires_admin_routing";
+              return (
+                <div
+                  key={n.id}
+                  className={`rounded-lg border p-3 flex items-center gap-3 ${
+                    needsManual ? "border-destructive/40 bg-destructive/5" : ""
+                  }`}
+                >
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-mono">{n.id.slice(0, 8)}…</span>
+                      {needsManual && (
+                        <Badge variant="destructive" className="gap-1">
+                          <Snowflake className="h-3 w-3" /> توجيه يدوي مطلوب
+                        </Badge>
+                      )}
+                      <Badge variant="outline">{n.status}</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-3">
+                      <span>{Number(n.total_amount ?? 0).toFixed(2)} ج.م</span>
+                      <span>{new Date(n.created_at).toLocaleString("ar-EG")}</span>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => broadcast(n.id)}
+                    disabled={broadcastingId === n.id}
+                  >
+                    {broadcastingId === n.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Radio className="h-4 w-4 ml-1" /> بث ذكي
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
