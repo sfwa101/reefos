@@ -990,3 +990,49 @@ The system "breathes". The Offers page is fully Level-4 SDUI.
 Marketing respects the Athan globally. Three new sovereign vectors
 (Baraka transparency, Amanah gating, Spirit dormancy) are live across
 the renderer.
+
+---
+
+## Phase 21 Part 3 — The Great Cleansing & Social-Economic Convergence
+
+### Sovereign Purge Audit
+- Re-confirmed `src/modules/` holds only the legitimate `search/` module
+  (consumed by `BarcodeScannerModal` + `pages/Search.tsx`). All Phase-20
+  purge targets remain dead. No "Home Goods" code is rendered on the
+  Reef Al-Madina home — `/_app/` mounts `Home.tsx` (SDUI shell) which
+  delegates entirely to `LayoutFactory pageKey="reef_home"`. The
+  `store/HomeGoods.tsx` page is a separate `/store/home` surface.
+
+### Three new Level-4 SDUI Stem Cells
+- **`offer_neighborhood_pool`** — الجوار الجغرافي. Reads the user's
+  default city from `addresses`, counts `salsabil_master_orders` placed
+  in the same city in the last 60 minutes (matched via
+  `delivery_info->>city`), and surfaces a "live pulse" card with a
+  one-tap join into the Group-Buy engine. Honors Honest Margin,
+  Amanah lock, and Eithar toggle.
+- **`predictive_refill_rail`** — دورة الحياة. Surfaces consumables the
+  user has bought before and is statistically due to restock. Reads a
+  lightweight `salsabil.recent_purchases` localStorage ledger to stay
+  resilient to RLS and avoid heavy joins on the live order graph.
+  One-tap re-add via `useCart`.
+- Both schemas added to `BlockSchema` and registered in `BlockRegistry`.
+
+### Eithar (الإيثار) — altruism toggle
+- New `EitharToggle` micro-component injected into every Level-4 offer
+  block (FlashSale, Bundle, GroupBuy, NeighborhoodPool). When ON, the
+  user pays full price and the system flags a second unit as a Waqf
+  donation routed by region. Pref persisted per-offer in localStorage
+  (`salsabil_eithar_<offerId>`); the Cart layer reads the same key at
+  checkout to materialize the donation row.
+
+### Spirit Sanctuary on Home
+- `Home.tsx` now subscribes to `useSovereignPrayerStore.isDormant` and
+  visually "breathes" — dimmed opacity, reduced saturation, animations
+  paused — while the global `SovereignDormancyOverlay` (already mounted
+  in `__root.tsx`) shows the gender-aware prompt.
+
+### Result
+Three new sovereign vectors (geographic neighbor pooling, life-cycle
+refills, altruistic Waqf) are live as registry-driven blocks; the home
+page now physically breathes during prayer. The Social-Economic engine
+is breathing on the Home page.

@@ -16,6 +16,8 @@ import { SduiBarqTrackingBlock } from "../blocks/SduiBarqTrackingBlock";
 import { SduiOfferFlashSale } from "../blocks/offers/SduiOfferFlashSale";
 import { SduiOfferBundle } from "../blocks/offers/SduiOfferBundle";
 import { SduiOfferGroupBuy } from "../blocks/offers/SduiOfferGroupBuy";
+import { SduiOfferNeighborhoodPool } from "../blocks/offers/SduiOfferNeighborhoodPool";
+import { SduiPredictiveRefillRail } from "../blocks/offers/SduiPredictiveRefillRail";
 
 export function renderBlock(block: SduiBlock): ReactElement | null {
   switch (block.type) {
@@ -41,6 +43,10 @@ export function renderBlock(block: SduiBlock): ReactElement | null {
       return <SduiOfferBundle block={block} />;
     case "offer_group_buy":
       return <SduiOfferGroupBuy block={block} />;
+    case "offer_neighborhood_pool":
+      return <SduiOfferNeighborhoodPool block={block} />;
+    case "predictive_refill_rail":
+      return <SduiPredictiveRefillRail block={block} />;
     default: {
       const _exhaustive: never = block;
       void _exhaustive;

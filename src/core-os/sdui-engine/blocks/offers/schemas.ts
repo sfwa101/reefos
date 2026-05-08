@@ -48,6 +48,30 @@ export const OfferGroupBuyBlockSchema = z.object({
   }),
 });
 
+// Phase 21 Part 3 — Social-Economic vectors
+export const OfferNeighborhoodPoolBlockSchema = z.object({
+  type: z.literal("offer_neighborhood_pool"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().max(80).optional(),
+    subtitle: z.string().max(120).optional(),
+    campaign_id: z.string().nullable().optional(),
+    allow_eithar: z.boolean().optional(),
+    ...OfferSovereignFields,
+  }),
+});
+
+export const PredictiveRefillRailBlockSchema = z.object({
+  type: z.literal("predictive_refill_rail"),
+  id: z.string().min(1),
+  props: z.object({
+    title: z.string().max(80).optional(),
+    subtitle: z.string().max(120).optional(),
+  }),
+});
+
 export type SduiOfferFlashSaleBlock = z.infer<typeof OfferFlashSaleBlockSchema>;
 export type SduiOfferBundleBlock = z.infer<typeof OfferBundleBlockSchema>;
 export type SduiOfferGroupBuyBlock = z.infer<typeof OfferGroupBuyBlockSchema>;
+export type SduiOfferNeighborhoodPoolBlock = z.infer<typeof OfferNeighborhoodPoolBlockSchema>;
+export type SduiPredictiveRefillRailBlock = z.infer<typeof PredictiveRefillRailBlockSchema>;

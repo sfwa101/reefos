@@ -10,6 +10,8 @@ import {
   OfferFlashSaleBlockSchema,
   OfferBundleBlockSchema,
   OfferGroupBuyBlockSchema,
+  OfferNeighborhoodPoolBlockSchema,
+  PredictiveRefillRailBlockSchema,
 } from "../blocks/offers/schemas";
 
 export const HeroBlockSchema = z.object({
@@ -190,6 +192,8 @@ export const BlockSchema = z.discriminatedUnion("type", [
   OfferFlashSaleBlockSchema,
   OfferBundleBlockSchema,
   OfferGroupBuyBlockSchema,
+  OfferNeighborhoodPoolBlockSchema,
+  PredictiveRefillRailBlockSchema,
 ]);
 
 export type SduiModifierGroupBlock = z.infer<typeof ModifierGroupBlockSchema>;
