@@ -6,18 +6,16 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
-
 import BackHeader from "@/components/BackHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/products";
+import { fetchRestaurantAssets, type RestoProductRow } from "@/lib/sovereignCatalog";
+
+type RestoProduct = RestoProductRow;
 
 type RestoProduct = {
   id: string;
