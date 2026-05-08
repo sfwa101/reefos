@@ -3,9 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 
 const CART_KEY = "pos.cart.v1";
 const CACHE_KEY = "pos.products.cache.v1";
@@ -61,18 +59,15 @@ export function usePosEngine() {
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
 
-  // Load products (cached, then fresh)
+  // Load products (cached, then fresh) — Sovereign Catalog
   const refreshProducts = useCallback(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await __sb.from("products")
-      .select("id,name,price,stock,is_active,barcode,image_url,category")
-      .eq("is_active", true)
-      .order("name")
-      .limit(2000);
-    if (error) { toast.error("تعذّر تحميل المنتجات"); return; }
-    const rows = (data ?? []) as PosProduct[];
-    setProducts(rows);
-    saveCache(rows);
+    try {
+      const rows = (await fetchPosCatalog()) as unknown as PosProduct[];
+      setProducts(rows);
+      saveCache(rows);
+    } catch {
+      toast.error("تعذّر تحميل المنتجات");
+    }
   }, []);
 
   useEffect(() => {

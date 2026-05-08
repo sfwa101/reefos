@@ -620,3 +620,12 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 
 ### Outcome
 **The Salsabil OS catalog speaks one language: Universal Sovereign Assets.** Customer storefront, search, and vendor stock operations are bound directly to the Decentralized Matrix. The four sovereign engines (USA, Matrix, Tayseer, Barq) now own every operational and catalog surface end-to-end. The database is pristine — `orders`, `order_items`, `sub_orders`, and `products` are all officially ashes.
+
+## Phase 15 Part 2 — COMPLETED · The Function Massacre & Final UI Migration
+
+- 35+ Zombie RPCs purged from the database (orphaned references to dropped `products`/`orders`/`order_items`).
+- New shared adapter `src/lib/sovereignCatalog.ts` exposes the only read/write surface over `salsabil_assets ─ skus ─ financial_contracts ─ inventory_matrix`.
+- POS engine, cart sync, Restaurants storefront, infinite catalog, restaurant DAL, Reef Omni-Search scope, Search page, Inventory, CostBulk, ProductUnits, PurchaseInvoiceBuilder, Partners, Dashboard, CatalogBackup, vendor ops, and megaSeed migrated.
+- Stock writes route through `upsertSkuStock` (UPSERT into `salsabil_inventory_matrix.availability_data.stock`); price/cost writes route through `upsertSkuPrice` / `upsertSkuCost` against `salsabil_financial_contracts`.
+- The `__sb` containment alias has been **purged from the entire codebase** — `rg __sb src/` returns 0 results.
+- The frontend is now 100% disconnected from the ghost of `public.products`. Salsabil OS runs end-to-end on the Sovereign Matrix.

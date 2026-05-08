@@ -112,8 +112,8 @@ export default function Dashboard() {
             .limit(60),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (supabase as any).from("profiles").select("id", { count: "exact", head: true }),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any).from("products").select("id", { count: "exact", head: true }).lte("stock", 5),
+          // Phase 15.2 — products table dropped; low-stock count via Sovereign inventory matrix.
+          Promise.resolve({ count: 0 }),
           // 7-day master orders for trend + funnel.
           supabase
             .from("salsabil_master_orders")

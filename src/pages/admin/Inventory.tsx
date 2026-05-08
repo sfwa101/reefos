@@ -6,12 +6,10 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/lib/sovereignCatalog";
 
 type Row = {
-  id: string;
+  id: string;        // sku_id (Sovereign)
   name: string;
   unit: string;
   price: number;
@@ -57,13 +55,16 @@ export default function Inventory() {
 
   const load = useCallback(async () => {
     setRows(null);
-    const { data, error } = await __sb
-      .from("products")
-      .select("id,name,unit,price,stock,is_active,source")
-      .order("name")
-      .limit(2000);
-    if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
+    try {
+      const data = await fetchAdminCatalog();
+      setRows(data.map<Row>((r) => ({
+        id: r.id, name: r.name, unit: r.unit, price: r.price,
+        stock: r.stock, is_active: r.is_active, source: r.source,
+      })));
+    } catch (e) {
+      toast.error((e as Error).message);
+      setRows([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -84,15 +85,17 @@ export default function Inventory() {
     if (!dirtyCount) return;
     setSaving(true);
     try {
-      const tasks = Object.entries(edits).map(([id, patch]) => {
-        const upd: { price?: number; stock?: number } = {};
-        if (patch.price !== undefined && patch.price !== "") upd.price = Number(patch.price);
-        if (patch.stock !== undefined && patch.stock !== "") upd.stock = Number(patch.stock);
-        if (Object.keys(upd).length === 0) return Promise.resolve({ error: null });
-        return __sb.from("products").update(upd).eq("id", id);
-      });
-      const results = await Promise.all(tasks);
-      const errs = results.filter((r) => r.error);
+      const tasks: Promise<unknown>[] = [];
+      for (const [skuId, patch] of Object.entries(edits)) {
+        if (patch.price !== undefined && patch.price !== "") {
+          tasks.push(upsertSkuPrice(skuId, Number(patch.price)));
+        }
+        if (patch.stock !== undefined && patch.stock !== "") {
+          tasks.push(upsertSkuStock(skuId, Number(patch.stock)));
+        }
+      }
+      const results = await Promise.allSettled(tasks);
+      const errs = results.filter((r) => r.status === "rejected");
       if (errs.length) {
         toast.error(`فشل ${errs.length} عملية`);
       } else {

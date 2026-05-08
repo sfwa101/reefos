@@ -6,31 +6,17 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
-
 import BackHeader from "@/components/BackHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/products";
+import { fetchRestaurantAssets, type RestoProductRow } from "@/lib/sovereignCatalog";
 
-type RestoProduct = {
-  id: string;
-  name: string;
-  brand: string | null;
-  price: number;
-  image: string | null;
-  rating: number | null;
-  source: string | null;
-  fulfillment_type: string | null;
-  description: string | null;
-  metadata: Record<string, unknown> | null;
-};
+type RestoProduct = RestoProductRow;
+
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80&auto=format&fit=crop";
@@ -211,18 +197,15 @@ const Restaurants = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await __sb
-        .from("products")
-        .select(
-          "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",
-        )
-        .or("source.eq.restaurants,fulfillment_type.eq.restaurant")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true, nullsFirst: false });
-      if (cancelled) return;
-      if (error) toast.error("تعذّر تحميل المطاعم");
-      setItems((data ?? []) as RestoProduct[]);
-      setLoading(false);
+      try {
+        const rows = await fetchRestaurantAssets();
+        if (cancelled) return;
+        setItems(rows);
+      } catch {
+        if (!cancelled) toast.error("تعذّر تحميل المطاعم");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => {
       cancelled = true;

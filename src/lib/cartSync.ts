@@ -11,11 +11,9 @@
 // External reads must replace local state; never replay rows through add().
 
 import { supabase } from "@/integrations/supabase/client";
-import { PRODUCT_COLUMNS, rowToProduct, type DbRow, type Product } from "@/lib/products";
+import { type Product } from "@/lib/products";
 import type { CartLineMeta } from "@/context/CartContext";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { fetchAssetsByLegacyIds, assetToProduct } from "@/lib/sovereignCatalog";
 
 export type RemoteLine = {
   product_id: string;
@@ -54,18 +52,14 @@ const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
   return Array.from(map.values());
 };
 
-/** Fetch the products referenced by a remote cart in a single round-trip. */
+/** Resolve cart product_ids to full Products via the Sovereign Catalog. */
 async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> {
   const map = new Map<string, Product>();
   if (ids.length === 0) return map;
-  const { data, error } = await __sb
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .in("id", ids);
-  if (error || !data) return map;
-  for (const row of data as DbRow[]) {
-    const p = rowToProduct(row);
-    map.set(p.id, p);
+  const assets = await fetchAssetsByLegacyIds(ids);
+  for (const row of assets) {
+    const p = assetToProduct(row);
+    if (p) map.set(p.id, p);
   }
   return map;
 }

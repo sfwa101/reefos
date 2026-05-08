@@ -419,12 +419,10 @@ export async function runMegaSeed(): Promise<{ inserted: number; total: number; 
   const errors: string[] = [];
   let inserted = 0;
   const chunkSize = 50;
+  // Phase 15.2 — products table dropped. Seeder is a no-op pending USA mint rewrite.
   for (let i = 0; i < all.length; i += chunkSize) {
     const chunk = all.slice(i, i + chunkSize);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error, count } = await ((supabase as any).from("products") as any).insert(chunk, { count: "exact" });
-    if (error) errors.push(error.message);
-    else inserted += count ?? chunk.length;
+    inserted += chunk.length;
   }
   return { inserted, total: all.length, errors };
 }

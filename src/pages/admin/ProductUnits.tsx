@@ -51,12 +51,12 @@ export default function ProductUnits() {
   useEffect(() => {
     if (!allowed) return;
     (async () => {
-      const [{ data: u }, { data: p }] = await Promise.all([
+      const [{ data: u }, sov] = await Promise.all([
         db.from("units_of_measure").select("*").order("sort_order"),
-        (supabase as any).from("products").select("id,name,price").eq("is_active", true).order("name").limit(500),
+        import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       ]);
       setUnits((u || []) as UoM[]);
-      setProducts((p || []) as ProductRow[]);
+      setProducts(sov.map((r) => ({ id: r.id, name: r.name, price: r.price })));
     })();
   }, [allowed]);
 
