@@ -21,17 +21,16 @@ const DEFAULT_HOME_ORDER: SectionKey[] = [
   "ProductsGrid",
 ];
 
-// Reef Al-Madina main consumer storefront fallback — uses the Main Hub
-// stem cells (greeting + sticky search, story circles, promo banners,
-// department grid) followed by the merchandising rails.
+// Reef Al-Madina main consumer storefront fallback (Phase 22 — Minimalist
+// Re-Genesis). Even in offline / DB-failure mode, the OS ascends to the
+// Emperor's preferred minimalist face — NO banners, NO story circles, NO
+// grid overload — only the Sovereign rails of identity + intent.
 const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
-  "MainSearchHeader",
-  "StoryCircles",
-  "PromotionSlider",
-  "DepartmentGrid",
-  "BundlesRail",
-  "BestSellersRail",
-  "ProductsGrid",
+  "SmartGreeting",
+  "AmanahTierProgress",
+  "PersonalizedDealsRail",
+  "BuyAgainRail",
+  "QuickMealsRail",
 ];
 
 function fallbackOrderFor(pageKey: string): SectionKey[] {

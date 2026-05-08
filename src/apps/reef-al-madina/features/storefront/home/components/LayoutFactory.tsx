@@ -34,6 +34,13 @@ import { StoryCircles } from "@/apps/reef-al-madina/features/main-hub/components
 import { PromotionSlider } from "@/apps/reef-al-madina/features/main-hub/components/PromotionSlider";
 import { DepartmentGrid } from "@/apps/reef-al-madina/features/main-hub/components/DepartmentGrid";
 
+// Phase 22 — Minimalist Re-Genesis sections
+import SmartGreeting from "@/apps/reef-al-madina/features/main-hub/components/SmartGreeting";
+import AmanahTierProgress from "@/apps/reef-al-madina/features/main-hub/components/AmanahTierProgress";
+import PersonalizedDealsRail from "@/apps/reef-al-madina/features/offers/components/PersonalizedDealsRail";
+import BuyAgainRail from "./BuyAgainRail";
+import QuickMealsRail from "./QuickMealsRail";
+
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */
   orchestrator: HomeOrchestrator | null;
@@ -96,6 +103,26 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   StoryCircles: () => <StoryCircles />,
   PromotionSlider: () => <PromotionSlider />,
   DepartmentGrid: () => <DepartmentGrid />,
+
+  // Phase 22 — Minimalist Re-Genesis
+  SmartGreeting: () => <SmartGreeting />,
+  AmanahTierProgress: () => <AmanahTierProgress />,
+  PersonalizedDealsRail: ({ orchestrator: o }) => {
+    if (!o) return null;
+    // Pick discounted items from the live catalog (Product[] shape).
+    const picks = o.rawProducts
+      .filter((p) => {
+        const anyP = p as unknown as { old_price?: number | null; price?: number };
+        return typeof anyP.old_price === "number" && (anyP.old_price ?? 0) > (anyP.price ?? 0);
+      })
+      .slice(0, 12);
+    const items = picks.length >= 4 ? picks : o.rawProducts.slice(0, 12);
+    return <PersonalizedDealsRail items={items} />;
+  },
+  BuyAgainRail: () => <BuyAgainRail />,
+  QuickMealsRail: ({ orchestrator: o }) => (
+    <QuickMealsRail catalog={o?.rawProducts ?? []} />
+  ),
 };
 
 export const LayoutFactory = ({
