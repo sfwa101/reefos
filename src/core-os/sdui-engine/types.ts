@@ -32,7 +32,10 @@ export type SectionKey =
   | "QuickMealsRail"
   // Phase 26 — Sovereign Minimalism
   | "OfferNeighborhoodPool"
-  | "PredictiveRefillRail";
+  | "PredictiveRefillRail"
+  // Phase 29 — Sovereign Unification (hub-level stem cells)
+  | "SpatioTemporalOffersRail"
+  | "MaeenLauncherGrid";
 
 export type SectionConfig = {
   /** when false, the section is hidden even if listed in `section_order` */

@@ -45,6 +45,10 @@ import QuickMealsRail from "./QuickMealsRail";
 import OfferNeighborhoodPool from "@/apps/reef-al-madina/features/main-hub/components/OfferNeighborhoodPool";
 import PredictiveRefillRail from "@/apps/reef-al-madina/features/main-hub/components/PredictiveRefillRail";
 
+// Phase 29 — Sovereign Unification (hub-level stem cells)
+import SpatioTemporalOffersRail from "@/apps/reef-al-madina/features/offers/components/SpatioTemporalOffersRail";
+import MaeenLauncherGrid from "@/apps/khalil/components/MaeenLauncherGrid";
+
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */
   orchestrator: HomeOrchestrator | null;
@@ -131,6 +135,10 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   // Phase 26 — Sovereign Minimalism
   OfferNeighborhoodPool: () => <OfferNeighborhoodPool />,
   PredictiveRefillRail: () => <PredictiveRefillRail />,
+
+  // Phase 29 — Sovereign Unification
+  SpatioTemporalOffersRail: () => <SpatioTemporalOffersRail />,
+  MaeenLauncherGrid: () => <MaeenLauncherGrid />,
 };
 
 export const LayoutFactory = ({

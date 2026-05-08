@@ -18,11 +18,14 @@ const LEVEL_AR: Record<string, string> = {
   platinum: "البلاتيني",
 };
 
+// Phase 29 — Token compliance: tier colors now resolve to CSS variables
+// defined in `src/styles.css` (`--tier-*`), so the loyalty palette inherits
+// from the active Sovereign theme instead of being hardcoded.
 const LEVEL_COLOR: Record<string, string> = {
-  bronze: "#A97142",
-  silver: "#9CA3AF",
-  gold: "#D4A93A",
-  platinum: "#5E7B9A",
+  bronze: "hsl(var(--tier-bronze))",
+  silver: "hsl(var(--tier-silver))",
+  gold: "hsl(var(--tier-gold))",
+  platinum: "hsl(var(--tier-platinum))",
 };
 
 export default function LoyaltyProgress() {
@@ -38,7 +41,7 @@ export default function LoyaltyProgress() {
   }, [user?.id]);
 
   if (!p) return null;
-  const color = LEVEL_COLOR[p.current_level] ?? "#3F5226";
+  const color = LEVEL_COLOR[p.current_level] ?? "hsl(var(--primary))";
   const pct = p.next_level
     ? Math.min(100, Math.round((p.current_count / Math.max(1, p.target)) * 100))
     : 100;
