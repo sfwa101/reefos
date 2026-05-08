@@ -982,3 +982,21 @@ modesty grounds, but the preference is always honored when satisfiable.
 `salsabil_rideshare_pool` captures community-driven trips (origin, dest,
 seats, trunk_capacity_liters, departure_at). Phase 14 wires this into the
 Relay Network so trunks become opportunistic Middle-Mile cargo capacity.
+
+## Doctrine 7 — The Islamic Economic Graph
+
+Salsabil OS is not just an app; it is a holistic digital civilization combining
+the **commercial gravity of Alibaba**, the **social trust of WeChat**, and the
+**structural ERP of SAP / Salesforce** — all running on a unified double-entry
+ledger and a single sovereign identity. Every transaction, message, and asset
+flows through the same graph, governed by Islamic economic principles
+(riba-free settlement, zakat-aware accounting, modesty constraints).
+
+## Doctrine 8 — The Dual-Face Currency (Role Polymorphism)
+
+Every entity in Salsabil has two faces: **Consumer** and **Business**. A user
+can seamlessly morph from a retail buyer into a wholesale vendor, a driver, or
+a procurement manager. The UI does **not** force logouts or app reloads; it
+dynamically morphs the application's **SDUI tree** and **Theme DNA** based on
+the active persona context. Persona is a runtime dimension of the Sovereign
+Matrix, not a separate code path.
