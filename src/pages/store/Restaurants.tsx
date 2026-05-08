@@ -197,18 +197,15 @@ const Restaurants = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await __sb
-        .from("products")
-        .select(
-          "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",
-        )
-        .or("source.eq.restaurants,fulfillment_type.eq.restaurant")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true, nullsFirst: false });
-      if (cancelled) return;
-      if (error) toast.error("تعذّر تحميل المطاعم");
-      setItems((data ?? []) as RestoProduct[]);
-      setLoading(false);
+      try {
+        const rows = await fetchRestaurantAssets();
+        if (cancelled) return;
+        setItems(rows);
+      } catch {
+        if (!cancelled) toast.error("تعذّر تحميل المطاعم");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
