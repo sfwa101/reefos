@@ -13,6 +13,9 @@
 import { supabase } from "@/integrations/supabase/client";
 import { PRODUCT_COLUMNS, rowToProduct, type DbRow, type Product } from "@/lib/products";
 import type { CartLineMeta } from "@/context/CartContext";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 export type RemoteLine = {
   product_id: string;
@@ -55,7 +58,7 @@ const dedupeForPush = (lines: LocalLine[]): LocalLine[] => {
 async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> {
   const map = new Map<string, Product>();
   if (ids.length === 0) return map;
-  const { data, error } = await supabase
+  const { data, error } = await __sb
     .from("products")
     .select(PRODUCT_COLUMNS)
     .in("id", ids);

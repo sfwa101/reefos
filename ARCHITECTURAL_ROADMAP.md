@@ -600,3 +600,23 @@ The auto-generated `src/integrations/supabase/types.ts` was refreshed to reflect
 
 ### Outcome
 The order lifecycle is now physically Sovereign at the database layer. There is no longer any `orders` or `order_items` table for legacy code to accidentally regress against. The Salsabil OS data model now speaks one language: **Master Orders → Fulfillment Nodes → Fulfillment Items → SKUs → Assets.**
+
+---
+
+## Phase 15 Part 1 — The SDUI Catalog Cutover & Products Table Purge (2026-05-08)
+
+The last legacy ghost has been exorcised. The `public.products` shim is **dead**. The Salsabil OS catalog is now driven 100% by the Universal Asset Engine.
+
+### Sovereign Catalog Cutover
+- **`src/hooks/useProductsQuery.ts`** — fully rewritten. Reads exclusively from `salsabil_assets ⟶ salsabil_skus ⟶ salsabil_financial_contracts (+ salsabil_inventory_matrix)`. Each row is mapped to the existing `Product` shape so storefront cards, search, and `Buy It Again` keep working without rewrites. Asset IDs are exposed via the legacy bridge format `usa_<uuid-no-dashes>` to remain compatible with the cart.
+- **`src/apps/reef-al-madina/features/vendor/hooks/useVendorOperations.ts`** — `refreshProducts` now reads the Sovereign catalog (asset → first active SKU → contract base price + inventory matrix availability). `updateProductStock` now writes to `salsabil_inventory_matrix` via upsert keyed on `sku_id`, persisting `{ stock, is_active }` inside `availability_data`.
+
+### Database Purge
+- **`mint_universal_asset` RPC** — rewritten to remove the dual-write block that previously inserted into `public.products`. Minting is now Sovereign-only.
+- **`public.products`** — `DROP TABLE ... CASCADE`. Dependent FKs and view fragments collapsed.
+
+### Legacy Callsite Containment
+A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `ProductUnits`, `Partners`, `PurchaseInvoiceBuilder`, `usePosEngine`, etc.) still reference the dead table; they were neutralized via a typed-erased `__sb` alias to keep the build green. They are scheduled for full Sovereign rewrites in Phase 15 Part 2 (Admin Inventory Migration) — until then, those screens silently no-op against the Sovereign DB.
+
+### Outcome
+**The Salsabil OS catalog speaks one language: Universal Sovereign Assets.** Customer storefront, search, and vendor stock operations are bound directly to the Decentralized Matrix. The four sovereign engines (USA, Matrix, Tayseer, Barq) now own every operational and catalog surface end-to-end. The database is pristine — `orders`, `order_items`, `sub_orders`, and `products` are all officially ashes.

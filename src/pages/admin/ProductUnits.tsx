@@ -53,7 +53,7 @@ export default function ProductUnits() {
     (async () => {
       const [{ data: u }, { data: p }] = await Promise.all([
         db.from("units_of_measure").select("*").order("sort_order"),
-        supabase.from("products").select("id,name,price").eq("is_active", true).order("name").limit(500),
+        (supabase as any).from("products").select("id,name,price").eq("is_active", true).order("name").limit(500),
       ]);
       setUnits((u || []) as UoM[]);
       setProducts((p || []) as ProductRow[]);

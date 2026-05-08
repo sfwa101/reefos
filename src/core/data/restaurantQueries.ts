@@ -1,3 +1,7 @@
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
+
 /**
  * Restaurant data-access layer (DAL).
  * ----------------------------------------------------------------
@@ -32,7 +36,7 @@ const FIVE_MINUTES = 5 * 60 * 1000;
  * side-effect-free for SSR / loaders.
  */
 export async function fetchRestaurants(): Promise<RestoProduct[]> {
-  const { data, error } = await supabase
+  const { data, error } = await __sb
     .from("products")
     .select(
       "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",

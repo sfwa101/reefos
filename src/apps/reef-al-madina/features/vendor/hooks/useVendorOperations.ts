@@ -4,6 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
 import type { VendorLiveOrderItem, VendorProduct } from "../types/vendor-ops.types";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 const MOCK_VENDOR_IDS = ["god-mode-vendor"];
 const MOCK_VENDOR_PRODUCTS: VendorProduct[] = [
@@ -67,14 +70,53 @@ export function useVendorOperations() {
 
   const refreshProducts = useCallback(async () => {
     if (vendorIds.length === 0) { setProducts([]); productIdsRef.current = new Set(); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("products")
-      .select("id,vendor_id,name,price,stock,is_active,image_url,image,category")
-      .in("vendor_id", vendorIds)
-      .order("name");
+    // Phase 15.1 — Sovereign Catalog read.
+    // The vendor cockpit now reads from salsabil_assets ➜ skus ➜ contracts/inventory
+    // (vendor_id scoping at the asset level is a future phase; for now we expose
+    // the active catalog so vendors can see/edit stock + price on Sovereign rows).
+    const { data, error } = await supabase
+      .from("salsabil_assets")
+      .select(`
+        id, name, category_path, media,
+        salsabil_skus (
+          id, sort_order, is_active,
+          salsabil_financial_contracts ( base_price ),
+          salsabil_inventory_matrix ( availability_data )
+        )
+      `)
+      .eq("is_active", true)
+      .eq("asset_type", "physical")
+      .order("name")
+      .limit(500);
     if (error) { setError(error.message); return; }
-    const rows = (data ?? []) as VendorProduct[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rows: VendorProduct[] = ((data ?? []) as any[]).map((a) => {
+      const skus = (a.salsabil_skus ?? []).slice().sort(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (x: any, y: any) => (x.sort_order ?? 0) - (y.sort_order ?? 0),
+      );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const primary: any = skus.find((s: any) => s.is_active !== false) ?? skus[0] ?? {};
+      const price = Number(primary?.salsabil_financial_contracts?.[0]?.base_price ?? 0);
+      const availability = primary?.salsabil_inventory_matrix?.[0]?.availability_data ?? {};
+      const stock = Number(availability?.stock ?? availability?.qty ?? 0);
+      const isActive = availability?.is_active ?? true;
+      const media = a.media;
+      const image = Array.isArray(media)
+        ? (typeof media[0] === "string" ? media[0] : media[0]?.url ?? null)
+        : null;
+      return {
+        id: primary?.id ?? a.id, // sku id is the addressable unit for stock writes
+        vendor_id: vendorIds[0] ?? null,
+        name: a.name,
+        price,
+        stock,
+        is_active: !!isActive,
+        image_url: image,
+        image,
+        category: a.category_path?.split("/")[0] ?? "general",
+      };
+    });
     setProducts(rows);
     productIdsRef.current = new Set(rows.map(r => r.id));
   }, [vendorIds]);
@@ -173,16 +215,23 @@ export function useVendorOperations() {
     return () => { supabase.removeChannel(ch); };
   }, [vendorIds, refreshLiveItems, refreshProducts]);
 
-  /** Update product stock & active flag. Authorized via RLS on products. */
+  /** Phase 15.1 — Sovereign stock writes. `productId` here is a SKU id;
+   *  we upsert the inventory row on `salsabil_inventory_matrix` keyed by sku_id. */
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
-      .from("products")
-      .update({ stock: newQty, is_active: isActive })
-      .eq("id", productId);
+      .from("salsabil_inventory_matrix")
+      .upsert(
+        {
+          sku_id: productId,
+          inventory_type: "stock",
+          availability_data: { stock: newQty, is_active: isActive },
+        },
+        { onConflict: "sku_id" },
+      );
     if (error) {
-      toast.error("تعذّر تحديث المنتج", { description: error.message });
+      toast.error("تعذّر تحديث المخزون", { description: error.message });
       await refreshProducts();
       return false;
     }

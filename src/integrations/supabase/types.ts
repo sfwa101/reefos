@@ -603,22 +603,7 @@ export type Database = {
           uom?: string
           waste_pct?: number
         }
-        Relationships: [
-          {
-            foreignKeyName: "bom_components_child_product_id_fkey"
-            columns: ["child_product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "bom_components_parent_product_id_fkey"
-            columns: ["parent_product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       branches: {
         Row: {
@@ -2830,15 +2815,7 @@ export type Database = {
           updated_at?: string
           vendor_id?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "group_buy_campaigns_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       group_buy_pledges: {
         Row: {
@@ -3409,15 +3386,7 @@ export type Database = {
           target_quantity?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "manufacturing_orders_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       media_assets: {
         Row: {
@@ -4085,15 +4054,7 @@ export type Database = {
           product_id?: string
           tier_name?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "pricing_tiers_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       print_jobs: {
         Row: {
@@ -4275,15 +4236,7 @@ export type Database = {
           split_type?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "product_partners_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       product_requests: {
         Row: {
@@ -4366,13 +4319,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "product_units_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "product_units_unit_code_fkey"
             columns: ["unit_code"]
             isOneToOne: false
@@ -4421,154 +4367,7 @@ export type Database = {
           stock?: number
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "product_variants_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      products: {
-        Row: {
-          addons: Json | null
-          affiliate_commission_pct: number
-          badge: string | null
-          barcode: string | null
-          brand: string | null
-          category: string
-          category_id: string | null
-          compare_at_price: number | null
-          cost_price: number | null
-          created_at: string
-          description: string | null
-          description_i18n: Json | null
-          fulfillment_type: string
-          id: string
-          image: string | null
-          image_path: string | null
-          image_url: string | null
-          is_active: boolean
-          metadata: Json
-          name: string
-          name_i18n: Json | null
-          old_price: number | null
-          packaging_cost: number | null
-          perishable: boolean | null
-          price: number
-          rating: number | null
-          selling_price: number | null
-          sort_order: number
-          source: string
-          stock: number
-          store_id: string | null
-          sub_category: string | null
-          unit: string
-          updated_at: string
-          variants: Json | null
-          vendor_id: string | null
-        }
-        Insert: {
-          addons?: Json | null
-          affiliate_commission_pct?: number
-          badge?: string | null
-          barcode?: string | null
-          brand?: string | null
-          category?: string
-          category_id?: string | null
-          compare_at_price?: number | null
-          cost_price?: number | null
-          created_at?: string
-          description?: string | null
-          description_i18n?: Json | null
-          fulfillment_type?: string
-          id: string
-          image?: string | null
-          image_path?: string | null
-          image_url?: string | null
-          is_active?: boolean
-          metadata?: Json
-          name: string
-          name_i18n?: Json | null
-          old_price?: number | null
-          packaging_cost?: number | null
-          perishable?: boolean | null
-          price?: number
-          rating?: number | null
-          selling_price?: number | null
-          sort_order?: number
-          source?: string
-          stock?: number
-          store_id?: string | null
-          sub_category?: string | null
-          unit?: string
-          updated_at?: string
-          variants?: Json | null
-          vendor_id?: string | null
-        }
-        Update: {
-          addons?: Json | null
-          affiliate_commission_pct?: number
-          badge?: string | null
-          barcode?: string | null
-          brand?: string | null
-          category?: string
-          category_id?: string | null
-          compare_at_price?: number | null
-          cost_price?: number | null
-          created_at?: string
-          description?: string | null
-          description_i18n?: Json | null
-          fulfillment_type?: string
-          id?: string
-          image?: string | null
-          image_path?: string | null
-          image_url?: string | null
-          is_active?: boolean
-          metadata?: Json
-          name?: string
-          name_i18n?: Json | null
-          old_price?: number | null
-          packaging_cost?: number | null
-          perishable?: boolean | null
-          price?: number
-          rating?: number | null
-          selling_price?: number | null
-          sort_order?: number
-          source?: string
-          stock?: number
-          store_id?: string | null
-          sub_category?: string | null
-          unit?: string
-          updated_at?: string
-          variants?: Json | null
-          vendor_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "products_category_id_fkey"
-            columns: ["category_id"]
-            isOneToOne: false
-            referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "products_vendor_id_fkey"
-            columns: ["vendor_id"]
-            isOneToOne: false
-            referencedRelation: "vendors"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -4787,13 +4586,6 @@ export type Database = {
             referencedRelation: "purchase_invoices"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "purchase_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
         ]
       }
       purchase_order_lines: {
@@ -4824,13 +4616,6 @@ export type Database = {
             columns: ["po_id"]
             isOneToOne: false
             referencedRelation: "purchase_orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "purchase_order_lines_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
@@ -7920,13 +7705,6 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "zone_availability_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
             referencedColumns: ["id"]
           },
         ]
