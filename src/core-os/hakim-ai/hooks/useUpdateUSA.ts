@@ -32,7 +32,7 @@ export function useUpdateUSA() {
     onSuccess: () => {
       toast.success("تم تحديث الأصل وتزامنه بنجاح");
       qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
-      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["catalog", "products"] });
       qc.invalidateQueries({ queryKey: ["admin-grid"] });
       qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
     },

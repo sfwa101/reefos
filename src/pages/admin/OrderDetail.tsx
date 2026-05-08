@@ -188,7 +188,7 @@ export default function OrderDetail() {
     setShowAssign(true);
     if (drivers.length === 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).from("drivers").select("*").eq("is_active", true).order("full_name");
+      const { data } = await (supabase as any).from("drivers").select("*").eq("is_active", true).order("full_name").limit(500);
       setDrivers(data ?? []);
     }
   }

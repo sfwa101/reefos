@@ -29,7 +29,7 @@ export default function Charity() {
     const start = new Date(Date.now() - periodDays * 86400000).toISOString().slice(0, 10);
     const end = new Date().toISOString().slice(0, 10);
     const [r, d] = await Promise.all([
-      (supabase as any).from("charity_rules").select("*").order("created_at", { ascending: false }),
+      (supabase as any).from("charity_rules").select("*").order("created_at", { ascending: false }).limit(1000),
       (supabase as any).rpc("compute_charity_dues", { _start: start, _end: end }),
     ]);
     setRules((r.data || []) as Rule[]);

@@ -52,7 +52,7 @@ export default function ProductUnits() {
     if (!allowed) return;
     (async () => {
       const [{ data: u }, sov] = await Promise.all([
-        db.from("units_of_measure").select("*").order("sort_order"),
+        db.from("units_of_measure").select("*").order("sort_order").limit(500),
         import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       ]);
       setUnits((u || []) as UoM[]);
@@ -64,7 +64,7 @@ export default function ProductUnits() {
     setSelected(p);
     setLoading(true);
     const [{ data: pu }, { data: bd }] = await Promise.all([
-      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor"),
+      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor").limit(500),
       db.rpc("nested_stock_breakdown", { _product_id: p.id }),
     ]);
     setRows((pu || []) as PU[]);

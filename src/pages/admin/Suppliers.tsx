@@ -28,7 +28,7 @@ export default function Suppliers() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from("suppliers").select("*").order("created_at", { ascending: false });
+    const { data, error } = await (supabase as any).from("suppliers").select("*").order("created_at", { ascending: false }).limit(1000);
     if (error) toast.error(error.message);
     else setRows((data || []) as Supplier[]);
     setLoading(false);

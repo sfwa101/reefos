@@ -24,7 +24,7 @@ export default function Stores() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const { data, error } = await supabase.from("stores").select("*").order("name");
+    const { data, error } = await supabase.from("stores").select("*").order("name").limit(1000);
     if (error) toast.error(error.message);
     setItems((data ?? []) as Store[]);
   }, []);

@@ -33,7 +33,7 @@ export default function Branches() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.from("branches").select("*").order("created_at");
+    const { data, error } = await supabase.from("branches").select("*").order("created_at").limit(1000);
     if (error) toast.error(error.message);
     setItems((data as Branch[]) || []);
     setLoading(false);
