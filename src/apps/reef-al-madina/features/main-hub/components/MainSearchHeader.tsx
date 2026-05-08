@@ -22,7 +22,7 @@ export const MainSearchHeader = () => {
     if (!el) return;
     const obs = new IntersectionObserver(
       ([entry]) => setPinned(!entry.isIntersecting),
-      { rootMargin: "-96px 0px 0px 0px", threshold: 0 },
+      { rootMargin: "-64px 0px 0px 0px", threshold: 0 },
     );
     obs.observe(el);
     return () => obs.disconnect();
