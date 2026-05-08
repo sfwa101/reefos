@@ -12,7 +12,10 @@ import type { USAGenesisPayload } from "./useVisionGenesis";
 export type MintUSAInput = Pick<
   USAGenesisPayload,
   "asset" | "skus" | "financial_contract"
->;
+> & {
+  /** Optional 768-dim semantic embedding to persist (zero-waste reuse from Matchmaker). */
+  semantic_embedding?: number[] | null;
+};
 
 export function useMintUSA() {
   const qc = useQueryClient();
