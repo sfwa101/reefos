@@ -49,6 +49,19 @@ Deno.serve(async (req) => {
       .limit(30);
 
     if (freqErr) {
+      // PGRST205 = relation missing from schema cache. Treat as "no history yet"
+      // so the UI gets a clean empty state instead of a 500 blank screen.
+      const code = (freqErr as { code?: string }).code;
+      if (code === "PGRST205" || code === "42P01") {
+        console.warn("freq source missing, returning empty basket:", code);
+        return json({
+          ok: true,
+          empty: true,
+          headline: "ابدأ التسوق لتظهر سلتك الذكية",
+          confidence: 0,
+          basket: [],
+        });
+      }
       console.error("freq query error:", freqErr);
       return json({ error: "freq_query_failed" }, 500);
     }
