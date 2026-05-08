@@ -66,9 +66,10 @@ export const useBuyAgainProducts = (): {
 
       const seen = new Set<string>();
       const out: string[] = [];
-      for (const it of (items ?? []) as Array<{
+      const rows = (items ?? []) as unknown as Array<{
         salsabil_skus: { asset_id: string | null } | null;
-      }>) {
+      }>;
+      for (const it of rows) {
         const aid = it.salsabil_skus?.asset_id;
         if (!aid) continue;
         const legacyId = assetIdToLegacyProductId(aid);

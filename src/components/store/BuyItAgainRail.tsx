@@ -54,7 +54,9 @@ const BuyItAgainRail = ({ pool }: Props) => {
 
         const ids = Array.from(
           new Set(
-            (data as Array<{ salsabil_skus: { asset_id: string | null } | null }>)
+            ((data ?? []) as unknown as Array<{
+              salsabil_skus: { asset_id: string | null } | null;
+            }>)
               .map((r) => r.salsabil_skus?.asset_id)
               .filter((aid): aid is string => Boolean(aid))
               .map(assetIdToLegacyProductId),
