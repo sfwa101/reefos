@@ -102,21 +102,52 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
 
   const approve = async () => {
     if (!payload) return;
-    if (handoffOnly) {
-      onApprove?.(payload, file);
-      reset();
-      return;
-    }
     try {
+      // Phase 13 — Imperial Aesthetic Pipeline.
+      // Purify the source image (background removal + soft white backdrop)
+      // BEFORE minting so every USA enters the catalog visually harmonized.
+      let mediaUrl: string | null = null;
+      if (file) {
+        const purified = await aestheticMutation.mutateAsync({
+          file,
+          style: "white",
+        });
+        // Convert data URL → Blob → upload to product-images bucket.
+        const blob = await (await fetch(purified.imageDataUrl)).blob();
+        const path = `usa/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
+        const { error: upErr } = await supabase.storage
+          .from("product-images")
+          .upload(path, blob, { contentType: "image/png", upsert: false });
+        if (upErr) throw new Error(upErr.message);
+        const { data: pub } = supabase.storage
+          .from("product-images")
+          .getPublicUrl(path);
+        mediaUrl = pub.publicUrl;
+      }
+
+      const enrichedAsset = mediaUrl
+        ? { ...payload.asset, media: [mediaUrl, ...(payload.asset.media ?? [])] }
+        : payload.asset;
+      const enrichedPayload: USAGenesisPayload = {
+        ...payload,
+        asset: enrichedAsset,
+      };
+
+      if (handoffOnly) {
+        onApprove?.(enrichedPayload, file);
+        reset();
+        return;
+      }
       await mintMutation.mutateAsync({
-        asset: payload.asset,
+        asset: enrichedAsset,
         skus: payload.skus,
         financial_contract: payload.financial_contract,
       });
-      onApprove?.(payload, file);
+      onApprove?.(enrichedPayload, file);
       reset();
-    } catch {
-      // toast handled in hook
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "unknown";
+      if (msg !== "mint_failed") toast.error(`تعذّر تحسين/رفع الصورة: ${msg}`);
     }
   };
 
