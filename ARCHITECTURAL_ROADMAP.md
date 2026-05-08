@@ -716,3 +716,21 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 3. **7 Vulnerabilities → Superpowers Matrix** — Event Ledger, Computed Cell Cache, Generation Counter, Cell Registry, Immune System (RLS + Triggers), Living Documentation, Simulation Environment (God Mode) — each mapped to its structural superpower.
 
 **Status:** Doctrine sealed. The Stem Cell paradigm is now the binding canonical architecture for all future Salsabil OS work.
+
+## Phase 18 — Archival Protocol: Islamic Economic Graph Ideation
+
+Etched **Section VIII: The Islamic Economic Graph — Visionary Roadmap** into
+`SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Nine canonical pillars now bind all
+Phase 19+ work:
+
+1. Baraka Engine (Ethical Logistics)
+2. Sovereign Mesh Network (Offline Economy)
+3. Stem-Cell Mudarabah (Micro-Equity)
+4. Time as a Sovereign Asset
+5. Halal Firewall & Riba-Blocker
+6. Programmable Digital Waqf
+7. Amanah Trust Graph
+8. Automated Fara'id Inheritance Engine
+9. Real-Time Zakat Purifier
+
+No code mutations. Pure doctrinal expansion.
