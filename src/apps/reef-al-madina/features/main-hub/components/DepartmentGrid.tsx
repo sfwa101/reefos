@@ -396,18 +396,8 @@ export const DepartmentGrid = () => {
 
   return (
     <section className="animate-float-up" style={{ animationDelay: "120ms" }}>
-      {/* Title row — sits directly under the Sovereign TopBar */}
-      <div className="mb-4 flex items-end justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),0.5rem)]">
-        <div className="min-w-0">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-            أقسام ريف المدينة
-          </h1>
-          <p className="text-[12px] font-medium text-muted-foreground">
-            {mode === "slices" && "اسحب أفقياً للتنقل بين الأقسام"}
-            {mode === "bubbles" && "مرر عمودياً — يكبر القسم في المنتصف"}
-            {mode === "graded" && "أقسام رئيسية بحجم أكبر وأقسام فرعية"}
-          </p>
-        </div>
+      {/* Minimal toggle — Sovereign TopBar owns the page title */}
+      <div className="mb-3 flex items-center justify-end px-4 pt-2">
         <ModeToggle mode={mode} onChange={setMode} />
       </div>
 
