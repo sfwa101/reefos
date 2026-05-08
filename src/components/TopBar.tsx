@@ -128,7 +128,8 @@ const TopBar = () => {
                 </motion.span>
               )}
             </AnimatePresence>
-          </Link>
+            </Link>
+          </div>
         </div>
       </header>
 
