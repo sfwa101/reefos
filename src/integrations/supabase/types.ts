@@ -4372,83 +4372,104 @@ export type Database = {
       profiles: {
         Row: {
           avatar_key: string | null
+          avatar_kind: string | null
           avatar_url: string | null
           birth_date: string | null
           branch_id: string | null
           budget_range: string | null
+          city: string | null
           created_at: string
           dislikes: string[] | null
           full_name: string | null
           gender: string | null
+          governorate: string | null
           hide_balance: boolean
           household_size: number | null
           id: string
           is_b2b_commissioner: boolean
+          is_kyc_verified: boolean
+          kyc_verified_at: string | null
           lifestyle_tags: string[] | null
           likes: string[] | null
           loyalty_lifetime_spend: number
           loyalty_points: number
           loyalty_tier: Database["public"]["Enums"]["loyalty_tier"]
+          national_id: string | null
           occupation: string | null
           partner_tier_id: string | null
           phone: string | null
           preferred_locale: string | null
           referral_code: string | null
           referred_by: string | null
+          short_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_key?: string | null
+          avatar_kind?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           branch_id?: string | null
           budget_range?: string | null
+          city?: string | null
           created_at?: string
           dislikes?: string[] | null
           full_name?: string | null
           gender?: string | null
+          governorate?: string | null
           hide_balance?: boolean
           household_size?: number | null
           id: string
           is_b2b_commissioner?: boolean
+          is_kyc_verified?: boolean
+          kyc_verified_at?: string | null
           lifestyle_tags?: string[] | null
           likes?: string[] | null
           loyalty_lifetime_spend?: number
           loyalty_points?: number
           loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
+          national_id?: string | null
           occupation?: string | null
           partner_tier_id?: string | null
           phone?: string | null
           preferred_locale?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          short_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_key?: string | null
+          avatar_kind?: string | null
           avatar_url?: string | null
           birth_date?: string | null
           branch_id?: string | null
           budget_range?: string | null
+          city?: string | null
           created_at?: string
           dislikes?: string[] | null
           full_name?: string | null
           gender?: string | null
+          governorate?: string | null
           hide_balance?: boolean
           household_size?: number | null
           id?: string
           is_b2b_commissioner?: boolean
+          is_kyc_verified?: boolean
+          kyc_verified_at?: string | null
           lifestyle_tags?: string[] | null
           likes?: string[] | null
           loyalty_lifetime_spend?: number
           loyalty_points?: number
           loyalty_tier?: Database["public"]["Enums"]["loyalty_tier"]
+          national_id?: string | null
           occupation?: string | null
           partner_tier_id?: string | null
           phone?: string | null
           preferred_locale?: string | null
           referral_code?: string | null
           referred_by?: string | null
+          short_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -8031,6 +8052,7 @@ export type Database = {
         }[]
       }
       check_kyc_status: { Args: { p_user_id: string }; Returns: boolean }
+      check_phone_exists: { Args: { p_phone: string }; Returns: boolean }
       clear_sovereign_settlements: {
         Args: { p_vendor_id: string }
         Returns: number
