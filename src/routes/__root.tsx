@@ -28,6 +28,8 @@ import { CatalogBootstrap } from "@/components/system/CatalogBootstrap";
 import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBootstrap";
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 import { DevOSNavigator } from "@/components/system/DevOSNavigator";
+import { SovereignSpiritBootstrap } from "@/core-os/spirit/SovereignSpiritBootstrap";
+import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
 
 function NotFoundComponent() {
   return (
@@ -157,8 +159,10 @@ function RootComponent() {
                           <LiveRulesBootstrap />
                           <CatalogBootstrap />
                           <BehaviorTrackerBootstrap />
+                          <SovereignSpiritBootstrap />
                           <SubdomainGuard />
                           <Toaster />
+                          <SovereignDormancyOverlay />
                           <Outlet />
                         </FavoritesProvider>
                       </CompareProvider>
