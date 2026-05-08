@@ -49,6 +49,11 @@ import PredictiveRefillRail from "@/apps/reef-al-madina/features/main-hub/compon
 import SpatioTemporalOffersRail from "@/apps/reef-al-madina/features/offers/components/SpatioTemporalOffersRail";
 import MaeenLauncherGrid from "@/apps/khalil/components/MaeenLauncherGrid";
 
+// Phase 30 — Advanced Stem Cell Ascendancy primitives
+import { SduiMenuList } from "@/core-os/sdui-engine/primitives/SduiMenuList";
+import { SduiWizardChain } from "@/core-os/sdui-engine/primitives/SduiWizardChain";
+import { SduiComparisonGrid } from "@/core-os/sdui-engine/primitives/SduiComparisonGrid";
+
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */
   orchestrator: HomeOrchestrator | null;
@@ -139,6 +144,11 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   // Phase 29 — Sovereign Unification
   SpatioTemporalOffersRail: () => <SpatioTemporalOffersRail />,
   MaeenLauncherGrid: () => <MaeenLauncherGrid />,
+
+  // Phase 30 — Advanced Stem Cell Ascendancy
+  SduiMenuList: (_ctx, cfg) => <SduiMenuList cfg={cfg} />,
+  SduiWizardChain: (_ctx, cfg) => <SduiWizardChain cfg={cfg} />,
+  SduiComparisonGrid: (_ctx, cfg) => <SduiComparisonGrid cfg={cfg} />,
 };
 
 export const LayoutFactory = ({
