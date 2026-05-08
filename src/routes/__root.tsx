@@ -11,6 +11,7 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
+import { SovereignThemeProvider } from "@/core-os/theme/SovereignThemeProvider";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
