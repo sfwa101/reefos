@@ -172,13 +172,13 @@ export function sanitizeSectionConfig(
   return out;
 }
 
-export const PADDING_CLASS: Record<NonNullable<import("@/apps/reef-al-madina/features/storefront/home/types/sdui.types").SectionConfig["padding"]>, string> = {
+export const PADDING_CLASS: Record<NonNullable<SectionConfig["padding"]>, string> = {
   sm: "py-2",
   md: "py-4",
   lg: "py-8",
 };
 
-export const TONE_CLASS: Record<NonNullable<import("@/apps/reef-al-madina/features/storefront/home/types/sdui.types").SectionConfig["tone"]>, string> = {
+export const TONE_CLASS: Record<NonNullable<SectionConfig["tone"]>, string> = {
   primary: "bg-primary/5",
   accent:  "bg-[hsl(var(--accent))]/5",
   info:    "bg-info/5",
