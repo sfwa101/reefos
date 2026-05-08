@@ -702,3 +702,17 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 3. **Roadmap Sync** — This entry. Phase 18 (Build) will refactor `RoleSwitcher` into a Sovereign Persona Engine that morphs SDUI + Theme DNA without navigation.
 
 **Status:** Audit complete. Manifesto sealed at 8 doctrines. Awaiting Emperor's authorization for Phase 18 Build.
+
+---
+
+## Phase 18 (Archival Protocol) — Stem Cell Anatomy & The 7 Superpowers
+
+**Mission:** Permanently embed the Emperor's biological-computation doctrine into the Architectural Manifest so every future engineer and AI agent inherits the Stem Cell paradigm by default.
+
+### Strikes Executed
+
+1. **New Manifest Section VII** — "The Stem Cell Anatomy & The 7 Superpowers" appended to `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Documents the seven internal organs of a cell (Identity, Capabilities, Schema, Behaviors, Polymorphic Renderers, Relations, Lifecycle).
+2. **Three Principles Codified** — Existence before Form · Communication not Dependency · Context rules not Code.
+3. **7 Vulnerabilities → Superpowers Matrix** — Event Ledger, Computed Cell Cache, Generation Counter, Cell Registry, Immune System (RLS + Triggers), Living Documentation, Simulation Environment (God Mode) — each mapped to its structural superpower.
+
+**Status:** Doctrine sealed. The Stem Cell paradigm is now the binding canonical architecture for all future Salsabil OS work.

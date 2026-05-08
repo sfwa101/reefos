@@ -1000,3 +1000,82 @@ a procurement manager. The UI does **not** force logouts or app reloads; it
 dynamically morphs the application's **SDUI tree** and **Theme DNA** based on
 the active persona context. Persona is a runtime dimension of the Sovereign
 Matrix, not a separate code path.
+
+---
+
+# VII. THE STEM CELL ANATOMY & THE 7 SUPERPOWERS
+
+Salsabil OS is built on a **biological-computation paradigm**. Every unit in
+the system — a product, a vendor, an order, a wallet, a screen, a workflow —
+is a **Stem Cell**: a self-describing, environment-aware, event-broadcasting
+organism. The platform is not an application; it is a **living tissue** of
+cells composed into verticals (Reef Al-Madina, Maeen, Asraab, Reef Aamal,
+Binaa) on a single sovereign genome.
+
+## The Anatomy of a Salsabil Cell
+
+Every cell carries the same seven internal organs:
+
+1. **Identity** — Sovereign UUID, tenant dimension, persona scope, lineage
+   (parent cell + generation counter). A cell knows *who* it is across every
+   surface.
+2. **Capabilities** — Declarative list of what the cell *can do* (e.g.
+   `can_be_sold`, `can_be_delivered`, `can_be_zakat_calculated`). Capabilities
+   are matched at runtime by the SDUI resolver and the capability registry —
+   never hardcoded into a screen.
+3. **Schema** — The cell's data shape, validated by the Sovereign Matrix
+   (Postgres + Zod). Schema evolution is versioned via the generation counter.
+4. **Behaviors** — Pure, side-effect-free transformations the cell exposes
+   (price calculation, zakat split, modesty filter). Behaviors are *invoked
+   by events*, never by direct function calls from another cell.
+5. **Renderers (Polymorphic)** — A single cell ships **four canonical faces**:
+   - **Mobile** (consumer SDUI tree)
+   - **POS** (cashier-optimized dense layout)
+   - **API** (machine-readable contract for Hakim, partners, webhooks)
+   - **Semantic** (vector embedding + natural-language description for AI
+     reasoning and search)
+   The environment selects the face — the cell never selects itself.
+6. **Relations** — Typed edges to other cells in the Islamic Economic Graph
+   (owns, fulfilled_by, dispatched_by, settles_to). Relations are first-class
+   data, not foreign keys hidden in joins.
+7. **Lifecycle** — Birth → Active → Dormant → Archived, each transition
+   emitted to the Event Ledger. Cells are never deleted, only archived; the
+   ledger preserves the full forensic history.
+
+## The Three Principles of Cellular Existence
+
+1. **Existence before Form** — A cell exists as pure data + capabilities first;
+   its visual or operational form is *derived* from the environment that
+   summons it (mobile, POS, wearable, voice, API). No cell is "a screen."
+2. **Communication, not Dependency** — Cells **broadcast events** onto the
+   Sovereign Event Bus and **subscribe** to events they care about. No cell
+   imports another cell's functions. This eliminates coupling and lets the
+   Logic Weaver reroute flows from the database without code edits.
+3. **Context rules, not Code** — There are **no hardcoded `if` ladders** about
+   tenant, persona, locale, modesty, or device. The active context (resolved
+   by the Sovereign Matrix) dictates which renderer, which theme DNA, which
+   capability set, and which workflow the cell expresses. Code stays generic;
+   the database stays sovereign.
+
+## The 7 Vulnerabilities → Superpowers
+
+The Stem Cell paradigm has seven natural failure modes. The Emperor's
+doctrine flips each into a structural superpower:
+
+| # | Vulnerability | Solution | Superpower Unlocked |
+|---|---|---|---|
+| 1 | **Cognitive Complexity** — humans cannot trace event-driven cell flows by reading code | **Event Ledger** — every emit/subscribe is persisted with cell IDs, generation, payload hash | **Free Audit Trail & Compliance** — full forensic replay for finance, Sharia audit, GDPR, court orders |
+| 2 | **Performance Lag** — recomputing derived state on every event is expensive | **Computed Cell Cache** — memoized projections invalidated by generation counter, persisted to IndexedDB on the client | **Free Offline Mode & Edge PWA** — the app runs from cache; sync resumes when the network returns |
+| 3 | **Infinite Loops** — events trigger events that re-trigger the originator | **Generation Counter** — every cell mutation increments a monotonic counter; a cell ignores events older than its current generation | **Free Undo/Redo & Versioning** — any cell can be rewound to any prior generation; native time-travel debugging |
+| 4 | **Cell Discovery** — with thousands of cells nobody knows what exists | **Cell Registry** — every cell self-registers its identity, capabilities, schema, and renderers into a discoverable catalog | **Automated Service Marketplace** — Hakim, partners, and tenants browse the catalog and *compose* new verticals without engineering |
+| 5 | **Rogue Cells (Governance)** — a malicious or buggy cell could mutate forbidden data | **Immune System (RLS + DB Triggers)** — Postgres RLS gates every read; triggers gate every write; modesty / zakat / riba constraints enforced at the matrix level | **Automated Compliance Engine** — Sharia, KYC, AML, and tenant policies are enforced by the database itself, not by hopeful application code |
+| 6 | **Onboarding Difficulty** — new engineers (and AI agents) cannot grasp a living organism from static docs | **Living Documentation** — every cell's identity, capabilities, schema, and lineage are self-documenting and queryable in real time | **Ready AI Training Data** — Hakim and future LLMs are fine-tuned directly on the live cell graph; documentation cannot drift from reality |
+| 7 | **Testing Complexity** — event-driven systems explode in combinatorial test surface | **Simulation Environment (God Mode)** — a sandboxed mirror of the Sovereign Matrix where any cell can be spawned, any event injected, any persona impersonated | **Full Digital Twin** — every tenant, every workflow, every Hakim mutation can be rehearsed against a live-fidelity twin before touching production |
+
+---
+
+**Sealed by:** The Principal Enterprise Architect, on behalf of the Emperor.
+**Binding scope:** All future code, schemas, edge functions, AI agents, and
+documentation in the Salsabil OS monorepo. Any contribution that violates the
+Three Principles or fails to compose with the Seven Anatomical Organs is
+**non-canonical** and must be refactored before merge.
