@@ -1036,3 +1036,51 @@ Three new sovereign vectors (geographic neighbor pooling, life-cycle
 refills, altruistic Waqf) are live as registry-driven blocks; the home
 page now physically breathes during prayer. The Social-Economic engine
 is breathing on the Home page.
+
+---
+
+## Phase 21 — Consolidation & Doctrine 10 Codification
+
+### Cumulative Result (Parts 1 → 3)
+Phase 21 transformed three independent surfaces (Home, Offers, Spirit) into a
+single **breathing**, identity-aware, spatio-temporal organism:
+
+1. **Spatio-Temporal Offers Engine** — `offers_matrix` table + `useSpatioTemporalOffers`
+   hook + 5 Level-4 SDUI blocks: `offer_flash_sale`, `offer_bundle`,
+   `offer_group_buy`, `offer_neighborhood_pool`, `predictive_refill_rail`.
+2. **Sovereign Prayer Sanctuary** — `core-os/spirit/*` (zustand store ticking
+   every 30s, dependency-free Cairo+governorate schedule, root-mounted
+   bootstrap, gender-aware overlay). Global `isDormant` flag consumed by
+   Home, Offers, FlashSalesGrid.
+3. **Sovereign Vectors live in every offer block**: Baraka (`HonestMarginBadge`),
+   Amanah (`AmanahLockShield`), Smart Fakka (`FakkaRoundupToggle`),
+   Eithar (`EitharToggle`).
+4. **Home Cleansing** — `src/pages/Home.tsx` is now a thin SDUI shell over
+   `LayoutFactory pageKey="reef_home"`; `DEFAULT_HOME_ORDER` corrected to
+   the true general storefront layout; legacy `src/modules/` purged
+   (only `search/` remains, legitimately consumed).
+
+### Doctrine 10 codified
+The Spatio-Temporal Spirit Protocol is now a binding architectural doctrine
+in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Any new marketing/promo surface
+MUST subscribe to `isDormant` and any new offer block MUST carry the three
+sovereign vectors (Baraka / Amanah / Fakka).
+
+### File map (Phase 21 final state)
+- `supabase/migrations/2026_05_08_*_offers_matrix.sql`
+- `src/apps/reef-al-madina/features/offers/{types/offerMatrix.ts, hooks/useSpatioTemporalOffers.ts, components/{SovereignOfferCard,HonestMarginBadge,FakkaRoundupToggle,EitharToggle}.tsx}`
+- `src/core-os/spirit/{computePrayerTimes,useSovereignPrayer,SovereignSpiritBootstrap,SovereignDormancyOverlay}.ts(x)`
+- `src/core-os/sdui-engine/blocks/offers/{schemas.ts, AmanahLockShield, SduiOfferFlashSale, SduiOfferBundle, SduiOfferGroupBuy, SduiOfferNeighborhoodPool, SduiPredictiveRefillRail}.tsx`
+- `src/core-os/sdui-engine/engine/{schemas.ts, BlockRegistry.tsx}` (5 new block types registered)
+- `src/pages/{Home.tsx, Offers.tsx}` (both reduced to SDUI shells)
+- `src/routes/__root.tsx` (mounts SpiritBootstrap + DormancyOverlay)
+- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts`
+  (`DEFAULT_HOME_ORDER` corrected to general storefront)
+
+### Next horizon
+Phase 22 candidates: (a) promote `useDailyCountdown` to a zustand singleton
+to retire N intervals, (b) gate `useHomeOrchestrator` behind active SDUI
+blocks to skip catalog pre-fetch, (c) Eithar fulfillment pipeline at the
+Cart/Checkout layer (materialize the Waqf row from `salsabil_eithar_*`
+keys), (d) move `salsabil.recent_purchases` ledger from localStorage to a
+hardened RPC.
