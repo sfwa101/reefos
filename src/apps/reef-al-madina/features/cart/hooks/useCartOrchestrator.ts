@@ -19,7 +19,8 @@ import {
   validateGuestFields,
   validateMinOrder,
 } from "./useCartValidation";
-import { placeOrderAtomic, allocateOrderInventory } from "./useCartCheckoutRpc";
+import { allocateOrderInventory } from "./useCartCheckoutRpc";
+import { callSovereignCheckout } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
