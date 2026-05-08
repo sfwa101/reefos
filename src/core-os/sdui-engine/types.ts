@@ -29,7 +29,10 @@ export type SectionKey =
   | "AmanahTierProgress"
   | "PersonalizedDealsRail"
   | "BuyAgainRail"
-  | "QuickMealsRail";
+  | "QuickMealsRail"
+  // Phase 26 — Sovereign Minimalism
+  | "OfferNeighborhoodPool"
+  | "PredictiveRefillRail";
 
 export type SectionConfig = {
   /** when false, the section is hidden even if listed in `section_order` */
