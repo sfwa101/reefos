@@ -121,7 +121,8 @@ export default function AllocationMonitor() {
 
   async function reallocate(orderId: string) {
     setReallocating(true);
-    const { data, error } = await supabase.rpc("allocate_order_inventory", {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("allocate_order_inventory", {
       _order_id: orderId,
       _zone: zoneInput || "M",
     });
