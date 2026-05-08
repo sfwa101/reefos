@@ -43,7 +43,7 @@ const PRICING_LABELS: Record<USAGenesisPayload["financial_contract"]["pricing_mo
 };
 
 interface Props {
-  readonly onApprove?: (payload: USAGenesisPayload) => void;
+  readonly onApprove?: (payload: USAGenesisPayload, file?: File | null) => void;
   /** When true, approval hands the payload to the parent (co-pilot mode) instead of minting directly. */
   readonly handoffOnly?: boolean;
 }
@@ -100,7 +100,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const approve = async () => {
     if (!payload) return;
     if (handoffOnly) {
-      onApprove?.(payload);
+      onApprove?.(payload, file);
       reset();
       return;
     }
@@ -110,7 +110,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
         skus: payload.skus,
         financial_contract: payload.financial_contract,
       });
-      onApprove?.(payload);
+      onApprove?.(payload, file);
       reset();
     } catch {
       // toast handled in hook

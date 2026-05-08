@@ -12,6 +12,7 @@ export type USAGenesisAsset = {
   description: string;
   asset_type: "physical" | "digital" | "service" | "rental" | "milestone_project";
   traits: string[];
+  media?: string[];
 };
 
 export type USAGenesisSku = {

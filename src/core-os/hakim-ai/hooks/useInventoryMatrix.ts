@@ -34,14 +34,14 @@ export function useInventoryMatrix(skuId: string | undefined) {
 export interface UpsertInventoryInput {
   sku_id: string;
   location_id: string;
-  inventory_type?: "count" | "duration" | "capacity" | "binary";
+  inventory_type?: "count" | "time_slots" | "capacity";
   availability: Record<string, unknown>;
 }
 
 export function useUpdateInventory() {
   const qc = useQueryClient();
   return useMutation<string, Error, UpsertInventoryInput>({
-    mutationFn: async ({ sku_id, location_id, inventory_type = "count", availability }) => {
+    mutationFn: async ({ sku_id, location_id, inventory_type = "count", availability }: UpsertInventoryInput) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const { data, error } = await (supabase.rpc as any)("upsert_inventory_matrix", {
         p_sku_id: sku_id,

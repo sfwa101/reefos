@@ -7,13 +7,14 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface USARecord {
@@ -61,18 +62,6 @@ const PRICING_LABELS: Record<PricingModel, string> = {
   milestone_installments: "أقساط بمراحل",
 };
 
-const Placeholder = ({ icon: Icon, title, hint }: { icon: typeof Wrench; title: string; hint: string }) => (
-  <div className="rounded-3xl border border-dashed border-border/60 bg-background-secondary/40 p-8 text-center">
-    <div className="mx-auto inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-3">
-      <Icon className="h-7 w-7 text-primary" />
-    </div>
-    <p className="font-display text-[15px] mb-1">{title}</p>
-    <p className="text-[12px] text-foreground-tertiary leading-relaxed max-w-sm mx-auto">{hint}</p>
-    <span className="inline-block mt-4 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2.5 py-1 rounded-full">
-      الجزء السادس · قريباً
-    </span>
-  </div>
-);
 
 const Field = ({
   label, children, hint,
@@ -98,6 +87,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [pricingModel, setPricingModel] = useState<PricingModel>("flat");
   const [currency, setCurrency] = useState<"EGP" | "USD" | "EUR">("EGP");
   const [aiDraft, setAiDraft] = useState<USAGenesisPayload | null>(null);
+  const [aiFile, setAiFile] = useState<File | null>(null);
 
   // Sovereign Override state — Phase 8 Part 4.
   const [duplicateMatches, setDuplicateMatches] = useState<MatchedAsset[]>([]);
@@ -121,6 +111,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPricingModel("flat");
       setCurrency("EGP");
       setAiDraft(null);
+      setAiFile(null);
       setTab("basic");
     }
     setDuplicateMatches([]);
@@ -128,7 +119,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     setHasOverriddenAI(false);
   }, [asset, open]);
 
-  const handleAIHandoff = (payload: USAGenesisPayload) => {
+  const handleAIHandoff = (payload: USAGenesisPayload, file?: File | null) => {
     setName(payload.asset.name);
     setDescription(payload.asset.description);
     setAssetType(payload.asset.asset_type);
@@ -136,6 +127,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     setCurrency(payload.financial_contract.currency);
     setBasePrice(String(payload.financial_contract.base_price));
     setAiDraft(payload);
+    setAiFile(file ?? null);
     setTab("basic");
     setDuplicateMatches([]);
     setHasOverriddenAI(false);
@@ -172,6 +164,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
             description: description.trim(),
             asset_type: assetType,
             traits: aiDraft?.asset.traits ?? [],
+            media: await uploadAiImageIfAny(),
           },
           skus: aiDraft?.skus ?? [],
           financial_contract: {
@@ -182,6 +175,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           },
           semantic_embedding: embedding,
         });
+        setHasOverriddenAI(false);
+        setPendingEmbedding(null);
         onSaved?.();
         onClose();
       } else {
@@ -195,6 +190,24 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       }
     } catch {
       /* toast handled in hook */
+    }
+  };
+
+  const uploadAiImageIfAny = async (): Promise<string[] | undefined> => {
+    if (!aiFile) return undefined;
+    try {
+      const ext = aiFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `usa-genesis/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("product-images")
+        .upload(path, aiFile, { contentType: aiFile.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      return data.publicUrl ? [data.publicUrl] : undefined;
+    } catch (e) {
+      console.warn("[USAEditor] media upload failed", e);
+      toast.error("تعذّر رفع الصورة — سيُسكّ الأصل بدون صورة");
+      return undefined;
     }
   };
 
