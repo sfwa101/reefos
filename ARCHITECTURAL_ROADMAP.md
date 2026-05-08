@@ -413,3 +413,20 @@ bypass LLM processing.
 - **Hook:** `useUpdateFulfillmentStatus` (TanStack mutation) bumps a node's `status` (`pending → preparing → prepared → shipped → delivered/cancelled`) and invalidates both grid and per-vendor caches.
 - **UI:** `src/pages/vendor/VendorOrders.tsx` rewritten on `UniversalAdminGrid` (server-paginated against `salsabil_fulfillment_nodes`). Columns: order id (truncated) + date, status pill, items count, total. Row actions: `تفاصيل الطلب` (opens dialog joining `salsabil_fulfillment_items → salsabil_skus → salsabil_assets`) and `تغيير الحالة إلى جاهز`.
 - **Doctrine:** A customer's master order is a Sovereign artifact; each vendor only ever sees their own slice via `fulfillment_nodes`. RLS — not application code — is the trust boundary.
+
+## Phase 10 Part 1 — The Sovereign Router & Legacy Bridge (2026-05-08)
+- **Audit Fix:** Closes the Phase 10.1 gap surfaced in the read-only reconnaissance. The Master Order Spine, missing for two cycles, is now live.
+- **Master Orders:** New `public.salsabil_master_orders` (`customer_id` FK `auth.users`, `total_amount`, `status='pending'`, `delivery_info jsonb`). RLS: admins manage all, customers `SELECT` only rows where `auth.uid() = customer_id`. Touch trigger via `touch_updated_at()`.
+- **Delivery Snapshot (Gap 4):** `salsabil_fulfillment_nodes.delivery_snapshot jsonb` added + non-validated FK `master_order_id → salsabil_master_orders(id)`. Vendors can finally see *where* to deliver under their own RLS scope — no leakage to peer tenants.
+- **Legacy Bridge (Gap 3):** `resolve_legacy_product_to_sku(text) → uuid` (SECURITY DEFINER, STABLE). Resolution order: native UUID → `usa_<uuid>` prefix → `products.metadata->>'usa_sku_id'`. Returns `NULL` when the product cannot be mapped — caller must reject the cart line.
+- **Sovereign Checkout RPC (Gap 1 + 6):** `process_checkout_sovereign(p_customer_id, p_cart_items jsonb, p_delivery_info jsonb) → uuid`. Single transaction:
+  1. Inserts master order with delivery info.
+  2. For each `{product_id, quantity}` line, resolves the SKU via the bridge.
+  3. Picks the **cheapest vendor with sufficient stock** from `salsabil_inventory_matrix` (`override_price` ASC NULLS LAST, ties broken by `updated_at`), `FOR UPDATE` to prevent oversell races.
+  4. **Decrements stock atomically** via `jsonb_set(availability_data, '{count}', new_count)` — closes Gap 6.
+  5. Upserts the per-vendor `fulfillment_node` (accumulating `total_amount`, injecting `delivery_snapshot`).
+  6. Inserts the `fulfillment_item` (`sku_id`, `quantity`, `price_at_time` snapshot — frozen against future price drift).
+  7. Rolls up `master_orders.total_amount` and returns the master order ID.
+- **Pricing Source:** Falls back to the latest active `salsabil_financial_contracts.base_price` when no vendor `override_price` is declared. Sovereign price is canonical; local override is permitted but observable.
+- **Failure Modes:** Empty cart, unresolved SKU, or insufficient stock all `RAISE EXCEPTION` — the entire transaction rolls back, leaving inventory and the master order untouched.
+- **Status:** Backend ready. Cart frontend (`useCartCheckoutRpc` → `place_order_atomic_v2`) still on the legacy spine — Phase 10.2 will swap the wire and add the `sku_id` resolver inside the cart adapter.

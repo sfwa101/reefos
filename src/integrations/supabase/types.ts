@@ -5417,6 +5417,7 @@ export type Database = {
       salsabil_fulfillment_nodes: {
         Row: {
           created_at: string
+          delivery_snapshot: Json
           id: string
           master_order_id: string | null
           notes: string | null
@@ -5427,6 +5428,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          delivery_snapshot?: Json
           id?: string
           master_order_id?: string | null
           notes?: string | null
@@ -5437,6 +5439,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          delivery_snapshot?: Json
           id?: string
           master_order_id?: string | null
           notes?: string | null
@@ -5446,6 +5449,13 @@ export type Database = {
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "salsabil_fulfillment_nodes_master_fk"
+            columns: ["master_order_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_master_orders"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salsabil_fulfillment_nodes_vendor_id_fkey"
             columns: ["vendor_id"]
@@ -5489,6 +5499,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      salsabil_master_orders: {
+        Row: {
+          created_at: string
+          customer_id: string
+          delivery_info: Json
+          id: string
+          status: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_id: string
+          delivery_info?: Json
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_id?: string
+          delivery_info?: Json
+          id?: string
+          status?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
       }
       salsabil_skus: {
         Row: {
@@ -8698,6 +8738,14 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
+      process_checkout_sovereign: {
+        Args: {
+          p_cart_items: Json
+          p_customer_id: string
+          p_delivery_info: Json
+        }
+        Returns: string
+      }
       process_commission_vesting: { Args: never; Returns: Json }
       process_due_subscriptions: {
         Args: never
@@ -8771,6 +8819,10 @@ export type Database = {
       resolve_fulfillment: {
         Args: { _branch_id: string; _product_id: string; _zone?: string }
         Returns: Json
+      }
+      resolve_legacy_product_to_sku: {
+        Args: { p_legacy_id: string }
+        Returns: string
       }
       rotate_flash_sale: { Args: never; Returns: string }
       rotate_flash_sale_v2: { Args: never; Returns: Json }
