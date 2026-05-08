@@ -7,7 +7,7 @@ import {
   HandCoins, ClipboardList, PiggyBank,
   Scale, Ban, MessageCircle, AlertTriangle, Globe, Sliders,
   CalendarClock, Percent, BookOpen, Handshake,
-  Brain, Radar, Lightbulb, Network, Wand2,
+  Brain, Radar, Lightbulb, Network, Wand2, Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
