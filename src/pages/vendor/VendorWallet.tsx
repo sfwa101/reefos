@@ -76,6 +76,11 @@ export default function VendorWallet() {
         )}
       </div>
 
+      {/* Phase 10.4 — sovereign auto-settlement (per-delivered-node) */}
+      <div className="pt-2">
+        <SovereignSettlementsPanel />
+      </div>
+
       {/* Phase 12 — event-sourced settlement engine */}
       <div className="pt-2">
         <VendorSettlementDashboard />
