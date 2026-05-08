@@ -44,8 +44,6 @@ const DEFAULT_MAEEN_HUB_ORDER: SectionKey[] = ["MaeenLauncherGrid"];
 const DEFAULT_CATEGORY_ORDER: SectionKey[] = [
   "SearchAndFilters",
   "CategoriesGrid",
-  "BundlesRail",
-  "BestSellersRail",
   "ProductsGrid",
 ];
 
