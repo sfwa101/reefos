@@ -40,8 +40,14 @@ type AuthCtx = {
   loading: boolean;
   profileLoading: boolean;
   isInitializing: boolean;
-  signUpWithPhone: (phone: string, password: string, fullName: string) => Promise<{ error?: string }>;
+  signUpWithPhone: (
+    phone: string,
+    password: string,
+    fullName: string,
+    extras?: { governorate?: string | null; city?: string | null },
+  ) => Promise<{ error?: string }>;
   signInWithPhone: (phone: string, password: string) => Promise<{ error?: string }>;
+  checkPhoneExists: (phone: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
