@@ -953,3 +953,40 @@ economic surface. Two new sovereign vectors (Baraka transparency,
 Fakka micro-charity) are live at the card layer. The legacy
 `useOffersRails` / `storefront_rails` path remains as a dormant
 safety net for instant rollback.
+
+---
+
+## Phase 21 (Part 2) — Spirit Engine & SDUI Offers Ascension
+
+### The Sovereign Prayer Sanctuary
+- New `src/core-os/spirit/` module: `computePrayerTimes.ts` (dependency-free
+  Cairo-baseline schedule + governorate offset), `useSovereignPrayer.ts`
+  (zustand store ticking every 30s), `SovereignSpiritBootstrap.tsx`
+  (root-mounted ticker), and `SovereignDormancyOverlay.tsx` (glassy,
+  non-intrusive Athan card).
+- Mounted globally inside `__root.tsx` so every screen — Storefront,
+  Offers, Cart, Wallet — breathes with the user's local prayer time.
+- During the dormancy window (Athan → +20 min) the store sets
+  `isDormant === true`. Marketing surfaces that subscribe (e.g. the
+  legacy `FlashSalesGrid`, now accepting a `paused` prop) dim & pause.
+- Overlay prompt morphs by gender (Doctrine 9.4): congregational call
+  for men, on-time prompt for women.
+
+### SDUI Offers Ascension
+- Three new Level-4 Stem Cell schemas registered in the BlockRegistry:
+  `offer_flash_sale`, `offer_bundle`, `offer_group_buy`.
+- Each carries the sovereign vectors `honest_margin` (Baraka),
+  `amanah_lock` (tier gating), and `allow_fakka_roundup` (Smart Fakka).
+- `AmanahLockShield` renders a locked, blurred upsell card whenever the
+  user's tier is below the block's required tier.
+- The dormant Group-Buy Engine is finally wired into the consumer
+  Offers surface as a first-class block (`SduiOfferGroupBuy`).
+- `src/pages/Offers.tsx` now mounts `<SduiRenderer />` and translates
+  every `offers_matrix` row into a parsed block. Unknown block_types
+  fall through safely to the flash-sale renderer.
+
+### Result
+The system "breathes". The Offers page is fully Level-4 SDUI.
+Marketing respects the Athan globally. Three new sovereign vectors
+(Baraka transparency, Amanah gating, Spirit dormancy) are live across
+the renderer.

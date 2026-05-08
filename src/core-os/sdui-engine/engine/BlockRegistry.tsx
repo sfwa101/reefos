@@ -1,10 +1,7 @@
 /**
  * BlockRegistry — single source of truth mapping `block.type` → renderer.
- * Each entry is a render function that accepts the validated block and
- * returns JSX. Adding a new block: extend the schema union + register here.
- * Renderer auto-skips unknown types.
- *
- * Zero `any`: the discriminated union narrows `block` per renderer arm.
+ * Adding a new block: extend the schema union + register here. Renderer
+ * auto-skips unknown types via the exhaustiveness guard.
  */
 import type { ReactElement } from "react";
 import type { SduiBlock } from "./schemas";
@@ -16,6 +13,9 @@ import { SduiAppGridBlock } from "../blocks/SduiAppGridBlock";
 import { SduiOmniSearchBlock } from "../blocks/SduiOmniSearchBlock";
 import { SduiUnifiedStatusBlock } from "../blocks/SduiUnifiedStatusBlock";
 import { SduiBarqTrackingBlock } from "../blocks/SduiBarqTrackingBlock";
+import { SduiOfferFlashSale } from "../blocks/offers/SduiOfferFlashSale";
+import { SduiOfferBundle } from "../blocks/offers/SduiOfferBundle";
+import { SduiOfferGroupBuy } from "../blocks/offers/SduiOfferGroupBuy";
 
 export function renderBlock(block: SduiBlock): ReactElement | null {
   switch (block.type) {
@@ -35,9 +35,13 @@ export function renderBlock(block: SduiBlock): ReactElement | null {
       return <SduiUnifiedStatusBlock />;
     case "barq_tracking":
       return <SduiBarqTrackingBlock block={block} />;
+    case "offer_flash_sale":
+      return <SduiOfferFlashSale block={block} />;
+    case "offer_bundle":
+      return <SduiOfferBundle block={block} />;
+    case "offer_group_buy":
+      return <SduiOfferGroupBuy block={block} />;
     default: {
-      // Exhaustiveness guard — adding a new SduiBlock variant forces
-      // a compile error here until it's wired in.
       const _exhaustive: never = block;
       void _exhaustive;
       return null;
