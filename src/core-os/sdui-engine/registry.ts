@@ -8,7 +8,7 @@
  *
  * No arbitrary HTML, no string-eval — only props the registry approves.
  */
-import type { SectionKey } from "./types";
+import type { SectionKey, SectionConfig } from "./types";
 
 export type PageKey = "main_hub" | "home" | "sections" | "offers";
 
