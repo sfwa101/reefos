@@ -48,21 +48,43 @@ async function fetchActiveTheme(tenantId: string): Promise<SovereignTheme | null
   return (data as SovereignTheme | null) ?? null;
 }
 
+/** Track CSS variable keys we've previously injected so we can clean them
+ *  up before re-applying — prevents ghost colors when DNA changes. */
+const INJECTED_KEYS = new Set<string>();
+
 /** Apply a DNA payload to document.documentElement as inline CSS vars. */
 function injectDna(payload: ThemeDnaPayload | undefined) {
   if (typeof document === "undefined" || !payload) return;
   const root = document.documentElement;
+
+  // Cleanup previously injected vars first.
+  for (const key of INJECTED_KEYS) root.style.removeProperty(key);
+  INJECTED_KEYS.clear();
+
   const colors = payload.colors ?? {};
   for (const [key, value] of Object.entries(colors)) {
-    if (typeof value === "string") root.style.setProperty(`--${key}`, value);
+    if (typeof value === "string") {
+      const varName = `--${key}`;
+      root.style.setProperty(varName, value);
+      INJECTED_KEYS.add(varName);
+    }
   }
   const effects = payload.effects ?? {};
   if (typeof effects.radius === "string") {
     root.style.setProperty("--radius", effects.radius);
+    INJECTED_KEYS.add("--radius");
   }
   if (typeof effects.glass === "boolean") {
     root.dataset.glass = effects.glass ? "on" : "off";
   }
+}
+
+/** Remove all DNA-injected variables from the root. */
+function clearDna() {
+  if (typeof document === "undefined") return;
+  const root = document.documentElement;
+  for (const key of INJECTED_KEYS) root.style.removeProperty(key);
+  INJECTED_KEYS.clear();
 }
 
 /** Fetch the persona row matching the active key (Phase 18 Part 1). */
