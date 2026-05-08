@@ -5458,6 +5458,59 @@ export type Database = {
           },
         ]
       }
+      salsabil_vendor_members: {
+        Row: {
+          created_at: string
+          role: string
+          user_id: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          role?: string
+          user_id: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          role?: string
+          user_id?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_vendor_members_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_vendors: {
+        Row: {
+          business_name: string
+          created_at: string
+          id: string
+          is_active: boolean
+          logo_url: string | null
+        }
+        Insert: {
+          business_name: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+        }
+        Update: {
+          business_name?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          logo_url?: string | null
+        }
+        Relationships: []
+      }
       saved_baskets: {
         Row: {
           created_at: string
@@ -8407,6 +8460,10 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      is_vendor_member: {
+        Args: { _role?: string; _user_id: string; _vendor_id: string }
+        Returns: boolean
+      }
       join_gam_eya: {
         Args: {
           _circle_id: string
