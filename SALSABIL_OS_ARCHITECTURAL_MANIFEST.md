@@ -819,3 +819,20 @@ Storefront presentation adapts by sector:
 - **Retail / Supermarket** → Obscure the Vendor identity. Orders route invisibly via the **Decentralized Inventory Matrix** and the **Global USA**, preventing price manipulation, visual pollution, and catalog fragmentation. The customer sees one canonical asset; the system silently fulfils from the cheapest/closest vendor.
 
 This rule is enforced at the presentation layer — never at the data layer — so a single USA can simultaneously serve a branded restaurant menu and a white-labeled supermarket shelf without duplication.
+
+## The Decentralized Inventory & Pricing Matrix (Phase 9.3)
+
+The **Sovereign Catalog dictates the canonical price; the Decentralized Matrix permits transparent, per-tenant deviation.** Every vendor's stock declaration is a row in `salsabil_inventory_matrix` keyed by `(sku_id, location_code = vendor_id)`. Inside `availability_data` (jsonb) the tenant may store an optional `override_price` — leave empty to sell at the unified Sovereign price; populate to reflect local cost/service differentials. The override is observable, auditable, and bounded by the Global USA. Vendors NEVER mutate the catalog itself; they only declare *availability against* assets.
+
+The `upsert_inventory_matrix` RPC enforces this boundary: admins can write any location, vendor members can ONLY write rows where `location_code = their vendor_id` (validated against `salsabil_vendor_members`). The matching SELECT RLS policy mirrors this so each tenant sees only their own slice.
+
+## The Multi-Vendor Routing Engine (Phase 9.4)
+
+A customer's master order is a **Sovereign artifact**. To deliver it across many tenants without exposing their slices to one another, every order is decomposed at checkout into N **fulfillment nodes** — one per vendor:
+
+- **`salsabil_fulfillment_nodes`** — `(master_order_id, vendor_id, status, total_amount)`. Status flows `pending → preparing → prepared → shipped → delivered` (or `cancelled`).
+- **`salsabil_fulfillment_items`** — line items inside a node: `(node_id, sku_id, quantity, price_at_time)`. `price_at_time` is captured as the canonical or overridden price at the moment of purchase, so subsequent vendor edits never rewrite history.
+
+**RLS — not application code — is the trust boundary.** The `current_user_is_vendor_member()` SECURITY DEFINER helper gates SELECT/UPDATE on nodes (and SELECT on items via node membership) so a vendor can NEVER read another vendor's slice, even with a crafted query. Admins retain global ALL.
+
+The Vendor Portal consumes this through `useUpdateFulfillmentStatus` and a `UniversalAdminGrid` view of `/vendor/orders` — tenants see and act on only their own slice.
