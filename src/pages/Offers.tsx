@@ -1,81 +1,64 @@
 import { useMemo } from "react";
-import { products } from "@/lib/products";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ShieldCheck, MapPin, Clock } from "lucide-react";
+import { ShieldCheck, MapPin, Clock, Moon } from "lucide-react";
 import DynamicHeroBanner from "@/apps/reef-al-madina/features/offers/components/DynamicHeroBanner";
-import PersonalizedDealsRail from "@/apps/reef-al-madina/features/offers/components/PersonalizedDealsRail";
-import FlashSalesGrid from "@/apps/reef-al-madina/features/offers/components/FlashSalesGrid";
-import BundleDealsRail, { type BundleDeal } from "@/apps/reef-al-madina/features/offers/components/BundleDealsRail";
-import SectionOffersRail from "@/apps/reef-al-madina/features/offers/components/SectionOffersRail";
-import SponsoredRestaurantRail from "@/apps/reef-al-madina/features/offers/components/SponsoredRestaurantRail";
-import TierExclusiveOffers, { type TierOffer } from "@/apps/reef-al-madina/features/offers/components/TierExclusiveOffers";
-import SovereignOfferCard from "@/apps/reef-al-madina/features/offers/components/SovereignOfferCard";
+import { SduiRenderer } from "@/core-os/sdui-engine/components/SduiRenderer";
+import { parseBlocks, type SduiBlock } from "@/core-os/sdui-engine/engine/schemas";
 import { useDailyCountdown } from "@/apps/reef-al-madina/features/offers/hooks/useDailyCountdown";
 import { useSpatioTemporalOffers } from "@/apps/reef-al-madina/features/offers/hooks/useSpatioTemporalOffers";
+import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
 import type { OfferMatrixRow } from "@/apps/reef-al-madina/features/offers/types/offerMatrix";
 
 /**
  * Phase 21 — The Spatio-Temporal Offers Surface.
- * Reads from `offers_matrix` via `useSpatioTemporalOffers`, which morphs the
- * page based on Time × Space × Identity × Amanah. The legacy hardcoded rails
- * remain as a graceful fallback when the matrix is empty.
+ * Reads from `offers_matrix` via `useSpatioTemporalOffers`, maps each row to
+ * a Level-4 SDUI block, and pumps them through the central `SduiRenderer`.
+ * The Spirit Engine pauses tickers automatically during the prayer window.
  */
 const Offers = () => {
   const countdown = useDailyCountdown();
   const { offers, loading, userContext } = useSpatioTemporalOffers();
+  const isDormant = useSovereignPrayerStore((s) => s.isDormant);
 
-  const discounted = useMemo(() => products.filter((p) => p.oldPrice), []);
-  const flashSale = useMemo(() => discounted.slice(0, 4), [discounted]);
-  const personalized = useMemo(() => discounted.slice(4, 10), [discounted]);
-
-  const fallbackBundles: BundleDeal[] = useMemo(
-    () => [
-      { id: "b1", title: "باقة الإفطار العائلي", subtitle: "وفر 18٪", priceLabel: "ابدأ من 149 ج" },
-      { id: "b2", title: "باقة المخبوزات", subtitle: "وفر 22٪", priceLabel: "ابدأ من 89 ج" },
-    ],
-    [],
-  );
-  const tierOffers: TierOffer[] = useMemo(
-    () => [
-      { id: "t1", title: "خصم 15٪ على اللحوم", tier: "silver", description: "كل أسبوع" },
-      { id: "t2", title: "توصيل VIP مجاني", tier: "gold" },
-      { id: "t3", title: "كاشباك مضاعف", tier: "platinum" },
-    ],
-    [],
-  );
-
-  const renderMatrixOffer = (row: OfferMatrixRow) => {
-    switch (row.block_type) {
-      case "flash_sale":
-        return <FlashSalesGrid key={row.id} items={flashSale} title={row.title} />;
-      case "bundle":
-        return <BundleDealsRail key={row.id} bundles={fallbackBundles} title={row.title} />;
-      case "personalized":
-        return <PersonalizedDealsRail key={row.id} items={personalized} title={row.title} />;
-      case "restaurant":
-      case "sponsored":
-        return (
-          <SponsoredRestaurantRail
-            key={row.id}
-            title={row.title}
-            subtitle={row.subtitle}
-            restaurantId={row.target_id}
-          />
-        );
-      case "category":
-        return (
-          <SectionOffersRail
-            key={row.id}
-            title={row.title}
-            subtitle={row.subtitle}
-            targetId={row.target_id}
-          />
-        );
-      case "tier_exclusive":
-      default:
-        return <SovereignOfferCard key={row.id} offer={row} />;
-    }
-  };
+  // Translate matrix rows into SDUI blocks. Unknown block_types fall through
+  // to the generic flash sale renderer so admins never produce a dead row.
+  const blocks: SduiBlock[] = useMemo(() => {
+    const raw = offers.map((row: OfferMatrixRow) => {
+      const sovereign = {
+        honest_margin: row.honest_margin_pct ?? undefined,
+        amanah_lock: row.persona_context?.required_tier ?? undefined,
+        allow_fakka_roundup: row.allow_fakka_roundup,
+      };
+      switch (row.block_type) {
+        case "bundle":
+          return {
+            type: "offer_bundle" as const,
+            id: row.id,
+            props: { title: row.title, subtitle: row.subtitle ?? undefined, target_id: row.target_id, ...sovereign },
+          };
+        case "personalized":
+        case "category":
+        case "restaurant":
+        case "sponsored":
+        case "tier_exclusive":
+        case "flash_sale":
+        default:
+          if (row.block_type === ("group_buy" as unknown as string) && row.target_id) {
+            return {
+              type: "offer_group_buy" as const,
+              id: row.id,
+              props: { title: row.title, subtitle: row.subtitle ?? undefined, campaign_id: row.target_id, ...sovereign },
+            };
+          }
+          return {
+            type: "offer_flash_sale" as const,
+            id: row.id,
+            props: { title: row.title, subtitle: row.subtitle ?? undefined, target_id: row.target_id, ...sovereign },
+          };
+      }
+    });
+    return parseBlocks(raw);
+  }, [offers]);
 
   return (
     <div className="space-y-6 lg:px-8" dir="rtl">
@@ -83,7 +66,7 @@ const Offers = () => {
         <h1 className="font-display text-3xl font-extrabold leading-tight tracking-tight">العروض</h1>
         <p className="mt-1 text-xs text-muted-foreground">خصومات اليوم من جميع الأقسام</p>
 
-        {/* Spatio-Temporal context strip — proves the engine is live */}
+        {/* Spatio-Temporal context strip — proves the engine is breathing */}
         <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-muted-foreground">
           {userContext.governorate && (
             <span className="inline-flex items-center gap-1 rounded-full bg-muted/50 px-2 py-0.5">
@@ -101,6 +84,12 @@ const Offers = () => {
               مواطن موثّق
             </span>
           )}
+          {isDormant && (
+            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-amber-700 dark:text-amber-300">
+              <Moon className="h-3 w-3" />
+              وقت صلاة — إيقاف العروض
+            </span>
+          )}
         </div>
       </section>
 
@@ -112,18 +101,15 @@ const Offers = () => {
           <Skeleton className="h-40 w-full" />
           <Skeleton className="h-40 w-full" />
         </div>
-      ) : offers.length === 0 ? (
-        <div className="space-y-6">
-          <PersonalizedDealsRail items={personalized} />
-          <FlashSalesGrid items={flashSale} />
-          <BundleDealsRail bundles={fallbackBundles} />
-          <TierExclusiveOffers offers={tierOffers} userTier={userContext.tier} />
-          <p className="py-4 text-center text-xs text-muted-foreground">
-            نجهز لكم أقوى العروض قريباً…
-          </p>
-        </div>
       ) : (
-        <div className="space-y-6">{offers.map(renderMatrixOffer)}</div>
+        <SduiRenderer
+          blocks={blocks}
+          empty={
+            <p className="py-10 text-center text-xs text-muted-foreground">
+              نجهز لكم أقوى العروض قريباً…
+            </p>
+          }
+        />
       )}
     </div>
   );
