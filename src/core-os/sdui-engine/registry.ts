@@ -150,6 +150,48 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     allowedOverrides: ["padding", "tone", "showTimer", "title"],
     iconKey: "Zap",
   },
+
+  // ---------- Phase 22 — Minimalist Re-Genesis ----------
+  SmartGreeting: {
+    key: "SmartGreeting",
+    label: "ترحيب ذكي",
+    description: "تحية مخصصة بحسب وقت اليوم واسم العميل",
+    pages: ["main_hub", "home"],
+    allowedOverrides: ["padding"],
+    iconKey: "Sun",
+  },
+  AmanahTierProgress: {
+    key: "AmanahTierProgress",
+    label: "شريط المستوى (الأمانة)",
+    description: "شريط تقدم مستوى الولاء — Pastel Minimalist",
+    pages: ["main_hub", "home"],
+    allowedOverrides: ["padding"],
+    iconKey: "BadgeCheck",
+  },
+  PersonalizedDealsRail: {
+    key: "PersonalizedDealsRail",
+    label: "عروض صُممت لك",
+    description: "شريط عروض شخصية مبني على سياق الهوية",
+    pages: ["home", "offers"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Sparkles",
+  },
+  BuyAgainRail: {
+    key: "BuyAgainRail",
+    label: "اشتر مجدداً",
+    description: "إعادة طلب المنتجات السابقة بضغطة",
+    pages: ["home"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "RotateCcw",
+  },
+  QuickMealsRail: {
+    key: "QuickMealsRail",
+    label: "وجبات سريعة",
+    description: "شريط الوجبات الجاهزة من المطبخ",
+    pages: ["home"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Soup",
+  },
 };
 
 /** Ordered list of sections registered for a given page. */
