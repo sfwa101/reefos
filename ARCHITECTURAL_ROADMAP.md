@@ -556,3 +556,26 @@ The customer surface fell first. Now the admin and vendor cockpits are severed f
 
 ### Outcome
 The Admin Master List, the Slide-Over inspector, and the Vendor Operations Hub now render exclusively from the Sovereign Matrix. Combined with Phase 14 Part 1 (customer surface) and the Driver layer (already Sovereign), only the analytics, wallet, and notifications surfaces still hold residual `public.orders` reads — those fall in Phase 14 Part 3.
+
+---
+
+## Phase 14 Part 3 — The Final Cleanup: Total Eradication (2026-05-08)
+
+The last living references to `public.orders` / `public.order_items` in the UI tree have been hunted down and rewritten. The Salsabil OS Frontend is now **100% Sovereign**.
+
+### Surfaces migrated
+- **`pages/Account.tsx`** — customer "My Orders" count now reads `salsabil_master_orders.customer_id`.
+- **`pages/admin/Finance.tsx`** — 30-day revenue KPI sums `salsabil_master_orders.total_amount` with headline status aggregated from child nodes.
+- **`components/admin/AnalyticsCharts.tsx`** — 14-day revenue area chart and status pie now group `salsabil_master_orders` with aggregated headline statuses.
+- **`pages/admin/Dashboard.tsx`** — live orders feed, 7-day trend, funnel, and "top categories" all migrated. Top categories now aggregate `salsabil_fulfillment_items.quantity × price_at_time` joined to `salsabil_skus → salsabil_assets.category_path`. Realtime subscriptions retargeted to `salsabil_master_orders` + `salsabil_fulfillment_nodes`.
+- **`pages/admin/Notifications.tsx`** — VIP segment resolver now counts delivered `salsabil_master_orders` per `customer_id`.
+- **`pages/admin/CustomerDetail.tsx`** — lifetime spend, order count, and the embedded order grid all read from `salsabil_master_orders` with headline-status aggregation.
+- **`pages/admin/AllocationMonitor.tsx`** — recent-orders panel reads `salsabil_master_orders` and counts child fulfillment nodes (the Sovereign equivalent of the legacy `sub_orders`).
+- **`pages/admin/OrderDetail.tsx`** — full rewrite. Loads master → nodes → items → sku → asset; status mutations cascade across all child nodes; driver assignment writes `driver_id` + `assigned_at` to all nodes simultaneously; address now read from `delivery_info` snapshot (eliminating the legacy `addresses` join).
+- **`core-os/finance/hooks/useWalletDashboard.ts`** — wallet category breakdown, monthly tracking, app-spend grouping, and savings calculation all walk `salsabil_master_orders → salsabil_fulfillment_nodes → salsabil_fulfillment_items → salsabil_skus → salsabil_assets`. App grouping is now sourced from `master_orders.delivery_info.app_id` (Phase VII-A invariant preserved). Old/new price savings derived from `asset.traits.{old_price, price}`.
+
+### Final Audit
+A repository-wide `rg` for `from("orders")`, `from("order_items")`, `Tables['orders']`, `Tables['order_items']` returns **zero matches** in `src/`. The `products` shim is the only legacy table still touched, and only by the vendor product-CRUD surface — that table is intentionally retained until the SDUI catalog cutover.
+
+### Outcome
+**The UI is 100% Sovereign.** The legacy `orders` / `order_items` tables are now read-orphans at the application layer — safe to retire whenever the DB-side purge is scheduled. All four sovereign engines (USA, Matrix, Tayseer, Barq) own their respective UI surfaces end-to-end with zero legacy contamination.
