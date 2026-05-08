@@ -27,10 +27,11 @@ const DEFAULT_HOME_ORDER: SectionKey[] = [
 // grid overload — only the Sovereign rails of identity + intent.
 const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
   "SmartGreeting",
+  "MainSearchHeader",
   "AmanahTierProgress",
-  "PersonalizedDealsRail",
+  "StoryCircles",
+  "BestSellersRail",
   "BuyAgainRail",
-  "QuickMealsRail",
 ];
 
 function fallbackOrderFor(pageKey: string): SectionKey[] {
