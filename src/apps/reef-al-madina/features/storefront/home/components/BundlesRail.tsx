@@ -15,15 +15,19 @@ import { RailHeader } from "./RailHeader";
 export const BundlesRail = ({
   catalog,
   hue,
+  title,
+  sub,
 }: {
   catalog: HGProduct[];
   hue: string;
+  title?: string;
+  sub?: string;
 }) => (
   <section className="mt-5 px-4">
     <RailHeader
       icon={Package}
-      title="حزم موفّرة"
-      sub="مجموعات مختارة بسعر أوفر عند الشراء معًا"
+      title={title || "عروض وحزم التوفير"}
+      sub={sub || "مجموعات مختارة بسعر أوفر"}
       hue={hue}
     />
     <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
