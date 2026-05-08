@@ -906,3 +906,50 @@ Consumer storefront is now a pure SDUI surface end-to-end. The
 hardcoded Level-1 rail-stack is gone; the engine is live. Every
 homepage and category vertical shares one renderer, one orchestrator,
 one fallback contract.
+
+---
+
+## Phase 21 — The Spatio-Temporal Offers Engine
+
+The Offers surface ascends from a Level-2 hybrid (DB-scheduled rails over
+static catalog) to a Level-4 Stem Cell that morphs along four axes:
+**Time × Space × Identity × Amanah**.
+
+### The Matrix
+- New table `offers_matrix` with four JSONB context columns:
+  `temporal_context` (start/end_hour, weekdays, season_tags, starts_at,
+  ends_at), `geo_context` (governorate_codes, proximity_boost_km,
+  zone_ids), `persona_context` (required_tier, gender_lock, kyc_only,
+  min_amanah_score), and `logic_weaver_rules` (boost/filter rule list).
+- Two transparency vectors live on every row: `honest_margin_pct`
+  (Baraka Engine) and `allow_fakka_roundup` (Smart Fakka).
+- RLS: public read of active rows, admin-only writes (via
+  `has_role(auth.uid(),'admin')`).
+
+### The Resolver
+- `useSpatioTemporalOffers` reads the active matrix, then applies four
+  filter passes on the client: temporal window, governorate match,
+  persona gate (incl. **Modesty Protocol — gender_lock, Doctrine 9.4**),
+  and Amanah score floor. Logic-weaver `boost` rules add to `priority`
+  for final sort.
+- User context derives from `useAuth().profile`: `gender`,
+  `is_kyc_verified`, `governorate`. Tier and Amanah are stubbed at
+  `bronze` / `0` until Phase 21.2 binds them to the Wallet ledger.
+
+### The Surface
+- `src/pages/Offers.tsx` refactored: matrix-driven rails replace the
+  hardcoded `useOffersRails` switch. Legacy rails kept as the
+  graceful fallback when the matrix is empty.
+- `SovereignOfferCard` is the atomic block: title + subtitle +
+  `HonestMarginBadge` (Baraka transparency chip) + `FakkaRoundupToggle`
+  (charity round-up, persisted to `localStorage` for the cart layer).
+- A "spatio-temporal context strip" beneath the page header renders
+  the live governorate, daily countdown, and KYC-citizen badge — proof
+  the engine is breathing.
+
+### Result
+The Offers page is now a personalised, identity-aware, time-aware
+economic surface. Two new sovereign vectors (Baraka transparency,
+Fakka micro-charity) are live at the card layer. The legacy
+`useOffersRails` / `storefront_rails` path remains as a dormant
+safety net for instant rollback.
