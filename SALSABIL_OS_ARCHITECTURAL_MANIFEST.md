@@ -852,3 +852,30 @@ The Vendor Portal consumes this through `useUpdateFulfillmentStatus` and a `Univ
 5. **SDUI is the Skin.** Every screen in every Benaa module is generated server-side from layout JSON in `sdui_layouts`. Hakim writes the layout; the renderer obeys.
 6. **Tayseer as Native Treasury.** Every tenant gets a Tayseer wallet by default. Settlements, payouts, employee salaries, vendor commissions, customer refunds — all flow through one ledger primitive.
 7. **Hakim The Engineer.** The terminal endgame: an autonomous LLM-driven agent that reads natural-language module specs from the Emperor, auto-generates migrations, RPCs, RLS, SDUI layouts, and TypeScript hooks, and ships them through this very pipeline — no IDE, no human compiler. This manifest is its constitution.
+
+---
+
+## 🛰️ Phase 14 Mandate — The Sovereign Relay Network (Middle-Mile / BlaBlaCar Logistics)
+
+**Status:** Enshrined. To be activated post-Barq stabilization.
+
+Salsabil OS must utilize public intercity transport (Microbuses, Taxis) as
+"Middle-Mile Trunk Lines". Batched orders are assigned to a driver traveling
+to a 15km+ Hub. Upon drop-off at the Hub (P2P Micro-Hubs / Benaa Stores),
+local Last-Mile drivers (bicycles/scooters) complete the delivery.
+
+This breaks the single-driver distance constraint, incorporates **Eco/Economy
+48hr Windows** for non-urgent deliveries, and activates **Circular Reverse
+Logistics** (returns flow back along the same trunk lines).
+
+### Architectural Pillars
+- **Trunk Legs**: `salsabil_delivery_legs` rows of type `middle_mile` carry
+  batched fulfillment nodes between hubs.
+- **Last-Mile Legs**: `last_mile` legs dispatched fresh from the destination
+  hub via the existing `broadcast_smart_dispatch` engine.
+- **Hub Registry**: Benaa Stores + community P2P micro-hubs registered as
+  geo-points in `geo_zones` with `is_relay_hub=true`.
+- **Eco SLA**: Orders flagged `service_type='eco_48h'` opt into trunk batching
+  for cost reduction.
+- **Reverse Logistics**: Returns piggyback on outbound trunk capacity.
+
