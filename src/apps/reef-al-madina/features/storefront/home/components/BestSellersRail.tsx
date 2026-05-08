@@ -11,16 +11,20 @@ export const BestSellersRail = ({
   items,
   hue,
   onOpen,
+  title,
+  sub,
 }: {
   items: HGProduct[];
   hue: string;
   onOpen: (id: string) => void;
+  title?: string;
+  sub?: string;
 }) => (
   <section className="mt-6 px-4">
     <RailHeader
       icon={Crown}
-      title="الأكثر مبيعًا"
-      sub="اختيارات موثوقة من آلاف العملاء"
+      title={title || "الأكثر طلباً"}
+      sub={sub || "اختيارات موثوقة من العملاء"}
       hue={hue}
     />
     <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-2 scrollbar-none [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
