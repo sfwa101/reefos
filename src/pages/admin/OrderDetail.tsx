@@ -1,3 +1,15 @@
+/**
+ * Admin OrderDetail — Sovereign Matrix Edition (Phase 14 Part 3)
+ *
+ * Reads from `salsabil_master_orders` → `salsabil_fulfillment_nodes`
+ * → `salsabil_fulfillment_items` → `salsabil_skus` → `salsabil_assets`.
+ *
+ * Status mutations cascade to all child nodes of the master order.
+ * Driver assignment writes `driver_id` to all nodes simultaneously.
+ *
+ * The legacy `addresses` lookup is replaced by reading the snapshot stored
+ * in `master_orders.delivery_info` (already captured at checkout time).
+ */
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
@@ -28,56 +40,145 @@ const statusBadge: Record<string, string> = {
   paid: "bg-success/12 text-success",
 };
 
-/**
- * Invalidate every cache slice the dashboard reads so KPIs refresh
- * the instant a manager flips an order status. Called after every mutation.
- */
+const STATUS_PRIORITY = [
+  "pending", "confirmed", "paid", "preparing", "ready",
+  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
+];
+function aggregateStatus(statuses: string[], fallback: string): string {
+  if (!statuses.length) return fallback;
+  if (statuses.every((s) => s === "delivered")) return "delivered";
+  if (statuses.every((s) => s === "cancelled")) return "cancelled";
+  const active = statuses.filter((s) => s !== "delivered" && s !== "cancelled");
+  const pool = active.length ? active : statuses;
+  return pool.reduce((lo, s) =>
+    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
+  , pool[0]);
+}
+
 function invalidateOrderCaches(qc: ReturnType<typeof useQueryClient>) {
   ["orders", "admin-orders", "dashboard", "dashboard-stats", "finance", "finance-metrics", "delivery-tasks", "hakim-pulse"].forEach((k) =>
     qc.invalidateQueries({ queryKey: [k] }),
   );
 }
 
+interface MasterOrder {
+  id: string;
+  total: number;
+  status: string;            // aggregated headline
+  created_at: string;
+  customer_id: string;
+  payment_method: string | null;
+  notes: string | null;
+  delivery_info: Record<string, unknown> | null;
+  node_ids: string[];
+}
+
+interface ItemRow {
+  id: string;
+  quantity: number;
+  price: number;
+  product_name: string;
+  product_image: string | null;
+}
+
+interface CustomerLite { full_name: string | null; phone: string | null }
+
 export default function OrderDetail() {
   const { orderId } = useParams({ strict: false }) as { orderId: string };
   const router = useRouter();
   const qc = useQueryClient();
-  const [order, setOrder] = useState<any>(null);
-  const [items, setItems] = useState<any[]>([]);
-  const [customer, setCustomer] = useState<any>(null);
-  const [address, setAddress] = useState<any>(null);
+  const [order, setOrder] = useState<MasterOrder | null>(null);
+  const [items, setItems] = useState<ItemRow[]>([]);
+  const [customer, setCustomer] = useState<CustomerLite | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [drivers, setDrivers] = useState<any[]>([]);
 
   useEffect(() => {
     if (!orderId) return;
     (async () => {
+      // 1) Master order + nested fulfillment nodes + items + sku + asset.
+      const { data: master } = await supabase
+        .from("salsabil_master_orders")
+        .select(`
+          id, total_amount, status, created_at, customer_id, delivery_info,
+          salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk (
+            id, status, notes,
+            salsabil_fulfillment_items (
+              id, quantity, price_at_time,
+              salsabil_skus ( salsabil_assets ( name, media ) )
+            )
+          )
+        `)
+        .eq("id", orderId)
+        .maybeSingle();
+
+      if (!master) { setOrder(null); return; }
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: o } = await (supabase as any).from("orders").select("*").eq("id", orderId).maybeSingle();
-      setOrder(o);
-      if (!o) return;
-      const [it, cust, addr] = await Promise.all([
+      const nodes: any[] = (master as any).salsabil_fulfillment_nodes ?? [];
+      const nodeIds: string[] = nodes.map((n) => n.id);
+      const nodeStatuses: string[] = nodes.map((n) => n.status);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const di: any = (master as any).delivery_info ?? {};
+      const flatItems: ItemRow[] = [];
+      nodes.forEach((n) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("order_items").select("*").eq("order_id", orderId),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("profiles").select("*").eq("id", o.user_id).maybeSingle(),
-        o.address_id ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any).from("addresses").select("*").eq("id", o.address_id).maybeSingle() : Promise.resolve({ data: null }),
-      ]);
-      setItems(it.data ?? []);
-      setCustomer(cust.data);
-      setAddress(addr.data);
+        (n.salsabil_fulfillment_items ?? []).forEach((it: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const media = (it?.salsabil_skus?.salsabil_assets?.media as any) ?? {};
+          const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+          flatItems.push({
+            id: it.id,
+            quantity: it.quantity,
+            price: Number(it.price_at_time ?? 0),
+            product_name: it?.salsabil_skus?.salsabil_assets?.name ?? "منتج",
+            product_image: image,
+          });
+        });
+      });
+      // Aggregated notes (vendor-level, joined).
+      const notes = nodes.map((n) => n.notes).filter(Boolean).join(" • ") || (di.notes ?? null);
+
+      setOrder({
+        id: master.id,
+        total: Number(master.total_amount ?? 0),
+        status: aggregateStatus(nodeStatuses, master.status ?? "pending"),
+        created_at: master.created_at,
+        customer_id: master.customer_id,
+        payment_method: di.payment_method ?? null,
+        notes,
+        delivery_info: di,
+        node_ids: nodeIds,
+      });
+      setItems(flatItems);
+
+      // 2) Customer profile.
+      if (master.customer_id) {
+        const { data: cust } = await supabase
+          .from("profiles")
+          .select("full_name,phone")
+          .eq("id", master.customer_id)
+          .maybeSingle();
+        setCustomer(cust ?? null);
+      }
     })();
   }, [orderId]);
 
   async function setStatus(next: string) {
     if (!order) return;
     setUpdating(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from("orders").update({ status: next }).eq("id", order.id);
+    const updates: { status: string; delivered_at?: string } = { status: next };
+    if (next === "delivered") updates.delivered_at = new Date().toISOString();
+    const { error: nodeErr } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .update(updates)
+      .in("id", order.node_ids);
+    // Mirror onto the master order so the headline stays consistent.
+    await supabase.from("salsabil_master_orders").update({ status: next }).eq("id", order.id);
     setUpdating(false);
-    if (error) return toast.error("تعذّر تحديث الحالة");
+    if (nodeErr) return toast.error("تعذّر تحديث الحالة");
     setOrder({ ...order, status: next });
     invalidateOrderCaches(qc);
     toast.success("تم تحديث حالة الطلب");
@@ -95,14 +196,17 @@ export default function OrderDetail() {
   async function confirmAndAssign(driverId: string, driverName: string) {
     if (!order) return;
     setUpdating(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from("orders")
-      .update({ status: "out_for_delivery", assigned_driver_id: driverId })
-      .eq("id", order.id);
+    const { error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .update({
+        driver_id: driverId,
+        status: "out_for_delivery",
+        assigned_at: new Date().toISOString(),
+      })
+      .in("id", order.node_ids);
     setUpdating(false);
     if (error) return toast.error("تعذّر تعيين المندوب");
-    setOrder({ ...order, status: "out_for_delivery", assigned_driver_id: driverId });
+    setOrder({ ...order, status: "out_for_delivery" });
     setShowAssign(false);
     invalidateOrderCaches(qc);
     toast.success(`تم التعيين إلى ${driverName}`);
@@ -123,6 +227,9 @@ export default function OrderDetail() {
   const idx = FLOW.findIndex(s => s.value === order.status);
   const next = idx >= 0 && idx < FLOW.length - 1 ? FLOW[idx + 1] : null;
   const canAssignDriver = ["pending", "confirmed", "preparing", "ready"].includes(order.status);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const addr: any = order.delivery_info ?? {};
+  const addressLine = [addr.city, addr.district, addr.street, addr.building].filter(Boolean).join(" - ");
 
   return (
     <>
@@ -147,7 +254,6 @@ export default function OrderDetail() {
             </span>
           </div>
 
-          {/* Action stack — sequential, contextual */}
           <div className="space-y-2">
             {canAssignDriver && (
               <button disabled={updating} onClick={openAssignDriver}
@@ -199,21 +305,21 @@ export default function OrderDetail() {
                     <p className="text-[14px] font-medium truncate">{it.product_name}</p>
                     <p className="text-[11.5px] text-foreground-tertiary num">{it.quantity} × {fmtMoney(it.price)}</p>
                   </div>
-                  <span className="font-display text-[14px] num">{fmtMoney(Number(it.price) * Number(it.quantity))}</span>
+                  <span className="font-display text-[14px] num">{fmtMoney(it.price * it.quantity)}</span>
                 </IOSRow>
               ))}
             </IOSList>
           )}
         </IOSSection>
 
-        {address && (
+        {addressLine && (
           <IOSSection title="عنوان التوصيل">
             <IOSList>
               <IOSRow>
                 <MapPin className="h-4 w-4 text-foreground-tertiary" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-[14px]">{address.label}</p>
-                  <p className="text-[12px] text-foreground-tertiary">{[address.city, address.district, address.street, address.building].filter(Boolean).join(" - ")}</p>
+                  <p className="text-[14px]">{addr.label ?? "العنوان"}</p>
+                  <p className="text-[12px] text-foreground-tertiary">{addressLine}</p>
                 </div>
               </IOSRow>
             </IOSList>
@@ -227,7 +333,6 @@ export default function OrderDetail() {
         )}
       </div>
 
-      {/* ============ Driver Assignment Sheet ============ */}
       {showAssign && (
         <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50" onClick={() => setShowAssign(false)}>
           <div className="w-full sm:max-w-md rounded-t-[24px] sm:rounded-[24px] bg-card p-5 shadow-float ring-1 ring-border/40" onClick={(e) => e.stopPropagation()} dir="rtl">
@@ -235,7 +340,7 @@ export default function OrderDetail() {
               <h2 className="font-display text-lg font-extrabold">اختر مندوب التوصيل</h2>
               <button onClick={() => setShowAssign(false)} className="h-9 w-9 rounded-[10px] bg-foreground/5 flex items-center justify-center"><X className="h-4 w-4" /></button>
             </div>
-            <p className="text-[12px] text-foreground-tertiary mb-3">سيتم تأكيد الطلب وتحويل حالته إلى "قيد التوصيل" تلقائياً</p>
+            <p className="text-[12px] text-foreground-tertiary mb-3">سيتم تعيين المندوب لكل عُقد التنفيذ التابعة لهذا الطلب وتحويل الحالة إلى "قيد التوصيل".</p>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto">
               {drivers.length === 0 && (
                 <p className="text-center text-[13px] text-foreground-tertiary py-8">لا يوجد مناديب متاحون حالياً</p>

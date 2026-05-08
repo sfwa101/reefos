@@ -42,16 +42,17 @@ export default function NotificationsPage() {
       // Resolve target user IDs based on segment
       let userIds: string[] = [];
       if (segment === "vip") {
-        // VIP = users with delivered orders >= 20 (gold/platinum tier proxy)
+        // Sovereign Matrix: VIP = customers with ≥20 delivered master orders.
         const { data, error } = await supabase
-          .from("orders")
-          .select("user_id")
+          .from("salsabil_master_orders")
+          .select("customer_id")
           .eq("status", "delivered")
           .limit(2000);
         if (error) throw error;
         const counts: Record<string, number> = {};
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (data || []).forEach((o: any) => {
-          if (o.user_id) counts[o.user_id] = (counts[o.user_id] || 0) + 1;
+          if (o.customer_id) counts[o.customer_id] = (counts[o.customer_id] || 0) + 1;
         });
         userIds = Object.entries(counts).filter(([, c]) => c >= 20).map(([uid]) => uid);
       } else {

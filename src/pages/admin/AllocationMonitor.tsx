@@ -80,31 +80,29 @@ export default function AllocationMonitor() {
 
   async function loadOrders() {
     setLoading(true);
-    const { data: orderRows } = await supabase
-      .from("orders")
-      .select("id,total,status,created_at,user_id")
+    // Sovereign Matrix: list master orders + count their fulfillment nodes (which is the
+    // Sovereign equivalent of "sub_orders" — a node = one vendor's slice of the master order).
+    const { data: masterRows } = await supabase
+      .from("salsabil_master_orders")
+      .select("id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(id)")
       .order("created_at", { ascending: false })
       .limit(50);
 
-    if (!orderRows) {
+    if (!masterRows) {
       setOrders([]);
       setLoading(false);
       return;
     }
 
-    const ids = orderRows.map((o) => o.id);
-    const { data: subs } = await supabase
-      .from("sub_orders")
-      .select("order_id")
-      .in("order_id", ids);
-
-    const counts = new Map<string, number>();
-    (subs || []).forEach((s) => counts.set(s.order_id, (counts.get(s.order_id) || 0) + 1));
-
     setOrders(
-      orderRows.map((o) => ({
-        ...o,
-        sub_count: counts.get(o.id) || 0,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (masterRows as any[]).map((m) => ({
+        id: m.id,
+        total: Number(m.total_amount ?? 0),
+        status: m.status,
+        created_at: m.created_at,
+        user_id: m.customer_id,
+        sub_count: (m.salsabil_fulfillment_nodes ?? []).length,
       })),
     );
     setLoading(false);

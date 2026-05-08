@@ -23,19 +23,18 @@ import { useWalletSavings } from "./useWalletSavings";
  * unchanged — but each slice can now re-render in isolation.
  */
 
-type ProductsRel = {
-  category: string | null;
-  old_price: number | null;
-  price: number | null;
+// Sovereign asset shape returned via fulfillment_items → sku → asset.
+type AssetRel = {
+  category_path: string | null;
+  traits: { old_price?: number | null; price?: number | null } | null;
 } | null;
 
-type OrderItemRow = {
-  price: number;
+type FulfillmentItemRow = {
+  price_at_time: number;
   quantity: number;
-  product_id: string;
   created_at: string;
-  order_id: string;
-  products: ProductsRel;
+  node_id: string;
+  salsabil_skus: { salsabil_assets: AssetRel } | null;
 };
 
 export type AppSpend = { app_id: string; total: number };
@@ -75,15 +74,25 @@ export const useWalletDashboard = () => {
       monthStart.setDate(1);
       monthStart.setHours(0, 0, 0, 0);
 
-      const orderIdRes = await supabase
-        .from("orders")
-        // Phase VII-A — capture app_id so wallet can group spend per app.
-        .select("id, app_id")
-        .eq("user_id", userId);
-      const orderRows = (orderIdRes.data ?? []) as Array<{ id: string; app_id?: string | null }>;
-      const orderIds = orderRows.map((o) => o.id);
-      const orderApp: Record<string, string> = {};
-      orderRows.forEach((o) => { orderApp[o.id] = o.app_id ?? "reef"; });
+      // Sovereign Matrix: walk master_orders → fulfillment_nodes → fulfillment_items.
+      // App grouping is captured at master_orders.delivery_info.app_id (Phase VII-A invariant).
+      const masterRes = await supabase
+        .from("salsabil_master_orders")
+        .select("id, delivery_info, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(id)")
+        .eq("customer_id", userId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const masters = ((masterRes.data ?? []) as any[]);
+      const nodeIds: string[] = [];
+      const nodeApp: Record<string, string> = {};
+      masters.forEach((m) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const appKey = (m.delivery_info as any)?.app_id ?? "reef";
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (m.salsabil_fulfillment_nodes ?? []).forEach((n: any) => {
+          nodeIds.push(n.id);
+          nodeApp[n.id] = appKey;
+        });
+      });
 
       const [
         { data: items },
@@ -92,11 +101,9 @@ export const useWalletDashboard = () => {
         { data: budgetRows },
       ] = await Promise.all([
         supabase
-          .from("order_items")
-          .select(
-            "price,quantity,product_id,created_at,order_id,products(category, old_price, price)",
-          )
-          .in("order_id", orderIds.length ? orderIds : ["00000000-0000-0000-0000-000000000000"]),
+          .from("salsabil_fulfillment_items")
+          .select("price_at_time,quantity,created_at,node_id, salsabil_skus(salsabil_assets(category_path,traits))")
+          .in("node_id", nodeIds.length ? nodeIds : ["00000000-0000-0000-0000-000000000000"]),
         supabase
           .from("referrals")
           .select("id,status,commission,first_order_at,created_at")
@@ -128,17 +135,18 @@ export const useWalletDashboard = () => {
       const monthCat: Record<string, number> = {};
       const byApp: Record<string, number> = {};
       let savings = 0;
-      for (const it of (items ?? []) as unknown as OrderItemRow[]) {
-        const cat = it.products?.category || "other";
-        const lineTotal = Number(it.price) * Number(it.quantity);
+      for (const it of (items ?? []) as unknown as FulfillmentItemRow[]) {
+        const asset = it.salsabil_skus?.salsabil_assets ?? null;
+        const cat = asset?.category_path?.split("/")?.[0] || "other";
+        const lineTotal = Number(it.price_at_time) * Number(it.quantity);
         byCat[cat] = (byCat[cat] || 0) + lineTotal;
-        const appKey = orderApp[it.order_id] ?? "reef";
+        const appKey = nodeApp[it.node_id] ?? "reef";
         byApp[appKey] = (byApp[appKey] || 0) + lineTotal;
         const ts = it.created_at ? new Date(it.created_at) : null;
         if (ts && ts >= monthStart) monthCat[cat] = (monthCat[cat] || 0) + lineTotal;
-        const op = it.products?.old_price;
-        const pp = it.products?.price;
-        if (op && pp && op > pp) {
+        const op = asset?.traits?.old_price;
+        const pp = asset?.traits?.price;
+        if (op && pp && Number(op) > Number(pp)) {
           savings += (Number(op) - Number(pp)) * Number(it.quantity);
         }
       }

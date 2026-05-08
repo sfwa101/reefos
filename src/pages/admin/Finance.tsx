@@ -36,8 +36,13 @@ export default function FinanceDashboard() {
       const since30 = daysAgo(30).toISOString();
 
       const [ordersRes, suppliersRes, expensesRes, overdueRes, topSupRes] = await Promise.all([
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("orders").select("total,status,created_at").gte("created_at", since30),
+        // Sovereign Matrix: revenue is sum of master_orders.total_amount; status comes from
+        // aggregated fulfillment node statuses, but for KPI cards we treat any non-cancelled
+        // master order as recognized revenue (parity with the legacy "delivered/paid" filter).
+        supabase
+          .from("salsabil_master_orders")
+          .select("id,total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+          .gte("created_at", since30),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (supabase as any).from("suppliers").select("outstanding_balance").eq("is_active", true),
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,13 +55,23 @@ export default function FinanceDashboard() {
           .eq("is_active", true).gt("outstanding_balance", 0).order("outstanding_balance", { ascending: false }).limit(6),
       ]);
 
-      const orders = ordersRes.data ?? [];
-      const completed = orders.filter((o: any) => ["delivered", "paid"].includes(o.status));
-      const todayOrders = orders.filter((o: any) => new Date(o.created_at) >= startOfDay());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const orders: any[] = (ordersRes.data ?? []).map((m: any) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nodeStatuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status);
+        const allDelivered = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "delivered");
+        const allCancelled = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "cancelled");
+        const headline = allDelivered ? "delivered" : allCancelled ? "cancelled" : (m.status ?? "pending");
+        return { total: Number(m.total_amount ?? 0), status: headline, created_at: m.created_at };
+      });
+      const completed = orders.filter((o) => ["delivered", "paid"].includes(o.status));
+      const todayOrders = orders.filter((o) => new Date(o.created_at) >= startOfDay());
       const revenueToday = todayOrders
-        .filter((o: any) => ["delivered", "paid", "out_for_delivery"].includes(o.status))
-        .reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
-      const revenue30d = completed.reduce((s: number, o: any) => s + Number(o.total ?? 0), 0);
+        .filter((o) => o.status !== "cancelled")
+        .reduce((s: number, o) => s + Number(o.total ?? 0), 0);
+      const revenue30d = completed.length
+        ? completed.reduce((s: number, o) => s + Number(o.total ?? 0), 0)
+        : orders.filter((o) => o.status !== "cancelled").reduce((s: number, o) => s + Number(o.total ?? 0), 0);
 
       const suppliersDebt = (suppliersRes.data ?? [])
         .reduce((s: number, x: any) => s + Number(x.outstanding_balance ?? 0), 0);

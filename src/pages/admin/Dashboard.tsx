@@ -62,9 +62,24 @@ type OrderRow = {
   total: number | null;
   status: string;
   created_at: string;
-  user_id: string;
+  user_id: string;          // master_orders.customer_id surfaced as user_id for downstream UI compat
   profiles?: { full_name?: string | null } | null;
 };
+
+const STATUS_PRIORITY = [
+  "pending", "confirmed", "paid", "preparing", "ready",
+  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
+];
+function aggregateStatus(statuses: string[], fallback: string): string {
+  if (!statuses.length) return fallback;
+  if (statuses.every((s) => s === "delivered")) return "delivered";
+  if (statuses.every((s) => s === "cancelled")) return "cancelled";
+  const active = statuses.filter((s) => s !== "delivered" && s !== "cancelled");
+  const pool = active.length ? active : statuses;
+  return pool.reduce((lo, s) =>
+    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
+  , pool[0]);
+}
 
 export default function Dashboard() {
   const { profile } = useAuth();
@@ -89,35 +104,59 @@ export default function Dashboard() {
     const load = async () => {
       try {
         const [ordersRes, profilesRes, lowRes, weekRes, catsRes] = await Promise.all([
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any)
-            .from("orders")
-            .select("id,total,status,created_at,user_id, profiles:user_id(full_name)")
+          // Sovereign Matrix: live master orders feed (with child node statuses for headline aggregation).
+          supabase
+            .from("salsabil_master_orders")
+            .select("id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
             .order("created_at", { ascending: false })
             .limit(60),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (supabase as any).from("profiles").select("id", { count: "exact", head: true }),
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           (supabase as any).from("products").select("id", { count: "exact", head: true }).lte("stock", 5),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any)
-            .from("orders")
-            .select("id,total,created_at,status")
+          // 7-day master orders for trend + funnel.
+          supabase
+            .from("salsabil_master_orders")
+            .select("id,total_amount,created_at,status, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
             .gte("created_at", start7.toISOString())
             .order("created_at", { ascending: true }),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any)
-            .from("order_items")
-            .select("subtotal,products(category)")
+          // Top categories — Sovereign: aggregate fulfillment items via sku → asset.category_path.
+          supabase
+            .from("salsabil_fulfillment_items")
+            .select("quantity,price_at_time,created_at, salsabil_skus(salsabil_assets(category_path))")
             .gte("created_at", start7.toISOString())
             .limit(500),
         ]);
         if (cancelled) return;
 
-        const list: OrderRow[] = Array.isArray(ordersRes?.data) ? ordersRes.data : [];
+        // Hydrate customer names in one batch.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const masters: any[] = Array.isArray(ordersRes?.data) ? ordersRes.data : [];
+        const customerIds = Array.from(new Set(masters.map((m) => m.customer_id).filter(Boolean)));
+        const nameMap = new Map<string, string | null>();
+        if (customerIds.length) {
+          const { data: profs } = await supabase
+            .from("profiles")
+            .select("id,full_name")
+            .in("id", customerIds);
+          (profs ?? []).forEach((p) => nameMap.set(p.id, p.full_name));
+        }
+
+        const list: OrderRow[] = masters.map((m) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const statuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status);
+          return {
+            id: m.id,
+            total: Number(m.total_amount ?? 0),
+            status: aggregateStatus(statuses, m.status ?? "pending"),
+            created_at: m.created_at,
+            user_id: m.customer_id,
+            profiles: { full_name: nameMap.get(m.customer_id) ?? null },
+          };
+        });
         const today = list.filter((o) => new Date(o.created_at) >= startToday);
         const inDelivery = list.filter((o) =>
-          ["out_for_delivery", "preparing", "ready", "confirmed"].includes(o.status),
+          ["out_for_delivery", "preparing", "ready", "confirmed", "assigned", "picked_up"].includes(o.status),
         ).length;
         const todayRev = today.reduce((s, o) => s + Number(o.total ?? 0), 0);
 
@@ -131,13 +170,14 @@ export default function Dashboard() {
         });
         setOrders(list);
 
-        // Top categories (last 7 days)
+        // Top categories from Sovereign fulfillment items → sku → asset.category_path.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const items: any[] = Array.isArray(catsRes?.data) ? catsRes.data : [];
         const catMap = new Map<string, number>();
         for (const it of items) {
-          const cat = it?.products?.category ?? "غير مصنّف";
-          catMap.set(cat, (catMap.get(cat) ?? 0) + Number(it?.subtotal ?? 0));
+          const cat = it?.salsabil_skus?.salsabil_assets?.category_path?.split("/")?.[0] ?? "غير مصنّف";
+          const lineTotal = Number(it?.price_at_time ?? 0) * Number(it?.quantity ?? 0);
+          catMap.set(cat, (catMap.get(cat) ?? 0) + lineTotal);
         }
         setTopCats(
           [...catMap.entries()]
@@ -146,7 +186,15 @@ export default function Dashboard() {
             .slice(0, 5),
         );
 
-        setWeek(Array.isArray(weekRes?.data) ? weekRes.data : []);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const weekMasters: any[] = Array.isArray(weekRes?.data) ? weekRes.data : [];
+        setWeek(weekMasters.map((m) => ({
+          id: m.id,
+          total: Number(m.total_amount ?? 0),
+          created_at: m.created_at,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          status: aggregateStatus((m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status), m.status ?? "pending"),
+        })));
       } catch {
         if (!cancelled) setOrders([]);
       }
@@ -155,11 +203,17 @@ export default function Dashboard() {
     load();
 
     const channel = supabase
-      .channel("admin-dashboard-orders")
+      .channel("admin-dashboard-master-orders")
       .on(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         "postgres_changes" as any,
-        { event: "*", schema: "public", table: "orders" },
+        { event: "*", schema: "public", table: "salsabil_master_orders" },
+        () => { if (!cancelled) load(); },
+      )
+      .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "postgres_changes" as any,
+        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
         () => { if (!cancelled) load(); },
       )
       .subscribe();

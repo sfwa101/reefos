@@ -41,7 +41,8 @@ const Account = () => {
     (async () => {
       const [{ data: w }, { count }, { data: spent }, { data: kyc }] = await Promise.all([
         supabase.from("wallet_balances").select("balance, points").eq("user_id", user.id).maybeSingle(),
-        supabase.from("orders").select("id", { count: "exact", head: true }).eq("user_id", user.id),
+        // Sovereign Matrix: master orders are the single source of truth for "my order count".
+        supabase.from("salsabil_master_orders").select("id", { count: "exact", head: true }).eq("customer_id", user.id),
         supabase.rpc("user_total_spent", { _user_id: user.id }),
         supabase.from("kyc_verifications").select("status").eq("user_id", user.id).maybeSingle<{ status: NonNullable<KycStatus> }>(),
       ]);
