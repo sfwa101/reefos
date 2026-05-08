@@ -31,7 +31,7 @@ export function useMintUSA() {
     onSuccess: (assetId) => {
       toast.success("تم سكّ الأصل بنجاح وتحديث المتجر");
       qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
-      qc.invalidateQueries({ queryKey: ["products"] });
+      qc.invalidateQueries({ queryKey: ["catalog", "products"] });
       qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
     },
     onError: (err) => {

@@ -202,10 +202,12 @@ export function useVendorOperations() {
       .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_items" }, () => {
         refreshLiveItems();
       })
-      .on("postgres_changes", { event: "*", schema: "public", table: "products" }, (payload) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const row = (payload.new ?? payload.old) as any;
-        if (!row?.vendor_id || !vendorIds.includes(row.vendor_id)) return;
+      // Phase 15.3 — Sovereign realtime: stock and price updates flow through
+      // the Decentralized Matrix and Financial Contracts, not the dead `products` shim.
+      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_inventory_matrix" }, () => {
+        refreshProducts();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_financial_contracts" }, () => {
         refreshProducts();
       })
       .subscribe();

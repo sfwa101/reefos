@@ -629,3 +629,18 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 - Stock writes route through `upsertSkuStock` (UPSERT into `salsabil_inventory_matrix.availability_data.stock`); price/cost writes route through `upsertSkuPrice` / `upsertSkuCost` against `salsabil_financial_contracts`.
 - The `__sb` containment alias has been **purged from the entire codebase** — `rg __sb src/` returns 0 results.
 - The frontend is now 100% disconnected from the ghost of `public.products`. Salsabil OS runs end-to-end on the Sovereign Matrix.
+
+---
+
+## Phase 15 — Part 3: The Pre-Hakim Cleansing (Realtime, Cache & Limits)
+
+**Mission:** Seal the OS perfectly before awakening Hakim AI (Phase 16).
+
+### Strikes Executed
+
+1. **Vendor Realtime Retargeting** — `useVendorOperations.ts` no longer subscribes to the dropped `public.products` table. The channel now listens on `salsabil_inventory_matrix` (stock) and `salsabil_financial_contracts` (price), so vendor product refresh fires correctly off the Sovereign Matrix.
+2. **Cache Key Coherence** — `useUpdateUSA` and `useMintUSA` now invalidate `["catalog","products"]` (matching `PRODUCTS_QUERY_KEY` in `lib/products.ts`), eliminating silent storefront staleness after asset mutations.
+3. **Query Boundary Enforcement** — Hard `.limit()` bounds applied to all unbounded admin reads: `Suppliers`, `Stores`, `Branches`, `Charity` (1000), `OrderDetail.drivers` (500), `ProductUnits.{units_of_measure, product_units}` (500). No unbounded fetches remain in admin surfaces.
+4. **Dead Seed Eradication** — Deleted `src/lib/catalogSeedShared.ts`, `src/pages/admin/CatalogBackup.tsx`, `src/routes/admin.catalog-backup.tsx`, and `scripts/db-backup/sync-seed.ts`. The legacy `products`-coupled seed/backup pipeline is officially ashes.
+
+**Status:** OS is sealed. The frontend is 100% Sovereign, realtime channels are aligned to the Matrix, cache keys are coherent, and all admin queries are bounded. Cleared for Phase 16 — Hakim AI Builder.

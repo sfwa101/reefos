@@ -23,10 +23,16 @@ type ValidatePricing = { ok: boolean; message?: string } | null;
 // Wrapping the client in a precise interface keeps every call site checked.
 type ProductUnitsDb = {
   from(table: "units_of_measure"): {
-    select(s: string): { order(c: string): Promise<{ data: UoM[] | null }> };
+    select(s: string): {
+      order(c: string): { limit(n: number): Promise<{ data: UoM[] | null }> };
+    };
   };
   from(table: "product_units"): {
-    select(s: string): { eq(c: string, v: string): { order(c: string): Promise<{ data: PU[] | null }> } };
+    select(s: string): {
+      eq(c: string, v: string): {
+        order(c: string): { limit(n: number): Promise<{ data: PU[] | null }> };
+      };
+    };
     delete(): { eq(c: string, v: string): Promise<{ error: { message: string } | null }> };
     upsert(payload: PU[], opts: { onConflict: string }): Promise<{ error: { message: string } | null }>;
   };
@@ -52,7 +58,7 @@ export default function ProductUnits() {
     if (!allowed) return;
     (async () => {
       const [{ data: u }, sov] = await Promise.all([
-        db.from("units_of_measure").select("*").order("sort_order"),
+        db.from("units_of_measure").select("*").order("sort_order").limit(500),
         import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       ]);
       setUnits((u || []) as UoM[]);
@@ -64,7 +70,7 @@ export default function ProductUnits() {
     setSelected(p);
     setLoading(true);
     const [{ data: pu }, { data: bd }] = await Promise.all([
-      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor"),
+      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor").limit(500),
       db.rpc("nested_stock_breakdown", { _product_id: p.id }),
     ]);
     setRows((pu || []) as PU[]);
