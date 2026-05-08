@@ -5329,6 +5329,89 @@ export type Database = {
         }
         Relationships: []
       }
+      salsabil_delivery_legs: {
+        Row: {
+          created_at: string
+          driver_id: string
+          id: string
+          node_id: string
+          route_geometry: Json | null
+          sequence_index: number
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          driver_id: string
+          id?: string
+          node_id: string
+          route_geometry?: Json | null
+          sequence_index?: number
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          driver_id?: string
+          id?: string
+          node_id?: string
+          route_geometry?: Json | null
+          sequence_index?: number
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_delivery_legs_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_delivery_legs_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_fulfillment_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_driver_shifts: {
+        Row: {
+          driver_id: string
+          ended_at: string | null
+          gross_earnings: number
+          id: string
+          start_lat: number | null
+          start_lng: number | null
+          started_at: string
+        }
+        Insert: {
+          driver_id: string
+          ended_at?: string | null
+          gross_earnings?: number
+          id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          started_at?: string
+        }
+        Update: {
+          driver_id?: string
+          ended_at?: string | null
+          gross_earnings?: number
+          id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          started_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_driver_shifts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salsabil_financial_contracts: {
         Row: {
           base_price: number
@@ -5416,39 +5499,70 @@ export type Database = {
       }
       salsabil_fulfillment_nodes: {
         Row: {
+          assigned_at: string | null
           created_at: string
+          delivered_at: string | null
           delivery_snapshot: Json
+          driver_id: string | null
+          dropoff_lat: number | null
+          dropoff_lng: number | null
           id: string
           master_order_id: string | null
           notes: string | null
+          picked_up_at: string | null
+          pickup_lat: number | null
+          pickup_lng: number | null
           status: string
           total_amount: number
           updated_at: string
           vendor_id: string
         }
         Insert: {
+          assigned_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_snapshot?: Json
+          driver_id?: string | null
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
           id?: string
           master_order_id?: string | null
           notes?: string | null
+          picked_up_at?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           status?: string
           total_amount?: number
           updated_at?: string
           vendor_id: string
         }
         Update: {
+          assigned_at?: string | null
           created_at?: string
+          delivered_at?: string | null
           delivery_snapshot?: Json
+          driver_id?: string | null
+          dropoff_lat?: number | null
+          dropoff_lng?: number | null
           id?: string
           master_order_id?: string | null
           notes?: string | null
+          picked_up_at?: string | null
+          pickup_lat?: number | null
+          pickup_lng?: number | null
           status?: string
           total_amount?: number
           updated_at?: string
           vendor_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "salsabil_fulfillment_nodes_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salsabil_fulfillment_nodes_master_fk"
             columns: ["master_order_id"]
@@ -8346,6 +8460,7 @@ export type Database = {
         }
         Returns: string
       }
+      current_driver_id: { Args: never; Returns: string }
       current_mega_event: { Args: never; Returns: Json }
       current_user_branch_id: { Args: never; Returns: string }
       current_user_is_vendor_member: {
