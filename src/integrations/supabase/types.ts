@@ -5331,6 +5331,7 @@ export type Database = {
           customer_id: string
           delivery_info: Json
           id: string
+          idempotency_key: string | null
           status: string
           total_amount: number
           updated_at: string
@@ -5340,6 +5341,7 @@ export type Database = {
           customer_id: string
           delivery_info?: Json
           id?: string
+          idempotency_key?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
@@ -5349,6 +5351,7 @@ export type Database = {
           customer_id?: string
           delivery_info?: Json
           id?: string
+          idempotency_key?: string | null
           status?: string
           total_amount?: number
           updated_at?: string
@@ -8540,6 +8543,7 @@ export type Database = {
           p_cart_items: Json
           p_customer_id: string
           p_delivery_info: Json
+          p_idempotency_key?: string
         }
         Returns: string
       }

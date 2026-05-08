@@ -175,8 +175,8 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
-        {/* Dev-Node mounted at the root — visible in all builds (Phase VIII Restoration). */}
-        <DevOSNavigator />
+        {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
+        {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
     </GlobalErrorBoundary>
   );

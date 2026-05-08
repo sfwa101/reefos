@@ -7,7 +7,60 @@
 
 ---
 
-## 🪶 Phase 34 — The Final Aesthetic Ascendancy (Tri-Mode Departments)
+## 🛡️ Phase 36 — The Titanium Shield (Financial & Security Hardening)
+
+### Task 1 · God Mode Eradication (Zero Trust)
+- `src/lib/godMode.ts` now short-circuits to `false` when
+  `import.meta.env.DEV === false`. Vite tree-shakes the entire
+  `localStorage` / `window.SALSABIL_GOD_MODE` read path out of the
+  production bundle.
+- `src/routes/__root.tsx` mounts `<DevOSNavigator />` only when
+  `import.meta.env.DEV` — the FAB, the Crown toggle, and every admin
+  shortcut are physically absent from production HTML.
+- All `isGodMode()` callers (`useVendorOperations`, `useDriverEngine`,
+  `HomeRedirector`) inherit the gate automatically — no per-call-site
+  changes required.
+
+### Task 2 · Financial Idempotency (Golden Rule of Payments)
+- **Schema:** added `salsabil_master_orders.idempotency_key uuid` with
+  a partial unique index. Duplicate keys can never create duplicate
+  orders, regardless of how many times a flaky network retries.
+- **RPC:** `process_checkout_sovereign` now takes
+  `p_idempotency_key uuid` (4th arg). On entry it short-circuits and
+  returns the prior `master_order_id` if the key has already been
+  consumed — preventing double-charging, duplicate fulfillment nodes,
+  and double inventory decrements.
+- **Client:** `useSovereignCheckout` exports `newIdempotencyKey()`
+  (UUID v4 via `crypto.randomUUID`) and `SovereignCheckoutInput`
+  now requires `idempotency_key`. The cart orchestrator generates a
+  fresh key on every submit and passes it through.
+
+### Task 3 · Client-Side Financial Mutation Audit
+Audit of every `supabase.from(...).update|insert|delete` call from the
+browser. **Verdict per file:**
+- ✅ `useSovereignCheckout` — already RPC-only (`process_checkout_sovereign`).
+- ✅ `useCartOrchestrator` / `useSharedCartSync` / `cartSync.ts` — only
+  manipulate `cart_items` / `shared_cart_items` (draft cart, RLS-scoped
+  to the owner). NOT financial state.
+- ✅ `savedBaskets.ts` — user-owned wishlist metadata, non-financial.
+- ✅ Admin marketing panels (`FlashPanel`, `CouponsPanel`, `BannersPanel`)
+  — RLS-gated to admin role; no balance/ledger writes.
+- ⚠️ **FLAG:** `core-os/finance/components/WalletSavingsJars.tsx` performs
+  a direct `savings_transactions` insert + `savings_jars` upsert from
+  the browser. RLS scopes the rows to `auth.uid()`, but balance math
+  runs on the client. **Phase 36.1 follow-up:** wrap this in a
+  `process_savings_jar_op(p_user_id, p_jar_id, p_amount, p_kind,
+  p_idempotency_key)` RPC so jar balances + transaction log are written
+  atomically server-side.
+
+### Result
+Treasury hardened. No God-Mode bypass ships to production. Every
+checkout is replay-safe. Remaining client-side financial surface is
+catalogued and scoped to a single follow-up RPC (jar operations).
+
+---
+
+
 
 - **BackHeader purged** from `Sections.tsx`; the title "أقسام ريف المدينة"
   now lives in `DepartmentGrid` directly under the Sovereign TopBar with
