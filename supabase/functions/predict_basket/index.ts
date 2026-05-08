@@ -83,6 +83,17 @@ Deno.serve(async (req) => {
       .eq("is_active", true);
 
     if (prodErr) {
+      const code = (prodErr as { code?: string }).code;
+      if (code === "PGRST205" || code === "42P01") {
+        console.warn("products source missing, returning empty basket:", code);
+        return json({
+          ok: true,
+          empty: true,
+          headline: "ابدأ التسوق لتظهر سلتك الذكية",
+          confidence: 0,
+          basket: [],
+        });
+      }
       console.error("products query error:", prodErr);
       return json({ error: "products_query_failed" }, 500);
     }
