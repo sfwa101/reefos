@@ -3,9 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 
 const CART_KEY = "pos.cart.v1";
 const CACHE_KEY = "pos.products.cache.v1";
