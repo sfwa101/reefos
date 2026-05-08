@@ -5603,9 +5603,58 @@ export type Database = {
           },
         ]
       }
+      salsabil_vendor_settlements: {
+        Row: {
+          created_at: string
+          gross_amount: number
+          id: string
+          net_amount: number
+          node_id: string
+          platform_fee: number
+          status: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          node_id: string
+          platform_fee?: number
+          status?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          gross_amount?: number
+          id?: string
+          net_amount?: number
+          node_id?: string
+          platform_fee?: number
+          status?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_vendor_settlements_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: true
+            referencedRelation: "salsabil_fulfillment_nodes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_vendor_settlements_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salsabil_vendors: {
         Row: {
           business_name: string
+          commission_rate: number
           created_at: string
           id: string
           is_active: boolean
@@ -5613,6 +5662,7 @@ export type Database = {
         }
         Insert: {
           business_name: string
+          commission_rate?: number
           created_at?: string
           id?: string
           is_active?: boolean
@@ -5620,6 +5670,7 @@ export type Database = {
         }
         Update: {
           business_name?: string
+          commission_rate?: number
           created_at?: string
           id?: string
           is_active?: boolean
