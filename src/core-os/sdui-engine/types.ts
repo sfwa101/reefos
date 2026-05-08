@@ -23,7 +23,13 @@ export type SectionKey =
   | "MainSearchHeader"
   | "StoryCircles"
   | "PromotionSlider"
-  | "DepartmentGrid";
+  | "DepartmentGrid"
+  // Phase 22 — Minimalist Re-Genesis sections
+  | "SmartGreeting"
+  | "AmanahTierProgress"
+  | "PersonalizedDealsRail"
+  | "BuyAgainRail"
+  | "QuickMealsRail";
 
 export type SectionConfig = {
   /** when false, the section is hidden even if listed in `section_order` */
