@@ -39,6 +39,7 @@ import { Route as AdminStoreSettlementsRouteImport } from './routes/admin.store-
 import { Route as AdminStaffAttendanceRouteImport } from './routes/admin.staff-attendance'
 import { Route as AdminStaffAdvancesRouteImport } from './routes/admin.staff-advances'
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
+import { Route as AdminSovereignTreasuryRouteImport } from './routes/admin.sovereign-treasury'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
 import { Route as AdminRolePermissionsRouteImport } from './routes/admin.role-permissions'
@@ -292,6 +293,11 @@ const AdminStaffAdvancesRoute = AdminStaffAdvancesRouteImport.update({
 const AdminStaffRoute = AdminStaffRouteImport.update({
   id: '/staff',
   path: '/staff',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSovereignTreasuryRoute = AdminSovereignTreasuryRouteImport.update({
+  id: '/sovereign-treasury',
+  path: '/sovereign-treasury',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
@@ -896,6 +902,7 @@ export interface FileRoutesByFullPath {
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-advances': typeof AdminStaffAdvancesRoute
   '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
@@ -1027,6 +1034,7 @@ export interface FileRoutesByTo {
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-advances': typeof AdminStaffAdvancesRoute
   '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
@@ -1165,6 +1173,7 @@ export interface FileRoutesById {
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
   '/admin/settings': typeof AdminSettingsRoute
+  '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
   '/admin/staff-advances': typeof AdminStaffAdvancesRoute
   '/admin/staff-attendance': typeof AdminStaffAttendanceRoute
@@ -1304,6 +1313,7 @@ export interface FileRouteTypes {
     | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
+    | '/admin/sovereign-treasury'
     | '/admin/staff'
     | '/admin/staff-advances'
     | '/admin/staff-attendance'
@@ -1435,6 +1445,7 @@ export interface FileRouteTypes {
     | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
+    | '/admin/sovereign-treasury'
     | '/admin/staff'
     | '/admin/staff-advances'
     | '/admin/staff-attendance'
@@ -1572,6 +1583,7 @@ export interface FileRouteTypes {
     | '/admin/role-permissions'
     | '/admin/savings'
     | '/admin/settings'
+    | '/admin/sovereign-treasury'
     | '/admin/staff'
     | '/admin/staff-advances'
     | '/admin/staff-attendance'
@@ -1858,6 +1870,13 @@ declare module '@tanstack/react-router' {
       path: '/staff'
       fullPath: '/admin/staff'
       preLoaderRoute: typeof AdminStaffRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/sovereign-treasury': {
+      id: '/admin/sovereign-treasury'
+      path: '/sovereign-treasury'
+      fullPath: '/admin/sovereign-treasury'
+      preLoaderRoute: typeof AdminSovereignTreasuryRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/settings': {
@@ -2820,6 +2839,7 @@ interface AdminRouteChildren {
   AdminRolePermissionsRoute: typeof AdminRolePermissionsRoute
   AdminSavingsRoute: typeof AdminSavingsRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
+  AdminSovereignTreasuryRoute: typeof AdminSovereignTreasuryRoute
   AdminStaffRoute: typeof AdminStaffRoute
   AdminStaffAdvancesRoute: typeof AdminStaffAdvancesRoute
   AdminStaffAttendanceRoute: typeof AdminStaffAttendanceRoute
@@ -2892,6 +2912,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRolePermissionsRoute: AdminRolePermissionsRoute,
   AdminSavingsRoute: AdminSavingsRoute,
   AdminSettingsRoute: AdminSettingsRoute,
+  AdminSovereignTreasuryRoute: AdminSovereignTreasuryRoute,
   AdminStaffRoute: AdminStaffRoute,
   AdminStaffAdvancesRoute: AdminStaffAdvancesRoute,
   AdminStaffAttendanceRoute: AdminStaffAttendanceRoute,
