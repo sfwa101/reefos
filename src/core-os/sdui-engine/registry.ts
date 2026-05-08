@@ -59,6 +59,12 @@ export const PAGE_LABELS: Record<PageKey, string> = {
   offers_hub: "صفحة العروض (Sovereign)",
   maeen_hub: "بوابة معين (Sovereign)",
   category_storefront: "متاجر الأقسام (Sovereign)",
+  reef_restaurants: "مجمع المطاعم",
+  reef_subscriptions: "خطط الاشتراكات",
+  reef_baskets: "السلال الذكية",
+  reef_wholesale: "متجر الجملة",
+  reef_compare_home_goods: "مقارنة الأجهزة",
+  reef_school_library: "بوابة الطالب",
 };
 
 /** Default section order used when seeding a new page. */
@@ -83,6 +89,12 @@ export const DEFAULT_PAGE_ORDER: Record<PageKey, SectionKey[]> = {
     "BestSellersRail",
     "ProductsGrid",
   ],
+  reef_restaurants: ["SduiMenuList"],
+  reef_subscriptions: ["SduiWizardChain"],
+  reef_baskets: ["SduiWizardChain"],
+  reef_wholesale: ["SduiComparisonGrid"],
+  reef_compare_home_goods: ["SduiComparisonGrid"],
+  reef_school_library: ["SduiWizardChain"],
 };
 
 export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
@@ -254,6 +266,32 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     pages: ["maeen_hub"],
     allowedOverrides: ["padding"],
     iconKey: "LayoutGrid",
+  },
+
+  // ---------- Phase 30 — Advanced Stem Cell Ascendancy ----------
+  SduiMenuList: {
+    key: "SduiMenuList",
+    label: "قائمة الطعام التفاعلية",
+    description: "قائمة وجبات بفئات لزجة وتكامل سلة (Restaurants)",
+    pages: ["reef_restaurants"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "UtensilsCrossed",
+  },
+  SduiWizardChain: {
+    key: "SduiWizardChain",
+    label: "سلسلة المعالج (Wizard)",
+    description: "تدفق متعدد الخطوات للاشتراكات والسلال وبوابة الطالب",
+    pages: ["reef_subscriptions", "reef_baskets", "reef_school_library"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Workflow",
+  },
+  SduiComparisonGrid: {
+    key: "SduiComparisonGrid",
+    label: "شبكة المقارنة",
+    description: "جداول المقارنة بين المنتجات (Wholesale / HomeGoods)",
+    pages: ["reef_wholesale", "reef_compare_home_goods"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Scale",
   },
 };
 

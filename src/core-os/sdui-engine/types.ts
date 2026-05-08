@@ -52,8 +52,6 @@ export type SectionConfig = {
   hue?: string;
   showTimer?: boolean;
   density?: "compact" | "comfortable" | "spacious";
-  /** Phase 30 — selects which concrete domain a primitive should render. */
-  variant?: string;
 };
 
 export type LayoutStatus = "draft" | "published";
