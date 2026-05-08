@@ -1479,3 +1479,45 @@ achieved across all customer surfaces.**
 **Result:** Departments stem cell is now Apple-tier — liquid-smooth
 animations, zero token violations, dark-mode parity, and admin-driven
 through the same `ui_layouts` pipeline as every other Sovereign surface.
+
+---
+
+## Phase 32 — The Sovereign Retribution (Theme War & UI Purge)
+
+**Theme Engine Monopoly:**
+- `useSovereignTheme` now tracks every injected CSS variable in a module-
+  level `INJECTED_KEYS` set and **cleans them up before** every re-injection,
+  killing ghost colors. The hook also bails out (and clears any leftover
+  inline vars) when (a) `profile.theme_preference` is set, OR (b) `<html>`
+  already carries a `data-theme` attribute set by `ThemeContext`. The
+  Emperor's manual selection now wins absolutely.
+- `ThemeContext.setColorTheme` persists the choice to
+  `profiles.theme_preference` in the background (non-blocking) and the
+  provider hydrates from the same column on first auth, so the choice
+  survives across sessions and devices.
+
+**Departments Visual Purge (`DepartmentGrid`):**
+- Killed the JS gradient string. `tintBg` now returns a pure
+  `hsl(var(--dept-*))` color and is applied via `backgroundColor`.
+- Removed the dirty `blur-2xl` / `blur-3xl` color blobs from both Grid and
+  Stacked modes.
+- Removed `col-span-2 row-span-2 / min-h-[180px]` on the featured card and
+  added `grid-flow-dense` to eliminate the 1×2 hole.
+- Stacked mode wrapper now `overflow-hidden`; `y` mapping reduced to
+  `offset * 10` so cards stay inside the page envelope and never poke
+  above the TopBar. Cards shortened to `h-[340px]`.
+- Stacked drag now uses `dragElastic={0.2}` + `dragMomentum={false}` for a
+  clean snap.
+- CTA repainted from `bg-foreground text-background` to
+  `bg-primary text-primary-foreground` for pastel harmony.
+
+**Spiritual Alignment:**
+- `Sections.tsx` subscribes to `useSovereignPrayerStore` and applies the
+  exact same dimming envelope (`opacity-50 saturate-[.6] blur-[.4px]
+  transition-all duration-700`) used by `Home.tsx` whenever `isDormant`
+  is true.
+
+**Result:** The Theme War is over — `data-theme` always wins, ghost
+variables are scrubbed on every flip, and the Emperor's choice persists to
+the database. The Sections screen is now a clean, spiritually-aligned
+Apple-tier surface with zero blur smudges and no grid holes.
