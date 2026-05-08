@@ -1084,3 +1084,50 @@ blocks to skip catalog pre-fetch, (c) Eithar fulfillment pipeline at the
 Cart/Checkout layer (materialize the Waqf row from `salsabil_eithar_*`
 keys), (d) move `salsabil.recent_purchases` ledger from localStorage to a
 hardened RPC.
+
+---
+
+## Phase 22 — The Minimalist Re-Genesis & DST Correction
+*Status: ✅ Shipped*
+
+### Visual Re-Genesis (Reef Home → Pastel Minimalist)
+The Reef Al-Madina home surface has been stripped of banners, story circles
+and the department grid. The new Sovereign sequence is identity-led, not
+merchandising-led:
+
+1. `SmartGreeting` — time-aware salutation (مساء الخير، …)
+2. `AmanahTierProgress` — slim Apple-style loyalty bar
+3. `PersonalizedDealsRail` — discounts curated from the live catalog
+4. `BuyAgainRail` — Sovereign Matrix re-order (`useBuyAgainProducts`)
+5. `QuickMealsRail` — kitchen / ready-to-eat picks
+
+The DB row (`ui_layouts.page_key='reef_home'`) was updated to publish this
+order and `DEFAULT_REEF_HOME_ORDER` in `useUiLayout.ts` was aligned so the
+fallback face matches the Emperor's intent even in offline mode.
+
+### Spirit Engine — DST Patch (+60 min, Apr→Oct)
+`computePrayerTimes.ts` now ships an `isEgyptDst(now)` predicate computing
+the **last Friday of April** through the **last Thursday of October** and
+adds 60 minutes to every prayer time during that window. Resolves the
+~40-minute early Maghrib reported by the Emperor. `SovereignDormancyOverlay`
+inherits the correction automatically (it reads from the same store).
+
+### Performance — `useDailyCountdown` Singleton
+The hook is now backed by a single global Zustand store + one shared
+`setInterval`. Every additional consumer is free; mounting/unmounting no
+longer leaks intervals. Closes Phase 21 next-horizon item (a).
+
+### Registry Sync
+`SectionKey` union and `SECTION_REGISTRY` extended with the 5 new
+minimalist sections so the Admin SDUI editor can re-order them without
+code changes.
+
+### File map (Phase 22)
+- `src/core-os/spirit/computePrayerTimes.ts` — `isEgyptDst()` + DST offset
+- `src/apps/reef-al-madina/features/offers/hooks/useDailyCountdown.ts` — singleton
+- `src/apps/reef-al-madina/features/main-hub/components/AmanahTierProgress.tsx` — new
+- `src/apps/reef-al-madina/features/storefront/home/components/{BuyAgainRail,QuickMealsRail}.tsx` — new
+- `src/apps/reef-al-madina/features/storefront/home/components/LayoutFactory.tsx` — 5 new renderers
+- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts` — minimalist fallback
+- `src/core-os/sdui-engine/{types.ts, registry.ts}` — section keys + metadata
+- `ui_layouts` table — `reef_home` row repointed to the new sequence
