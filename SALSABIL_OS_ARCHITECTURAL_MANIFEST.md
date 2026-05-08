@@ -1,3 +1,80 @@
+# 🌌 THE ULTIMATE MANIFESTO: STEM CELL ARCHITECTURE & LEVEL-4 INTENT-TO-INTERFACE ENGINE
+
+> **Enshrined:** Phase 17 (Prologue) — 2026-05-08
+> **Authority:** The Emperor's Doctrine, ratified into the Sovereign Core.
+> **Scope:** Binding upon every kernel module, every tenant app, every future vertical.
+
+Salsabil OS is **not an application**. It is a **Meta-Platform** — a factory
+of digital empires — engineered along six immutable doctrines. All future
+phases (Theme Matrix, SDUI Level-4, Hakim Genesis) MUST conform to these.
+
+## I. The Meta-Platform Doctrine
+We do not build apps. We build a **factory of digital empires**. Every unit
+of the system is a **Stem Cell** carrying its own:
+- **Identity** (who/what it is, tenant scope, ownership)
+- **Behavior** (its rules, validations, side effects)
+- **Data** (its schema and reactive contract with the Matrix)
+- **Interface** (its visual DNA, adaptive across surfaces)
+- **Events** (its inputs/outputs to the Sovereign Event Bus)
+
+A Stem Cell is the atomic unit of value. Verticals (Reef, Maeen, Asrab,
+Benaa, Nabd, Khalil) are merely **compositions** of Stem Cells.
+
+## II. Adaptive Contextual Existence (Apple/Google Philosophy)
+Components have **no hardcoded layouts**. A Stem Cell **morphs automatically**
+based on its host environment:
+- On **Mobile** → Bottom Sheet / Card
+- On **POS** → Touch-optimized Button / Tile
+- On **Desktop** → Side Panel / Inline Pane
+- On **Wearable / Voice** → Reduced atomic projection
+
+The cell asks the environment "where am I?" and renders accordingly. No
+duplicated component trees per surface — one DNA, many expressions.
+
+## III. Reactive Database & Unidirectional Flow (Datalog / cFS Philosophy)
+We **do not poll**. The system is built on reactive DB principles:
+- The **Sovereign Matrix** (DB) is the single source of truth.
+- Cells **subscribe** to slices of the Matrix and update autonomously
+  when state shifts.
+- Data flows **unidirectionally**: Matrix → Cell → User → Event → Matrix.
+- No imperative `fetch()` loops; no manual cache juggling — invalidation
+  is a property of the subscription contract.
+
+## IV. The Logic Weaver
+Workflows, rules, and business logic are **configurations in the database**
+(JSON / Rule DSL), **not** hardcoded TypeScript functions. A new pricing
+model, a new approval flow, a new fulfillment graph is authored as data
+and woven by the Weaver runtime. Code becomes the interpreter; data
+becomes the program.
+
+## V. Hakim AI as the Stem Cell Injector
+Hakim is the **autonomous architect**. He:
+1. Interprets human intent (e.g. "I want a restaurant management system").
+2. Synthesizes the **Visual DNA** (SDUI JSON) and **Logical DNA**
+   (asset/contract/rule schemas) of the required Stem Cells.
+3. **Injects** them into the Matrix — minting an entire vertical without
+   a developer touching a file.
+
+Hakim is not a chatbot. He is the **factory's foreman**.
+
+## VI. Multi-Tenant Multi-Dimension Reality
+Reef Al Madina, Maeen, Benaa, Asrab — and every future empire — are
+**different instances (Tenants)** running on the **exact same Sovereign
+Kernel**. There is **one OS, many realities**. Tenancy is a dimension of
+state, not a fork of code. A patch to the kernel propagates to every
+empire instantly; a tenant's theme/contract/layout shifts only its own
+reality.
+
+---
+
+> **Binding clause:** Any code, schema, or doctrine that contradicts the
+> six articles above is, by definition, **legacy** and scheduled for
+> cleansing. The Core-OS (`src/core-os/`) is the only sanctified ground
+> for Stem Cell DNA. The `src/apps/` layer holds **tenant configurations
+> and presentation glue only** — never sovereign logic.
+
+---
+
 # 🏛️ SALSABIL OS — ARCHITECTURAL MANIFEST
 
 > **Generated:** Phase VIII-Dev v3 — **Restoration + Kernel Purification (Phase 2) complete**

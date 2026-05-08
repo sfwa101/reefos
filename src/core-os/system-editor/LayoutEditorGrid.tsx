@@ -19,7 +19,7 @@ import {
   SECTION_LABELS,
   PAGE_LABELS,
   useLayoutEditor,
-} from "@/apps/reef-al-madina/features/admin/hooks/useLayoutEditor";
+} from "@/core-os/system-editor/hooks/useLayoutEditor";
 import { SECTION_REGISTRY, type PageKey } from "@/core-os/sdui-engine/registry";
 import type {
   SectionConfig, SectionKey,

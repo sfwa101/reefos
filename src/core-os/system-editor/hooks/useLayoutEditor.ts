@@ -15,7 +15,7 @@ import type {
   SectionConfig,
   SectionKey,
   UiLayout,
-} from "@/apps/reef-al-madina/features/storefront/home/types/sdui.types";
+} from "@/core-os/sdui-engine/types";
 import {
   DEFAULT_PAGE_ORDER,
   PAGE_LABELS,
