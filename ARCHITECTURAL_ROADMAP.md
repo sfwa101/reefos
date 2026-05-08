@@ -1521,3 +1521,33 @@ through the same `ui_layouts` pipeline as every other Sovereign surface.
 variables are scrubbed on every flip, and the Emperor's choice persists to
 the database. The Sections screen is now a clean, spiritually-aligned
 Apple-tier surface with zero blur smudges and no grid holes.
+
+---
+
+## Phase 33 — Aesthetic Pivot & Matrix Purge
+
+**Date:** 2026-05-08
+
+### 1. The HomeGoods Virus — Eradicated
+Root cause: `useHomeOrchestrator` hard-coded `useHomeProductsQuery(48, "home")`,
+so EVERY category page (Meat, Dairy, Pharmacy, Sweets…) silently rendered the
+HomeGoods catalog regardless of `pageKey`. The DB was clean — the bug lived
+in the orchestrator.
+
+**Fix:** Orchestrator now accepts an optional `ProductSource`. `SduiCategoryPage`
+maps `themeKey → ProductSource` (with `homeTools → home` legacy alias) and
+passes it through, so each category fetches its OWN products.
+
+### 2. Departments Hub — Horizontal Slices
+Removed: dual-mode toggle, `drag="y"` stacked App-Switcher, blur blobs,
+`bg-card/80` translucent layers.
+
+Implemented: a single horizontal `snap-x snap-mandatory` carousel of
+`260×380` vertical slices. Opaque `hsl(var(--dept-*))` backgrounds, side
+padding `calc(50% - 130px)` so first/last cards snap to viewport center.
+Per-card `framer-motion` stagger entry + 15ms haptic on tap.
+
+### 3. Result
+- Standard categories render the correct products again.
+- Departments hub flows like liquid silk on iOS Safari.
+- 100% token compliance maintained (no raw HSL strings, no translucent fakes).
