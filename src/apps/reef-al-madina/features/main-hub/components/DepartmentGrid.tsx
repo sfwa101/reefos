@@ -254,7 +254,7 @@ export const DepartmentGrid = () => {
     () =>
       DEPARTMENTS.map((d) => ({
         ...d,
-        unavailable: !zone.acceptsPerishables && d.perishable,
+        unavailable: Boolean(!zone.acceptsPerishables && d.perishable),
       })),
     [zone.acceptsPerishables],
   );
