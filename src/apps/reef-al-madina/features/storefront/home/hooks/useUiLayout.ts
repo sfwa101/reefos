@@ -51,11 +51,39 @@ const DEFAULT_CATEGORY_ORDER: SectionKey[] = [
   "ProductsGrid",
 ];
 
+// Phase 30 — Advanced Stem Cell Ascendancy: complex domain pages.
+// Each fallback is a single-section locked order driven by the primitive's
+// `variant` config. Even when the DB row is missing the page renders
+// correctly because the primitive itself defaults to its only variant.
+const DEFAULT_RESTAURANTS_ORDER: SectionKey[] = ["SduiMenuList"];
+const DEFAULT_SUBSCRIPTIONS_ORDER: SectionKey[] = ["SduiWizardChain"];
+const DEFAULT_BASKETS_ORDER: SectionKey[] = ["SduiWizardChain"];
+const DEFAULT_WHOLESALE_ORDER: SectionKey[] = ["SduiComparisonGrid"];
+const DEFAULT_COMPARE_HG_ORDER: SectionKey[] = ["SduiComparisonGrid"];
+const DEFAULT_SCHOOL_LIBRARY_ORDER: SectionKey[] = ["SduiWizardChain"];
+
+// Locked variant fallbacks per page so the wizard/comparison primitives
+// know which concrete domain to render when the DB config is unavailable.
+const VARIANT_FALLBACK: Record<string, { section: SectionKey; variant: string }> = {
+  reef_restaurants: { section: "SduiMenuList", variant: "restaurants" },
+  reef_subscriptions: { section: "SduiWizardChain", variant: "subscriptions" },
+  reef_baskets: { section: "SduiWizardChain", variant: "baskets" },
+  reef_wholesale: { section: "SduiComparisonGrid", variant: "wholesale" },
+  reef_compare_home_goods: { section: "SduiComparisonGrid", variant: "compare_home_goods" },
+  reef_school_library: { section: "SduiWizardChain", variant: "school_library" },
+};
+
 function fallbackOrderFor(pageKey: string): SectionKey[] {
   if (pageKey === "reef_home") return DEFAULT_REEF_HOME_ORDER;
   if (pageKey === "departments_hub") return DEFAULT_DEPARTMENTS_HUB_ORDER;
   if (pageKey === "offers_hub") return DEFAULT_OFFERS_HUB_ORDER;
   if (pageKey === "maeen_hub") return DEFAULT_MAEEN_HUB_ORDER;
+  if (pageKey === "reef_restaurants") return DEFAULT_RESTAURANTS_ORDER;
+  if (pageKey === "reef_subscriptions") return DEFAULT_SUBSCRIPTIONS_ORDER;
+  if (pageKey === "reef_baskets") return DEFAULT_BASKETS_ORDER;
+  if (pageKey === "reef_wholesale") return DEFAULT_WHOLESALE_ORDER;
+  if (pageKey === "reef_compare_home_goods") return DEFAULT_COMPARE_HG_ORDER;
+  if (pageKey === "reef_school_library") return DEFAULT_SCHOOL_LIBRARY_ORDER;
   if (pageKey.startsWith("category_")) return DEFAULT_CATEGORY_ORDER;
   return DEFAULT_HOME_ORDER;
 }
@@ -106,12 +134,18 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
   const layout = useMemo<UiLayout | null>(() => {
     if (query.data) return query.data;
     if (query.isLoading) return null;
-    // Fallback: never render blank.
+    // Fallback: never render blank. Inject the locked variant into
+    // section_config so the Phase 30 primitives know which concrete
+    // domain to render even without a DB row.
+    const variantFb = VARIANT_FALLBACK[pageKey];
+    const section_config = variantFb
+      ? { [variantFb.section]: { variant: variantFb.variant } }
+      : {};
     return {
       id: "fallback",
       page_key: pageKey,
       section_order: fallbackOrderFor(pageKey),
-      section_config: {},
+      section_config: section_config as UiLayout["section_config"],
       section_titles: {},
       is_active: true,
       status: "published",

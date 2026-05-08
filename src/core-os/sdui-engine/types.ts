@@ -35,7 +35,11 @@ export type SectionKey =
   | "PredictiveRefillRail"
   // Phase 29 — Sovereign Unification (hub-level stem cells)
   | "SpatioTemporalOffersRail"
-  | "MaeenLauncherGrid";
+  | "MaeenLauncherGrid"
+  // Phase 30 — Advanced Stem Cell Ascendancy (complex domain primitives)
+  | "SduiMenuList"
+  | "SduiWizardChain"
+  | "SduiComparisonGrid";
 
 export type SectionConfig = {
   /** when false, the section is hidden even if listed in `section_order` */
