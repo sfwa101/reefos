@@ -9,9 +9,13 @@
  * Tenant is hardcoded to `reef` for now; Phase 17 Part 2 wires it through
  * the SovereignThemeProvider context.
  */
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import {
+  useSovereignContext,
+  type PersonaRow,
+} from "@/core-os/capabilities/store/useSovereignContext";
 
 export type ThemeDnaPayload = {
   colors?: Record<string, string>;
@@ -60,21 +64,69 @@ function injectDna(payload: ThemeDnaPayload | undefined) {
   }
 }
 
+/** Fetch the persona row matching the active key (Phase 18 Part 1). */
+async function fetchPersona(personaKey: string): Promise<PersonaRow | null> {
+  const { data, error } = await supabase
+    .from("salsabil_persona_matrix")
+    .select(
+      "id, persona_key, label_ar, icon, theme_overlay, capabilities, role_predicates, is_active, sort_order",
+    )
+    .eq("persona_key", personaKey)
+    .eq("is_active", true)
+    .maybeSingle();
+  if (error) throw error;
+  return (data as unknown as PersonaRow | null) ?? null;
+}
+
+/** Deep-merge persona overlay on top of base DNA (colors + effects). */
+function mergeDna(
+  base: ThemeDnaPayload | undefined,
+  overlay: PersonaRow["theme_overlay"] | undefined,
+): ThemeDnaPayload {
+  return {
+    colors: { ...(base?.colors ?? {}), ...(overlay?.colors ?? {}) },
+    effects: { ...(base?.effects ?? {}), ...(overlay?.effects ?? {}) },
+  };
+}
+
 export function useSovereignTheme(tenantId: string = "reef") {
-  const query = useQuery({
+  const themeQuery = useQuery({
     queryKey: [...SOVEREIGN_THEME_QUERY_KEY, tenantId],
     queryFn: () => fetchActiveTheme(tenantId),
     staleTime: 60_000,
     refetchOnWindowFocus: false,
   });
 
+  const activePersonaKey = useSovereignContext((s) => s.activePersonaKey);
+  const setPersonaData = useSovereignContext((s) => s.setPersonaData);
+
+  const personaQuery = useQuery({
+    queryKey: ["sovereign-persona", activePersonaKey],
+    queryFn: () => fetchPersona(activePersonaKey),
+    staleTime: 60_000,
+    refetchOnWindowFocus: false,
+  });
+
+  // Hydrate the Zustand store with the resolved persona row.
   useEffect(() => {
-    injectDna(query.data?.dna_payload);
-  }, [query.data]);
+    setPersonaData(personaQuery.data ?? null);
+  }, [personaQuery.data, setPersonaData]);
+
+  const mergedDna = useMemo(
+    () => mergeDna(themeQuery.data?.dna_payload, personaQuery.data?.theme_overlay),
+    [themeQuery.data, personaQuery.data],
+  );
+
+  // Inject merged DNA whenever base theme OR active persona changes.
+  useEffect(() => {
+    injectDna(mergedDna);
+  }, [mergedDna]);
 
   return {
-    theme: query.data ?? null,
-    loading: query.isLoading,
-    error: query.error as Error | null,
+    theme: themeQuery.data ?? null,
+    loading: themeQuery.isLoading,
+    error: themeQuery.error as Error | null,
+    persona: personaQuery.data ?? null,
+    activePersonaKey,
   };
 }

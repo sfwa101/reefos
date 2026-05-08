@@ -734,3 +734,22 @@ Phase 19+ work:
 9. Real-Time Zakat Purifier
 
 No code mutations. Pure doctrinal expansion.
+
+## Phase 18 Part 1 — The Sovereign Persona Engine
+
+- Created `salsabil_persona_matrix` table with `persona_key`, `theme_overlay`,
+  `capabilities`, `role_predicates`. Seeded with `consumer` (default) and
+  `business` (corporate-navy dark overlay).
+- Public read RLS; admin-only write RLS via `has_role(...,'admin')`.
+- New Zustand store `src/core-os/capabilities/store/useSovereignContext.ts`
+  holds `activePersonaKey` + `activePersonaData`, persists choice in
+  `localStorage` under `salsabil_active_persona`.
+- `useSovereignTheme` now fetches the active persona row in parallel with the
+  tenant theme and **deep-merges** `theme_overlay` (colors + effects) on top
+  of the base DNA before injecting CSS variables — instant face morphing
+  without reload or logout.
+- Etched the 9 Legendary Vectors of the Islamic Economic Graph into Doctrine
+  7 of the manifest (Baraka Engine, Sovereign Mesh, Stem-Cell Mudarabah,
+  Time as Asset, Halal Firewall, Digital Waqf, Amanah Graph, Fara'id Engine,
+  Zakat Purifier).
+- UI Switcher deferred to Part 2 per the Emperor's command.

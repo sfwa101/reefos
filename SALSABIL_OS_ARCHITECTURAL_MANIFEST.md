@@ -992,6 +992,38 @@ ledger and a single sovereign identity. Every transaction, message, and asset
 flows through the same graph, governed by Islamic economic principles
 (riba-free settlement, zakat-aware accounting, modesty constraints).
 
+### The 9 Legendary Vectors (Ultimate Vision Roadmap)
+
+The Islamic Economic Graph crystallizes into nine binding architectural vectors
+— the compass for all Phase 19+ work:
+
+1. **The Baraka Engine** — Ethical Logistics: routing weighted by driver/vendor
+   financial need and real-time social context, not only speed/cost.
+2. **Sovereign Mesh Network** — Offline Economy: POS + Tayseer wallets transact
+   over Bluetooth/WiFi-Direct P2P mesh and reconcile to the Sovereign Ledger
+   on reconnect.
+3. **Stem-Cell Mudarabah** — Micro-Equity: bank loans replaced by instant
+   crowd-funding of merchant assets/shipments via profit-sharing smart contracts.
+4. **Time as a Sovereign Asset** — Maeen/Binaa users trade labor hours directly
+   as a quantifiable currency, with no fiat conversion required.
+5. **The Halal Firewall & Riba-Blocker** — DB-level immune system: contracts
+   implying guaranteed returns or late penalties freeze into
+   `Suspended_for_Audit` and route to a Sharia Supervisory Board UI.
+6. **Programmable Digital Waqf** — Fractional ownership of productive assets
+   designated as endowments; the USA Engine perpetually routes 100% of profits
+   to designated charity ledgers.
+7. **The Amanah (Trust) Graph** — Capitalist 5-star ratings replaced by a
+   holistic Trust Score (debt punctuality, charity, fulfilled commitments)
+   that unlocks interest-free credit and premium OS privileges.
+8. **Automated Fara'id Engine** — On verified passing, the ledger freezes the
+   Tayseer wallet, settles internal debts, deducts up to 1/3 for wills, and
+   distributes the remainder to heirs by exact Sharia fractions.
+9. **Real-Time Zakat Purifier** — Tayseer continuously computes Hawl + Nisab
+   on ledger balances, surfacing a 1-tap purification button that funds
+   verified low-income accounts within Reef Al-Madina.
+
+---
+
 ## Doctrine 8 — The Dual-Face Currency (Role Polymorphism)
 
 Every entity in Salsabil has two faces: **Consumer** and **Business**. A user
