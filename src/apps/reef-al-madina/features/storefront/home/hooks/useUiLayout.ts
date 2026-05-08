@@ -134,12 +134,18 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
   const layout = useMemo<UiLayout | null>(() => {
     if (query.data) return query.data;
     if (query.isLoading) return null;
-    // Fallback: never render blank.
+    // Fallback: never render blank. Inject the locked variant into
+    // section_config so the Phase 30 primitives know which concrete
+    // domain to render even without a DB row.
+    const variantFb = VARIANT_FALLBACK[pageKey];
+    const section_config = variantFb
+      ? { [variantFb.section]: { variant: variantFb.variant } }
+      : {};
     return {
       id: "fallback",
       page_key: pageKey,
       section_order: fallbackOrderFor(pageKey),
-      section_config: {},
+      section_config: section_config as UiLayout["section_config"],
       section_titles: {},
       is_active: true,
       status: "published",
