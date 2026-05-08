@@ -110,7 +110,8 @@ export default function AllocationMonitor() {
 
   async function loadAllocation(orderId: string) {
     setSelectedOrder(orderId);
-    const { data, error } = await supabase.rpc("allocation_overview", { _order_id: orderId });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any).rpc("allocation_overview", { _order_id: orderId });
     if (error) {
       toast.error("تعذّر تحميل تفاصيل التوزيع");
       return;
