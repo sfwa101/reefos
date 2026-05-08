@@ -1171,3 +1171,38 @@ into standard customer TopBars.
 pill is back in its rightful sticky slot, the Switcher is invisible to
 single-persona accounts, and the Spirit Engine breathes in lock-step with
 the real Gamasa Athan.
+
+---
+
+## Phase 25 — The Sovereign Resurrection Strike (2026-05-08)
+
+**Crisis:** All routes returning HTTP 500. Forensic audit traced a single
+root cause — Phase 24's `useAuth()` call inside `useSovereignTheme` ran
+above its provider, since `<SovereignThemeProvider>` was the parent of
+`<AuthProvider>`. SSR threw `useAuth must be used within AuthProvider` on
+every render, h3 swallowed it into the catastrophic-500 envelope.
+
+**Strikes executed:**
+
+1. **Provider Tree Re-ordering** — `src/routes/__root.tsx` rewired so
+   `<AuthProvider>` is the parent of `<SovereignThemeProvider>`. Auth
+   context is now guaranteed to exist before any theme hook executes.
+2. **Theme Authority Safety Guard** — Added `useAuthOptional()` to
+   `AuthContext.tsx` (returns `null` instead of throwing). Refactored
+   `useSovereignTheme.ts` to consume it, so even out-of-tree mounts or
+   pre-hydration ticks degrade gracefully to the base DNA without locking
+   the app behind a 500.
+3. **Golden UI Verified** — `Home.tsx` remains the pure SDUI shell on
+   `reef_home`; `useDailyCountdown` Zustand singleton confirmed intact —
+   Liquid Silk performance preserved.
+
+**Files touched:**
+
+- `src/routes/__root.tsx`
+- `src/context/AuthContext.tsx`
+- `src/core-os/theme/hooks/useSovereignTheme.ts`
+- `ARCHITECTURAL_ROADMAP.md`
+
+**Outcome:** SSR boots cleanly. The "مساء الخير، حسن" greeting is back,
+the Pastel Minimalist hub is live, and the Theme Authority Lock now fails
+safe instead of fatal.
