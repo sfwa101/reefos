@@ -11,6 +11,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
+// Generic category fallback (Meat, Sweets, Pharmacy, Home Goods, etc.)
 const DEFAULT_HOME_ORDER: SectionKey[] = [
   "HeroBanner",
   "SearchAndFilters",
@@ -19,6 +20,23 @@ const DEFAULT_HOME_ORDER: SectionKey[] = [
   "BestSellersRail",
   "ProductsGrid",
 ];
+
+// Reef Al-Madina main consumer storefront fallback — uses the Main Hub
+// stem cells (greeting + sticky search, story circles, promo banners,
+// department grid) followed by the merchandising rails.
+const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
+  "MainSearchHeader",
+  "StoryCircles",
+  "PromotionSlider",
+  "DepartmentGrid",
+  "BundlesRail",
+  "BestSellersRail",
+  "ProductsGrid",
+];
+
+function fallbackOrderFor(pageKey: string): SectionKey[] {
+  return pageKey === "reef_home" ? DEFAULT_REEF_HOME_ORDER : DEFAULT_HOME_ORDER;
+}
 
 function readPreviewMode(): LayoutStatus {
   if (typeof window === "undefined") return "published";
