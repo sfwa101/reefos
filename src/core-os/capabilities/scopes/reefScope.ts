@@ -19,7 +19,7 @@ export const reefScope: OmniScope = {
       .ilike("name", `%${query}%`)
       .limit(8);
     if (signal.aborted || !data) return [];
-    return data.map((p) => ({
+    return data.map((p: { id: string; name: string; category: string | null }) => ({
       id: p.id,
       title: p.name,
       subtitle: p.category ?? undefined,
