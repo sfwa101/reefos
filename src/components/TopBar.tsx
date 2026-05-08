@@ -87,7 +87,7 @@ const TopBar = () => {
         className="fixed inset-x-0 top-0 z-40 bg-background/80 backdrop-blur-xl"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="mx-auto grid h-14 w-full max-w-md grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:max-w-[1400px] lg:px-6">
+        <div dir="ltr" className="mx-auto grid h-14 w-full max-w-md grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:max-w-[1400px] lg:px-6">
           {/* LEFT — Cart */}
           <Link
             to="/cart"
@@ -106,7 +106,7 @@ const TopBar = () => {
                   animate={{ width: "auto", opacity: 1, marginRight: 2, paddingRight: 14 }}
                   exit={{ width: 0, opacity: 0, marginRight: 0, paddingRight: 0 }}
                   transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
-                  className="overflow-hidden whitespace-nowrap font-display text-sm font-bold tabular-nums"
+                  className="overflow-hidden whitespace-nowrap font-display text-[15px] font-extrabold tabular-nums tracking-tight"
                 >
                   {fmtCompact(total)}
                 </motion.span>
