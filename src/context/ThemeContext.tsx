@@ -79,6 +79,17 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const setColorTheme = (c: ColorTheme) => {
     setColorThemeState(c);
     localStorage.setItem("reef-color", c);
+    // Persist to profile so the Emperor's choice survives across sessions/devices.
+    void (async () => {
+      try {
+        const { data } = await supabase.auth.getUser();
+        const uid = data.user?.id;
+        if (!uid) return;
+        await supabase.from("profiles").update({ theme_preference: c }).eq("id", uid);
+      } catch {
+        /* non-blocking */
+      }
+    })();
   };
 
   const value = useMemo<ThemeCtx>(
