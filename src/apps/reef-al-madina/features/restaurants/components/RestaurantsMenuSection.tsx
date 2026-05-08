@@ -185,7 +185,7 @@ const RestaurantSection = ({
 const slug = (s: string) =>
   "rest-" + s.replace(/\s+/g, "-").toLowerCase().slice(0, 40);
 
-const Restaurants = () => {
+const RestaurantsMenuSection = () => {
   const theme = storeThemes.restaurants;
   const [items, setItems] = useState<RestoProduct[]>([]);
   const [loading, setLoading] = useState(true);
@@ -355,4 +355,4 @@ const Restaurants = () => {
   );
 };
 
-export default Restaurants;
+export default RestaurantsMenuSection;

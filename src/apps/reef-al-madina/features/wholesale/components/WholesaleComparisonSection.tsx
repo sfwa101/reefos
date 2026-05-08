@@ -28,7 +28,7 @@ const cats: StoreCategory[] = [
   { id: "pets", name: "حيوانات", match: (p) => p.source === "wholesale" && p.category === "أغذية الحيوانات" },
 ];
 
-const Wholesale = () => {
+const WholesaleComparisonSection = () => {
   const bulkProducts = useMemo(() => buildBulk(), []);
   return (
   <SinglePageStore
@@ -87,4 +87,4 @@ const Wholesale = () => {
   );
 };
 
-export default Wholesale;
+export default WholesaleComparisonSection;

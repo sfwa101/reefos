@@ -18,7 +18,7 @@ const categories = [
   { id: "مناسبات", name: "مناسبات" },
 ];
 
-const Baskets = () => {
+const BasketsBuilderSection = () => {
   const theme = storeThemes.baskets;
   const [active, setActive] = useState("all");
   const { subs } = useSubscriptions();
@@ -152,4 +152,4 @@ const Baskets = () => {
   );
 };
 
-export default Baskets;
+export default BasketsBuilderSection;

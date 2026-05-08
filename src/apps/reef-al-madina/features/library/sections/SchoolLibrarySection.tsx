@@ -21,7 +21,7 @@ import { BorrowSheet } from "@/apps/reef-al-madina/features/library/components/B
 import { BundlesGrid } from "@/apps/reef-al-madina/features/library/components/BundlesGrid";
 import { PrintWizard } from "@/apps/reef-al-madina/features/library/components/PrintWizard";
 
-const SchoolLibrary = () => {
+const SchoolLibrarySection = () => {
   const [tab, setTab] = useState<TabKey>("store");
   const [kycOpen, setKycOpen] = useState(false);
   const [borrowProduct, setBorrowProduct] = useState<Product | null>(null);
@@ -142,4 +142,4 @@ const SchoolLibrary = () => {
   );
 };
 
-export default SchoolLibrary;
+export default SchoolLibrarySection;

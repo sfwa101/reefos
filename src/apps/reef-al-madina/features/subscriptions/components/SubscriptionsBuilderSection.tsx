@@ -34,7 +34,7 @@ const weekDays = [
 ] as const;
 type DayId = typeof weekDays[number]["id"];
 
-const Subscriptions = () => {
+const SubscriptionsBuilderSection = () => {
   const [planId, setPlanId] = useState<PlanId>("maintain");
   const [freq, setFreq] = useState(frequencies[0].id);
   const [dur, setDur] = useState(durations[1].id);
@@ -422,4 +422,4 @@ const Subscriptions = () => {
   );
 };
 
-export default Subscriptions;
+export default SubscriptionsBuilderSection;

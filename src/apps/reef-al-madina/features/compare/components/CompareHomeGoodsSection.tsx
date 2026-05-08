@@ -20,7 +20,7 @@ import { toast } from "sonner";
 
 const fmt = (n: number) => `${toLatin(n.toLocaleString("en-US"))} ج.م`;
 
-const CompareHomeGoods = () => {
+const CompareHomeGoodsSection = () => {
   const { items, remove, clear } = useCompare();
   const { add } = useCartActions();
 
@@ -288,4 +288,4 @@ const Trust = ({
   </div>
 );
 
-export default CompareHomeGoods;
+export default CompareHomeGoodsSection;
