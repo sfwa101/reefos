@@ -86,20 +86,21 @@ export default function CostBulk() {
     if (dirty.length === 0) { toast.info("لا تغييرات"); return; }
     setSaving(true);
     try {
-      const updates = dirty.map((id) => {
-        const e = edits[id];
-        const patch: Record<string, number> = {};
-        if (e.cost && !isNaN(Number(e.cost))) patch.cost_price = Number(e.cost);
-        if (e.aff !== undefined && e.aff !== "" && !isNaN(Number(e.aff))) patch.affiliate_commission_pct = Number(e.aff);
-        return { id, patch };
-      }).filter((u) => Object.keys(u.patch).length > 0);
-
-      // batch updates
-      for (const u of updates) {
-        const { error } = await __sb.from("products").update(u.patch as never).eq("id", u.id);
-        if (error) throw error;
+      const byId = new Map((rows ?? []).map((r) => [r.id, r] as const));
+      let saved = 0;
+      for (const skuId of dirty) {
+        const e = edits[skuId];
+        const row = byId.get(skuId);
+        if (!row) continue;
+        if (e.cost && !isNaN(Number(e.cost))) {
+          await upsertSkuCost(skuId, Number(e.cost));
+        }
+        if (e.aff !== undefined && e.aff !== "" && !isNaN(Number(e.aff))) {
+          await upsertAssetAffiliatePct(row.asset_id, Number(e.aff));
+        }
+        saved++;
       }
-      toast.success(`تم حفظ ${updates.length} منتج`);
+      toast.success(`تم حفظ ${saved} منتج`);
       await load();
     } catch (err) {
       toast.error("فشل الحفظ: " + (err as Error).message);
