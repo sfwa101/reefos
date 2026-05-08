@@ -111,7 +111,8 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
       const [prof, wal, ord] = await Promise.all([
         supabase.from("profiles").select("id,full_name,phone,avatar_url,created_at,occupation,household_size,preferred_locale").eq("id", customerId).maybeSingle(),
         supabase.from("wallet_balances").select("balance,points,cashback,coupons").eq("user_id", customerId).maybeSingle(),
-        supabase.from("orders").select("total,created_at").eq("user_id", customerId).limit(1000),
+        // Sovereign Matrix: lifetime spend = sum of master_orders.total_amount for this customer.
+        supabase.from("salsabil_master_orders").select("total_amount,created_at").eq("customer_id", customerId).limit(1000),
       ]);
 
       if (cancelled) return;
@@ -119,7 +120,8 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
       setProfile((prof.data as Profile) ?? null);
       setWallet((wal.data as WalletRow) ?? { balance: 0, points: 0, cashback: 0, coupons: 0 });
 
-      const orders = (ord.data ?? []) as { total: number; created_at: string }[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const orders = ((ord.data ?? []) as any[]).map((o) => ({ total: Number(o.total_amount ?? 0), created_at: o.created_at as string }));
       const total_spent = orders.reduce((a, b) => a + Number(b.total ?? 0), 0);
       const last_order_at = orders.length
         ? orders.map((o) => o.created_at).sort().slice(-1)[0]
@@ -136,14 +138,26 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
   // DataSource for the orders mini-grid — same stem cell, just a user_id filter via custom fetcher.
   const ordersDataSource: DataSource<OrderRow> = useMemo(() => ({
     fetcher: async () => {
+      // Sovereign Matrix: customer's master orders, with aggregated headline status from child nodes.
       const { data, error } = await supabase
-        .from("orders")
-        .select("id,total,status,created_at")
-        .eq("user_id", customerId)
+        .from("salsabil_master_orders")
+        .select("id,total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+        .eq("customer_id", customerId)
         .order("created_at", { ascending: false })
         .limit(100);
       if (error) throw error;
-      return (data ?? []) as OrderRow[];
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return ((data ?? []) as any[]).map((m) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const nodes: any[] = m.salsabil_fulfillment_nodes ?? [];
+        const statuses = nodes.map((n) => n.status);
+        const headline =
+          statuses.length === 0 ? (m.status ?? "pending") :
+          statuses.every((s) => s === "delivered") ? "delivered" :
+          statuses.every((s) => s === "cancelled") ? "cancelled" :
+          (statuses.find((s) => !["delivered","cancelled"].includes(s)) ?? m.status ?? "pending");
+        return { id: m.id, total: Number(m.total_amount ?? 0), status: headline, created_at: m.created_at } as OrderRow;
+      });
     },
     searchKeys: ["id", "status"],
   }), [customerId]);
