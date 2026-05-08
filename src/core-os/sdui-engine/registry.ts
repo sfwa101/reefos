@@ -18,7 +18,14 @@ export type PageKey =
   // Phase 29 — Sovereign Unification page keys
   | "offers_hub"
   | "maeen_hub"
-  | "category_storefront";
+  | "category_storefront"
+  // Phase 30 — Advanced Stem Cell Ascendancy (complex domain pages)
+  | "reef_restaurants"
+  | "reef_subscriptions"
+  | "reef_baskets"
+  | "reef_wholesale"
+  | "reef_compare_home_goods"
+  | "reef_school_library";
 
 export type AllowedOverride =
   | "padding"
