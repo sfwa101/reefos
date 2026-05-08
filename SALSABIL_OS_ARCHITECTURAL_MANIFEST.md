@@ -1259,3 +1259,59 @@ Any flow that requests demographic data already derivable from the National
 ID, exposes the full ID in daily UX, treats corporate accounts as faceless,
 or requires female users to upload real photographs is **non-canonical** and
 must be rejected at architectural review.
+
+---
+
+## Doctrine 10 — The Spatio-Temporal Spirit Protocol
+
+سلسبيل OS لا يعمل خارج الزمان والمكان والروح. كل سطح تجاري يجب أن يتنفس
+مع المستخدم: مع وقته، مع حيّه، مع تقواه، ومع مستوى ائتمانه (Amanah).
+
+### X.1 Sovereign Dormancy (السكون السيادي)
+
+النظام يدخل حالة **Dormancy** تلقائياً خلال نوافذ الأذان (Athan → +20 min).
+خلالها: تخفت العروض التسويقية (opacity/saturation)، تتوقف العدّادات
+المتحركة، ويظهر `SovereignDormancyOverlay` بنبرة محترمة. يختلف الخطاب
+حسب الجنس (Doctrine 9.4): دعوة جماعية للرجال، تنبيه على الوقت للنساء.
+المصدر الوحيد للحقيقة: `useSovereignPrayerStore.isDormant`.
+
+### X.2 Spatio-Temporal Offers Matrix
+
+العروض ليست خصومات ثابتة — هي **مصفوفة Spatio-Temporal**: كل صف في
+`offers_matrix` يحمل (block_type, time_window, geo_scope, amanah_tier,
+honest_margin, allow_fakka_roundup, allow_eithar). صفحة `/offers` هي
+سطح SDUI Level-4 خالص يعرض هذه المصفوفة عبر `BlockRegistry`.
+
+### X.3 Sovereign Vectors المشتركة
+
+كل بلوك عرض يحمل ثلاثة موجّهات سيادية إلزامية:
+- **Baraka** (`honest_margin`): شفافية الهامش — يُعرض كـ `HonestMarginBadge`.
+- **Amanah Lock** (`amanah_tier`): قفل العروض حسب طبقة الثقة عبر
+  `AmanahLockShield` (طبقة upsell ضبابية للطبقات الأدنى).
+- **Smart Fakka** (`allow_fakka_roundup`): التقريب لأقرب جنيه يذهب
+  للوقف، مدمج في خلية العرض نفسها لا في الخروج.
+
+### X.4 Social-Economic Stem Cells
+
+ثلاث خلايا جديدة تمثّل التقاء الزمان والمكان والهوية:
+- **Neighborhood Pool** — نبض الحيّ: عدّ الطلبات الحيّة في نفس المدينة
+  آخر 60 دقيقة، ودعوة للانضمام إلى Group-Buy بنقرة واحدة.
+- **Predictive Refill Rail** — دورة حياة الاستهلاك: يقترح إعادة شراء
+  المستهلكات اعتماداً على دفتر `salsabil.recent_purchases` المحلي.
+- **Eithar Toggle** (الإيثار): زرّ على كل عرض عالي القيمة — يدفع
+  المستخدم السعر الكامل وتُسجَّل وحدة ثانية كوقف موجَّه إقليمياً.
+
+### X.5 The Breathing Storefront
+
+الواجهة الرئيسية `Home.tsx` هي قشرة SDUI تشترك في `isDormant`
+وتتفاعل بصرياً (dimmed opacity + paused animations) بحيث "يتنفس"
+المتجر حرفياً مع المستخدم. لا تشغيل تسويق فوق الأذان، أبداً.
+
+---
+
+**Binding clause (Doctrine 10):** أيّ سطح يعرض ترويجاً أو عدّاداً أو
+تنبيهاً تسويقياً يجب أن يقرأ `useSovereignPrayerStore.isDormant` ويحترم
+حالة السكون. أيّ بلوك عرض جديد في `BlockRegistry` يجب أن يطبّق
+الموجّهات الثلاثة (Baraka / Amanah / Fakka) ويتوافق مع مصفوفة
+`offers_matrix`. خلاف ذلك يُعتبر **non-canonical** ويُرفض في المراجعة
+المعمارية.
