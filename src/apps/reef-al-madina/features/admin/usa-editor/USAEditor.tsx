@@ -433,6 +433,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   dir="ltr"
                 />
               </Field>
+              {isNew && <DuplicateAdvisor />}
               <SaveButton />
             </TabsContent>
 
