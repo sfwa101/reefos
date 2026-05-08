@@ -32,20 +32,20 @@ export const MainSearchHeader = () => {
     <>
       <div ref={sentinelRef} aria-hidden className="h-px w-full" />
       <section
-        className={`sticky top-[88px] z-30 -mx-4 px-4 py-2 transition-all duration-300 ease-apple ${
+        className={`sticky top-[calc(env(safe-area-inset-top)+56px)] z-30 -mx-4 px-4 py-1.5 transition-all duration-300 ease-apple ${
           pinned
-            ? "bg-background/85 backdrop-blur-xl border-b border-border/40 shadow-[0_1px_0_0_hsl(var(--border)/0.3)]"
+            ? "bg-background/85 backdrop-blur-2xl border-b border-border/40 shadow-[0_1px_0_0_hsl(var(--border)/0.3)]"
             : "bg-transparent border-b border-transparent"
         }`}
       >
         <Link
           to="/search"
           search={{ q: "" }}
-          className="flex w-full items-center gap-2 rounded-full bg-secondary/70 px-4 py-3 text-right ring-1 ring-border/30 transition active:scale-[0.99]"
+          className="flex h-10 w-full items-center gap-2 rounded-full bg-secondary/70 px-3.5 text-right ring-1 ring-border/30 shadow-[inset_0_1px_0_0_hsl(var(--background)/0.5),0_1px_2px_0_hsl(var(--foreground)/0.04)] transition active:scale-[0.99]"
           dir="rtl"
         >
           <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
-          <span className="flex-1 truncate text-[13.5px] font-medium text-muted-foreground">
+          <span className="flex-1 truncate text-[13px] font-medium text-muted-foreground">
             {SEARCH_PLACEHOLDERS[0] ?? "ابحث في ريف المدينة…"}
           </span>
           <button
@@ -56,9 +56,9 @@ export const MainSearchHeader = () => {
               e.stopPropagation();
               window.dispatchEvent(new CustomEvent("reef:open-barcode"));
             }}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 text-primary"
+            className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary"
           >
-            <ScanLine className="h-4 w-4" strokeWidth={2.6} />
+            <ScanLine className="h-3.5 w-3.5" strokeWidth={2.6} />
           </button>
         </Link>
       </section>
