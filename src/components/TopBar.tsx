@@ -87,7 +87,7 @@ const TopBar = () => {
         className="fixed inset-x-0 top-0 z-40 bg-background/80 backdrop-blur-xl"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="mx-auto grid h-14 w-full max-w-md grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:max-w-[1400px] lg:px-6">
+        <div dir="ltr" className="mx-auto grid h-14 w-full max-w-md grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:max-w-[1400px] lg:px-6">
           {/* LEFT — Cart */}
           <Link
             to="/cart"
