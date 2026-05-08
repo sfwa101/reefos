@@ -5277,6 +5277,48 @@ export type Database = {
         }
         Relationships: []
       }
+      salsabil_persona_matrix: {
+        Row: {
+          capabilities: Json
+          created_at: string
+          icon: string | null
+          id: string
+          is_active: boolean
+          label_ar: string
+          persona_key: string
+          role_predicates: Json
+          sort_order: number
+          theme_overlay: Json
+          updated_at: string
+        }
+        Insert: {
+          capabilities?: Json
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label_ar: string
+          persona_key: string
+          role_predicates?: Json
+          sort_order?: number
+          theme_overlay?: Json
+          updated_at?: string
+        }
+        Update: {
+          capabilities?: Json
+          created_at?: string
+          icon?: string | null
+          id?: string
+          is_active?: boolean
+          label_ar?: string
+          persona_key?: string
+          role_predicates?: Json
+          sort_order?: number
+          theme_overlay?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       salsabil_rideshare_pool: {
         Row: {
           available_seats: number
