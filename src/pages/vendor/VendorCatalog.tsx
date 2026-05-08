@@ -149,7 +149,6 @@ export default function VendorCatalog() {
         dataSource={{
           table: "salsabil_assets",
           select: "id,name,description,asset_type,is_active,created_at,salsabil_skus(id),salsabil_financial_contracts(base_price,currency,is_active,valid_from)",
-          filters: [{ column: "is_active", operator: "eq", value: true }],
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["name", "description"],
           map: (raw: RawAsset): CatalogRow => {
