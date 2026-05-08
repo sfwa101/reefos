@@ -383,10 +383,15 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
           <button
             type="button"
             onClick={approve}
-            disabled={!handoffOnly && mintMutation.isPending}
+            disabled={aestheticMutation.isPending || (!handoffOnly && mintMutation.isPending)}
             className="w-full h-12 rounded-2xl bg-emerald-600 text-white text-[13px] font-extrabold press inline-flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            {!handoffOnly && mintMutation.isPending ? (
+            {aestheticMutation.isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                حكيم يقوم بتحسين الصورة وإزالة الخلفية…
+              </>
+            ) : !handoffOnly && mintMutation.isPending ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" />
                 جاري سكّ الأصل…
