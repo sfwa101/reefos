@@ -61,13 +61,15 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
     let cancel = false;
     (async () => {
       setLoadingRefs(true);
-      const [s, p] = await Promise.all([
+      const [s, sov] = await Promise.all([
         supabase.from("suppliers").select("id,name").eq("is_active", true).order("name"),
-        (supabase as any).from("products").select("id,name,cost_price,stock").eq("is_active", true).order("name").limit(800),
+        import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       ]);
       if (cancel) return;
       setSuppliers((s.data ?? []) as Supplier[]);
-      setProducts((p.data ?? []) as Product[]);
+      setProducts(sov.map((r) => ({
+        id: r.id, name: r.name, cost_price: r.cost_price, stock: r.stock,
+      })));
       setLoadingRefs(false);
     })();
     return () => { cancel = true; };
