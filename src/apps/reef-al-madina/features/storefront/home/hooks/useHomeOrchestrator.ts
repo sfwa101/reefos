@@ -62,8 +62,8 @@ export type HomeOrchestrator = {
   resetFilters: () => void;
 };
 
-export const useHomeOrchestrator = (): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, "home");
+export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
+  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, source);
   // [Phase 28] Diagnostic console.debug removed — was firing on every render
   // and inflating React commit time on mobile during scroll.
 
