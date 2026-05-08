@@ -5379,6 +5379,82 @@ export type Database = {
           },
         ]
       }
+      salsabil_fulfillment_items: {
+        Row: {
+          created_at: string
+          id: string
+          node_id: string
+          price_at_time: number
+          quantity: number
+          sku_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          node_id: string
+          price_at_time?: number
+          quantity: number
+          sku_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          node_id?: string
+          price_at_time?: number
+          quantity?: number
+          sku_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_fulfillment_items_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_fulfillment_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_fulfillment_nodes: {
+        Row: {
+          created_at: string
+          id: string
+          master_order_id: string | null
+          notes: string | null
+          status: string
+          total_amount: number
+          updated_at: string
+          vendor_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          master_order_id?: string | null
+          notes?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          master_order_id?: string | null
+          notes?: string | null
+          status?: string
+          total_amount?: number
+          updated_at?: string
+          vendor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_fulfillment_nodes_vendor_id_fkey"
+            columns: ["vendor_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_vendors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       salsabil_inventory_matrix: {
         Row: {
           availability_data: Json
@@ -8174,6 +8250,10 @@ export type Database = {
       }
       current_mega_event: { Args: never; Returns: Json }
       current_user_branch_id: { Args: never; Returns: string }
+      current_user_is_vendor_member: {
+        Args: { _vendor_id: string }
+        Returns: boolean
+      }
       current_user_role: {
         Args: never
         Returns: Database["public"]["Enums"]["app_role"]
