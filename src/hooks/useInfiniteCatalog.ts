@@ -18,18 +18,11 @@ import {
   type UseInfiniteQueryResult,
 } from "@tanstack/react-query";
 import { useMemo } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import {
-  PRODUCT_COLUMNS,
-  rowToProduct,
-  type DbRow,
   type Product,
   type ProductSource,
 } from "@/lib/products";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
-
+import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
 
 export interface UseInfiniteCatalogParams {
   readonly sources: ReadonlyArray<ProductSource>;
@@ -45,39 +38,21 @@ export interface CatalogPage {
 
 const DEFAULT_LIMIT = 50;
 
-/** Escape PostgREST `%` and `,` so search input can't break the `or` filter. */
-const escapeIlike = (raw: string): string =>
-  raw.replace(/[%,()]/g, (m) => `\\${m}`);
-
 async function fetchCatalogPage(
   params: UseInfiniteCatalogParams,
   offset: number,
   limit: number,
 ): Promise<CatalogPage> {
-  let query = __sb
-    .from("products")
-    .select(PRODUCT_COLUMNS)
-    .eq("is_active", true)
-    .order("sort_order", { ascending: true })
-    .range(offset, offset + limit - 1);
-
-  if (params.sources.length > 0) {
-    query = query.in("source", params.sources as unknown as string[]);
-  }
-  if (params.subCategory) {
-    query = query.eq("sub_category", params.subCategory);
-  }
-  const term = params.q?.trim();
-  if (term) {
-    const safe = escapeIlike(term);
-    query = query.or(`name.ilike.%${safe}%,brand.ilike.%${safe}%`);
-  }
-
-  const { data, error } = await query;
-  if (error) throw error;
-
-  const rows = (data ?? []) as DbRow[];
-  const items = rows.map(rowToProduct);
+  const rows = await searchSovereignAssets({
+    q: params.q,
+    sources: params.sources,
+    subCategory: params.subCategory,
+    offset,
+    limit,
+  });
+  const items = rows
+    .map(assetToProduct)
+    .filter((p): p is Product => p != null);
   return {
     items,
     nextOffset: items.length < limit ? null : offset + limit,
