@@ -1,13 +1,15 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Save, Loader2, Filter, Calculator, AlertTriangle } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
-import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import {
+  fetchAdminCatalog,
+  upsertSkuCost,
+  upsertAssetAffiliatePct,
+  type SkuAdminRow,
+} from "@/lib/sovereignCatalog";
 
 
 type Row = {
