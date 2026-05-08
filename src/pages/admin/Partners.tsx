@@ -29,12 +29,12 @@ export default function Partners() {
 
   const load = async () => {
     setLoading(true);
-    const [p, pp, pl] = await Promise.all([
-      (supabase as any).from("products").select("id,name").eq("is_active", true).order("name").limit(500),
+    const [sov, pp, pl] = await Promise.all([
+      import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       (supabase as any).from("product_partners").select("*, products(name)").order("created_at", { ascending: false }),
       (supabase as any).from("partner_ledgers").select("*").order("created_at", { ascending: false }).limit(50),
     ]);
-    setProducts((p.data || []) as Product[]);
+    setProducts(sov.map((r) => ({ id: r.id, name: r.name })) as Product[]);
     setPartners((pp.data || []) as Partner[]);
     setLedger((pl.data || []) as Ledger[]);
     setLoading(false);
