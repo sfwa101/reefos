@@ -859,3 +859,50 @@ reject any non-compliant identity/KYC feature at architectural review.
   `src/context/AuthContext.tsx` (extras + checkPhoneExists),
   `src/routes/_app/wallet.tsx` (gate wrap),
   `src/components/ui/SovereignPersonaSwitcher.tsx` (KYC check on business).
+
+---
+
+## Phase 20 (Part 1) — The Storefront SDUI Ascension & Legacy Purge
+
+### Legacy Purge (Dead Code Eradication)
+Removed `src/modules/{meat,kitchen,village,supermarket,restaurants,subscriptions}`
+in their entirety. Only `src/modules/search` survives — actively
+imported by `Search.tsx` and `BarcodeScannerModal.tsx`. The lone
+`RestoProduct` type that `core/data/restaurantQueries.ts` pulled from
+`@/modules/restaurants/types` was inlined to keep the DAL self-contained.
+
+### Storefront SDUI Activation
+- `src/pages/Home.tsx` was rewritten from a 312-LOC hardcoded stack
+  (SmartGreeting → 7 hand-coded `ProductCarousel` rails →
+  HomeBelowFold) into a thin shell that mounts
+  `<LayoutFactory pageKey="reef_home" orchestrator={…} theme={…} />`.
+  Section presence, order, titles, and `enabled` flags now flow from
+  the `ui_layouts` row at runtime — admins reorder the homepage
+  without a deploy.
+- `src/pages/HomeBelowFold.tsx` deleted (its rails are now SDUI blocks).
+- Fallback safety preserved: `useUiLayout` already returns
+  `DEFAULT_HOME_ORDER` (Hero → Search → Categories → Bundles →
+  BestSellers → ProductsGrid) when no published row exists — the
+  storefront never renders blank on a fresh tenant.
+- Hardware-Back scroll-to-top guard preserved.
+
+### Sovereign Category Wrapper
+- New: `src/apps/reef-al-madina/features/storefront/components/SduiCategoryPage.tsx`.
+  Generic shell that takes `themeKey`, `pageKey`, `title` and renders
+  `LayoutFactory` + DetailSheet + FiltersSheet against
+  `ui_layouts.page_key = "category_<slug>"`.
+- Routes converted to one-liner SDUI wrappers:
+  `store.meat`, `store.kitchen`, `store.village`, `store.supermarket`,
+  `store.restaurants`, `store.subscription`.
+- Static `ProductCard` + `@/lib/products` pages refactored to thin
+  wrappers in `src/pages/store/`: `Meat`, `Sweets`, `Dairy`,
+  `Pharmacy`, `Produce`, `Recipes`, `Village`, `Kitchen`. Each is
+  now ≤ 8 LOC and 100% DB-driven via SDUI.
+- Specialized flows kept untouched (`Baskets*`, `HomeGoods`,
+  `Wholesale`, `CompareHomeGoods`, `SchoolLibrary`).
+
+### Result
+Consumer storefront is now a pure SDUI surface end-to-end. The
+hardcoded Level-1 rail-stack is gone; the engine is live. Every
+homepage and category vertical shares one renderer, one orchestrator,
+one fallback contract.
