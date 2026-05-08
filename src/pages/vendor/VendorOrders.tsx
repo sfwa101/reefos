@@ -241,6 +241,46 @@ export default function VendorOrders() {
                 <span className="font-display num text-[14px]">{fmtMoney(detailsNode.total_amount)} EGP</span>
               </div>
 
+              {(() => {
+                const d = detailsNode.delivery_snapshot;
+                const recipient = d?.recipient_name ?? d?.customer_name ?? d?.name;
+                const addrLabel = d?.address_label ?? d?.label;
+                const addrLine = [d?.street, d?.building && `مبنى ${d.building}`, d?.floor && `دور ${d.floor}`, d?.apartment && `شقة ${d.apartment}`]
+                  .filter(Boolean).join(" — ");
+                const cityLine = [d?.city, d?.zone].filter(Boolean).join(" • ");
+                const hasAny = d && (recipient || d.phone || addrLabel || addrLine || cityLine || d.notes);
+                return (
+                  <div className="rounded-xl border border-border/60 bg-surface-muted/40 p-3 space-y-2">
+                    <p className="text-[11px] font-bold text-foreground-secondary">بيانات التوصيل</p>
+                    {!hasAny ? (
+                      <p className="text-[11.5px] text-foreground-tertiary">لا توجد بيانات توصيل مرفقة لهذا الطلب.</p>
+                    ) : (
+                      <div className="space-y-1.5 text-[12px]">
+                        {recipient && (
+                          <div className="flex items-center gap-2"><User className="h-3.5 w-3.5 text-foreground-tertiary" /><span className="font-semibold">{recipient}</span></div>
+                        )}
+                        {d?.phone && (
+                          <div className="flex items-center gap-2"><Phone className="h-3.5 w-3.5 text-foreground-tertiary" /><a href={`tel:${d.phone}`} className="num text-primary">{d.phone}</a></div>
+                        )}
+                        {(addrLabel || addrLine || cityLine) && (
+                          <div className="flex items-start gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-foreground-tertiary mt-0.5" />
+                            <div className="min-w-0">
+                              {addrLabel && <p className="font-semibold text-[11.5px]">{addrLabel}</p>}
+                              {addrLine && <p className="text-[11.5px] text-foreground-secondary">{addrLine}</p>}
+                              {cityLine && <p className="text-[11px] text-foreground-tertiary">{cityLine}</p>}
+                            </div>
+                          </div>
+                        )}
+                        {d?.notes && (
+                          <p className="text-[11.5px] text-foreground-secondary border-r-2 border-warning/50 pr-2">📝 {d.notes}</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {itemsLoading ? (
                 <div className="h-24 flex items-center justify-center"><Loader2 className="h-5 w-5 animate-spin text-primary" /></div>
               ) : !items?.length ? (
