@@ -5543,6 +5543,13 @@ export type Database = {
             referencedRelation: "salsabil_fulfillment_nodes"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "salsabil_fulfillment_items_sku_id_fkey"
+            columns: ["sku_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_skus"
+            referencedColumns: ["id"]
+          },
         ]
       }
       salsabil_fulfillment_nodes: {
@@ -5613,6 +5620,13 @@ export type Database = {
           },
           {
             foreignKeyName: "salsabil_fulfillment_nodes_master_fk"
+            columns: ["master_order_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_master_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_fulfillment_nodes_master_order_id_fkey"
             columns: ["master_order_id"]
             isOneToOne: false
             referencedRelation: "salsabil_master_orders"
