@@ -1,0 +1,109 @@
+/**
+ * SovereignSettlementsPanel — Phase 10.4
+ * Reads `salsabil_vendor_settlements` (RLS-scoped to current vendor members)
+ * and surfaces gross / fee / net metrics + line items.
+ */
+import { useEffect, useMemo, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { IOSCard } from "@/components/ios/IOSCard";
+import { fmtMoney } from "@/lib/format";
+import { Loader2, TrendingUp, Receipt, PiggyBank } from "lucide-react";
+
+type Row = {
+  id: string;
+  vendor_id: string;
+  node_id: string;
+  gross_amount: number;
+  platform_fee: number;
+  net_amount: number;
+  status: string;
+  created_at: string;
+};
+
+const STATUS_LABEL: Record<string, string> = {
+  pending_clearance: "قيد التسوية",
+  cleared: "تم التحويل",
+  reversed: "مرتجع",
+};
+
+export function SovereignSettlementsPanel() {
+  const [rows, setRows] = useState<Row[] | null>(null);
+
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (supabase as any)
+      .from("salsabil_vendor_settlements")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(100)
+      .then(({ data }: { data: Row[] | null }) => setRows(data ?? []));
+  }, []);
+
+  const totals = useMemo(() => {
+    const r = rows ?? [];
+    return {
+      gross: r.reduce((s, x) => s + Number(x.gross_amount ?? 0), 0),
+      fee: r.reduce((s, x) => s + Number(x.platform_fee ?? 0), 0),
+      net: r.reduce((s, x) => s + Number(x.net_amount ?? 0), 0),
+    };
+  }, [rows]);
+
+  if (!rows) {
+    return (
+      <div className="py-6 flex items-center justify-center">
+        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <h2 className="font-display text-[16px]">محرّك التسوية السيادي</h2>
+
+      <div className="grid grid-cols-3 gap-2">
+        <IOSCard className="!p-3">
+          <TrendingUp className="h-4 w-4 text-primary mb-1" />
+          <p className="text-[10.5px] text-foreground-tertiary">إجمالي المبيعات</p>
+          <p className="font-display num text-[15px]">{fmtMoney(totals.gross)}</p>
+        </IOSCard>
+        <IOSCard className="!p-3">
+          <Receipt className="h-4 w-4 text-warning mb-1" />
+          <p className="text-[10.5px] text-foreground-tertiary">عمولة المنصة</p>
+          <p className="font-display num text-[15px]">{fmtMoney(totals.fee)}</p>
+        </IOSCard>
+        <IOSCard className="!p-3">
+          <PiggyBank className="h-4 w-4 text-success mb-1" />
+          <p className="text-[10.5px] text-foreground-tertiary">صافي الأرباح</p>
+          <p className="font-display num text-[15px]">{fmtMoney(totals.net)}</p>
+        </IOSCard>
+      </div>
+
+      {rows.length === 0 ? (
+        <IOSCard className="text-center text-foreground-tertiary text-[13px] py-8">
+          لا توجد تسويات بعد. ستظهر هنا فور تأكيد تسليم أول طلب.
+        </IOSCard>
+      ) : (
+        <IOSCard className="!p-0 overflow-hidden">
+          <div className="grid grid-cols-12 px-3 py-2 text-[10.5px] font-bold text-foreground-tertiary border-b border-border/50">
+            <span className="col-span-4">الطلب</span>
+            <span className="col-span-2 text-left">الإجمالي</span>
+            <span className="col-span-2 text-left">العمولة</span>
+            <span className="col-span-2 text-left">الصافي</span>
+            <span className="col-span-2 text-left">الحالة</span>
+          </div>
+          {rows.map((r) => (
+            <div key={r.id} className="grid grid-cols-12 px-3 py-2 text-[12px] border-b border-border/30 last:border-0">
+              <span className="col-span-4 font-mono truncate">#{r.node_id.slice(0, 8)}</span>
+              <span className="col-span-2 text-left num">{fmtMoney(r.gross_amount)}</span>
+              <span className="col-span-2 text-left num text-warning">−{fmtMoney(r.platform_fee)}</span>
+              <span className="col-span-2 text-left num font-bold text-success">{fmtMoney(r.net_amount)}</span>
+              <span className="col-span-2 text-left text-[10.5px] text-foreground-secondary">
+                {STATUS_LABEL[r.status] ?? r.status}
+              </span>
+            </div>
+          ))}
+        </IOSCard>
+      )}
+    </div>
+  );
+}

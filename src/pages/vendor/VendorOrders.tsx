@@ -5,7 +5,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Loader2, Package, CheckCircle2, Clock, Eye, PackageCheck, MapPin, Phone, User } from "lucide-react";
+import { Loader2, Package, CheckCircle2, Clock, Eye, PackageCheck, MapPin, Phone, User, Truck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCurrentVendor } from "@/core-os/hakim-ai/hooks/useCurrentVendor";
 import { useUpdateFulfillmentStatus, type FulfillmentStatus } from "@/core-os/hakim-ai/hooks/useFulfillmentNodes";
@@ -181,6 +181,14 @@ export default function VendorOrders() {
       onClick: (r) => {
         if (r.status === "prepared" || r.status === "shipped" || r.status === "delivered") return;
         updateStatus.mutate({ node_id: r.id, status: "prepared" });
+      },
+    },
+    {
+      label: "تأكيد التسليم",
+      icon: Truck,
+      onClick: (r) => {
+        if (r.status === "delivered" || r.status === "cancelled") return;
+        updateStatus.mutate({ node_id: r.id, status: "delivered" });
       },
     },
   ], [updateStatus]);
