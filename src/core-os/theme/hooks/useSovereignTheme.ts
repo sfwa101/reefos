@@ -113,10 +113,23 @@ export function useSovereignTheme(tenantId: string = "reef") {
     setPersonaData(personaQuery.data ?? null);
   }, [personaQuery.data, setPersonaData]);
 
-  const mergedDna = useMemo(
-    () => mergeDna(themeQuery.data?.dna_payload, personaQuery.data?.theme_overlay),
-    [themeQuery.data, personaQuery.data],
-  );
+  // Phase 24 — THEME AUTHORITY LOCK.
+  // The Emperor's manual selection (profiles.theme_preference) has ABSOLUTE
+  // priority. When set, persona overlays are IGNORED so the chrome never
+  // auto-flips colors behind the user's back. Persona overlays only apply
+  // when the user has not chosen a personal theme.
+  const { profile } = useAuth();
+  const userThemeLock = (profile as unknown as { theme_preference?: string | null } | null)
+    ?.theme_preference ?? null;
+
+  const mergedDna = useMemo(() => {
+    const base = themeQuery.data?.dna_payload;
+    if (userThemeLock) {
+      // Respect the user's locked theme — base DNA only, no overlay.
+      return mergeDna(base, undefined);
+    }
+    return mergeDna(base, personaQuery.data?.theme_overlay);
+  }, [themeQuery.data, personaQuery.data, userThemeLock]);
 
   // Inject merged DNA whenever base theme OR active persona changes.
   useEffect(() => {
