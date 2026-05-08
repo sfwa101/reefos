@@ -183,6 +183,14 @@ export default function VendorOrders() {
         updateStatus.mutate({ node_id: r.id, status: "prepared" });
       },
     },
+    {
+      label: "تأكيد التسليم",
+      icon: Truck,
+      onClick: (r) => {
+        if (r.status === "delivered" || r.status === "cancelled") return;
+        updateStatus.mutate({ node_id: r.id, status: "delivered" });
+      },
+    },
   ], [updateStatus]);
 
   if (vendorLoading) {
