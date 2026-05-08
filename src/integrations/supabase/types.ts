@@ -9011,7 +9011,6 @@ export type Database = {
         }
         Returns: string
       }
-      place_order_atomic_v2: { Args: { _payload: Json }; Returns: string }
       pledge_group_buy: {
         Args: { _campaign_id: string; _quantity: number }
         Returns: Json
