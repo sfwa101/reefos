@@ -275,7 +275,7 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     label: "قائمة الطعام التفاعلية",
     description: "قائمة وجبات بفئات لزجة وتكامل سلة (Restaurants)",
     pages: ["reef_restaurants"],
-    allowedOverrides: ["padding", "title"],
+    allowedOverrides: ["padding", "title", "variant"],
     iconKey: "UtensilsCrossed",
   },
   SduiWizardChain: {
@@ -283,7 +283,7 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     label: "سلسلة المعالج (Wizard)",
     description: "تدفق متعدد الخطوات للاشتراكات والسلال وبوابة الطالب",
     pages: ["reef_subscriptions", "reef_baskets", "reef_school_library"],
-    allowedOverrides: ["padding", "title"],
+    allowedOverrides: ["padding", "title", "variant"],
     iconKey: "Workflow",
   },
   SduiComparisonGrid: {
@@ -291,7 +291,7 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     label: "شبكة المقارنة",
     description: "جداول المقارنة بين المنتجات (Wholesale / HomeGoods)",
     pages: ["reef_wholesale", "reef_compare_home_goods"],
-    allowedOverrides: ["padding", "title"],
+    allowedOverrides: ["padding", "title", "variant"],
     iconKey: "Scale",
   },
 };
