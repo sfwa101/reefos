@@ -157,10 +157,10 @@ type BubblePos = { x: number; y: number; size: number };
 
 /** Honeycomb-ish staggered grid mirroring an Apple-Watch springboard. */
 const computeBubbleLayout = (count: number): BubblePos[] => {
-  const cols = 4;
-  const cellW = 110;
-  const cellH = 100;
-  const baseSize = 88;
+  const cols = 3;
+  const cellW = 132;
+  const cellH = 122;
+  const baseSize = 124;
   const positions: BubblePos[] = [];
   for (let i = 0; i < count; i++) {
     const row = Math.floor(i / cols);
@@ -168,7 +168,7 @@ const computeBubbleLayout = (count: number): BubblePos[] => {
     const xOffset = row % 2 === 0 ? 0 : cellW / 2;
     positions.push({
       x: col * cellW + xOffset,
-      y: row * cellH * 0.86,
+      y: row * cellH * 0.88,
       size: baseSize,
     });
   }
@@ -190,17 +190,22 @@ const Bubble = ({
   const scale = useTransform(scrollY, (v) => {
     const center = v + containerH / 2;
     const dist = Math.abs(pos.y + pos.size / 2 - center);
-    const t = Math.max(0, 1 - dist / (containerH * 0.55));
-    return 0.62 + t * 0.55; // 0.62 → 1.17
+    const t = Math.max(0, 1 - dist / (containerH * 0.6));
+    return 0.7 + t * 0.5; // 0.7 → 1.2
   });
   const opacity = useTransform(scrollY, (v) => {
     const center = v + containerH / 2;
     const dist = Math.abs(pos.y + pos.size / 2 - center);
-    return Math.max(0.35, 1 - dist / (containerH * 0.7));
+    return Math.max(0.45, 1 - dist / (containerH * 0.75));
   });
 
   return (
     <motion.div
+      drag
+      dragElastic={0.35}
+      dragMomentum
+      dragConstraints={{ left: -40, right: 40, top: -40, bottom: 40 }}
+      whileTap={{ scale: 1.08 }}
       style={{
         position: "absolute",
         left: pos.x,
@@ -215,15 +220,15 @@ const Bubble = ({
         to={d.to}
         onClick={d.unavailable ? undefined : haptic}
         className={cn(
-          "relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[34px] ring-1 ring-border/40 shadow-tile transition-transform ease-apple",
+          "relative flex h-full w-full flex-col items-center justify-center overflow-hidden rounded-[36px] ring-1 ring-border/40 shadow-tile transition-transform ease-apple",
           d.unavailable ? "opacity-40 pointer-events-none" : "active:scale-95",
         )}
         style={{
           background: `radial-gradient(circle at 30% 25%, hsl(var(--${d.tintVar})) 0%, hsl(var(--${d.tintVar}) / 0.65) 70%, hsl(var(--card) / 0.9) 100%)`,
         }}
       >
-        <span className="text-3xl" aria-hidden>{d.emoji}</span>
-        <span className="mt-1 px-1 text-center text-[10px] font-bold leading-tight text-foreground">
+        <span className="text-4xl" aria-hidden>{d.emoji}</span>
+        <span className="mt-1.5 px-1 text-center text-[11px] font-bold leading-tight text-foreground">
           {d.title}
         </span>
       </Link>
@@ -236,14 +241,19 @@ const BubblesMode = ({ items }: { items: (Dept & { unavailable: boolean })[] }) 
   const { scrollY } = useScroll({ container: ref });
   const [containerH, setContainerH] = useState(560);
   useEffect(() => {
-    if (ref.current) setContainerH(ref.current.clientHeight);
+    const update = () => { if (ref.current) setContainerH(ref.current.clientHeight); };
+    update();
+    window.addEventListener("resize", update);
+    return () => window.removeEventListener("resize", update);
   }, []);
 
   const positions = useMemo(() => computeBubbleLayout(items.length), [items.length]);
-  const totalH = positions.length
-    ? Math.max(...positions.map((p) => p.y + p.size)) + 80
-    : 0;
-  const totalW = 4 * 110 + 55; // cols * cellW + offset
+  const cols = 3;
+  const cellW = 132;
+  const totalW = cols * cellW + cellW / 2;
+  // Pad enough to ensure scrollY actually exceeds containerH so size mapping engages.
+  const lastY = positions.length ? Math.max(...positions.map((p) => p.y + p.size)) : 0;
+  const totalH = lastY + 360;
 
   return (
     <div
@@ -251,12 +261,12 @@ const BubblesMode = ({ items }: { items: (Dept & { unavailable: boolean })[] }) 
       className="no-scrollbar relative mx-auto h-[560px] overflow-y-auto overscroll-contain"
       style={{ width: totalW + 32, paddingInline: 16 }}
     >
-      <div style={{ position: "relative", height: totalH, width: totalW }}>
+      <div style={{ position: "relative", height: totalH, width: totalW, paddingTop: 80 }}>
         {items.map((d, i) => (
           <Bubble
             key={d.id}
             d={d}
-            pos={positions[i]}
+            pos={{ ...positions[i], y: positions[i].y + 80 }}
             scrollY={scrollY}
             containerH={containerH}
           />
@@ -266,32 +276,74 @@ const BubblesMode = ({ items }: { items: (Dept & { unavailable: boolean })[] }) 
   );
 };
 
-/* ───────────────────────────── Mode 3 — Graded ─────────────────────────── */
+/* ───────────────────────────── Mode 3 — Graded Masonry ─────────────────── */
 
-const GradedMode = ({ items }: { items: (Dept & { unavailable: boolean })[] }) => {
-  const primary = items.filter((d) => d.weight === "primary");
-  const secondary = items.filter((d) => d.weight !== "primary");
-
-  return (
-    <div className="space-y-6">
-      {/* Primary — large slices, horizontal scroll */}
+const GradedTile = ({
+  d,
+  index,
+  primary,
+}: {
+  d: Dept & { unavailable: boolean };
+  index: number;
+  primary: boolean;
+}) => (
+  <motion.div
+    initial={{ opacity: 0, scale: 0.92 }}
+    animate={{ opacity: 1, scale: 1 }}
+    transition={{ delay: index * 0.04, type: "spring", stiffness: 240, damping: 24 }}
+    className={cn(primary ? "col-span-2 row-span-2" : "col-span-1 row-span-1")}
+  >
+    <Link
+      to={d.to}
+      onClick={d.unavailable ? undefined : haptic}
+      className={cn(
+        "group relative flex h-full w-full flex-col justify-between overflow-hidden rounded-[28px] p-4 ring-1 ring-border/40 shadow-tile ease-apple",
+        d.unavailable ? "opacity-40 pointer-events-none" : "active:scale-[.97] hover:-translate-y-1",
+      )}
+      style={{
+        background: `radial-gradient(120% 100% at 30% 0%, hsl(var(--${d.tintVar}) / 0.9) 0%, hsl(var(--${d.tintVar}) / 0.55) 55%, hsl(var(--card) / 0.85) 100%)`,
+        minHeight: primary ? 220 : 110,
+      }}
+    >
       <div
-        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-2"
-        style={{ paddingInline: "calc(50% - 160px)" }}
-      >
-        {primary.map((d, i) => <Slice key={d.id} d={d} index={i} size="lg" />)}
+        aria-hidden
+        className="absolute inset-0 -z-10 backdrop-blur-xl"
+        style={{ backgroundColor: "hsl(var(--card) / 0.3)" }}
+      />
+      <div className="flex items-start justify-between">
+        <span aria-hidden style={{ fontSize: primary ? 44 : 28 }}>{d.emoji}</span>
+        {primary && (
+          <span className="rounded-full bg-card/90 px-2.5 py-0.5 text-[10px] font-bold text-muted-foreground ring-1 ring-border/40 backdrop-blur-md">
+            رئيسي
+          </span>
+        )}
       </div>
+      <div>
+        <h3 className={cn(
+          "font-display font-extrabold leading-tight text-foreground",
+          primary ? "text-xl" : "text-sm",
+        )}>
+          {d.title}
+        </h3>
+        {primary && (
+          <p className="mt-0.5 text-[12px] font-medium text-muted-foreground">
+            {d.unavailable ? "غير متاح في منطقتك" : d.subtitle}
+          </p>
+        )}
+      </div>
+    </Link>
+  </motion.div>
+);
 
-      {/* Secondary — medium slices, horizontal scroll */}
-      <div className="px-4">
-        <h3 className="mb-2 text-[13px] font-bold text-muted-foreground">المزيد من الأقسام</h3>
-        <div className="no-scrollbar flex snap-x snap-mandatory gap-3 overflow-x-auto pb-4">
-          {secondary.map((d, i) => <Slice key={d.id} d={d} index={i} size="sm" />)}
-        </div>
-      </div>
+const GradedMode = ({ items }: { items: (Dept & { unavailable: boolean })[] }) => (
+  <div className="px-4">
+    <div className="grid auto-rows-[110px] grid-cols-4 gap-3">
+      {items.map((d, i) => (
+        <GradedTile key={d.id} d={d} index={i} primary={d.weight === "primary"} />
+      ))}
     </div>
-  );
-};
+  </div>
+);
 
 /* ───────────────────────────── Mode toggle ─────────────────────────────── */
 
@@ -344,18 +396,8 @@ export const DepartmentGrid = () => {
 
   return (
     <section className="animate-float-up" style={{ animationDelay: "120ms" }}>
-      {/* Title row — sits directly under the Sovereign TopBar */}
-      <div className="mb-4 flex items-end justify-between gap-3 px-4 pt-[max(env(safe-area-inset-top),0.5rem)]">
-        <div className="min-w-0">
-          <h1 className="font-display text-2xl font-extrabold tracking-tight text-foreground">
-            أقسام ريف المدينة
-          </h1>
-          <p className="text-[12px] font-medium text-muted-foreground">
-            {mode === "slices" && "اسحب أفقياً للتنقل بين الأقسام"}
-            {mode === "bubbles" && "مرر عمودياً — يكبر القسم في المنتصف"}
-            {mode === "graded" && "أقسام رئيسية بحجم أكبر وأقسام فرعية"}
-          </p>
-        </div>
+      {/* Minimal toggle — Sovereign TopBar owns the page title */}
+      <div className="mb-3 flex items-center justify-end px-4 pt-2">
         <ModeToggle mode={mode} onChange={setMode} />
       </div>
 

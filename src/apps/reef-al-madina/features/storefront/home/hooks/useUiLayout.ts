@@ -34,10 +34,8 @@ const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
 ];
 
 // Phase 28 — Sections (departments_hub) ascended to the Level-4 Matrix.
-const DEFAULT_DEPARTMENTS_HUB_ORDER: SectionKey[] = [
-  "MainSearchHeader",
-  "DepartmentGrid",
-];
+// Phase 35 — Header Purge: Sovereign TopBar stands alone above DepartmentGrid.
+const DEFAULT_DEPARTMENTS_HUB_ORDER: SectionKey[] = ["DepartmentGrid"];
 
 // Phase 29 — Sovereign Unification: Offers, Maeen and category storefronts
 // ascended to the Level-4 Matrix with locked Golden Orders.

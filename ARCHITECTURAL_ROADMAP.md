@@ -1575,3 +1575,11 @@ Per-card `framer-motion` stagger entry + 15ms haptic on tap.
 - Standard categories render the correct products again.
 - Departments hub flows like liquid silk on iOS Safari.
 - 100% token compliance maintained (no raw HSL strings, no translucent fakes).
+
+
+## Phase 35 — The Grand Revival (Catalog + Virus Purge + UI Liberation)
+
+- **Catalog Revival**: Patched 5 sovereign assets with valid `category_path` (supermarket/produce) and converted `traits` from arrays into branded JSON objects. Seeded `salsabil_inventory_matrix` with stock=50 for all 7 SKUs so storefront filters return rows again.
+- **HomeGoods Virus Purge**: Removed hard-coded HomeGoods copy from `BundlesRail` ("حزم موفّرة") and `BestSellersRail` ("الأكثر مبيعًا") — generic stem cells now context-neutral across every category page.
+- **Departments UI Liberation**: Removed `MainSearchHeader` from `departments_hub` (DB + fallback) and the duplicated `<h1>` from `DepartmentGrid`; Sovereign TopBar stands alone. Mode 2 bubbles enlarged to 124px, dragable (`drag`, `dragElastic=0.35`, momentum), totalH padded so vertical scroll engages the magnify mapping. Mode 3 rewritten as asymmetric CSS grid (`grid-cols-4 auto-rows-[110px]` with primary tiles at `col-span-2 row-span-2`).
+

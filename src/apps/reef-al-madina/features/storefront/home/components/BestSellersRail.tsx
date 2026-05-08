@@ -19,7 +19,7 @@ export const BestSellersRail = ({
   <section className="mt-6 px-4">
     <RailHeader
       icon={Crown}
-      title="الأكثر مبيعًا في الأجهزة"
+      title="الأكثر مبيعًا"
       sub="اختيارات موثوقة من آلاف العملاء"
       hue={hue}
     />
