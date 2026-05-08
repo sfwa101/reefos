@@ -787,3 +787,75 @@ reject any non-compliant identity/KYC feature at architectural review.
 - **Eradicated:** `src/apps/reef-al-madina/features/account/components/RoleSwitcher.tsx`
   deleted. `defaultView.ts` retained — `pickDefaultView`/`readActiveView`
   still serve `HomeRedirector` (separate concern).
+
+---
+
+## Phase 19 — The Progressive Citizenship Gateway & Modesty Protocol
+
+**Status:** Live · **Surface:** Auth, Wallet, Persona Switcher
+
+### The 3-Tier Identity Funnel
+1. **Guest** — anonymous browsing, no auth.
+2. **Level-1 Resident** — phone + 6-digit PIN + name + governorate/city.
+   Frictionless onboarding. Full access to ordering, themes, settings.
+   Wallet (Tayseer) is **locked** behind the Soft-Wall.
+3. **Sovereign Citizen** — Level-1 + 14-digit National ID hydration.
+   Unlocks Tayseer Wallet, Business persona, Sharia ledger features.
+
+### Phone-First Identity Gateway (`src/pages/Auth.tsx`)
+- Country-code selector (default **+20 🇪🇬**) + phone input.
+- Single-step lookup via RPC `public.check_phone_exists(p_phone text)`:
+  - **Known** → PIN unlock screen.
+  - **New**   → Level-1 register form.
+- Email/password UI obliterated. The phone *is* the identity.
+
+### Level-1 Onboarding (Temporary Identity)
+- Fields: full name, governorate (default **الدقهلية - جمصة**), city,
+  6-digit numeric PIN.
+- GPS auto-locate via Nominatim reverse-geocode → fills `city` + `governorate`.
+- `signUpWithPhone` extended with `extras: { governorate, city }` →
+  persisted on the `profiles` row immediately after signup.
+
+### KYC Soft-Wall (`src/core-os/capabilities/identity/KycUpgradeGate.tsx`)
+- Wrapper component that intercepts Level-1 access to identity-grade surfaces.
+- Currently mounted on `/_app/wallet` and triggered when the Persona
+  Switcher tries to enter the Business face without verification.
+- Renders a Radix bottom-sheet explaining the upgrade in Arabic.
+
+### National ID Decoder (`egyptianIdDecoder.ts`)
+- Pure utility: `decodeEgyptianId(raw) → { isValid, dob, gender,
+  governorateCode, governorate, shortId }`.
+- Validates century byte, calendar date, governorate map (27 governorates +
+  88 = خارج الجمهورية). Gender from byte 13 (odd=male, even=female).
+- `shortId` = last 6 digits → the daily-UX badge (Doctrine 9.2).
+
+### Modesty Protocol Enforcer (Doctrine 9.4)
+- Decoded gender drives the UI branch **at component level**:
+  - `female` → real-photo upload **strictly hidden**, replaced by a
+    6-tile Sovereign Avatar Library (Flower / Star / Heart / Crown /
+    Gem / Spark).
+  - `male` → real-photo upload required (capture or file).
+- On submit: `profiles` updated with `national_id`, `short_id`,
+  `governorate`, `birth_date`, `gender`, `avatar_kind`,
+  `is_kyc_verified=true`, `kyc_verified_at=now()`.
+
+### Schema (Migration `phase19_progressive_citizenship`)
+- `profiles` + `national_id` (unique), `short_id`, `governorate`, `city`,
+  `is_kyc_verified` (bool, default false), `kyc_verified_at`, `avatar_kind`.
+- Public RPC `check_phone_exists(text) → boolean` (security definer,
+  fixed search_path, granted to anon + authenticated). Returns true if
+  phone matches `profiles.phone` OR synthesized `auth.users.email`.
+
+### Persona Switcher Hardening
+- `SovereignPersonaSwitcher.handleSelect` checks
+  `profile?.is_kyc_verified` before allowing the **business** persona.
+  Unverified users are routed to `/wallet` where the Soft-Wall handles
+  the upgrade flow.
+
+### Files Touched
+- **Created:** `src/core-os/capabilities/identity/egyptianIdDecoder.ts`,
+  `src/core-os/capabilities/identity/KycUpgradeGate.tsx`.
+- **Edited:** `src/pages/Auth.tsx` (full phone-first rewrite),
+  `src/context/AuthContext.tsx` (extras + checkPhoneExists),
+  `src/routes/_app/wallet.tsx` (gate wrap),
+  `src/components/ui/SovereignPersonaSwitcher.tsx` (KYC check on business).

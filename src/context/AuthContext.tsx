@@ -24,6 +24,13 @@ export type Profile = {
   likes?: string[] | null;
   dislikes?: string[] | null;
   budget_range?: string | null;
+  national_id?: string | null;
+  short_id?: string | null;
+  governorate?: string | null;
+  city?: string | null;
+  is_kyc_verified?: boolean;
+  kyc_verified_at?: string | null;
+  avatar_kind?: string | null;
 };
 
 type AuthCtx = {
@@ -33,8 +40,14 @@ type AuthCtx = {
   loading: boolean;
   profileLoading: boolean;
   isInitializing: boolean;
-  signUpWithPhone: (phone: string, password: string, fullName: string) => Promise<{ error?: string }>;
+  signUpWithPhone: (
+    phone: string,
+    password: string,
+    fullName: string,
+    extras?: { governorate?: string | null; city?: string | null },
+  ) => Promise<{ error?: string }>;
   signInWithPhone: (phone: string, password: string) => Promise<{ error?: string }>;
+  checkPhoneExists: (phone: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 };
@@ -153,7 +166,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [fetchProfile]);
 
-  const signUpWithPhone = useCallback<AuthCtx["signUpWithPhone"]>(async (phone, password, fullName) => {
+  const signUpWithPhone = useCallback<AuthCtx["signUpWithPhone"]>(async (phone, password, fullName, extras) => {
     const email = phoneToEmail(phone);
     const normalized = normalizePhone(phone);
     const { data, error } = await supabase.auth.signUp({
@@ -165,9 +178,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       },
     });
     if (error) return { error: humanize(error.message) };
-    if (data.session?.user) await ensureProfile(data.session.user, fullName);
+    if (data.session?.user) {
+      await ensureProfile(data.session.user, fullName);
+      // Stamp the Level-1 hydration fields (governorate / city) if provided.
+      if (extras && (extras.governorate || extras.city)) {
+        try {
+          await supabase.from("profiles").update({
+            governorate: extras.governorate ?? null,
+            city: extras.city ?? null,
+          }).eq("id", data.session.user.id);
+          await fetchProfile(data.session.user.id);
+        } catch { /* non-fatal */ }
+      }
+    }
     return {};
-  }, [ensureProfile]);
+  }, [ensureProfile, fetchProfile]);
 
   const signInWithPhone = useCallback<AuthCtx["signInWithPhone"]>(async (phone, password) => {
     const email = phoneToEmail(phone);
@@ -176,6 +201,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (data.user) await ensureProfile(data.user);
     return {};
   }, [ensureProfile]);
+
+  const checkPhoneExists = useCallback<AuthCtx["checkPhoneExists"]>(async (phone) => {
+    const normalized = normalizePhone(phone);
+    try {
+      const { data, error } = await supabase.rpc("check_phone_exists", { p_phone: normalized });
+      if (error) return false;
+      return !!data;
+    } catch { return false; }
+  }, []);
 
   const signOut = useCallback(async () => {
     await supabase.auth.signOut();
@@ -189,9 +223,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     () => ({
       session, user, profile, loading, profileLoading,
       isInitializing: loading,
-      signUpWithPhone, signInWithPhone, signOut, refreshProfile,
+      signUpWithPhone, signInWithPhone, checkPhoneExists, signOut, refreshProfile,
     }),
-    [session, user, profile, loading, profileLoading, signUpWithPhone, signInWithPhone, signOut, refreshProfile],
+    [session, user, profile, loading, profileLoading, signUpWithPhone, signInWithPhone, checkPhoneExists, signOut, refreshProfile],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
