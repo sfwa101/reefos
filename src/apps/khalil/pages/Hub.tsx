@@ -9,7 +9,7 @@ import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/co
 import { storeThemes } from "@/lib/storeThemes";
 
 const MaeenHub = () => {
-  const theme = storeThemes.reef;
+  const theme = storeThemes.supermarket;
   return (
     <div dir="rtl" className="min-h-screen bg-background pb-24">
       <main className="mx-auto max-w-2xl px-4 pt-4">

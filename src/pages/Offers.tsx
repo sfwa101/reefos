@@ -10,7 +10,7 @@ import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/co
 import { storeThemes } from "@/lib/storeThemes";
 
 const Offers = () => {
-  const theme = storeThemes.reef;
+  const theme = storeThemes.supermarket;
   return (
     <div className="space-y-6 lg:px-8" dir="rtl">
       <LayoutFactory pageKey="offers_hub" theme={theme} />
