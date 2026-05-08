@@ -800,3 +800,6 @@ Effective Phase 7, the term **Product** is deprecated across Salsabil OS in favo
 4. **Inventory Matrix** (`salsabil_inventory_matrix`) — WHAT'S available: `count` · `time_slots` · `capacity`.
 
 A tomato, a borrowed novel, a 12-month wholesale rice tier, a kitchen-finishing project with 20/40/40 milestones, and a Friday-night cooking class are all USAs. They share one cart, one checkout, one Hakim brain, one ledger, and one analytics surface. **Anywhere code or docs say "Product", it now means USA.**
+
+## Core Doctrine — The Sovereign Override Rule
+AI acts as a smart advisor (e.g., detecting duplicates, flagging rules), but the Human Admin always retains the final absolute authority to override, force-execute, or resolve edge cases. Every advisory surface (matchmaker, validator, classifier) MUST expose an unconditional human override path.

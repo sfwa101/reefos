@@ -7,11 +7,12 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2 } from "lucide-react";
+import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
+import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
 import { toast } from "sonner";
 
@@ -87,6 +88,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const isNew = !asset;
   const update = useUpdateUSA();
   const mint = useMintUSA();
+  const matchmaker = useAssetMatchmaker();
 
   const [tab, setTab] = useState<string>(isNew ? "basic" : "basic");
   const [name, setName] = useState("");
@@ -96,6 +98,11 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [pricingModel, setPricingModel] = useState<PricingModel>("flat");
   const [currency, setCurrency] = useState<"EGP" | "USD" | "EUR">("EGP");
   const [aiDraft, setAiDraft] = useState<USAGenesisPayload | null>(null);
+
+  // Sovereign Override state — Phase 8 Part 4.
+  const [duplicateMatches, setDuplicateMatches] = useState<MatchedAsset[]>([]);
+  const [pendingEmbedding, setPendingEmbedding] = useState<number[] | null>(null);
+  const [hasOverriddenAI, setHasOverriddenAI] = useState(false);
 
   useEffect(() => {
     if (asset) {
@@ -116,9 +123,11 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setAiDraft(null);
       setTab("basic");
     }
+    setDuplicateMatches([]);
+    setPendingEmbedding(null);
+    setHasOverriddenAI(false);
   }, [asset, open]);
 
-  // Co-pilot handshake: AI hands payload back, we prefill + jump to basic tab.
   const handleAIHandoff = (payload: USAGenesisPayload) => {
     setName(payload.asset.name);
     setDescription(payload.asset.description);
@@ -128,12 +137,14 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     setBasePrice(String(payload.financial_contract.base_price));
     setAiDraft(payload);
     setTab("basic");
+    setDuplicateMatches([]);
+    setHasOverriddenAI(false);
     toast.success("تم تعبئة النموذج باقتراح حكيم — راجِع وعدّل قبل السكّ");
   };
 
-  const isPending = update.isPending || mint.isPending;
+  const isPending = update.isPending || mint.isPending || matchmaker.isChecking;
 
-  const handleSave = async () => {
+  const handleSave = async (forceOverride = false) => {
     const trimmed = name.trim();
     if (!trimmed) return;
     const priceNum = basePrice.trim() === "" ? null : Number(basePrice);
@@ -141,6 +152,20 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
 
     try {
       if (isNew) {
+        let embedding = pendingEmbedding;
+
+        // Advisory Interceptor — only run if Admin hasn't already overridden.
+        if (!forceOverride && !hasOverriddenAI) {
+          const result = await matchmaker.checkDuplicates(trimmed, description.trim());
+          embedding = result.embedding;
+          setPendingEmbedding(result.embedding);
+          if (result.matches.length > 0) {
+            setDuplicateMatches(result.matches);
+            toast.warning("⚠️ حكيم رصد أصولاً مشابهة — راجع التحذير قبل السكّ");
+            return;
+          }
+        }
+
         await mint.mutateAsync({
           asset: {
             name: trimmed,
@@ -155,6 +180,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
             currency,
             contract_rules: aiDraft?.financial_contract.contract_rules ?? {},
           },
+          semantic_embedding: embedding,
         });
         onSaved?.();
         onClose();
@@ -172,17 +198,86 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     }
   };
 
+  const handleAcceptAdvice = () => {
+    setDuplicateMatches([]);
+    setPendingEmbedding(null);
+    setName("");
+    setDescription("");
+    setBasePrice("");
+    setAiDraft(null);
+    toast.info("تم إلغاء السكّ — يمكنك الآن إضافة المخزون للأصل الموجود.");
+  };
+
+  const handleForceMint = async () => {
+    setHasOverriddenAI(true);
+    setDuplicateMatches([]);
+    await handleSave(true);
+  };
+
+  const DuplicateAdvisor = () =>
+    duplicateMatches.length > 0 ? (
+      <div className="rounded-2xl border-2 border-amber-500/50 bg-amber-50 dark:bg-amber-950/30 p-4 space-y-3">
+        <div className="flex items-start gap-2">
+          <AlertTriangle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+          <div>
+            <p className="text-[12.5px] font-extrabold text-amber-900 dark:text-amber-200">
+              ⚠️ نصيحة حكيم: يبدو أن هذا الأصل موجود بالفعل في الكتالوج.
+            </p>
+            <p className="text-[10.5px] text-amber-800/80 dark:text-amber-300/80 mt-0.5">
+              لمنع تلوث الكتالوج، فكّر بإضافة المخزون للأصل الموجود بدل سكّ نسخة جديدة.
+            </p>
+          </div>
+        </div>
+
+        <ul className="space-y-1.5">
+          {duplicateMatches.map((m) => (
+            <li
+              key={m.id}
+              className="flex items-center justify-between rounded-xl bg-background/70 px-3 py-2 border border-amber-200 dark:border-amber-800"
+            >
+              <span className="text-[12px] font-semibold truncate">{m.name}</span>
+              <span className="text-[10.5px] font-bold num bg-amber-500/15 text-amber-800 dark:text-amber-200 px-2 py-0.5 rounded-full">
+                {(m.similarity * 100).toFixed(1)}٪
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+          <button
+            type="button"
+            onClick={handleAcceptAdvice}
+            className="h-11 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold press inline-flex items-center justify-center gap-1.5"
+          >
+            <ShieldCheck className="h-4 w-4" />
+            قبول نصيحة حكيم (إلغاء السكّ)
+          </button>
+          <button
+            type="button"
+            onClick={handleForceMint}
+            disabled={isPending}
+            className="h-11 rounded-xl bg-rose-600 text-white text-[12px] font-extrabold press inline-flex items-center justify-center gap-1.5 disabled:opacity-50"
+          >
+            <AlertTriangle className="h-4 w-4" />
+            تخطي حكيم وسكّ كأصل جديد
+          </button>
+        </div>
+      </div>
+    ) : null;
+
   const SaveButton = () => (
     <button
       type="button"
-      onClick={handleSave}
-      disabled={isPending || !name.trim()}
+      onClick={() => handleSave(false)}
+      disabled={isPending || !name.trim() || duplicateMatches.length > 0}
       className="w-full h-12 rounded-2xl bg-emerald-600 text-white text-[13px] font-extrabold press inline-flex items-center justify-center gap-2 disabled:opacity-50"
     >
       {isPending ? (
         <>
           <Loader2 className="h-4 w-4 animate-spin" />
-          {isNew ? "جاري سكّ الأصل…" : "جاري الحفظ والتزامن…"}
+          {matchmaker.isChecking
+            ? "حكيم يفحص التكرارات…"
+            : isNew ? "جاري سكّ الأصل…" : "جاري الحفظ والتزامن…"}
         </>
       ) : (
         <>
@@ -192,7 +287,6 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       )}
     </button>
   );
-
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <SheetContent
@@ -279,6 +373,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   className="w-full rounded-xl border border-border bg-background px-3 py-2 text-[13px] outline-none focus:border-primary resize-none"
                 />
               </Field>
+              {isNew && <DuplicateAdvisor />}
               <SaveButton />
             </TabsContent>
 
@@ -338,6 +433,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   dir="ltr"
                 />
               </Field>
+              {isNew && <DuplicateAdvisor />}
               <SaveButton />
             </TabsContent>
 
