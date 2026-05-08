@@ -24,6 +24,7 @@ import { Route as VendorWalletRouteImport } from './routes/vendor.wallet'
 import { Route as VendorProductsRouteImport } from './routes/vendor.products'
 import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
 import { Route as VendorDashboardRouteImport } from './routes/vendor.dashboard'
+import { Route as VendorCatalogRouteImport } from './routes/vendor.catalog'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
@@ -216,6 +217,11 @@ const VendorOrdersRoute = VendorOrdersRouteImport.update({
 const VendorDashboardRoute = VendorDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => VendorRoute,
+} as any)
+const VendorCatalogRoute = VendorCatalogRouteImport.update({
+  id: '/catalog',
+  path: '/catalog',
   getParentRoute: () => VendorRoute,
 } as any)
 const DriverWalletRoute = DriverWalletRouteImport.update({
@@ -904,6 +910,7 @@ export interface FileRoutesByFullPath {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -1034,6 +1041,7 @@ export interface FileRoutesByTo {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -1171,6 +1179,7 @@ export interface FileRoutesById {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
@@ -1309,6 +1318,7 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/catalog'
     | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
@@ -1439,6 +1449,7 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/catalog'
     | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
@@ -1575,6 +1586,7 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/vendor/catalog'
     | '/vendor/dashboard'
     | '/vendor/orders'
     | '/vendor/products'
@@ -1741,6 +1753,13 @@ declare module '@tanstack/react-router' {
       path: '/dashboard'
       fullPath: '/vendor/dashboard'
       preLoaderRoute: typeof VendorDashboardRouteImport
+      parentRoute: typeof VendorRoute
+    }
+    '/vendor/catalog': {
+      id: '/vendor/catalog'
+      path: '/catalog'
+      fullPath: '/vendor/catalog'
+      preLoaderRoute: typeof VendorCatalogRouteImport
       parentRoute: typeof VendorRoute
     }
     '/driver/wallet': {
@@ -2909,6 +2928,7 @@ const DriverRouteWithChildren =
   DriverRoute._addFileChildren(DriverRouteChildren)
 
 interface VendorRouteChildren {
+  VendorCatalogRoute: typeof VendorCatalogRoute
   VendorDashboardRoute: typeof VendorDashboardRoute
   VendorOrdersRoute: typeof VendorOrdersRoute
   VendorProductsRoute: typeof VendorProductsRoute
@@ -2917,6 +2937,7 @@ interface VendorRouteChildren {
 }
 
 const VendorRouteChildren: VendorRouteChildren = {
+  VendorCatalogRoute: VendorCatalogRoute,
   VendorDashboardRoute: VendorDashboardRoute,
   VendorOrdersRoute: VendorOrdersRoute,
   VendorProductsRoute: VendorProductsRoute,

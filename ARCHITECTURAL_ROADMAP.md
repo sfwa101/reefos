@@ -394,3 +394,9 @@ bypass LLM processing.
 - **Multi-Tenant Schema:** Created `salsabil_vendors` (tenant entity) and `salsabil_vendor_members` (user↔tenant join with sub-role). RLS enforced via the new `is_vendor_member()` SECURITY DEFINER helper: members read their own vendor, owners manage memberships, admins retain global control.
 - **Identity Hook:** `useCurrentVendor()` (TanStack Query) resolves the authenticated user's primary active tenant + their role within it — single source of truth for the vendor portal.
 - **Doctrine:** The **Benaa SaaS & Multi-Tenant Doctrine** and the **Dynamic Visibility Rule** are now permanently inscribed in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Salsabil is no longer just a marketplace — it is the foundation for a sovereign Arabic B2B ERP ecosystem.
+
+## Phase 9 Part 2 — Vendor Catalog & Matrix Onboarding (2026-05-08)
+- **Read-Only USA Lens:** New `/vendor/catalog` route renders `VendorCatalog` powered by `UniversalAdminGrid`, fetching `salsabil_assets` joined with `salsabil_skus` + `salsabil_financial_contracts`. Strictly NO Edit/Delete row actions — Tenants cannot mutate the Sovereign Catalog.
+- **Inventory Declaration Modal:** Single row action `إضافة لمخزني` opens a Dialog wired to `useCurrentVendor()` + `useUpdateInventory()`. On confirm, calls `upsert_inventory_matrix` with `location_id = currentVendor.vendor.id`, materialising the Tenant's local stock row inside the Decentralized Inventory Matrix.
+- **Sidebar/Tab Bar:** `VendorShell` extended from 4 → 5 tabs — added "الكتالوج" (Library icon) between Home and Orders; renamed "منتجاتي" → "مخزوني" (Package icon) to align with the Inventory Matrix doctrine.
+- **Doctrine:** Catalog is global and sovereign; inventory is decentralized and tenant-scoped. Vendors declare *availability against* assets, never the assets themselves.
