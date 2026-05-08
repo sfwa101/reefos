@@ -644,3 +644,18 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 4. **Dead Seed Eradication** — Deleted `src/lib/catalogSeedShared.ts`, `src/pages/admin/CatalogBackup.tsx`, `src/routes/admin.catalog-backup.tsx`, and `scripts/db-backup/sync-seed.ts`. The legacy `products`-coupled seed/backup pipeline is officially ashes.
 
 **Status:** OS is sealed. The frontend is 100% Sovereign, realtime channels are aligned to the Matrix, cache keys are coherent, and all admin queries are bounded. Cleared for Phase 16 — Hakim AI Builder.
+
+---
+
+## Phase 16 — Hakim The Engineer V1 (Autonomous Builder)
+
+**Mission:** Translate the Emperor's natural-language commands into ready-to-mint Sovereign Blueprints (Asset + Contract + SDUI), and instantiate entire business verticals in one click.
+
+### Strikes Executed
+
+1. **Hakim Architect Edge Function** — `supabase/functions/hakim_architect/index.ts` accepts a `prompt` and calls Lovable AI Gateway (`google/gemini-2.5-pro`) with a strict `submit_blueprint` tool schema. Returns `{ module_name, description, suggested_assets[], sdui_layout }`. Handles 429 (rate-limit) and 402 (credits) explicitly.
+2. **Hakim Command Terminal** — `src/apps/reef-al-madina/features/admin/hakim/HakimTerminal.tsx`. Imperial Black aesthetic terminal with a textarea command input, blueprint preview (asset cards with type/pricing/traits badges), and the "اعتماد وسكّ القطاع" execute button.
+3. **Sovereign Executor Hook** — `useHakimExecutor.ts` loops over `suggested_assets`, normalizes each into a `mint_universal_asset` payload (default SKU + financial contract), reports `{ minted, failed }`, and invalidates the catalog/asset query caches.
+4. **Routing & Sidebar** — Mounted at `/admin/hakim-engineer` (preserves the existing Advisor at `/admin/hakim`). Sidebar entry "حكيم المهندس" added under نظام الذكاء group with the `Bot` icon.
+
+**Status:** Hakim The Engineer V1 is online. The OS now supports prompt-to-module autonomous generation, awaiting the Emperor's first command.
