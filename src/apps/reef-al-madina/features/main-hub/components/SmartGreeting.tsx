@@ -1,31 +1,33 @@
 /**
- * SmartGreeting — personalized header above the search bar.
+ * SmartGreeting — Phase 26 (Islamic + Admin-controlled sub-message).
  *
- * Reads `profile.full_name` from AuthContext and the local hour of day
- * to generate a time-aware greeting + a contextual sub-line. Pure
- * presentation — zero hardcoded user data.
+ * Time-aware Islamic salutation + a sub-line read from the
+ * `app_settings.greeting_subline` admin-controlled JSONB so marketing can
+ * change tone without a code deploy. Falls back to a curated rotation.
  */
 import { useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
+import { useSystemSetting } from "@/hooks/useSystemSettings";
 
-type Slot = "dawn" | "morning" | "noon" | "afternoon" | "evening" | "night";
+type Slot = "fajr" | "morning" | "noon" | "asr" | "maghrib" | "isha";
 
 const slotFromHour = (h: number): Slot => {
-  if (h < 5) return "night";
-  if (h < 11) return "morning";
-  if (h < 14) return "noon";
-  if (h < 17) return "afternoon";
-  if (h < 22) return "evening";
-  return "night";
+  if (h < 5) return "isha";
+  if (h < 7) return "fajr";
+  if (h < 12) return "morning";
+  if (h < 15) return "noon";
+  if (h < 18) return "asr";
+  if (h < 21) return "maghrib";
+  return "isha";
 };
 
 const greetings: Record<Slot, { hi: string; sub: string; emoji: string }> = {
-  dawn:      { hi: "صباح النور",  sub: "بداية مباركة — جهّز قائمة اليوم بهدوء 🌅", emoji: "🌅" },
-  morning:   { hi: "صباح الخير",  sub: "جاهز لفطور طازج يملأ يومك بالطاقة؟ 🍳",  emoji: "✨" },
-  noon:      { hi: "نهارك سعيد",  sub: "اختر غداء يليق بك — وصلناك في دقائق 🍲",  emoji: "☀️" },
-  afternoon: { hi: "أهلاً بعودتك", sub: "وقت كوب شاي وقطعة حلوى — على راحتك 🍵",  emoji: "🌤️" },
-  evening:   { hi: "مساء الخير",  sub: "عشاء العائلة على بُعد ضغطة — جهّزناه لك 🌙", emoji: "🌙" },
-  night:     { hi: "مساء الهدوء", sub: "جهّز سلة الغد الآن، توصلك أول الصباح ⭐",  emoji: "⭐" },
+  fajr:    { hi: "أنار الله يومك",  sub: "بداية مباركة بإذن الله — جهّز قائمة اليوم بسكينة 🤲", emoji: "🌅" },
+  morning: { hi: "صباح الخير",      sub: "حياك الله — فطور طازج يملأ يومك بالبركة 🌿",            emoji: "✨" },
+  noon:    { hi: "حياك الله",       sub: "نهارك مبارك — اختر غداء يليق بك ووصلناك سريعاً 🍲",     emoji: "☀️" },
+  asr:     { hi: "أهلاً بعودتك",    sub: "وقت كوب شاي وقطعة حلوى — على راحتك 🍵",                  emoji: "🌤️" },
+  maghrib: { hi: "مساء الخير",      sub: "تقبّل الله — عشاء العائلة على بُعد ضغطة 🌙",            emoji: "🌙" },
+  isha:    { hi: "مساء النور",      sub: "جهّز سلة الغد الآن، توصلك أول الصباح ⭐",                emoji: "⭐" },
 };
 
 const firstName = (full: string | null | undefined): string => {
@@ -33,11 +35,17 @@ const firstName = (full: string | null | undefined): string => {
   return full.trim().split(/\s+/)[0] ?? "";
 };
 
+type AdminSubline = { enabled?: boolean; text?: string } | null;
+
 export const SmartGreeting = () => {
   const { profile } = useAuth();
   const slot = useMemo(() => slotFromHour(new Date().getHours()), []);
   const g = greetings[slot];
   const name = firstName(profile?.full_name);
+
+  // Admin-controlled override (single source of truth: app_settings).
+  const { value: adminSub } = useSystemSetting<AdminSubline>("greeting_subline", null);
+  const sub = adminSub?.enabled && adminSub?.text ? adminSub.text : g.sub;
 
   return (
     <header dir="rtl" className="px-1 pt-1 animate-float-up">
@@ -45,9 +53,7 @@ export const SmartGreeting = () => {
         {g.hi}
         {name ? `، ${name}` : ""} <span aria-hidden>{g.emoji}</span>
       </h1>
-      <p className="mt-1 text-[13px] font-medium text-muted-foreground">
-        {g.sub}
-      </p>
+      <p className="mt-1 text-[13px] font-medium text-muted-foreground">{sub}</p>
     </header>
   );
 };

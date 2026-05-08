@@ -33,21 +33,22 @@ export const MainSearchHeader = () => {
     <>
       <div ref={sentinelRef} aria-hidden className="h-px w-full" />
       <section
-        className={`sticky top-[96px] z-30 -mx-4 px-4 py-2 transition-all duration-300 ease-apple ${
+        className={`sticky top-[88px] z-30 -mx-4 px-4 py-2 transition-all duration-300 ease-apple ${
           pinned
-            ? "bg-background/75 backdrop-blur-md border-b border-border/50"
+            ? "bg-background/85 backdrop-blur-xl border-b border-border/40 shadow-[0_1px_0_0_hsl(var(--border)/0.3)]"
             : "bg-transparent border-b border-transparent"
         }`}
       >
         <Link
           to="/search"
           search={{ q: "" }}
-          className="flex w-full items-center gap-2 rounded-full bg-secondary/60 px-4 py-3 text-right ring-1 ring-border/40 transition active:scale-[0.99]"
+          className="flex w-full items-center gap-2 rounded-full bg-secondary/70 px-4 py-3 text-right ring-1 ring-border/30 transition active:scale-[0.99]"
           dir="rtl"
         >
-          <Search className="h-4.5 w-4.5 text-muted-foreground" strokeWidth={2.4} />
+          <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
           <TypewriterPlaceholder
             options={SEARCH_PLACEHOLDERS}
+            staticMode
             className="flex-1 text-[13.5px] font-medium text-muted-foreground"
           />
           <button
