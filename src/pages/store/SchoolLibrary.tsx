@@ -93,7 +93,7 @@ const SchoolLibrary = () => {
 
         {/* ---------- BORROW TAB ---------- */}
         <TabsContent value="borrow" className="mt-4 space-y-4">
-          <div className="flex items-center gap-3 rounded-2xl p-3 shadow-soft" style={{ background: isVerified ? "#E8F8EF" : PALETTE.primarySoft }}>
+          <div className="flex items-center gap-3 rounded-2xl p-3 shadow-soft" style={{ background: isVerified ? "hsl(var(--surface-mint))" : PALETTE.primarySoft }}>
             {isVerified ? <CheckCircle2 className="h-5 w-5 text-emerald-600" /> : <Lock className="h-5 w-5" style={{ color: PALETTE.primary }} />}
             <div className="flex-1">
               <p className="font-display text-sm font-extrabold">{isVerified ? "حسابك موثق ✓" : "تحتاج إلى توثيق الهوية"}</p>

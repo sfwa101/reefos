@@ -11,7 +11,9 @@ export default function MegaEventBanner() {
   const event = useMegaEvent();
   if (!event) return null;
 
-  const accent = event.banner_color_hex || "#dc2626";
+  // Phase 29 — Token compliance: fall back to the destructive token instead
+  // of a hardcoded crimson hex so the banner inherits the active theme.
+  const accent = event.banner_color_hex || "hsl(var(--destructive))";
   const pct = Number(event.global_discount_pct ?? 0);
 
   return (

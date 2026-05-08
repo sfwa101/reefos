@@ -105,6 +105,13 @@
   --destructive: 4 78% 56%;
   --destructive-foreground: 0 0% 100%;
 
+  /* Phase 29 — Tier tokens (loyalty levels) — replace hardcoded hexes */
+  --tier-bronze: 26 45% 46%;     /* ≈ #A97142 */
+  --tier-silver: 220 9% 64%;     /* ≈ #9CA3AF */
+  --tier-gold: 45 65% 53%;       /* ≈ #D4A93A */
+  --tier-platinum: 210 24% 49%;  /* ≈ #5E7B9A */
+  --surface-mint: 145 60% 94%;   /* ≈ #E8F8EF */
+
   --border: 140 15% 88%;
   --input: 140 15% 88%;
   --ring: 142 35% 38%;
@@ -186,6 +193,13 @@
 
   --destructive: 4 70% 52%;
   --destructive-foreground: 0 0% 100%;
+
+  /* Phase 29 — Tier tokens — dark mode (slightly lifted for contrast) */
+  --tier-bronze: 26 50% 58%;
+  --tier-silver: 220 10% 72%;
+  --tier-gold: 45 70% 62%;
+  --tier-platinum: 210 28% 62%;
+  --surface-mint: 145 25% 18%;
 
   --border: 220 8% 22%;
   --input: 220 8% 22%;

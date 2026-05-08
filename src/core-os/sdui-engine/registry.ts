@@ -10,7 +10,15 @@
  */
 import type { SectionKey, SectionConfig } from "./types";
 
-export type PageKey = "main_hub" | "home" | "sections" | "offers";
+export type PageKey =
+  | "main_hub"
+  | "home"
+  | "sections"
+  | "offers"
+  // Phase 29 — Sovereign Unification page keys
+  | "offers_hub"
+  | "maeen_hub"
+  | "category_storefront";
 
 export type AllowedOverride =
   | "padding"
@@ -41,6 +49,9 @@ export const PAGE_LABELS: Record<PageKey, string> = {
   home: "الصفحة الرئيسية (الكاملة)",
   sections: "صفحة الأقسام",
   offers: "صفحة العروض",
+  offers_hub: "صفحة العروض (Sovereign)",
+  maeen_hub: "بوابة معين (Sovereign)",
+  category_storefront: "متاجر الأقسام (Sovereign)",
 };
 
 /** Default section order used when seeding a new page. */
@@ -56,6 +67,15 @@ export const DEFAULT_PAGE_ORDER: Record<PageKey, SectionKey[]> = {
   ],
   sections: ["CategoriesGrid", "ProductsGrid"],
   offers: ["BundlesRail", "BestSellersRail", "ProductsGrid"],
+  offers_hub: ["SpatioTemporalOffersRail"],
+  maeen_hub: ["MaeenLauncherGrid"],
+  category_storefront: [
+    "SearchAndFilters",
+    "CategoriesGrid",
+    "BundlesRail",
+    "BestSellersRail",
+    "ProductsGrid",
+  ],
 };
 
 export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
@@ -209,6 +229,24 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     pages: ["home", "main_hub"],
     allowedOverrides: ["padding", "title"],
     iconKey: "Repeat",
+  },
+
+  // ---------- Phase 29 — Sovereign Unification ----------
+  SpatioTemporalOffersRail: {
+    key: "SpatioTemporalOffersRail",
+    label: "مصفوفة العروض الزمكانية",
+    description: "محرك العروض الكامل (مكان × زمان × هوية)",
+    pages: ["offers_hub"],
+    allowedOverrides: ["padding"],
+    iconKey: "Sparkles",
+  },
+  MaeenLauncherGrid: {
+    key: "MaeenLauncherGrid",
+    label: "شبكة بوابة معين",
+    description: "شبكة التطبيقات داخل بوابة معين الموحّدة",
+    pages: ["maeen_hub"],
+    allowedOverrides: ["padding"],
+    iconKey: "LayoutGrid",
   },
 };
 

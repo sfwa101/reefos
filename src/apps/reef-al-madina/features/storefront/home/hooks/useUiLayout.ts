@@ -34,16 +34,29 @@ const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
 ];
 
 // Phase 28 — Sections (departments_hub) ascended to the Level-4 Matrix.
-// Locked Golden Order so the Departments hub never renders blank during
-// migrations, cache misses, or DB downtime.
 const DEFAULT_DEPARTMENTS_HUB_ORDER: SectionKey[] = [
   "MainSearchHeader",
   "DepartmentGrid",
 ];
 
+// Phase 29 — Sovereign Unification: Offers, Maeen and category storefronts
+// ascended to the Level-4 Matrix with locked Golden Orders.
+const DEFAULT_OFFERS_HUB_ORDER: SectionKey[] = ["SpatioTemporalOffersRail"];
+const DEFAULT_MAEEN_HUB_ORDER: SectionKey[] = ["MaeenLauncherGrid"];
+const DEFAULT_CATEGORY_ORDER: SectionKey[] = [
+  "SearchAndFilters",
+  "CategoriesGrid",
+  "BundlesRail",
+  "BestSellersRail",
+  "ProductsGrid",
+];
+
 function fallbackOrderFor(pageKey: string): SectionKey[] {
   if (pageKey === "reef_home") return DEFAULT_REEF_HOME_ORDER;
   if (pageKey === "departments_hub") return DEFAULT_DEPARTMENTS_HUB_ORDER;
+  if (pageKey === "offers_hub") return DEFAULT_OFFERS_HUB_ORDER;
+  if (pageKey === "maeen_hub") return DEFAULT_MAEEN_HUB_ORDER;
+  if (pageKey.startsWith("category_")) return DEFAULT_CATEGORY_ORDER;
   return DEFAULT_HOME_ORDER;
 }
 
