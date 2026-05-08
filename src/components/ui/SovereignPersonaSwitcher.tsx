@@ -68,7 +68,7 @@ type Props = { variant?: "pill" | "chip"; className?: string };
 
 const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { roles } = useUserRoles();
   const { activePersonaKey, setPersona } = useSovereignContext();
   const [open, setOpen] = useState(false);
