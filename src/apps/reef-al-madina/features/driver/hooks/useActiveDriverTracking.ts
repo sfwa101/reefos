@@ -1,12 +1,9 @@
 /**
- * Phase T-B.2 — Active Driver Tracking
- * ------------------------------------
- * Resolves an order → its assigned driver, then subscribes to that
- * driver's `driver_positions` row via Supabase Realtime. Used by the
- * customer "track your driver" map and the admin dispatch board.
+ * Phase 12.1 — Sovereign rewire.
+ * Resolves a fulfillment node → its assigned driver, then subscribes
+ * to that driver's `driver_positions` row via Supabase Realtime.
  *
- * Realtime channel filter limits the wire to a single PK row, so the
- * customer never sees other drivers' positions even with broad RLS.
+ * Legacy `orders.driver_id` lookup is purged.
  */
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -23,16 +20,21 @@ export type DriverLivePosition = {
   updatedAt: string | null;
 };
 
-type Args = { orderId?: string; driverId?: string };
+type Args = {
+  /** Sovereign fulfillment node id (preferred). */
+  nodeId?: string;
+  /** Direct driver id, bypasses lookup. */
+  driverId?: string;
+  /**
+   * Back-compat: callers still passing `orderId` are treated as
+   * `master_order_id` against the Sovereign Matrix.
+   */
+  orderId?: string;
+};
 
-// driver_positions stores `position` as PostGIS geography. The wire
-// representation we receive over postgres_changes is a hex-encoded WKB
-// string (SRID=4326). Decoding it client-side avoids a round-trip RPC.
 function decodeWkbPoint(hex: string | null | undefined): { lat: number; lng: number } | null {
   if (!hex || hex.length < 50) return null;
   try {
-    // EWKB format: byteOrder(1) + type(4) + srid?(4) + x(8) + y(8)
-    // We just extract the last 16 bytes (lng then lat as little-endian doubles).
     const bytes = hex.match(/../g)?.map((b) => parseInt(b, 16));
     if (!bytes) return null;
     const buf = new Uint8Array(bytes);
@@ -48,21 +50,38 @@ function decodeWkbPoint(hex: string | null | undefined): { lat: number; lng: num
   }
 }
 
-export function useActiveDriverTracking({ orderId, driverId }: Args) {
+export function useActiveDriverTracking({ nodeId, driverId, orderId }: Args) {
   const [resolvedDriverId, setResolvedDriverId] = useState<string | null>(driverId ?? null);
   const [position, setPosition] = useState<DriverLivePosition | null>(null);
 
-  // Resolve order → driver_id once
+  // Resolve node/master-order → driver_id from the Sovereign Matrix.
   useEffect(() => {
     if (driverId) { setResolvedDriverId(driverId); return; }
-    if (!orderId) return;
     let active = true;
-    supabase.from("orders").select("driver_id").eq("id", orderId).maybeSingle()
-      .then(({ data }) => {
-        if (active && data?.driver_id) setResolvedDriverId(data.driver_id);
-      });
+    const run = async () => {
+      if (nodeId) {
+        const { data } = await supabase
+          .from("salsabil_fulfillment_nodes")
+          .select("driver_id")
+          .eq("id", nodeId)
+          .maybeSingle();
+        if (active && data?.driver_id) setResolvedDriverId(data.driver_id as string);
+        return;
+      }
+      if (orderId) {
+        const { data } = await supabase
+          .from("salsabil_fulfillment_nodes")
+          .select("driver_id")
+          .eq("master_order_id", orderId)
+          .not("driver_id", "is", null)
+          .limit(1)
+          .maybeSingle();
+        if (active && data?.driver_id) setResolvedDriverId(data.driver_id as string);
+      }
+    };
+    run();
     return () => { active = false; };
-  }, [orderId, driverId]);
+  }, [nodeId, orderId, driverId]);
 
   // Initial fetch + realtime subscription scoped to this driver only
   useEffect(() => {

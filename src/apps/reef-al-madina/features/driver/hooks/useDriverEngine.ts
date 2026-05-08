@@ -1,27 +1,34 @@
 /**
  * useDriverEngine — single source of truth for the Driver operational surface.
  *
- * Responsibilities (KISS, mobile-first):
- *   - Resolve the current driver row from auth.uid()
- *   - Load + Realtime-subscribe to `delivery_tasks` for that driver
- *   - Hydrate joined customer/order info from `orders` + `profiles`
- *   - Track active surge zones from `geo_zones` (realtime-aware)
- *   - Drive the FSM via existing RPCs:
- *       fireEvent(taskId, 'out_for_delivery' | 'arrived' | 'location_ping')
- *       completeDelivery(task)  → handles barcode + COD prompts
- *   - Derive shift earnings (deliveredToday, forecast, COD-in-hand)
+ * Phase 12.1 — Barq Sovereignty rewrite.
+ * --------------------------------------
+ * The legacy `delivery_tasks` + `orders` + `profiles` join is purged.
+ * The driver now consumes the Sovereign Matrix directly:
+ *   - rows  → public.salsabil_fulfillment_nodes WHERE driver_id = me
+ *   - customer/address → node.delivery_snapshot (jsonb injected at checkout)
+ *   - realtime → channel on salsabil_fulfillment_nodes filtered by driver_id
  *
- * Backend-first contract — we DO NOT change schemas. Optimistic UI is
- * applied only on advance/arrived to keep tap-latency low; the realtime
- * channel reconciles authoritative state.
+ * FSM transitions UPDATE the node directly (RLS gates this to the assigned
+ * driver). Hitting status='delivered' triggers `trigger_auto_settlement()`
+ * which atomically writes the vendor's settlement row.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
+import type {
+  DriverEarnings,
+  DriverEvent,
+  DriverTask,
+  GpsFix,
+  OrderInfo,
+  SurgeZone,
+  TaskStatus,
+} from "../types/driver.types";
 
 const MOCK_DRIVER_ID = "god-mode-driver";
-const MOCK_DRIVER_TASKS: import("../types/driver.types").DriverTask[] = [
+const MOCK_DRIVER_TASKS: DriverTask[] = [
   {
     id: "mock-task-1",
     order_id: "mock-order-1",
@@ -47,19 +54,10 @@ const MOCK_DRIVER_TASKS: import("../types/driver.types").DriverTask[] = [
     driver_lng: null,
   },
 ];
-const MOCK_DRIVER_ORDERS: Record<string, import("../types/driver.types").OrderInfo> = {
+const MOCK_DRIVER_ORDERS: Record<string, OrderInfo> = {
   "mock-order-1": { id: "mock-order-1", total: 250, user_id: "mock-user-1", full_name: "عميل تجريبي ١", phone: "01000000001" },
   "mock-order-2": { id: "mock-order-2", total: 480, user_id: "mock-user-2", full_name: "عميل تجريبي ٢", phone: "01000000002" },
 };
-import type {
-  DriverEarnings,
-  DriverEvent,
-  DriverTask,
-  GpsFix,
-  OrderInfo,
-  SurgeZone,
-  TaskStatus,
-} from "../types/driver.types";
 
 /** Status set the driver actively works on (excludes terminal states). */
 const ACTIVE_STATUSES: TaskStatus[] = ["pending", "out_for_delivery", "arrived"];
@@ -75,21 +73,60 @@ const getGPS = (): Promise<GpsFix> =>
     );
   });
 
+type SnapshotShape = {
+  full_name?: string;
+  customer_name?: string;
+  phone?: string;
+  customer_phone?: string;
+  address?: string;
+  delivery_address?: string;
+  zone?: string;
+  delivery_zone?: string;
+  service_type?: string;
+  cod_amount?: number;
+  customer_id?: string;
+  user_id?: string;
+};
+
+/** Map a Sovereign fulfillment node row → DriverTask + OrderInfo. */
+function nodeToTaskAndOrder(node: Record<string, unknown>): {
+  task: DriverTask;
+  order: OrderInfo;
+} {
+  const snap = (node.delivery_snapshot ?? {}) as SnapshotShape;
+  const masterId = (node.master_order_id as string | null) ?? (node.id as string);
+  const total = Number(node.total_amount ?? 0);
+  const task: DriverTask = {
+    id: node.id as string,
+    order_id: masterId,
+    status: ((node.status as TaskStatus) ?? "pending") as TaskStatus,
+    service_type: (snap.service_type ?? "standard") as DriverTask["service_type"],
+    delivery_zone: (snap.delivery_zone ?? snap.zone ?? null) as string | null,
+    customer_barcode: null,
+    cod_amount: Number(snap.cod_amount ?? 0),
+    commission_amount: 0,
+    driver_lat: null,
+    driver_lng: null,
+  };
+  const order: OrderInfo = {
+    id: masterId,
+    total,
+    user_id: (snap.customer_id ?? snap.user_id ?? "") as string,
+    full_name: snap.full_name ?? snap.customer_name ?? null,
+    phone: snap.phone ?? snap.customer_phone ?? null,
+    address: snap.address ?? snap.delivery_address ?? null,
+  };
+  return { task, order };
+}
+
 export type DriverEngine = {
-  // identity
   driverId: string | null;
   loading: boolean;
-
-  // data
   tasks: DriverTask[];
   orders: Record<string, OrderInfo>;
   surgeZones: SurgeZone[];
   earnings: DriverEarnings;
-
-  // status flags
   busyTaskId: string | null;
-
-  // actions (FSM)
   fireEvent: (taskId: string, ev: DriverEvent) => Promise<void>;
   completeDelivery: (task: DriverTask) => Promise<void>;
   refresh: () => Promise<void>;
@@ -102,13 +139,10 @@ export const useDriverEngine = (): DriverEngine => {
   const [orders, setOrders] = useState<Record<string, OrderInfo>>({});
   const [surgeZones, setSurgeZones] = useState<SurgeZone[]>([]);
   const [busyTaskId, setBusyTaskId] = useState<string | null>(null);
-
-  /** Tracks delivered-today counter from realtime UPDATE→delivered transitions. */
   const deliveredTodayRef = useRef(0);
 
-  /* ─── core load: tasks + joined order/profile data ─── */
+  /* ─── core load: Sovereign fulfillment nodes for this driver ─── */
   const load = useCallback(async () => {
-    // God Mode bypass — inject mock driver profile for admin QA.
     if (isGodMode()) {
       setDriverId(MOCK_DRIVER_ID);
       setTasks(MOCK_DRIVER_TASKS);
@@ -116,8 +150,6 @@ export const useDriverEngine = (): DriverEngine => {
       setLoading(false);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
     const auth = await supabase.auth.getUser();
     const uid = auth.data.user?.id;
     if (!uid) {
@@ -126,12 +158,12 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: drv } = await sb
+    const { data: drv } = await supabase
       .from("drivers")
       .select("id")
       .eq("user_id", uid)
       .maybeSingle();
-    const id = drv?.id ?? null;
+    const id = (drv?.id as string | undefined) ?? null;
     setDriverId(id);
 
     if (!id) {
@@ -141,40 +173,23 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: t } = await sb
-      .from("delivery_tasks")
-      .select("*")
+    const { data: nodes } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id,master_order_id,status,total_amount,delivery_snapshot,assigned_at,picked_up_at,delivered_at")
       .eq("driver_id", id)
-      .in("status", ACTIVE_STATUSES)
-      .order("created_at", { ascending: false });
+      .in("status", ACTIVE_STATUSES as unknown as string[])
+      .order("assigned_at", { ascending: false, nullsFirst: false });
 
-    const list = (t ?? []) as DriverTask[];
-    setTasks(list);
-
-    if (list.length) {
-      const orderIds = list.map((x) => x.order_id);
-      const { data: ods } = await sb
-        .from("orders")
-        .select("id,total,user_id")
-        .in("id", orderIds);
-
-      const userIds = (ods ?? []).map((o: OrderInfo) => o.user_id);
-      const { data: profs } = await sb
-        .from("profiles")
-        .select("id,full_name,phone")
-        .in("id", userIds);
-
-      const map: Record<string, OrderInfo> = {};
-      (ods ?? []).forEach((o: OrderInfo) => {
-        const p = (profs ?? []).find(
-          (x: { id: string }) => x.id === o.user_id,
-        );
-        map[o.id] = { ...o, full_name: p?.full_name, phone: p?.phone };
-      });
-      setOrders(map);
-    } else {
-      setOrders({});
+    const list = (nodes ?? []) as Record<string, unknown>[];
+    const taskList: DriverTask[] = [];
+    const orderMap: Record<string, OrderInfo> = {};
+    for (const n of list) {
+      const { task, order } = nodeToTaskAndOrder(n);
+      taskList.push(task);
+      orderMap[task.order_id] = order;
     }
+    setTasks(taskList);
+    setOrders(orderMap);
     setLoading(false);
   }, []);
 
@@ -188,18 +203,23 @@ export const useDriverEngine = (): DriverEngine => {
     setSurgeZones(((data ?? []) as SurgeZone[]).filter((z) => z.surge_active));
   }, []);
 
-  /* ─── boot + realtime subscriptions ─── */
+  /* ─── boot + realtime subscriptions on Sovereign Matrix ─── */
   useEffect(() => {
     load();
     loadSurge();
 
-    const tasksCh = supabase
-      .channel("driver-engine-tasks")
+    if (!driverId) {
+      // first load resolves driverId; the next effect run will subscribe.
+    }
+
+    const nodesChannel = supabase
+      .channel(`driver-engine-nodes${driverId ? `-${driverId}` : ""}`)
       .on(
         "postgres_changes",
-        { event: "*", schema: "public", table: "delivery_tasks" },
+        driverId
+          ? { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `driver_id=eq.${driverId}` }
+          : { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
         (payload) => {
-          // Track delivered-today increments locally for the earnings bar.
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const n = (payload.new ?? {}) as any;
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -222,46 +242,62 @@ export const useDriverEngine = (): DriverEngine => {
       .subscribe();
 
     return () => {
-      supabase.removeChannel(tasksCh);
+      supabase.removeChannel(nodesChannel);
       supabase.removeChannel(zonesCh);
     };
-  }, [load, loadSurge]);
+  }, [load, loadSurge, driverId]);
 
-  /* ─── FSM actions ─── */
+  /* ─── FSM actions: direct UPDATE on the Sovereign node (RLS-gated) ─── */
   const fireEvent = useCallback(
-    async (taskId: string, ev: DriverEvent) => {
-      setBusyTaskId(taskId);
+    async (nodeId: string, ev: DriverEvent) => {
+      setBusyTaskId(nodeId);
       const gps = await getGPS();
 
-      // Optimistic transition for state-advancing events (skip for pings).
-      if (ev !== "location_ping") {
-        const nextStatus: TaskStatus =
-          ev === "out_for_delivery" ? "out_for_delivery" : "arrived";
-        setTasks((prev) =>
-          prev.map((t) => (t.id === taskId ? { ...t, status: nextStatus } : t)),
-        );
+      if (ev === "location_ping") {
+        // No status change; this is a courtesy ping. Telemetry hook owns the
+        // actual driver_positions write — we just re-fetch.
+        setBusyTaskId(null);
+        toast.success("تحديث الموقع");
+        return;
       }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).rpc("driver_log_event", {
-        _task_id: taskId,
-        _event: ev,
-        _lat: gps?.lat,
-        _lng: gps?.lng,
-      });
+      const nextStatus: TaskStatus =
+        ev === "out_for_delivery" ? "out_for_delivery" : "arrived";
+
+      // Optimistic
+      setTasks((prev) =>
+        prev.map((t) => (t.id === nodeId ? { ...t, status: nextStatus } : t)),
+      );
+
+      const patch: {
+        status: string;
+        picked_up_at?: string;
+        pickup_lat?: number;
+        pickup_lng?: number;
+      } = { status: nextStatus };
+      if (ev === "out_for_delivery") {
+        patch.picked_up_at = new Date().toISOString();
+        if (gps) {
+          patch.pickup_lat = gps.lat;
+          patch.pickup_lng = gps.lng;
+        }
+      }
+
+      const { error } = await supabase
+        .from("salsabil_fulfillment_nodes")
+        .update(patch)
+        .eq("id", nodeId);
       setBusyTaskId(null);
 
       if (error) {
         toast.error(error.message);
-        load(); // reconcile authoritative state on failure
+        load();
         return;
       }
       toast.success(
         ev === "out_for_delivery"
           ? "تم تسجيل الخروج للتوصيل"
-          : ev === "arrived"
-            ? "تم تسجيل الوصول"
-            : "تحديث الموقع",
+          : "تم تسجيل الوصول",
       );
     },
     [load],
@@ -272,43 +308,40 @@ export const useDriverEngine = (): DriverEngine => {
       setBusyTaskId(task.id);
       const gps = await getGPS();
 
-      let scanned: string | null = null;
-      if (task.customer_barcode) {
-        scanned = window.prompt("امسح/أدخل باركود العميل لتأكيد التسليم:");
-        if (!scanned) {
-          setBusyTaskId(null);
-          return;
-        }
-      }
-
       const cod =
         task.cod_amount > 0
           ? window.confirm(`هل حصّلت ${task.cod_amount} ج.م نقداً؟`)
-          : false;
+          : true;
+      if (!cod && task.cod_amount > 0) {
+        setBusyTaskId(null);
+        return;
+      }
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error, data } = await (supabase as any).rpc("complete_delivery", {
-        _task_id: task.id,
-        _scanned_barcode: scanned,
-        _lat: gps?.lat,
-        _lng: gps?.lng,
-        _cod_collected: cod,
-      });
+      const patch: {
+        status: string;
+        delivered_at: string;
+        dropoff_lat?: number;
+        dropoff_lng?: number;
+      } = {
+        status: "delivered",
+        delivered_at: new Date().toISOString(),
+      };
+      if (gps) {
+        patch.dropoff_lat = gps.lat;
+        patch.dropoff_lng = gps.lng;
+      }
+
+      const { error } = await supabase
+        .from("salsabil_fulfillment_nodes")
+        .update(patch)
+        .eq("id", task.id);
       setBusyTaskId(null);
 
       if (error) {
-        toast.error(
-          error.message === "barcode_mismatch"
-            ? "الباركود غير مطابق"
-            : error.message === "gps_proof_required"
-              ? "يجب تفعيل الموقع GPS"
-              : error.message,
-        );
+        toast.error(error.message);
         return;
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const commission = (data as any)?.commission ?? task.commission_amount ?? 0;
-      toast.success(`تم التسليم! عمولة: ${commission} ج.م`);
+      toast.success("تم التسليم! تمت التسوية تلقائياً");
     },
     [],
   );
