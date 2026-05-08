@@ -269,7 +269,12 @@ export const useDriverEngine = (): DriverEngine => {
         prev.map((t) => (t.id === nodeId ? { ...t, status: nextStatus } : t)),
       );
 
-      const patch: Record<string, unknown> = { status: nextStatus };
+      const patch: {
+        status: string;
+        picked_up_at?: string;
+        pickup_lat?: number;
+        pickup_lng?: number;
+      } = { status: nextStatus };
       if (ev === "out_for_delivery") {
         patch.picked_up_at = new Date().toISOString();
         if (gps) {
@@ -312,7 +317,12 @@ export const useDriverEngine = (): DriverEngine => {
         return;
       }
 
-      const patch: Record<string, unknown> = {
+      const patch: {
+        status: string;
+        delivered_at: string;
+        dropoff_lat?: number;
+        dropoff_lng?: number;
+      } = {
         status: "delivered",
         delivered_at: new Date().toISOString(),
       };
