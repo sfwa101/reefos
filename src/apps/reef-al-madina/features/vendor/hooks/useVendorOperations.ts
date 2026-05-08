@@ -215,15 +215,23 @@ export function useVendorOperations() {
     return () => { supabase.removeChannel(ch); };
   }, [vendorIds, refreshLiveItems, refreshProducts]);
 
-  /** Update product stock & active flag. Authorized via RLS on products. */
+  /** Phase 15.1 — Sovereign stock writes. `productId` here is a SKU id;
+   *  we upsert the inventory row on `salsabil_inventory_matrix` keyed by sku_id. */
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await __sb.from("products")
-      .update({ stock: newQty, is_active: isActive })
-      .eq("id", productId);
+    const { error } = await (supabase as any)
+      .from("salsabil_inventory_matrix")
+      .upsert(
+        {
+          sku_id: productId,
+          inventory_type: "stock",
+          availability_data: { stock: newQty, is_active: isActive },
+        },
+        { onConflict: "sku_id" },
+      );
     if (error) {
-      toast.error("تعذّر تحديث المنتج", { description: error.message });
+      toast.error("تعذّر تحديث المخزون", { description: error.message });
       await refreshProducts();
       return false;
     }
