@@ -659,3 +659,17 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 4. **Routing & Sidebar** — Mounted at `/admin/hakim-engineer` (preserves the existing Advisor at `/admin/hakim`). Sidebar entry "حكيم المهندس" added under نظام الذكاء group with the `Bot` icon.
 
 **Status:** Hakim The Engineer V1 is online. The OS now supports prompt-to-module autonomous generation, awaiting the Emperor's first command.
+
+---
+
+## Phase 17 (Prologue) — Manifesto Archival & Boundary Repair
+
+**Mission:** Enshrine the Ultimate Manifesto into the sovereign documentation and surgically repair the two Core-OS → App boundary violations exposed by the Stem Cell audit, before constructing the Level-4 Theme & Template Matrix.
+
+### Strikes Executed
+
+1. **Manifesto Enshrined** — Prepended "THE ULTIMATE MANIFESTO: STEM CELL ARCHITECTURE & LEVEL-4 INTENT-TO-INTERFACE ENGINE" to `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Six binding doctrines now sit at the top of the Sovereign Manifest: Meta-Platform, Adaptive Contextual Existence, Reactive DB / Unidirectional Flow, Logic Weaver, Hakim as Stem Cell Injector, Multi-Tenant Multi-Dimension Reality.
+2. **Registry Boundary Repaired** — `src/core-os/sdui-engine/registry.ts` no longer back-imports `SectionConfig` from `@/apps/reef-al-madina/...sdui.types`. `PADDING_CLASS` and `TONE_CLASS` now derive their type from the canonical kernel source `@/core-os/sdui-engine/types`.
+3. **System Editor Boundary Repaired** — Relocated `useLayoutEditor` from `src/apps/reef-al-madina/features/admin/hooks/` into `src/core-os/system-editor/hooks/`. `LayoutEditorGrid.tsx` updated to consume the kernel path. The empty Reef admin/hooks directory was removed.
+
+**Status:** The Core-OS is now strictly independent of the Reef app layer. Zero illegal `core-os/ → apps/` imports remain. The kernel is sealed and ready for Phase 17 — the Sovereign Theme & SDUI Template Matrix.
