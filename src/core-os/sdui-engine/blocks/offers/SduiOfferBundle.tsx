@@ -5,6 +5,7 @@ import { useMemo } from "react";
 import BundleDealsRail, { type BundleDeal } from "@/apps/reef-al-madina/features/offers/components/BundleDealsRail";
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components/FakkaRoundupToggle";
+import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
 import { AmanahLockShield } from "./AmanahLockShield";
 import type { SduiOfferBundleBlock } from "./schemas";
 
@@ -22,12 +23,11 @@ export const SduiOfferBundle = ({ block }: { block: SduiOfferBundleBlock }) => {
 
   return (
     <section>
-      {(honest_margin !== undefined || allow_fakka_roundup) && (
-        <div className="mb-2 flex flex-wrap items-center gap-2">
-          {honest_margin !== undefined && <HonestMarginBadge marginPct={honest_margin} />}
-          {allow_fakka_roundup && <FakkaRoundupToggle offerId={block.id} />}
-        </div>
-      )}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        {honest_margin !== undefined && <HonestMarginBadge marginPct={honest_margin} />}
+        {allow_fakka_roundup && <FakkaRoundupToggle offerId={block.id} />}
+        <EitharToggle offerId={block.id} />
+      </div>
       <BundleDealsRail bundles={bundles} title={title} />
     </section>
   );

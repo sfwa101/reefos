@@ -6,6 +6,7 @@ import { GroupBuyTicker } from "@/apps/reef-al-madina/features/group-buy/compone
 import { useGroupBuyEngine } from "@/apps/reef-al-madina/features/group-buy/hooks/useGroupBuyEngine";
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components/FakkaRoundupToggle";
+import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users } from "lucide-react";
 import { AmanahLockShield } from "./AmanahLockShield";
@@ -30,6 +31,7 @@ export const SduiOfferGroupBuy = ({ block }: { block: SduiOfferGroupBuyBlock }) 
         <div className="flex items-center gap-2">
           {honest_margin !== undefined && <HonestMarginBadge marginPct={honest_margin} />}
           {allow_fakka_roundup && <FakkaRoundupToggle offerId={block.id} />}
+          <EitharToggle offerId={block.id} />
         </div>
       </div>
       {subtitle && <p className="mb-2 text-xs text-muted-foreground">{subtitle}</p>}
