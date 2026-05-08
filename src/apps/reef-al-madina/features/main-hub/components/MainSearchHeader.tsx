@@ -46,11 +46,9 @@ export const MainSearchHeader = () => {
           dir="rtl"
         >
           <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
-          <TypewriterPlaceholder
-            options={SEARCH_PLACEHOLDERS}
-            staticMode
-            className="flex-1 text-[13.5px] font-medium text-muted-foreground"
-          />
+          <span className="flex-1 truncate text-[13.5px] font-medium text-muted-foreground">
+            {SEARCH_PLACEHOLDERS[0] ?? "ابحث في ريف المدينة…"}
+          </span>
           <button
             type="button"
             aria-label="مسح باركود"
