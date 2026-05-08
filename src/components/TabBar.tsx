@@ -1,4 +1,4 @@
-import { Home, Tag, LayoutGrid, Wallet, User, ShoppingBag, type LucideIcon } from "lucide-react";
+import { Home, Tag, LayoutGrid, Wallet, ShoppingBag, ShoppingCart, type LucideIcon } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
 import { useCartCount } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
@@ -7,16 +7,19 @@ type TabItem = {
   id: string;
   label: string;
   icon: LucideIcon;
-  to: "/" | "/offers" | "/sections" | "/wallet" | "/account";
+  to: "/" | "/offers" | "/sections" | "/wallet" | "/cart";
   primary?: boolean;
 };
 
+// Phase 26 — Account moved off the TabBar (now reachable via the TopBar
+// hamburger). The Cart is promoted to a primary tab so checkout is one tap
+// away from anywhere in the app.
 const items: TabItem[] = [
   { id: "home", label: "الرئيسية", icon: Home, to: "/" },
   { id: "offers", label: "العروض", icon: Tag, to: "/offers" },
   { id: "sections", label: "الأقسام", icon: LayoutGrid, to: "/sections", primary: true },
   { id: "wallet", label: "المحفظة", icon: Wallet, to: "/wallet" },
-  { id: "account", label: "حسابي", icon: User, to: "/account" },
+  { id: "cart", label: "السلة", icon: ShoppingCart, to: "/cart" },
 ];
 
 const TabBar = () => {

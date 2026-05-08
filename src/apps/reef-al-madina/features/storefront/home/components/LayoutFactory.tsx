@@ -41,6 +41,10 @@ import PersonalizedDealsRail from "@/apps/reef-al-madina/features/offers/compone
 import BuyAgainRail from "./BuyAgainRail";
 import QuickMealsRail from "./QuickMealsRail";
 
+// Phase 26 — Sovereign Minimalism
+import OfferNeighborhoodPool from "@/apps/reef-al-madina/features/main-hub/components/OfferNeighborhoodPool";
+import PredictiveRefillRail from "@/apps/reef-al-madina/features/main-hub/components/PredictiveRefillRail";
+
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */
   orchestrator: HomeOrchestrator | null;
@@ -123,6 +127,10 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   QuickMealsRail: ({ orchestrator: o }) => (
     <QuickMealsRail catalog={o?.rawProducts ?? []} />
   ),
+
+  // Phase 26 — Sovereign Minimalism
+  OfferNeighborhoodPool: () => <OfferNeighborhoodPool />,
+  PredictiveRefillRail: () => <PredictiveRefillRail />,
 };
 
 export const LayoutFactory = ({

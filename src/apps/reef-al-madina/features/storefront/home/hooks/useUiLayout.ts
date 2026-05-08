@@ -21,16 +21,16 @@ const DEFAULT_HOME_ORDER: SectionKey[] = [
   "ProductsGrid",
 ];
 
-// Reef Al-Madina main consumer storefront fallback (Phase 24 — Golden
-// Freeze). The Pastel Minimalist DNA is hard-coded here so NO "shabby"
-// version can ever leak in via DB downtime, cache miss, or migration drift.
-// This sequence is the Emperor's locked Golden Order.
+// Reef Al-Madina main consumer storefront fallback (Phase 26 — Sovereign
+// Minimalism). The Pastel Minimalist DNA is hard-coded here so NO regression
+// can leak in via DB downtime, cache miss, or migration drift. This sequence
+// is the Emperor's locked Golden Order.
 const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
   "SmartGreeting",
   "MainSearchHeader",
-  "AmanahTierProgress",
   "StoryCircles",
-  "BestSellersRail",
+  "OfferNeighborhoodPool",
+  "PredictiveRefillRail",
 ];
 
 function fallbackOrderFor(pageKey: string): SectionKey[] {

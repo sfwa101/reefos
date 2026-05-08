@@ -108,35 +108,35 @@ export function useSovereignTheme(tenantId: string = "reef") {
     refetchOnWindowFocus: false,
   });
 
-  // Hydrate the Zustand store with the resolved persona row.
+  // Hydrate the Zustand store with the resolved persona row so capability
+  // gates still work — but we DO NOT inject persona colors anymore.
   useEffect(() => {
     setPersonaData(personaQuery.data ?? null);
   }, [personaQuery.data, setPersonaData]);
 
-  // Phase 24 — THEME AUTHORITY LOCK.
-  // The Emperor's manual selection (profiles.theme_preference) has ABSOLUTE
-  // priority. When set, persona overlays are IGNORED so the chrome never
-  // auto-flips colors behind the user's back. Persona overlays only apply
-  // when the user has not chosen a personal theme.
-  // Null-safe: returns null when called above AuthProvider during hydration.
+  // Phase 26 — THEME LIBERATION.
+  // The chrome NEVER auto-flips colors. The only sources of truth are:
+  //   1. The base tenant DNA (`salsabil_theme_matrix`).
+  //   2. The Emperor's manual selection (`profiles.theme_preference`),
+  //      handled by the dedicated theme switcher in /account.
+  // Persona overlays and Spirit/dormancy state are explicitly excluded
+  // from color injection — Spirit only triggers the spiritual overlay,
+  // never the palette.
   const auth = useAuthOptional();
   const profile = auth?.profile ?? null;
   const userThemeLock = (profile as unknown as { theme_preference?: string | null } | null)
     ?.theme_preference ?? null;
 
-  const mergedDna = useMemo(() => {
-    const base = themeQuery.data?.dna_payload;
-    if (userThemeLock) {
-      // Respect the user's locked theme — base DNA only, no overlay.
-      return mergeDna(base, undefined);
-    }
-    return mergeDna(base, personaQuery.data?.theme_overlay);
-  }, [themeQuery.data, personaQuery.data, userThemeLock]);
+  const baseDna = useMemo<ThemeDnaPayload>(() => {
+    return mergeDna(themeQuery.data?.dna_payload, undefined);
+  }, [themeQuery.data]);
 
-  // Inject merged DNA whenever base theme OR active persona changes.
+  // Inject only the base DNA. The user-locked theme is applied separately
+  // (data-theme attribute via ThemeContext) — we never overwrite it here.
   useEffect(() => {
-    injectDna(mergedDna);
-  }, [mergedDna]);
+    if (userThemeLock) return; // user has chosen — leave their theme alone
+    injectDna(baseDna);
+  }, [baseDna, userThemeLock]);
 
   return {
     theme: themeQuery.data ?? null,
@@ -146,3 +146,4 @@ export function useSovereignTheme(tenantId: string = "reef") {
     activePersonaKey,
   };
 }
+

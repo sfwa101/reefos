@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check, ChevronDown, MapPin, Plus, ShoppingBag } from "lucide-react";
+import { Check, MapPin, Menu, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useCartTotal } from "@/context/CartContext";
@@ -15,16 +15,13 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
-import SovereignPersonaSwitcher from "@/components/ui/SovereignPersonaSwitcher";
 
 /**
- * TopBar — Phase 12.3.
+ * TopBar — Phase 26 (Sovereign Minimalism).
  *
- * The location pill now opens an *Addresses* picker (real saved addresses)
- * instead of the legacy zone selector (governorates). Picking an address
- * updates the global delivery zone via setFromAddress(city, district), and
- * the "+ New" button opens the Map-first AddressSheet without leaving the
- * shopping surface.
+ * Three-zone layout: cart (left) · centered address pill · hamburger (right).
+ * The persona switcher has moved to /account. Address pill shows ONLY the
+ * dynamic address (e.g. "المنزل، جمصة"); no static "اختر عنوان" placeholder.
  */
 
 const compactFmt = new Intl.NumberFormat("en-US", {
@@ -79,7 +76,10 @@ const TopBar = () => {
     setPickerOpen(false);
   };
 
-  const activeLabel = addresses.find((a) => a.id === activeId)?.label ?? "اختر عنوان";
+  const activeAddress = addresses.find((a) => a.id === activeId);
+  const addressText = activeAddress
+    ? `${activeAddress.label}، ${zone.shortName}`
+    : zone.shortName;
 
   return (
     <>
@@ -87,26 +87,10 @@ const TopBar = () => {
         className="fixed inset-x-0 top-0 z-40 bg-background/80 backdrop-blur-xl"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
-        <div className="mx-auto flex h-14 w-full max-w-md items-center justify-between gap-3 px-4 lg:max-w-[1400px] lg:px-6">
-          <button
-            type="button"
-            onClick={() => setPickerOpen(true)}
-            aria-label="تغيير عنوان التوصيل"
-            aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-            className="inline-flex h-11 min-h-[44px] items-center gap-1.5 rounded-full bg-secondary/60 px-3 text-[13px] font-medium text-foreground ring-1 ring-border/40 transition active:scale-[0.97]"
-          >
-            <MapPin className="h-4 w-4 text-primary" strokeWidth={2.4} />
-            <span className="font-bold">{activeLabel}</span>
-            <span className="text-muted-foreground">،</span>
-            <span className="text-muted-foreground">{zone.shortName}</span>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2.4} />
-          </button>
-
-          <div className="flex items-center gap-2">
-            {user && <SovereignPersonaSwitcher variant="pill" />}
-            <Link
-              to="/cart"
+        <div className="mx-auto grid h-14 w-full max-w-md grid-cols-[auto_1fr_auto] items-center gap-2 px-4 lg:max-w-[1400px] lg:px-6">
+          {/* LEFT — Cart */}
+          <Link
+            to="/cart"
             aria-label="السلة"
             className="relative inline-flex h-11 min-w-11 items-center justify-start overflow-hidden rounded-full bg-primary/10 text-primary backdrop-blur-md ring-1 ring-primary/15 transition active:scale-[0.97]"
             dir="ltr"
@@ -128,12 +112,33 @@ const TopBar = () => {
                 </motion.span>
               )}
             </AnimatePresence>
-            </Link>
-          </div>
+          </Link>
+
+          {/* CENTER — Address Pill (dynamic only) */}
+          <button
+            type="button"
+            onClick={() => setPickerOpen(true)}
+            aria-label="تغيير عنوان التوصيل"
+            aria-haspopup="dialog"
+            aria-expanded={pickerOpen}
+            className="mx-auto inline-flex h-11 min-h-[44px] max-w-full items-center gap-1.5 truncate rounded-full bg-secondary/60 px-4 text-[13px] font-bold text-foreground ring-1 ring-border/40 transition active:scale-[0.97]"
+          >
+            <MapPin className="h-4 w-4 text-primary" strokeWidth={2.4} />
+            <span className="truncate">{addressText}</span>
+          </button>
+
+          {/* RIGHT — Hamburger → /account */}
+          <Link
+            to="/account"
+            aria-label="القائمة"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-secondary/60 text-foreground ring-1 ring-border/40 transition active:scale-[0.97]"
+          >
+            <Menu className="h-5 w-5" strokeWidth={2.2} />
+          </Link>
         </div>
       </header>
 
-      {/* Addresses picker — real saved addresses (NOT zone list) */}
+      {/* Addresses picker */}
       <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>
         <SheetContent
           side="bottom"
@@ -211,7 +216,6 @@ const TopBar = () => {
         </SheetContent>
       </Sheet>
 
-      {/* Map-first AddressSheet — same component used by the cart */}
       <AddressSheet
         open={addrSheetOpen}
         onOpenChange={(v) => {
