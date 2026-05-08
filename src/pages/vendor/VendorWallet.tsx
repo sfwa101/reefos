@@ -4,6 +4,7 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ArrowDownCircle, Banknote } from "lucide-react";
 import { VendorSettlementDashboard } from "@/apps/reef-al-madina/features/vendor/components/VendorSettlementDashboard";
+import { SovereignSettlementsPanel } from "@/apps/reef-al-madina/features/vendor/components/SovereignSettlementsPanel";
 
 type W = { vendor_id: string; available_balance: number; pending_balance: number; lifetime_earned: number; lifetime_paid_out: number };
 type Payout = { id: string; amount: number; method: string; reference: string | null; status: string; created_at: string };
