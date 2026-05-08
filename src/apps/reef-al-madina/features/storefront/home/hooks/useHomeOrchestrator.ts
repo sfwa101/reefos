@@ -63,18 +63,9 @@ export type HomeOrchestrator = {
 };
 
 export const useHomeOrchestrator = (): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading, error, isFetching, status, fetchStatus } =
-    useHomeProductsQuery(48, "home");
-
-  // [Phase 23.3] Deadlock telemetry — surfaces stuck Suspense / hung query.
-  console.debug("[Home Diagnostics] HomeOrchestrator", {
-    isLoading,
-    isFetching,
-    status,
-    fetchStatus,
-    rows: rawProducts.length,
-    error: error ? String((error as Error).message ?? error) : null,
-  });
+  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, "home");
+  // [Phase 28] Diagnostic console.debug removed — was firing on every render
+  // and inflating React commit time on mobile during scroll.
 
   const catalog = useMemo(
     () => rawProducts.map(productToHGView),

@@ -33,8 +33,18 @@ const DEFAULT_REEF_HOME_ORDER: SectionKey[] = [
   "PredictiveRefillRail",
 ];
 
+// Phase 28 — Sections (departments_hub) ascended to the Level-4 Matrix.
+// Locked Golden Order so the Departments hub never renders blank during
+// migrations, cache misses, or DB downtime.
+const DEFAULT_DEPARTMENTS_HUB_ORDER: SectionKey[] = [
+  "MainSearchHeader",
+  "DepartmentGrid",
+];
+
 function fallbackOrderFor(pageKey: string): SectionKey[] {
-  return pageKey === "reef_home" ? DEFAULT_REEF_HOME_ORDER : DEFAULT_HOME_ORDER;
+  if (pageKey === "reef_home") return DEFAULT_REEF_HOME_ORDER;
+  if (pageKey === "departments_hub") return DEFAULT_DEPARTMENTS_HUB_ORDER;
+  return DEFAULT_HOME_ORDER;
 }
 
 function readPreviewMode(): LayoutStatus {

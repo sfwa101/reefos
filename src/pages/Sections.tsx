@@ -1,48 +1,27 @@
 /**
- * Sections — Phase 16.01 SDUI-driven hub.
- * ---------------------------------------
- * The page is now a thin shell. Layout content is fetched from
- * `sdui_layouts` (slug = "departments_hub"), validated by Zod, and
- * rendered through the SduiRenderer + BlockRegistry.
- *
- * Admin edits to the published version flow live to all users with
- * zero deploys; corrupted JSON degrades gracefully (bad blocks are
- * dropped, screen never crashes).
+ * Sections — Phase 28 Ascension (Level-3 → Level-4).
+ * ---------------------------------------------------
+ * The hub now consumes the Sovereign `ui_layouts` pipeline through
+ * `LayoutFactory`, the same engine that drives `reef_home`. The legacy
+ * `sdui_layouts` + `SduiRenderer` runtime is retired here; section
+ * presence/order are admin-editable via DB and the hub falls back to
+ * a locked Golden Order ([MainSearchHeader, DepartmentGrid]) when no
+ * row is published.
  */
-import { useSduiLayout } from "@/core-os/sdui-engine/hooks/useSduiLayout";
-import { SduiRenderer } from "@/core-os/sdui-engine/components/SduiRenderer";
 import BackHeader from "@/components/BackHeader";
+import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
+import { storeThemes } from "@/lib/storeThemes";
+
+const HUB_THEME = storeThemes.supermarket;
+const HUB_PAGE_KEY = "departments_hub";
 
 const Sections = () => {
-  const { blocks, loading, error } = useSduiLayout("departments_hub");
-
   return (
-    <div className="min-h-screen pb-24">
+    <div className="min-h-screen pb-24" dir="rtl">
       <BackHeader title="مركز الأقسام" />
-
-      {loading ? (
-        <div className="px-4 py-8 space-y-4" aria-busy="true">
-          <div className="h-28 rounded-3xl bg-card/40 animate-pulse" />
-          <div className="grid grid-cols-3 gap-3">
-            {Array.from({ length: 9 }).map((_, i) => (
-              <div key={i} className="h-28 rounded-3xl bg-card/40 animate-pulse" />
-            ))}
-          </div>
-        </div>
-      ) : error ? (
-        <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-          تعذّر تحميل الأقسام مؤقتاً.
-        </div>
-      ) : (
-        <SduiRenderer
-          blocks={blocks}
-          empty={
-            <div className="px-4 py-10 text-center text-sm text-muted-foreground">
-              لا توجد أقسام منشورة حالياً.
-            </div>
-          }
-        />
-      )}
+      <div className="space-y-6 pt-2">
+        <LayoutFactory pageKey={HUB_PAGE_KEY} theme={HUB_THEME} />
+      </div>
     </div>
   );
 };

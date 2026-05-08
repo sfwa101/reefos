@@ -7,6 +7,23 @@
 
 ---
 
+## 🪶 Phase 28 — The Silent Performance Strike & Sections Ascension
+
+- **Code Chatter eradicated.** `useHomeOrchestrator` no longer fires
+  `console.debug("[Home Diagnostics]…")` on every render. The React commit
+  phase on mobile is freed of telemetry overhead during scroll.
+- **Predictive Brain deferred.** `PredictiveRefillRail` now gates
+  `useBuyAgainProducts` behind `requestIdleCallback` (800ms timeout fallback).
+  The Home page paints immediately; predictive AI work runs only after the
+  main thread is idle.
+- **Sections ascended Level-3 → Level-4.** `/sections` now renders through
+  `LayoutFactory` + `ui_layouts` (page_key=`departments_hub`). The legacy
+  `SduiRenderer` runtime is retired on this surface. Locked Golden Order:
+  `[MainSearchHeader, DepartmentGrid]`. Single SDUI engine across Home and
+  Sections; admins gain runtime re-ordering via the same editor.
+
+---
+
 ## 📜 Preamble
 
 The Phases A→L stack delivers an **immune, autonomous, single-region PostgreSQL super-app** capable of serving the first ~1M users with mathematical correctness (double-entry ledger invariant), atomic settlement, geospatial dispatch, and an internal DEX matching engine.
