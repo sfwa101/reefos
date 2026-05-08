@@ -87,6 +87,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [pricingModel, setPricingModel] = useState<PricingModel>("flat");
   const [currency, setCurrency] = useState<"EGP" | "USD" | "EUR">("EGP");
   const [aiDraft, setAiDraft] = useState<USAGenesisPayload | null>(null);
+  const [aiFile, setAiFile] = useState<File | null>(null);
 
   // Sovereign Override state — Phase 8 Part 4.
   const [duplicateMatches, setDuplicateMatches] = useState<MatchedAsset[]>([]);
@@ -110,6 +111,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPricingModel("flat");
       setCurrency("EGP");
       setAiDraft(null);
+      setAiFile(null);
       setTab("basic");
     }
     setDuplicateMatches([]);
@@ -117,7 +119,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     setHasOverriddenAI(false);
   }, [asset, open]);
 
-  const handleAIHandoff = (payload: USAGenesisPayload) => {
+  const handleAIHandoff = (payload: USAGenesisPayload, file?: File | null) => {
     setName(payload.asset.name);
     setDescription(payload.asset.description);
     setAssetType(payload.asset.asset_type);
@@ -125,6 +127,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     setCurrency(payload.financial_contract.currency);
     setBasePrice(String(payload.financial_contract.base_price));
     setAiDraft(payload);
+    setAiFile(file ?? null);
     setTab("basic");
     setDuplicateMatches([]);
     setHasOverriddenAI(false);
@@ -161,6 +164,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
             description: description.trim(),
             asset_type: assetType,
             traits: aiDraft?.asset.traits ?? [],
+            media: await uploadAiImageIfAny(),
           },
           skus: aiDraft?.skus ?? [],
           financial_contract: {
@@ -171,6 +175,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           },
           semantic_embedding: embedding,
         });
+        setHasOverriddenAI(false);
+        setPendingEmbedding(null);
         onSaved?.();
         onClose();
       } else {
@@ -184,6 +190,24 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       }
     } catch {
       /* toast handled in hook */
+    }
+  };
+
+  const uploadAiImageIfAny = async (): Promise<string[] | undefined> => {
+    if (!aiFile) return undefined;
+    try {
+      const ext = aiFile.name.split(".").pop()?.toLowerCase() || "jpg";
+      const path = `usa-genesis/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      const { error: upErr } = await supabase.storage
+        .from("product-images")
+        .upload(path, aiFile, { contentType: aiFile.type, upsert: false });
+      if (upErr) throw upErr;
+      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
+      return data.publicUrl ? [data.publicUrl] : undefined;
+    } catch (e) {
+      console.warn("[USAEditor] media upload failed", e);
+      toast.error("تعذّر رفع الصورة — سيُسكّ الأصل بدون صورة");
+      return undefined;
     }
   };
 
