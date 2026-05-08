@@ -256,6 +256,67 @@ export default function AllocationMonitor() {
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardHeader className="pb-3 flex-row items-center justify-between space-y-0">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Radio className="h-4 w-4" /> عقد التوصيل بدون مندوب — البث الذكي
+          </CardTitle>
+          <Button size="sm" variant="outline" onClick={loadUnassignedNodes} disabled={loadingNodes}>
+            <RefreshCcw className={`h-4 w-4 ${loadingNodes ? "animate-spin" : ""}`} />
+          </Button>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          {loadingNodes ? (
+            <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+          ) : unassigned.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-6">
+              كل العقد لديها مندوب 🎉
+            </p>
+          ) : (
+            unassigned.map((n) => {
+              const needsManual = n.status === "requires_admin_routing";
+              return (
+                <div
+                  key={n.id}
+                  className={`rounded-lg border p-3 flex items-center gap-3 ${
+                    needsManual ? "border-destructive/40 bg-destructive/5" : ""
+                  }`}
+                >
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="font-mono">{n.id.slice(0, 8)}…</span>
+                      {needsManual && (
+                        <Badge variant="destructive" className="gap-1">
+                          <Snowflake className="h-3 w-3" /> توجيه يدوي مطلوب
+                        </Badge>
+                      )}
+                      <Badge variant="outline">{n.status}</Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground flex items-center gap-3">
+                      <span>{Number(n.total_amount ?? 0).toFixed(2)} ج.م</span>
+                      <span>{new Date(n.created_at).toLocaleString("ar-EG")}</span>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => broadcast(n.id)}
+                    disabled={broadcastingId === n.id}
+                  >
+                    {broadcastingId === n.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <>
+                        <Radio className="h-4 w-4 ml-1" /> بث ذكي
+                      </>
+                    )}
+                  </Button>
+                </div>
+              );
+            })
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
