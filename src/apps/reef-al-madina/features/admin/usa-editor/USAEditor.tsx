@@ -7,13 +7,14 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Wrench, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
+import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 export interface USARecord {
@@ -61,18 +62,6 @@ const PRICING_LABELS: Record<PricingModel, string> = {
   milestone_installments: "أقساط بمراحل",
 };
 
-const Placeholder = ({ icon: Icon, title, hint }: { icon: typeof Wrench; title: string; hint: string }) => (
-  <div className="rounded-3xl border border-dashed border-border/60 bg-background-secondary/40 p-8 text-center">
-    <div className="mx-auto inline-flex items-center justify-center h-14 w-14 rounded-2xl bg-primary/10 mb-3">
-      <Icon className="h-7 w-7 text-primary" />
-    </div>
-    <p className="font-display text-[15px] mb-1">{title}</p>
-    <p className="text-[12px] text-foreground-tertiary leading-relaxed max-w-sm mx-auto">{hint}</p>
-    <span className="inline-block mt-4 text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 px-2.5 py-1 rounded-full">
-      الجزء السادس · قريباً
-    </span>
-  </div>
-);
 
 const Field = ({
   label, children, hint,
