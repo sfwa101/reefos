@@ -88,7 +88,7 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
     return {
       id: "fallback",
       page_key: pageKey,
-      section_order: DEFAULT_HOME_ORDER,
+      section_order: fallbackOrderFor(pageKey),
       section_config: {},
       section_titles: {},
       is_active: true,
