@@ -2017,6 +2017,7 @@ export type Database = {
         Row: {
           base_salary: number
           branch_id: string | null
+          capabilities: Json
           commission_flat: number | null
           commission_pct: number | null
           created_at: string
@@ -2041,6 +2042,7 @@ export type Database = {
         Insert: {
           base_salary?: number
           branch_id?: string | null
+          capabilities?: Json
           commission_flat?: number | null
           commission_pct?: number | null
           created_at?: string
@@ -2065,6 +2067,7 @@ export type Database = {
         Update: {
           base_salary?: number
           branch_id?: string | null
+          capabilities?: Json
           commission_flat?: number | null
           commission_pct?: number | null
           created_at?: string
@@ -2668,6 +2671,7 @@ export type Database = {
           created_at: string
           current_load_factor: number
           delivery_fee: number
+          dispatch_strategy: string
           districts: string[]
           eta_label: string
           eta_minutes: number | null
@@ -2692,6 +2696,7 @@ export type Database = {
           created_at?: string
           current_load_factor?: number
           delivery_fee?: number
+          dispatch_strategy?: string
           districts?: string[]
           eta_label?: string
           eta_minutes?: number | null
@@ -2716,6 +2721,7 @@ export type Database = {
           created_at?: string
           current_load_factor?: number
           delivery_fee?: number
+          dispatch_strategy?: string
           districts?: string[]
           eta_label?: string
           eta_minutes?: number | null
@@ -5367,6 +5373,48 @@ export type Database = {
           },
           {
             foreignKeyName: "salsabil_delivery_legs_node_id_fkey"
+            columns: ["node_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_fulfillment_nodes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      salsabil_dispatch_offers: {
+        Row: {
+          created_at: string
+          driver_id: string
+          expires_at: string
+          id: string
+          node_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          driver_id: string
+          expires_at?: string
+          id?: string
+          node_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          driver_id?: string
+          expires_at?: string
+          id?: string
+          node_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_dispatch_offers_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_dispatch_offers_node_id_fkey"
             columns: ["node_id"]
             isOneToOne: false
             referencedRelation: "salsabil_fulfillment_nodes"
@@ -8290,6 +8338,10 @@ export type Database = {
         Returns: unknown
       }
       _st_within: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
+      accept_dispatch_offer: {
+        Args: { p_driver_id: string; p_offer_id: string }
+        Returns: boolean
+      }
       addauth: { Args: { "": string }; Returns: boolean }
       addgeometrycolumn:
         | {
@@ -8376,6 +8428,7 @@ export type Database = {
         }
         Returns: Json
       }
+      broadcast_smart_dispatch: { Args: { p_node_id: string }; Returns: number }
       calculate_bom_cost: { Args: { p_product_id: string }; Returns: number }
       calculate_order_commission: {
         Args: { p_order_id: string }
