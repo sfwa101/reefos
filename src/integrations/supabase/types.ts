@@ -5612,6 +5612,7 @@ export type Database = {
           node_id: string
           platform_fee: number
           status: string
+          updated_at: string
           vendor_id: string
         }
         Insert: {
@@ -5622,6 +5623,7 @@ export type Database = {
           node_id: string
           platform_fee?: number
           status?: string
+          updated_at?: string
           vendor_id: string
         }
         Update: {
@@ -5632,6 +5634,7 @@ export type Database = {
           node_id?: string
           platform_fee?: number
           status?: string
+          updated_at?: string
           vendor_id?: string
         }
         Relationships: [
@@ -8273,6 +8276,10 @@ export type Database = {
       }
       cfo_dashboard_stats: { Args: never; Returns: Json }
       check_kyc_status: { Args: { p_user_id: string }; Returns: boolean }
+      clear_sovereign_settlements: {
+        Args: { p_vendor_id: string }
+        Returns: number
+      }
       close_pos_shift: {
         Args: { _actual_balance: number; _shift_id: string }
         Returns: {
