@@ -468,3 +468,14 @@ bypass LLM processing.
   - `useActiveDriverTracking.ts` — driver resolution now reads `salsabil_fulfillment_nodes.driver_id` (by `nodeId` or by `master_order_id`), legacy `orders.driver_id` lookup deleted.
   - `useActiveDelivery.ts` (Maeen) — counts non-terminal `salsabil_fulfillment_nodes` joined to the customer's `salsabil_master_orders`, replacing the old `orders` count.
 - **Doctrine:** the driver client now natively consumes the Sovereign Matrix. The same row that the customer pays into and the vendor fulfills is the same row the driver delivers and the trigger settles — one canonical lifecycle, one source of truth, zero legacy bridges.
+
+## Phase 12 — Part 2: Multi-Layer Dispatch, Smart Vehicle Routing & Cold Chain Firewall (2026-05-08)
+
+- **Smart schema:** `geo_zones.dispatch_strategy text DEFAULT 'broadcast'`. `drivers` gains `vehicle_type text DEFAULT 'scooter'` (walking | bicycle | scooter | car | refrigerated_truck) and `capabilities jsonb DEFAULT '{}'` (e.g. `{"has_cooler_box": true}`). New `salsabil_dispatch_offers` table (node_id, driver_id, status, expires_at) with admin-all + driver-self RLS via `current_driver_id()`.
+- **Smart Broadcaster RPC `broadcast_smart_dispatch(p_node_id)`:** computes vendor→pickup distance via `ST_Distance` geography, scans node items joined to `salsabil_assets` for `traits->>'requires_cold_chain'`, then filters live `driver_positions` by a distance bracket (<2km: walking+bicycle+scooter+car; <8km: scooter+car; ≥8km: car+refrigerated_truck) AND a cold-chain gate (must be `refrigerated_truck` OR `capabilities.has_cooler_box`). Inserts pending offers with 45s expiry within a 10km PostGIS radius.
+- **Cold Chain Firewall:** if cold-chain is required, distance ≥2km, and zero matching fridge-capable drivers exist, the node is flipped to `requires_admin_routing` and the RPC returns 0 — no melted ice cream, no silent fallback.
+- **Transactional Acceptance RPC `accept_dispatch_offer(p_offer_id, p_driver_id)`:** locks the offer (`FOR UPDATE`), validates pending + non-expired, locks the fulfillment node, assigns `driver_id`+`assigned_at`, flips the node to `preparing`, marks the winning offer `accepted` and all sibling offers `missed`. Race-safe by construction; returns `false` on expiry, missed race, or already-assigned node.
+
+## Hakim AI — Vision Processing Pipeline Mandate (DEFERRED)
+
+- **Emperor's mandate (logged 2026-05-08):** Immediately after Barq stabilization, Hakim must ship the Vision Processing Pipeline — automated **Background Removal & Aesthetic Pastel Background Generator** (via Remove.bg API or Gemini Vision API) running on every merchant USA upload. All vendor-uploaded assets must pass through this filter to enforce the strict Salsabil visual harmony standard before they reach catalog or SDUI surfaces.
