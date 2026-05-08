@@ -104,10 +104,29 @@ export default function VendorOrders() {
         sku_code: r.sku?.sku_code ?? null,
         asset_name: r.sku?.asset?.name ?? null,
       }));
-    },
-  });
+  const queryClient = useQueryClient();
 
-  const metrics = useMemo<BentoMetric[]>(() => [
+  // Realtime radar — vendor-scoped subscription on fulfillment_nodes
+  useEffect(() => {
+    if (!vendorId) return;
+    const channel = supabase
+      .channel(`vendor-fulfillment-${vendorId}`)
+      .on(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        "postgres_changes" as any,
+        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `vendor_id=eq.${vendorId}` },
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (payload: any) => {
+          if (payload.eventType === "INSERT") toast.success("طلب جديد بحاجة للتجهيز!");
+          else if (payload.eventType === "UPDATE") toast("تم تحديث حالة الطلب");
+          queryClient.invalidateQueries({ queryKey: ["admin-grid", "salsabil_fulfillment_nodes"] });
+          queryClient.invalidateQueries({ queryKey: ["vendor-fulfillment-nodes"] });
+        },
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [vendorId, queryClient]);
+
     { key: "total", label: "إجمالي الطلبات", icon: Package, tone: "primary", compute: (r) => fmtNum(r.length) },
     { key: "pending", label: "قيد الانتظار", icon: Clock, tone: "warning", compute: (r) => fmtNum(r.filter((x) => x.status === "pending" || x.status === "preparing").length), urgent: (r) => r.some((x) => x.status === "pending") },
     { key: "ready", label: "جاهزة/مشحونة", icon: CheckCircle2, tone: "success", compute: (r) => fmtNum(r.filter((x) => x.status === "prepared" || x.status === "shipped" || x.status === "delivered").length) },
