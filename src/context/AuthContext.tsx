@@ -24,6 +24,13 @@ export type Profile = {
   likes?: string[] | null;
   dislikes?: string[] | null;
   budget_range?: string | null;
+  national_id?: string | null;
+  short_id?: string | null;
+  governorate?: string | null;
+  city?: string | null;
+  is_kyc_verified?: boolean;
+  kyc_verified_at?: string | null;
+  avatar_kind?: string | null;
 };
 
 type AuthCtx = {
