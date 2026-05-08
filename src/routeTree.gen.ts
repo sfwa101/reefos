@@ -63,6 +63,7 @@ import { Route as AdminKycRouteImport } from './routes/admin.kyc'
 import { Route as AdminInventoryLocationsRouteImport } from './routes/admin.inventory-locations'
 import { Route as AdminInventoryRouteImport } from './routes/admin.inventory'
 import { Route as AdminHakimInsightsRouteImport } from './routes/admin.hakim-insights'
+import { Route as AdminHakimEngineerRouteImport } from './routes/admin.hakim-engineer'
 import { Route as AdminHakimChatRouteImport } from './routes/admin.hakim-chat'
 import { Route as AdminHakimAnomaliesRouteImport } from './routes/admin.hakim-anomalies'
 import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
@@ -412,6 +413,11 @@ const AdminInventoryRoute = AdminInventoryRouteImport.update({
 const AdminHakimInsightsRoute = AdminHakimInsightsRouteImport.update({
   id: '/hakim-insights',
   path: '/hakim-insights',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminHakimEngineerRoute = AdminHakimEngineerRouteImport.update({
+  id: '/hakim-engineer',
+  path: '/hakim-engineer',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminHakimChatRoute = AdminHakimChatRouteImport.update({
@@ -872,6 +878,7 @@ export interface FileRoutesByFullPath {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-engineer': typeof AdminHakimEngineerRoute
   '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
@@ -1003,6 +1010,7 @@ export interface FileRoutesByTo {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-engineer': typeof AdminHakimEngineerRoute
   '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
@@ -1141,6 +1149,7 @@ export interface FileRoutesById {
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
   '/admin/hakim-chat': typeof AdminHakimChatRoute
+  '/admin/hakim-engineer': typeof AdminHakimEngineerRoute
   '/admin/hakim-insights': typeof AdminHakimInsightsRoute
   '/admin/inventory': typeof AdminInventoryRoute
   '/admin/inventory-locations': typeof AdminInventoryLocationsRoute
@@ -1280,6 +1289,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-engineer'
     | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
@@ -1411,6 +1421,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-engineer'
     | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
@@ -1548,6 +1559,7 @@ export interface FileRouteTypes {
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
     | '/admin/hakim-chat'
+    | '/admin/hakim-engineer'
     | '/admin/hakim-insights'
     | '/admin/inventory'
     | '/admin/inventory-locations'
@@ -2026,6 +2038,13 @@ declare module '@tanstack/react-router' {
       path: '/hakim-insights'
       fullPath: '/admin/hakim-insights'
       preLoaderRoute: typeof AdminHakimInsightsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/hakim-engineer': {
+      id: '/admin/hakim-engineer'
+      path: '/hakim-engineer'
+      fullPath: '/admin/hakim-engineer'
+      preLoaderRoute: typeof AdminHakimEngineerRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/hakim-chat': {
@@ -2796,6 +2815,7 @@ interface AdminRouteChildren {
   AdminHakimRoute: typeof AdminHakimRoute
   AdminHakimAnomaliesRoute: typeof AdminHakimAnomaliesRoute
   AdminHakimChatRoute: typeof AdminHakimChatRoute
+  AdminHakimEngineerRoute: typeof AdminHakimEngineerRoute
   AdminHakimInsightsRoute: typeof AdminHakimInsightsRoute
   AdminInventoryRoute: typeof AdminInventoryRoute
   AdminInventoryLocationsRoute: typeof AdminInventoryLocationsRoute
@@ -2868,6 +2888,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminHakimRoute: AdminHakimRoute,
   AdminHakimAnomaliesRoute: AdminHakimAnomaliesRoute,
   AdminHakimChatRoute: AdminHakimChatRoute,
+  AdminHakimEngineerRoute: AdminHakimEngineerRoute,
   AdminHakimInsightsRoute: AdminHakimInsightsRoute,
   AdminInventoryRoute: AdminInventoryRoute,
   AdminInventoryLocationsRoute: AdminInventoryLocationsRoute,

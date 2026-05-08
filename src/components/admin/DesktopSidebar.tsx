@@ -7,7 +7,7 @@ import {
   HandCoins, ClipboardList, PiggyBank,
   Scale, Ban, MessageCircle, AlertTriangle, Globe, Sliders,
   CalendarClock, Percent, BookOpen, Handshake,
-  Brain, Radar, Lightbulb, Network, Wand2,
+  Brain, Radar, Lightbulb, Network, Wand2, Bot,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -79,6 +79,7 @@ const groups = [
   ]},
   { title: "ذكاء النظام (حكيم AI)", items: [
     { to: "/admin/hakim", icon: Brain, label: "المستشار حكيم" },
+    { to: "/admin/hakim-engineer", icon: Bot, label: "حكيم المهندس" },
     { to: "/admin/hakim-chat", icon: MessageCircle, label: "محادثة حكيم" },
     { to: "/admin/hakim-insights", icon: Lightbulb, label: "رؤى حكيم" },
     { to: "/admin/hakim-anomalies", icon: Radar, label: "رادار الشذوذ" },
