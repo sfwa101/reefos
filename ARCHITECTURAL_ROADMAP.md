@@ -541,3 +541,18 @@ circular reverse logistics. Activates after Barq stabilization.
 
 ### Outcome
 The customer-facing "Orders" and "Buy It Again" surfaces no longer touch a single byte of the legacy `orders`/`order_items` tables. Phase 14 Part 2 will complete the same massacre on the admin cockpit, vendor ops, driver tasks, and wallet dashboard.
+
+---
+
+## Phase 14 Part 2 — The UI Massacre: Admin & Vendor Cockpits (2026-05-08)
+
+The customer surface fell first. Now the admin and vendor cockpits are severed from the legacy `public.orders` / `public.order_items` tables and bound directly to the Sovereign Matrix.
+
+### Surfaces migrated
+- **`pages/admin/Orders.tsx`** — full rewrite. The Master Orders Hub now reads `salsabil_master_orders` joined with `salsabil_fulfillment_nodes` (for headline aggregation) and a batched `profiles` lookup (for customer name/phone). The headline status of each master order is derived via the `aggregateStatus` priority ladder over its child node statuses. Realtime subscriptions track INSERT/UPDATE on `salsabil_master_orders` and `*` on `salsabil_fulfillment_nodes`. Cancel cascades to all child nodes in one batch. The legacy single-tap "Advance" action was retired (per-vendor advancement now belongs in the vendor cockpit, not the admin master view).
+- **`components/admin/OrderSlideOver.tsx`** — full rewrite. Loads master order → nested fulfillment nodes → fulfillment items → sku → asset (display name). Driver assignment now writes `driver_id` + `status='out_for_delivery'` + `assigned_at` to **all** of the master order's nodes in one bulk update.
+- **`apps/reef-al-madina/features/vendor/hooks/useVendorOperations.ts`** — rewritten. Live order feed now queries `salsabil_fulfillment_nodes` filtered by the vendor's `vendor_id`, joined to `salsabil_master_orders` (for `delivery_info.service_type` / `delivery_info.payment_method`) and `salsabil_fulfillment_items → salsabil_skus → salsabil_assets` (for item display). Realtime listens on `salsabil_fulfillment_nodes` and `salsabil_fulfillment_items` (legacy `orders` / `order_items` channels removed). Product CRUD still hits the `products` shim until the SDUI cutover finalizes.
+- **`pages/driver/DriverTasks.tsx`** — already a thin shell over `useDriverEngine`; verified zero residual `Tables['orders']` references in the entire driver feature tree.
+
+### Outcome
+The Admin Master List, the Slide-Over inspector, and the Vendor Operations Hub now render exclusively from the Sovereign Matrix. Combined with Phase 14 Part 1 (customer surface) and the Driver layer (already Sovereign), only the analytics, wallet, and notifications surfaces still hold residual `public.orders` reads — those fall in Phase 14 Part 3.
