@@ -118,7 +118,9 @@ export function useSovereignTheme(tenantId: string = "reef") {
   // priority. When set, persona overlays are IGNORED so the chrome never
   // auto-flips colors behind the user's back. Persona overlays only apply
   // when the user has not chosen a personal theme.
-  const { profile } = useAuth();
+  // Null-safe: returns null when called above AuthProvider during hydration.
+  const auth = useAuthOptional();
+  const profile = auth?.profile ?? null;
   const userThemeLock = (profile as unknown as { theme_preference?: string | null } | null)
     ?.theme_preference ?? null;
 
