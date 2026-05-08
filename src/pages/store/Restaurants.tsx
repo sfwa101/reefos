@@ -17,18 +17,6 @@ import { fetchRestaurantAssets, type RestoProductRow } from "@/lib/sovereignCata
 
 type RestoProduct = RestoProductRow;
 
-type RestoProduct = {
-  id: string;
-  name: string;
-  brand: string | null;
-  price: number;
-  image: string | null;
-  rating: number | null;
-  source: string | null;
-  fulfillment_type: string | null;
-  description: string | null;
-  metadata: Record<string, unknown> | null;
-};
 
 const FALLBACK_IMG =
   "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80&auto=format&fit=crop";
