@@ -13,6 +13,7 @@
 import { useEffect } from "react";
 import BackHeader from "@/components/BackHeader";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
+import type { ProductSource } from "@/lib/products";
 import { useHomeOrchestrator } from "../home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "../home/components/LayoutFactory";
 import { DetailSheet } from "../home/components/DetailSheet";
@@ -29,6 +30,14 @@ export type SduiCategoryPageProps = {
   subtitle?: string;
 };
 
+// Phase 33 — Matrix Purge: theme keys mostly map 1:1 to ProductSource;
+// `homeTools` is the only legacy alias that points at the `home` catalog.
+const themeToSource = (key: StoreThemeKey): ProductSource | undefined => {
+  if (key === "homeTools") return "home";
+  if (key === "subscriptions") return undefined; // no direct source
+  return key as ProductSource;
+};
+
 const SduiCategoryPage = ({
   themeKey,
   pageKey,
@@ -36,7 +45,8 @@ const SduiCategoryPage = ({
   subtitle,
 }: SduiCategoryPageProps) => {
   const theme = storeThemes[themeKey];
-  const orchestrator = useHomeOrchestrator();
+  const source = themeToSource(themeKey);
+  const orchestrator = useHomeOrchestrator(source ?? "home");
 
   useEffect(() => {
     document.title = `${title} · ريف المدينة`;
