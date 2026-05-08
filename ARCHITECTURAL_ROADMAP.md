@@ -7,6 +7,30 @@
 
 ---
 
+## 🪶 Phase 34 — The Final Aesthetic Ascendancy (Tri-Mode Departments)
+
+- **BackHeader purged** from `Sections.tsx`; the title "أقسام ريف المدينة"
+  now lives in `DepartmentGrid` directly under the Sovereign TopBar with
+  proper safe-area padding.
+- **Tri-Mode stem cell** — `DepartmentGrid` exposes three Sovereign view
+  modes via a minimalist inline toggle (haptic on every click):
+  1. **Slices** — magnified vertical glass cards (`320×480`) in a
+     center-snapping horizontal carousel. Pastel `--dept-*` hues are
+     preserved as radial accent glows; the body uses `--card` with
+     `backdrop-blur-xl` so the surface adapts seamlessly to light/dark.
+  2. **Bubbles** — Apple-Watch springboard: staggered honeycomb of
+     squircles where the active center scales up (`useScroll` +
+     `useTransform`), edges fade and shrink for an infinite flow.
+  3. **Graded** — primary departments rendered large, secondary as a
+     compact rail beneath, establishing a clear visual hierarchy.
+- **Spiritual alignment** preserved — `Sections.tsx` still subscribes to
+  `useSovereignPrayerStore.isDormant` and dims the entire hub during
+  Athan windows in all three modes.
+- **100% token compliance** — no raw hex, all colors flow via
+  `hsl(var(--dept-*))`, `--card`, `--background`, `--foreground`.
+
+---
+
 ## 🪶 Phase 28 — The Silent Performance Strike & Sections Ascension
 
 - **Code Chatter eradicated.** `useHomeOrchestrator` no longer fires
