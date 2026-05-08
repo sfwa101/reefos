@@ -579,3 +579,24 @@ A repository-wide `rg` for `from("orders")`, `from("order_items")`, `Tables['ord
 
 ### Outcome
 **The UI is 100% Sovereign.** The legacy `orders` / `order_items` tables are now read-orphans at the application layer — safe to retire whenever the DB-side purge is scheduled. All four sovereign engines (USA, Matrix, Tayseer, Barq) own their respective UI surfaces end-to-end with zero legacy contamination.
+
+---
+
+## Phase 14 Part 4 — The DB Massacre: Final Purge of Legacy Tables (2026-05-08)
+
+The ships have been burned. With the UI 100% Sovereign (Phase 14.3), the dead monolithic order tables have been physically dropped from the Salsabil database.
+
+### Migration executed
+- `DROP TABLE IF EXISTS public.order_items CASCADE;`
+- `DROP TABLE IF EXISTS public.sub_orders CASCADE;`
+- `DROP TABLE IF EXISTS public.orders CASCADE;`
+
+### Type regeneration
+The auto-generated `src/integrations/supabase/types.ts` was refreshed to reflect the new schema. The dead orphan domain helper `src/core/orders/types.ts` (last consumer of `Database['public']['Tables']['orders']`) was deleted — it had zero callers across the codebase.
+
+### Preserved (intentionally)
+- **`public.products`** — retained as a dual-write shim until the SDUI catalog cutover finalizes.
+- All user / profile / auth tables — untouched.
+
+### Outcome
+The order lifecycle is now physically Sovereign at the database layer. There is no longer any `orders` or `order_items` table for legacy code to accidentally regress against. The Salsabil OS data model now speaks one language: **Master Orders → Fulfillment Nodes → Fulfillment Items → SKUs → Assets.**
