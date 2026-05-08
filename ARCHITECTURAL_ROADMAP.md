@@ -22,6 +22,24 @@
   `[MainSearchHeader, DepartmentGrid]`. Single SDUI engine across Home and
   Sections; admins gain runtime re-ordering via the same editor.
 
+### 🔬 Phase 28 Compliance Audit (full report → MANIFEST §XI)
+
+| Doctrine | Score | Notes |
+|---|---|---|
+| Sovereign Matrix conformance | 84% | Buy-Again + Home + Sections fully migrated |
+| SDUI Level-4 coverage | 22% | `reef_home` + `departments_hub` only |
+| Stem-cell registry coverage | 100% | All 16 sections in `SECTION_REGISTRY` |
+| Token-system compliance | 96% | 3 hex literals to remediate |
+| Security doctrine | 100% | RLS via `has_role()`, no rogue clients |
+
+**Targets for Phase 29:**
+1. Ascend `Offers.tsx` (`SduiRenderer` → `LayoutFactory`, `page_key=offers_hub`).
+2. Ascend `Khalil Hub` to the Level-4 pipeline.
+3. Vertical storefront SDUI — mint `reef_meat`, `reef_pharmacy`, `reef_sweets`,
+   `reef_kitchen`, … (17 pages) so `LayoutFactory` powers every department.
+4. Token cleanup — `--tier-bronze/silver/gold/platinum` tokens for
+   `LoyaltyProgress`; remove `#dc2626` and `#E8F8EF` literals.
+
 ---
 
 ## 📜 Preamble
