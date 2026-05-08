@@ -1131,3 +1131,43 @@ code changes.
 - `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts` — minimalist fallback
 - `src/core-os/sdui-engine/{types.ts, registry.ts}` — section keys + metadata
 - `ui_layouts` table — `reef_home` row repointed to the new sequence
+
+---
+
+## Phase 23 — The Sovereign Restoration (Liquid Silk)
+
+**Trigger:** Emperor reported the Home regressed to a crowded layout and the
+sticky Search bar disappeared. Maghrib still arrived ~40 min early in
+Gamasa / Dakahlia despite the Phase 22 DST patch. Persona Switcher leaked
+into standard customer TopBars.
+
+**Strikes executed:**
+
+1. **Golden Home Restoration** — `ui_layouts(page_key='reef_home')` and the
+   `DEFAULT_REEF_HOME_ORDER` fallback rewritten to the strict Sovereign Hub
+   sequence:
+   `SmartGreeting → MainSearchHeader → AmanahTierProgress → StoryCircles →
+   BestSellersRail("الأكثر طلباً") → BuyAgainRail`. All announcement banners,
+   department grids and heavy image blocks purged.
+2. **Persona Switcher Stealth Mode** — `SovereignPersonaSwitcher` now returns
+   `null` when `availablePersonas.length <= 1`. Standard customers see a
+   clean TopBar with no "switch" icon and no chip dropdown affordance.
+3. **Spirit Engine Calibration** — `computePrayerTimes.ts` gains a
+   `MAGHRIB_REGIONAL_BUFFER` table (Dakahlia +15, Damietta +12,
+   Kafr_El_Sheikh +10, Gharbia/Sharqia +8) applied **only** to Maghrib so the
+   Sovereign Dormancy window opens with the audible Athan instead of
+   astronomical sunset. DST window confirmed (last Friday April → last
+   Thursday October, +60 min).
+
+**Files touched:**
+
+- `ui_layouts` row `reef_home` (DB)
+- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts`
+- `src/components/ui/SovereignPersonaSwitcher.tsx`
+- `src/core-os/spirit/computePrayerTimes.ts`
+- `ARCHITECTURAL_ROADMAP.md`
+
+**Outcome:** Home returns to its Liquid Silk minimalist form, the Search
+pill is back in its rightful sticky slot, the Switcher is invisible to
+single-persona accounts, and the Spirit Engine breathes in lock-step with
+the real Gamasa Athan.

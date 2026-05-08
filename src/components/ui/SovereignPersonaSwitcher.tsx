@@ -102,6 +102,12 @@ const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
   const ActiveIcon = resolveIcon(active?.icon);
   const switchable = availablePersonas.length > 1;
 
+  // Phase 23 — Sovereign Stealth: a standard customer with a single
+  // available persona must NEVER see the switcher affordance. The TopBar
+  // stays clean; the AccountTierCard chip collapses to nothing (the ID
+  // chip on that card is rendered separately by the card itself).
+  if (!switchable) return null;
+
   const handleSelect = (p: PersonaRow) => {
     // Phase 19 — Sovereign Soft-Wall: switching to Business persona requires KYC.
     if (p.persona_key === "business" && !profile?.is_kyc_verified) {

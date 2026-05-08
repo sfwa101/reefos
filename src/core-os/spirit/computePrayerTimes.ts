@@ -104,16 +104,34 @@ export const isEgyptDst = (now: Date): boolean => {
   return t >= start && t <= end;
 };
 
+/**
+ * Per-governorate Maghrib safety buffer (minutes). The Cairo baseline
+ * computes solar Maghrib; the *audible* Athan in Delta governorates
+ * (notably Dakahlia / Gamasa) lags the geometric horizon by ~15 min
+ * because of haze + the muezzin's standard caution. We add this buffer
+ * ONLY to Maghrib so the Sovereign Dormancy window opens with the real
+ * Athan, not the astronomical sunset.
+ */
+const MAGHRIB_REGIONAL_BUFFER: Record<string, number> = {
+  Dakahlia: 15,
+  Damietta: 12,
+  Kafr_El_Sheikh: 10,
+  Gharbia: 8,
+  Sharqia: 8,
+};
+
 export const computePrayerSchedule = (now: Date, governorate: string | null): PrayerSchedule => {
   const month = now.getMonth();
   const base = CAIRO_BASELINE[month];
-  const offset = GOV_OFFSET[normalizeGov(governorate)] ?? 0;
+  const govKey = normalizeGov(governorate);
+  const offset = GOV_OFFSET[govKey] ?? 0;
   const dst = isEgyptDst(now) ? 60 : 0;
+  const maghribBuffer = MAGHRIB_REGIONAL_BUFFER[govKey] ?? 0;
   return {
     fajr: base.fajr + offset + dst,
     dhuhr: base.dhuhr + offset + dst,
     asr: base.asr + offset + dst,
-    maghrib: base.maghrib + offset + dst,
+    maghrib: base.maghrib + offset + dst + maghribBuffer,
     isha: base.isha + offset + dst,
   };
 };
