@@ -112,6 +112,20 @@
   --tier-platinum: 210 24% 49%;  /* ≈ #5E7B9A */
   --surface-mint: 145 60% 94%;   /* ≈ #E8F8EF */
 
+  /* Phase 31 — Department pastel tints (Sovereign Matrix tokens) */
+  --dept-fresh: 142 50% 92%;
+  --dept-leaf: 90 55% 90%;
+  --dept-greens: 100 55% 90%;
+  --dept-dairy: 210 70% 94%;
+  --dept-meat: 8 70% 92%;
+  --dept-kitchen: 30 85% 92%;
+  --dept-sweets: 330 70% 94%;
+  --dept-village: 36 80% 90%;
+  --dept-pharmacy: 200 70% 94%;
+  --dept-library: 50 80% 90%;
+  --dept-home: 265 70% 94%;
+  --dept-restaurants: 20 80% 92%;
+
   --border: 140 15% 88%;
   --input: 140 15% 88%;
   --ring: 142 35% 38%;
