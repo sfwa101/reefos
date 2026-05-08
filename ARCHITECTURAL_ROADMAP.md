@@ -517,3 +517,12 @@ circular reverse logistics. Activates after Barq stabilization.
   surge * speed_tier_multiplier; free above threshold; returns ETA.
 - **`salsabil_rideshare_pool`**: BlaBlaCar foundation (origin/dest, seats,
   trunk capacity, departure_at) — wiring into Relay Network in Phase 14.
+
+## Phase 13 — The Imperial Aesthetic Pipeline
+
+**Mandate:** Every merchant/admin uploaded product image must pass through Hakim Vision aesthetic purification before being minted into the Decentralized Matrix.
+
+- **Edge Function:** `process_image_aesthetic` — auth-gated, calls Lovable AI Gateway (`google/gemini-2.5-flash-image` / Nano Banana) to strip the messy original background and inject a clean white / pastel (pink / mint / cream) backdrop. Returns a base64 data URL.
+- **Client Adapter:** `useAestheticProcessor` — TanStack mutation handling file→base64 conversion, style selection, and AI failure modes (rate limit, credits exhausted, parse error).
+- **Genesis Integration:** `VisionGenesisUploader` now intercepts approval — purifies → uploads to `product-images` bucket → injects public URL into `payload.asset.media[0]` BEFORE invoking `mint_universal_asset`. Shows live "حكيم يقوم بتحسين الصورة وإزالة الخلفية…" feedback.
+- **Outcome:** SDUI visual harmony guaranteed across the catalog. No raw, unstyled merchant photos ever reach the Sovereign storefront.
