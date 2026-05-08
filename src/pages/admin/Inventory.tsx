@@ -6,12 +6,10 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
+import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/lib/sovereignCatalog";
 
 type Row = {
-  id: string;
+  id: string;        // sku_id (Sovereign)
   name: string;
   unit: string;
   price: number;
