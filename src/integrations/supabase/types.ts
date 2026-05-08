@@ -5662,6 +5662,39 @@ export type Database = {
           },
         ]
       }
+      salsabil_logistics_config: {
+        Row: {
+          base_fee: number
+          created_at: string
+          free_delivery_threshold: number
+          id: string
+          per_km_fee: number
+          speed_tiers: Json
+          surge_multiplier: number
+          zone_id: string | null
+        }
+        Insert: {
+          base_fee?: number
+          created_at?: string
+          free_delivery_threshold?: number
+          id?: string
+          per_km_fee?: number
+          speed_tiers?: Json
+          surge_multiplier?: number
+          zone_id?: string | null
+        }
+        Update: {
+          base_fee?: number
+          created_at?: string
+          free_delivery_threshold?: number
+          id?: string
+          per_km_fee?: number
+          speed_tiers?: Json
+          surge_multiplier?: number
+          zone_id?: string | null
+        }
+        Relationships: []
+      }
       salsabil_master_orders: {
         Row: {
           created_at: string
@@ -5691,6 +5724,56 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      salsabil_rideshare_pool: {
+        Row: {
+          available_seats: number
+          created_at: string
+          departure_at: string | null
+          dest_lat: number | null
+          dest_lng: number | null
+          id: string
+          origin_lat: number | null
+          origin_lng: number | null
+          owner_id: string
+          status: string
+          trunk_capacity_liters: number
+        }
+        Insert: {
+          available_seats?: number
+          created_at?: string
+          departure_at?: string | null
+          dest_lat?: number | null
+          dest_lng?: number | null
+          id?: string
+          origin_lat?: number | null
+          origin_lng?: number | null
+          owner_id: string
+          status?: string
+          trunk_capacity_liters?: number
+        }
+        Update: {
+          available_seats?: number
+          created_at?: string
+          departure_at?: string | null
+          dest_lat?: number | null
+          dest_lng?: number | null
+          id?: string
+          origin_lat?: number | null
+          origin_lng?: number | null
+          owner_id?: string
+          status?: string
+          trunk_capacity_liters?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_rideshare_pool_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       salsabil_skus: {
         Row: {
@@ -8744,6 +8827,15 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_sovereign_logistics_quote: {
+        Args: {
+          p_cart_total: number
+          p_distance_km: number
+          p_speed_tier?: string
+          p_zone_id: string
+        }
+        Returns: Json
+      }
       get_user_companies: { Args: { p_user_id: string }; Returns: Json }
       get_user_daily_transfer_limit: {
         Args: { _user_id?: string }

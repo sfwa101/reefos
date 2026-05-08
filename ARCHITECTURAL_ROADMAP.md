@@ -502,3 +502,18 @@ Documented in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Public intercity
 transport (Microbuses, Taxis) become Middle-Mile Trunk Lines between Benaa
 Hubs; Last-Mile completed by local riders. Enables eco 48h SLA windows and
 circular reverse logistics. Activates after Barq stabilization.
+
+---
+
+## Phase 12.4 — Pricing Kernel, Modesty Filter & Rideshare Foundation
+
+- **`salsabil_logistics_config`**: per-zone pricing (base_fee, per_km_fee,
+  free_delivery_threshold, surge_multiplier, speed_tiers JSON for
+  express/standard/economy).
+- **Modesty Filter**: `profiles.gender` added; `broadcast_smart_dispatch`
+  now prioritizes female drivers when the customer is female, with Sovereign
+  Override fallback to all qualified drivers if none match.
+- **`get_sovereign_logistics_quote`** RPC: dynamic fee = (base + km*rate) *
+  surge * speed_tier_multiplier; free above threshold; returns ETA.
+- **`salsabil_rideshare_pool`**: BlaBlaCar foundation (origin/dest, seats,
+  trunk capacity, departure_at) — wiring into Relay Network in Phase 14.
