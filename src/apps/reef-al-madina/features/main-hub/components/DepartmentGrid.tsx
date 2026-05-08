@@ -1,19 +1,16 @@
 /**
- * DepartmentGrid — Phase 31 Aesthetic Ascendancy.
- * ------------------------------------------------
- * Dual-mode Sovereign stem cell:
- *  - "grid"    → Apple-tier squircle bento grid with staggered reveal
- *  - "stacked" → iOS App Switcher style 3D vertical card stack with drag
- *
- * 100% token-compliant — all tints sourced from CSS variables defined
- * in `src/styles.css` (light + dark). No raw hex/HSL strings.
+ * DepartmentGrid — Phase 33 Aesthetic Pivot.
+ * ------------------------------------------
+ * Sovereign stem cell: a single horizontal carousel of vertical
+ * department slices. Liquid-silk snap scrolling, opaque token-driven
+ * pastels, Apple-tier minimalism. No dual-mode toggle, no draggable
+ * stack — the Emperor's locked aesthetic.
  */
 import { Link } from "@tanstack/react-router";
-import { memo, useMemo, useState, useCallback } from "react";
-import { motion, AnimatePresence, type PanInfo } from "framer-motion";
-import { LayoutGrid, Layers } from "lucide-react";
+import { memo, useMemo } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft } from "lucide-react";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
-import { useUI } from "@/context/UIContext";
 import { cn } from "@/lib/utils";
 
 type Dept = {
@@ -22,13 +19,12 @@ type Dept = {
   subtitle: string;
   emoji: string;
   to: string;
-  tintVar: string;       // CSS variable name (without `--`)
+  tintVar: string; // CSS variable name (without `--`)
   perishable?: boolean;
-  featured?: boolean;
 };
 
 const DEPARTMENTS: Dept[] = [
-  { id: "supermarket", title: "السوبرماركت",      subtitle: "كل احتياجاتك اليومية", emoji: "🛒", to: "/store/supermarket", tintVar: "dept-fresh", featured: true },
+  { id: "supermarket", title: "السوبرماركت",      subtitle: "كل احتياجاتك اليومية", emoji: "🛒", to: "/store/supermarket", tintVar: "dept-fresh" },
   { id: "baskets",     title: "سلال الريف",       subtitle: "سلال جاهزة وتوفير",     emoji: "🧺", to: "/store/baskets",     tintVar: "dept-leaf" },
   { id: "produce",     title: "خضار وفاكهة",      subtitle: "طازج من المزرعة",       emoji: "🥬", to: "/store/produce",     tintVar: "dept-greens", perishable: true },
   { id: "dairy",       title: "الألبان",          subtitle: "كل صباح",               emoji: "🥛", to: "/store/dairy",       tintVar: "dept-dairy", perishable: true },
@@ -43,8 +39,6 @@ const DEPARTMENTS: Dept[] = [
   { id: "restaurants", title: "المطاعم",          subtitle: "ألذ الأطباق",           emoji: "🍽️", to: "/store/restaurants", tintVar: "dept-restaurants" },
 ];
 
-type ViewMode = "grid" | "stacked";
-
 const haptic = () => {
   try {
     if (typeof navigator !== "undefined" && "vibrate" in navigator) {
@@ -55,185 +49,63 @@ const haptic = () => {
   }
 };
 
-const tintBg = (tintVar: string) => `hsl(var(--${tintVar}))`;
-
-// ───────────────────────────── GRID MODE ─────────────────────────────
-
-const containerVariants = {
-  hidden: { opacity: 0 },
-  show: { opacity: 1, transition: { staggerChildren: 0.05, delayChildren: 0.05 } },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 14, scale: 0.96 },
-  show: { opacity: 1, y: 0, scale: 1, transition: { type: "spring" as const, stiffness: 260, damping: 24 } },
-};
-
-const GridMode = memo(function GridMode({
-  items,
-  titleSize,
-  subSize,
+const Slice = memo(function Slice({
+  d,
+  index,
 }: {
-  items: (Dept & { unavailable: boolean })[];
-  titleSize: string;
-  subSize: string;
+  d: Dept & { unavailable: boolean };
+  index: number;
 }) {
   return (
     <motion.div
-      variants={containerVariants}
-      initial="hidden"
-      animate="show"
-      className="grid grid-cols-3 grid-flow-dense gap-3"
+      initial={{ opacity: 0, y: 18 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.04, type: "spring", stiffness: 240, damping: 26 }}
+      className="snap-center shrink-0"
     >
-      {items.map((d) => (
-        <motion.div
-          key={d.id}
-          variants={cardVariants}
-          whileTap={d.unavailable ? undefined : { scale: 0.96 }}
-          className="relative"
-        >
-          <Link
-            to={d.to}
-            onClick={d.unavailable ? undefined : haptic}
-            className={cn(
-              "group relative flex h-full min-h-[120px] w-full flex-col justify-end overflow-hidden rounded-[28px] shadow-soft ring-1 ring-border/40 transition ease-apple",
-              d.unavailable
-                ? "opacity-50 pointer-events-none"
-                : "hover:-translate-y-0.5 hover:shadow-tile",
-            )}
-            style={{ backgroundColor: tintBg(d.tintVar) }}
-          >
-            <div className="relative z-10 p-3.5">
-              <div
-                className={cn(
-                  "mb-2 inline-flex h-10 w-10 items-center justify-center rounded-2xl bg-card/90 text-xl shadow-sm ring-1 ring-border/50",
-                )}
-              >
-                <span aria-hidden>{d.emoji}</span>
-              </div>
-              <p className={cn("font-display font-extrabold text-foreground", titleSize)}>
-                {d.title}
-              </p>
-              <p className={cn("mt-0.5 font-medium text-muted-foreground", subSize)}>
-                {d.unavailable ? "غير متاح في منطقتك" : d.subtitle}
-              </p>
-            </div>
-          </Link>
-        </motion.div>
-      ))}
+      <Link
+        to={d.to}
+        onClick={d.unavailable ? undefined : haptic}
+        className={cn(
+          "group relative flex h-[380px] w-[260px] flex-col justify-between overflow-hidden rounded-[36px] p-6 ring-1 ring-border/30 shadow-tile transition-transform ease-apple",
+          d.unavailable
+            ? "opacity-40 pointer-events-none"
+            : "active:scale-[.97] hover:-translate-y-1",
+        )}
+        style={{ backgroundColor: `hsl(var(--${d.tintVar}))` }}
+      >
+        {/* Top — emoji medallion */}
+        <div className="flex items-start justify-between">
+          <div className="inline-flex h-20 w-20 items-center justify-center rounded-[28px] bg-card text-5xl shadow-soft ring-1 ring-border/40">
+            <span aria-hidden>{d.emoji}</span>
+          </div>
+          <span className="rounded-full bg-card/90 px-3 py-1 text-[10px] font-bold text-muted-foreground ring-1 ring-border/40">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+        </div>
+
+        {/* Bottom — title + CTA */}
+        <div className="space-y-3">
+          <div>
+            <h3 className="font-display text-2xl font-extrabold leading-tight text-foreground">
+              {d.title}
+            </h3>
+            <p className="mt-1 text-[13px] font-medium text-muted-foreground">
+              {d.unavailable ? "غير متاح في منطقتك" : d.subtitle}
+            </p>
+          </div>
+          <div className="inline-flex items-center gap-1.5 rounded-full bg-foreground px-4 py-2 text-xs font-bold text-background shadow-pill">
+            <span>ادخل القسم</span>
+            <ChevronLeft className="h-3.5 w-3.5" />
+          </div>
+        </div>
+      </Link>
     </motion.div>
   );
 });
 
-// ─────────────────────────── STACKED MODE ───────────────────────────
-
-const StackedMode = memo(function StackedMode({
-  items,
-}: {
-  items: (Dept & { unavailable: boolean })[];
-}) {
-  const [active, setActive] = useState(0);
-  const total = items.length;
-
-  const cycle = useCallback(
-    (dir: 1 | -1) => {
-      haptic();
-      setActive((i) => (i + dir + total) % total);
-    },
-    [total],
-  );
-
-  const onDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.y < -60 || info.velocity.y < -400) cycle(1);
-    else if (info.offset.y > 60 || info.velocity.y > 400) cycle(-1);
-  };
-
-  return (
-    <div className="relative mx-auto h-[420px] w-full max-w-sm select-none overflow-hidden">
-      <AnimatePresence initial={false}>
-        {items.map((d, i) => {
-          // Visual offset relative to active card; cards behind are stacked up.
-          const offset = (i - active + total) % total;
-          if (offset > 4) return null; // only render top 5 in the stack
-          const isTop = offset === 0;
-          return (
-            <motion.div
-              key={d.id}
-              drag={isTop ? "y" : false}
-              dragElastic={0.2}
-              dragConstraints={{ top: 0, bottom: 0 }}
-              dragMomentum={false}
-              onDragEnd={isTop ? onDragEnd : undefined}
-              animate={{
-                scale: 1 - offset * 0.05,
-                y: offset * 10,
-                opacity: 1 - offset * 0.18,
-                zIndex: total - offset,
-              }}
-              transition={{ type: "spring", stiffness: 280, damping: 30 }}
-              className="absolute inset-x-4 top-2 h-[340px] overflow-hidden rounded-[36px] shadow-tile ring-1 ring-border/50"
-              style={{ backgroundColor: tintBg(d.tintVar) }}
-            >
-              <div className="relative z-10 flex h-full flex-col justify-between p-6">
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-card/90 text-4xl shadow-sm ring-1 ring-border/50">
-                    <span aria-hidden>{d.emoji}</span>
-                  </div>
-                  <span className="rounded-full bg-card/80 px-3 py-1 text-[11px] font-bold text-muted-foreground">
-                    {active + 1} / {total}
-                  </span>
-                </div>
-                <div>
-                  <h3 className="font-display text-3xl font-extrabold text-foreground">
-                    {d.title}
-                  </h3>
-                  <p className="mt-1 text-sm font-medium text-muted-foreground">
-                    {d.unavailable ? "غير متاح في منطقتك" : d.subtitle}
-                  </p>
-                  <Link
-                    to={d.to}
-                    onClick={haptic}
-                    className={cn(
-                      "mt-4 inline-flex items-center justify-center rounded-2xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pill transition active:scale-95",
-                      d.unavailable && "pointer-events-none opacity-40",
-                    )}
-                  >
-                    ادخل القسم
-                  </Link>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </AnimatePresence>
-
-      {/* Cycle controls */}
-      <div className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-3">
-        <button
-          type="button"
-          onClick={() => cycle(-1)}
-          className="rounded-full bg-card/80 px-4 py-2 text-xs font-bold text-foreground shadow-soft ring-1 ring-border/50 backdrop-blur-xl"
-        >
-          السابق
-        </button>
-        <button
-          type="button"
-          onClick={() => cycle(1)}
-          className="rounded-full bg-foreground px-4 py-2 text-xs font-bold text-background shadow-pill"
-        >
-          التالي
-        </button>
-      </div>
-    </div>
-  );
-});
-
-// ───────────────────────────── ROOT ─────────────────────────────
-
 export const DepartmentGrid = () => {
   const { zone } = useLocation();
-  const { viewMode: uiViewMode } = useUI();
-  const [mode, setMode] = useState<ViewMode>("grid");
 
   const items = useMemo(
     () =>
@@ -244,74 +116,32 @@ export const DepartmentGrid = () => {
     [zone.acceptsPerishables],
   );
 
-  const titleSize = uiViewMode === "simplified" ? "text-[15px]" : "text-[13px]";
-  const subSize = uiViewMode === "simplified" ? "text-[12px]" : "text-[10.5px]";
-
-  const toggle = (next: ViewMode) => {
-    if (next === mode) return;
-    haptic();
-    setMode(next);
-  };
-
   return (
     <section className="animate-float-up" style={{ animationDelay: "180ms" }}>
-      <div className="mb-3 flex items-center justify-between px-1">
-        <h2 className="font-display text-xl font-extrabold tracking-tight">
-          أقسام ريف المدينة
-        </h2>
-        <div className="inline-flex items-center gap-1 rounded-full bg-card/80 p-1 shadow-soft ring-1 ring-border/50 backdrop-blur-xl">
-          <button
-            type="button"
-            aria-pressed={mode === "grid"}
-            onClick={() => toggle("grid")}
-            className={cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-full transition",
-              mode === "grid"
-                ? "bg-foreground text-background shadow-pill"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <LayoutGrid className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            aria-pressed={mode === "stacked"}
-            onClick={() => toggle("stacked")}
-            className={cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-full transition",
-              mode === "stacked"
-                ? "bg-foreground text-background shadow-pill"
-                : "text-muted-foreground hover:text-foreground",
-            )}
-          >
-            <Layers className="h-4 w-4" />
-          </button>
+      <div className="mb-3 flex items-end justify-between px-4">
+        <div>
+          <h2 className="font-display text-xl font-extrabold tracking-tight">
+            أقسام ريف المدينة
+          </h2>
+          <p className="text-[12px] font-medium text-muted-foreground">
+            اسحب للتنقل بين الأقسام
+          </p>
         </div>
+        <span className="text-[11px] font-bold text-muted-foreground">
+          {items.length} أقسام
+        </span>
       </div>
 
-      <AnimatePresence mode="wait">
-        {mode === "grid" ? (
-          <motion.div
-            key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18 }}
-          >
-            <GridMode items={items} titleSize={titleSize} subSize={subSize} />
-          </motion.div>
-        ) : (
-          <motion.div
-            key="stacked"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.22 }}
-          >
-            <StackedMode items={items} />
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <div
+        className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
+        // Side padding equal to (viewport - card)/2 keeps cards snapped
+        // to the visual center on every device size.
+        style={{ paddingInline: "calc(50% - 130px)" }}
+      >
+        {items.map((d, i) => (
+          <Slice key={d.id} d={d} index={i} />
+        ))}
+      </div>
     </section>
   );
 };
