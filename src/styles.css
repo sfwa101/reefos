@@ -55,6 +55,16 @@
   --font-display: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
 }
 
+/* ============================================================
+   ⚡ PHASE 17 — SOVEREIGN DNA ENGINE NOTICE ⚡
+   The color tokens defined below in `:root` and `.dark` are now
+   SSR / first-paint FALLBACKS only. The active palette is loaded
+   at runtime from `salsabil_theme_matrix.dna_payload` by
+   `SovereignThemeProvider` and injected as inline CSS variables
+   on `document.documentElement`, which override these blocks via
+   the natural inline-style > stylesheet specificity rule.
+   Do NOT edit colors here to re-skin the app — change the DB row.
+   ============================================================ */
 :root {
   /* Surfaces — light */
   --background: 120 30% 98%;
