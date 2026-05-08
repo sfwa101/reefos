@@ -248,8 +248,37 @@ async function fetchHomeProducts(
     .map(rowToProduct)
     .filter((p): p is Product => p != null);
   const filtered = source ? mapped.filter((p) => p.source === source) : mapped;
-  return filtered.slice(0, limit);
+  const sliced = filtered.slice(0, limit);
+  if (sliced.length === 0) {
+    // Failsafe: never render an empty shelf while DB seeding is in flight.
+    return MOCK_PRODUCTS(source, Math.min(limit, 4));
+  }
+  return sliced;
 }
+
+const MOCK_IMG = (hue: number) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(
+    `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='hsl(${hue},70%,85%)'/><stop offset='1' stop-color='hsl(${hue},70%,70%)'/></linearGradient></defs><rect width='200' height='200' fill='url(%23g)'/></svg>`,
+  )}`;
+
+const MOCK_PRODUCTS = (source: ProductSource | undefined, count: number): Product[] => {
+  const src: ProductSource = source ?? "supermarket";
+  const samples = [
+    { name: "منتج طازج", price: 25, hue: 140 },
+    { name: "اختيار اليوم", price: 45, hue: 30 },
+    { name: "عرض موفر", price: 60, hue: 200 },
+    { name: "الأكثر طلباً", price: 35, hue: 350 },
+  ];
+  return samples.slice(0, count).map((s, i) => ({
+    id: `mock_${src}_${i}`,
+    name: s.name,
+    unit: "وحدة",
+    price: s.price,
+    image: MOCK_IMG(s.hue),
+    category: src,
+    source: src,
+  }));
+};
 
 export const homeProductsQueryOptions = (limit = 48, source?: ProductSource) =>
   queryOptions({
