@@ -4,8 +4,19 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Loader2, Package, RefreshCcw, MapPin, AlertTriangle } from "lucide-react";
+import { Loader2, Package, RefreshCcw, MapPin, AlertTriangle, Radio, Snowflake } from "lucide-react";
 import { toast } from "sonner";
+
+type UnassignedNode = {
+  id: string;
+  master_order_id: string | null;
+  status: string;
+  total_amount: number | null;
+  created_at: string;
+  vendor_id: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+};
 
 type SubOrderRow = {
   sub_order_id: string;
