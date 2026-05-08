@@ -13,6 +13,25 @@ import { UniversalAdminGrid, type Column, type RowAction, type BentoMetric } fro
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { fmtMoney, fmtNum } from "@/lib/format";
 
+interface DeliverySnapshot {
+  recipient_name?: string;
+  customer_name?: string;
+  name?: string;
+  phone?: string;
+  address_label?: string;
+  label?: string;
+  city?: string;
+  zone?: string;
+  street?: string;
+  building?: string;
+  floor?: string;
+  apartment?: string;
+  notes?: string;
+  lat?: number;
+  lng?: number;
+  [k: string]: unknown;
+}
+
 interface NodeRow {
   id: string;
   master_order_id: string | null;
@@ -20,6 +39,7 @@ interface NodeRow {
   total_amount: number;
   items_count: number;
   created_at: string;
+  delivery_snapshot: DeliverySnapshot | null;
 }
 
 interface NodeItem {
