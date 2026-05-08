@@ -26,11 +26,13 @@ export default function CostBulk() {
 
   const load = async () => {
     setRows(null);
-    const { data } = await __sb
-      .from("products")
-      .select("id,name,source,category,price,cost_price,affiliate_commission_pct")
-      .order("source").order("name").limit(2000);
-    setRows((data ?? []) as Row[]);
+    try {
+      const data = await fetchAdminCatalog();
+      setRows(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setRows([]);
+    }
     setEdits({});
   };
   useEffect(() => { load(); }, []);
