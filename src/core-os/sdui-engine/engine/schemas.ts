@@ -6,6 +6,11 @@
  * the screen — Graceful Degradation is a hard requirement.
  */
 import { z } from "zod";
+import {
+  OfferFlashSaleBlockSchema,
+  OfferBundleBlockSchema,
+  OfferGroupBuyBlockSchema,
+} from "../blocks/offers/schemas";
 
 export const HeroBlockSchema = z.object({
   type: z.literal("hero"),
@@ -182,6 +187,9 @@ export const BlockSchema = z.discriminatedUnion("type", [
   OmniSearchBlockSchema,
   UnifiedStatusBlockSchema,
   BarqTrackingBlockSchema,
+  OfferFlashSaleBlockSchema,
+  OfferBundleBlockSchema,
+  OfferGroupBuyBlockSchema,
 ]);
 
 export type SduiModifierGroupBlock = z.infer<typeof ModifierGroupBlockSchema>;
