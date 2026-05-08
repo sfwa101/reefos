@@ -42,6 +42,41 @@ export default function AllocationMonitor() {
   const [allocation, setAllocation] = useState<SubOrderRow[]>([]);
   const [reallocating, setReallocating] = useState(false);
   const [zoneInput, setZoneInput] = useState("M");
+  const [unassigned, setUnassigned] = useState<UnassignedNode[]>([]);
+  const [loadingNodes, setLoadingNodes] = useState(false);
+  const [broadcastingId, setBroadcastingId] = useState<string | null>(null);
+
+  async function loadUnassignedNodes() {
+    setLoadingNodes(true);
+    const { data } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id,master_order_id,status,total_amount,created_at,vendor_id,pickup_lat,pickup_lng")
+      .is("driver_id", null)
+      .in("status", ["pending", "confirmed", "preparing", "ready_for_pickup", "requires_admin_routing"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    setUnassigned((data ?? []) as UnassignedNode[]);
+    setLoadingNodes(false);
+  }
+
+  async function broadcast(nodeId: string) {
+    setBroadcastingId(nodeId);
+    const { data, error } = await supabase.rpc("broadcast_smart_dispatch", {
+      p_node_id: nodeId,
+    });
+    setBroadcastingId(null);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    const count = Number(data ?? 0);
+    if (count === 0) {
+      toast.warning("لا يوجد مندوبون متاحون — قد يتطلب توجيه يدوي");
+    } else {
+      toast.success(`تم بث العرض إلى ${count} مندوب`);
+    }
+    await loadUnassignedNodes();
+  }
 
   async function loadOrders() {
     setLoading(true);
