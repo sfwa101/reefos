@@ -20,7 +20,7 @@ import {
   validateMinOrder,
 } from "./useCartValidation";
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
-import { callSovereignCheckout } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { callSovereignCheckout, newIdempotencyKey } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
@@ -368,10 +368,13 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         };
 
         try {
+          // Phase 36 Titanium Shield — idempotent checkout. Generated once
+          // per submit attempt; safe-to-retry across network failures.
           savedOrderId = await callSovereignCheckout({
             customer_id: currentUser.id,
             cart_items: sovereignItems,
             delivery_info: deliveryInfo,
+            idempotency_key: newIdempotencyKey(),
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
