@@ -3635,6 +3635,60 @@ export type Database = {
         }
         Relationships: []
       }
+      offers_matrix: {
+        Row: {
+          allow_fakka_roundup: boolean
+          block_type: string
+          created_at: string
+          geo_context: Json
+          honest_margin_pct: number | null
+          id: string
+          is_active: boolean
+          logic_weaver_rules: Json
+          persona_context: Json
+          priority: number
+          subtitle: string | null
+          target_id: string | null
+          temporal_context: Json
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_fakka_roundup?: boolean
+          block_type?: string
+          created_at?: string
+          geo_context?: Json
+          honest_margin_pct?: number | null
+          id?: string
+          is_active?: boolean
+          logic_weaver_rules?: Json
+          persona_context?: Json
+          priority?: number
+          subtitle?: string | null
+          target_id?: string | null
+          temporal_context?: Json
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_fakka_roundup?: boolean
+          block_type?: string
+          created_at?: string
+          geo_context?: Json
+          honest_margin_pct?: number | null
+          id?: string
+          is_active?: boolean
+          logic_weaver_rules?: Json
+          persona_context?: Json
+          priority?: number
+          subtitle?: string | null
+          target_id?: string | null
+          temporal_context?: Json
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       oracle_price_history: {
         Row: {
           id: string
