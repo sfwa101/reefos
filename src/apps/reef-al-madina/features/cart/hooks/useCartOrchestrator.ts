@@ -336,67 +336,55 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       let savedOrderId: string | null = null;
 
       if (!isGuest && currentUser) {
-        // Phase 13.2 — Build a single fulfillment wave with ALL items.
-        // Smart splitting (instant vs preorder) will be wired in a later UI phase.
-        const orderItems = lines.map((l) => ({
+        // Phase 10.2 — Sovereign Router: a single atomic RPC creates the
+        // master order, splits per vendor via the Decentralized Inventory
+        // Matrix, decrements stock, and fans out fulfillment nodes/items.
+        const sovereignItems = lines.map((l) => ({
           product_id: l.product.id,
-          product_name: l.product.name,
-          product_image: l.product.image ?? null,
-          price: l.meta?.unitPrice ?? l.product.price,
           quantity: l.qty,
         }));
 
-        const result = await placeOrderAtomic({
-          user_id: currentUser.id,
-          total: effectiveGrand,
-          payment_method: payment,
+        const deliveryInfo = {
           address_id: safeUuidOrNull(selectedAddr?.id),
+          address_label: selectedAddr?.label ?? null,
+          city: selectedAddr?.city ?? null,
+          district: selectedAddr?.district ?? null,
+          street: selectedAddr?.street ?? null,
+          building: selectedAddr?.building ?? null,
+          phone: isGuest ? guestPhone : (currentUser?.phone ?? null),
+          recipient_name: isGuest ? guestName : customerName,
+          zone: zone.id ?? null,
+          lat: null as number | null,
+          lng: null as number | null,
           notes: noteParts,
           service_type: "delivery",
-          delivery_zone: zone.id ?? null,
-          wallet_applied: walletApplied,
-          wallet_shortfall: walletShortfall,
-          secondary_payment: isSplit ? secondaryPayment : null,
-          total_cashback: payment === "wallet" ? totalCashback : 0,
-          change_remainder: showChangeJar ? changeRemainder : 0,
-          save_change: showChangeJar && saveChange && !donateChange,
-          donate_change: showChangeJar && donateChange,
-          tip,
-          promo_code: appliedPromo?.code ?? null,
-          discount,
-          // Phase 13.1 financial fields
-          tip_amount: tip,
-          charity_amount: charity,
-          charity_cause_id: charity > 0 ? charityCauseId : null,
+          // legacy header passthrough (vendors may surface this)
+          payment_method: payment,
+          total: effectiveGrand,
+          delivery_fee: effectiveDelivery,
+          eta_minutes: logisticsQuote?.etaMinutes ?? null,
           is_gift: giftMode,
           gift_message: giftMode ? (giftMessage || null) : null,
-          upfront_payment_required: 0,
-          upfront_payment_collected: 0,
-          // Single-wave fulfillment (smart split is a later UI phase)
-          fulfillments: [
-            {
-              sequence: 1,
-              status: "pending",
-              delivery_method_id: deliveryMethod?.id ?? null,
-              scheduled_for: null,
-              eta_minutes: logisticsQuote?.etaMinutes ?? null,
-              delivery_fee: effectiveDelivery,
-              notes: null,
-              items: orderItems,
-            },
-          ],
-        });
+        };
 
-        if (!result.ok || !result.orderId) {
-          console.error("[checkout] place_order_atomic failed — aborting", result);
-          toast.error((!result.ok && result.error) || "حدث خطأ أثناء تسجيل الطلب");
+        try {
+          savedOrderId = await callSovereignCheckout({
+            customer_id: currentUser.id,
+            cart_items: sovereignItems,
+            delivery_info: deliveryInfo,
+          });
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
+          console.error("[checkout] process_checkout_sovereign failed", e);
+          toast.error(msg);
           setSubmitting(false);
           submittingRef.current = false;
           return;
         }
-        savedOrderId = result.orderId;
 
-        await allocateOrderInventory(savedOrderId, zone.id);
+        if (savedOrderId) {
+          await allocateOrderInventory(savedOrderId, zone.id);
+        }
       }
 
       const mainMessage = buildWhatsAppMessage({
