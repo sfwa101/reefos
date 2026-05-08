@@ -59,18 +59,15 @@ export function usePosEngine() {
     return () => { window.removeEventListener("online", on); window.removeEventListener("offline", off); };
   }, []);
 
-  // Load products (cached, then fresh)
+  // Load products (cached, then fresh) — Sovereign Catalog
   const refreshProducts = useCallback(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await __sb.from("products")
-      .select("id,name,price,stock,is_active,barcode,image_url,category")
-      .eq("is_active", true)
-      .order("name")
-      .limit(2000);
-    if (error) { toast.error("تعذّر تحميل المنتجات"); return; }
-    const rows = (data ?? []) as PosProduct[];
-    setProducts(rows);
-    saveCache(rows);
+    try {
+      const rows = (await fetchPosCatalog()) as unknown as PosProduct[];
+      setProducts(rows);
+      saveCache(rows);
+    } catch {
+      toast.error("تعذّر تحميل المنتجات");
+    }
   }, []);
 
   useEffect(() => {
