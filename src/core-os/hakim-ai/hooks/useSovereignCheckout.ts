@@ -42,6 +42,25 @@ export type SovereignCheckoutInput = {
   customer_id: string;
   cart_items: SovereignCartItem[];
   delivery_info: SovereignDeliveryInfo;
+  /**
+   * Phase 36 Titanium Shield — required UUID v4. The server gates against
+   * duplicate inserts on this key; safe to retry the same call across
+   * network failures without creating duplicate orders or charges.
+   */
+  idempotency_key: string;
+};
+
+/** Browser-safe UUID v4 generator (crypto.randomUUID with a polyfill fallback). */
+export const newIdempotencyKey = (): string => {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  // RFC4122-ish fallback (very rarely hit on modern targets).
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
 };
 
 const friendly = (msg: string): string => {
@@ -60,10 +79,14 @@ const friendly = (msg: string): string => {
 export const callSovereignCheckout = async (
   input: SovereignCheckoutInput,
 ): Promise<string> => {
+  if (!input.idempotency_key) {
+    throw new Error("idempotency_key is required for checkout");
+  }
   const args = {
     p_customer_id: input.customer_id,
     p_cart_items: input.cart_items,
     p_delivery_info: input.delivery_info ?? {},
+    p_idempotency_key: input.idempotency_key,
   } as unknown as Parameters<
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (typeof supabase.rpc<any>)
