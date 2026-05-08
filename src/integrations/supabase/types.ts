@@ -1445,13 +1445,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "cross_branch_transfers_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cross_branch_transfers_source_branch_id_fkey"
             columns: ["source_branch_id"]
             isOneToOne: false
@@ -1771,15 +1764,7 @@ export type Database = {
           status?: string
           updated_at?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "delivery_tasks_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       discount_overrides: {
         Row: {
@@ -2488,13 +2473,6 @@ export type Database = {
             columns: ["driver_id"]
             isOneToOne: false
             referencedRelation: "drivers"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fulfillments_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
             referencedColumns: ["id"]
           },
         ]
@@ -3760,90 +3738,6 @@ export type Database = {
           },
         ]
       }
-      order_items: {
-        Row: {
-          created_at: string
-          fulfillment_id: string | null
-          id: string
-          is_preorder: boolean
-          order_id: string
-          price: number
-          product_id: string | null
-          product_image: string | null
-          product_name: string
-          quantity: number
-          requires_downpayment: boolean
-          store_id: string | null
-          sub_order_id: string | null
-        }
-        Insert: {
-          created_at?: string
-          fulfillment_id?: string | null
-          id?: string
-          is_preorder?: boolean
-          order_id: string
-          price?: number
-          product_id?: string | null
-          product_image?: string | null
-          product_name: string
-          quantity?: number
-          requires_downpayment?: boolean
-          store_id?: string | null
-          sub_order_id?: string | null
-        }
-        Update: {
-          created_at?: string
-          fulfillment_id?: string | null
-          id?: string
-          is_preorder?: boolean
-          order_id?: string
-          price?: number
-          product_id?: string | null
-          product_image?: string | null
-          product_name?: string
-          quantity?: number
-          requires_downpayment?: boolean
-          store_id?: string | null
-          sub_order_id?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_fulfillment_id_fkey"
-            columns: ["fulfillment_id"]
-            isOneToOne: false
-            referencedRelation: "fulfillments"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_sub_order_id_fkey"
-            columns: ["sub_order_id"]
-            isOneToOne: false
-            referencedRelation: "sub_orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_outbox: {
         Row: {
           attempts: number
@@ -3884,134 +3778,7 @@ export type Database = {
           sent_at?: string | null
           status?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "order_outbox_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      orders: {
-        Row: {
-          address_id: string | null
-          app_id: Database["public"]["Enums"]["salsabil_app_id"]
-          change_remainder: number
-          charity_amount: number
-          charity_cause_id: string | null
-          created_at: string
-          delivery_lat: number | null
-          delivery_lng: number | null
-          delivery_zone: string | null
-          discount: number
-          dispatched_at: string | null
-          donate_change: boolean
-          driver_id: string | null
-          gift_message: string | null
-          id: string
-          is_gift: boolean
-          notes: string | null
-          payment_method: string | null
-          promo_code: string | null
-          save_change: boolean
-          secondary_payment: string | null
-          service_type: string
-          status: string
-          tip: number
-          tip_amount: number
-          total: number
-          total_cashback: number
-          updated_at: string
-          upfront_payment_collected: number
-          upfront_payment_required: number
-          user_id: string
-          wallet_applied: number
-          wallet_shortfall: number
-          whatsapp_sent: boolean
-        }
-        Insert: {
-          address_id?: string | null
-          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
-          change_remainder?: number
-          charity_amount?: number
-          charity_cause_id?: string | null
-          created_at?: string
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_zone?: string | null
-          discount?: number
-          dispatched_at?: string | null
-          donate_change?: boolean
-          driver_id?: string | null
-          gift_message?: string | null
-          id?: string
-          is_gift?: boolean
-          notes?: string | null
-          payment_method?: string | null
-          promo_code?: string | null
-          save_change?: boolean
-          secondary_payment?: string | null
-          service_type?: string
-          status?: string
-          tip?: number
-          tip_amount?: number
-          total?: number
-          total_cashback?: number
-          updated_at?: string
-          upfront_payment_collected?: number
-          upfront_payment_required?: number
-          user_id: string
-          wallet_applied?: number
-          wallet_shortfall?: number
-          whatsapp_sent?: boolean
-        }
-        Update: {
-          address_id?: string | null
-          app_id?: Database["public"]["Enums"]["salsabil_app_id"]
-          change_remainder?: number
-          charity_amount?: number
-          charity_cause_id?: string | null
-          created_at?: string
-          delivery_lat?: number | null
-          delivery_lng?: number | null
-          delivery_zone?: string | null
-          discount?: number
-          dispatched_at?: string | null
-          donate_change?: boolean
-          driver_id?: string | null
-          gift_message?: string | null
-          id?: string
-          is_gift?: boolean
-          notes?: string | null
-          payment_method?: string | null
-          promo_code?: string | null
-          save_change?: boolean
-          secondary_payment?: string | null
-          service_type?: string
-          status?: string
-          tip?: number
-          tip_amount?: number
-          total?: number
-          total_cashback?: number
-          updated_at?: string
-          upfront_payment_collected?: number
-          upfront_payment_required?: number
-          user_id?: string
-          wallet_applied?: number
-          wallet_shortfall?: number
-          whatsapp_sent?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "orders_address_id_fkey"
-            columns: ["address_id"]
-            isOneToOne: false
-            referencedRelation: "addresses"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       partner_ledgers: {
         Row: {
@@ -4078,20 +3845,6 @@ export type Database = {
           status?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "partner_ledgers_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "partner_ledgers_order_item_id_fkey"
-            columns: ["order_item_id"]
-            isOneToOne: false
-            referencedRelation: "order_items"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "partner_ledgers_partner_id_fkey"
             columns: ["partner_id"]
@@ -6653,63 +6406,6 @@ export type Database = {
           },
         ]
       }
-      sub_orders: {
-        Row: {
-          assigned_collector_id: string | null
-          confirmed_at: string | null
-          created_at: string
-          id: string
-          notes: string | null
-          order_id: string
-          ready_at: string | null
-          status: string
-          store_id: string
-          total: number
-          updated_at: string
-        }
-        Insert: {
-          assigned_collector_id?: string | null
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          order_id: string
-          ready_at?: string | null
-          status?: string
-          store_id: string
-          total?: number
-          updated_at?: string
-        }
-        Update: {
-          assigned_collector_id?: string | null
-          confirmed_at?: string | null
-          created_at?: string
-          id?: string
-          notes?: string | null
-          order_id?: string
-          ready_at?: string | null
-          status?: string
-          store_id?: string
-          total?: number
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "sub_orders_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sub_orders_store_id_fkey"
-            columns: ["store_id"]
-            isOneToOne: false
-            referencedRelation: "stores"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subscription_billing_runs: {
         Row: {
           amount: number
@@ -7636,13 +7332,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "vendor_wallet_transactions_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "orders"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "vendor_wallet_transactions_vendor_id_fkey"
             columns: ["vendor_id"]
             isOneToOne: false
@@ -8294,25 +7983,6 @@ export type Database = {
           type?: string | null
         }
         Relationships: []
-      }
-      user_product_frequency: {
-        Row: {
-          avg_interval_days: number | null
-          last_ordered_at: string | null
-          order_count: number | null
-          product_id: string | null
-          qty_total: number | null
-          user_id: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_product_id_fkey"
-            columns: ["product_id"]
-            isOneToOne: false
-            referencedRelation: "products"
-            referencedColumns: ["id"]
-          },
-        ]
       }
     }
     Functions: {
