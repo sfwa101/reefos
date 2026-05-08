@@ -62,23 +62,26 @@ const HomePage = () => {
       />
 
       {/* Orchestrator-owned overlays — not part of SDUI flow */}
-      <DetailSheet
-        opened={orchestrator.opened}
-        rawProducts={orchestrator.rawProducts}
-        onClose={() => orchestrator.setOpenId(null)}
-      />
-      <FiltersSheet
-        open={orchestrator.filtersOpen}
-        onClose={() => orchestrator.setFiltersOpen(false)}
-        sort={orchestrator.sort}
-        setSort={orchestrator.setSort}
-        fulFilter={orchestrator.fulFilter}
-        setFulFilter={orchestrator.setFulFilter}
-        priceMax={orchestrator.priceMax}
-        setPriceMax={orchestrator.setPriceMax}
-        priceMaxAvail={orchestrator.priceMaxAvail}
-        onResetAll={orchestrator.resetAll}
-      />
+      {orchestrator.opened && (
+        <DetailSheet
+          product={orchestrator.opened}
+          onClose={() => orchestrator.setOpenId(null)}
+        />
+      )}
+      {orchestrator.filtersOpen && (
+        <FiltersSheet
+          sort={orchestrator.sort}
+          setSort={orchestrator.setSort}
+          fulFilter={orchestrator.fulFilter}
+          setFulFilter={orchestrator.setFulFilter}
+          priceMax={orchestrator.priceMax}
+          setPriceMax={orchestrator.setPriceMax}
+          priceMaxAvail={orchestrator.priceMaxAvail}
+          onClose={() => orchestrator.setFiltersOpen(false)}
+          onReset={orchestrator.resetAll}
+          hue={HOME_THEME.hue}
+        />
+      )}
     </div>
   );
 };
