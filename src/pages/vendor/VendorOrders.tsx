@@ -104,6 +104,9 @@ export default function VendorOrders() {
         sku_code: r.sku?.sku_code ?? null,
         asset_name: r.sku?.asset?.name ?? null,
       }));
+    },
+  });
+
   const queryClient = useQueryClient();
 
   // Realtime radar — vendor-scoped subscription on fulfillment_nodes
@@ -127,6 +130,7 @@ export default function VendorOrders() {
     return () => { supabase.removeChannel(channel); };
   }, [vendorId, queryClient]);
 
+  const metrics = useMemo<BentoMetric[]>(() => [
     { key: "total", label: "إجمالي الطلبات", icon: Package, tone: "primary", compute: (r) => fmtNum(r.length) },
     { key: "pending", label: "قيد الانتظار", icon: Clock, tone: "warning", compute: (r) => fmtNum(r.filter((x) => x.status === "pending" || x.status === "preparing").length), urgent: (r) => r.some((x) => x.status === "pending") },
     { key: "ready", label: "جاهزة/مشحونة", icon: CheckCircle2, tone: "success", compute: (r) => fmtNum(r.filter((x) => x.status === "prepared" || x.status === "shipped" || x.status === "delivered").length) },
