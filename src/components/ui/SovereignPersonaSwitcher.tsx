@@ -103,6 +103,12 @@ const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
   const switchable = availablePersonas.length > 1;
 
   const handleSelect = (p: PersonaRow) => {
+    // Phase 19 — Sovereign Soft-Wall: switching to Business persona requires KYC.
+    if (p.persona_key === "business" && !profile?.is_kyc_verified) {
+      setOpen(false);
+      navigate({ to: "/wallet" }).catch(() => { /* triggers KycUpgradeGate */ });
+      return;
+    }
     setPersona(p.persona_key);
     setOpen(false);
     const target = personaHomeFor(p.persona_key, roles);
