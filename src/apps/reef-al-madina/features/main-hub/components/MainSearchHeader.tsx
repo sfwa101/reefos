@@ -9,7 +9,6 @@
 import { Search, ScanLine } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SEARCH_PLACEHOLDERS } from "@/lib/personalize";
-import TypewriterPlaceholder from "@/components/TypewriterPlaceholder";
 import { useEffect, useRef, useState } from "react";
 
 export const MainSearchHeader = () => {
