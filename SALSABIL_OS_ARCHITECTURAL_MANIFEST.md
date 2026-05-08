@@ -1212,3 +1212,50 @@ of these nine pillars. Features that contradict any pillar (e.g. introducing
 interest, opaque ratings, or centralized inheritance override) are
 **non-canonical** and must be rejected at architectural review.
 
+
+---
+
+## Doctrine 9 — The Sovereign Identity & Modesty Protocol (KYC)
+
+Salsabil OS operates on absolute trust. Anonymous accounts are forbidden.
+Every Stem Cell identity is inextricably mathematically bound to a real-world
+National ID or Commercial Registry.
+
+### IX.1 Algorithmic Hydration
+
+The OS does **not** ask for DOB, Gender, or Birthplace. It algorithmically
+extracts this from the National ID structure (e.g., 14-digit Egyptian ID)
+upon entry. Manual demographic forms are forbidden — the ID *is* the identity
+payload.
+
+### IX.2 The Salsabil Short-ID
+
+For daily UX (Tayseer transfers, Maeen invites, Logistics confirmation),
+users interact using a **6-digit Short-ID** derived strictly from the last
+6 digits of their National ID. Memorable, collision-resistant within a
+locality, and never exposes the full sovereign identifier.
+
+### IX.3 Corporate DNA
+
+B2B faces (Vendors, Fleet Owners) are bound to a **Commercial Registry (CR)**
+number, creating a **Corporate Stem Cell** that links multiple individual
+National IDs as partners/staff with defined equity shares. Corporate identity
+is a graph of human cells, not a faceless legal abstraction.
+
+### IX.4 The Modesty Protocol (بروتوكول الحياء)
+
+Gender is determined algorithmically from the ID. The UI mandates real-world
+photo verification for **males** (building commercial trust). For **females**,
+the OS strictly bypasses real-photo uploads to protect privacy, replacing the
+flow with a **Sovereign Avatar Library**. This enforces Islamic cultural moats
+natively at the system architecture level — privacy is not a setting, it is
+a structural law.
+
+---
+
+**Binding clause (extension):** No identity, KYC, onboarding, or profile
+feature may be merged unless it complies with all four clauses of Doctrine 9.
+Any flow that requests demographic data already derivable from the National
+ID, exposes the full ID in daily UX, treats corporate accounts as faceless,
+or requires female users to upload real photographs is **non-canonical** and
+must be rejected at architectural review.
