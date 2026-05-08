@@ -4456,6 +4456,7 @@ export type Database = {
           referral_code: string | null
           referred_by: string | null
           short_id: string | null
+          theme_preference: string | null
           updated_at: string
         }
         Insert: {
@@ -4490,6 +4491,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           short_id?: string | null
+          theme_preference?: string | null
           updated_at?: string
         }
         Update: {
@@ -4524,6 +4526,7 @@ export type Database = {
           referral_code?: string | null
           referred_by?: string | null
           short_id?: string | null
+          theme_preference?: string | null
           updated_at?: string
         }
         Relationships: [
