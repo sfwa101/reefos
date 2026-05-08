@@ -1,86 +1,74 @@
-## Phase 14.03 — Master ID & Smart Role Switcher
+# Phase 29 — The Sovereign Unification Strike
 
-Goal: turn `AccountTierCard` into a premium identity hub displaying a bank-style Customer ID, plus a glass `RoleSwitcher` dropdown for users with multiple roles (admin / delivery / vendor / staff …).
+## Pre-flight findings (must confirm before coding)
 
-### 1. New hook — `src/hooks/useUserRoles.ts` (plural)
+A quick audit of the codebase shows the request's premises don't all match reality. Calling it out so we don't do redundant work:
 
-The current `useUserRole` returns only the highest-priority role. We need the full list for the switcher.
+1. **Vertical storefronts are already SDUI shells, not hardcoded JSX.**
+   - 8 of the 17 store pages (`Meat`, `Sweets`, `Pharmacy`, `Kitchen`, `Produce`, `Recipes`, `Dairy`, `Village`) are 7-line shells that already mount `SduiCategoryPage` with page keys like `category_meat`, `category_pharmacy`, etc.
+   - `HomeGoods.tsx` already uses `LayoutFactory` directly.
+   - The remaining heavyweights (`Restaurants`, `Subscriptions`, `Baskets*`, `Wholesale`, `CompareHomeGoods`, `SchoolLibrary`) are **domain-specific surfaces** (restaurant menus, subscription wizards, basket builders) — not generic product rails. Forcing them through a `vertical_storefront` rail registry would either lose functionality or require us to register a dozen one-off block types (RestaurantList, SubscriptionWizard, BasketBuilder) that have no reuse value.
+   - Recommendation: scope Task 2 to migrating `SduiCategoryPage`'s underlying engine from the legacy `sdui_layouts` runtime to `LayoutFactory` + `ui_layouts` (one change cascades to all 8 generic verticals). Leave domain pages as-is — they already follow stem-cell rules, just don't share the rail-grid pattern.
 
-- Returns `{ roles: AppRole[]; primary: AppRole; branchId; loading }`.
-- Same query as `useUserRole` but keeps the full sorted array.
-- `useUserRole` keeps working unchanged (back-compat).
+2. **`SduiCategoryPage` engine status.** Need to read `src/apps/reef-al-madina/features/storefront/components/SduiCategoryPage.tsx` to confirm which engine it currently runs on. If it's already on `LayoutFactory`, Task 2 collapses to seeding `ui_layouts` rows for the 8 categories.
 
-### 2. Customer ID derivation — `src/features/account/lib/customerId.ts`
+3. **`registry.ts` PageKey union** is currently `"main_hub" | "home" | "sections" | "offers"`. We need to widen it to include `offers_hub`, `maeen_hub`, and the `category_*` keys, and seed corresponding `ui_layouts` rows.
 
-- `formatCustomerId(uuid: string): string` → take the first 12 hex chars of the user's UUID, uppercase, format as `2050 8800 6600` style (groups of 4, padded with leading "20" prefix). Pure function, deterministic, no DB call.
-- Also export `toBankGroups(s, size=4)` helper.
+## Scope (after pre-flight)
 
-### 3. New stem-cell — `src/features/account/components/RoleSwitcher.tsx`
+### Task 1 — Offers + Maeen Hub ascension (Level-3 → Level-4)
+- Rewrite `src/pages/Offers.tsx` to mount `<LayoutFactory pageKey="offers_hub" />`, removing `SduiRenderer`, `parseBlocks`, and the `useSpatioTemporalOffers → block mapping` glue. The spatio-temporal data still flows — but as a registered section (`SpatioTemporalOffersRail`) the LayoutFactory renders, not as ad-hoc JSX.
+- Rewrite `src/apps/khalil/pages/Hub.tsx` similarly to `<LayoutFactory pageKey="maeen_hub" />`. Move the `HakimGenerativeOverlay` injection logic into a registered section (`MaeenAppGrid` or kept as side-effect hook).
+- Register two new sections in `src/core-os/sdui-engine/registry.ts` and add their renderers to `LayoutFactory`'s REGISTRY:
+  - `SpatioTemporalOffersRail` (wraps current Offers logic)
+  - `MaeenLauncherGrid` (wraps current Hub launcher SDUI consumption)
+- Seed `ui_layouts` rows for `offers_hub` and `maeen_hub` with locked Golden Order.
 
-Props: `{ roles: AppRole[]; currentView: "customer" | role; }`.
+### Task 2 — Vertical storefronts (revised)
+- Read `SduiCategoryPage` to see which engine it uses.
+- If legacy: refactor it once to use `LayoutFactory` + `ui_layouts` with page keys `category_<slug>`. All 8 verticals inherit the upgrade for free.
+- Seed `ui_layouts` rows for `category_meat`, `category_sweets`, `category_pharmacy`, `category_kitchen`, `category_produce`, `category_recipes`, `category_dairy`, `category_village` with the Golden Order `[SearchAndFilters, CategoriesGrid, BundlesRail, BestSellersRail, ProductsGrid]`.
+- Domain-specific pages (Restaurants, Subscriptions, Baskets*, Wholesale, CompareHomeGoods, SchoolLibrary) stay as-is and are documented as "domain stem cells, intentionally outside the generic rail registry."
 
-Behavior:
-- If `roles.length <= 1` (only customer): render a static premium `ID · 2050 8800 6600` chip — no chevron, no dropdown.
-- If multiple roles: render the same chip with a `ChevronDown` and wrap in shadcn `DropdownMenu`.
-- Menu items derived from a small map:
+### Task 3 — Token compliance purge
+- Add CSS variables to `src/styles.css` in the `:root` and `.dark` blocks:
+  - `--tier-bronze`, `--tier-silver`, `--tier-gold`, `--tier-platinum` (HSL triplets)
+  - `--surface-mint` (replacement for the inline `#E8F8EF`)
+- Refactor `src/components/LoyaltyProgress.tsx` to read `hsl(var(--tier-*))` (no inline hex).
+- Refactor `src/components/MegaEventBanner.tsx` `#dc2626` → `hsl(var(--destructive))`.
+- Refactor `src/pages/store/SchoolLibrary.tsx` inline `#E8F8EF` → `bg-[hsl(var(--surface-mint))]` (or a Tailwind class via `styles.css`).
 
-  ```
-  customer       → "واجهة العميل"  /         🏠
-  delivery       → "واجهة المندوب" /driver   🚚
-  vendor         → "واجهة البائع"  /vendor   🏪
-  admin/manager  → "لوحة الإدارة"  /admin    ⚙️
-  cashier        → "نقطة البيع"    /pos      💳
-  staff          → "بوابة الموظف"  /employee 👔
-  ```
+### Task 4 — Archive sync
+- Append Phase 29 entry to `ARCHITECTURAL_ROADMAP.md` summarizing the engine unification, the corrected scope on verticals, and the token purge.
+- Bump SDUI Level-4 coverage figure in the manifest (will be ~85% after this strike, not 100% — domain stem cells are intentional).
 
-- Selecting an item calls `useNavigate()({ to: path })` AND persists the choice in `localStorage` under `reef.activeView`.
-- Styling: `DropdownMenuContent` overridden with `bg-background/70 backdrop-blur-xl border-border/40 shadow-xl rounded-2xl` — Apple glass.
-- Typography: `font-mono tracking-[0.25em] text-[11px] opacity-90` for the ID line, mimicking engraved card numbers. Wrapped in `bg-foreground/15 ring-1 ring-foreground/20 rounded-md px-2 py-1`.
-
-All colors via tokens (`foreground/`, `background/`) — zero hardcoded HSL.
-
-### 4. Wire into `AccountTierCard.tsx`
-
-Replace the existing top-left badge:
-
-```
-<span>REEF · MEMBER</span>
-```
-
-with:
-
-```
-<RoleSwitcher roles={roles} currentView="customer" />
-```
-
-`AccountTierCard` receives `roles` + `customerId` as new props (keeps it dumb). `Account.tsx` reads them via `useUserRoles()` and `formatCustomerId(user.id)` and passes them down. The Sparkles "REEF · MEMBER" chip moves to a smaller secondary badge or is removed (to avoid duplication) — final card keeps tier badge on the right untouched.
-
-### 5. Smart Default View — `src/lib/defaultView.ts` + root redirect
-
-- Helper `pickDefaultPath(roles, savedView)`:
-  - If `savedView` exists in localStorage → return its path.
-  - Else if roles include `delivery` → `/driver`.
-  - Else if roles include `vendor` → `/vendor`.
-  - Else if roles include any admin-tier → `/admin`.
-  - Else → `/` (customer).
-- Hook this into `src/routes/_app/index.tsx` (or `Home.tsx` mount): on first visit after login, if user has a non-customer role and no `reef.activeView` saved, `navigate({ to: pickedPath, replace: true })`. Customers are never redirected.
-- The role switcher in the account page is the user's escape hatch back to `/` (writes `reef.activeView = "customer"`).
-
-### 6. Files
+## Files touched (≈12)
 
 Created:
-- `src/hooks/useUserRoles.ts`
-- `src/features/account/lib/customerId.ts`
-- `src/features/account/components/RoleSwitcher.tsx`
-- `src/lib/defaultView.ts`
+- `src/core-os/sdui-engine/blocks/SduiSpatioTemporalOffersRail.tsx`
+- `src/core-os/sdui-engine/blocks/SduiMaeenLauncherGrid.tsx`
+- migration: seed `ui_layouts` rows for `offers_hub`, `maeen_hub`, and `category_*` (8 rows)
 
 Edited:
-- `src/features/account/components/AccountTierCard.tsx` — accept `roles`, `customerId`; replace static badge.
-- `src/pages/Account.tsx` — fetch roles + customerId, pass through.
-- `src/routes/_app/index.tsx` — smart default redirect on mount.
+- `src/pages/Offers.tsx` (full rewrite, ~30 lines)
+- `src/apps/khalil/pages/Hub.tsx` (full rewrite, ~40 lines)
+- `src/apps/reef-al-madina/features/storefront/components/SduiCategoryPage.tsx` (engine swap)
+- `src/apps/reef-al-madina/features/storefront/home/components/LayoutFactory.tsx` (register 2 new sections)
+- `src/core-os/sdui-engine/registry.ts` (widen PageKey, add 2 SectionMeta entries)
+- `src/core-os/sdui-engine/types.ts` (add 2 SectionKey literals)
+- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts` (add fallback orders)
+- `src/styles.css` (4 tier tokens + 1 surface token, light + dark)
+- `src/components/LoyaltyProgress.tsx` (hex → token)
+- `src/components/MegaEventBanner.tsx` (hex → token)
+- `src/pages/store/SchoolLibrary.tsx` (hex → token)
+- `ARCHITECTURAL_ROADMAP.md` (Phase 29 entry)
 
-### 7. Strictness
+## Honest "100% coverage" caveat
+The Emperor's brief asks for 100% Level-4 coverage. After this strike the **generic SDUI rail surfaces** will be 100% on LayoutFactory + ui_layouts. The 6 domain-specific surfaces (Restaurants menu, Subscriptions wizard, Baskets builder, etc.) are intentionally NOT generic-rail-shaped — they're stem-cell components for one-of-a-kind flows. I'll document them as "Tier-2 stem cells" rather than retrofitting fake SDUI on top of bespoke UX. If you want them ascended too, that's Phase 30 with proper section primitives (FormStep, WizardChain, MenuList).
 
-- `roles: AppRole[]` typed; all icons typed `LucideIcon`. Zero `any`.
-- All colors via CSS variables / tailwind tokens.
-- `tsc --noEmit` must pass.
+## Approval requested
+Confirm:
+1. ✅ Proceed with revised Task 2 scope (engine swap inside `SduiCategoryPage` + 8 seed rows; leave 6 domain pages)?
+2. ✅ Acceptable that final Level-4 figure is ~85% (generic surfaces 100%, domain pages tracked separately)?
+
+On approval I'll execute end-to-end in one pass.
