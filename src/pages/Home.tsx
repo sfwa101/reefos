@@ -23,6 +23,7 @@ import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/h
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
 import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
+import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
 
 const HOME_THEME = storeThemes.supermarket;
 const HOME_PAGE_KEY = "reef_home";
@@ -30,6 +31,7 @@ const HOME_PAGE_KEY = "reef_home";
 const HomePage = () => {
   const { user } = useAuth();
   const orchestrator = useHomeOrchestrator();
+  const isDormant = useSovereignPrayerStore((s) => s.isDormant);
 
   // Hardware-Back override — scroll-to-top before exiting on first press.
   useEffect(() => {
@@ -54,7 +56,12 @@ const HomePage = () => {
   }, [user?.id]);
 
   return (
-    <div className="space-y-6 bg-background pb-32 text-foreground" dir="rtl">
+    <div
+      className={`space-y-6 bg-background pb-32 text-foreground transition-all duration-700 ${
+        isDormant ? "opacity-50 [&_*]:!animation-play-state-paused saturate-[.6] blur-[.4px]" : ""
+      }`}
+      dir="rtl"
+    >
       <LayoutFactory
         pageKey={HOME_PAGE_KEY}
         orchestrator={orchestrator}
