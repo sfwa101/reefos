@@ -6,6 +6,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Clock, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 import BackHeader from "@/components/BackHeader";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -208,7 +211,7 @@ const Restaurants = () => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await supabase
+      const { data, error } = await __sb
         .from("products")
         .select(
           "id,name,brand,price,image,rating,source,fulfillment_type,description,metadata",

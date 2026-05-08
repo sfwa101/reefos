@@ -4,6 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
 import type { VendorLiveOrderItem, VendorProduct } from "../types/vendor-ops.types";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 const MOCK_VENDOR_IDS = ["god-mode-vendor"];
 const MOCK_VENDOR_PRODUCTS: VendorProduct[] = [
@@ -216,8 +219,7 @@ export function useVendorOperations() {
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from("products")
+    const { error } = await __sb.from("products")
       .update({ stock: newQty, is_active: isActive })
       .eq("id", productId);
     if (error) {

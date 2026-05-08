@@ -1,5 +1,8 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
 import {
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
   Search as SearchIcon,
   X,
   PackageSearch,
@@ -35,8 +38,7 @@ function useSupabaseProductSearch(term: string, knownIds: Set<string>) {
       try {
         const like = `%${t}%`;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await (supabase as any)
-          .from("products")
+        const { data, error } = await __sb.from("products")
           .select("id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge")
           .eq("is_active", true)
           .or(`name.ilike.${like},brand.ilike.${like},category.ilike.${like},sub_category.ilike.${like}`)

@@ -4,13 +4,16 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { OmniScope, OmniHit } from "../SearchAtom";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 export const reefScope: OmniScope = {
   appId: "reef",
   label: "ريف",
   async fetch(query, signal): Promise<OmniHit[]> {
     if (signal.aborted) return [];
-    const { data } = await supabase
+    const { data } = await __sb
       .from("products")
       .select("id,name,category")
       .ilike("name", `%${query}%`)

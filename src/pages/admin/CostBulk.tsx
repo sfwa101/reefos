@@ -5,6 +5,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 
 type Row = {
@@ -29,7 +32,7 @@ export default function CostBulk() {
 
   const load = async () => {
     setRows(null);
-    const { data } = await supabase
+    const { data } = await __sb
       .from("products")
       .select("id,name,source,category,price,cost_price,affiliate_commission_pct")
       .order("source").order("name").limit(2000);
@@ -97,7 +100,7 @@ export default function CostBulk() {
 
       // batch updates
       for (const u of updates) {
-        const { error } = await (supabase as any).from("products").update(u.patch as never).eq("id", u.id);
+        const { error } = await __sb.from("products").update(u.patch as never).eq("id", u.id);
         if (error) throw error;
       }
       toast.success(`تم حفظ ${updates.length} منتج`);

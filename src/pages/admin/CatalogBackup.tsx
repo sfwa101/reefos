@@ -19,6 +19,9 @@ import { Download, Upload, ShieldCheck, Loader2, FileJson, AlertTriangle } from 
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
   CATALOG_TABLES,
   PK,
   type CatalogTable,

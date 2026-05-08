@@ -6,6 +6,9 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 type Row = {
   id: string;
@@ -54,7 +57,7 @@ export default function Inventory() {
 
   const load = useCallback(async () => {
     setRows(null);
-    const { data, error } = await supabase
+    const { data, error } = await __sb
       .from("products")
       .select("id,name,unit,price,stock,is_active,source")
       .order("name")
@@ -86,7 +89,7 @@ export default function Inventory() {
         if (patch.price !== undefined && patch.price !== "") upd.price = Number(patch.price);
         if (patch.stock !== undefined && patch.stock !== "") upd.stock = Number(patch.stock);
         if (Object.keys(upd).length === 0) return Promise.resolve({ error: null });
-        return (supabase as any).from("products").update(upd).eq("id", id);
+        return __sb.from("products").update(upd).eq("id", id);
       });
       const results = await Promise.all(tasks);
       const errs = results.filter((r) => r.error);

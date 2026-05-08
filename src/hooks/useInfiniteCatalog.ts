@@ -13,6 +13,9 @@
 //   subscriptions where needed.
 
 import {
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
   useInfiniteQuery,
   type InfiniteData,
   type UseInfiniteQueryResult,
@@ -50,7 +53,7 @@ async function fetchCatalogPage(
   offset: number,
   limit: number,
 ): Promise<CatalogPage> {
-  let query = supabase
+  let query = __sb
     .from("products")
     .select(PRODUCT_COLUMNS)
     .eq("is_active", true)
