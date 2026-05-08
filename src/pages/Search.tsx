@@ -1,8 +1,5 @@
 import { useSearch, useNavigate, Link } from "@tanstack/react-router";
 import {
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
   Search as SearchIcon,
   X,
   PackageSearch,
@@ -22,6 +19,10 @@ import { toLatin } from "@/lib/format";
 import { supabase } from "@/integrations/supabase/client";
 import { useUniversalSearch, useSearchHistory } from "@/modules/search";
 import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
+
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";

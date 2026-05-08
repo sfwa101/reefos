@@ -13,9 +13,6 @@
 //   subscriptions where needed.
 
 import {
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
   useInfiniteQuery,
   type InfiniteData,
   type UseInfiniteQueryResult,
@@ -29,6 +26,10 @@ import {
   type Product,
   type ProductSource,
 } from "@/lib/products";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
+
 
 export interface UseInfiniteCatalogParams {
   readonly sources: ReadonlyArray<ProductSource>;
