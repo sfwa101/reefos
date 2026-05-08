@@ -1,3 +1,14 @@
+/**
+ * Admin Master Orders Hub — Phase 14 Part 2
+ *
+ * Sovereign Migration: This page no longer reads from the legacy `public.orders`
+ * table. It is now bound directly to `salsabil_master_orders` joined with
+ * `salsabil_fulfillment_nodes` and the customer `profiles` table.
+ *
+ * The aggregated status of a master order is derived from its fulfillment
+ * nodes (vendor-level fulfillment units) using the same priority ladder used
+ * across the customer Account view.
+ */
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Package, Clock, TrendingUp, CheckCircle2, XCircle } from "lucide-react";
@@ -7,14 +18,14 @@ import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-interface OrderRow {
+interface MasterOrderRow {
   id: string;
-  status: string;
+  status: string;          // aggregated headline status
   total: number;
-  payment_method: string | null;
-  notes: string | null;
-  whatsapp_sent: boolean;
-  user_id: string;
+  customer_id: string;
+  customer_name: string | null;
+  customer_phone: string | null;
+  node_count: number;
   created_at: string;
 }
 
@@ -26,7 +37,7 @@ const TABS = [
   { key: "cancelled", label: "ملغية" },
 ] as const;
 
-const ACTIVE_STATUSES = ["confirmed", "preparing", "ready", "out_for_delivery", "paid"];
+const ACTIVE_STATUSES = ["confirmed", "preparing", "ready", "out_for_delivery", "paid", "assigned", "picked_up"];
 
 const STATUS_META: Record<string, { label: string; tone: string; dot: string }> = {
   pending:          { label: "بانتظار",     tone: "bg-warning/12 text-warning",         dot: "bg-warning" },
@@ -34,42 +45,44 @@ const STATUS_META: Record<string, { label: string; tone: string; dot: string }> 
   paid:             { label: "مدفوع",       tone: "bg-success/12 text-success",         dot: "bg-success" },
   preparing:        { label: "قيد التحضير", tone: "bg-[hsl(var(--purple))]/12 text-[hsl(var(--purple))]", dot: "bg-[hsl(var(--purple))]" },
   ready:            { label: "جاهز",        tone: "bg-[hsl(var(--teal))]/12 text-[hsl(var(--teal))]", dot: "bg-[hsl(var(--teal))]" },
+  assigned:         { label: "مُسند",       tone: "bg-info/12 text-info",               dot: "bg-info" },
+  picked_up:        { label: "تم الالتقاط", tone: "bg-[hsl(var(--indigo))]/12 text-[hsl(var(--indigo))]", dot: "bg-[hsl(var(--indigo))]" },
   out_for_delivery: { label: "قيد التوصيل", tone: "bg-[hsl(var(--indigo))]/12 text-[hsl(var(--indigo))]", dot: "bg-[hsl(var(--indigo))]" },
   delivered:        { label: "تم التسليم",  tone: "bg-success/12 text-success",         dot: "bg-success" },
   cancelled:        { label: "ملغي",        tone: "bg-destructive/12 text-destructive", dot: "bg-destructive" },
 };
 
-const PAYMENT_LABEL: Record<string, string> = {
-  cash: "نقدًا",
-  card: "بطاقة",
-  wallet: "محفظة",
-  bank_transfer: "تحويل بنكي",
-};
-
-// Quick-action transitions per status (mobile-first one-tap)
-const NEXT_STATUS: Record<string, { label: string; to: string }> = {
-  pending: { label: "تأكيد", to: "confirmed" },
-  confirmed: { label: "بدء التحضير", to: "preparing" },
-  preparing: { label: "جاهز", to: "ready" },
-  ready: { label: "للتوصيل", to: "out_for_delivery" },
-  out_for_delivery: { label: "تم التسليم", to: "delivered" },
-};
+// Priority ladder for aggregating multi-node status into a single headline.
+const STATUS_PRIORITY = [
+  "pending", "confirmed", "paid", "preparing", "ready",
+  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
+];
+function aggregateStatus(nodeStatuses: string[]): string {
+  if (!nodeStatuses.length) return "pending";
+  if (nodeStatuses.every((s) => s === "delivered")) return "delivered";
+  if (nodeStatuses.every((s) => s === "cancelled")) return "cancelled";
+  // Headline = lowest still-active stage (earliest in pipeline among non-delivered nodes).
+  const active = nodeStatuses.filter((s) => s !== "delivered" && s !== "cancelled");
+  const pool = active.length ? active : nodeStatuses;
+  return pool.reduce((lo, s) =>
+    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
+  , pool[0]);
+}
 
 export default function Orders() {
   const navigate = useNavigate();
   const [tab, setTab] = useState<typeof TABS[number]["key"]>("all");
-  const [nonce, setNonce] = useState(0); // bumped on realtime events to remount UAG
+  const [nonce, setNonce] = useState(0);
   const seenIds = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
 
-  // Realtime subscription — force UAG to re-fetch via nonce bump.
+  // Realtime — listen to Sovereign Matrix tables.
   useEffect(() => {
     const channel = supabase
-      .channel("admin-orders-list")
+      .channel("admin-master-orders-list")
       .on(
-        // postgres_changes typings differ across versions — narrow safely
         "postgres_changes" as never,
-        { event: "INSERT", schema: "public", table: "orders" },
+        { event: "INSERT", schema: "public", table: "salsabil_master_orders" },
         (payload: { new?: { id?: string } }) => {
           const newId = payload?.new?.id;
           if (newId && !seenIds.current.has(newId) && !firstLoad.current) {
@@ -83,12 +96,12 @@ export default function Orders() {
       )
       .on(
         "postgres_changes" as never,
-        { event: "UPDATE", schema: "public", table: "orders" },
+        { event: "UPDATE", schema: "public", table: "salsabil_master_orders" },
         () => setNonce((n) => n + 1),
       )
       .on(
         "postgres_changes" as never,
-        { event: "DELETE", schema: "public", table: "orders" },
+        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
         () => setNonce((n) => n + 1),
       )
       .subscribe();
@@ -97,40 +110,67 @@ export default function Orders() {
     };
   }, []);
 
-  const advanceStatus = async (row: OrderRow) => {
-    const next = NEXT_STATUS[row.status];
-    if (!next) return;
-    const { error } = await supabase.from("orders").update({ status: next.to }).eq("id", row.id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    toast.success(`#${row.id.slice(0, 8).toUpperCase()} → ${STATUS_META[next.to]?.label ?? next.to}`);
-    setNonce((n) => n + 1);
-  };
-
-  const cancelOrder = async (row: OrderRow) => {
-    const { error } = await supabase.from("orders").update({ status: "cancelled" }).eq("id", row.id);
-    if (error) {
-      toast.error(error.message);
+  // Sovereign cancel: cancel the master order + all its nodes.
+  const cancelOrder = async (row: MasterOrderRow) => {
+    const [mRes, nRes] = await Promise.all([
+      supabase.from("salsabil_master_orders").update({ status: "cancelled" }).eq("id", row.id),
+      supabase.from("salsabil_fulfillment_nodes").update({ status: "cancelled" }).eq("master_order_id", row.id),
+    ]);
+    const err = mRes.error ?? nRes.error;
+    if (err) {
+      toast.error(err.message);
       return;
     }
     toast.success(`تم إلغاء #${row.id.slice(0, 8).toUpperCase()}`);
     setNonce((n) => n + 1);
   };
 
-  const fetcher = async (): Promise<OrderRow[]> => {
+  const fetcher = async (): Promise<MasterOrderRow[]> => {
+    // Pull master orders with their fulfillment nodes (for status aggregation).
     const { data, error } = await supabase
-      .from("orders")
-      .select("id,status,total,payment_method,notes,whatsapp_sent,user_id,created_at")
+      .from("salsabil_master_orders")
+      .select(`
+        id,
+        total_amount,
+        customer_id,
+        created_at,
+        salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk ( status )
+      `)
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) {
-      console.error("[admin/orders] fetch failed:", error.message, error.details, error.hint);
+      console.error("[admin/orders] fetch failed:", error.message);
       toast.error(`تعذر جلب الطلبات: ${error.message}`);
       return [];
     }
-    const rows = (data ?? []) as OrderRow[];
+
+    // Hydrate customer profiles in a single batch (RLS-safe).
+    const customerIds = Array.from(new Set((data ?? []).map((d) => d.customer_id).filter(Boolean)));
+    const profileMap = new Map<string, { full_name: string | null; phone: string | null }>();
+    if (customerIds.length) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id,full_name,phone")
+        .in("id", customerIds);
+      (profiles ?? []).forEach((p) => profileMap.set(p.id, { full_name: p.full_name, phone: p.phone }));
+    }
+
+    const rows: MasterOrderRow[] = (data ?? []).map((m) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const nodes: { status: string }[] = (m as any).salsabil_fulfillment_nodes ?? [];
+      const prof = profileMap.get(m.customer_id);
+      return {
+        id: m.id,
+        status: aggregateStatus(nodes.map((n) => n.status)),
+        total: Number(m.total_amount ?? 0),
+        customer_id: m.customer_id,
+        customer_name: prof?.full_name ?? null,
+        customer_phone: prof?.phone ?? null,
+        node_count: nodes.length,
+        created_at: m.created_at,
+      };
+    });
+
     if (firstLoad.current) {
       rows.forEach((o) => seenIds.current.add(o.id));
       firstLoad.current = false;
@@ -143,13 +183,13 @@ export default function Orders() {
   };
 
   return (
-    <UniversalAdminGrid<OrderRow>
+    <UniversalAdminGrid<MasterOrderRow>
       key={`${tab}-${nonce}`}
-      title="الطلبات"
-      subtitle="مراقبة الطلبات الحية والتحكم بالحالات بضغطة واحدة"
+      title="الطلبات السيادية"
+      subtitle="مراقبة طلبات السيد (Master Orders) المُجمَّعة من عُقد التنفيذ الحيّة"
       dataSource={{
         fetcher,
-        searchKeys: ["id", "notes"],
+        searchKeys: ["id", "customer_name", "customer_phone"],
       }}
       metrics={[
         {
@@ -216,11 +256,9 @@ export default function Orders() {
                   <span className="font-display text-[13.5px] font-mono num">
                     #{r.id.slice(0, 8).toUpperCase()}
                   </span>
-                  {r.whatsapp_sent && (
-                    <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-success/10 text-success">
-                      WA ✓
-                    </span>
-                  )}
+                  <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
+                    {r.node_count} عُقد
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 mt-0.5 text-[11px] text-foreground-tertiary">
                   <span
@@ -232,7 +270,7 @@ export default function Orders() {
                     <span className={cn("h-1.5 w-1.5 rounded-full", meta.dot)} />
                     {meta.label}
                   </span>
-                  {r.payment_method && <span>• {PAYMENT_LABEL[r.payment_method] ?? r.payment_method}</span>}
+                  {r.customer_name && <span className="truncate max-w-[140px]">• {r.customer_name}</span>}
                   <span className="hidden sm:inline">• {fmtRelative(r.created_at)}</span>
                 </div>
               </div>
@@ -247,12 +285,6 @@ export default function Orders() {
       ]}
       onRowClick={(r) => navigate({ to: "/admin/orders/$orderId", params: { orderId: r.id } })}
       rowActions={[
-        {
-          label: "تقدم",
-          tone: "success",
-          icon: CheckCircle2,
-          onClick: (r) => advanceStatus(r),
-        },
         {
           label: "إلغاء",
           tone: "destructive",
