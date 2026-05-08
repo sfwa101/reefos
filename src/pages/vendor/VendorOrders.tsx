@@ -185,7 +185,7 @@ export default function VendorOrders() {
         empty={{ icon: Package, title: "لا توجد طلبات بعد", hint: "ستظهر هنا فور توجيه أي طلب لمخزنك." }}
         dataSource={{
           table: "salsabil_fulfillment_nodes",
-          select: "id, master_order_id, status, total_amount, created_at, salsabil_fulfillment_items(id)",
+          select: "id, master_order_id, status, total_amount, created_at, delivery_snapshot, salsabil_fulfillment_items(id)",
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["master_order_id"],
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -196,6 +196,7 @@ export default function VendorOrders() {
             total_amount: Number(raw.total_amount ?? 0),
             items_count: (raw.salsabil_fulfillment_items ?? []).length,
             created_at: raw.created_at,
+            delivery_snapshot: (raw.delivery_snapshot ?? null) as DeliverySnapshot | null,
           }),
         }}
         rowKey={(r) => r.id}
