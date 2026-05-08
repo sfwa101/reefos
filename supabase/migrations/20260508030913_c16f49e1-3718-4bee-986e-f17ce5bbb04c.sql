@@ -1,0 +1,2 @@
+ALTER PUBLICATION supabase_realtime ADD TABLE public.salsabil_fulfillment_nodes;
+ALTER TABLE public.salsabil_fulfillment_nodes REPLICA IDENTITY FULL;
