@@ -56,7 +56,7 @@ export default function VendorShell() {
       </header>
       <main className="max-w-3xl mx-auto"><Outlet /></main>
       <nav className="fixed bottom-0 inset-x-0 bg-surface/95 backdrop-blur border-t border-border/40 z-30">
-        <div className="max-w-3xl mx-auto grid grid-cols-4 h-16">
+        <div className="max-w-3xl mx-auto grid grid-cols-5 h-16">
           {tabs.map(t => {
             const active = t.exact ? location.pathname === t.to : location.pathname.startsWith(t.to);
             return (
