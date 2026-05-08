@@ -879,3 +879,29 @@ Logistics** (returns flow back along the same trunk lines).
   for cost reduction.
 - **Reverse Logistics**: Returns piggyback on outbound trunk capacity.
 
+
+---
+
+## Logistics Pricing & Speed Invariant (Phase 12.4)
+
+Delivery fees are **never hardcoded**. Every quote is a pure function of:
+`(zone_config.base_fee + distance_km * per_km_fee) * surge_multiplier *
+speed_tier_multiplier`, with free delivery above the zone's cart threshold.
+Speed tiers (`express`, `standard`, `economy`) are stored as JSON multipliers
+in `salsabil_logistics_config.speed_tiers` and resolved by
+`get_sovereign_logistics_quote()`.
+
+## Modesty Doctrine (Live Constraint)
+
+`broadcast_smart_dispatch` is **gender-aware**. When the master order's
+customer has `profiles.gender = 'female'`, candidate drivers are restricted
+to female drivers within the dispatch radius. If no female drivers are
+available, the **Sovereign Override** activates and the dispatch falls back
+to the standard vehicle/cold-chain-aware pool — no order is ever stuck on
+modesty grounds, but the preference is always honored when satisfiable.
+
+## Rideshare Pool Foundation
+
+`salsabil_rideshare_pool` captures community-driven trips (origin, dest,
+seats, trunk_capacity_liters, departure_at). Phase 14 wires this into the
+Relay Network so trunks become opportunistic Middle-Mile cargo capacity.
