@@ -133,7 +133,7 @@ export const DepartmentGrid = () => {
       </div>
 
       <div
-        className="scrollbar-hide flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
+        className="no-scrollbar flex snap-x snap-mandatory gap-4 overflow-x-auto pb-4"
         // Side padding equal to (viewport - card)/2 keeps cards snapped
         // to the visual center on every device size.
         style={{ paddingInline: "calc(50% - 130px)" }}
