@@ -51,7 +51,7 @@ const CatalogBackupPage = () => {
     const tables = {} as Record<CatalogTable, Record<string, unknown>[]>;
     try {
       for (const t of CATALOG_TABLES) {
-        const { data, error } = await supabase
+        const { data, error } = await __sb
           .from(t)
           .select("*")
           .order(PK[t], { ascending: true });
