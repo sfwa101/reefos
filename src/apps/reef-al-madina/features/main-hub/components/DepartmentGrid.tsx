@@ -55,8 +55,7 @@ const haptic = () => {
   }
 };
 
-const tintBg = (tintVar: string) =>
-  `linear-gradient(155deg, hsl(var(--${tintVar})) 0%, hsl(var(--card)) 90%)`;
+const tintBg = (tintVar: string) => `hsl(var(--${tintVar}))`;
 
 // ───────────────────────────── GRID MODE ─────────────────────────────
 
