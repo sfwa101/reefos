@@ -38,16 +38,14 @@ function useSupabaseProductSearch(term: string, knownIds: Set<string>) {
     const handle = setTimeout(async () => {
       try {
         const like = `%${t}%`;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error } = await __sb.from("products")
+                const { data, error } = await __sb.from("products")
           .select("id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge")
           .eq("is_active", true)
           .or(`name.ilike.${like},brand.ilike.${like},category.ilike.${like},sub_category.ilike.${like}`)
           .limit(40);
         if (cancelled) return;
         if (error) { setRemote([]); return; }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const mapped: Product[] = (data ?? []).map((r: any) => ({
+                const mapped: Product[] = (data ?? []).map((r: any) => ({
           id: String(r.id),
           name: r.name,
           brand: r.brand ?? undefined,

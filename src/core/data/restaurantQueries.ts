@@ -1,6 +1,3 @@
-// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const __sb: any = supabase;
 
 /**
  * Restaurant data-access layer (DAL).
@@ -24,6 +21,9 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import type { RestoProduct } from "@/modules/restaurants/types";
+// Phase 15.1 — products/categories tables dropped; legacy admin/POS callsites use a typed-erased alias.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const __sb: any = supabase;
 
 const RESTAURANTS_QUERY_KEY = ["restaurants"] as const;
 const FIVE_MINUTES = 5 * 60 * 1000;
