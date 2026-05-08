@@ -388,3 +388,9 @@ bypass LLM processing.
 - **G14 (CRITICAL fixed):** Vision Genesis hands its captured `File` back to the Editor, which uploads it to the public `product-images` bucket and injects the public URL into `payload.asset.media`. The mint RPC persists `media` into `salsabil_assets.media` and mirrors `media[0]` into legacy `products.image`.
 - **G9, G11, G12 cleanups:** `setHasOverriddenAI(false)` after every successful mint; removed unused `Placeholder` component, removed `Wrench` import, removed `console.log` from `useMintUSA`.
 - **Status:** USA Engine declared 100% production-stable. Ready for Phase 9 Vendor Gateway.
+
+## Phase 9 Part 1 — Vendor Genesis & Sovereign Lockdown (2026-05-08)
+- **Security Lockdown:** `src/routes/vendor.tsx` now wraps `VendorShell` in `<RoleGuard roles={["vendor","admin"]}>` — the entire `/vendor/*` subtree is sealed at the route boundary. No more anonymous access.
+- **Multi-Tenant Schema:** Created `salsabil_vendors` (tenant entity) and `salsabil_vendor_members` (user↔tenant join with sub-role). RLS enforced via the new `is_vendor_member()` SECURITY DEFINER helper: members read their own vendor, owners manage memberships, admins retain global control.
+- **Identity Hook:** `useCurrentVendor()` (TanStack Query) resolves the authenticated user's primary active tenant + their role within it — single source of truth for the vendor portal.
+- **Doctrine:** The **Benaa SaaS & Multi-Tenant Doctrine** and the **Dynamic Visibility Rule** are now permanently inscribed in `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`. Salsabil is no longer just a marketplace — it is the foundation for a sovereign Arabic B2B ERP ecosystem.
