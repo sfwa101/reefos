@@ -144,6 +144,7 @@ function RootComponent() {
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
+          <SovereignThemeProvider tenantId="reef">
           <LocaleProvider>
           <UIProvider>
             <TooltipProvider>
@@ -168,6 +169,7 @@ function RootComponent() {
             </TooltipProvider>
           </UIProvider>
           </LocaleProvider>
+          </SovereignThemeProvider>
         </ThemeProvider>
         {/* Dev-Node mounted at the root — visible in all builds (Phase VIII Restoration). */}
         <DevOSNavigator />
