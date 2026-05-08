@@ -688,3 +688,17 @@ A handful of admin/POS legacy tools (`Inventory`, `CostBulk`, `CatalogBackup`, `
 4. **CSS Cleansing (Soft)** — `src/styles.css` `:root` / `.dark` color blocks marked as **SSR / first-paint fallbacks only**. Inline CSS variables injected by the provider override them via natural inline-style > stylesheet specificity. Authors must now change the DB row, not the stylesheet, to re-skin the app.
 
 **Status:** The app boots from a DB-driven JSON DNA payload. Reef Al Madina is the first tenant on the Sovereign Theme Matrix. Level-1 Stem Cell Visuals are online — ready for Phase 17 Part 2 (multi-tenant resolver + dark/occasion overlays).
+
+---
+
+## Phase 18 (Prologue) — Legacy Switcher Audit & Manifesto Expansion
+
+**Mission:** Audit the legacy `RoleSwitcher` before mutating it into the Level-4 Sovereign Persona Engine, and enshrine Doctrines 7 & 8 (Islamic Economic Graph + Dual-Face Currency) in the Manifesto.
+
+### Strikes Executed
+
+1. **Legacy Switcher Audit** — Read-only scan of `src/apps/reef-al-madina/features/account/components/RoleSwitcher.tsx`, `src/lib/defaultView.ts`, `src/hooks/useUserRoles.ts`. Findings captured in the report below.
+2. **Manifesto Expansion** — Appended Doctrine 7 (The Islamic Economic Graph) and Doctrine 8 (The Dual-Face Currency / Role Polymorphism) to `SALSABIL_OS_ARCHITECTURAL_MANIFEST.md`.
+3. **Roadmap Sync** — This entry. Phase 18 (Build) will refactor `RoleSwitcher` into a Sovereign Persona Engine that morphs SDUI + Theme DNA without navigation.
+
+**Status:** Audit complete. Manifesto sealed at 8 doctrines. Awaiting Emperor's authorization for Phase 18 Build.
