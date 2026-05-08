@@ -21,12 +21,22 @@ const saveReady = (m: Record<string, true>) => {
   try { localStorage.setItem(READY_KEY, JSON.stringify(m)); } catch { /* noop */ }
 };
 
-const ACTIVE_STATUSES = new Set(["pending", "confirmed", "preparing", "ready", "out_for_delivery"]);
+// Active node statuses the vendor should still be working on.
+const ACTIVE_NODE_STATUSES = new Set([
+  "pending", "confirmed", "preparing", "ready",
+  "assigned", "picked_up", "out_for_delivery",
+]);
 
 /**
- * Vendor Operational Hook (Phase 16)
- * - Subscribes to vendor's products and order_items in real-time.
- * - Provides stock/active toggle and a local "Mark Ready" pulse (no schema changes).
+ * Vendor Operational Hook — Sovereign Matrix Edition (Phase 14 Part 2)
+ *
+ * Reads exclusively from `salsabil_fulfillment_nodes` ➜
+ * `salsabil_fulfillment_items` ➜ `salsabil_skus` ➜ `salsabil_assets`.
+ * Joined to `salsabil_master_orders` for customer / delivery context.
+ *
+ * Legacy `public.orders` and `public.order_items` are no longer touched.
+ * The product catalog still uses the `products` shim until the SDUI
+ * cutover is complete.
  */
 export function useVendorOperations() {
   const { user } = useAuth();
@@ -71,30 +81,57 @@ export function useVendorOperations() {
 
   const refreshLiveItems = useCallback(async () => {
     if (vendorIds.length === 0) { setItems([]); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("order_items")
-      .select("id,order_id,product_id,product_name,product_image,quantity,price,created_at, products!inner(vendor_id), orders!inner(status,service_type,payment_method)")
-      .in("products.vendor_id", vendorIds)
-      .in("orders.status", Array.from(ACTIVE_STATUSES))
+    // Sovereign read: vendor's fulfillment nodes ➜ items ➜ sku ➜ asset.
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select(`
+        id, status, vendor_id, master_order_id, created_at,
+        salsabil_master_orders!salsabil_fulfillment_nodes_master_fk ( delivery_info ),
+        salsabil_fulfillment_items (
+          id, quantity, price_at_time, created_at,
+          salsabil_skus (
+            id,
+            salsabil_assets ( id, name, media )
+          )
+        )
+      `)
+      .in("vendor_id", vendorIds)
+      .in("status", Array.from(ACTIVE_NODE_STATUSES))
       .order("created_at", { ascending: false })
       .limit(80);
     if (error) { setError(error.message); return; }
+
+    const rows: VendorLiveOrderItem[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows = (data ?? []).map((r: any): VendorLiveOrderItem => ({
-      id: r.id,
-      order_id: r.order_id,
-      product_id: r.product_id,
-      product_name: r.product_name,
-      product_image: r.product_image,
-      quantity: r.quantity,
-      price: Number(r.price),
-      created_at: r.created_at,
-      order_status: r.orders?.status ?? "pending",
-      service_type: r.orders?.service_type ?? "delivery",
-      payment_method: r.orders?.payment_method ?? null,
-      ready: !!readyRef.current[r.id],
-    }));
+    (data ?? []).forEach((node: any) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const deliveryInfo: any = node?.salsabil_master_orders?.delivery_info ?? {};
+      const serviceType = deliveryInfo?.service_type ?? "delivery";
+      const paymentMethod = deliveryInfo?.payment_method ?? null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const fis: any[] = node?.salsabil_fulfillment_items ?? [];
+      fis.forEach((it) => {
+        const sku = it?.salsabil_skus;
+        const asset = sku?.salsabil_assets;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const media = (asset?.media as any) ?? {};
+        const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+        rows.push({
+          id: it.id,
+          order_id: node.master_order_id ?? node.id,
+          product_id: asset?.id ?? sku?.id ?? "",
+          product_name: asset?.name ?? "منتج",
+          product_image: image,
+          quantity: it.quantity,
+          price: Number(it.price_at_time ?? 0),
+          created_at: it.created_at ?? node.created_at,
+          order_status: node.status,
+          service_type: serviceType,
+          payment_method: paymentMethod,
+          ready: !!readyRef.current[it.id],
+        });
+      });
+    });
     setItems(rows);
   }, [vendorIds]);
 
@@ -109,21 +146,21 @@ export function useVendorOperations() {
     return () => { cancelled = true; };
   }, [refreshProducts, refreshLiveItems]);
 
-  // Realtime subscriptions
+  // Realtime subscriptions — bound to Sovereign tables.
   useEffect(() => {
     if (vendorIds.length === 0) return;
     const ch = supabase
       .channel(`vendor-ops-${vendorIds.join("-")}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "order_items" }, (payload) => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" }, (payload) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const row = (payload.new ?? payload.old) as any;
-        if (!row?.product_id || !productIdsRef.current.has(row.product_id)) return;
+        if (!row?.vendor_id || !vendorIds.includes(row.vendor_id)) return;
         refreshLiveItems();
         if (payload.eventType === "INSERT") {
-          toast.success("طلب جديد لمنتجاتك", { description: row.product_name });
+          toast.success("طلب سيادي جديد لمتجرك");
         }
       })
-      .on("postgres_changes", { event: "UPDATE", schema: "public", table: "orders" }, () => {
+      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_items" }, () => {
         refreshLiveItems();
       })
       .on("postgres_changes", { event: "*", schema: "public", table: "products" }, (payload) => {
@@ -136,9 +173,8 @@ export function useVendorOperations() {
     return () => { supabase.removeChannel(ch); };
   }, [vendorIds, refreshLiveItems, refreshProducts]);
 
-  /** Update product stock & active flag. Authorized via RLS on products (vendor_id == auth.uid mapping). */
+  /** Update product stock & active flag. Authorized via RLS on products. */
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
-    // optimistic
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { error } = await (supabase as any)
@@ -154,7 +190,7 @@ export function useVendorOperations() {
     return true;
   }, [refreshProducts]);
 
-  /** Mark an order item as "Ready". Local-only (no schema change). Persists per-device. */
+  /** Mark a fulfillment item as "Ready". Local-only pulse (per-device). */
   const markOrderItemReady = useCallback(async (orderItemId: string) => {
     readyRef.current = { ...readyRef.current, [orderItemId]: true };
     saveReady(readyRef.current);
