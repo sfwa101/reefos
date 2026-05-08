@@ -60,6 +60,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const mutation = useVisionGenesis();
   const mintMutation = useMintUSA();
+  const aestheticMutation = useAestheticProcessor();
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
