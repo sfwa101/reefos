@@ -761,3 +761,29 @@ Algorithmic Hydration from National ID, Salsabil Short-ID (last 6 digits),
 Corporate DNA via CR number, and the Modesty Protocol (real-photo KYC for
 males, Sovereign Avatar Library for females). Binding clause extended to
 reject any non-compliant identity/KYC feature at architectural review.
+
+## Phase 18 Part 2 — The Imperial Switcher UI & Contextual Morphing
+
+**Status:** Live. Legacy code burned.
+
+- Created `src/components/ui/SovereignPersonaSwitcher.tsx` — dual-variant
+  Level-4 component (`pill` for global TopBar, `chip` for AccountTierCard).
+  Reads personas live from `salsabil_persona_matrix` via TanStack Query,
+  filters by `user_roles` (B2B persona requires admin/vendor/delivery/
+  cashier/branch_manager/store_manager/finance), and dispatches
+  `setPersona()` → instant Theme DNA morph (Part 1) + smooth TanStack
+  navigation to the persona's natural surface (`/`, `/vendor`, `/admin`,
+  `/driver`, `/pos`).
+- Apple-tier UX: shared Radix bottom-sheet (`rounded-t-[28px]`,
+  glassy ring), per-row framer-motion stagger entry, tinted icon
+  squares using each persona's `theme_overlay.colors.primary`,
+  active row in solid primary with check.
+- TopBar injection: pill mounted between address pill and cart
+  (only when authenticated). z-40 chrome, safe-area aware, no
+  collision with `DevOSNavigator` FAB or `TabBar`.
+- AccountTierCard swap: 1-for-1 replacement preserving the IdChip
+  visual footprint (Doctrine 9.2 Short-ID = last 6 digits of user
+  identifier). `stopPropagation` guards on parent intact.
+- **Eradicated:** `src/apps/reef-al-madina/features/account/components/RoleSwitcher.tsx`
+  deleted. `defaultView.ts` retained — `pickDefaultView`/`readActiveView`
+  still serve `HomeRedirector` (separate concern).
