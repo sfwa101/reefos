@@ -46,7 +46,8 @@ export async function fetchVendorPortalStats(): Promise<{
   data: VendorPortalStats | null;
   error: { message: string } | null;
 }> {
-  const { data, error } = await supabase.rpc("vendor_portal_stats");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc("vendor_portal_stats");
   return {
     data: (data as unknown as VendorPortalStats) ?? null,
     error: error ? { message: error.message } : null,
