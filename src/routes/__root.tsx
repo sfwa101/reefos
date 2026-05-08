@@ -146,11 +146,11 @@ function RootComponent() {
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider>
-          <SovereignThemeProvider tenantId="reef">
           <LocaleProvider>
           <UIProvider>
             <TooltipProvider>
               <AuthProvider>
+                <SovereignThemeProvider tenantId="reef">
                 <LocationProvider>
                   <CartProvider>
                     <SharedCartProvider>
@@ -169,11 +169,11 @@ function RootComponent() {
                     </SharedCartProvider>
                   </CartProvider>
                 </LocationProvider>
+                </SovereignThemeProvider>
               </AuthProvider>
             </TooltipProvider>
           </UIProvider>
           </LocaleProvider>
-          </SovereignThemeProvider>
         </ThemeProvider>
         {/* Dev-Node mounted at the root — visible in all builds (Phase VIII Restoration). */}
         <DevOSNavigator />

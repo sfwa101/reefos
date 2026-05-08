@@ -244,3 +244,11 @@ export const useAuth = () => {
   if (!v) throw new Error("useAuth must be used within AuthProvider");
   return v;
 };
+
+/**
+ * useAuthOptional — null-safe variant. Returns `null` instead of throwing
+ * when called above the AuthProvider in the tree. Used by foundational
+ * providers (e.g. SovereignThemeProvider) that may mount before the auth
+ * context is available during hydration.
+ */
+export const useAuthOptional = (): AuthCtx | null => useContext(Ctx);
