@@ -192,6 +192,24 @@ export const SECTION_REGISTRY: Record<SectionKey, SectionMeta> = {
     allowedOverrides: ["padding", "title"],
     iconKey: "Soup",
   },
+
+  // ---------- Phase 26 — Sovereign Minimalism ----------
+  OfferNeighborhoodPool: {
+    key: "OfferNeighborhoodPool",
+    label: "نبض الحي",
+    description: "بطاقة عروض الجيرة (Group-Buy / Pulse)",
+    pages: ["home", "main_hub", "offers"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Users",
+  },
+  PredictiveRefillRail: {
+    key: "PredictiveRefillRail",
+    label: "حان وقت التزود",
+    description: "تنبؤ بالمنتجات الاستهلاكية المرشحة لإعادة الطلب",
+    pages: ["home", "main_hub"],
+    allowedOverrides: ["padding", "title"],
+    iconKey: "Repeat",
+  },
 };
 
 /** Ordered list of sections registered for a given page. */
