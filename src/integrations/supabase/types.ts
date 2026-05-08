@@ -7948,37 +7948,9 @@ export type Database = {
         }
         Returns: Json
       }
-      allocate_order_inventory: {
-        Args: { _order_id: string; _zone?: string }
-        Returns: Json
-      }
-      allocation_overview: { Args: { _order_id: string }; Returns: Json }
       approve_advance_request: { Args: { _request_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
-      assign_nearest_driver: {
-        Args: { p_order_id: string; p_radius_m?: number }
-        Returns: {
-          distance_m: number
-          driver_id: string
-          order_id: string
-          queued: boolean
-        }[]
-      }
-      auto_route_order_to_branch: {
-        Args: {
-          _order_id: string
-          _product_id: string
-          _qty_pieces: number
-          _target_branch: string
-        }
-        Returns: Json
-      }
       broadcast_smart_dispatch: { Args: { p_node_id: string }; Returns: number }
-      calculate_bom_cost: { Args: { p_product_id: string }; Returns: number }
-      calculate_order_commission: {
-        Args: { p_order_id: string }
-        Returns: number
-      }
       category_affinity: {
         Args: { _user_id: string }
         Returns: {
@@ -7986,7 +7958,6 @@ export type Database = {
           score: number
         }[]
       }
-      cfo_dashboard_stats: { Args: never; Returns: Json }
       check_kyc_status: { Args: { p_user_id: string }; Returns: boolean }
       clear_sovereign_settlements: {
         Args: { p_vendor_id: string }
@@ -8018,32 +7989,9 @@ export type Database = {
           isSetofReturn: false
         }
       }
-      commit_sub_order_stock: { Args: { _sub_order_id: string }; Returns: Json }
-      complete_delivery: {
-        Args: {
-          _cod_collected?: boolean
-          _lat?: number
-          _lng?: number
-          _scanned_barcode?: string
-          _task_id: string
-        }
-        Returns: Json
-      }
-      compute_charity_dues: {
-        Args: { _end: string; _start: string }
-        Returns: Json
-      }
       compute_driver_commission: {
         Args: { _driver_id: string; _order_total: number }
         Returns: number
-      }
-      compute_user_level: {
-        Args: { _user_id: string }
-        Returns: Database["public"]["Enums"]["app_user_level"]
-      }
-      compute_zakat_assessment: {
-        Args: { _nisab_value?: number }
-        Returns: Json
       }
       convert_to_pieces: {
         Args: { _product_id: string; _qty: number; _unit_code: string }
@@ -8079,10 +8027,6 @@ export type Database = {
         }
         Returns: Json
       }
-      distribute_affiliate_commission: {
-        Args: { p_order_id: string; p_total_platform_fee: number }
-        Returns: undefined
-      }
       donate_to_campaign: {
         Args: {
           _amount: number
@@ -8090,10 +8034,6 @@ export type Database = {
           _note?: string
           _source?: string
         }
-        Returns: Json
-      }
-      driver_log_event: {
-        Args: { _event: string; _lat?: number; _lng?: number; _task_id: string }
         Returns: Json
       }
       driver_portal_stats: { Args: never; Returns: Json }
@@ -8140,16 +8080,10 @@ export type Database = {
       enablelongtransactions: { Args: never; Returns: string }
       ensure_referral_code: { Args: { _user_id?: string }; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
-      execute_trade_matching: {
-        Args: { p_security_id: string }
-        Returns: number
-      }
-      executive_dashboard_stats: { Args: { _days?: number }; Returns: Json }
       explode_bom: {
         Args: { p_product_id: string; p_target_qty: number }
         Returns: Json
       }
-      financial_snapshot: { Args: { _days?: number }; Returns: Json }
       find_allocation_warehouse: {
         Args: { _product_id: string; _qty: number; _zone: string }
         Returns: {
@@ -8182,15 +8116,6 @@ export type Database = {
               updated_at: string
             }[]
           }
-      frequently_bought_together: {
-        Args: { _limit?: number; _product_ids: string[] }
-        Returns: {
-          category: string
-          product_id: string
-          product_name: string
-          score: number
-        }[]
-      }
       geometry: { Args: { "": string }; Returns: unknown }
       geometry_above: {
         Args: { geom1: unknown; geom2: unknown }
@@ -8309,10 +8234,6 @@ export type Database = {
         Args: { _campaign_id: string }
         Returns: number
       }
-      hakim_deep_report: {
-        Args: { _from?: string; _to?: string }
-        Returns: Json
-      }
       hakim_pulse_stats: { Args: { _minutes?: number }; Returns: Json }
       has_permission: {
         Args: { _permission_key: string; _user_id: string }
@@ -8345,10 +8266,6 @@ export type Database = {
       is_driver: { Args: { _user_id: string }; Returns: boolean }
       is_gam_eya_member: {
         Args: { _circle: string; _user: string }
-        Returns: boolean
-      }
-      is_product_available_in_zone: {
-        Args: { _product_id: string; _zone_id: string }
         Returns: boolean
       }
       is_shared_cart_owner: {
@@ -8399,17 +8316,6 @@ export type Database = {
         Returns: string
       }
       longtransactionsenabled: { Args: never; Returns: boolean }
-      low_stock_products: {
-        Args: { _threshold?: number }
-        Returns: {
-          category: string
-          id: string
-          image_url: string
-          name: string
-          price: number
-          stock: number
-        }[]
-      }
       match_universal_asset: {
         Args: { p_embedding: string; p_threshold?: number }
         Returns: {
@@ -8418,7 +8324,6 @@ export type Database = {
           similarity: number
         }[]
       }
-      mint_loyalty_points: { Args: { p_order_id: string }; Returns: string }
       mint_universal_asset: { Args: { payload: Json }; Returns: string }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
       open_escrow_for_order: {
@@ -8430,49 +8335,11 @@ export type Database = {
         }
         Returns: string
       }
-      order_has_vendor_store: {
-        Args: { _order_id: string; _user_id: string }
-        Returns: boolean
-      }
       pay_gam_eya_installment: {
         Args: { _installment_id: string }
         Returns: Json
       }
       payments_schedule: { Args: { _days_ahead?: number }; Returns: Json }
-      personalized_flash_picks: {
-        Args: { _limit?: number; _user_id: string }
-        Returns: {
-          category: string
-          original_price: number
-          product_id: string
-          product_name: string
-          reason: string
-          suggested_discount_pct: number
-        }[]
-      }
-      place_order_atomic: {
-        Args: {
-          _address_id: string
-          _change_remainder?: number
-          _delivery_zone: string
-          _discount?: number
-          _donate_change?: boolean
-          _items: Json
-          _notes: string
-          _payment_method: string
-          _promo_code?: string
-          _save_change?: boolean
-          _secondary_payment?: string
-          _service_type: string
-          _tip?: number
-          _total: number
-          _total_cashback?: number
-          _user_id: string
-          _wallet_applied?: number
-          _wallet_shortfall?: number
-        }
-        Returns: string
-      }
       pledge_group_buy: {
         Args: { _campaign_id: string; _quantity: number }
         Returns: Json
@@ -8542,7 +8409,6 @@ export type Database = {
         Args: { _referral_id: string }
         Returns: Json
       }
-      progress_to_next_level: { Args: { _user_id: string }; Returns: Json }
       pull_catalog_sync: { Args: { p_last_sync?: string }; Returns: Json }
       pull_wallet_sync: { Args: { p_last_sync?: string }; Returns: Json }
       push_notification: {
@@ -8560,7 +8426,6 @@ export type Database = {
         Args: { _code: string; _order_id: string; _order_total: number }
         Returns: Json
       }
-      refresh_user_preferences: { Args: { _user_id?: string }; Returns: Json }
       reject_advance_request: {
         Args: { _reason: string; _request_id: string }
         Returns: Json
@@ -8569,7 +8434,6 @@ export type Database = {
         Args: { _reason: string; _topup_id: string }
         Returns: Json
       }
-      release_order_reservation: { Args: { _order_id: string }; Returns: Json }
       report_anomaly: {
         Args: {
           _description: string
@@ -8599,12 +8463,6 @@ export type Database = {
         Args: { _branch_id: string; _product_id: string; _zone?: string }
         Returns: Json
       }
-      resolve_legacy_product_to_sku: {
-        Args: { p_legacy_id: string }
-        Returns: string
-      }
-      rotate_flash_sale: { Args: never; Returns: string }
-      rotate_flash_sale_v2: { Args: never; Returns: Json }
       route_order_intelligent: {
         Args: {
           p_customer_lat: number
@@ -9214,19 +9072,6 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
-      submit_purchase_invoice: {
-        Args: {
-          _invoice_date?: string
-          _invoice_number?: string
-          _items: Json
-          _notes?: string
-          _paid_amount?: number
-          _supplier_id: string
-          _tax?: number
-          _total_amount: number
-        }
-        Returns: Json
-      }
       tayseer_place_limit_order: {
         Args: {
           p_amount: number
@@ -9269,15 +9114,6 @@ export type Database = {
         Args: { p_lat: number; p_lon: number }
         Returns: undefined
       }
-      update_universal_asset: {
-        Args: {
-          p_asset_id: string
-          p_base_price: number
-          p_description: string
-          p_name: string
-        }
-        Returns: string
-      }
       updategeometrysrid: {
         Args: {
           catalogn_name: string
@@ -9299,7 +9135,6 @@ export type Database = {
       }
       user_branch_ids: { Args: { _user_id: string }; Returns: string[] }
       user_store_ids: { Args: { _user_id: string }; Returns: string[] }
-      user_total_spent: { Args: { _user_id: string }; Returns: number }
       user_trust_limit: { Args: { _user_id: string }; Returns: number }
       user_vendor_ids: { Args: { _user_id: string }; Returns: string[] }
       validate_coupon: {
@@ -9310,15 +9145,6 @@ export type Database = {
         Args: { _cost_price: number; _new_price: number; _sale_price: number }
         Returns: Json
       }
-      validate_unit_pricing: {
-        Args: {
-          _product_id: string
-          _selling_price: number
-          _unit_code: string
-        }
-        Returns: Json
-      }
-      vendor_portal_stats: { Args: never; Returns: Json }
       wallet_transfer: {
         Args: { _amount: number; _note?: string; _recipient_phone: string }
         Returns: Json

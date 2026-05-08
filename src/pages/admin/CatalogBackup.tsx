@@ -51,7 +51,7 @@ const CatalogBackupPage = () => {
     const tables = {} as Record<CatalogTable, Record<string, unknown>[]>;
     try {
       for (const t of CATALOG_TABLES) {
-        const { data, error } = await supabase
+        const { data, error } = await __sb
           .from(t)
           .select("*")
           .order(PK[t], { ascending: true });
@@ -110,7 +110,7 @@ const CatalogBackupPage = () => {
           // generated row types apply. The generic Record<string, unknown>
           // shape we carry through SeedFile loses that link — cast at the
           // single boundary instead of fragmenting the loop.
-          const { error } = await supabase
+          const { error } = await __sb
             .from(t)
             .upsert(rows as never, { onConflict: PK[t] });
           if (error) throw new Error(`${t}: ${error.message}`);

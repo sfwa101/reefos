@@ -43,7 +43,8 @@ const Account = () => {
         supabase.from("wallet_balances").select("balance, points").eq("user_id", user.id).maybeSingle(),
         // Sovereign Matrix: master orders are the single source of truth for "my order count".
         supabase.from("salsabil_master_orders").select("id", { count: "exact", head: true }).eq("customer_id", user.id),
-        supabase.rpc("user_total_spent", { _user_id: user.id }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any).rpc("user_total_spent", { _user_id: user.id }),
         supabase.from("kyc_verifications").select("status").eq("user_id", user.id).maybeSingle<{ status: NonNullable<KycStatus> }>(),
       ]);
       if (!alive) return;

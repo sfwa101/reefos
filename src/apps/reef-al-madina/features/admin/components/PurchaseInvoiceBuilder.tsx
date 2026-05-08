@@ -142,7 +142,8 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
 
     setSubmitting(true);
     try {
-      const { data, error } = await supabase.rpc("submit_purchase_invoice", {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase as any).rpc("submit_purchase_invoice", {
         _supplier_id: form.supplier_id,
         _items: lines.map((l) => ({
           product_id: l.product_id,

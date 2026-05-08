@@ -14,13 +14,10 @@ export const allocateOrderInventory = async (
   orderId: string,
   zoneId: string | null | undefined,
 ): Promise<void> => {
-  try {
-    const { error } = await supabase.rpc("allocate_order_inventory", {
-      _order_id: orderId,
-      _zone: zoneId ?? undefined,
-    });
-    if (error) console.warn("[allocation] failed", error);
-  } catch (e) {
-    console.warn("[allocation] exception", e);
-  }
+  // Phase 15.2 — `allocate_order_inventory` RPC was dropped with the legacy
+  // orders schema. The Sovereign Router (`process_checkout_sovereign`) now
+  // handles allocation atomically inside the checkout transaction. Kept as
+  // a no-op so legacy callers don't crash; remove on next cleanup pass.
+  void orderId; void zoneId;
+  return;
 };
