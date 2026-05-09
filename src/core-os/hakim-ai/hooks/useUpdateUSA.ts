@@ -7,6 +7,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { tenantQueryKey } from "@/lib/tenantScope";
 
 export interface UpdateUSAInput {
   asset_id: string;
@@ -31,10 +32,11 @@ export function useUpdateUSA() {
     },
     onSuccess: () => {
       toast.success("تم تحديث الأصل وتزامنه بنجاح");
-      qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
-      qc.invalidateQueries({ queryKey: ["catalog", "products"] });
-      qc.invalidateQueries({ queryKey: ["admin-grid"] });
-      qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
+      // Phase 43 — tenant-scoped invalidations (match fetch keys exactly).
+      qc.invalidateQueries({ queryKey: tenantQueryKey("salsabil_assets") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("catalog") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("admin-grid") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("admin", "list", "products") });
     },
     onError: (err) => {
       toast.error(

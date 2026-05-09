@@ -1,19 +1,21 @@
 /**
- * God Mode helper — Phase 36 Titanium Shield.
+ * God Mode helper — Phase 36 Titanium Shield, hardened in Phase 43.
  *
- * STRICTLY DEV-ONLY. In production builds (`import.meta.env.DEV === false`),
- * this function ALWAYS returns `false`. The `localStorage` / `window` flag
- * reads are tree-shaken out by Vite when DEV is statically false, so no
- * admin-bypass surface ships in the production bundle.
+ * STRICTLY DEV-ONLY. Every `window` / `localStorage` read is wrapped in
+ * `if (import.meta.env.DEV)` so Vite tree-shakes the entire body away in
+ * production builds — the function compiles down to `() => false`. There
+ * is no admin-bypass surface in the production bundle.
  */
 export const isGodMode = (): boolean => {
-  if (!import.meta.env.DEV) return false;
-  if (typeof window === "undefined") return false;
-  const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
-  if (w.__SALSABIL_GOD_MODE__ || w.SALSABIL_GOD_MODE) return true;
-  try {
-    return window.localStorage.getItem("salsabil.dev.godMode") === "1";
-  } catch {
-    return false;
+  if (import.meta.env.DEV) {
+    if (typeof window === "undefined") return false;
+    const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
+    if (w.__SALSABIL_GOD_MODE__ || w.SALSABIL_GOD_MODE) return true;
+    try {
+      return window.localStorage.getItem("salsabil.dev.godMode") === "1";
+    } catch {
+      return false;
+    }
   }
+  return false;
 };

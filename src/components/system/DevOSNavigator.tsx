@@ -55,6 +55,7 @@ export const DevOSNavigator = () => {
   const [open, setOpen] = useState(false);
   const [nexusOpen, setNexusOpen] = useState(false);
   const [maeenDefault, setMaeenDefault] = useState<boolean>(() => {
+    if (!import.meta.env.DEV) return false;
     if (typeof window === "undefined") return false;
     if (window.localStorage.getItem(STORAGE_KEY) === "1") return true;
     // One-shot migration from legacy "khalil"/"diwan" keys.
@@ -68,16 +69,19 @@ export const DevOSNavigator = () => {
     return migrated;
   });
   const [godMode, setGodMode] = useState<boolean>(() => {
+    if (!import.meta.env.DEV) return false;
     if (typeof window === "undefined") return false;
     return window.localStorage.getItem(GOD_MODE_KEY) === "1";
   });
 
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
     if (typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, maeenDefault ? "1" : "0");
   }, [maeenDefault]);
 
   useEffect(() => {
+    if (!import.meta.env.DEV) return;
     if (typeof window === "undefined") return;
     window.localStorage.setItem(GOD_MODE_KEY, godMode ? "1" : "0");
     const w = window as unknown as { __SALSABIL_GOD_MODE__?: boolean; SALSABIL_GOD_MODE?: boolean };
