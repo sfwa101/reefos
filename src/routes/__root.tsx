@@ -149,6 +149,24 @@ function RootComponent() {
     return undefined;
   }, []);
 
+  // Phase 57 — Success Partner: capture `?ref=CODE` from the URL on first
+  // load, persist into localStorage, and clean the address bar so the link
+  // survives signup / OAuth round-trips without polluting the page state.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      const url = new URL(window.location.href);
+      const ref = url.searchParams.get("ref");
+      if (ref && /^[0-9]{6}$/.test(ref)) {
+        window.localStorage.setItem("salsabil_ref_code", ref);
+        url.searchParams.delete("ref");
+        window.history.replaceState({}, "", url.toString());
+      }
+    } catch {
+      /* noop */
+    }
+  }, []);
+
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
