@@ -100,9 +100,6 @@ const Wallet = () => {
             <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
               تيسير · المحفظة السيادية
             </p>
-            <h1 className="font-display text-[26px] font-black tracking-tight mt-0.5 text-foreground truncate">
-              أهلاً، {ownerName.split(" ")[0]}
-            </h1>
             {shortId && (
               <p className="mt-0.5 text-[11px] font-bold text-muted-foreground tabular-nums tracking-wider">
                 <span className="text-primary">ID</span> · {toLatin(shortId)}
@@ -134,9 +131,9 @@ const Wallet = () => {
               key={a.id}
               type="button"
               onClick={a.onClick}
-              className="group flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-tayseer-surface text-tayseer-cream py-3.5 shadow-md active:scale-95 transition"
+              className="group flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-secondary text-secondary-foreground hover:bg-secondary/80 py-3.5 shadow-sm ring-1 ring-border active:scale-95 transition"
             >
-              <a.icon className="h-5 w-5 text-tayseer-gold" strokeWidth={2.2} />
+              <a.icon className="h-5 w-5 text-primary" strokeWidth={2.2} />
               <span className="text-[11px] font-extrabold">{a.label}</span>
             </button>
           ))}
