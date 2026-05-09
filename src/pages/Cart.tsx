@@ -45,7 +45,8 @@ const Cart = () => {
   };
 
   const isLocked = o.isSharedMode && o.sharedCart?.status === "pending_approvals";
-  const checkoutDisabled = o.logisticsBlocked || hasPricingErrors || isLocked;
+  const paymentsHalted = !o.paymentsEnabled;
+  const checkoutDisabled = o.logisticsBlocked || hasPricingErrors || isLocked || paymentsHalted;
 
   if (o.lines.length === 0) {
     return (
