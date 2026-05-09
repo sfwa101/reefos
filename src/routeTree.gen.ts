@@ -80,6 +80,7 @@ import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as AdminCustomersRouteImport } from './routes/admin.customers'
 import { Route as AdminCrossBranchTransfersRouteImport } from './routes/admin.cross-branch-transfers'
 import { Route as AdminCostBulkRouteImport } from './routes/admin.cost-bulk'
+import { Route as AdminControlPlaneRouteImport } from './routes/admin.control-plane'
 import { Route as AdminCommissionLedgerRouteImport } from './routes/admin.commission-ledger'
 import { Route as AdminCharityRouteImport } from './routes/admin.charity'
 import { Route as AdminCfoRouteImport } from './routes/admin.cfo'
@@ -502,6 +503,11 @@ const AdminCostBulkRoute = AdminCostBulkRouteImport.update({
   path: '/cost-bulk',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminControlPlaneRoute = AdminControlPlaneRouteImport.update({
+  id: '/control-plane',
+  path: '/control-plane',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminCommissionLedgerRoute = AdminCommissionLedgerRouteImport.update({
   id: '/commission-ledger',
   path: '/commission-ledger',
@@ -862,6 +868,7 @@ export interface FileRoutesByFullPath {
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
+  '/admin/control-plane': typeof AdminControlPlaneRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -994,6 +1001,7 @@ export interface FileRoutesByTo {
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
+  '/admin/control-plane': typeof AdminControlPlaneRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -1133,6 +1141,7 @@ export interface FileRoutesById {
   '/admin/cfo': typeof AdminCfoRoute
   '/admin/charity': typeof AdminCharityRoute
   '/admin/commission-ledger': typeof AdminCommissionLedgerRoute
+  '/admin/control-plane': typeof AdminControlPlaneRoute
   '/admin/cost-bulk': typeof AdminCostBulkRoute
   '/admin/cross-branch-transfers': typeof AdminCrossBranchTransfersRoute
   '/admin/customers': typeof AdminCustomersRouteWithChildren
@@ -1273,6 +1282,7 @@ export interface FileRouteTypes {
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
+    | '/admin/control-plane'
     | '/admin/cost-bulk'
     | '/admin/cross-branch-transfers'
     | '/admin/customers'
@@ -1405,6 +1415,7 @@ export interface FileRouteTypes {
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
+    | '/admin/control-plane'
     | '/admin/cost-bulk'
     | '/admin/cross-branch-transfers'
     | '/admin/customers'
@@ -1543,6 +1554,7 @@ export interface FileRouteTypes {
     | '/admin/cfo'
     | '/admin/charity'
     | '/admin/commission-ledger'
+    | '/admin/control-plane'
     | '/admin/cost-bulk'
     | '/admin/cross-branch-transfers'
     | '/admin/customers'
@@ -2157,6 +2169,13 @@ declare module '@tanstack/react-router' {
       path: '/cost-bulk'
       fullPath: '/admin/cost-bulk'
       preLoaderRoute: typeof AdminCostBulkRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/control-plane': {
+      id: '/admin/control-plane'
+      path: '/control-plane'
+      fullPath: '/admin/control-plane'
+      preLoaderRoute: typeof AdminControlPlaneRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/commission-ledger': {
@@ -2799,6 +2818,7 @@ interface AdminRouteChildren {
   AdminCfoRoute: typeof AdminCfoRoute
   AdminCharityRoute: typeof AdminCharityRoute
   AdminCommissionLedgerRoute: typeof AdminCommissionLedgerRoute
+  AdminControlPlaneRoute: typeof AdminControlPlaneRoute
   AdminCostBulkRoute: typeof AdminCostBulkRoute
   AdminCrossBranchTransfersRoute: typeof AdminCrossBranchTransfersRoute
   AdminCustomersRoute: typeof AdminCustomersRouteWithChildren
@@ -2872,6 +2892,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminCfoRoute: AdminCfoRoute,
   AdminCharityRoute: AdminCharityRoute,
   AdminCommissionLedgerRoute: AdminCommissionLedgerRoute,
+  AdminControlPlaneRoute: AdminControlPlaneRoute,
   AdminCostBulkRoute: AdminCostBulkRoute,
   AdminCrossBranchTransfersRoute: AdminCrossBranchTransfersRoute,
   AdminCustomersRoute: AdminCustomersRouteWithChildren,
