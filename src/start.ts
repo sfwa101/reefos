@@ -31,12 +31,18 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   const headers = result.response?.headers;
   if (!headers) return result;
 
+  // Phase 47-Hotfix — In DEV (Lovable preview) we must allow iframe embedding.
+  // PROD keeps the strict clickjacking lockdown.
+  const isDev = import.meta.env.DEV;
+
   // HSTS — only meaningful over HTTPS, but harmless to set in dev.
   headers.set(
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains; preload",
   );
-  headers.set("X-Frame-Options", "DENY");
+  if (!isDev) {
+    headers.set("X-Frame-Options", "DENY");
+  }
   headers.set("X-Content-Type-Options", "nosniff");
   headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
   headers.set(
@@ -47,6 +53,9 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   // Inline scripts/styles allowed for TanStack hydration; refine to nonces
   // in a follow-up phase once SSR shell is stable.
   if (!headers.has("Content-Security-Policy")) {
+    const frameAncestors = isDev
+      ? "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev"
+      : "frame-ancestors 'none'";
     headers.set(
       "Content-Security-Policy",
       [
@@ -56,7 +65,7 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
         "font-src 'self' data: https://fonts.gstatic.com",
         "img-src 'self' data: blob: https:",
         "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app",
-        "frame-ancestors 'none'",
+        frameAncestors,
         "base-uri 'self'",
         "form-action 'self'",
         "object-src 'none'",
