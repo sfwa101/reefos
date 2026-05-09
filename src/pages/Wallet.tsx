@@ -159,12 +159,18 @@ const Wallet = () => {
         </Link>
 
         {/* MINI-APP DOCK */}
-        <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
+        <div className="grid grid-cols-5 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
           {docks.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setDock(t.id)}
+              onClick={() => {
+                if (t.id === "family") {
+                  navigate({ to: "/family" });
+                } else {
+                  setDock(t.id);
+                }
+              }}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition ${
                 dock === t.id
                   ? "bg-background text-foreground ring-1 ring-border/50 shadow-sm"
