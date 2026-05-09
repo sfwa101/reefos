@@ -125,7 +125,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
       active = false;
       void supabase.removeChannel(ch);
     };
-  }, [userId]);
+  }, [userId, activeWorkspaceId]);
 
   const top = insights[0];
   const highSeverity = insights.some(
