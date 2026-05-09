@@ -118,6 +118,7 @@ import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.l
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
+import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
@@ -696,6 +697,11 @@ const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminEntityRoute,
 } as any)
+const PosPosInventoryRoute = PosPosInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => PosPosRoute,
+} as any)
 const AppSubSlugRoute = AppSubSlugRouteImport.update({
   id: '/sub/$slug',
   path: '/sub/$slug',
@@ -863,7 +869,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
-  '/pos': typeof PosPosRoute
+  '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -974,6 +980,7 @@ export interface FileRoutesByFullPath {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/inventory': typeof PosPosInventoryRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -998,7 +1005,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
-  '/pos': typeof PosPosRoute
+  '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1109,6 +1116,7 @@ export interface FileRoutesByTo {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/inventory': typeof PosPosInventoryRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1139,7 +1147,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
-  '/_pos/pos': typeof PosPosRoute
+  '/_pos/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1251,6 +1259,7 @@ export interface FileRoutesById {
   '/_app/store/village': typeof AppStoreVillageRoute
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
+  '/_pos/pos/inventory': typeof PosPosInventoryRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1392,6 +1401,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/inventory'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1527,6 +1537,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/inventory'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1668,6 +1679,7 @@ export interface FileRouteTypes {
     | '/_app/store/village'
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
+    | '/_pos/pos/inventory'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -2456,6 +2468,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntityIdRouteImport
       parentRoute: typeof AdminEntityRoute
     }
+    '/_pos/pos/inventory': {
+      id: '/_pos/pos/inventory'
+      path: '/inventory'
+      fullPath: '/pos/inventory'
+      preLoaderRoute: typeof PosPosInventoryRouteImport
+      parentRoute: typeof PosPosRoute
+    }
     '/_app/sub/$slug': {
       id: '/_app/sub/$slug'
       path: '/sub/$slug'
@@ -2769,12 +2788,23 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PosPosRouteChildren {
+  PosPosInventoryRoute: typeof PosPosInventoryRoute
+}
+
+const PosPosRouteChildren: PosPosRouteChildren = {
+  PosPosInventoryRoute: PosPosInventoryRoute,
+}
+
+const PosPosRouteWithChildren =
+  PosPosRoute._addFileChildren(PosPosRouteChildren)
+
 interface PosRouteChildren {
-  PosPosRoute: typeof PosPosRoute
+  PosPosRoute: typeof PosPosRouteWithChildren
 }
 
 const PosRouteChildren: PosRouteChildren = {
-  PosPosRoute: PosPosRoute,
+  PosPosRoute: PosPosRouteWithChildren,
 }
 
 const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
