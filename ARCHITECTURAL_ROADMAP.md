@@ -2074,3 +2074,62 @@ demolishes the rigid KYC wall in favor of progressive disclosure.
 - Law 4 (Cognitive UI): hard wall replaced with progressive token-driven advisory.
 - Law 6 (Zero-Trust): every wallet write still funnels through one
   `SECURITY DEFINER` RPC; RLS on `wallets`/`ledger_entries` blocks direct writes.
+
+---
+
+## Phase 53 — Sovereign POS Workspace & Ledger Integration (Sealed)
+
+The Phase 17 POS engine has been promoted to a Sovereign Operator
+Workspace. Walk-in cash sales now flow through the same sovereign order
+pipeline as e-commerce (Phase 51/52), so every till receipt becomes a
+real `salsabil_master_orders` row visible in the Phase 48 Business Ops
+Dashboard. Constitutional law alignment: Law 1 (Sovereign Order Pipeline),
+Law 2 (Stem-Cell ledger reuse), Law 4 (Cognitive UI for operators),
+Law 6 (Zero-Trust SECURITY DEFINER settlement).
+
+### Layout — `src/routes/_pos.tsx`
+- High-density, RTL operator shell. Permanent top-bar shows Active Shift
+  status, Cashier identity, network state, and Ground-Sync queue depth.
+- Icon-only sidebar (`w-14`) with four operator surfaces: Sales (`/pos`),
+  Inventory (`/pos/inventory`), Returns (`/pos/returns`), Close Shift
+  (`/pos/close-shift`).
+- Children: `_pos.pos.tsx` (sales index), `_pos.pos.inventory.tsx`,
+  `_pos.pos.returns.tsx`, `_pos.pos.close-shift.tsx`. The legacy flat
+  `pos.tsx` route was removed to avoid a `/pos` collision.
+
+### Ledger wiring
+- New SECURITY DEFINER RPC `process_pos_cash_payment(order_id, amount)`:
+  authorises caller via `has_role(cashier|branch_manager|admin)`, posts a
+  balanced double-entry pair `Cash Drawer (+X) / Treasury (−X)` into
+  `ledger_entries`, then marks the order paid + auto-promotes
+  `pending → confirmed`. EXECUTE granted to `authenticated` only.
+- New reserved system wallet seeded: `…000888 — Branch Cash Drawer (EGP)`
+  (placeholder owner `…000888` to satisfy `(user_id, currency)` uniqueness).
+- `usePosEngine.checkout` refactored: idempotent
+  `process_checkout_sovereign` → `process_pos_cash_payment` →
+  best-effort `pos_shifts` counters. Sales now persist to the sovereign
+  ledger; `pos_shifts` becomes operator accountability only.
+
+### Ground-Sync (Phase 49) integration
+- If `navigator.onLine === false` the checkout enqueues
+  `process_checkout_sovereign` via `enqueueOfflineMutation`, clears the
+  cart immediately, and toasts "حُفظ بدون اتصال" — the next customer is
+  served without delay.
+- If the online RPC throws a network-class error (`isLikelyNetworkError`),
+  the same fast-path engages. If only the settlement leg fails offline,
+  the cash RPC is queued and the operator is warned.
+- The layout polls `offlineQueueSize()` every 5 s and auto-drains via
+  `processQueue()` on the `online` event, surfacing pending count in the
+  HUD.
+
+### Verification
+- Sovereign visibility: a successful POS sale produces a master order
+  with `payment_status='paid'`, status `confirmed`, and a balanced
+  ledger group — the Phase 48 dashboard, Phase 51 ledger view, and Phase
+  47 anomaly detector all see it without further wiring.
+- Atomicity: cash settlement is a single SECURITY DEFINER transaction
+  with row lock on the order; the existing
+  `assert_ledger_group_balanced` trigger blocks unbalanced groups.
+- Operator UX: Dense DNA (12px HUD, 14px sidebar icons, mono numerics,
+  no chrome). Cart clears on the same frame as the toast — no blocking
+  spinner between customers.
