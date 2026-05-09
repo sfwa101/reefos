@@ -9,6 +9,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { tenantQueryKey } from "@/lib/tenantScope";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
 // Generic category fallback (Meat, Sweets, Pharmacy, Home Goods, etc.)
