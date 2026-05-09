@@ -33,6 +33,13 @@ export default function POSPage() {
   return (
     <div className="bg-background pb-6" dir="rtl">
       <main className="max-w-5xl mx-auto px-4 pt-3">
+        <header className="flex items-center justify-between mb-2 px-1">
+          <div className="flex items-center gap-2">
+            <Store className="h-4 w-4 text-primary" />
+            <h1 className="font-display text-[15px]">نقطة البيع</h1>
+          </div>
+          <PosSyncPill online={e.online} />
+        </header>
         <PosShiftManager
           shift={e.shift}
           loading={e.shiftLoading}
