@@ -81,21 +81,30 @@ export function useSduiLayout(slug: string): State {
     [],
   );
 
+  // Phase 38 — Sovereign Control Plane kill switch. When AI orchestration is
+  // disabled, skip the generative overlay entirely and serve the static SDUI.
+  const { value: aiOrchestrationEnabled } = useSystemSetting<boolean>(
+    "ai_orchestration_enabled",
+    true,
+  );
+
   const blocks = useMemo<SduiBlock[]>(() => {
     if (!query.data) return [];
-    // 1. Try the augmented payload first.
-    try {
-      const augmented = HakimGenerativeOverlay.applyToLayout(query.data, slug);
-      const parsed = parseBlocks(augmented);
-      if (parsed.length > 0) return parsed;
-    } catch {
-      /* fall through to stable layout */
+    // 1. Try the augmented payload first (only when AI is enabled).
+    if (aiOrchestrationEnabled) {
+      try {
+        const augmented = HakimGenerativeOverlay.applyToLayout(query.data, slug);
+        const parsed = parseBlocks(augmented);
+        if (parsed.length > 0) return parsed;
+      } catch {
+        /* fall through to stable layout */
+      }
     }
     // 2. Fallback: original payload (Zod safety guarantee).
     return parseBlocks(query.data);
     // overlayTick triggers recompute when intent scores change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query.data, slug, overlayTick]);
+  }, [query.data, slug, overlayTick, aiOrchestrationEnabled]);
 
   return {
     blocks,
