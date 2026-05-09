@@ -127,38 +127,36 @@ const Wallet = () => {
           ownerName={ownerName}
         />
 
-        {/* QUICK ACTION HUD — 4 large circular buttons */}
-        <div className="grid grid-cols-4 gap-3">
+        {/* QUICK ACTION HUD — 4 large rounded sovereign buttons */}
+        <div className="grid grid-cols-4 gap-2.5">
           {actions.map((a) => (
             <button
               key={a.id}
               type="button"
               onClick={a.onClick}
-              className="group flex flex-col items-center gap-1.5 active:scale-95 transition"
+              className="group flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-tayseer-surface text-tayseer-cream py-3.5 shadow-md active:scale-95 transition"
             >
-              <span className="grid place-items-center h-14 w-14 rounded-full bg-card text-primary ring-1 ring-border/60 shadow-md group-active:bg-primary group-active:text-primary-foreground transition">
-                <a.icon className="h-5 w-5" strokeWidth={2.2} />
-              </span>
-              <span className="text-[11px] font-extrabold text-foreground/80">{a.label}</span>
+              <a.icon className="h-5 w-5 text-tayseer-gold" strokeWidth={2.2} />
+              <span className="text-[11px] font-extrabold">{a.label}</span>
             </button>
           ))}
         </div>
 
-        {/* AFFILIATE PROMOTION — link to sovereign /affiliate route */}
+        {/* AFFILIATE PROMOTION — sovereign tokenized banner */}
         <Link
           to="/affiliate"
-          className="flex items-center justify-between rounded-2xl bg-card text-card-foreground p-3 ring-1 ring-border/50 shadow-sm active:scale-[0.99] transition"
+          className="flex items-center justify-between rounded-2xl bg-tayseer-surface text-tayseer-cream p-3 shadow-sm active:scale-[0.99] transition"
         >
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-amber-500/10 text-amber-500">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-tayseer-gold/15 text-tayseer-gold">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>
               <p className="text-[12.5px] font-extrabold">برنامج الإحالة السيادي</p>
-              <p className="text-[10.5px] text-muted-foreground">اربح عمولة على كل دعوة ناجحة</p>
+              <p className="text-[10.5px] text-tayseer-cream/70">اربح عمولة على كل دعوة ناجحة</p>
             </div>
           </div>
-          <span className="text-[11px] font-bold text-primary">افتح ←</span>
+          <span className="text-[11px] font-bold text-tayseer-gold">افتح ←</span>
         </Link>
 
         {/* MINI-APP DOCK */}
