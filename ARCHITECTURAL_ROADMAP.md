@@ -2490,3 +2490,41 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
 - `rg "emerald|rose-[0-9]|amber-[0-9]" src/core-os/finance/ src/pages/Wallet.tsx src/routes/_app/wallet.tsx` → 0 matches.
 - `useWalletTransactions` references only `wallets` + `ledger_entries`. Comment is the only `wallet_transactions` mention.
 - Customer wallet now sees Treasury writes (commissions, settlements) on the same surface as their P2P transfers — single source of truth restored.
+
+---
+
+## Phase 62 — Family OS Activation & Sovereign Hub UI
+
+### Action 1 · Wire Spending Limits into Payment Engine
+- Updated `public.process_tayseer_payment(p_order_id, p_amount)` to invoke
+  `PERFORM public.check_wallet_limit(v_wallet.id, p_amount)` immediately after the
+  wallet row is `FOR UPDATE`-locked and before the available-funds check.
+- Daily/weekly/monthly caps now atomically gate every Tayseer debit. Exceeding a
+  cap raises `limit_exceeded:<period>:<max>:<spent>` (ERRCODE `check_violation`).
+- Added a friendly Arabic mapping in `useTayseerRapidPay.ts`:
+  `"عذراً، لقد تجاوزت حد الإنفاق المسموح به."`
+
+### Action 2 · Family Hub Page (`/family`)
+- New route `src/routes/_app/family.tsx` lazy-loads `src/pages/FamilyHub.tsx`.
+- Onboarding state: if the user has no `tayseer_family_members` row, the page
+  surfaces a sovereign card to create a new `tayseer_family_groups` (the
+  `trg_tayseer_family_bootstrap` trigger auto-promotes the creator to `head`).
+- Family Roster: shows every `tayseer_family_members` row enriched with
+  `profiles.full_name/short_id` and the user's EGP `wallets.id`.
+- Limit Controller: `head`/`admin` roles see a `Settings2` action per dependent
+  that opens an `EditLimitDialog` upserting `tayseer_wallet_limits` with
+  `onConflict: "wallet_id,period"`.
+- Shared Vaults: grid of `tayseer_shared_vaults` for the active group with
+  progress bars (`current_balance / target_amount`) and a stub Contribute CTA.
+
+### Action 3 · Wallet Dock Integration
+- `src/pages/Wallet.tsx` extended `DockKey` to include `"family"` and grew the
+  dock from `grid-cols-4` → `grid-cols-5`. Tapping "الأسرة" navigates to
+  `/family` (the dock cell never enters its `dock` state, preserving existing
+  ops/gameyas/vaults/insights wiring).
+
+### Verification
+- All UI built on semantic tokens (`bg-card`, `text-foreground`, `bg-primary/10`,
+  `ring-border`). No hex literals, no `dark:` overrides.
+- Migration applied; only pre-existing linter warnings remain (no new findings
+  attributable to Phase 62).
