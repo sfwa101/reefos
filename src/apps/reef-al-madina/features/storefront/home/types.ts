@@ -40,6 +40,11 @@ export type HGProduct = {
   tagline: string;
   badges: string[];
   warranty?: string;
+  /** Phase 54 — Inventory Triage. */
+  stock?: number;
+  wakalahEligible?: boolean;
+  hideOnZero?: boolean;
+  lowStockThreshold?: number;
 };
 
 export type Bundle = {
