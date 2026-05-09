@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Sparkles, TrendingUp, Wallet, Users } from "lucide-react";
+import { Copy, Check, Sparkles, TrendingUp, Wallet, Users, Share2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
