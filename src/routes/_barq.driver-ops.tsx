@@ -13,7 +13,7 @@ import { ActiveTasksFeed } from "@/apps/reef-al-madina/features/driver/component
 import { DriverEarningsBar } from "@/apps/reef-al-madina/features/driver/components/DriverEarningsBar";
 import { DriverSurgeBanner } from "@/apps/reef-al-madina/features/driver/components/DriverSurgeBanner";
 
-export const Route = createFileRoute("/_driver/driver-ops")({
+export const Route = createFileRoute("/_barq/driver-ops")({
   component: DriverOpsPage,
 });
 

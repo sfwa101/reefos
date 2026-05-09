@@ -16,8 +16,8 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PosRouteImport } from './routes/_pos'
 import { Route as KdsRouteImport } from './routes/_kds'
-import { Route as DriverRouteImport } from './routes/_driver'
 import { Route as DispatchRouteImport } from './routes/_dispatch'
+import { Route as BarqRouteImport } from './routes/_barq'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
@@ -102,8 +102,8 @@ import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advanc
 import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
 import { Route as PosPosRouteImport } from './routes/_pos.pos'
 import { Route as KdsKdsRouteImport } from './routes/_kds.kds'
-import { Route as DriverDriverOpsRouteImport } from './routes/_driver.driver-ops'
 import { Route as DispatchDispatchRouteImport } from './routes/_dispatch.dispatch'
+import { Route as BarqDriverOpsRouteImport } from './routes/_barq.driver-ops'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -191,12 +191,12 @@ const KdsRoute = KdsRouteImport.update({
   id: '/_kds',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DriverRoute = DriverRouteImport.update({
-  id: '/_driver',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const DispatchRoute = DispatchRouteImport.update({
   id: '/_dispatch',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BarqRoute = BarqRouteImport.update({
+  id: '/_barq',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -620,15 +620,15 @@ const KdsKdsRoute = KdsKdsRouteImport.update({
   path: '/kds',
   getParentRoute: () => KdsRoute,
 } as any)
-const DriverDriverOpsRoute = DriverDriverOpsRouteImport.update({
-  id: '/driver-ops',
-  path: '/driver-ops',
-  getParentRoute: () => DriverRoute,
-} as any)
 const DispatchDispatchRoute = DispatchDispatchRouteImport.update({
   id: '/dispatch',
   path: '/dispatch',
   getParentRoute: () => DispatchRoute,
+} as any)
+const BarqDriverOpsRoute = BarqDriverOpsRouteImport.update({
+  id: '/driver-ops',
+  path: '/driver-ops',
+  getParentRoute: () => BarqRoute,
 } as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
@@ -914,8 +914,8 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/driver-ops': typeof BarqDriverOpsRoute
   '/dispatch': typeof DispatchDispatchRoute
-  '/driver-ops': typeof DriverDriverOpsRoute
   '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1055,8 +1055,8 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/driver-ops': typeof BarqDriverOpsRoute
   '/dispatch': typeof DispatchDispatchRoute
-  '/driver-ops': typeof DriverDriverOpsRoute
   '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1187,8 +1187,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_barq': typeof BarqRouteWithChildren
   '/_dispatch': typeof DispatchRouteWithChildren
-  '/_driver': typeof DriverRouteWithChildren
   '/_kds': typeof KdsRouteWithChildren
   '/_pos': typeof PosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
@@ -1205,8 +1205,8 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/_barq/driver-ops': typeof BarqDriverOpsRoute
   '/_dispatch/dispatch': typeof DispatchDispatchRoute
-  '/_driver/driver-ops': typeof DriverDriverOpsRoute
   '/_kds/kds': typeof KdsKdsRoute
   '/_pos/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1353,8 +1353,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
-    | '/dispatch'
     | '/driver-ops'
+    | '/dispatch'
     | '/kds'
     | '/pos'
     | '/admin/$entity'
@@ -1494,8 +1494,8 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
-    | '/dispatch'
     | '/driver-ops'
+    | '/dispatch'
     | '/kds'
     | '/pos'
     | '/admin/$entity'
@@ -1625,8 +1625,8 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_barq'
     | '/_dispatch'
-    | '/_driver'
     | '/_kds'
     | '/_pos'
     | '/admin'
@@ -1643,8 +1643,8 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/_barq/driver-ops'
     | '/_dispatch/dispatch'
-    | '/_driver/driver-ops'
     | '/_kds/kds'
     | '/_pos/pos'
     | '/admin/$entity'
@@ -1776,8 +1776,8 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  BarqRoute: typeof BarqRouteWithChildren
   DispatchRoute: typeof DispatchRouteWithChildren
-  DriverRoute: typeof DriverRouteWithChildren
   KdsRoute: typeof KdsRouteWithChildren
   PosRoute: typeof PosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
@@ -1838,18 +1838,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KdsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_driver': {
-      id: '/_driver'
-      path: ''
-      fullPath: '/'
-      preLoaderRoute: typeof DriverRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/_dispatch': {
       id: '/_dispatch'
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof DispatchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_barq': {
+      id: '/_barq'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof BarqRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -2440,19 +2440,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KdsKdsRouteImport
       parentRoute: typeof KdsRoute
     }
-    '/_driver/driver-ops': {
-      id: '/_driver/driver-ops'
-      path: '/driver-ops'
-      fullPath: '/driver-ops'
-      preLoaderRoute: typeof DriverDriverOpsRouteImport
-      parentRoute: typeof DriverRoute
-    }
     '/_dispatch/dispatch': {
       id: '/_dispatch/dispatch'
       path: '/dispatch'
       fullPath: '/dispatch'
       preLoaderRoute: typeof DispatchDispatchRouteImport
       parentRoute: typeof DispatchRoute
+    }
+    '/_barq/driver-ops': {
+      id: '/_barq/driver-ops'
+      path: '/driver-ops'
+      fullPath: '/driver-ops'
+      preLoaderRoute: typeof BarqDriverOpsRouteImport
+      parentRoute: typeof BarqRoute
     }
     '/_app/wallet': {
       id: '/_app/wallet'
@@ -2928,6 +2928,16 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface BarqRouteChildren {
+  BarqDriverOpsRoute: typeof BarqDriverOpsRoute
+}
+
+const BarqRouteChildren: BarqRouteChildren = {
+  BarqDriverOpsRoute: BarqDriverOpsRoute,
+}
+
+const BarqRouteWithChildren = BarqRoute._addFileChildren(BarqRouteChildren)
+
 interface DispatchRouteChildren {
   DispatchDispatchRoute: typeof DispatchDispatchRoute
 }
@@ -2939,17 +2949,6 @@ const DispatchRouteChildren: DispatchRouteChildren = {
 const DispatchRouteWithChildren = DispatchRoute._addFileChildren(
   DispatchRouteChildren,
 )
-
-interface DriverRouteChildren {
-  DriverDriverOpsRoute: typeof DriverDriverOpsRoute
-}
-
-const DriverRouteChildren: DriverRouteChildren = {
-  DriverDriverOpsRoute: DriverDriverOpsRoute,
-}
-
-const DriverRouteWithChildren =
-  DriverRoute._addFileChildren(DriverRouteChildren)
 
 interface KdsRouteChildren {
   KdsKdsRoute: typeof KdsKdsRoute
@@ -3244,8 +3243,8 @@ const VendorRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  BarqRoute: BarqRouteWithChildren,
   DispatchRoute: DispatchRouteWithChildren,
-  DriverRoute: DriverRouteWithChildren,
   KdsRoute: KdsRouteWithChildren,
   PosRoute: PosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
@@ -3257,3 +3256,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
