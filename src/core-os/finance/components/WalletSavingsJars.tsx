@@ -135,7 +135,7 @@ export const SavingsJarDialog = ({
     const { error } = await supabase.rpc("process_savings_jar_op", {
       p_amount: args.amount ?? 0,
       p_kind: kind,
-      p_label: args.label ?? null,
+      p_label: args.label ?? kind,
       p_idempotency_key: idem,
       p_settings: (args.settings ?? null) as never,
     });
