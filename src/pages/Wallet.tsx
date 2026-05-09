@@ -142,18 +142,18 @@ const Wallet = () => {
         {/* AFFILIATE PROMOTION — sovereign tokenized banner */}
         <Link
           to="/affiliate"
-          className="flex items-center justify-between rounded-2xl bg-tayseer-surface text-tayseer-cream p-3 shadow-sm active:scale-[0.99] transition"
+          className="flex items-center justify-between rounded-2xl bg-card text-card-foreground p-3 shadow-sm ring-1 ring-border active:scale-[0.99] transition"
         >
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-tayseer-gold/15 text-tayseer-gold">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary/10 text-primary">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>
               <p className="text-[12.5px] font-extrabold">برنامج الإحالة السيادي</p>
-              <p className="text-[10.5px] text-tayseer-cream/70">اربح عمولة على كل دعوة ناجحة</p>
+              <p className="text-[10.5px] text-muted-foreground">اربح عمولة على كل دعوة ناجحة</p>
             </div>
           </div>
-          <span className="text-[11px] font-bold text-tayseer-gold">افتح ←</span>
+          <span className="text-[11px] font-bold text-primary">افتح ←</span>
         </Link>
 
         {/* MINI-APP DOCK */}
