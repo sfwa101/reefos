@@ -66,5 +66,9 @@ export const productToHGView = (p: Product): HGProduct => {
     tagline: meta.tagline ?? "",
     badges: meta.badges ?? [],
     warranty: meta.warranty,
+    stock: p.stock,
+    wakalahEligible: p.wakalahEligible,
+    hideOnZero: p.hideOnZero,
+    lowStockThreshold: p.lowStockThreshold,
   };
 };
