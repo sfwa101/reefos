@@ -1,10 +1,11 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Package, Clock, Home, Copy, ExternalLink } from "lucide-react";
+import { Check, Package, Clock, Home, Copy, ExternalLink, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
+import { supabase } from "@/integrations/supabase/client";
 
 type StoredWaFallback = {
   phone: string;
@@ -32,6 +33,33 @@ const OrderSuccess = () => {
       console.warn("[checkout] failed to read WhatsApp fallback", e);
     }
   }, []);
+
+  // Phase 58 — Walk-in / pickup OTP for this customer's order
+  const [pickupOtp, setPickupOtp] = useState<string | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("salsabil_fulfillment_nodes")
+        .select("id, delivery_snapshot")
+        .eq("master_order_id", id)
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      const snap = (data.delivery_snapshot ?? {}) as { handover?: { otp?: string } };
+      if (snap.handover?.otp) {
+        setPickupOtp(snap.handover.otp);
+        return;
+      }
+      // Fallback to RPC if RLS hides snapshot
+      const { data: otp } = await supabase.rpc("get_handover_otp", {
+        p_node_id: data.id as string,
+      });
+      if (!cancelled && typeof otp === "string") setPickupOtp(otp);
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
 
   const copySummary = async () => {
     if (!waFallback?.text) return;
@@ -88,6 +116,25 @@ const OrderSuccess = () => {
           </div>
         )}
       </div>
+
+      {pickupOtp && (
+        <div className="w-full max-w-sm rounded-2xl border border-primary/30 bg-primary/5 p-4 ring-1 ring-primary/20 text-start shadow-soft">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+              <KeyRound className="h-5 w-5" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-bold text-muted-foreground">رمز الاستلام (OTP)</p>
+              <p className="font-mono font-extrabold text-[26px] tracking-[0.4em] text-primary tabular-nums" dir="ltr">
+                {pickupOtp}
+              </p>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-2">
+            اعرض هذا الرمز للمندوب أو محطة التسليم لتأكيد استلام الطلب.
+          </p>
+        </div>
+      )}
 
       {waFallback && (
         <div className="w-full max-w-sm space-y-3 rounded-2xl border border-border bg-card p-4 text-start shadow-soft">

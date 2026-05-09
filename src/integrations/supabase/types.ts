@@ -4458,6 +4458,7 @@ export type Database = {
           short_id: string | null
           theme_preference: string | null
           updated_at: string
+          vehicle_dna: Json
         }
         Insert: {
           avatar_key?: string | null
@@ -4493,6 +4494,7 @@ export type Database = {
           short_id?: string | null
           theme_preference?: string | null
           updated_at?: string
+          vehicle_dna?: Json
         }
         Update: {
           avatar_key?: string | null
@@ -4528,6 +4530,7 @@ export type Database = {
           short_id?: string | null
           theme_preference?: string | null
           updated_at?: string
+          vehicle_dna?: Json
         }
         Relationships: [
           {
@@ -8442,6 +8445,7 @@ export type Database = {
         Returns: boolean
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
+      get_handover_otp: { Args: { p_node_id: string }; Returns: string }
       get_sovereign_logistics_quote: {
         Args: {
           p_cart_total: number
@@ -8509,6 +8513,7 @@ export type Database = {
         Args: { _role?: string; _user_id: string; _vendor_id: string }
         Returns: boolean
       }
+      issue_handover_otp: { Args: { p_node_id: string }; Returns: string }
       join_gam_eya: {
         Args: {
           _circle_id: string
