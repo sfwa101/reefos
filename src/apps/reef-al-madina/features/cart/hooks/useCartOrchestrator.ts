@@ -436,6 +436,41 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
         if (savedOrderId) {
           await allocateOrderInventory(savedOrderId, zone.id);
+
+          // Phase 52 — Tayseer Rapid Pay settlement. If the customer chose
+          // the wallet method, atomically settle the order against the
+          // canonical Tayseer ledger (balance + credit_limit). The cart UI
+          // waits for this RPC before declaring success, so the order's
+          // payment_status flips to 'paid' inside the same user action.
+          if (payment === "wallet" && walletApplied > 0) {
+            try {
+              await callTayseerPayment({
+                order_id: savedOrderId,
+                amount: walletApplied,
+              });
+              toast.success("تم الدفع بنجاح من محفظة تيسير");
+              void logSovereignEvent({
+                trace_id: traceId,
+                event_domain: "wallet",
+                event_type: "tayseer_payment_success",
+                payload: { order_id: savedOrderId, amount: walletApplied },
+              });
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "فشل الدفع من محفظة تيسير";
+              console.error("[checkout] process_tayseer_payment failed", e);
+              void logSovereignEvent({
+                trace_id: traceId,
+                event_domain: "wallet",
+                event_type: "tayseer_payment_failed",
+                payload: { order_id: savedOrderId, amount: walletApplied, message: msg },
+              });
+              toast.error(msg);
+              setSubmitting(false);
+              submittingRef.current = false;
+              return;
+            }
+          }
+
           void logSovereignEvent({
             trace_id: traceId,
             event_domain: "checkout",
