@@ -81,7 +81,7 @@ export const WalletCharityHub = ({
       <motion.div
         initial={{ opacity: 0, y: 8 }}
         animate={{ opacity: 1, y: 0 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-debit/15 via-primary/10 to-premium/15 p-4 ring-1 ring-debit/25"
+        className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500/15 via-primary/10 to-amber-500/15 p-4 ring-1 ring-rose-500/25"
       >
         <div className="flex items-start gap-3">
           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-debit to-debit text-primary-foreground shadow-lg">
@@ -105,7 +105,7 @@ export const WalletCharityHub = ({
               onClick={() =>
                 donate.mutate({ campaignId: null, amount: p, source: "general_pool" })
               }
-              className="rounded-full bg-card px-3 py-1.5 text-[11px] font-extrabold ring-1 ring-debit/25 transition hover:bg-debit/10 disabled:opacity-50"
+              className="rounded-full bg-card px-3 py-1.5 text-[11px] font-extrabold ring-1 ring-rose-500/25 transition hover:bg-rose-500/10 disabled:opacity-50"
             >
               {toLatin(p)} ج.م
             </button>
@@ -147,7 +147,7 @@ export const WalletCharityHub = ({
                   }}
                   className="flex w-full items-stretch gap-3 rounded-2xl bg-card p-3 text-right shadow-[0_2px_10px_-6px_rgba(0,0,0,0.08)] ring-1 ring-border/40 transition hover:ring-primary/30"
                 >
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/15 to-debit/15">
+                  <div className="flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-primary/15 to-rose-500/15">
                     {c.cover_url ? (
                       <img
                         src={c.cover_url}
@@ -155,7 +155,7 @@ export const WalletCharityHub = ({
                         className="h-full w-full object-cover"
                       />
                     ) : (
-                      <Heart className="h-6 w-6 text-debit" />
+                      <Heart className="h-6 w-6 text-rose-500" />
                     )}
                   </div>
                   <div className="flex-1 min-w-0">

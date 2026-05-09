@@ -76,8 +76,8 @@ export const GameyaDetailsSheet = ({
           <span
             className={`rounded-full px-2.5 py-1 text-[10px] font-extrabold ${
               circle.status === "active"
-                ? "bg-credit/15 text-credit"
-                : "bg-warn/15 text-warn"
+                ? "bg-emerald-500/15 text-emerald-500"
+                : "bg-amber-500/15 text-amber-500"
             }`}
           >
             {circle.status === "active" ? "نشطة" : "بانتظار الاكتمال"}
@@ -138,7 +138,7 @@ export const GameyaDetailsSheet = ({
                         isCurrent
                           ? "bg-primary text-primary-foreground"
                           : isPast
-                            ? "bg-credit/20 text-credit"
+                            ? "bg-emerald-500/20 text-emerald-500"
                             : "bg-foreground/5 text-foreground"
                       }`}
                     >
@@ -153,7 +153,7 @@ export const GameyaDetailsSheet = ({
                           </span>
                         )}
                         {m.is_trusted && (
-                          <ShieldCheck className="h-3 w-3 text-credit" />
+                          <ShieldCheck className="h-3 w-3 text-emerald-500" />
                         )}
                       </p>
                       <p className="text-[10px] text-muted-foreground">
@@ -165,7 +165,7 @@ export const GameyaDetailsSheet = ({
                       </p>
                     </div>
                     {isCurrent && (
-                      <Crown className="h-4 w-4 shrink-0 text-premium" />
+                      <Crown className="h-4 w-4 shrink-0 text-amber-500" />
                     )}
                     {!isPast && !isCurrent && (
                       <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />

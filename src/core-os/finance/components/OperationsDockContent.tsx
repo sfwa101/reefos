@@ -19,7 +19,7 @@ import { useWalletTransactions, type WalletTxn } from "../hooks/useWalletTransac
  * (اليوم / أمس / dd MMM yyyy). 100% theme-token driven.
  *
  * Visual rules:
- *  - Positive amounts: text-credit + leading + sign.
+ *  - Positive amounts: text-emerald-500 + leading + sign.
  *  - Negative / debit:  text-foreground + leading − sign.
  *  - Each row uses bg-card / ring-border / text-foreground.
  */
@@ -95,11 +95,11 @@ const iconForTxn = (t: WalletTxn): { Icon: LucideIcon; tone: "in" | "out" | "sho
 };
 
 const toneClasses: Record<string, string> = {
-  in: "bg-credit/10 text-credit",
+  in: "bg-emerald-500/10 text-emerald-500",
   out: "bg-muted text-foreground",
   shop: "bg-primary/10 text-primary",
   circle: "bg-primary/10 text-primary",
-  reward: "bg-premium/10 text-premium",
+  reward: "bg-amber-500/10 text-amber-500",
 };
 
 const TxnRow = ({ txn }: { txn: WalletTxn }) => {
@@ -127,7 +127,7 @@ const TxnRow = ({ txn }: { txn: WalletTxn }) => {
       </div>
       <span
         className={`font-display text-sm font-black tabular-nums ${
-          positive ? "text-credit" : "text-foreground"
+          positive ? "text-emerald-500" : "text-foreground"
         }`}
       >
         {positive ? "+" : "−"}

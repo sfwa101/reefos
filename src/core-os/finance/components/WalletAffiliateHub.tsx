@@ -142,7 +142,7 @@ export const WalletAffiliateHub = ({
               </div>
             </div>
             {unlocksWholesale && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-premium/15 px-2 py-0.5 text-[10px] font-extrabold text-premium ring-1 ring-premium/30">
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-extrabold text-amber-500 ring-1 ring-amber-500/30">
                 <Sparkles className="h-3 w-3" /> أسعار جملة
               </span>
             )}
@@ -156,7 +156,7 @@ export const WalletAffiliateHub = ({
                 <span className="text-primary">
                   {toLatin(invitesToNext)} متبقية لـ {nextTier.name}
                   {nextTier.unlocks_wholesale && !unlocksWholesale && (
-                    <span className="ms-1 inline-flex items-center gap-0.5 text-premium">
+                    <span className="ms-1 inline-flex items-center gap-0.5 text-amber-500">
                       <Lock className="h-2.5 w-2.5" /> جملة
                     </span>
                   )}

@@ -150,7 +150,7 @@ const Wallet = () => {
           className="flex items-center justify-between rounded-2xl bg-card text-card-foreground p-3 ring-1 ring-border/50 shadow-sm active:scale-[0.99] transition"
         >
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-premium/10 text-premium">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-amber-500/10 text-amber-500">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>

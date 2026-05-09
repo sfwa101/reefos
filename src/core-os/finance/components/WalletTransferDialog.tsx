@@ -129,20 +129,20 @@ export const WalletTransferDialog = ({
 
         {/* KYC advisory — soft, non-blocking. Sovereign Override bypasses entirely. */}
         {showKycWall && (
-          <div className="mb-4 rounded-2xl bg-warn/10 p-4 ring-1 ring-warn/30">
+          <div className="mb-4 rounded-2xl bg-amber-500/10 p-4 ring-1 ring-amber-500/30">
             <div className="mb-2 flex items-center gap-2">
-              <Lock className="h-4 w-4 text-warn" />
-              <h3 className="text-sm font-extrabold text-warn">
+              <Lock className="h-4 w-4 text-amber-500" />
+              <h3 className="text-sm font-extrabold text-amber-500">
                 التحويل يتطلب توثيق الحساب
               </h3>
             </div>
-            <p className="mb-3 text-[11px] leading-relaxed text-warn/90">
+            <p className="mb-3 text-[11px] leading-relaxed text-amber-500/90">
               لحماية المستخدمين، يُفضَّل توثيق هويتك (KYC) قبل إجراء أي تحويل بين المحافظ.
             </p>
             <Link
               to="/account/settings"
               onClick={onClose}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-warn px-3 py-2 text-xs font-extrabold text-background shadow-pill active:scale-95"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-amber-500 px-3 py-2 text-xs font-extrabold text-background shadow-pill active:scale-95"
             >
               <ShieldCheck className="h-3.5 w-3.5" />
               توثيق الحساب الآن
@@ -249,8 +249,8 @@ export const WalletTransferDialog = ({
             )}
           </div>
 
-          <div className="mb-4 rounded-xl bg-warn/10 p-2.5 ring-1 ring-warn/20">
-            <p className="text-[10px] font-bold leading-relaxed text-warn">
+          <div className="mb-4 rounded-xl bg-amber-500/10 p-2.5 ring-1 ring-amber-500/20">
+            <p className="text-[10px] font-bold leading-relaxed text-amber-500">
               ⚠️ التحويل فوري ولا يمكن إلغاؤه. تأكد من رقم المستلم.
             </p>
           </div>
