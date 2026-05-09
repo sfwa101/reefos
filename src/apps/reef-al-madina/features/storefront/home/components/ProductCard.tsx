@@ -118,6 +118,8 @@ export const ProductCard = ({
     toast.success(inCompare ? "أُزيل من المقارنة" : "أُضيف للمقارنة");
   };
 
+  if (isHidden) return null;
+
   if (variant === "minimal") {
     return (
       <article
