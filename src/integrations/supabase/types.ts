@@ -7704,6 +7704,7 @@ export type Database = {
         Row: {
           balance: number
           created_at: string
+          credit_limit: number
           currency: string
           id: string
           status: string
@@ -7713,6 +7714,7 @@ export type Database = {
         Insert: {
           balance?: number
           created_at?: string
+          credit_limit?: number
           currency?: string
           id?: string
           status?: string
@@ -7722,6 +7724,7 @@ export type Database = {
         Update: {
           balance?: number
           created_at?: string
+          credit_limit?: number
           currency?: string
           id?: string
           status?: string
