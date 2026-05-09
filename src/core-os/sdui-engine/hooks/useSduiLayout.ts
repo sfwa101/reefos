@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
+import { useSystemSetting } from "@/hooks/useSystemSettings";
 
 type State = {
   blocks: SduiBlock[];
