@@ -246,6 +246,30 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       realtimeChannelRef.current = channel;
     };
 
+    // Phase 44 — pause socket while tab is hidden, resume + catch-up on return.
+    const onVisibility = () => {
+      if (typeof document === "undefined") return;
+      const id = userIdRef.current;
+      if (!id) return;
+      if (document.visibilityState === "hidden") {
+        teardownRealtime();
+      } else if (!realtimeChannelRef.current) {
+        subscribeRealtime(id);
+        // Catch-up fetch for changes missed while backgrounded.
+        void (async () => {
+          try {
+            const remote = await fetchRemoteCart(id);
+            applyRemote(remote);
+          } catch (err) {
+            console.warn("[cart] visibility resume refetch failed:", err);
+          }
+        })();
+      }
+    };
+    if (typeof document !== "undefined") {
+      document.addEventListener("visibilitychange", onVisibility);
+    }
+
     const handleUser = async () => {
       userIdRef.current = uid;
 
