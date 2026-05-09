@@ -7,6 +7,19 @@
 
 ---
 
+## 🔥 Phase 43 — The Great Sovereign Purge (Tech Debt & Leak Resolution)
+
+- **God Mode Eradication.** `src/lib/godMode.ts` and `src/components/system/DevOSNavigator.tsx` now wrap every `localStorage` read/write and `window.__SALSABIL_GOD_MODE__` exposure in `if (import.meta.env.DEV)`. Vite statically eliminates the dev-only branches in production builds — there is no admin-bypass surface in the prod bundle.
+- **IndexedDB Memory Cap.** Router `gcTime` reduced from 24h → 2h to prevent iOS Safari 50MB quota crashes. `src/lib/queryPersister.ts` now wraps `idb-keyval` writes with `trimDehydratedBlob()` enforcing three caps before disk write: per-query payload ≤ 256 KB, newest 50 queries kept (by `dataUpdatedAt`), total blob ≤ 4 MB. Buster bumped to `salsabil-os-v4-phase43`.
+- **Strict Tenant Query-Key Enforcement.** `useUpdateUSA`, `useMintUSA`, `useHakimExecutor` and `useInfiniteCatalog` now build their `queryKey` and `invalidateQueries` calls through `tenantQueryKey(...)`. The persister also recognises tenant-prefixed keys (`["tenant", id, "<prefix>", ...]`).
+- **Realtime Socket Cleanup Audit.** All 14 `supabase.channel(...).on('postgres_changes', ...)` sites confirmed to call `supabase.removeChannel(...)` in their `useEffect` cleanup (Vendor/Driver/Cart/Group-Buy hooks, Admin Dashboard/Orders/ProfitObservation, HakimPulseMonitor, BarqLogistics, SduiLayout, CartContext). No leaks remain.
+- **Critical Admin Mutations → SECURITY DEFINER RPCs.**
+  - `admin_manage_staff_role(p_user_id, p_role, p_action, p_role_id, p_is_active)` — replaces raw `user_roles` insert/update/delete from `Staff.tsx`. Verifies caller has `admin` or `super_admin` via `has_role()`. EXECUTE granted to `authenticated` only.
+  - `admin_update_partner_ledger(p_ledger_id, p_status, p_mark_paid)` — replaces raw `partner_ledgers` update from `Partners.tsx`. Requires `admin`/`finance`/`super_admin`.
+- **Result.** Dev leaks sealed, IndexedDB bounded, tenant cache cryptographically partitioned, socket pool stable, and the two highest-risk privilege-escalation surfaces removed from the client.
+
+---
+
 ## 🛡️ Phase 36 — The Titanium Shield (Financial & Security Hardening)
 
 ### Task 1 · God Mode Eradication (Zero Trust)
