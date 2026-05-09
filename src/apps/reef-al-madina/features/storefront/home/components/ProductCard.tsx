@@ -63,6 +63,13 @@ export const ProductCard = ({
   const inCompare = compare.has(p.id);
   const compareFull = !inCompare && compare.items.length >= compare.max;
 
+  // Phase 54 — Inventory Triage & Wakalah
+  const stock = p.stock ?? Number.POSITIVE_INFINITY;
+  const isOOS = stock === 0;
+  const isWakalah = isOOS && p.wakalahEligible === true;
+  const isHidden = isOOS && p.hideOnZero === true && !isWakalah;
+  const isHardOOS = isOOS && !isWakalah && !p.hideOnZero;
+
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (typeof navigator !== "undefined" && navigator.vibrate) {
