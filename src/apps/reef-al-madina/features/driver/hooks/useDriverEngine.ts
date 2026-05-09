@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
+import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import type {
   DriverEarnings,
   DriverEvent,
@@ -290,6 +291,18 @@ export const useDriverEngine = (): DriverEngine => {
       setBusyTaskId(null);
 
       if (error) {
+        // Phase 49 — Ground-Sync: queue locally on network failure so
+        // the driver keeps moving; the sync manager flushes on resume.
+        if (isLikelyNetworkError(error)) {
+          await enqueueOfflineMutation({
+            op: "table.update",
+            table: "salsabil_fulfillment_nodes",
+            match: { id: nodeId },
+            patch,
+          });
+          toast.success("تم الحفظ محلياً، ستتم المزامنة عند عودة الاتصال");
+          return;
+        }
         toast.error(error.message);
         load();
         return;
@@ -338,6 +351,16 @@ export const useDriverEngine = (): DriverEngine => {
       setBusyTaskId(null);
 
       if (error) {
+        if (isLikelyNetworkError(error)) {
+          await enqueueOfflineMutation({
+            op: "table.update",
+            table: "salsabil_fulfillment_nodes",
+            match: { id: task.id },
+            patch,
+          });
+          toast.success("تم الحفظ محلياً، ستتم المزامنة عند عودة الاتصال");
+          return;
+        }
         toast.error(error.message);
         return;
       }

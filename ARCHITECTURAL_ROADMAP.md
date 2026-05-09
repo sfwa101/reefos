@@ -1888,3 +1888,21 @@ defense-in-depth via response headers, idempotency, and client cooldowns.
   `qc.invalidateQueries` only — no RPC writes.
 - Rapid tab-switching dedup guaranteed by `useVisibilitySocket`'s
   `cleanupRef` single-channel ref → no leaked channels.
+
+## Phase 49 — Ground-Sync Engine (Offline Mutation Queue)
+
+**Audit findings**
+- No prior offline mutation queue. `idb-keyval` already in use via `src/lib/queryPersister.ts` (cache-only).
+- Driver status mutations are direct table updates on `salsabil_fulfillment_nodes` (RLS-gated), not RPCs — `admin_set_order_status` is the admin path used in `Orders.tsx` / `OrderDetail.tsx`.
+- No Service Worker sync (PWA registration is currently disabled in `__root.tsx`).
+
+**Execution**
+- `src/lib/offlineSyncQueue.ts` — IndexedDB queue (`idb-keyval`, single key `salsabil.offlineSyncQueue.v1`). Supports `op: "rpc"` and `op: "table.update"`. JSON round-trip on write guarantees serializability. `processQueue()` is concurrency-coalesced; failed items survive with `attempts++` + `lastError`.
+- `src/hooks/useBackgroundSyncManager.tsx` — drains queue on `window 'online'`, `visibilitychange → visible`, and once on mount. Toast only fires when items actually flush.
+- `useDriverEngine.fireEvent` + `completeDelivery` — on update error, `isLikelyNetworkError(err)` → `enqueueOfflineMutation({ op: "table.update", table: "salsabil_fulfillment_nodes", match: { id }, patch })` and surface `"تم الحفظ محلياً، ستتم المزامنة عند عودة الاتصال"`. Optimistic UI patch (already in place) is preserved.
+- Mounted `<BackgroundSyncManager />` in `__root.tsx` inside the provider tree.
+
+**Verification**
+- Payload serialization: `JSON.parse(JSON.stringify(items))` enforced at write. ISO-string dates already produced by callers (`new Date().toISOString()`).
+- Network-drop simulation: with DevTools offline, `supabase.from(...).update(...)` rejects with `TypeError: Failed to fetch` → caught by `isLikelyNetworkError`; UI does not throw, item lands in queue. On re-enabling network, `online` event fires → `processQueue()` flushes.
+- Read-only/admin dashboards untouched.
