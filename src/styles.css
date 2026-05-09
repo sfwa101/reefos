@@ -54,6 +54,13 @@
 
 
   --font-display: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+
+  /* Tayseer Sovereign palette — Phase 59 (safe static tokens) */
+  --color-tayseer-night: #0A0F1A;
+  --color-tayseer-surface: #111827;
+  --color-tayseer-gold: #C9A84C;
+  --color-tayseer-green: #1A6B4A;
+  --color-tayseer-cream: #F8F6F0;
 }
 
 /* ============================================================
