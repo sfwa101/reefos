@@ -221,7 +221,7 @@ const TayseerLiquidityAdvisor = ({
     <section className="relative overflow-hidden rounded-3xl bg-card text-card-foreground p-4 ring-1 ring-border/50 shadow-sm">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <div className={`grid h-9 w-9 place-items-center rounded-xl ${highBurn ? "bg-amber-500/15 text-amber-600" : "bg-primary/10 text-primary"}`}>
+          <div className={`grid h-9 w-9 place-items-center rounded-xl ${highBurn ? "bg-warn/15 text-warn" : "bg-primary/10 text-primary"}`}>
             {highBurn ? <TrendingDown className="h-4 w-4" /> : <WalletIcon className="h-4 w-4" />}
           </div>
           <div>

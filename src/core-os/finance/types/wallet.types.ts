@@ -60,6 +60,7 @@ export type Budget = {
 
 export type Profile = {
   full_name: string | null;
+  short_id?: string | null;
 };
 
 export type PaymentMethodId = "instapay" | "vodafone-cash" | "bank" | "cash";

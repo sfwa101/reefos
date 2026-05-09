@@ -1,43 +1,56 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
   Send,
   Plus,
   ScanLine,
-  Sparkles,
+  HandHeart,
   Users,
   Target,
   PieChart as PieIcon,
   Wallet2,
-  ArrowDownUp,
+  ShieldCheck,
   Eye,
   EyeOff,
+  Sparkles,
 } from "lucide-react";
 
 import { useWalletDashboard } from "@/core-os/finance/hooks/useWalletDashboard";
-import { useWalletAssets, type WalletAsset } from "@/core-os/finance/hooks/useWalletAssets";
+import { useWalletAssets } from "@/core-os/finance/hooks/useWalletAssets";
 import { useHideBalance } from "@/core-os/finance/hooks/useHideBalance";
 import { useWalletTransactions } from "@/core-os/finance/hooks/useWalletTransactions";
-import { NeoCardsCarousel } from "@/core-os/finance/components/NeoCardsCarousel";
 import { WalletTopupDialog } from "@/core-os/finance/components/WalletTopupDialog";
 import { WalletTransferDialog } from "@/core-os/finance/components/WalletTransferDialog";
 import { WalletPosBarcode } from "@/core-os/finance/components/WalletPosBarcode";
+import { WalletCharityHub } from "@/core-os/finance/components/WalletCharityHub";
 import { GameyasDockContent } from "@/core-os/finance/components/GameyasDockContent";
 import { OperationsDockContent } from "@/core-os/finance/components/OperationsDockContent";
 import { VaultsDockContent } from "@/core-os/finance/components/VaultsDockContent";
 import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockContent";
 import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
-import { WalletAssetConvertSheet } from "@/core-os/finance/components/WalletAssetConvertSheet";
+import { toLatin } from "@/lib/format";
 
+type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity";
+
+/**
+ * Phase 59 — Tayseer Sovereign Wallet.
+ *
+ *   • Header surfaces the user's 6-digit Tayseer Short ID — the sovereign
+ *     identity binding the customer to the ledger.
+ *   • UnifiedBalanceCard: glassmorphism shell on `--card` + `--primary`
+ *     primitives — no hardcoded gradients, no rose/amber/emerald literals.
+ *   • QuickActionHUD: four sovereign actions (ادفع · اشحن · حوّل · تبرع).
+ *   • Transactions read from the SOVEREIGN LEDGER (`ledger_entries` via
+ *     `useWalletTransactions`) — `wallet_transactions` is no longer touched.
+ */
 const Wallet = () => {
   const c = useWalletDashboard();
   const { assets, loading: assetsLoading } = useWalletAssets(c.userId);
   const { hidden, toggle: toggleHide } = useHideBalance(c.userId);
   const txnsData = useWalletTransactions(c.userId);
-  const [activeAsset, setActiveAsset] = useState<WalletAsset | null>(null);
-  const [dock, setDock] = useState<"ops" | "gameyas" | "vaults" | "insights">("ops");
-  const [showConvert, setShowConvert] = useState(false);
+  const [dock, setDock] = useState<DockKey>("ops");
 
   if (c.loading || assetsLoading) {
     return (
@@ -48,6 +61,8 @@ const Wallet = () => {
   }
 
   const ownerName = c.profile?.full_name || "عميل ريف";
+  const shortId = c.profile?.short_id || null;
+  const totalBalance = Number(c.balance?.balance ?? 0);
 
   const savingsData = {
     jar: c.jar,
@@ -58,91 +73,101 @@ const Wallet = () => {
   };
 
   const actions = [
-    { id: "send", label: "إرسال", icon: Send, onClick: () => c.setShowTransfer(true) },
-    { id: "topup", label: "إيداع", icon: Plus, onClick: c.openTopup },
-    { id: "convert", label: "تحويل أصول", icon: ArrowDownUp, onClick: () => setShowConvert(true) },
-    { id: "qr", label: "دفع QR", icon: ScanLine, onClick: () => c.setShowPos(true) },
-    { id: "cashback", label: "كاش باك", icon: Sparkles, onClick: () => c.openAffiliateTab() },
+    { id: "pay", label: "ادفع", icon: ScanLine, onClick: () => c.setShowPos(true) },
+    { id: "topup", label: "اشحن", icon: Plus, onClick: c.openTopup },
+    { id: "transfer", label: "حوّل", icon: Send, onClick: () => c.setShowTransfer(true) },
+    { id: "donate", label: "تبرّع", icon: HandHeart, onClick: () => setDock("charity") },
+  ];
+
+  const docks: { id: DockKey; label: string; icon: typeof Wallet2 }[] = [
+    { id: "ops", label: "العمليات", icon: Wallet2 },
+    { id: "gameyas", label: "الجمعيات", icon: Users },
+    { id: "vaults", label: "حصّالاتي", icon: Target },
+    { id: "insights", label: "تحليلات", icon: PieIcon },
   ];
 
   return (
     <div className="w-full min-h-screen bg-background text-foreground pb-24">
       <div className="relative mx-auto flex w-full max-w-2xl flex-col gap-5 px-4 lg:px-8 pt-4">
-        {/* HEADER */}
+        {/* SOVEREIGN HEADER */}
         <motion.section
           initial={{ opacity: 0, y: -8 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="flex items-end justify-between"
         >
-          <div>
+          <div className="min-w-0">
             <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
-              REEF · NEO BANK
+              تيسير · المحفظة السيادية
             </p>
-            <h1 className="font-display text-[28px] font-black tracking-tight mt-0.5 text-foreground">
+            <h1 className="font-display text-[26px] font-black tracking-tight mt-0.5 text-foreground truncate">
               أهلاً، {ownerName.split(" ")[0]}
             </h1>
-          </div>
-          <div className="flex items-center gap-2">
-            {activeAsset && (
-              <motion.span
-                layoutId="active-asset-badge"
-                className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10.5px] font-extrabold ring-1 ring-primary/20"
-              >
-                {activeAsset.label}
-              </motion.span>
+            {shortId && (
+              <p className="mt-0.5 text-[11px] font-bold text-muted-foreground tabular-nums tracking-wider">
+                <span className="text-primary">ID</span> · {toLatin(shortId)}
+              </p>
             )}
-            <button
-              type="button"
-              onClick={toggleHide}
-              aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
-              className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
-            >
-              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
           </div>
+          <button
+            type="button"
+            onClick={toggleHide}
+            aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
+            className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
+          >
+            {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
         </motion.section>
 
-        {/* SUPER-CARDS CAROUSEL (cards keep their own gradient) */}
-        <div className="-mx-4 lg:-mx-8">
-          <NeoCardsCarousel
-            assets={assets}
-            hidden={hidden}
-            onToggleHide={toggleHide}
-            ownerName={ownerName}
-            onAssetChange={setActiveAsset}
-          />
-        </div>
+        {/* UNIFIED BALANCE CARD — glassmorphism on tokens */}
+        <UnifiedBalanceCard
+          balance={totalBalance}
+          hidden={hidden}
+          shortId={shortId}
+          ownerName={ownerName}
+        />
 
-        {/* QUICK-ACTION RIBBON */}
-        <div className="grid grid-cols-5 gap-2">
+        {/* QUICK ACTION HUD — 4 large circular buttons */}
+        <div className="grid grid-cols-4 gap-3">
           {actions.map((a) => (
             <button
               key={a.id}
               type="button"
               onClick={a.onClick}
-              className="group flex flex-col items-center gap-1.5 rounded-2xl bg-card text-card-foreground px-2 py-3 ring-1 ring-border/50 shadow-sm active:scale-[0.96] transition"
+              className="group flex flex-col items-center gap-1.5 active:scale-95 transition"
             >
-              <span className="grid place-items-center h-10 w-10 rounded-xl bg-primary/10 text-primary group-active:bg-primary group-active:text-primary-foreground transition">
-                <a.icon className="h-[18px] w-[18px]" />
+              <span className="grid place-items-center h-14 w-14 rounded-full bg-card text-primary ring-1 ring-border/60 shadow-md group-active:bg-primary group-active:text-primary-foreground transition">
+                <a.icon className="h-5 w-5" strokeWidth={2.2} />
               </span>
-              <span className="text-[10.5px] font-bold text-foreground/80">{a.label}</span>
+              <span className="text-[11px] font-extrabold text-foreground/80">{a.label}</span>
             </button>
           ))}
         </div>
 
+        {/* AFFILIATE PROMOTION — link to sovereign /affiliate route */}
+        <Link
+          to="/affiliate"
+          className="flex items-center justify-between rounded-2xl bg-card text-card-foreground p-3 ring-1 ring-border/50 shadow-sm active:scale-[0.99] transition"
+        >
+          <div className="flex items-center gap-3">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-premium/10 text-premium">
+              <Sparkles className="h-4 w-4" />
+            </span>
+            <div>
+              <p className="text-[12.5px] font-extrabold">برنامج الإحالة السيادي</p>
+              <p className="text-[10.5px] text-muted-foreground">اربح عمولة على كل دعوة ناجحة</p>
+            </div>
+          </div>
+          <span className="text-[11px] font-bold text-primary">افتح ←</span>
+        </Link>
+
         {/* MINI-APP DOCK */}
         <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
-          {[
-            { id: "ops", label: "العمليات", icon: Wallet2 },
-            { id: "gameyas", label: "الجمعيات", icon: Users },
-            { id: "vaults", label: "حصّالاتي", icon: Target },
-            { id: "insights", label: "تحليلات", icon: PieIcon },
-          ].map((t) => (
+          {docks.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setDock(t.id as typeof dock)}
+              onClick={() => setDock(t.id)}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition ${
                 dock === t.id
                   ? "bg-background text-foreground ring-1 ring-border/50 shadow-sm"
@@ -174,6 +199,8 @@ const Wallet = () => {
                 onOpenSettings={() => c.setShowJar(true)}
                 data={savingsData}
               />
+            ) : dock === "charity" ? (
+              <WalletCharityHub walletBalance={totalBalance} />
             ) : (
               <InsightsDockContent userId={c.userId} data={txnsData} appSpend={c.appSpend} />
             )}
@@ -193,7 +220,7 @@ const Wallet = () => {
         {c.showTransfer && (
           <WalletTransferDialog
             onClose={() => c.setShowTransfer(false)}
-            balance={Number(c.balance?.balance ?? 0)}
+            balance={totalBalance}
             onDone={(newBal) =>
               c.setBalance((b) => (b ? { ...b, balance: newBal } : b))
             }
@@ -204,7 +231,7 @@ const Wallet = () => {
             onClose={() => c.setShowPos(false)}
             customerCode={c.customerCode}
             name={ownerName}
-            balance={Number(c.balance?.balance ?? 0)}
+            balance={totalBalance}
             points={c.balance?.points ?? 0}
           />
         )}
@@ -220,14 +247,74 @@ const Wallet = () => {
             }}
           />
         )}
-        {showConvert && (
-          <WalletAssetConvertSheet
-            assets={assets}
-            onClose={() => setShowConvert(false)}
-          />
-        )}
       </AnimatePresence>
     </div>
+  );
+};
+
+/**
+ * UnifiedBalanceCard — Tayseer Sovereign hero card.
+ * Pure glass: layered `--card`, `--primary` glow, "Tayseer Secured" shield.
+ * Renders the Short ID masked as ○ ○ ○ ○ ##### for trust + privacy.
+ */
+const UnifiedBalanceCard = ({
+  balance,
+  hidden,
+  shortId,
+  ownerName,
+}: {
+  balance: number;
+  hidden: boolean;
+  shortId: string | null;
+  ownerName: string;
+}) => {
+  const masked = shortId
+    ? `○ ○ ${toLatin(shortId.slice(-4).padStart(4, "0"))}`
+    : "○ ○ ○ ○";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: 0.05 }}
+      className="relative overflow-hidden rounded-3xl bg-card text-card-foreground p-5 ring-1 ring-border/60 shadow-elegant"
+    >
+      {/* layered glass glow */}
+      <div className="pointer-events-none absolute -top-16 -end-16 h-48 w-48 rounded-full bg-primary/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -start-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+
+      <div className="relative flex items-start justify-between">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            الرصيد الكلي
+          </p>
+          <p className="mt-1 font-display text-4xl font-black tabular-nums text-foreground">
+            {hidden ? "•••••" : toLatin(balance.toLocaleString("en-US"))}
+            <span className="ms-1.5 align-top text-sm font-bold text-muted-foreground">
+              ج.م
+            </span>
+          </p>
+        </div>
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-primary/20">
+          <ShieldCheck className="h-3 w-3" />
+          مؤمَّنة بـ تيسير
+        </span>
+      </div>
+
+      <div className="relative mt-6 flex items-end justify-between">
+        <div>
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            معرّف تيسير السيادي
+          </p>
+          <p className="mt-0.5 font-mono text-base font-black tabular-nums tracking-[0.2em] text-foreground">
+            {masked}
+          </p>
+        </div>
+        <p className="text-[11px] font-extrabold text-foreground/80 truncate max-w-[55%] text-end">
+          {ownerName}
+        </p>
+      </div>
+    </motion.div>
   );
 };
 

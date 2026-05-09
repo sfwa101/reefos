@@ -89,9 +89,9 @@ export const WalletPosBarcode = ({
           </div>
         </div>
 
-        <div className="mt-3 flex items-center gap-2 rounded-xl bg-amber-500/10 p-2.5 ring-1 ring-amber-500/20">
-          <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-amber-600" />
-          <p className="flex-1 text-[10px] font-bold leading-relaxed text-amber-700 dark:text-amber-300">
+        <div className="mt-3 flex items-center gap-2 rounded-xl bg-warn/10 p-2.5 ring-1 ring-warn/20">
+          <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-warn" />
+          <p className="flex-1 text-[10px] font-bold leading-relaxed text-warn">
             هذا الكود ديناميكي ويُستخدم لمرة واحدة عند الكاشير. لا تشاركه مع أي شخص خارج الفرع.
           </p>
         </div>
