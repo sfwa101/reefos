@@ -29,6 +29,7 @@ import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBoo
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 import { SovereignSpiritBootstrap } from "@/core-os/spirit/SovereignSpiritBootstrap";
+import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
 
 function NotFoundComponent() {
