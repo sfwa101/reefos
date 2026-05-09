@@ -339,14 +339,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         return;
       }
 
-      // Phase 13.26 — Pre-flight guard: block wallet payment when balance
-      // is insufficient and no secondary payment method has been configured.
+      // Phase 52 — guard checks Smart Balance Reserve (balance + credit_limit).
+      // Tayseer customers may pay on credit up to their assigned limit.
       if (
         payment === "wallet" &&
-        effectiveGrand > walletBalance &&
+        effectiveGrand > (walletBalance + trustLimit) &&
         !isSplit
       ) {
-        toast.error("رصيد المحفظة لا يكفي، يرجى اختيار طريقة دفع للمبلغ المتبقي");
+        toast.error("الرصيد المتاح + حد تيسير لا يكفي، يرجى اختيار طريقة دفع للمبلغ المتبقي");
         setSubmitting(false);
         submittingRef.current = false;
         return;
