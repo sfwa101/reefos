@@ -89,6 +89,6 @@ export const useFeaturedCategoriesQuery = () =>
         };
       });
     },
-    staleTime: 5 * 60_000,
-    gcTime: 30 * 60_000,
+    staleTime: 60 * 60 * 1000, // Phase 39 — Departments: 1h fresh.
+    gcTime: 24 * 60 * 60 * 1000,
   });
