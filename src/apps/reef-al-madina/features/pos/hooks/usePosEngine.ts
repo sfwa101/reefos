@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
 import { fetchPosCatalog } from "@/lib/sovereignCatalog";
+import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 
 const CART_KEY = "pos.cart.v1";
 const CACHE_KEY = "pos.products.cache.v1";
