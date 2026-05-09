@@ -47,7 +47,7 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains; preload",
   );
-  if (!isDev) {
+  if (!isLovableHost) {
     headers.set("X-Frame-Options", "DENY");
   }
   headers.set("X-Content-Type-Options", "nosniff");
@@ -60,7 +60,7 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   // Inline scripts/styles allowed for TanStack hydration; refine to nonces
   // in a follow-up phase once SSR shell is stable.
   if (!headers.has("Content-Security-Policy")) {
-    const frameAncestors = isDev
+    const frameAncestors = isLovableHost
       ? "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev"
       : "frame-ancestors 'none'";
     headers.set(
