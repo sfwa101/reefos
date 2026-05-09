@@ -8148,6 +8148,10 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_trigger_circuit_breaker: {
+        Args: { p_reason: string; p_setting_key: string }
+        Returns: Json
+      }
       admin_update_partner_ledger: {
         Args: { p_ledger_id: string; p_mark_paid?: boolean; p_status?: string }
         Returns: Json
