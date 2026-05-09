@@ -44,16 +44,16 @@ function KdsLayout() {
   const stationLabel = "محطة التجهيز · الرئيسية";
 
   return (
-    <div dir="rtl" className="min-h-screen bg-zinc-950 text-zinc-50 flex flex-col">
-      <header className="sticky top-0 z-30 border-b border-zinc-800 bg-zinc-900/95 backdrop-blur">
+    <div dir="rtl" className="dark min-h-screen bg-background text-foreground flex flex-col">
+      <header className="sticky top-0 z-30 border-b border-border bg-card/95 backdrop-blur">
         <div className="h-12 px-4 flex items-center gap-4 text-[12.5px]">
           <div className="flex items-center gap-2 font-display font-extrabold">
-            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-amber-500/15 text-amber-400">
+            <span className="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-primary/15 text-primary">
               <ChefHat className="h-4 w-4" />
             </span>
-            <span className="text-zinc-100">KDS</span>
-            <span className="text-zinc-500">·</span>
-            <span className="text-zinc-300 font-normal">{stationLabel}</span>
+            <span className="text-foreground">KDS</span>
+            <span className="text-muted-foreground">·</span>
+            <span className="text-muted-foreground font-normal">{stationLabel}</span>
           </div>
           <div className="flex-1" />
           <div className="flex items-center gap-2 text-[11.5px]">
@@ -61,12 +61,12 @@ function KdsLayout() {
             <Stat label="قيد التجهيز" value={counts.preparing} tone="warn" />
             <Stat label="جاهز" value={counts.ready} tone="ok" />
           </div>
-          <div className="h-4 w-px bg-zinc-700" />
+          <div className="h-4 w-px bg-border" />
           <div className="flex items-center gap-1.5">
             {online ? (
-              <span className="flex items-center gap-1 text-emerald-400"><Wifi className="h-3.5 w-3.5" /> متصل</span>
+              <span className="flex items-center gap-1 text-emerald-500"><Wifi className="h-3.5 w-3.5" /> متصل</span>
             ) : (
-              <span className="flex items-center gap-1 text-amber-400"><WifiOff className="h-3.5 w-3.5" /> منفصل</span>
+              <span className="flex items-center gap-1 text-amber-500"><WifiOff className="h-3.5 w-3.5" /> منفصل</span>
             )}
           </div>
         </div>
@@ -83,7 +83,7 @@ function Stat({ label, value, tone }: { label: string; value: number; tone: "ok"
   const cls =
     tone === "ok" ? "bg-emerald-500/15 text-emerald-300 ring-emerald-500/30"
     : tone === "warn" ? "bg-amber-500/15 text-amber-300 ring-amber-500/30"
-    : "bg-zinc-800 text-zinc-300 ring-zinc-700";
+    : "bg-muted text-muted-foreground ring-border";
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 ring-1 ${cls}`}>
       {tone === "warn" && <Flame className="h-3 w-3" />}

@@ -42,7 +42,7 @@ function KdsBoard() {
 
   if (loading) {
     return (
-      <div className="flex h-[60vh] items-center justify-center text-zinc-400">
+      <div className="flex h-[60vh] items-center justify-center text-muted-foreground">
         <Loader2 className="h-6 w-6 animate-spin" />
       </div>
     );
@@ -56,7 +56,7 @@ function KdsBoard() {
   }
   if (sorted.length === 0) {
     return (
-      <div className="flex h-[60vh] flex-col items-center justify-center gap-2 text-zinc-500">
+      <div className="flex h-[60vh] flex-col items-center justify-center gap-2 text-muted-foreground">
         <CheckCircle2 className="h-8 w-8 text-emerald-500" />
         <p className="text-sm">لا توجد تذاكر — المطبخ فاضي 🎉</p>
       </div>
@@ -98,8 +98,8 @@ function TicketCard({
   const statusColor =
     ticket.prep.status === "ready" ? "border-emerald-500/40 bg-emerald-500/5"
     : ticket.prep.status === "preparing" ? "border-amber-500/40 bg-amber-500/5"
-    : isLate ? "border-red-500/60 bg-red-500/10 ring-1 ring-red-500/30"
-    : "border-zinc-800 bg-zinc-900/60";
+    : isLate ? "border-destructive/60 bg-destructive/10 ring-1 ring-destructive/30"
+    : "border-border bg-card/60";
 
   const shortId = ticket.id.slice(0, 6).toUpperCase();
 
@@ -107,10 +107,10 @@ function TicketCard({
     <article className={`rounded-xl border ${statusColor} p-3 flex flex-col gap-3 min-h-[220px]`}>
       <header className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <span className="font-mono font-extrabold text-zinc-100 text-[15px]">#{shortId}</span>
+          <span className="font-mono font-extrabold text-foreground text-[15px]">#{shortId}</span>
           <StatusPill status={ticket.prep.status} />
         </div>
-        <div className={`inline-flex items-center gap-1 text-[11px] font-mono ${isLate ? "text-red-300" : "text-zinc-400"}`}>
+        <div className={`inline-flex items-center gap-1 text-[11px] font-mono ${isLate ? "text-destructive" : "text-muted-foreground"}`}>
           {isLate ? <AlertTriangle className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
           {ageMin}د
         </div>
@@ -118,14 +118,14 @@ function TicketCard({
 
       <ul className="flex-1 space-y-1.5 text-[13.5px]">
         {ticket.items.length === 0 && (
-          <li className="text-zinc-500 text-[12px]">لا توجد أصناف مرتبطة</li>
+          <li className="text-muted-foreground text-[12px]">لا توجد أصناف مرتبطة</li>
         )}
         {ticket.items.map((it) => (
           <li key={it.id} className="flex items-baseline gap-2">
-            <span className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md bg-zinc-800 px-1.5 font-mono text-[12px] font-bold text-amber-300">
+            <span className="inline-flex h-6 min-w-[28px] items-center justify-center rounded-md bg-muted px-1.5 font-mono text-[12px] font-bold text-amber-500">
               ×{it.quantity}
             </span>
-            <span className="text-zinc-100 leading-snug">
+            <span className="text-foreground leading-snug">
               {it.sku_name ?? "—"}
             </span>
           </li>
@@ -133,7 +133,7 @@ function TicketCard({
       </ul>
 
       {ticket.notes && (
-        <p className="rounded-md bg-zinc-800/70 p-2 text-[11.5px] text-zinc-300 leading-relaxed">
+        <p className="rounded-md bg-muted/70 p-2 text-[11.5px] text-muted-foreground leading-relaxed">
           {ticket.notes}
         </p>
       )}
@@ -143,7 +143,7 @@ function TicketCard({
           <button
             type="button"
             onClick={() => onAction("preparing")}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <Play className="h-4 w-4" /> ابدأ التجهيز
           </button>
@@ -152,13 +152,13 @@ function TicketCard({
           <button
             type="button"
             onClick={() => onAction("ready")}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
+            className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <CheckCircle2 className="h-4 w-4" /> تم التجهيز
           </button>
         )}
         {ticket.prep.status === "ready" && (
-          <div className="w-full text-center text-[12px] font-bold text-emerald-300 py-2">
+          <div className="w-full text-center text-[12px] font-bold text-emerald-500 py-2">
             بانتظار المندوب / الكاشير
           </div>
         )}
@@ -169,9 +169,9 @@ function TicketCard({
 
 function StatusPill({ status }: { status: PrepStatus }) {
   const map: Record<PrepStatus, { label: string; cls: string }> = {
-    pending:   { label: "بانتظار",     cls: "bg-zinc-800 text-zinc-300" },
-    preparing: { label: "قيد التجهيز", cls: "bg-amber-500/20 text-amber-300" },
-    ready:     { label: "جاهز",        cls: "bg-emerald-500/20 text-emerald-300" },
+    pending:   { label: "بانتظار",     cls: "bg-muted text-muted-foreground" },
+    preparing: { label: "قيد التجهيز", cls: "bg-amber-500/20 text-amber-500" },
+    ready:     { label: "جاهز",        cls: "bg-emerald-500/20 text-emerald-500" },
   };
   const m = map[status];
   return (

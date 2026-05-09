@@ -2207,3 +2207,14 @@ a triage projection on every product card.
   read-modify-write on the JSONB snapshot and flips node `status` to
   `ready_for_pickup` when marked ready (handing the order back to
   driver dispatch / cashier walk-in flow).
+
+## Phase 55.1 — KDS Architectural Detox (Token Migration)
+- Purged all `zinc-*` / `slate-*` / `gray-*` hardcoded color classes from `src/routes/_kds.tsx` and `src/routes/_kds.kds.tsx`.
+- Migrated to semantic design tokens: `bg-background`, `bg-card`, `bg-muted`, `border-border`, `text-foreground`, `text-muted-foreground`, `text-destructive`, `bg-primary/15`.
+- Wrapped KDS root with `className="dark"` so the operator wall display always renders the dark token palette regardless of user theme.
+- Status accents (amber/emerald) preserved as functional traffic-light signals — these are not theme colors but operational semantics.
+
+## Phase 56 — Pre-Audit (Dispatch / Handover)
+- Handover identification: short ID (first 6 chars of `salsabil_fulfillment_nodes.id`) already exposed by KDS. No OTP/barcode column exists — recommend extending `delivery_snapshot.handover` JSONB with `{ otp, code }` per Law 2.
+- Status transitions available on nodes: `ready_for_pickup` → `assigned` (driver) → `picked_up_at`/`delivered_at`. Walk-in ("delivered" by cashier) has no dedicated status; recommend `delivered_walkin` text status.
+- No existing Pickup/Handover UI found. Driver side has `useDispatchRadar` (offer acceptance), but no "scan & confirm handover" surface.
