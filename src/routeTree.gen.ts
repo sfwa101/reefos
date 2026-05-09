@@ -14,6 +14,7 @@ import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as PosRouteImport } from './routes/_pos'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
@@ -96,6 +97,7 @@ import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
 import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advance-approvals'
 import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
+import { Route as PosPosRouteImport } from './routes/_pos.pos'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -170,6 +172,10 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosRoute = PosRouteImport.update({
+  id: '/_pos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -583,6 +589,11 @@ const AdminEntityRoute = AdminEntityRouteImport.update({
   path: '/$entity',
   getParentRoute: () => AdminRoute,
 } as any)
+const PosPosRoute = PosPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => PosRoute,
+} as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -852,6 +863,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/pos': typeof PosPosRoute
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -975,6 +987,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AppIndexRoute
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
   '/affiliate': typeof AppAffiliateRoute
@@ -985,6 +998,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/pos': typeof PosPosRoute
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1062,7 +1076,6 @@ export interface FileRoutesByTo {
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
   '/vendor/wallet': typeof VendorWalletRoute
-  '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
   '/driver': typeof DriverIndexRoute
   '/vendor': typeof VendorIndexRoute
@@ -1111,6 +1124,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_pos': typeof PosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
@@ -1125,6 +1139,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/_pos/pos': typeof PosPosRoute
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1266,6 +1281,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1389,6 +1405,7 @@ export interface FileRouteTypes {
     | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/auth'
     | '/employee'
     | '/affiliate'
@@ -1399,6 +1416,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1476,7 +1494,6 @@ export interface FileRouteTypes {
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/wallet'
-    | '/'
     | '/admin'
     | '/driver'
     | '/vendor'
@@ -1524,6 +1541,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_pos'
     | '/admin'
     | '/auth'
     | '/driver'
@@ -1538,6 +1556,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/_pos/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1664,6 +1683,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  PosRoute: typeof PosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
@@ -1706,6 +1726,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_pos': {
+      id: '/_pos'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -2282,6 +2309,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntityRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_pos/pos': {
+      id: '/_pos/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof PosPosRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_app/wallet': {
       id: '/_app/wallet'
       path: '/wallet'
@@ -2735,6 +2769,16 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PosRouteChildren {
+  PosPosRoute: typeof PosPosRoute
+}
+
+const PosRouteChildren: PosRouteChildren = {
+  PosPosRoute: PosPosRoute,
+}
+
+const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
+
 interface AdminEntityRouteChildren {
   AdminEntityIdRoute: typeof AdminEntityIdRoute
 }
@@ -2993,6 +3037,7 @@ const VendorRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  PosRoute: PosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
@@ -3002,13 +3047,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
