@@ -1,6 +1,7 @@
 import { createRouter, useRouter } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
+import { installEdgePersister } from "./lib/queryPersister";
 
 function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
@@ -62,13 +63,14 @@ export const getRouter = () => {
     defaultOptions: {
       queries: {
         staleTime: 60_000,
+        gcTime: 24 * 60 * 60 * 1000,
         refetchOnWindowFocus: false,
       },
     },
   });
 
-  // Phase VIII-FIX — offline-first persistence is temporarily disabled so
-  // route/data changes propagate immediately during OS route synchronization.
+  // Phase 39 — Local-First Cache Persistence (IndexedDB hydration).
+  installEdgePersister(queryClient);
 
   const router = createRouter({
     routeTree,

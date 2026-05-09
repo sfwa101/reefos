@@ -292,24 +292,10 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     async (input) => {
       guardEditable();
       if (!cart || !user) return;
-      const nextSignature = itemsSignature([
-        ...items,
-        {
-          id: `optimistic-${input.product_id}-${metaSignature(input.meta)}`,
-          cart_id: cart.id,
-          added_by: user.id,
-          product_id: input.product_id,
-          product_name: input.product_name,
-          unit_price: input.unit_price,
-          quantity: input.quantity,
-          meta: input.meta ?? {},
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-      ]);
-      lastLocalItemsSignatureRef.current = nextSignature;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: err } = await (supabase as any).from("shared_cart_items").insert({
+      // Phase 39 — Optimistic UI: snapshot, apply, rollback on error.
+      const snapshot = items;
+      const optimistic: SharedCartItem = {
+        id: `optimistic-${input.product_id}-${metaSignature(input.meta)}-${Date.now()}`,
         cart_id: cart.id,
         added_by: user.id,
         product_id: input.product_id,
@@ -317,39 +303,86 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
         unit_price: input.unit_price,
         quantity: input.quantity,
         meta: input.meta ?? {},
-      });
-      if (err) throw err;
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      };
+      const nextItems = normalizeItems([...items, optimistic]);
+      lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
+      setItems(nextItems);
+      try {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const { error: err } = await (supabase as any).from("shared_cart_items").insert({
+          cart_id: cart.id,
+          added_by: user.id,
+          product_id: input.product_id,
+          product_name: input.product_name,
+          unit_price: input.unit_price,
+          quantity: input.quantity,
+          meta: input.meta ?? {},
+        });
+        if (err) throw err;
+      } catch (err) {
+        // Rollback to pre-mutation snapshot, then resync from server.
+        setItems(snapshot);
+        lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
+        void fetchAll(cart.id);
+        throw err;
+      }
     },
-    [cart, user, items, guardEditable],
+    [cart, user, items, guardEditable, fetchAll],
   );
 
   const updateItemQty = useCallback(
     async (itemId: string, quantity: number) => {
       guardEditable();
-      if (quantity <= 0) {
-        lastLocalItemsSignatureRef.current = itemsSignature(items.filter((i) => i.id !== itemId));
-        const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
+      if (!cart) return;
+      const snapshot = items;
+      const nextItems =
+        quantity <= 0
+          ? items.filter((i) => i.id !== itemId)
+          : items.map((i) => (i.id === itemId ? { ...i, quantity } : i));
+      lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
+      setItems(nextItems);
+      try {
+        if (quantity <= 0) {
+          const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
+          if (err) throw err;
+          return;
+        }
+        const { error: err } = await supabase
+          .from("shared_cart_items")
+          .update({ quantity })
+          .eq("id", itemId);
         if (err) throw err;
-        return;
+      } catch (err) {
+        setItems(snapshot);
+        lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
+        void fetchAll(cart.id);
+        throw err;
       }
-      lastLocalItemsSignatureRef.current = itemsSignature(items.map((i) => (i.id === itemId ? { ...i, quantity } : i)));
-      const { error: err } = await supabase
-        .from("shared_cart_items")
-        .update({ quantity })
-        .eq("id", itemId);
-      if (err) throw err;
     },
-    [items, guardEditable],
+    [items, guardEditable, cart, fetchAll],
   );
 
   const removeItem = useCallback(
     async (itemId: string) => {
       guardEditable();
-      lastLocalItemsSignatureRef.current = itemsSignature(items.filter((i) => i.id !== itemId));
-      const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
-      if (err) throw err;
+      if (!cart) return;
+      const snapshot = items;
+      const nextItems = items.filter((i) => i.id !== itemId);
+      lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
+      setItems(nextItems);
+      try {
+        const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
+        if (err) throw err;
+      } catch (err) {
+        setItems(snapshot);
+        lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
+        void fetchAll(cart.id);
+        throw err;
+      }
     },
-    [items, guardEditable],
+    [items, guardEditable, cart, fetchAll],
   );
 
   return {
