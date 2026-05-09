@@ -2528,3 +2528,45 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
   `ring-border`). No hex literals, no `dark:` overrides.
 - Migration applied; only pre-existing linter warnings remain (no new findings
   attributable to Phase 62).
+
+---
+
+## Phase 63 — Sovereign Cashier Blitz (Gamasa Readiness)
+
+100-day summer-season POS optimization. Single metric: **taps-to-sale**.
+
+### Action 1 · UI Detox (Doctrine IV)
+- `PosShiftManager.tsx`: removed `bg-gradient-to-r from-primary to-primary-glow`
+  → flat `bg-primary` with `ring-1 ring-border`. Migrated all legacy iOS tokens
+  (`text-foreground-tertiary`, `text-foreground-secondary`, `bg-surface-muted`)
+  to shadcn-aligned semantics (`text-muted-foreground`, `bg-muted`).
+- `PosQuickPay.tsx`: rewrote from scratch — eliminated
+  `bg-gradient-to-r from-success to-teal`. Pure semantic tokens throughout.
+
+### Action 2 · Zero-Friction & Exact-Pay (Doctrine VIII)
+- Final confirm now uses `<ZeroFrictionButton>`: tap-to-pay ≤ 200 ج.م,
+  hold-to-pay > 200 ج.م. Consistent haptic with Wallet/Cart.
+- New **"ادفع بالضبط"** action (Zap icon, `bg-secondary`) collapses
+  tender + confirm into a single tap for the dominant exact-cash case.
+  Fires triple-pulse haptic `[15, 40, 15]`.
+- Numpad and quick-tender chips emit subtle `vibrate(8–10)` feedback.
+
+### Action 3 · Sync Radar (`src/components/pos/PosSyncPill.tsx`)
+- Live online/offline pill in POS header:
+  - 🟢 `Wifi` + "متصل" when synced
+  - 🟠 `WifiOff` + "أوفلاين · يُحفظ محلياً" + pending count badge when offline
+  - 🔵 `RefreshCw` + "مزامنة N" when online with queued ops
+- Polls `offlineQueueSize()` every 4 s. Auto-flushes via `processQueue()`
+  when transitioning offline → online. Tap pill to force flush.
+
+### Action 4 · Barcode Auto-Add Haptic
+- `usePosEngine.ts` keystroke-burst scanner now fires `vibrate([15, 30, 15])`
+  on a successful product match, confirming the add without a glance.
+- Auto-add behavior was already present (≥6-char burst → `addProduct`); only
+  haptic confirmation was missing.
+
+### Verification
+- Cashier flow now: scan → ⚡ "ادفع بالضبط" = **1 tap to close sale**.
+  Manual cash: scan → numpad → ZeroFrictionButton = 2–3 taps.
+- Zero hardcoded gradients in `features/pos/`. Zero `text-white`/`bg-white`.
+- All offline queue states visible to operator; manual sync trigger available.
