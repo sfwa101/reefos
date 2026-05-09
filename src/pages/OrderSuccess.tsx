@@ -34,6 +34,33 @@ const OrderSuccess = () => {
     }
   }, []);
 
+  // Phase 58 — Walk-in / pickup OTP for this customer's order
+  const [pickupOtp, setPickupOtp] = useState<string | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from("salsabil_fulfillment_nodes")
+        .select("id, delivery_snapshot")
+        .eq("master_order_id", id)
+        .limit(1)
+        .maybeSingle();
+      if (cancelled || !data) return;
+      const snap = (data.delivery_snapshot ?? {}) as { handover?: { otp?: string } };
+      if (snap.handover?.otp) {
+        setPickupOtp(snap.handover.otp);
+        return;
+      }
+      // Fallback to RPC if RLS hides snapshot
+      const { data: otp } = await supabase.rpc("get_handover_otp", {
+        p_node_id: data.id as string,
+      });
+      if (!cancelled && typeof otp === "string") setPickupOtp(otp);
+    })();
+    return () => { cancelled = true; };
+  }, [id]);
+
   const copySummary = async () => {
     if (!waFallback?.text) return;
     const ok = await copyTextToClipboard(waFallback.text);
