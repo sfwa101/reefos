@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Copy, Check, Sparkles, TrendingUp, Wallet, Users } from "lucide-react";
+import { Copy, Check, Sparkles, TrendingUp, Wallet, Users, Share2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
@@ -72,12 +72,21 @@ export default function AffiliateDashboard() {
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-base">
             <Sparkles className="h-4 w-4 text-primary" />
-            Your referral link
+            كود الشراكة الخاص بك
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           {engine.referralCode ? (
             <>
+              {/* Phase 57 — emphasised 6-digit code (Tayseer Short ID). */}
+              <div className="flex flex-col items-center gap-1 rounded-lg border border-primary/30 bg-primary/5 py-4">
+                <span className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  رقم شريك النجاح
+                </span>
+                <span className="font-mono text-4xl font-extrabold tabular-nums tracking-[0.4em] text-primary">
+                  {engine.referralCode}
+                </span>
+              </div>
               <div className="flex items-stretch gap-2">
                 <div className="flex flex-1 items-center rounded-md border bg-muted/40 px-3 py-2 font-mono text-xs sm:text-sm break-all">
                   {engine.referralLink}
@@ -93,29 +102,38 @@ export default function AffiliateDashboard() {
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
-                  <span className="ml-1 hidden sm:inline">
-                    {copied ? "Copied" : "Copy"}
-                  </span>
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  asChild
+                  className="shrink-0 border-emerald-500/40 text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400"
+                >
+                  <a
+                    href={`https://wa.me/?text=${encodeURIComponent(
+                      `انضم لي على ريف المدينة عبر كود الشراكة ${engine.referralCode}\n${engine.referralLink}`,
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="مشاركة عبر واتساب"
+                  >
+                    <Share2 className="h-4 w-4" />
+                    <span className="ml-1 hidden sm:inline">واتساب</span>
+                  </a>
                 </Button>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Code:{" "}
-                <span className="font-mono font-semibold text-foreground">
-                  {engine.referralCode}
-                </span>
-              </p>
             </>
           ) : (
             <div className="flex items-center justify-between gap-3">
               <p className="text-sm text-muted-foreground">
-                You don't have a referral code yet.
+                لم يتم إصدار كود الشراكة بعد.
               </p>
               <Button
                 size="sm"
                 disabled={engine.provisioning}
                 onClick={() => engine.provisionCode().catch(() => {})}
               >
-                {engine.provisioning ? "Generating…" : "Generate code"}
+                {engine.provisioning ? "جارٍ الإصدار…" : "إصدار الكود"}
               </Button>
             </div>
           )}

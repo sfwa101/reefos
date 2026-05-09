@@ -1,3 +1,11 @@
+/**
+ * @deprecated Phase 57 — superseded by
+ *   `src/apps/reef-al-madina/features/affiliate/hooks/useAffiliateEngine.ts`,
+ *   which is the canonical Success Partner engine (server-authoritative
+ *   6-digit code, WhatsApp share, Tayseer payout). This module is kept only
+ *   to avoid breaking `WalletAffiliateHub.tsx` until that hub is migrated.
+ *   DO NOT extend; new affiliate UX must consume the reef-al-madina hook.
+ */
 import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 

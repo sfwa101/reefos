@@ -7959,6 +7959,7 @@ export type Database = {
       }
     }
     Functions: {
+      _gen_unique_6digit_code: { Args: never; Returns: string }
       _postgis_deprecate: {
         Args: { newname: string; oldname: string; version: string }
         Returns: undefined
@@ -8165,6 +8166,7 @@ export type Database = {
         Args: { p_ledger_id: string; p_mark_paid?: boolean; p_status?: string }
         Returns: Json
       }
+      apply_referral_code: { Args: { p_code: string }; Returns: Json }
       approve_advance_request: { Args: { _request_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
       broadcast_smart_dispatch: { Args: { p_node_id: string }; Returns: number }
@@ -8569,6 +8571,10 @@ export type Database = {
           p_vendor_id: string
         }
         Returns: string
+      }
+      pay_commission_from_treasury: {
+        Args: { p_commission_id: string }
+        Returns: Json
       }
       pay_gam_eya_installment: {
         Args: { _installment_id: string }

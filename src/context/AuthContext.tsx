@@ -190,6 +190,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           await fetchProfile(data.session.user.id);
         } catch { /* non-fatal */ }
       }
+
+      // Phase 57 — Success Partner: apply captured referral code (if any)
+      // and provision the new user's own 6-digit referral code.
+      try {
+        const ref =
+          typeof window !== "undefined"
+            ? window.localStorage.getItem("salsabil_ref_code")
+            : null;
+        if (ref && /^[0-9]{6}$/.test(ref)) {
+          await supabase.rpc("apply_referral_code" as never, { p_code: ref } as never);
+          window.localStorage.removeItem("salsabil_ref_code");
+        }
+      } catch { /* non-fatal */ }
+      try {
+        await supabase.rpc("ensure_referral_code" as never, { _user_id: data.session.user.id } as never);
+      } catch { /* non-fatal */ }
     }
     return {};
   }, [ensureProfile, fetchProfile]);

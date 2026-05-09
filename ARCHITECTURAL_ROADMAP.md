@@ -2251,3 +2251,60 @@ a triage projection on every product card.
   status / empty OTP / unknown channel.
 - Dispatch routes contain zero hardcoded `zinc-*`/`slate-*`/`gray-*`
   classes — all surfaces consume semantic tokens.
+
+---
+
+## Phase 57 — Success Partner Engine & Tayseer Short-ID Referral
+
+### Sovereign Identity (Tayseer 6-Digit Code)
+- Rewrote `public.ensure_referral_code(_user_id)` (`SECURITY DEFINER`,
+  `search_path = public`):
+  - Strict 6-digit numeric output.
+  - Prefers `right(profiles.national_id, 6)` when KYC is present and the
+    candidate is unique.
+  - Falls back to a unique random `100000–999999` code via the new
+    `_gen_unique_6digit_code()` helper.
+  - Mirrors the code into `public.referral_codes` for fast reverse lookup.
+  - Bootstraps `user_affiliate_state` at the lowest tier on first call.
+- One-shot backfill migrates every legacy 7-character `referral_code` to the
+  new format, preferring National-ID-derived codes when available.
+
+### Secure Referrer Attachment
+- Added `public.apply_referral_code(p_code text)` (`SECURITY DEFINER`):
+  - Validates the 6-digit format, rejects self-referral and duplicate links.
+  - Sets `profiles.referred_by` and inserts a `referrals` row at status
+    `registered` (idempotent on `referred_id`).
+  - Granted `EXECUTE` to `authenticated`.
+
+### Sovereign Payout (Treasury → Affiliate Wallet)
+- Added `public.pay_commission_from_treasury(p_commission_id uuid)`
+  (`SECURITY DEFINER`, staff-only):
+  - Locks the `commission_ledger` row, validates status / amount, resolves
+    the affiliate's active EGP wallet.
+  - Writes a balanced two-leg `ledger_entries` group (Debit Treasury
+    `…0777`, Credit Affiliate) with deterministic `idempotency_key =
+    commission:<id>:debit|credit` (Law 6 — Immutable Ledger).
+  - Updates wallet balances and marks the commission `paid`.
+
+### Frontend Wire-up
+- `src/routes/__root.tsx`: intercepts `?ref=NNNNNN` on first paint, persists
+  to `localStorage.salsabil_ref_code`, and cleans the address bar.
+- `src/context/AuthContext.tsx`: on successful sign-up, calls
+  `apply_referral_code` (with the captured code) and `ensure_referral_code`
+  for the new user, then clears the localStorage key.
+- `src/apps/reef-al-madina/features/affiliate/hooks/useAffiliateEngine.ts`:
+  removed client-side 7-char generator. `provisionCode` now calls the
+  server `ensure_referral_code` RPC and reads from the `referral_codes`
+  mirror with a `profiles.referral_code` fallback.
+- `AffiliateDashboard.tsx`: prominent 6-digit code display (mono, 4xl,
+  tracked) + WhatsApp share button (`https://wa.me/?text=…`) alongside the
+  existing copy CTA. Strings localized to Arabic.
+- `src/core-os/finance/hooks/useAffiliateEngine.ts`: marked `@deprecated`
+  pending `WalletAffiliateHub` migration.
+
+### Verification
+- All new SECURITY DEFINER functions pin `search_path = public`.
+- Referral codes produced by the new path are guaranteed `^[0-9]{6}$` and
+  unique across `profiles.referral_code` + `referral_codes.code`.
+- Payout RPC enforces staff-only access and produces zero-sum
+  `ledger_entries` per `transaction_group_id`.
