@@ -61,8 +61,8 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   // in a follow-up phase once SSR shell is stable.
   if (!headers.has("Content-Security-Policy")) {
     const frameAncestors = isLovableHost
-      ? "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev"
-      : "frame-ancestors 'none'";
+      ? "frame-ancestors *" // Allow all parent origins ONLY on the preview/dev hosts (fixes mobile wrapper)
+      : "frame-ancestors 'none'"; // Strict lockdown on the real production host
     headers.set(
       "Content-Security-Policy",
       [
