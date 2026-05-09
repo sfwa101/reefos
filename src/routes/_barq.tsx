@@ -19,7 +19,7 @@ import { RoleGuard } from "@/components/admin/RoleGuard";
 import { useDispatchRadar } from "@/apps/reef-al-madina/features/driver/hooks/useDispatchRadar";
 import { IncomingOfferModal } from "@/apps/reef-al-madina/features/driver/components/IncomingOfferModal";
 
-export const Route = createFileRoute("/_driver")({
+export const Route = createFileRoute("/_barq")({
   component: DriverLayout,
 });
 
