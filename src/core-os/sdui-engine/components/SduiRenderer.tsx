@@ -6,18 +6,15 @@
 import { memo, type ReactNode } from "react";
 import { renderBlock } from "../engine/BlockRegistry";
 import type { SduiBlock } from "../engine/schemas";
+import { SDUIErrorBoundary } from "./SDUIErrorBoundary";
 
 const SafeBlock = memo(
   function SafeBlock({ block }: { block: SduiBlock }) {
-    try {
-      return renderBlock(block);
-    } catch (err) {
-      if (typeof console !== "undefined") {
-        // eslint-disable-next-line no-console
-        console.error(`[SDUI] block ${block.id} (${block.type}) failed`, err);
-      }
-      return null;
-    }
+    return (
+      <SDUIErrorBoundary blockId={block.id} blockKind={`sdui:${block.type}`}>
+        {renderBlock(block)}
+      </SDUIErrorBoundary>
+    );
   },
   (prev, next) => prev.block === next.block,
 );
