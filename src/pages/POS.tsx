@@ -3,7 +3,7 @@ import { usePosEngine } from "@/apps/reef-al-madina/features/pos/hooks/usePosEng
 import { PosShiftManager } from "@/apps/reef-al-madina/features/pos/components/PosShiftManager";
 import { PosBarcodeCart } from "@/apps/reef-al-madina/features/pos/components/PosBarcodeCart";
 import { PosQuickPay } from "@/apps/reef-al-madina/features/pos/components/PosQuickPay";
-import { ShieldAlert, Loader2, WifiOff } from "lucide-react";
+import { ShieldAlert, Loader2 } from "lucide-react";
 
 export default function POSPage() {
   const { role, loading: roleLoading } = useUserRole();
@@ -30,18 +30,7 @@ export default function POSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-6" dir="rtl">
-      <header className="sticky top-0 z-30 bg-surface/95 backdrop-blur border-b border-border/40">
-        <div className="max-w-5xl mx-auto px-4 h-12 flex items-center justify-between">
-          <p className="font-display text-[16px]">نقطة البيع</p>
-          {!e.online && (
-            <span className="flex items-center gap-1 text-[11px] text-warning">
-              <WifiOff className="h-3.5 w-3.5" /> وضع عدم الاتصال
-            </span>
-          )}
-        </div>
-      </header>
-
+    <div className="bg-background pb-6" dir="rtl">
       <main className="max-w-5xl mx-auto px-4 pt-3">
         <PosShiftManager
           shift={e.shift}

@@ -8637,6 +8637,10 @@ export type Database = {
         Args: { _campaign_id: string }
         Returns: Json
       }
+      process_pos_cash_payment: {
+        Args: { p_amount: number; p_order_id: string }
+        Returns: Json
+      }
       process_savings_jar_op: {
         Args: {
           p_amount: number

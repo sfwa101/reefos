@@ -10,11 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
-import { Route as PosRouteImport } from './routes/pos'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as PosRouteImport } from './routes/_pos'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
@@ -97,6 +97,7 @@ import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
 import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advance-approvals'
 import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
+import { Route as PosPosRouteImport } from './routes/_pos.pos'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -117,6 +118,9 @@ import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.l
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
+import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
+import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
+import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
@@ -153,11 +157,6 @@ const VendorRoute = VendorRouteImport.update({
   path: '/vendor',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PosRoute = PosRouteImport.update({
-  id: '/pos',
-  path: '/pos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const EmployeeRoute = EmployeeRouteImport.update({
   id: '/employee',
   path: '/employee',
@@ -176,6 +175,10 @@ const AuthRoute = AuthRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PosRoute = PosRouteImport.update({
+  id: '/_pos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -589,6 +592,11 @@ const AdminEntityRoute = AdminEntityRouteImport.update({
   path: '/$entity',
   getParentRoute: () => AdminRoute,
 } as any)
+const PosPosRoute = PosPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
+  getParentRoute: () => PosRoute,
+} as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -690,6 +698,21 @@ const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
   id: '/$id',
   path: '/$id',
   getParentRoute: () => AdminEntityRoute,
+} as any)
+const PosPosReturnsRoute = PosPosReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => PosPosRoute,
+} as any)
+const PosPosInventoryRoute = PosPosInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => PosPosRoute,
+} as any)
+const PosPosCloseShiftRoute = PosPosCloseShiftRouteImport.update({
+  id: '/close-shift',
+  path: '/close-shift',
+  getParentRoute: () => PosPosRoute,
 } as any)
 const AppSubSlugRoute = AppSubSlugRouteImport.update({
   id: '/sub/$slug',
@@ -848,7 +871,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
   '/affiliate': typeof AppAffiliateRoute
@@ -859,6 +881,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -969,6 +992,9 @@ export interface FileRoutesByFullPath {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/close-shift': typeof PosPosCloseShiftRoute
+  '/pos/inventory': typeof PosPosInventoryRoute
+  '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -982,9 +1008,9 @@ export interface FileRoutesByFullPath {
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AppIndexRoute
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
   '/maeen': typeof AppMaeenRoute
@@ -993,6 +1019,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1070,7 +1097,6 @@ export interface FileRoutesByTo {
   '/vendor/orders': typeof VendorOrdersRoute
   '/vendor/products': typeof VendorProductsRoute
   '/vendor/wallet': typeof VendorWalletRoute
-  '/': typeof AppIndexRoute
   '/admin': typeof AdminIndexRoute
   '/driver': typeof DriverIndexRoute
   '/vendor': typeof VendorIndexRoute
@@ -1104,6 +1130,9 @@ export interface FileRoutesByTo {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/close-shift': typeof PosPosCloseShiftRoute
+  '/pos/inventory': typeof PosPosInventoryRoute
+  '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1119,11 +1148,11 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_pos': typeof PosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/affiliate': typeof AppAffiliateRoute
@@ -1134,6 +1163,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/_pos/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
@@ -1245,6 +1275,9 @@ export interface FileRoutesById {
   '/_app/store/village': typeof AppStoreVillageRoute
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
+  '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
+  '/_pos/pos/inventory': typeof PosPosInventoryRoute
+  '/_pos/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1265,7 +1298,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/pos'
     | '/vendor'
     | '/account'
     | '/affiliate'
@@ -1276,6 +1308,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1386,6 +1419,9 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/close-shift'
+    | '/pos/inventory'
+    | '/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1399,9 +1435,9 @@ export interface FileRouteTypes {
     | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/auth'
     | '/employee'
-    | '/pos'
     | '/affiliate'
     | '/cart'
     | '/maeen'
@@ -1410,6 +1446,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1487,7 +1524,6 @@ export interface FileRouteTypes {
     | '/vendor/orders'
     | '/vendor/products'
     | '/vendor/wallet'
-    | '/'
     | '/admin'
     | '/driver'
     | '/vendor'
@@ -1521,6 +1557,9 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/close-shift'
+    | '/pos/inventory'
+    | '/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1535,11 +1574,11 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_pos'
     | '/admin'
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/pos'
     | '/vendor'
     | '/_app/account'
     | '/_app/affiliate'
@@ -1550,6 +1589,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/_pos/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
     | '/admin/affiliate-settings'
@@ -1661,6 +1701,9 @@ export interface FileRouteTypes {
     | '/_app/store/village'
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
+    | '/_pos/pos/close-shift'
+    | '/_pos/pos/inventory'
+    | '/_pos/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1676,11 +1719,11 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  PosRoute: typeof PosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
-  PosRoute: typeof PosRoute
   VendorRoute: typeof VendorRouteWithChildren
 }
 
@@ -1691,13 +1734,6 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pos': {
-      id: '/pos'
-      path: '/pos'
-      fullPath: '/pos'
-      preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employee': {
@@ -1726,6 +1762,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_pos': {
+      id: '/_pos'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -2302,6 +2345,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntityRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/_pos/pos': {
+      id: '/_pos/pos'
+      path: '/pos'
+      fullPath: '/pos'
+      preLoaderRoute: typeof PosPosRouteImport
+      parentRoute: typeof PosRoute
+    }
     '/_app/wallet': {
       id: '/_app/wallet'
       path: '/wallet'
@@ -2441,6 +2491,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/$entity/$id'
       preLoaderRoute: typeof AdminEntityIdRouteImport
       parentRoute: typeof AdminEntityRoute
+    }
+    '/_pos/pos/returns': {
+      id: '/_pos/pos/returns'
+      path: '/returns'
+      fullPath: '/pos/returns'
+      preLoaderRoute: typeof PosPosReturnsRouteImport
+      parentRoute: typeof PosPosRoute
+    }
+    '/_pos/pos/inventory': {
+      id: '/_pos/pos/inventory'
+      path: '/inventory'
+      fullPath: '/pos/inventory'
+      preLoaderRoute: typeof PosPosInventoryRouteImport
+      parentRoute: typeof PosPosRoute
+    }
+    '/_pos/pos/close-shift': {
+      id: '/_pos/pos/close-shift'
+      path: '/close-shift'
+      fullPath: '/pos/close-shift'
+      preLoaderRoute: typeof PosPosCloseShiftRouteImport
+      parentRoute: typeof PosPosRoute
     }
     '/_app/sub/$slug': {
       id: '/_app/sub/$slug'
@@ -2755,6 +2826,31 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PosPosRouteChildren {
+  PosPosCloseShiftRoute: typeof PosPosCloseShiftRoute
+  PosPosInventoryRoute: typeof PosPosInventoryRoute
+  PosPosReturnsRoute: typeof PosPosReturnsRoute
+}
+
+const PosPosRouteChildren: PosPosRouteChildren = {
+  PosPosCloseShiftRoute: PosPosCloseShiftRoute,
+  PosPosInventoryRoute: PosPosInventoryRoute,
+  PosPosReturnsRoute: PosPosReturnsRoute,
+}
+
+const PosPosRouteWithChildren =
+  PosPosRoute._addFileChildren(PosPosRouteChildren)
+
+interface PosRouteChildren {
+  PosPosRoute: typeof PosPosRouteWithChildren
+}
+
+const PosRouteChildren: PosRouteChildren = {
+  PosPosRoute: PosPosRouteWithChildren,
+}
+
+const PosRouteWithChildren = PosRoute._addFileChildren(PosRouteChildren)
+
 interface AdminEntityRouteChildren {
   AdminEntityIdRoute: typeof AdminEntityIdRoute
 }
@@ -3013,11 +3109,11 @@ const VendorRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  PosRoute: PosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
-  PosRoute: PosRoute,
   VendorRoute: VendorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
