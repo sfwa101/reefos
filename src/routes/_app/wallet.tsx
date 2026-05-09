@@ -3,6 +3,7 @@ import { ShieldCheck, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { lazyPage } from "@/routes/-lazyRoute";
 import { useAuth } from "@/context/AuthContext";
+import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 
 const Wallet = lazyPage(() => import("@/pages/Wallet"));
 
@@ -24,6 +25,7 @@ const DISMISS_KEY = "tayseer:kyc-advisory:dismissed";
  */
 const ProgressiveKycBanner = () => {
   const { profile } = useAuth();
+  const hasSovereignOverride = useSovereignOverride();
   const [dismissed, setDismissed] = useState<boolean>(false);
 
   useEffect(() => {
@@ -35,6 +37,7 @@ const ProgressiveKycBanner = () => {
   }, []);
 
   if (profile?.is_kyc_verified) return null;
+  if (hasSovereignOverride) return null;
   if (dismissed) return null;
 
   const dismiss = () => {

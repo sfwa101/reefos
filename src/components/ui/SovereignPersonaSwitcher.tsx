@@ -26,6 +26,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
+import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { useSovereignContext, type PersonaRow } from "@/core-os/capabilities/store/useSovereignContext";
 import { cn } from "@/lib/utils";
 
@@ -70,6 +71,7 @@ const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
   const navigate = useNavigate();
   const { user, profile } = useAuth();
   const { roles } = useUserRoles();
+  const hasSovereignOverride = useSovereignOverride();
   const { activePersonaKey, setPersona } = useSovereignContext();
   const [open, setOpen] = useState(false);
 
@@ -110,7 +112,8 @@ const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
 
   const handleSelect = (p: PersonaRow) => {
     // Phase 19 — Sovereign Soft-Wall: switching to Business persona requires KYC.
-    if (p.persona_key === "business" && !profile?.is_kyc_verified) {
+    // Phase 55 — Sovereign Override: admins bypass KYC entirely.
+    if (p.persona_key === "business" && !profile?.is_kyc_verified && !hasSovereignOverride) {
       setOpen(false);
       navigate({ to: "/wallet" }).catch(() => { /* triggers KycUpgradeGate */ });
       return;
