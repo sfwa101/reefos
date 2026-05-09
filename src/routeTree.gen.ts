@@ -16,6 +16,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PosRouteImport } from './routes/_pos'
 import { Route as KdsRouteImport } from './routes/_kds'
+import { Route as DriverRouteImport } from './routes/_driver'
 import { Route as DispatchRouteImport } from './routes/_dispatch'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
@@ -101,6 +102,7 @@ import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advanc
 import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
 import { Route as PosPosRouteImport } from './routes/_pos.pos'
 import { Route as KdsKdsRouteImport } from './routes/_kds.kds'
+import { Route as DriverDriverOpsRouteImport } from './routes/_driver.driver-ops'
 import { Route as DispatchDispatchRouteImport } from './routes/_dispatch.dispatch'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
@@ -187,6 +189,10 @@ const PosRoute = PosRouteImport.update({
 } as any)
 const KdsRoute = KdsRouteImport.update({
   id: '/_kds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DriverRoute = DriverRouteImport.update({
+  id: '/_driver',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DispatchRoute = DispatchRouteImport.update({
@@ -614,6 +620,11 @@ const KdsKdsRoute = KdsKdsRouteImport.update({
   path: '/kds',
   getParentRoute: () => KdsRoute,
 } as any)
+const DriverDriverOpsRoute = DriverDriverOpsRouteImport.update({
+  id: '/driver-ops',
+  path: '/driver-ops',
+  getParentRoute: () => DriverRoute,
+} as any)
 const DispatchDispatchRoute = DispatchDispatchRouteImport.update({
   id: '/dispatch',
   path: '/dispatch',
@@ -904,6 +915,7 @@ export interface FileRoutesByFullPath {
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
   '/dispatch': typeof DispatchDispatchRoute
+  '/driver-ops': typeof DriverDriverOpsRoute
   '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1044,6 +1056,7 @@ export interface FileRoutesByTo {
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
   '/dispatch': typeof DispatchDispatchRoute
+  '/driver-ops': typeof DriverDriverOpsRoute
   '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1175,6 +1188,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
   '/_dispatch': typeof DispatchRouteWithChildren
+  '/_driver': typeof DriverRouteWithChildren
   '/_kds': typeof KdsRouteWithChildren
   '/_pos': typeof PosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
@@ -1192,6 +1206,7 @@ export interface FileRoutesById {
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
   '/_dispatch/dispatch': typeof DispatchDispatchRoute
+  '/_driver/driver-ops': typeof DriverDriverOpsRoute
   '/_kds/kds': typeof KdsKdsRoute
   '/_pos/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
@@ -1339,6 +1354,7 @@ export interface FileRouteTypes {
     | '/sections'
     | '/wallet'
     | '/dispatch'
+    | '/driver-ops'
     | '/kds'
     | '/pos'
     | '/admin/$entity'
@@ -1479,6 +1495,7 @@ export interface FileRouteTypes {
     | '/sections'
     | '/wallet'
     | '/dispatch'
+    | '/driver-ops'
     | '/kds'
     | '/pos'
     | '/admin/$entity'
@@ -1609,6 +1626,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_app'
     | '/_dispatch'
+    | '/_driver'
     | '/_kds'
     | '/_pos'
     | '/admin'
@@ -1626,6 +1644,7 @@ export interface FileRouteTypes {
     | '/_app/sections'
     | '/_app/wallet'
     | '/_dispatch/dispatch'
+    | '/_driver/driver-ops'
     | '/_kds/kds'
     | '/_pos/pos'
     | '/admin/$entity'
@@ -1758,6 +1777,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   DispatchRoute: typeof DispatchRouteWithChildren
+  DriverRoute: typeof DriverRouteWithChildren
   KdsRoute: typeof KdsRouteWithChildren
   PosRoute: typeof PosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
@@ -1816,6 +1836,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof KdsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_driver': {
+      id: '/_driver'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof DriverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dispatch': {
@@ -2413,6 +2440,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KdsKdsRouteImport
       parentRoute: typeof KdsRoute
     }
+    '/_driver/driver-ops': {
+      id: '/_driver/driver-ops'
+      path: '/driver-ops'
+      fullPath: '/driver-ops'
+      preLoaderRoute: typeof DriverDriverOpsRouteImport
+      parentRoute: typeof DriverRoute
+    }
     '/_dispatch/dispatch': {
       id: '/_dispatch/dispatch'
       path: '/dispatch'
@@ -2906,6 +2940,17 @@ const DispatchRouteWithChildren = DispatchRoute._addFileChildren(
   DispatchRouteChildren,
 )
 
+interface DriverRouteChildren {
+  DriverDriverOpsRoute: typeof DriverDriverOpsRoute
+}
+
+const DriverRouteChildren: DriverRouteChildren = {
+  DriverDriverOpsRoute: DriverDriverOpsRoute,
+}
+
+const DriverRouteWithChildren =
+  DriverRoute._addFileChildren(DriverRouteChildren)
+
 interface KdsRouteChildren {
   KdsKdsRoute: typeof KdsKdsRoute
 }
@@ -3200,6 +3245,7 @@ const VendorRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   DispatchRoute: DispatchRouteWithChildren,
+  DriverRoute: DriverRouteWithChildren,
   KdsRoute: KdsRouteWithChildren,
   PosRoute: PosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,

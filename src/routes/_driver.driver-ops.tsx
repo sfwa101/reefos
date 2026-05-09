@@ -37,7 +37,7 @@ function DriverOpsPage() {
       const { data } = await supabase
         .from("salsabil_fulfillment_nodes")
         .select("id, master_order_id, status, total_amount, delivery_snapshot")
-        .eq("driver_id", engine.driverId)
+        .eq("driver_id", engine.driverId as string)
         .in("status", ["assigned", "ready_for_pickup"]);
       if (cancelled) return;
       const list: PickupNode[] = (data ?? []).map((n) => {
