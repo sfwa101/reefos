@@ -4,6 +4,7 @@ import { PosShiftManager } from "@/apps/reef-al-madina/features/pos/components/P
 import { PosBarcodeCart } from "@/apps/reef-al-madina/features/pos/components/PosBarcodeCart";
 import { PosQuickPay } from "@/apps/reef-al-madina/features/pos/components/PosQuickPay";
 import { PosSyncPill } from "@/components/pos/PosSyncPill";
+import { FloatingGuardian } from "@/components/hakim/FloatingGuardian";
 import { ShieldAlert, Loader2, Store } from "lucide-react";
 
 export default function POSPage() {
@@ -38,7 +39,10 @@ export default function POSPage() {
             <Store className="h-4 w-4 text-primary" />
             <h1 className="font-display text-[15px]">نقطة البيع</h1>
           </div>
-          <PosSyncPill online={e.online} />
+          <div className="flex items-center gap-2">
+            <FloatingGuardian workspace="pos" inline />
+            <PosSyncPill online={e.online} />
+          </div>
         </header>
         <PosShiftManager
           shift={e.shift}

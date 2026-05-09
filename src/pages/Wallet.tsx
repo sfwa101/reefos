@@ -31,6 +31,7 @@ import { VaultsDockContent } from "@/core-os/finance/components/VaultsDockConten
 import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockContent";
 import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
 import { toLatin } from "@/lib/format";
+import { FloatingGuardian } from "@/components/hakim/FloatingGuardian";
 
 type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity" | "family";
 
@@ -108,14 +109,17 @@ const Wallet = () => {
               </p>
             )}
           </div>
-          <button
-            type="button"
-            onClick={toggleHide}
-            aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
-            className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
-          >
-            {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <FloatingGuardian workspace="wallet" inline />
+            <button
+              type="button"
+              onClick={toggleHide}
+              aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
+              className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
+            >
+              {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
         </motion.section>
 
         {/* UNIFIED BALANCE CARD — glassmorphism on tokens */}
