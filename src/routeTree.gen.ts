@@ -118,6 +118,7 @@ import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.l
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
+import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
@@ -697,6 +698,11 @@ const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
   path: '/$id',
   getParentRoute: () => AdminEntityRoute,
 } as any)
+const PosPosReturnsRoute = PosPosReturnsRouteImport.update({
+  id: '/returns',
+  path: '/returns',
+  getParentRoute: () => PosPosRoute,
+} as any)
 const PosPosInventoryRoute = PosPosInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
@@ -981,6 +987,7 @@ export interface FileRoutesByFullPath {
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/inventory': typeof PosPosInventoryRoute
+  '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1117,6 +1124,7 @@ export interface FileRoutesByTo {
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/inventory': typeof PosPosInventoryRoute
+  '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1260,6 +1268,7 @@ export interface FileRoutesById {
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
+  '/_pos/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
@@ -1402,6 +1411,7 @@ export interface FileRouteTypes {
     | '/store/wholesale'
     | '/sub/$slug'
     | '/pos/inventory'
+    | '/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1538,6 +1548,7 @@ export interface FileRouteTypes {
     | '/store/wholesale'
     | '/sub/$slug'
     | '/pos/inventory'
+    | '/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -1680,6 +1691,7 @@ export interface FileRouteTypes {
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
     | '/_pos/pos/inventory'
+    | '/_pos/pos/returns'
     | '/admin/$entity/$id'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
@@ -2468,6 +2480,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminEntityIdRouteImport
       parentRoute: typeof AdminEntityRoute
     }
+    '/_pos/pos/returns': {
+      id: '/_pos/pos/returns'
+      path: '/returns'
+      fullPath: '/pos/returns'
+      preLoaderRoute: typeof PosPosReturnsRouteImport
+      parentRoute: typeof PosPosRoute
+    }
     '/_pos/pos/inventory': {
       id: '/_pos/pos/inventory'
       path: '/inventory'
@@ -2790,10 +2809,12 @@ const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PosPosRouteChildren {
   PosPosInventoryRoute: typeof PosPosInventoryRoute
+  PosPosReturnsRoute: typeof PosPosReturnsRoute
 }
 
 const PosPosRouteChildren: PosPosRouteChildren = {
   PosPosInventoryRoute: PosPosInventoryRoute,
+  PosPosReturnsRoute: PosPosReturnsRoute,
 }
 
 const PosPosRouteWithChildren =
