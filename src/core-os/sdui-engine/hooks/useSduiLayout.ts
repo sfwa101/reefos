@@ -63,7 +63,7 @@ export function useSduiLayout(slug: string): State {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["sdui_layouts", slug],
+    queryKey: tenantQueryKey("sdui_layouts", slug),
     queryFn: () => fetchSduiBlocks(slug),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
