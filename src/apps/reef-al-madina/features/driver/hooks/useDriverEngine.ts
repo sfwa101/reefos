@@ -17,6 +17,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
+import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import type {
   DriverEarnings,
   DriverEvent,
