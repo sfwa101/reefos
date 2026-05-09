@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as VendorRouteImport } from './routes/vendor'
-import { Route as PosRouteImport } from './routes/pos'
 import { Route as EmployeeRouteImport } from './routes/employee'
 import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
@@ -151,11 +150,6 @@ import { Route as AppAccountAddressesRouteImport } from './routes/_app/account.a
 const VendorRoute = VendorRouteImport.update({
   id: '/vendor',
   path: '/vendor',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PosRoute = PosRouteImport.update({
-  id: '/pos',
-  path: '/pos',
   getParentRoute: () => rootRouteImport,
 } as any)
 const EmployeeRoute = EmployeeRouteImport.update({
@@ -848,7 +842,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
   '/affiliate': typeof AppAffiliateRoute
@@ -984,7 +977,6 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
   '/maeen': typeof AppMaeenRoute
@@ -1123,7 +1115,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/pos': typeof PosRoute
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/affiliate': typeof AppAffiliateRoute
@@ -1265,7 +1256,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/pos'
     | '/vendor'
     | '/account'
     | '/affiliate'
@@ -1401,7 +1391,6 @@ export interface FileRouteTypes {
   to:
     | '/auth'
     | '/employee'
-    | '/pos'
     | '/affiliate'
     | '/cart'
     | '/maeen'
@@ -1539,7 +1528,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/driver'
     | '/employee'
-    | '/pos'
     | '/vendor'
     | '/_app/account'
     | '/_app/affiliate'
@@ -1680,7 +1668,6 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
-  PosRoute: typeof PosRoute
   VendorRoute: typeof VendorRouteWithChildren
 }
 
@@ -1691,13 +1678,6 @@ declare module '@tanstack/react-router' {
       path: '/vendor'
       fullPath: '/vendor'
       preLoaderRoute: typeof VendorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pos': {
-      id: '/pos'
-      path: '/pos'
-      fullPath: '/pos'
-      preLoaderRoute: typeof PosRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/employee': {
@@ -3017,9 +2997,18 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
-  PosRoute: PosRoute,
   VendorRoute: VendorRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
