@@ -468,7 +468,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
                 trace_id: traceId,
                 event_domain: "wallet",
                 event_type: "tayseer_payment_failed",
-                payload: { order_id: savedOrderId, amount: walletApplied, message: msg },
+                payload: { order_id: savedOrderId, amount: tayseerCharge, message: msg },
               });
               toast.error(msg);
               setSubmitting(false);
