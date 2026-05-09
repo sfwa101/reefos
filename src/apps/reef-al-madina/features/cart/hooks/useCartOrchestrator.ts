@@ -272,13 +272,20 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   const checkoutWA = async () => {
     if (submittingRef.current) {
-      console.warn("[checkout] duplicate submit blocked");
+      console.warn("[checkout] duplicate submit blocked (in-flight)");
+      return;
+    }
+    const sinceLast = Date.now() - lastSubmitAtRef.current;
+    if (sinceLast < SUBMIT_COOLDOWN_MS) {
+      const wait = Math.ceil((SUBMIT_COOLDOWN_MS - sinceLast) / 1000);
+      toast.error(`لقد تجاوزت حد الطلبات المسموح به، يرجى المحاولة بعد ${wait} ثانية`);
       return;
     }
     if (!paymentsEnabled) {
       toast.error("نظام الدفع متوقف مؤقتاً للتحديث");
       return;
     }
+    lastSubmitAtRef.current = Date.now();
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
     console.info("[checkout] WhatsApp checkout invoked", {
