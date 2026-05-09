@@ -45,7 +45,8 @@ const Cart = () => {
   };
 
   const isLocked = o.isSharedMode && o.sharedCart?.status === "pending_approvals";
-  const checkoutDisabled = o.logisticsBlocked || hasPricingErrors || isLocked;
+  const paymentsHalted = !o.paymentsEnabled;
+  const checkoutDisabled = o.logisticsBlocked || hasPricingErrors || isLocked || paymentsHalted;
 
   if (o.lines.length === 0) {
     return (
@@ -189,15 +190,17 @@ const Cart = () => {
           >
             <span className="flex items-center gap-2 text-sm">
               {checkoutDisabled && <Lock className="h-4 w-4" />}
-              {isLocked
-                ? "مقفلة — بانتظار الموافقات"
-                : hasPricingErrors
-                  ? "أكمل بيانات المنتجات أولاً"
-                  : o.logisticsBlocked
-                    ? o.logisticsQuote?.blockers[0]?.code === "below_min_order"
-                      ? "الحد الأدنى للمنطقة غير مكتمل"
-                      : "غير متاح في منطقتك حالياً"
-                    : "متابعة الدفع"}
+              {paymentsHalted
+                ? "نظام الدفع متوقف مؤقتاً للتحديث"
+                : isLocked
+                  ? "مقفلة — بانتظار الموافقات"
+                  : hasPricingErrors
+                    ? "أكمل بيانات المنتجات أولاً"
+                    : o.logisticsBlocked
+                      ? o.logisticsQuote?.blockers[0]?.code === "below_min_order"
+                        ? "الحد الأدنى للمنطقة غير مكتمل"
+                        : "غير متاح في منطقتك حالياً"
+                      : "متابعة الدفع"}
             </span>
             <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
               {toLatin(Math.round(o.effectiveGrand))} ج

@@ -107,6 +107,7 @@ const groups = [
     { to: "/admin/design", icon: Layout, label: "محرر التصميم" },
   ]},
   { title: "إعدادات النظام", items: [
+    { to: "/admin/control-plane", icon: ShieldCheck, label: "غرفة التحكم السيادية" },
     { to: "/admin/system-settings", icon: Sliders, label: "مفاتيح التشغيل" },
     { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات" },
     { to: "/admin/support", icon: MessagesSquare, label: "الدعم" },

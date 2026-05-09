@@ -21,6 +21,7 @@ import {
 } from "./useCartValidation";
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
@@ -58,6 +59,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   // Dynamic kill-switch: when disabled, checkout completes in-app and skips WhatsApp dispatch.
   const { value: enableWaCheckout } = useSystemSetting<boolean>("enable_whatsapp_checkout", true);
+  // Phase 38 — Sovereign Control Plane kill switch.
+  const { value: paymentsEnabled } = useSystemSetting<boolean>("payments_enabled", true);
 
   const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
     useCartValidation(total);
@@ -266,11 +269,30 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       console.warn("[checkout] duplicate submit blocked");
       return;
     }
+    if (!paymentsEnabled) {
+      toast.error("نظام الدفع متوقف مؤقتاً للتحديث");
+      return;
+    }
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
     console.info("[checkout] WhatsApp checkout invoked", {
       source,
       cartLines: lines.length,
+    });
+    // Phase 38 — distributed tracing: one trace_id per submit attempt; the
+    // same id is reused for `checkout_attempt` and (on success) `checkout_success`.
+    const traceId = createTraceId();
+    const checkoutIdempotencyKey = newIdempotencyKey();
+    void logSovereignEvent({
+      trace_id: traceId,
+      event_domain: "checkout",
+      event_type: "checkout_attempt",
+      payload: {
+        idempotency_key: checkoutIdempotencyKey,
+        line_count: lines.length,
+        grand: effectiveGrand,
+        payment,
+      },
     });
     submittingRef.current = true;
     setSubmitting(true);
@@ -368,17 +390,23 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         };
 
         try {
-          // Phase 36 Titanium Shield — idempotent checkout. Generated once
-          // per submit attempt; safe-to-retry across network failures.
+          // Phase 36 Titanium Shield — idempotent checkout. Phase 38 reuses
+          // the same key the trace event captured so success can be correlated.
           savedOrderId = await callSovereignCheckout({
             customer_id: currentUser.id,
             cart_items: sovereignItems,
             delivery_info: deliveryInfo,
-            idempotency_key: newIdempotencyKey(),
+            idempotency_key: checkoutIdempotencyKey,
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
           console.error("[checkout] process_checkout_sovereign failed", e);
+          void logSovereignEvent({
+            trace_id: traceId,
+            event_domain: "checkout",
+            event_type: "checkout_failed",
+            payload: { idempotency_key: checkoutIdempotencyKey, message: msg },
+          });
           toast.error(msg);
           setSubmitting(false);
           submittingRef.current = false;
@@ -387,6 +415,16 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
         if (savedOrderId) {
           await allocateOrderInventory(savedOrderId, zone.id);
+          void logSovereignEvent({
+            trace_id: traceId,
+            event_domain: "checkout",
+            event_type: "checkout_success",
+            payload: {
+              idempotency_key: checkoutIdempotencyKey,
+              order_id: savedOrderId,
+              grand: effectiveGrand,
+            },
+          });
         }
       }
 
@@ -604,6 +642,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     // checkout
     submitting,
     checkoutWA,
+    paymentsEnabled,
     // WhatsApp fallback dialog
     waFallback,
     dismissWaFallback,
@@ -660,7 +699,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     hasBooking, hasNonBookingItems, hasInstantSweets, hasFreshSweets,
     vendorGroups, instantGroups, scheduledGroups, showFulfillmentSections,
     isMultiVendor, totalCashback, groupIsMixedScheduled, crossSell,
-    submitting, waFallback,
+    submitting, waFallback, paymentsEnabled,
     isSharedMode, sharedCartId, shared,
     logisticsQuote, logisticsBlocked, effectiveDelivery, effectiveGrand, codAllowed,
     giftMode, giftMessage, giftRecipientName, giftRecipientPhone, giftRecipientAddress,
