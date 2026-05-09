@@ -27,6 +27,8 @@ export type TayseerPayResult = {
 
 const friendly = (raw: string): string => {
   const m = raw.toLowerCase();
+  if (m.includes("limit_exceeded") || m.includes("wallet_limit"))
+    return "عذراً، لقد تجاوزت حد الإنفاق المسموح به.";
   if (m.includes("insufficient_funds")) return "رصيد محفظة تيسير غير كافٍ لإتمام الدفع";
   if (m.includes("wallet_missing")) return "لا توجد محفظة تيسير لهذا الحساب";
   if (m.includes("wallet_inactive")) return "محفظة تيسير غير مفعّلة حالياً";
