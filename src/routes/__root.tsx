@@ -165,6 +165,7 @@ function RootComponent() {
                       <CompareProvider>
                         <FavoritesProvider>
                           <LiveRulesBootstrap />
+                          <BackgroundSyncManager />
                           <CatalogBootstrap />
                           <BehaviorTrackerBootstrap />
                           <SovereignSpiritBootstrap />
