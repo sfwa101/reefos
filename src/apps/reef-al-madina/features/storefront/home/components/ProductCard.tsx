@@ -63,6 +63,13 @@ export const ProductCard = ({
   const inCompare = compare.has(p.id);
   const compareFull = !inCompare && compare.items.length >= compare.max;
 
+  // Phase 54 — Inventory Triage & Wakalah
+  const stock = p.stock ?? Number.POSITIVE_INFINITY;
+  const isOOS = stock === 0;
+  const isWakalah = isOOS && p.wakalahEligible === true;
+  const isHidden = isOOS && p.hideOnZero === true && !isWakalah;
+  const isHardOOS = isOOS && !isWakalah && !p.hideOnZero;
+
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (typeof navigator !== "undefined" && navigator.vibrate) {
@@ -73,6 +80,10 @@ export const ProductCard = ({
       toast.error("المنتج غير متاح حالياً");
       return;
     }
+    if (isHardOOS) {
+      toast.error("نفد المخزون");
+      return;
+    }
     if (isPre) {
       add(product, 1, {
         payDeposit: true,
@@ -81,6 +92,15 @@ export const ProductCard = ({
       });
       toast.success("تم تأكيد الحجز", {
         description: `دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
+      });
+      return;
+    }
+    if (isWakalah) {
+      add(product, 1, {
+        properties: { procurement_mode: "wakalah" },
+      });
+      toast.success("سنوفّره بالوكالة", {
+        description: "يضيفه السائق عند توفّره — لا خصم مسبق",
       });
       return;
     }
@@ -97,6 +117,8 @@ export const ProductCard = ({
     compare.toggle(toCompareItem(p));
     toast.success(inCompare ? "أُزيل من المقارنة" : "أُضيف للمقارنة");
   };
+
+  if (isHidden) return null;
 
   if (variant === "minimal") {
     return (
@@ -126,10 +148,18 @@ export const ProductCard = ({
             </span>
             <button
               onClick={handleAdd}
-              aria-label="أضف إلى السلة"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
+              disabled={isHardOOS}
+              aria-label={isHardOOS ? "نفد" : isWakalah ? "أضفه إن توفر" : "أضف إلى السلة"}
+              title={isWakalah ? "أضفه إن توفر (وكالة)" : undefined}
+              className={`flex h-9 items-center justify-center rounded-full px-2 text-[10px] font-extrabold shadow-pill transition active:scale-90 ${
+                isHardOOS
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : isWakalah
+                    ? "bg-amber-500 text-white"
+                    : "w-9 bg-primary text-primary-foreground"
+              }`}
             >
-              <Plus className="h-4 w-4" strokeWidth={3} />
+              {isHardOOS ? "نفد" : isWakalah ? "وكالة" : <Plus className="h-4 w-4" strokeWidth={3} />}
             </button>
           </div>
         </div>
@@ -142,7 +172,7 @@ export const ProductCard = ({
       onClick={onOpen}
       className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card text-right shadow-soft ring-1 ring-border/50 transition active:scale-[0.99] ${
         isPre ? "ring-2 ring-amber-300/60" : ""
-      }`}
+      } ${isHardOOS ? "opacity-60 saturate-50" : ""} ${isWakalah ? "ring-2 ring-amber-400/60" : ""}`}
       style={{ contentVisibility: "auto", containIntrinsicSize: "320px 340px" }}
     >
       {isPre && (
@@ -236,14 +266,31 @@ export const ProductCard = ({
 
           <button
             onClick={handleAdd}
-            aria-label={isPre ? "احجز الآن" : "أضف إلى السلة"}
+            disabled={isHardOOS}
+            aria-label={
+              isHardOOS ? "نفد المخزون"
+              : isWakalah ? "أضفه إن توفر (وكالة)"
+              : isPre ? "احجز الآن"
+              : "أضف إلى السلة"
+            }
             className={`flex h-9 items-center gap-1 rounded-full px-3 text-[11px] font-extrabold shadow-pill transition active:scale-95 ${
-              isPre
-                ? "bg-gradient-to-l from-amber-500 to-amber-600 text-white"
-                : "bg-primary text-primary-foreground"
+              isHardOOS
+                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                : isWakalah
+                  ? "bg-amber-500 text-white"
+                  : isPre
+                    ? "bg-gradient-to-l from-amber-500 to-amber-600 text-white"
+                    : "bg-primary text-primary-foreground"
             }`}
           >
-            {isPre ? (
+            {isHardOOS ? (
+              <>نفد</>
+            ) : isWakalah ? (
+              <>
+                <Plus className="h-3.5 w-3.5" strokeWidth={3} />
+                أضفه إن توفر
+              </>
+            ) : isPre ? (
               <>
                 <CalendarClock className="h-3.5 w-3.5" />
                 احجز الآن

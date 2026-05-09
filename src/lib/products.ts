@@ -41,6 +41,11 @@ export type Product = {
   perishable?: boolean;
   metadata?: Record<string, unknown>;
   description?: string;
+  /** Phase 54 — Inventory Triage projections (from salsabil_skus.attributes + inventory_matrix). */
+  stock?: number;
+  wakalahEligible?: boolean;
+  hideOnZero?: boolean;
+  lowStockThreshold?: number;
 };
 
 export type DbRow = {

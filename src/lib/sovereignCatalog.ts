@@ -138,6 +138,15 @@ export function assetToProduct(row: RawAsset): Product | null {
   const category = row.category_path?.split("/")[0]
     ?? (traits.category as string | undefined) ?? "general";
 
+  const attrsRec = attrs as Record<string, unknown>;
+  const wakalahEligible = attrsRec.wakalah_eligible === true;
+  const hideOnZero = attrsRec.hide_on_zero === true;
+  const lowStockRaw = attrsRec.low_stock_threshold;
+  const lowStockThreshold =
+    typeof lowStockRaw === "number"
+      ? lowStockRaw
+      : Number(lowStockRaw ?? 10) || 10;
+
   return {
     id: toLegacyAssetId(row.id),
     name: row.name,
@@ -154,10 +163,17 @@ export function assetToProduct(row: RawAsset): Product | null {
     source: sourceFromCategory(row.category_path),
     badge: (traits.badge as Product["badge"]) ?? undefined,
     perishable: (traits.perishable as boolean | undefined) ?? undefined,
+    stock: skuStock(primary),
+    wakalahEligible,
+    hideOnZero,
+    lowStockThreshold,
     metadata: {
       ...(traits as Record<string, unknown>),
       usa_asset_id: row.id,
       usa_sku_id: primary.id,
+      wakalah_eligible: wakalahEligible,
+      hide_on_zero: hideOnZero,
+      low_stock_threshold: lowStockThreshold,
     },
     description: row.description ?? undefined,
   };
