@@ -78,32 +78,32 @@ function useReferralCodeQuery(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Phase 57 — read from referral_codes (mirror), fall back to profiles.
+      const { data: rc } = await supabase
         .from("referral_codes")
         .select("code")
         .eq("user_id", userId!)
         .maybeSingle();
-      if (error) throw error;
-      return data?.code ?? null;
+      if (rc?.code) return rc.code;
+      const { data: prof } = await supabase
+        .from("profiles")
+        .select("referral_code")
+        .eq("id", userId!)
+        .maybeSingle();
+      return (prof?.referral_code as string | null) ?? null;
     },
   });
 
   const provision = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error("not authenticated");
-      // Retry on unique-collision up to 3x.
-      let lastErr: unknown = null;
-      for (let i = 0; i < 3; i += 1) {
-        const code = generateCode(userId);
-        const { data, error } = await supabase
-          .from("referral_codes")
-          .insert({ user_id: userId, code })
-          .select("code")
-          .single();
-        if (!error) return data.code;
-        lastErr = error;
-      }
-      throw lastErr ?? new Error("unable to provision code");
+      // Phase 57 — server-authoritative 6-digit code (National ID derived).
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data, error } = await (supabase.rpc as any)("ensure_referral_code", {
+        _user_id: userId,
+      });
+      if (error) throw error;
+      return data as string;
     },
     onSuccess: (code) => {
       if (userId) qc.setQueryData(QK.code(userId), code);
