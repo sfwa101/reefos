@@ -52,11 +52,6 @@
   --color-teal: hsl(var(--teal));
   --color-indigo: hsl(var(--indigo));
 
-  /* Phase 59 — Tayseer Sovereign financial state tokens */
-  --color-credit: hsl(var(--credit));
-  --color-debit: hsl(var(--debit));
-  --color-warn: hsl(var(--warn));
-  --color-premium: hsl(var(--premium));
 
   --font-display: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
 }
@@ -175,15 +170,6 @@
   --teal: 175 70% 41%;
   --indigo: 235 78% 60%;
 
-  /* Phase 59 — Tayseer Sovereign Financial Manifesto (light)
-     credit  = Islamic Sage Green  · positive flow / income
-     debit   = Deep Wine Garnet   · outgoing / restricted
-     warn    = Sovereign Amber    · advisory / pending
-     premium = Tayseer Gold       · tier / honor / VIP */
-  --credit: 145 55% 38%;
-  --debit: 350 65% 45%;
-  --warn: 35 95% 50%;
-  --premium: 42 75% 50%;
 
   --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-glow)) 100%);
   --shadow-elegant: 0 20px 50px -12px hsl(var(--primary) / 0.25);
@@ -196,11 +182,6 @@
   --foreground-secondary: 220 10% 78%;
   --foreground-tertiary: 220 8% 60%;
 
-  /* Phase 59 — Tayseer Sovereign Financial Manifesto (dark) */
-  --credit: 145 60% 55%;
-  --debit: 350 70% 62%;
-  --warn: 38 95% 60%;
-  --premium: 42 80% 60%;
 }
 
 /* Dark theme — global defaults (graphite base) */

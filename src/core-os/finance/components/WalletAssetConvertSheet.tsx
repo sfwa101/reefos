@@ -146,7 +146,7 @@ export const WalletAssetConvertSheet = ({
         </Row>
 
         {overBalance && (
-          <p className="mt-2 text-[11px] font-bold text-debit">
+          <p className="mt-2 text-[11px] font-bold text-rose-500">
             الرصيد غير كافٍ
           </p>
         )}
