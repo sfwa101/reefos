@@ -291,6 +291,18 @@ export const useDriverEngine = (): DriverEngine => {
       setBusyTaskId(null);
 
       if (error) {
+        // Phase 49 — Ground-Sync: queue locally on network failure so
+        // the driver keeps moving; the sync manager flushes on resume.
+        if (isLikelyNetworkError(error)) {
+          await enqueueOfflineMutation({
+            op: "table.update",
+            table: "salsabil_fulfillment_nodes",
+            match: { id: nodeId },
+            patch,
+          });
+          toast.success("تم الحفظ محلياً، ستتم المزامنة عند عودة الاتصال");
+          return;
+        }
         toast.error(error.message);
         load();
         return;
