@@ -390,17 +390,23 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         };
 
         try {
-          // Phase 36 Titanium Shield — idempotent checkout. Generated once
-          // per submit attempt; safe-to-retry across network failures.
+          // Phase 36 Titanium Shield — idempotent checkout. Phase 38 reuses
+          // the same key the trace event captured so success can be correlated.
           savedOrderId = await callSovereignCheckout({
             customer_id: currentUser.id,
             cart_items: sovereignItems,
             delivery_info: deliveryInfo,
-            idempotency_key: newIdempotencyKey(),
+            idempotency_key: checkoutIdempotencyKey,
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
           console.error("[checkout] process_checkout_sovereign failed", e);
+          void logSovereignEvent({
+            trace_id: traceId,
+            event_domain: "checkout",
+            event_type: "checkout_failed",
+            payload: { idempotency_key: checkoutIdempotencyKey, message: msg },
+          });
           toast.error(msg);
           setSubmitting(false);
           submittingRef.current = false;
@@ -409,6 +415,16 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
         if (savedOrderId) {
           await allocateOrderInventory(savedOrderId, zone.id);
+          void logSovereignEvent({
+            trace_id: traceId,
+            event_domain: "checkout",
+            event_type: "checkout_success",
+            payload: {
+              idempotency_key: checkoutIdempotencyKey,
+              order_id: savedOrderId,
+              grand: effectiveGrand,
+            },
+          });
         }
       }
 
