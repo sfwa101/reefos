@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 
 /* ============================================================
  * Phase 6 — Real-Time Shared Carts FSM
@@ -151,7 +152,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     }
   }, []);
 
-  // Initial load + realtime subscription
+  // Initial load + realtime subscription (Phase 44: visibility-aware)
   useEffect(() => {
     cancelledRef.current = false;
     if (!sharedCartId) {
@@ -162,57 +163,69 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       return;
     }
     fetchAll(sharedCartId);
-
-    const channel = supabase
-      .channel(`shared-cart-${sharedCartId}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "shared_carts", filter: `id=eq.${sharedCartId}` },
-        (payload) => {
-          if (payload.eventType === "DELETE") setCart(null);
-          else setCart((payload.new as SharedCart) ?? null);
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "shared_cart_participants", filter: `cart_id=eq.${sharedCartId}` },
-        (payload) => {
-          setParticipants((prev) => {
-            if (payload.eventType === "INSERT") return [...prev, payload.new as SharedCartParticipant];
-            if (payload.eventType === "UPDATE")
-              return prev.map((p) => (p.id === (payload.new as SharedCartParticipant).id ? (payload.new as SharedCartParticipant) : p));
-            if (payload.eventType === "DELETE")
-              return prev.filter((p) => p.id !== (payload.old as SharedCartParticipant).id);
-            return prev;
-          });
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "shared_cart_items", filter: `cart_id=eq.${sharedCartId}` },
-        (payload) => {
-          setItems((prev) => {
-            let next = prev;
-            if (payload.eventType === "INSERT") next = [...prev, payload.new as SharedCartItem];
-            else if (payload.eventType === "UPDATE")
-              next = prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
-            else if (payload.eventType === "DELETE")
-              next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
-            const normalized = normalizeItems(next);
-            const signature = itemsSignature(normalized);
-            if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
-            lastLocalItemsSignatureRef.current = signature;
-            return normalized;
-          });
-        },
-      )
-      .subscribe();
-
     return () => {
       cancelledRef.current = true;
-      supabase.removeChannel(channel);
     };
   }, [sharedCartId, fetchAll]);
+
+  useVisibilitySocket(
+    () => {
+      if (!sharedCartId) return;
+      const channel = supabase
+        .channel(`shared-cart-${sharedCartId}`)
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "shared_carts", filter: `id=eq.${sharedCartId}` },
+          (payload) => {
+            if (payload.eventType === "DELETE") setCart(null);
+            else setCart((payload.new as SharedCart) ?? null);
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "shared_cart_participants", filter: `cart_id=eq.${sharedCartId}` },
+          (payload) => {
+            setParticipants((prev) => {
+              if (payload.eventType === "INSERT") return [...prev, payload.new as SharedCartParticipant];
+              if (payload.eventType === "UPDATE")
+                return prev.map((p) => (p.id === (payload.new as SharedCartParticipant).id ? (payload.new as SharedCartParticipant) : p));
+              if (payload.eventType === "DELETE")
+                return prev.filter((p) => p.id !== (payload.old as SharedCartParticipant).id);
+              return prev;
+            });
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "shared_cart_items", filter: `cart_id=eq.${sharedCartId}` },
+          (payload) => {
+            setItems((prev) => {
+              let next = prev;
+              if (payload.eventType === "INSERT") next = [...prev, payload.new as SharedCartItem];
+              else if (payload.eventType === "UPDATE")
+                next = prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
+              else if (payload.eventType === "DELETE")
+                next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
+              const normalized = normalizeItems(next);
+              const signature = itemsSignature(normalized);
+              if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
+              lastLocalItemsSignatureRef.current = signature;
+              return normalized;
+            });
+          },
+        )
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    },
+    () => {
+      // Tab returned to foreground — catch up on anything missed while hidden.
+      if (sharedCartId) void fetchAll(sharedCartId);
+    },
+    [sharedCartId, fetchAll],
+    !!sharedCartId,
+  );
 
   const isOwner = !!(cart && user && cart.owner_id === user.id);
   const myParticipant = useMemo(

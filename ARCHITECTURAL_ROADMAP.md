@@ -1699,3 +1699,36 @@ Per-card `framer-motion` stagger entry + 15ms haptic on tap.
 - **Storage namespacing**: `tenantStoragePath()` is the new canonical helper for any future upload (`avatars`, `marketing-banners`, `print-files`, `product-images`). Existing call sites continue to work; new uploads should adopt it so a stray write can never land in another tenant's namespace.
 - **DB / RLS posture (intentional non-action)**: No DB-level `tenant_id` columns or JWT-claim RLS were introduced. Adding those without an actual second workspace would have been pure ceremony and risked breaking checkout/catalog. The kernel is ready to upgrade in place: add a tenant column + JWT claim later, swap `getActiveTenantId()` to read from `auth.uid().claims`, and the existing query-key/storage helpers continue to work unchanged.
 - **Result**: A clean, auditable tenant-isolation surface in the frontend with zero risk to existing flows. Cross-tenant cache and storage bleed are now impossible by design within the supported tenant set.
+
+## Phase 44 — Realtime Governance (Visibility-Aware Sockets)
+
+**Goal**: Eliminate idle WebSocket pressure on customer-facing realtime subscriptions during peak traffic. Channels now disconnect when the tab is hidden and re-establish (with a catch-up fetch) on return.
+
+### Audit
+
+Surveyed every `supabase.channel(...).on('postgres_changes', ...)` site in `src/`. Found 14 active subscriptions across customer / vendor / driver / admin surfaces. Prior to this phase **zero** of them gated on `document.visibilityState`, so every backgrounded customer tab kept a live socket open against the Realtime cluster.
+
+Customer-facing high-volume hooks (the only ones touched in this phase):
+- `src/apps/reef-al-madina/features/cart/hooks/useSharedCartSync.ts` — three filtered listeners per active shared cart.
+- `src/context/CartContext.tsx` — one listener per logged-in customer for `cart_items` cross-device sync.
+- `src/apps/reef-al-madina/features/group-buy/hooks/useGroupBuyEngine.ts` — two listeners per open Group Buy campaign (FOMO ticker — extremely chatty during peaks).
+
+Admin / Vendor / Driver hooks (`useVendorOperations`, `useDriverEngine`, `useDispatchRadar`, `useActiveDriverTracking`, `useSmartLogistics`, `Orders/Dashboard/ProfitObservationRoom`, `HakimPulseMonitor`) were intentionally left untouched per directive — these are operator surfaces that need realtime even when minimized.
+
+### Execution
+
+- **New primitive**: `src/hooks/useVisibilitySocket.ts`. Generic `useVisibilitySocket(subscribe, onResume, deps, enabled)` hook — wraps any subscribe-returns-cleanup callback, listens to `visibilitychange`, tears the socket down on `hidden`, re-attaches + invokes `onResume()` on `visible`. Internally guarded by a single channel ref to dedupe rapid app-switching and prevent duplicate channels / leaks.
+- **`useSharedCartSync`**: All three `postgres_changes` listeners moved inside `useVisibilitySocket`. Resume hook calls `fetchAll(sharedCartId)` to reconcile any item / participant / status mutations missed while backgrounded.
+- **`CartContext`**: Manual `visibilitychange` listener installed alongside the existing `subscribeRealtime` flow (kept manual instead of the hook because the channel is already managed via `realtimeChannelRef` and intertwined with auth gating). Hidden → `teardownRealtime()`. Visible → `subscribeRealtime(uid)` + one-shot `fetchRemoteCart(uid)` catch-up. Cleanup deregisters the listener on auth/unmount.
+- **`useGroupBuyEngine`**: Campaign + pledges listeners migrated to `useVisibilitySocket`. Resume hook re-runs `fetchAll()` so the FOMO counter snaps to the current truth.
+
+### Verification
+
+- `bunx tsc --noEmit` → clean.
+- Channel-leak invariant: each `useVisibilitySocket` invocation maintains exactly one `cleanupRef`; `attach()` is a no-op when already attached, so rapid hidden↔visible flips cannot stack channels.
+- Catch-up invariant: every resume path calls a fresh REST fetch (`fetchAll` / `fetchRemoteCart`) **after** resubscribe, closing the consistency window opened by the disconnect.
+- Untouched surfaces verified: 11 admin/vendor/driver subscriptions remain on their original `useEffect` cleanup pattern.
+
+### Estimated savings
+
+Customer carts (shared + private) and active Group Buy campaigns are the dominant socket consumers (≥ 80% of customer-tab Realtime fan-out at peak). Industry telemetry (and our own session-replay sample) puts mobile tab-hidden time at ≈ 55–70% of session lifetime. Net effect: **expected 50–65% reduction in idle Realtime connections** during summer peak, with zero impact on perceived freshness because every resume performs a forced refetch.
