@@ -459,7 +459,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
                 trace_id: traceId,
                 event_domain: "wallet",
                 event_type: "tayseer_payment_success",
-                payload: { order_id: savedOrderId, amount: walletApplied },
+                payload: { order_id: savedOrderId, amount: tayseerCharge, wakalah_excluded: wakalahTotal },
               });
             } catch (e) {
               const msg = e instanceof Error ? e.message : "فشل الدفع من محفظة تيسير";
