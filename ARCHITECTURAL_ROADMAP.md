@@ -2438,3 +2438,45 @@ mirror only.
 - Soften the Transfer KYC wall + add Sovereign Override.
 - Audit RTL logical-prop usage across the finance module.
 
+
+---
+
+## 🟢 Phase 59 — Tayseer Sovereign Wallet Redesign & Ledger Unification (2026-05-09)
+
+The audit confirmed two critical violations: 31 hardcoded color literals (`emerald-500`, `rose-500`, `amber-500` family) across 9 finance components, and a Sovereign Ledger disconnect — Phase 57 commission writes hit `ledger_entries` but the customer feed still read `wallet_transactions`. Phase 59 closes both wounds.
+
+### Action 1 · Financial Design Tokens (Law 4 — Token-Pure UI)
+- Added 4 sovereign financial tokens to `src/styles.css` (`:root` + `.dark`):
+  - `--credit` — Islamic Sage Green (income / positive flow)
+  - `--debit` — Deep Wine Garnet (outgoing / restricted)
+  - `--warn` — Sovereign Amber (advisory / pending)
+  - `--premium` — Tayseer Gold (tier / VIP / honor)
+- Mapped through `@theme inline` → `--color-credit` etc. so Tailwind v4 auto-generates `text-credit`, `bg-warn/10`, `ring-debit/25` utilities.
+- All 31 violations replaced. `rg "emerald|rose-[0-9]|amber-[0-9]"` over `src/core-os/finance/`, `src/pages/Wallet.tsx`, `src/routes/_app/wallet.tsx` returns ZERO hits.
+
+### Action 2 · Sovereign Ledger Source of Truth (Law 6 — Immutable Ledger)
+- Rewrote `src/core-os/finance/hooks/useWalletTransactions.ts`:
+  - Resolves the user's EGP wallet from `public.wallets` (RLS-respecting).
+  - Reads ledger rows from `public.ledger_entries` ordered by `created_at DESC` limit 100.
+  - Maps signed `amount` + `description` → legacy `WalletTxn` shape (`kind` inferred, `status="approved"`, `source="ledger"`).
+- Customer Operations Dock, Insights Dock, and the Vault subscriber now show every Phase 57 commission, Tayseer Treasury settlement, and P2P transfer in real time.
+- Legacy `wallet_transactions` reads removed from this hook.
+
+### Action 3 · Sovereign Wallet Shell & Card
+- `src/pages/Wallet.tsx` rebuilt around four primitives:
+  - **Sovereign Header** — surfaces `profile.short_id` (6-digit Tayseer ID) under the greeting.
+  - **UnifiedBalanceCard** — pure glassmorphism on `--card` + dual `--primary` glow halos. Shows balance, masked Short ID `○ ○ XXXX`, and "مؤمَّنة بـ تيسير" trust shield.
+  - **QuickActionHUD** — 4 large circular tokens: ادفع · اشحن · حوّل · تبرّع. The تبرّع button switches the dock to the (already-tokenized) `WalletCharityHub`.
+  - **Sovereign Affiliate Promo** — replaces the deprecated `WalletAffiliateHub` entry point with a single tokenized link to `/affiliate` (the canonical sovereign Affiliate Dashboard).
+- The 5-action ribbon was retired in favor of the 4-button HUD; Convert-Asset moved out of the primary HUD per cognitive-load reduction goals.
+
+### Action 4 · Soften Transfer KYC (Sovereign Override)
+- `WalletTransferDialog` now consults `useSovereignOverride()`:
+  - Master Admins bypass the KYC wall entirely.
+  - For everyone else the wall is rebuilt on `--warn` (advisory amber) instead of `rose-500/30` — softer, tokenized, still blocking until KYC level ≥ 1.
+- `useWalletBalance` hook now selects `short_id` alongside `full_name` so the Sovereign ID is available everywhere downstream.
+
+### Verification
+- `rg "emerald|rose-[0-9]|amber-[0-9]" src/core-os/finance/ src/pages/Wallet.tsx src/routes/_app/wallet.tsx` → 0 matches.
+- `useWalletTransactions` references only `wallets` + `ledger_entries`. Comment is the only `wallet_transactions` mention.
+- Customer wallet now sees Treasury writes (commissions, settlements) on the same surface as their P2P transfers — single source of truth restored.
