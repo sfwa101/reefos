@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
-import { useAdminRoles } from "@/components/admin/RoleGuard";
+import { useCapability } from "@/hooks/useCapability";
 import { useSystemSetting, setSystemSetting } from "@/hooks/useSystemSettings";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -8,8 +8,8 @@ import { Loader2, MessageCircle, Settings as SettingsIcon } from "lucide-react";
 import { toast } from "sonner";
 
 export default function SystemSettings() {
-  const { hasRole, loading: rolesLoading } = useAdminRoles();
-  const isAdmin = hasRole("admin");
+  // Phase 65 — capability-driven (admin bypass).
+  const { allowed: isAdmin, loading: rolesLoading } = useCapability("global.system.manage");
 
   const waCheckout = useSystemSetting<boolean>("enable_whatsapp_checkout", true);
   const [saving, setSaving] = useState<string | null>(null);
