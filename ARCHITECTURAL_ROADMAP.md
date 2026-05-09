@@ -1931,3 +1931,51 @@ defense-in-depth via response headers, idempotency, and client cooldowns.
 - `VISION.md` — present at repo root (10.5 KB).
 - `TECH_PHILOSOPHY.md` — present at repo root (8.1 KB).
 - This entry seals Phase 50.
+
+---
+
+## Phase 50 (Re-Sealed) — Human OS & Morphing Workspaces Constitution
+
+**Date:** 2026-05-09
+**Status:** ✅ Established — Highest Authority
+
+The System Constitution has been re-codified to formalize the **Human OS**
+paradigm and **Workspace Morphing** doctrine.
+
+### `VISION.md` (Strategic Constitution — Arabic)
+- **Core Concept:** Salsabil OS is a *Unified Sovereign Runtime* functioning
+  as a **Human OS**, replacing static apps with an **Adaptive Professional
+  Runtime**.
+- **Identity vs. Workspace:** One Sovereign Identity (Tayseer) → many
+  dynamic Workspaces (Solo Freelancer, Teacher, Lawyer, Driver, Investor)
+  and Organizations (Reef Al-Madina, Barq, Tayseer, Nour El-Din, Benaa).
+- **Workspace Morphing (Multi-Reality):** Instant transition between
+  Merchant ↔ Driver ↔ Investor ↔ Teacher modes — UI, AI, workflows, and
+  permissions physically morph based on the active **Professional DNA**.
+  No logout, no reload.
+- **Capability Marketplace:** Not a "Feature Store". Users inject **Smart
+  Living Blocks** directly into their Workspaces via the Composer; blocks
+  inherit DNA, tokens, tracing, and RLS scope.
+
+### `TECH_PHILOSOPHY.md` (Engineering Laws — English)
+1. **Capability Composer over Page Builder** — declarative intents only.
+2. **Stem Cell Architecture & Multi-Reality** — `workspace_id` + Role DNA
+   drive everything; no archetype quartets.
+3. **Hyper-Speed Local-First (Ground-Sync Engine)** — IndexedDB,
+   Stale-While-Revalidate, Offline Sync Queue. 0 ms perceived latency.
+4. **Cognitive UI Adaptation** — density, touch targets, contrast, and
+   motion driven by Design Tokens resolved from Professional DNA.
+5. **Autonomous Governance** — Zod everywhere, SDUI Error Boundaries,
+   AI sandboxing, automated Circuit Breakers.
+6. **Zero-Trust Execution & Immutable Ledger** — all sensitive writes
+   through `SECURITY DEFINER` RPCs, append-only `sovereignTracing.ts`.
+
+### Mandate
+Every future contribution — human or AI — **must read `VISION.md` and
+`TECH_PHILOSOPHY.md` before writing code**. Violation of any of the six
+laws is a structural defect and must be reverted.
+
+The Constitution is now the **highest authority** in the codebase. It
+overrides convenience, overrides speed, overrides any individual feature
+request that contradicts it.
+
