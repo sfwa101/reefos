@@ -32,7 +32,7 @@ import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockCo
 import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
 import { toLatin } from "@/lib/format";
 
-type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity";
+type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity" | "family";
 
 /**
  * Phase 59 — Tayseer Sovereign Wallet.
