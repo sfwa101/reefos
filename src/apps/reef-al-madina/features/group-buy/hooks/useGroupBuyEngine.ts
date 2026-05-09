@@ -95,33 +95,39 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
     fetchAll();
   }, [fetchAll]);
 
-  // Realtime: campaign current_quantity & status updates for FOMO
-  useEffect(() => {
-    if (!campaignId) return;
-    const channel = supabase
-      .channel(`gb-campaign-${campaignId}`)
-      .on(
-        "postgres_changes",
-        { event: "UPDATE", schema: "public", table: "group_buy_campaigns", filter: `id=eq.${campaignId}` },
-        (payload) => {
-          const next = payload.new as GroupBuyCampaign;
-          setCampaign((prev) => (prev ? { ...prev, ...next } : next));
-        },
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "group_buy_pledges", filter: `campaign_id=eq.${campaignId}` },
-        () => {
-          // Refresh own pledge view on any change
-          fetchAll();
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [campaignId, fetchAll]);
+  // Realtime: campaign current_quantity & status updates for FOMO (Phase 44: visibility-aware)
+  useVisibilitySocket(
+    () => {
+      if (!campaignId) return;
+      const channel = supabase
+        .channel(`gb-campaign-${campaignId}`)
+        .on(
+          "postgres_changes",
+          { event: "UPDATE", schema: "public", table: "group_buy_campaigns", filter: `id=eq.${campaignId}` },
+          (payload) => {
+            const next = payload.new as GroupBuyCampaign;
+            setCampaign((prev) => (prev ? { ...prev, ...next } : next));
+          },
+        )
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "group_buy_pledges", filter: `campaign_id=eq.${campaignId}` },
+          () => {
+            fetchAll();
+          },
+        )
+        .subscribe();
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    },
+    () => {
+      // Catch up campaign + pledge state after returning from background.
+      if (campaignId) void fetchAll();
+    },
+    [campaignId, fetchAll],
+    !!campaignId,
+  );
 
   const tierState = useMemo(() => computeTierState(campaign, tiers), [campaign, tiers]);
 
