@@ -84,7 +84,7 @@ export const WalletCharityHub = ({
         className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-rose-500/15 via-primary/10 to-amber-500/15 p-4 ring-1 ring-rose-500/25"
       >
         <div className="flex items-start gap-3">
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-debit to-debit text-primary-foreground shadow-lg">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-rose-500 text-primary-foreground shadow-lg">
             <HandHeart className="h-5 w-5" strokeWidth={2.4} />
           </div>
           <div className="flex-1">
@@ -179,7 +179,7 @@ export const WalletCharityHub = ({
                     )}
                     <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-primary to-debit"
+                        className="h-full rounded-full bg-gradient-to-r from-primary to-rose-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -294,7 +294,7 @@ export const WalletCharityHub = ({
                     source: "direct",
                   })
                 }
-                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-debit to-primary py-3 font-extrabold text-primary-foreground shadow-lg disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-primary py-3 font-extrabold text-primary-foreground shadow-lg disabled:opacity-50"
               >
                 {donate.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
