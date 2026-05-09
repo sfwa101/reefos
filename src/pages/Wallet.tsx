@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Loader2,
@@ -32,7 +32,7 @@ import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockCo
 import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
 import { toLatin } from "@/lib/format";
 
-type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity";
+type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity" | "family";
 
 /**
  * Phase 59 — Tayseer Sovereign Wallet.
@@ -50,6 +50,7 @@ const Wallet = () => {
   const { assets, loading: assetsLoading } = useWalletAssets(c.userId);
   const { hidden, toggle: toggleHide } = useHideBalance(c.userId);
   const txnsData = useWalletTransactions(c.userId);
+  const navigate = useNavigate();
   const [dock, setDock] = useState<DockKey>("ops");
 
   if (c.loading || assetsLoading) {
@@ -82,6 +83,7 @@ const Wallet = () => {
   const docks: { id: DockKey; label: string; icon: typeof Wallet2 }[] = [
     { id: "ops", label: "العمليات", icon: Wallet2 },
     { id: "gameyas", label: "الجمعيات", icon: Users },
+    { id: "family", label: "الأسرة", icon: Users },
     { id: "vaults", label: "حصّالاتي", icon: Target },
     { id: "insights", label: "تحليلات", icon: PieIcon },
   ];
@@ -157,12 +159,18 @@ const Wallet = () => {
         </Link>
 
         {/* MINI-APP DOCK */}
-        <div className="grid grid-cols-4 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
+        <div className="grid grid-cols-5 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
           {docks.map((t) => (
             <button
               key={t.id}
               type="button"
-              onClick={() => setDock(t.id)}
+              onClick={() => {
+                if (t.id === "family") {
+                  navigate({ to: "/family" });
+                } else {
+                  setDock(t.id);
+                }
+              }}
               className={`flex flex-col items-center gap-1 rounded-xl py-2 text-[11px] font-bold transition ${
                 dock === t.id
                   ? "bg-background text-foreground ring-1 ring-border/50 shadow-sm"
