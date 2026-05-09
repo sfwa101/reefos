@@ -148,10 +148,18 @@ export const ProductCard = ({
             </span>
             <button
               onClick={handleAdd}
-              aria-label="أضف إلى السلة"
-              className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
+              disabled={isHardOOS}
+              aria-label={isHardOOS ? "نفد" : isWakalah ? "أضفه إن توفر" : "أضف إلى السلة"}
+              title={isWakalah ? "أضفه إن توفر (وكالة)" : undefined}
+              className={`flex h-9 items-center justify-center rounded-full px-2 text-[10px] font-extrabold shadow-pill transition active:scale-90 ${
+                isHardOOS
+                  ? "bg-muted text-muted-foreground cursor-not-allowed"
+                  : isWakalah
+                    ? "bg-amber-500 text-white"
+                    : "w-9 bg-primary text-primary-foreground"
+              }`}
             >
-              <Plus className="h-4 w-4" strokeWidth={3} />
+              {isHardOOS ? "نفد" : isWakalah ? "وكالة" : <Plus className="h-4 w-4" strokeWidth={3} />}
             </button>
           </div>
         </div>
