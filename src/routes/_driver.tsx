@@ -70,11 +70,12 @@ function DriverShellInner() {
   }, []);
 
   const tabs = useMemo(
-    () => [
-      { to: "/_driver/radar", icon: Radar, label: "الرادار" },
-      { to: "/_driver", icon: ListChecks, label: "طلباتي", exact: true },
-      { to: "/_driver/earnings", icon: Wallet, label: "العهدة" },
-    ],
+    () =>
+      [
+        { to: "/driver-ops", icon: ListChecks, label: "طلباتي", exact: true },
+        { to: "/driver/map", icon: Radar, label: "الخريطة" },
+        { to: "/driver/wallet", icon: Wallet, label: "العهدة" },
+      ] as const,
     [],
   );
 
