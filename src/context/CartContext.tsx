@@ -321,6 +321,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       cancelled = true;
+      if (typeof document !== "undefined") {
+        document.removeEventListener("visibilitychange", onVisibility);
+      }
       teardownRealtime();
     };
   }, [uid, isInitializing, emitTier]);
