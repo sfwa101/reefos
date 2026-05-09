@@ -1842,3 +1842,49 @@ defense-in-depth via response headers, idempotency, and client cooldowns.
 - **MITM downgrade:** blocked for 2 years post-first-visit (HSTS preload).
 - **Checkout duplication during latency spikes:** ~99% prevention via the
   3-layer guard (cooldown → in-flight ref → idempotency key).
+
+---
+
+## Phase 48 — Business Ops Dashboard (Realtime Command Center)
+
+### Audit
+- Existing `Dashboard.tsx` was a generic admin landing surface — not
+  optimised for the 100-day summer peak (no AOV, no live critical-orders
+  table, no low-stock widget, no visibility-aware socket).
+- Schemas confirmed: `salsabil_master_orders(id, customer_id, total_amount,
+  status, delivery_info, created_at, updated_at, idempotency_key)`;
+  `salsabil_inventory_matrix(id, sku_id, inventory_type, availability_data,
+  location_code, updated_at)`. Names resolved via
+  `salsabil_skus → salsabil_assets`.
+- `useVisibilitySocket` (Phase 44) confirmed available and used as the sole
+  realtime primitive.
+
+### Execution
+- **Created:** `src/pages/admin/BusinessOpsDashboard.tsx`
+  - Role gate: `useAdminRoles()` → `admin | finance | store_manager`.
+  - KPIs (today, `created_at` ∈ [00:00, 24:00), `status ≠ cancelled`):
+    Revenue, Order Count, Active Orders, AOV.
+  - Critical orders table: `status IN (pending, preparing, out_for_delivery)`,
+    most-recent 50, deep-link to `/admin/orders/$orderId`.
+  - Low-stock widget: `inventory_type = 'count'` rows where
+    `(availability_data->>'count')::int ≤ 10`, joined to SKU + asset name.
+  - Realtime: single channel on `salsabil_master_orders` wrapped in
+    `useVisibilitySocket`; on resume, all three queries are invalidated
+    for catch-up consistency.
+  - **Read-only:** zero direct mutations. Status changes still flow through
+    `admin_set_order_status` from the order detail page (Phase 37 RPC).
+- **Edited:** `src/routes/admin.index.tsx` — `/admin` now renders
+  `BusinessOpsDashboard` as the primary landing page (the alias
+  `/admin/dashboard` already redirects here).
+
+### Verification
+- All TanStack queries use `tenantQueryKey("admin", "ops", ...)` →
+  partitioned by tenant in the persisted IndexedDB cache.
+- Realtime channel subscribes only while `document.visibilityState !==
+  "hidden"` AND `allowed === true`. Hidden tab → `removeChannel` →
+  socket pressure released. Resume → resubscribe + invalidate trio.
+- No mutation calls (`.insert`, `.update`, `.delete`, `rpc('admin_set_*')`)
+  in `BusinessOpsDashboard.tsx`. The realtime subscription fires
+  `qc.invalidateQueries` only — no RPC writes.
+- Rapid tab-switching dedup guaranteed by `useVisibilitySocket`'s
+  `cleanupRef` single-channel ref → no leaked channels.
