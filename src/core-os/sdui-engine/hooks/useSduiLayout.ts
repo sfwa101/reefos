@@ -11,8 +11,26 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
+import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
 import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
+
+/**
+ * Emergency fallback block — guaranteed valid against the SDUI schema.
+ * Used when the entire payload is corrupted so the user never sees
+ * a blank screen (Phase 40 — Graceful Degradation).
+ */
+const EMERGENCY_FALLBACK: SduiBlock[] = [
+  {
+    type: "hero",
+    id: "fallback_hero",
+    props: {
+      title: "جاري تحضير المحتوى",
+      subtitle: "نقوم بتحديث الواجهة، حاول مجدداً خلال لحظات.",
+      tone: "sand",
+    },
+  },
+];
 
 type State = {
   blocks: SduiBlock[];
