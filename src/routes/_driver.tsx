@@ -72,9 +72,9 @@ function DriverShellInner() {
   const tabs = useMemo(
     () =>
       [
-        { to: "/driver-ops", icon: ListChecks, label: "طلباتي", exact: true },
-        { to: "/driver/map", icon: Radar, label: "الخريطة" },
-        { to: "/driver/wallet", icon: Wallet, label: "العهدة" },
+        { to: "/driver-ops", icon: ListChecks, label: "طلباتي", exact: true as boolean },
+        { to: "/driver/map", icon: Radar, label: "الخريطة", exact: false as boolean },
+        { to: "/driver/wallet", icon: Wallet, label: "العهدة", exact: false as boolean },
       ] as const,
     [],
   );
