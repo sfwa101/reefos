@@ -2172,3 +2172,38 @@ a triage projection on every product card.
   upfront deduction for items not yet owned (Sharia: no sale of what you
   don't possess). The order itself still records the wakalah lines for
   the driver/back-office to fulfil and settle later.
+
+## Phase 55 — Sovereign Override & KDS Workspace
+
+### Sovereign Override
+- New `useSovereignOverride()` hook returns `true` when the current user
+  holds the `admin` role.
+- `SovereignPersonaSwitcher.handleSelect`: bypasses the hard `/wallet`
+  redirect on the Business persona for sovereign admins — they route
+  directly to `/admin` without KYC nags.
+- `KycUpgradeGate`: early-returns `children` when override is on; the
+  bottom-sheet wall is never mounted for admins.
+- `routes/_app/wallet.tsx → ProgressiveKycBanner`: hidden for admins.
+
+### KDS Database (Law 2 — JSONB over DDL)
+- `ALTER TYPE app_role ADD VALUE 'kitchen_staff'` (the only DDL — enums
+  cannot live in JSONB).
+- `salsabil_fulfillment_nodes` added to `supabase_realtime` publication
+  (idempotent) with `REPLICA IDENTITY FULL` for old/new row payloads.
+- Prep state persisted inside `delivery_snapshot.prep_meta` JSONB —
+  `{ status, started_at, completed_at, station, expected_minutes }`.
+  Type defined in `src/apps/reef-al-madina/features/kds/types.ts`.
+
+### KDS Workspace
+- `src/routes/_kds.tsx` — high-contrast (zinc-950) operator shell with
+  station label, online indicator, and live counts (pending / preparing
+  / ready) in the top-bar.
+- `src/routes/_kds.kds.tsx` — dense responsive grid of order tickets;
+  each card surfaces `#shortId`, age, items × qty, optional notes, and
+  one big action button (Start Prep → Mark Ready). Tickets older than
+  15 minutes that are not yet ready glow red.
+- `useKdsEngine` (Phase 44 visibility-governed socket) subscribes to
+  `salsabil_fulfillment_nodes` changes; `setPrepStatus` does a
+  read-modify-write on the JSONB snapshot and flips node `status` to
+  `ready_for_pickup` when marked ready (handing the order back to
+  driver dispatch / cashier walk-in flow).
