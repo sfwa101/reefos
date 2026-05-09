@@ -21,6 +21,7 @@ import {
 } from "./useCartValidation";
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
@@ -106,27 +107,34 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       return;
     }
     (async () => {
+      // Phase 52 — Tayseer Kernel Integration. Reads balance + credit_limit
+      // strictly from the canonical `public.wallets` table (EGP). The legacy
+      // `wallet_balances` + `user_trust_limit` path is retired (Law 2).
       const [
         { data: addrData },
-        { data: balData },
+        { data: walletRow },
         { data: profileData },
-        { data: trustData },
       ] = await Promise.all([
         supabase
           .from("addresses")
           .select("id,label,city,district,street,building,is_default")
           .eq("user_id", user.id)
           .order("is_default", { ascending: false }),
-        supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("wallets")
+          .select("balance,credit_limit")
+          .eq("user_id", user.id)
+          .eq("currency", "EGP")
+          .maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-        supabase.rpc("user_trust_limit", { _user_id: user.id }),
       ]);
       const list = (addrData as Addr[]) ?? [];
       setAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setAddrId(def.id);
-      setWalletBalance(Number(balData?.balance ?? 0));
-      setTrustLimit(Number(trustData ?? 0));
+      const w = walletRow as { balance?: number | string; credit_limit?: number | string } | null;
+      setWalletBalance(Number(w?.balance ?? 0));
+      setTrustLimit(Number(w?.credit_limit ?? 0));
       setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
     })();
   }, [user]);
@@ -331,14 +339,14 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         return;
       }
 
-      // Phase 13.26 — Pre-flight guard: block wallet payment when balance
-      // is insufficient and no secondary payment method has been configured.
+      // Phase 52 — guard checks Smart Balance Reserve (balance + credit_limit).
+      // Tayseer customers may pay on credit up to their assigned limit.
       if (
         payment === "wallet" &&
-        effectiveGrand > walletBalance &&
+        effectiveGrand > (walletBalance + trustLimit) &&
         !isSplit
       ) {
-        toast.error("رصيد المحفظة لا يكفي، يرجى اختيار طريقة دفع للمبلغ المتبقي");
+        toast.error("الرصيد المتاح + حد تيسير لا يكفي، يرجى اختيار طريقة دفع للمبلغ المتبقي");
         setSubmitting(false);
         submittingRef.current = false;
         return;
@@ -428,6 +436,41 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
         if (savedOrderId) {
           await allocateOrderInventory(savedOrderId, zone.id);
+
+          // Phase 52 — Tayseer Rapid Pay settlement. If the customer chose
+          // the wallet method, atomically settle the order against the
+          // canonical Tayseer ledger (balance + credit_limit). The cart UI
+          // waits for this RPC before declaring success, so the order's
+          // payment_status flips to 'paid' inside the same user action.
+          if (payment === "wallet" && walletApplied > 0) {
+            try {
+              await callTayseerPayment({
+                order_id: savedOrderId,
+                amount: walletApplied,
+              });
+              toast.success("تم الدفع بنجاح من محفظة تيسير");
+              void logSovereignEvent({
+                trace_id: traceId,
+                event_domain: "wallet",
+                event_type: "tayseer_payment_success",
+                payload: { order_id: savedOrderId, amount: walletApplied },
+              });
+            } catch (e) {
+              const msg = e instanceof Error ? e.message : "فشل الدفع من محفظة تيسير";
+              console.error("[checkout] process_tayseer_payment failed", e);
+              void logSovereignEvent({
+                trace_id: traceId,
+                event_domain: "wallet",
+                event_type: "tayseer_payment_failed",
+                payload: { order_id: savedOrderId, amount: walletApplied, message: msg },
+              });
+              toast.error(msg);
+              setSubmitting(false);
+              submittingRef.current = false;
+              return;
+            }
+          }
+
           void logSovereignEvent({
             trace_id: traceId,
             event_domain: "checkout",
