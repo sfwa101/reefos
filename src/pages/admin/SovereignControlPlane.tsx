@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { ShieldAlert, CreditCard, Sparkles, Power, Loader2 } from "lucide-react";
+import { ShieldAlert, CreditCard, Sparkles, Power, Loader2, ShieldCheck, AlertTriangle } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Switch } from "@/components/ui/switch";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { useSystemSetting, setSystemSetting } from "@/hooks/useSystemSettings";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
+import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
 /**
