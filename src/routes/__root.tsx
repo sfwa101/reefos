@@ -147,6 +147,7 @@ function RootComponent() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <TenantProvider>
         <ThemeProvider>
           <LocaleProvider>
           <UIProvider>
