@@ -82,7 +82,7 @@ export function useSduiLayout(slug: string): State {
           filter: `slug=eq.${slug}`,
         },
         () => {
-          void queryClient.invalidateQueries({ queryKey: ["sdui_layouts", slug] });
+          void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
         },
       )
       .subscribe();
