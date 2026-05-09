@@ -5705,6 +5705,7 @@ export type Database = {
           amount: number
           created_at: string
           id: string
+          idempotency_key: string | null
           kind: string
           label: string
           user_id: string
@@ -5713,6 +5714,7 @@ export type Database = {
           amount: number
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           kind?: string
           label: string
           user_id: string
@@ -5721,6 +5723,7 @@ export type Database = {
           amount?: number
           created_at?: string
           id?: string
+          idempotency_key?: string | null
           kind?: string
           label?: string
           user_id?: string
@@ -8091,6 +8094,10 @@ export type Database = {
         Args: { p_entity_id: string; p_mode: string }
         Returns: Json
       }
+      admin_set_order_status: {
+        Args: { p_order_id: string; p_status: string }
+        Returns: Json
+      }
       admin_topup_wallet: {
         Args: {
           _amount: number
@@ -8104,6 +8111,10 @@ export type Database = {
       approve_advance_request: { Args: { _request_id: string }; Returns: Json }
       approve_wallet_topup: { Args: { _topup_id: string }; Returns: Json }
       broadcast_smart_dispatch: { Args: { p_node_id: string }; Returns: number }
+      can_access_order: {
+        Args: { p_order_id: string; p_user_id: string }
+        Returns: boolean
+      }
       category_affinity: {
         Args: { _user_id: string }
         Returns: {
@@ -8558,6 +8569,16 @@ export type Database = {
       process_escrow_release: { Args: never; Returns: number }
       process_group_buy_campaign: {
         Args: { _campaign_id: string }
+        Returns: Json
+      }
+      process_savings_jar_op: {
+        Args: {
+          p_amount: number
+          p_idempotency_key: string
+          p_kind: string
+          p_label: string
+          p_settings?: Json
+        }
         Returns: Json
       }
       process_successful_referral: {
