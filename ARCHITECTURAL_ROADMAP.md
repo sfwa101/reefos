@@ -1906,3 +1906,28 @@ defense-in-depth via response headers, idempotency, and client cooldowns.
 - Payload serialization: `JSON.parse(JSON.stringify(items))` enforced at write. ISO-string dates already produced by callers (`new Date().toISOString()`).
 - Network-drop simulation: with DevTools offline, `supabase.from(...).update(...)` rejects with `TypeError: Failed to fetch` → caught by `isLikelyNetworkError`; UI does not throw, item lands in queue. On re-enabling network, `online` event fires → `processQueue()` flushes.
 - Read-only/admin dashboards untouched.
+
+## Phase 50 — System Constitution Established
+
+**Mandate**
+- The Emperor has decreed the formal constitution of Salsabil OS as a *Sovereign Digital Civilization* — not an app, not an ERP, not a super-app.
+
+**Artifacts**
+- `VISION.md` (root) — الدستور الاستراتيجي. Defines the Unified Sovereign Runtime, the five organisms (Reef Al-Madina, Tayseer, Barq, Nour El-Din, Benaa), the Interface DNA (Neuroadaptive Interface System), the Reputation & Economic Graph, the ten civilizational laws, and the seven-era civilizational roadmap.
+- `TECH_PHILOSOPHY.md` (root) — The Engineering Laws. Codifies the five non-negotiable laws:
+  1. Capability Composer over Page Builder
+  2. Stem Cell Architecture
+  3. Hyper-Speed Local-First
+  4. Autonomous Governance
+  5. The Immutable Ledger (Zero-Trust Execution)
+  Plus the Anti-Pattern table, Definition of Done, and the Engineer's Oath.
+
+**Binding force**
+- Every future contribution (human or AI) MUST read both documents before writing code.
+- Violations of any of the five laws are structural defects, not style preferences — they must be reverted.
+- All subsequent phases reference these documents as the source of architectural truth.
+
+**Verification**
+- `VISION.md` — present at repo root (10.5 KB).
+- `TECH_PHILOSOPHY.md` — present at repo root (8.1 KB).
+- This entry seals Phase 50.
