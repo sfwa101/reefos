@@ -66,7 +66,12 @@ export default function Partners() {
   };
 
   const markPaid = async (id: string) => {
-    await (supabase as any).from("partner_ledgers").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", id);
+    // Phase 43 — routed through SECURITY DEFINER RPC (no raw client update).
+    const { error } = await (supabase.rpc as any)("admin_update_partner_ledger", {
+      p_ledger_id: id,
+      p_mark_paid: true,
+    });
+    if (error) return toast.error("فشل: " + error.message);
     toast.success("تم تسجيل الدفع");
     load();
   };

@@ -63,7 +63,9 @@ export const getRouter = () => {
     defaultOptions: {
       queries: {
         staleTime: 60_000,
-        gcTime: 24 * 60 * 60 * 1000,
+        // Phase 43 — reduced from 24h → 2h to prevent iOS Safari 50MB
+        // IndexedDB quota crashes on heavy admin grids and infinite catalogs.
+        gcTime: 2 * 60 * 60 * 1000,
         refetchOnWindowFocus: false,
       },
     },

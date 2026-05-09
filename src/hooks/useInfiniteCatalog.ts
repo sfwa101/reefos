@@ -23,6 +23,7 @@ import {
   type ProductSource,
 } from "@/lib/products";
 import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
+import { getActiveTenantId } from "@/context/TenantContext";
 
 export interface UseInfiniteCatalogParams {
   readonly sources: ReadonlyArray<ProductSource>;
@@ -84,10 +85,13 @@ export function useInfiniteCatalog(
     CatalogPage,
     Error,
     InfiniteData<CatalogPage, number>,
-    readonly [string, string, string, string, number],
+    readonly [string, string, string, string, string, string, number],
     number
   >({
+    // Phase 41/43 — tenant-scoped key prevents cross-tenant cache bleed.
     queryKey: [
+      "tenant",
+      getActiveTenantId(),
       "catalog",
       sourcesKey,
       params.subCategory ?? "",

@@ -7,6 +7,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { tenantQueryKey } from "@/lib/tenantScope";
 import type { USAGenesisPayload } from "./useVisionGenesis";
 
 export type MintUSAInput = Pick<
@@ -28,11 +29,11 @@ export function useMintUSA() {
       if (error) throw new Error(error.message ?? "mint_failed");
       return String(data);
     },
-    onSuccess: (assetId) => {
+    onSuccess: () => {
       toast.success("تم سكّ الأصل بنجاح وتحديث المتجر");
-      qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
-      qc.invalidateQueries({ queryKey: ["catalog", "products"] });
-      qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("salsabil_assets") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("catalog") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("admin", "list", "products") });
     },
     onError: (err) => {
       toast.error(err.message?.includes("unauthorized")

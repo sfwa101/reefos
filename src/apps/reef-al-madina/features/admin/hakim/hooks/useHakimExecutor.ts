@@ -5,6 +5,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { tenantQueryKey } from "@/lib/tenantScope";
 
 export interface SuggestedAsset {
   name: string;
@@ -79,9 +80,9 @@ export function useHakimExecutor() {
       return report;
     },
     onSuccess: (report) => {
-      qc.invalidateQueries({ queryKey: ["salsabil_assets"] });
-      qc.invalidateQueries({ queryKey: ["catalog", "products"] });
-      qc.invalidateQueries({ queryKey: ["admin", "list", "products"] });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("salsabil_assets") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("catalog") });
+      qc.invalidateQueries({ queryKey: tenantQueryKey("admin", "list", "products") });
       if (report.failed.length === 0) {
         toast.success(`تم سكّ ${report.minted.length} أصل بنجاح ✨`);
       } else {
