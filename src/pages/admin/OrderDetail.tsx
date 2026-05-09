@@ -169,16 +169,13 @@ export default function OrderDetail() {
   async function setStatus(next: string) {
     if (!order) return;
     setUpdating(true);
-    const updates: { status: string; delivered_at?: string } = { status: next };
-    if (next === "delivered") updates.delivered_at = new Date().toISOString();
-    const { error: nodeErr } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .update(updates)
-      .in("id", order.node_ids);
-    // Mirror onto the master order so the headline stays consistent.
-    await supabase.from("salsabil_master_orders").update({ status: next }).eq("id", order.id);
+    // Phase 37 — single atomic admin RPC replaces direct table writes.
+    const { error: rpcErr } = await supabase.rpc("admin_set_order_status", {
+      p_order_id: order.id,
+      p_status: next,
+    });
     setUpdating(false);
-    if (nodeErr) return toast.error("تعذّر تحديث الحالة");
+    if (rpcErr) return toast.error("تعذّر تحديث الحالة");
     setOrder({ ...order, status: next });
     invalidateOrderCaches(qc);
     toast.success("تم تحديث حالة الطلب");

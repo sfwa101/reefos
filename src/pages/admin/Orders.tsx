@@ -110,15 +110,14 @@ export default function Orders() {
     };
   }, []);
 
-  // Sovereign cancel: cancel the master order + all its nodes.
+  // Phase 37 — atomic admin RPC; no direct table writes from the browser.
   const cancelOrder = async (row: MasterOrderRow) => {
-    const [mRes, nRes] = await Promise.all([
-      supabase.from("salsabil_master_orders").update({ status: "cancelled" }).eq("id", row.id),
-      supabase.from("salsabil_fulfillment_nodes").update({ status: "cancelled" }).eq("master_order_id", row.id),
-    ]);
-    const err = mRes.error ?? nRes.error;
-    if (err) {
-      toast.error(err.message);
+    const { error } = await supabase.rpc("admin_set_order_status", {
+      p_order_id: row.id,
+      p_status: "cancelled",
+    });
+    if (error) {
+      toast.error(error.message);
       return;
     }
     toast.success(`تم إلغاء #${row.id.slice(0, 8).toUpperCase()}`);

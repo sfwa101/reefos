@@ -122,27 +122,25 @@ export const SavingsJarDialog = ({
     );
   };
 
-  const upsertJar = async (patch: Partial<SavingsJar> & { balance?: number }) => {
-    const next: {
-      user_id: string;
-      balance: number;
-      auto_save_enabled: boolean;
-      round_to: number;
-      goal: number | null;
-      goal_label: string | null;
-    } = {
-      user_id: userId,
-      balance: patch.balance ?? jar.balance,
-      auto_save_enabled: patch.auto_save_enabled ?? jar.auto_save_enabled,
-      round_to: patch.round_to ?? jar.round_to,
-      goal: patch.goal !== undefined ? patch.goal : jar.goal,
-      goal_label: patch.goal_label !== undefined ? patch.goal_label : jar.goal_label,
-    };
-    const { error } = await supabase
-      .from("savings_jar")
-      .upsert(next, { onConflict: "user_id" });
+  // Phase 37 — All ledger writes go through the atomic RPC.
+  // The browser never touches `savings_jar` / `savings_transactions` directly.
+  const callJarOp = async (
+    kind: "deposit" | "withdraw" | "settings",
+    args: { amount?: number; label?: string; settings?: Record<string, unknown> },
+  ): Promise<boolean> => {
+    const idem =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+    const { error } = await supabase.rpc("process_savings_jar_op", {
+      p_amount: args.amount ?? 0,
+      p_kind: kind,
+      p_label: args.label ?? kind,
+      p_idempotency_key: idem,
+      p_settings: (args.settings ?? null) as never,
+    });
     if (error) {
-      toast.error("تعذّر الحفظ");
+      toast.error(error.message === "insufficient balance" ? "الرصيد غير كافٍ" : "تعذّر الحفظ");
       return false;
     }
     return true;
@@ -150,11 +148,13 @@ export const SavingsJarDialog = ({
 
   const saveSettings = async () => {
     setBusy(true);
-    const ok = await upsertJar({
-      auto_save_enabled: autoSave,
-      round_to: roundTo,
-      goal: goal ? Number(goal) : null,
-      goal_label: goalLabel || null,
+    const ok = await callJarOp("settings", {
+      settings: {
+        auto_save_enabled: autoSave,
+        round_to: roundTo,
+        goal: goal || null,
+        goal_label: goalLabel || null,
+      },
     });
     setBusy(false);
     if (ok) {
@@ -163,15 +163,11 @@ export const SavingsJarDialog = ({
     }
   };
 
-  const deposit = async (amount: number, label: string, kind = "deposit") => {
+  const deposit = async (amount: number, label: string) => {
     if (amount <= 0) return;
     setBusy(true);
-    const newBalance = Number(jar.balance || 0) + amount;
-    const ok = await upsertJar({ balance: newBalance });
+    const ok = await callJarOp("deposit", { amount, label });
     if (ok) {
-      await supabase
-        .from("savings_transactions")
-        .insert({ user_id: userId, amount, kind, label });
       fireMiniConfetti();
       toast.success(`+${toLatin(amount)} ج.م في حصّالتك 🐷`);
       await refresh();
@@ -188,15 +184,8 @@ export const SavingsJarDialog = ({
       return;
     }
     setBusy(true);
-    const newBalance = Number(jar.balance || 0) - amt;
-    const ok = await upsertJar({ balance: newBalance });
+    const ok = await callJarOp("withdraw", { amount: amt, label: "سحب من الحصّالة" });
     if (ok) {
-      await supabase.from("savings_transactions").insert({
-        user_id: userId,
-        amount: amt,
-        kind: "withdraw",
-        label: "سحب من الحصّالة",
-      });
       toast.success(`تم تحويل ${toLatin(amt)} ج.م إلى محفظتك`);
       await refresh();
       setDepositAmount("");
