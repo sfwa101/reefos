@@ -195,6 +195,12 @@
   --surface-muted: 222 8% 18%;
   --foreground-secondary: 220 10% 78%;
   --foreground-tertiary: 220 8% 60%;
+
+  /* Phase 59 — Tayseer Sovereign Financial Manifesto (dark) */
+  --credit: 145 60% 55%;
+  --debit: 350 70% 62%;
+  --warn: 38 95% 60%;
+  --premium: 42 80% 60%;
 }
 
 /* Dark theme — global defaults (graphite base) */
