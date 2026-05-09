@@ -120,6 +120,7 @@ import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.cus
 import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
 import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
+import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
 import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
@@ -708,6 +709,11 @@ const PosPosInventoryRoute = PosPosInventoryRouteImport.update({
   path: '/inventory',
   getParentRoute: () => PosPosRoute,
 } as any)
+const PosPosCloseShiftRoute = PosPosCloseShiftRouteImport.update({
+  id: '/close-shift',
+  path: '/close-shift',
+  getParentRoute: () => PosPosRoute,
+} as any)
 const AppSubSlugRoute = AppSubSlugRouteImport.update({
   id: '/sub/$slug',
   path: '/sub/$slug',
@@ -986,6 +992,7 @@ export interface FileRoutesByFullPath {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
   '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
@@ -1123,6 +1130,7 @@ export interface FileRoutesByTo {
   '/store/village': typeof AppStoreVillageRoute
   '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
+  '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
   '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
@@ -1267,6 +1275,7 @@ export interface FileRoutesById {
   '/_app/store/village': typeof AppStoreVillageRoute
   '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
+  '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
   '/_pos/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
@@ -1410,6 +1419,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/close-shift'
     | '/pos/inventory'
     | '/pos/returns'
     | '/admin/$entity/$id'
@@ -1547,6 +1557,7 @@ export interface FileRouteTypes {
     | '/store/village'
     | '/store/wholesale'
     | '/sub/$slug'
+    | '/pos/close-shift'
     | '/pos/inventory'
     | '/pos/returns'
     | '/admin/$entity/$id'
@@ -1690,6 +1701,7 @@ export interface FileRouteTypes {
     | '/_app/store/village'
     | '/_app/store/wholesale'
     | '/_app/sub/$slug'
+    | '/_pos/pos/close-shift'
     | '/_pos/pos/inventory'
     | '/_pos/pos/returns'
     | '/admin/$entity/$id'
@@ -2494,6 +2506,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosPosInventoryRouteImport
       parentRoute: typeof PosPosRoute
     }
+    '/_pos/pos/close-shift': {
+      id: '/_pos/pos/close-shift'
+      path: '/close-shift'
+      fullPath: '/pos/close-shift'
+      preLoaderRoute: typeof PosPosCloseShiftRouteImport
+      parentRoute: typeof PosPosRoute
+    }
     '/_app/sub/$slug': {
       id: '/_app/sub/$slug'
       path: '/sub/$slug'
@@ -2808,11 +2827,13 @@ const AppRouteChildren: AppRouteChildren = {
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
 interface PosPosRouteChildren {
+  PosPosCloseShiftRoute: typeof PosPosCloseShiftRoute
   PosPosInventoryRoute: typeof PosPosInventoryRoute
   PosPosReturnsRoute: typeof PosPosReturnsRoute
 }
 
 const PosPosRouteChildren: PosPosRouteChildren = {
+  PosPosCloseShiftRoute: PosPosCloseShiftRoute,
   PosPosInventoryRoute: PosPosInventoryRoute,
   PosPosReturnsRoute: PosPosReturnsRoute,
 }
