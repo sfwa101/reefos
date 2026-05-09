@@ -133,8 +133,8 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
 
 function Stat({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
   return (
-    <div className={`rounded-xl p-2.5 ${highlight ? "bg-primary/10" : "bg-surface-muted"}`}>
-      <p className="text-[10px] text-foreground-tertiary">{label}</p>
+    <div className={`rounded-xl p-2.5 ${highlight ? "bg-primary/10" : "bg-muted"}`}>
+      <p className="text-[10px] text-muted-foreground">{label}</p>
       <p className={`font-display text-[14px] num ${highlight ? "text-primary" : ""}`}>{value}</p>
     </div>
   );
