@@ -1,10 +1,11 @@
 import { Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Package, Clock, Home, Copy, ExternalLink } from "lucide-react";
+import { Check, Package, Clock, Home, Copy, ExternalLink, KeyRound } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
+import { supabase } from "@/integrations/supabase/client";
 
 type StoredWaFallback = {
   phone: string;
