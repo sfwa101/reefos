@@ -5076,6 +5076,36 @@ export type Database = {
           },
         ]
       }
+      salsabil_event_timeline: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          event_domain: string
+          event_type: string
+          id: string
+          payload: Json
+          trace_id: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          event_domain: string
+          event_type: string
+          id?: string
+          payload?: Json
+          trace_id: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          event_domain?: string
+          event_type?: string
+          id?: string
+          payload?: Json
+          trace_id?: string
+        }
+        Relationships: []
+      }
       salsabil_financial_contracts: {
         Row: {
           base_price: number
@@ -8477,6 +8507,15 @@ export type Database = {
           _event: string
           _product_id?: string
           _query?: string
+        }
+        Returns: string
+      }
+      log_sovereign_event: {
+        Args: {
+          p_event_domain: string
+          p_event_type: string
+          p_payload?: Json
+          p_trace_id: string
         }
         Returns: string
       }
