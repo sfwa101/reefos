@@ -3,7 +3,8 @@ import { usePosEngine } from "@/apps/reef-al-madina/features/pos/hooks/usePosEng
 import { PosShiftManager } from "@/apps/reef-al-madina/features/pos/components/PosShiftManager";
 import { PosBarcodeCart } from "@/apps/reef-al-madina/features/pos/components/PosBarcodeCart";
 import { PosQuickPay } from "@/apps/reef-al-madina/features/pos/components/PosQuickPay";
-import { ShieldAlert, Loader2 } from "lucide-react";
+import { PosSyncPill } from "@/components/pos/PosSyncPill";
+import { ShieldAlert, Loader2, Store } from "lucide-react";
 
 export default function POSPage() {
   const { role, loading: roleLoading } = useUserRole();
