@@ -275,25 +275,25 @@ const UnifiedBalanceCard = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.05 }}
-      className="relative overflow-hidden rounded-3xl bg-card text-card-foreground p-5 ring-1 ring-border/60 shadow-elegant"
+      className="relative overflow-hidden rounded-3xl bg-tayseer-night text-tayseer-cream p-5 shadow-elegant"
     >
-      {/* layered glass glow */}
-      <div className="pointer-events-none absolute -top-16 -end-16 h-48 w-48 rounded-full bg-primary/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -start-20 h-56 w-56 rounded-full bg-primary/10 blur-3xl" />
+      {/* layered sovereign glow */}
+      <div className="pointer-events-none absolute -top-16 -end-16 h-48 w-48 rounded-full bg-tayseer-gold/25 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-20 -start-20 h-56 w-56 rounded-full bg-tayseer-green/20 blur-3xl" />
 
       <div className="relative flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tayseer-cream/60">
             الرصيد الكلي
           </p>
-          <p className="mt-1 font-display text-4xl font-black tabular-nums text-foreground">
+          <p className="mt-1 font-display text-5xl font-black tabular-nums text-tayseer-cream">
             {hidden ? "•••••" : toLatin(balance.toLocaleString("en-US"))}
-            <span className="ms-1.5 align-top text-sm font-bold text-muted-foreground">
+            <span className="ms-1.5 align-top text-sm font-bold text-tayseer-gold">
               ج.م
             </span>
           </p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-primary/20">
+        <span className="inline-flex items-center gap-1 rounded-full bg-tayseer-green/20 text-tayseer-green px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-tayseer-green/30">
           <ShieldCheck className="h-3 w-3" />
           مؤمَّنة بـ تيسير
         </span>
@@ -301,14 +301,14 @@ const UnifiedBalanceCard = ({
 
       <div className="relative mt-6 flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-tayseer-cream/60">
             معرّف تيسير السيادي
           </p>
-          <p className="mt-0.5 font-mono text-base font-black tabular-nums tracking-[0.2em] text-foreground">
+          <p className="mt-0.5 font-mono text-base font-black tabular-nums tracking-[0.2em] text-tayseer-gold">
             {masked}
           </p>
         </div>
-        <p className="text-[11px] font-extrabold text-foreground/80 truncate max-w-[55%] text-end">
+        <p className="text-[11px] font-extrabold text-tayseer-cream/85 truncate max-w-[55%] text-end">
           {ownerName}
         </p>
       </div>
