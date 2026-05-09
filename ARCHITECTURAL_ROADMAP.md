@@ -2570,3 +2570,54 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
   Manual cash: scan → numpad → ZeroFrictionButton = 2–3 taps.
 - Zero hardcoded gradients in `features/pos/`. Zero `text-white`/`bg-white`.
 - All offline queue states visible to operator; manual sync trigger available.
+
+---
+
+## Phase 64 — Hakim Genesis & Federated Event Bus
+**Date:** 2026-05-09 · **Codename:** Sovereign Brain
+
+### Migration · `20260509_phase64_hakim_genesis.sql`
+- **Ledger DNA enrichment** — added `category`, `merchant_name`, `tags[]` to
+  `ledger_entries` (nullable, indexed where present, no trigger impact).
+- **Federated event bus** — `emit_sovereign_event(domain, type, payload, trace?)`
+  SECURITY DEFINER RPC writes to `salsabil_event_timeline`. Only path
+  authorized for cross-stem-cell notifications.
+- **Hakim user insights store** — `public.hakim_user_insights` with severity
+  enum, workspace scoping, RLS: owner read + dismiss only, system-write via
+  edge fn / SECURITY DEFINER.
+- **Financial sight** — `hakim_user_financial_snapshot(user_id, days)` RPC
+  returns balance, income/expense, savings velocity, top categories, top
+  merchants, daily series — locked to caller's wallets via `wallets.user_id`
+  join + auth check.
+
+### UI · `src/components/hakim/FloatingGuardian.tsx`
+- **Progressive Disclosure** — invisible by default. Mounts only when
+  `hakim_user_insights` returns unread rows for the auth'd user.
+- **Realtime subscription** — postgres_changes channel keyed by user_id;
+  new insights appear without polling.
+- **Adaptive Pill** — `bg-card`, `text-foreground`, `ring-border` only.
+  Severity escalation: high-severity insights add `ring-destructive` + amber
+  `AlertTriangle` icon (Doctrine VIII Zero-Friction signal).
+- **Sheet content** — top insight + dismiss, 3-tile snapshot (balance/in/out),
+  top-categories list, lightweight chat against `hakim-chat` edge fn.
+- Two mount modes: `inline` (used in headers) and floating FAB (default).
+
+### Headers wired
+- `src/pages/Wallet.tsx` — `<FloatingGuardian inline workspace="wallet" />`
+  next to the eye/hide toggle.
+- `src/pages/POS.tsx` — `<FloatingGuardian inline workspace="pos" />`
+  next to `PosSyncPill` in the header row.
+
+### Doctrine compliance
+- **Law 1 (Composer)** — Pill is a token-only block, no hardcoded styling.
+- **Law 5 (Autonomous)** — Hakim never writes to source domain tables;
+  only proposes via `hakim_user_insights`.
+- **Law 6 (Ledger)** — `emit_sovereign_event` is the single sovereign write
+  path for cross-domain notifications, append-only into the timeline.
+- **Doctrine VIII (Progressive Disclosure)** — Pill is silent until Hakim
+  has something meaningful to say.
+
+### Companion Documentation
+- `src/docs/NOOR_ELDIN_MANIFESTO.md` — University constitution: Learning
+  Journeys, Sovereign Skill Graph, Digital Apprenticeships, Hakim as Coach,
+  Reputation Economy. Sovereign Stem Cell binding under Law 2.
