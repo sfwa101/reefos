@@ -83,6 +83,7 @@ const Wallet = () => {
   const docks: { id: DockKey; label: string; icon: typeof Wallet2 }[] = [
     { id: "ops", label: "العمليات", icon: Wallet2 },
     { id: "gameyas", label: "الجمعيات", icon: Users },
+    { id: "family", label: "الأسرة", icon: Users },
     { id: "vaults", label: "حصّالاتي", icon: Target },
     { id: "insights", label: "تحليلات", icon: PieIcon },
   ];
