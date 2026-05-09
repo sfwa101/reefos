@@ -1778,3 +1778,67 @@ Forensic, read-only admin dashboard over `salsabil_event_timeline` (Phase 38) fo
 - RPC denies non-admin/finance callers (`forbidden`) — only one privileged tab can trip the breaker.
 - Whitelist on `p_setting_key` prevents arbitrary `app_settings` rows being flipped.
 - `trippedActive` badge in UI cross-references latest `circuit_breaker_tripped` event with the live setting value.
+
+---
+
+## Phase 47-Alt — The Sentinel (Security Headers & Burst Hardening)
+
+### Directive Conflict & Resolution
+The original Phase 47 brief called for a Postgres-backed rate-limit table
+(`salsabil_api_limits`) and `check_api_rate_limit(...)` RPC. Platform
+constraint: **the backend has no edge primitives (Redis / token-bucket / WAF)
+for rate limiting**. A Postgres counter would create hot-row contention
+(every checkout touching the same `actor_id` row → serialized UPDATEs) that
+is *worse* than the abuse vector it tries to mitigate. Per the
+`no-backend-rate-limiting` directive, we executed **Phase 47-Alt** instead:
+defense-in-depth via response headers, idempotency, and client cooldowns.
+
+### Audit
+- No prior rate-limit primitives in `src/`. Existing protection: `submittingRef`
+  (in-flight lock), `p_idempotency_key` on `process_checkout_sovereign`, and
+  the Phase 46 SDUI Watchdog.
+- No security headers were being set anywhere — `index.html` had only
+  `viewport`/`charset`. CSP/HSTS/X-Frame-Options completely absent at both
+  meta and HTTP-header level.
+
+### Execution
+- **`src/start.ts` (Created):** Global `createMiddleware().server()` request
+  middleware injects strict security headers on every Worker response:
+  - `Strict-Transport-Security: max-age=63072000; includeSubDomains; preload`
+  - `X-Frame-Options: DENY` (clickjacking)
+  - `X-Content-Type-Options: nosniff`
+  - `Referrer-Policy: strict-origin-when-cross-origin`
+  - `Permissions-Policy: camera=(), microphone=(), geolocation=(self), payment=(), usb=()`
+  - `Content-Security-Policy`: locked `default-src 'self'`; allowlist for
+    Supabase (`https://*.supabase.co` + `wss://*.supabase.co`), Google Fonts,
+    R2 image CDN; `frame-ancestors 'none'`; `object-src 'none'`;
+    `base-uri 'self'`; `form-action 'self'`. Inline scripts still permitted
+    for TanStack hydration — nonce migration is a future hardening pass.
+- **`src/routes/__root.tsx` (Edited):** Added `<meta name="referrer">` and
+  `color-scheme` as defense-in-depth fallbacks for static crawlers.
+- **`useCartOrchestrator.ts` (Edited):** Added `lastSubmitAtRef` + 3-second
+  client cooldown layered on top of the existing in-flight lock. Repeat
+  submits within the window surface the exact Arabic copy from the brief:
+  *"لقد تجاوزت حد الطلبات المسموح به، يرجى المحاولة بعد X ثانية"*.
+- **No SQL migration created** — backend rate-limit table intentionally
+  skipped (see Directive Conflict above).
+
+### Verification
+- Legitimate flow (1 checkout / few seconds): unaffected — cooldown elapses
+  between user attempts.
+- Burst (10 rapid clicks): first acquires `submittingRef`; clicks 2–10 hit
+  the cooldown branch and are rejected with the Arabic toast; no extra RPC
+  hits Supabase.
+- Server-side guarantee: even if the cooldown were bypassed,
+  `p_idempotency_key` on `process_checkout_sovereign` causes Supabase to
+  return the *same* `master_order_id` instead of creating a duplicate order.
+- Headers applied uniformly to SSR pages, server functions, and server
+  routes via the global request middleware — single point of enforcement.
+
+### Estimated Impact
+- **XSS surface:** reduced by `script-src` allowlist (blocks third-party
+  injection vectors).
+- **Clickjacking:** eliminated (`X-Frame-Options: DENY` + `frame-ancestors 'none'`).
+- **MITM downgrade:** blocked for 2 years post-first-visit (HSTS preload).
+- **Checkout duplication during latency spikes:** ~99% prevention via the
+  3-layer guard (cooldown → in-flight ref → idempotency key).

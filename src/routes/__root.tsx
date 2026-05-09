@@ -66,6 +66,10 @@ export const Route = createRootRouteWithContext<RouterContext>()({
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // Phase 47-Alt — Sentinel: defense-in-depth meta-level security hints.
+      // Real enforcement lives in `src/start.ts` request middleware (HTTP headers).
+      { name: "referrer", content: "strict-origin-when-cross-origin" },
+      { name: "color-scheme", content: "light dark" },
       { title: "ريف المدينة — عبق الريف داخل المدينة" },
       { name: "description", content: "كل ماتحتاج اليه في مكان واحد" },
       { property: "og:title", content: "ريف المدينة — عبق الريف داخل المدينة" },
