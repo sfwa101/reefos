@@ -58,6 +58,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   // Dynamic kill-switch: when disabled, checkout completes in-app and skips WhatsApp dispatch.
   const { value: enableWaCheckout } = useSystemSetting<boolean>("enable_whatsapp_checkout", true);
+  // Phase 38 — Sovereign Control Plane kill switch.
+  const { value: paymentsEnabled } = useSystemSetting<boolean>("payments_enabled", true);
 
   const { promo, setPromo, appliedPromo, applyPromo, minOrderTotal } =
     useCartValidation(total);
