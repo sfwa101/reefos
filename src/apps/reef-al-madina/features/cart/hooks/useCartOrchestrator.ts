@@ -107,27 +107,34 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       return;
     }
     (async () => {
+      // Phase 52 — Tayseer Kernel Integration. Reads balance + credit_limit
+      // strictly from the canonical `public.wallets` table (EGP). The legacy
+      // `wallet_balances` + `user_trust_limit` path is retired (Law 2).
       const [
         { data: addrData },
-        { data: balData },
+        { data: walletRow },
         { data: profileData },
-        { data: trustData },
       ] = await Promise.all([
         supabase
           .from("addresses")
           .select("id,label,city,district,street,building,is_default")
           .eq("user_id", user.id)
           .order("is_default", { ascending: false }),
-        supabase.from("wallet_balances").select("balance").eq("user_id", user.id).maybeSingle(),
+        supabase
+          .from("wallets")
+          .select("balance,credit_limit")
+          .eq("user_id", user.id)
+          .eq("currency", "EGP")
+          .maybeSingle(),
         supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-        supabase.rpc("user_trust_limit", { _user_id: user.id }),
       ]);
       const list = (addrData as Addr[]) ?? [];
       setAddresses(list);
       const def = list.find((a) => a.is_default) ?? list[0];
       if (def) setAddrId(def.id);
-      setWalletBalance(Number(balData?.balance ?? 0));
-      setTrustLimit(Number(trustData ?? 0));
+      const w = walletRow as { balance?: number | string; credit_limit?: number | string } | null;
+      setWalletBalance(Number(w?.balance ?? 0));
+      setTrustLimit(Number(w?.credit_limit ?? 0));
       setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
     })();
   }, [user]);
