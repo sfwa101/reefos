@@ -268,11 +268,30 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       console.warn("[checkout] duplicate submit blocked");
       return;
     }
+    if (!paymentsEnabled) {
+      toast.error("نظام الدفع متوقف مؤقتاً للتحديث");
+      return;
+    }
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
     console.info("[checkout] WhatsApp checkout invoked", {
       source,
       cartLines: lines.length,
+    });
+    // Phase 38 — distributed tracing: one trace_id per submit attempt; the
+    // same id is reused for `checkout_attempt` and (on success) `checkout_success`.
+    const traceId = createTraceId();
+    const checkoutIdempotencyKey = newIdempotencyKey();
+    void logSovereignEvent({
+      trace_id: traceId,
+      event_domain: "checkout",
+      event_type: "checkout_attempt",
+      payload: {
+        idempotency_key: checkoutIdempotencyKey,
+        line_count: lines.length,
+        grand: effectiveGrand,
+        payment,
+      },
     });
     submittingRef.current = true;
     setSubmitting(true);
