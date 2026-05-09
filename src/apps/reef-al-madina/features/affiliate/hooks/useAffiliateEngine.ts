@@ -63,12 +63,10 @@ const QK = {
   ledger: (uid: string) => ["affiliate", "ledger", uid] as const,
 };
 
-function generateCode(uid: string): string {
-  // 8-char base36 derived from uid + entropy. Server enforces uniqueness.
-  const seed = uid.replace(/-/g, "").slice(0, 6).toUpperCase();
-  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${seed}${rand}`;
-}
+// Phase 57 — Client-side code generation removed. The 6-digit code is now
+// produced exclusively by the server-side `ensure_referral_code` RPC, which
+// uses the user's National ID (last 6 digits) when available.
+
 
 function useReferralCodeQuery(userId: string | undefined) {
   const qc = useQueryClient();
