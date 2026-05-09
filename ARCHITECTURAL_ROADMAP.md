@@ -2218,3 +2218,36 @@ a triage projection on every product card.
 - Handover identification: short ID (first 6 chars of `salsabil_fulfillment_nodes.id`) already exposed by KDS. No OTP/barcode column exists — recommend extending `delivery_snapshot.handover` JSONB with `{ otp, code }` per Law 2.
 - Status transitions available on nodes: `ready_for_pickup` → `assigned` (driver) → `picked_up_at`/`delivered_at`. Walk-in ("delivered" by cashier) has no dedicated status; recommend `delivered_walkin` text status.
 - No existing Pickup/Handover UI found. Driver side has `useDispatchRadar` (offer acceptance), but no "scan & confirm handover" surface.
+
+## Phase 56 — Order Dispatch & Secure Handover Workspace
+
+**Date:** 2026-05-09
+**Status:** Shipped
+
+### Backend (Law 6 — Immutable Ledger)
+- New SECURITY DEFINER RPC `confirm_handover(p_node_id uuid, p_otp text, p_channel text)`:
+  - Locks the target node `FOR UPDATE`.
+  - Rejects if status not in `('ready_for_pickup','assigned')`.
+  - MVP OTP gate accepts any non-empty string (placeholder for Phase 56.1
+    when `delivery_snapshot.handover.otp` will be issued at order creation).
+  - `walkin` → status `delivered_walkin`, `delivered_at = now()`.
+  - `driver` → status `shipped`, `picked_up_at = now()`.
+  - Appends an immutable `handover_meta[]` trace
+    `{ channel, otp_provided, confirmed_at, actor }` to `delivery_snapshot`
+    via `jsonb_set` — Law 2 compliant, zero DDL on the hot table.
+- Granted `EXECUTE` to `authenticated`.
+
+### UI (Law 4 — Cognitive UI, Token-Pure)
+- `src/routes/_dispatch.tsx` — operator shell, `dark` scope, dense top-bar
+  with online/offline indicator. Zero hardcoded colors; only design tokens
+  (`bg-background`, `bg-card`, `border-border`, `text-primary`, etc.).
+- `src/routes/_dispatch.dispatch.tsx` — board of `ready_for_pickup` nodes
+  with realtime via `useVisibilitySocket` (Phase 44 governance). Two CTAs
+  per ticket: عميل (walkin) / مندوب (driver), opening an OTP dialog that
+  invokes `confirm_handover` and removes the ticket on success.
+
+### Verification
+- RPC verified to handle both channel transitions and reject invalid
+  status / empty OTP / unknown channel.
+- Dispatch routes contain zero hardcoded `zinc-*`/`slate-*`/`gray-*`
+  classes — all surfaces consume semantic tokens.
