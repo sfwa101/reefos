@@ -1732,3 +1732,22 @@ Admin / Vendor / Driver hooks (`useVendorOperations`, `useDriverEngine`, `useDis
 ### Estimated savings
 
 Customer carts (shared + private) and active Group Buy campaigns are the dominant socket consumers (≥ 80% of customer-tab Realtime fan-out at peak). Industry telemetry (and our own session-replay sample) puts mobile tab-hidden time at ≈ 55–70% of session lifetime. Net effect: **expected 50–65% reduction in idle Realtime connections** during summer peak, with zero impact on perceived freshness because every resume performs a forced refetch.
+
+## Phase 45 — Sovereign Tracing Dashboard (Observability UI)
+
+Forensic, read-only admin dashboard over `salsabil_event_timeline` (Phase 38) for tracing AI mutations, checkout attempts, and sensitive flows by `trace_id`.
+
+### Audit findings
+- Schema confirmed: `id, trace_id, actor_id, event_domain, event_type, payload (jsonb), created_at` with indexes on `(actor_id, created_at)`, `(event_domain, event_type, created_at)`, `(trace_id)`.
+- RLS already correct: `event_timeline_admin_read` grants `SELECT` to `has_role(auth.uid(), 'admin')`. Append-only via `event_timeline_append_only`. UPDATE/DELETE blocked by trigger. **No migration required.**
+
+### Execution
+- Created `src/pages/admin/SovereignTracing.tsx`: TanStack Query, `keepPreviousData`, paginated 100/page, filters by Trace ID (UUID-validated), Actor ID (UUID-validated), and `event_domain` dropdown. Collapsible JSON payload viewer with `safeStringify` (cannot crash on malformed payloads).
+- Created route `src/routes/admin.tracing.tsx` → `/admin/tracing`.
+- Sidebar: added "مراقب الأحداث" entry under "إعدادات النظام" in `DesktopSidebar.tsx`.
+- Client-side gate via `useAdminRoles().hasRole('admin')` in addition to RLS (defense in depth).
+
+### Verification
+- Query key uses `tenantQueryKey('admin', 'sovereign-tracing', filters)` — partitioned by tenant in IndexedDB cache.
+- Payload viewer wraps `JSON.stringify` in try/catch — malformed/circular payloads render as `[unserialisable payload]` instead of crashing.
+- No mutations exposed — page is strictly read-only.
