@@ -134,7 +134,7 @@ export const VaultsDockContent = ({
                   </div>
                   <p
                     className={`text-[13px] font-black tabular-nums ${
-                      positive ? "text-emerald-500" : "text-foreground"
+                      positive ? "text-credit" : "text-foreground"
                     }`}
                   >
                     {positive ? "+" : ""}
