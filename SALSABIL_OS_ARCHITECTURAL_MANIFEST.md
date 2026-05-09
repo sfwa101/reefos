@@ -1398,3 +1398,86 @@ Security doctrine:              100%  ▓▓▓▓▓▓▓▓▓▓
 Doctrines IV (Logic Weaver) and VIII (Adaptive DNA) are partially honored
 — gap is in vertical storefronts and three legacy hex literals. No
 critical violations; remediation is tractable in Phase 29.
+
+---
+
+## XII. State of the Empire — Phases 55 → 58 Ratified (2026-05-09)
+
+The four executed phases since Phase 54 advance Doctrines I (Stem Cell),
+III (Reactive Matrix), VIII (Adaptive DNA), and the Tayseer Sovereign
+Identity covenant.
+
+### XII.1 Operator Workspaces (Doctrine VIII — Adaptive DNA)
+Three pathless layouts now share a unified high-contrast operator DNA
+(RTL, dark shell, semantic tokens only — zero Tailwind palette literals):
+
+| Layout | Phase | Surface |
+|---|---|---|
+| `src/routes/_kds.tsx` | 55 + 55.1 detox | Kitchen Display |
+| `src/routes/_dispatch.tsx` | 56 | Order Dispatch & Handover |
+| `src/routes/_barq.tsx` | 58 (renamed from `_driver` to resolve route-tree symbol clash with the legacy `/driver` flat shell) | Barq Driver Operator |
+
+### XII.2 Sovereign Handover Loop (Doctrine VI — Zero-Trust Ledger)
+- `confirm_handover(p_node_id, p_otp, p_channel)` — `SECURITY DEFINER`,
+  pinned `search_path = public`. The MVP "any non-empty string" bypass
+  was removed; mismatches raise `invalid_otp`.
+- `auto_issue_handover_otp` BEFORE-UPDATE trigger mints a 4-digit OTP
+  into `delivery_snapshot.handover` the first time a node enters
+  `ready_for_pickup` (idempotent).
+- `get_handover_otp(p_node_id)` exposes the OTP only to the order's
+  customer, the assigned driver, or `admin/staff/manager`.
+- Customer surface: `OrderSuccess` displays the walk-in OTP card.
+
+### XII.3 Success Partner Engine (Tayseer Sovereign Identity)
+Phase 57 enforced the **6-digit Tayseer Short ID = referral code**
+covenant:
+- `ensure_referral_code` rewritten to prefer the last 6 digits of
+  `national_id` (post-KYC) or fall back to a unique
+  `100000–999999` random.
+- `apply_referral_code(p_code)` attaches signups to referrers in
+  `profiles.referred_by` + `public.referrals` (self-referral blocked).
+- `pay_commission_from_treasury(p_commission_id)` — staff-only,
+  zero-sum double entry against the Treasury Wallet `…0777`,
+  idempotent via `commission:<id>:debit|credit`.
+- Frontend: `__root.tsx` captures `?ref=` → `localStorage`;
+  `AuthContext` calls `apply_referral_code` + `ensure_referral_code`
+  immediately after sign-up; `AffiliateDashboard` displays the
+  6-digit code (4xl mono) + WhatsApp deep-link share.
+- Deprecated: `src/core-os/finance/hooks/useAffiliateEngine.ts`.
+
+### XII.4 Vehicle DNA Foundation
+- `profiles.vehicle_dna jsonb` minted in Phase 58 for future weighted
+  driver/vehicle compatibility scoring (mode, capabilities,
+  efficiency_range). Not yet read by the dispatcher.
+
+### XII.5 Open Doctrinal Debt (Phase 59 Target)
+- **Doctrine IV (Logic Weaver):** transaction-kind labels still
+  hardcoded in `OperationsDockContent`.
+- **Doctrine VIII (Adaptive DNA):** 31 hardcoded color literals across
+  `src/core-os/finance/` (rose / amber / emerald / blue) — semantics
+  must move to design tokens (`--credit`, `--debit`, `--warn`,
+  `--premium`).
+- **Doctrine VI (Immutable Ledger):** `useWalletTransactions` still
+  reads the legacy `wallet_transactions` mirror; sovereign
+  `ledger_entries` writes (Phase 57 commissions, Tayseer treasury) are
+  invisible to the customer feed.
+- **Affiliate UI fragmentation:** sovereign `AffiliateDashboard`
+  coexists with legacy `WalletAffiliateHub`.
+
+### XII.6 Updated Compliance Score (post Phase 58)
+
+```
+Sovereign Matrix conformance:   88%   ▓▓▓▓▓▓▓▓▓░
+SDUI Level-4 coverage:          22%   ▓▓░░░░░░░░
+Stem-cell registry coverage:    100%  ▓▓▓▓▓▓▓▓▓▓
+Token-system compliance:        91%   ▓▓▓▓▓▓▓▓▓░  (finance pollution)
+Security doctrine:              100%  ▓▓▓▓▓▓▓▓▓▓
+Operator-workspace DNA parity:  100%  ▓▓▓▓▓▓▓▓▓▓  (KDS·Dispatch·Barq)
+Sovereign Handover (OTP):       100%  ▓▓▓▓▓▓▓▓▓▓
+```
+
+**Verdict:** The Operator Tier (KDS · Dispatch · Barq) and the
+Sovereign Identity Tier (Tayseer Short ID · Affiliate · Treasury
+payouts) are fully ratified. The Customer Wallet Tier remains the
+sole significant doctrinal debt — scheduled for Phase 59
+(Sovereign Wallet Redesign).
