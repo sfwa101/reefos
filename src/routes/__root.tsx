@@ -164,7 +164,9 @@ function RootComponent() {
                           <SubdomainGuard />
                           <Toaster />
                           <SovereignDormancyOverlay />
-                          <Outlet />
+                          <MaintenanceGate>
+                            <Outlet />
+                          </MaintenanceGate>
                         </FavoritesProvider>
                       </CompareProvider>
                     </SharedCartProvider>
