@@ -180,6 +180,7 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
+        </TenantProvider>
         {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
         {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
