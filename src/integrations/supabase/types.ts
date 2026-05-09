@@ -9422,6 +9422,7 @@ export type Database = {
         | "branch_manager"
         | "inventory_clerk"
         | "charity_auditor"
+        | "kitchen_staff"
       app_user_level: "bronze" | "silver" | "gold" | "platinum"
       fulfillment_status:
         | "pending"
@@ -9626,6 +9627,7 @@ export const Constants = {
         "branch_manager",
         "inventory_clerk",
         "charity_auditor",
+        "kitchen_staff",
       ],
       app_user_level: ["bronze", "silver", "gold", "platinum"],
       fulfillment_status: [
