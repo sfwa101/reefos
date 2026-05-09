@@ -200,7 +200,7 @@ const Wallet = () => {
                 data={savingsData}
               />
             ) : dock === "charity" ? (
-              <WalletCharityHub userId={c.userId} walletBalance={totalBalance} />
+              <WalletCharityHub walletBalance={totalBalance} />
             ) : (
               <InsightsDockContent userId={c.userId} data={txnsData} appSpend={c.appSpend} />
             )}
