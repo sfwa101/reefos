@@ -117,6 +117,25 @@ const OrderSuccess = () => {
         )}
       </div>
 
+      {pickupOtp && (
+        <div className="w-full max-w-sm rounded-2xl border border-primary/30 bg-primary/5 p-4 ring-1 ring-primary/20 text-start shadow-soft">
+          <div className="flex items-center gap-3">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary/15 text-primary">
+              <KeyRound className="h-5 w-5" />
+            </span>
+            <div className="flex-1">
+              <p className="text-[11px] font-bold text-muted-foreground">رمز الاستلام (OTP)</p>
+              <p className="font-mono font-extrabold text-[26px] tracking-[0.4em] text-primary tabular-nums" dir="ltr">
+                {pickupOtp}
+              </p>
+            </div>
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-2">
+            اعرض هذا الرمز للمندوب أو محطة التسليم لتأكيد استلام الطلب.
+          </p>
+        </div>
+      )}
+
       {waFallback && (
         <div className="w-full max-w-sm space-y-3 rounded-2xl border border-border bg-card p-4 text-start shadow-soft">
           <div>
