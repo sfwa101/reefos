@@ -1,167 +1,173 @@
-# 🌌 VISION.md — Salsabil OS / Reef Al-Madina
+# 🌌 VISION.md — دستور سلسبيل (Salsabil OS)
 
-> **The Strategic Constitution**
-> A foundational document for every human and AI contributor.
-> Read this BEFORE writing a single line of code.
-
----
-
-## 0. The One-Line Truth
-
-> **We are not building an app. We are not building an ERP.**
-> We are building a **Multi-Role Adaptive Commerce Civilization** —
-> a living operating system where capabilities compose themselves around
-> the human using them, not the other way around.
-
-If you ever find yourself asking *"where do I add this page?"* — stop.
-You are thinking in the wrong dimension. There are no pages here.
-There are **capabilities**, **roles**, **contexts**, and **intents**.
-The interface is a *consequence*, not an artifact.
+> **الدستور الاستراتيجي للحضارة الرقمية السيادية**
+> وثيقة مرجعية دائمة — تُلزم كل مطوّر بشري أو ذكاء اصطناعي.
+> اقرأها **قبل** أن تكتب سطراً واحداً من الكود.
 
 ---
 
-## 1. The Four Pillars
+## 0. الحقيقة الواحدة
 
-### 1.1 🧬 Capability Composer
+> **نحن لا نبني تطبيقاً. ولا نبني نظام ERP. ولا حتى سوبر-آب.**
+> نحن نبني **حضارة رقمية سيادية موحّدة** —
+> *Sovereign Digital Civilization* تجري على **Unified Sovereign Runtime**
+> واحد، تتعايش فيه التجارة، اللوجستيات، البنوك، التعليم، وصناعة الشركات
+> ككائنات حية تتبادل الهوية، الثقة، ورأس المال.
 
-The system does **not** ship hardcoded screens.
-It ships **capabilities** — atomic, reusable units of business power:
-
-- `orders.fulfill`
-- `inventory.adjust`
-- `staff.dispatch`
-- `wallet.transfer`
-- `pricing.override`
-
-A "screen" is just a **runtime composition** of capabilities chosen by:
-1. The user's active **role** (cashier, driver, vendor, admin, customer…)
-2. The user's current **context** (in-store, on-route, peak-hour, offline)
-3. The user's **Interface DNA** (see §1.2)
-4. The **tenant scope** (Reef, Asrab, Khalil, Nabd…)
-
-> ❌ `pages/CashierScreen.tsx` with hand-wired widgets.
-> ✅ `compose(["orders.queue","payments.collect","inventory.lookup"], dna)`
-
-The Composer is the **only** authority that decides what a user sees.
-No file under `src/pages/*` is allowed to claim final UI authority —
-all pages are *thin shells* over the Composer.
+سلسبيل ليست منصّة. سلسبيل هي **الأرض الرقمية** التي تقوم عليها مدن
+رقمية متعددة، تحكمها قوانين واحدة، وتشترك في نَفَسٍ واحد.
 
 ---
 
-### 1.2 🧠 Interface DNA
+## 1. المفهوم الجوهري
 
-Every identity in the system carries a **DNA profile** — a structured,
-persistent description of *who they are operationally*:
+**Salsabil OS = Unified Sovereign Runtime + Multi-Role Adaptive Commerce Civilization**
+
+- **Unified Sovereign Runtime:** زمن تشغيل واحد، قاعدة بيانات واحدة،
+  هوية واحدة، محفظة واحدة، ذكاء واحد (Hakim) — يخدم كل الكائنات.
+- **Multi-Role Adaptive Civilization:** الإنسان الواحد قد يكون عميلاً
+  وتاجراً ومستثمراً وسائقاً ومعلّماً في آنٍ واحد، والواجهة تتشكّل
+  حوله بشكل متكيّف، لا العكس.
+
+> الواجهة نتيجة، لا مادة.
+> الدور سياق، لا حساب منفصل.
+> التطبيق تركيبة لحظية، لا منتج جامد.
+
+---
+
+## 2. المنظومة (The Sovereign Ecosystem)
+
+خمسة كائنات حية، جسد واحد، روح واحدة:
+
+### 🌾 ريف المدينة — *Reef Al-Madina* (التجارة / Commerce)
+المدينة التجارية الأم: سوبرماركت، لحوم، صيدلية، مطاعم، مطبخ، حلويات،
+اشتراكات، قرية، أسر منتجة، جملة، ومسوّقون. أول كائن وُلد على سلسبيل،
+وهو الميدان الذي تُختبر فيه كل قوانين الحضارة.
+
+### 💎 تيسير — *Tayseer* (نواة الهوية الكونية والمصرفية / Universal Identity Kernel & Banking)
+العمود الفقري المالي والهوياتي للحضارة:
+- **هوية واحدة** (الرقم القومي + KYC) لكل البشر في المنظومة.
+- **محفظة واحدة** تتبع الإنسان عبر كل الأدوار والمدن.
+- **خدمات مصرفية سيادية** مطابقة للشريعة: ادخار، زكاة، صدقة، تيسير،
+  تمويل بدون ربا، وسلسلة قيادة لكل قرش.
+- لا يمكن لأي كائن آخر في المنظومة أن يحوّل قرشاً دون المرور على تيسير.
+
+### ⚡ برق — *Barq* (اللوجستيات الفيدرالية / Federated Logistics)
+محرك الحركة في الحضارة:
+- أسطول داخلي + شراكات خارجية (Hub & Spoke).
+- تسعير ديناميكي حسب المسافة، الوزن، الذروة، والربحية.
+- عقد ذكي بين البائع، السائق، والمستلم — موحَّد عبر ريف، بناء، وأي
+  كائن مستقبلي يحتاج تحريك ذرّة من نقطة إلى نقطة.
+
+### 📚 نور الدين — *Nour El-Din* (محرّك القدرات البشرية / Human Capability Engine)
+مدرسة الحضارة:
+- تعليم وتدريب وتأهيل لكل دور في المنظومة (سائق، كاشير، تاجر، مدير).
+- شهادات معترف بها داخلياً تَفتح صلاحيات (`user_roles`) تلقائياً.
+- مسارات تطوّر ذاتي: عميل → مسوّق → تاجر → مستثمر.
+- دمج عميق مع Hakim: الذكاء يقترح المسار التالي لكل إنسان.
+
+### 🏗️ بناء — *Benaa* (مولّد الشركات اللحظي / Runtime Business Generator)
+مصنع الشركات داخل الحضارة:
+- أي إنسان يطلق "شركة" خلال دقائق: متجر، مطعم، مكتب توصيل، ورشة، مدرسة.
+- الشركة تَرث تلقائياً: هوية تيسير، لوجستيات برق، تعليم نور الدين،
+  وتكامل ريف.
+- لا تأسيس قانوني مكرر، لا بنية تحتية مكرّرة، لا واجهات مكرّرة —
+  كل شيء **يُلتقط من الجوّ** عبر Capability Composer.
+
+---
+
+## 3. الـ Interface DNA — الحمض النووي للواجهة
+
+الواجهات في سلسبيل **ليست صفحات ثابتة**. إنها كائنات حيّة تتشكّل لحظياً
+بناءً على **DNA Profile** للكيان الذي ينظر إليها:
 
 ```ts
 type InterfaceDNA = {
-  scale: "micro" | "small" | "enterprise";   // business scale
-  roles: AppRole[];                          // multi-role identity
-  cognitiveLoad: "minimal" | "balanced" | "dense";
-  motorContext: "thumb" | "stylus" | "mouse" | "voice";
-  ambientLight: "bright" | "dim" | "dark";
-  literacy: "icon-first" | "text-first" | "mixed";
-  preferredFlow: "guided" | "expert" | "shortcut";
-  language: "ar" | "en" | "bilingual";
+  scale:        "micro" | "small" | "enterprise"; // حجم الكيان
+  roles:        AppRole[];                        // أدوار متعددة في وقت واحد
+  cognitiveLoad:"minimal" | "balanced" | "dense"; // الحمل الذهني المطلوب
+  motorContext: "thumb"   | "stylus" | "mouse" | "voice";
+  ambientLight: "bright"  | "dim"    | "dark";
+  literacy:     "icon"    | "text"   | "mixed";
+  flow:         "guided"  | "expert" | "shortcut";
+  language:     "ar"      | "en"     | "bilingual";
 };
 ```
 
-The DNA dictates **density, motion, color temperature, button size,
-keyboard shortcuts, and workflow shape** — automatically. A cashier's
-DNA produces tap-targets ≥ 56px and zero animation. A manager's DNA
-produces dense data tables and keyboard-first navigation. **Same code,
-different organism.**
+**النظام عصبي-تكيّفي (Neuroadaptive Interface System):**
+- كاشير في ساعات الذروة → تباين أقصى، أهداف لمس ≥ 56px، صفر حركة.
+- سائق تحت الشمس → ألوان قابلة للقراءة في النور، أهداف ≥ 64px.
+- مدير في مكتبه → كثافة بيانات عالية، اختصارات لوحة مفاتيح.
+- عميل في وقت فراغ → تجربة سينمائية، حركة معبّرة.
 
-DNA is **mutable** — it learns from behavior via the Event Bus and
-adapts over weeks, not just at signup.
-
----
-
-### 1.3 🧱 Smart Living Blocks (Block Economy)
-
-A "block" in Salsabil OS is **not** a visual component. It is an
-**economic, semantic, and intelligent unit**:
-
-| Layer | What the block carries |
-|---|---|
-| **Visual** | Render contract (token-driven, theme-aware) |
-| **Permissions** | Who may see, edit, dispatch, audit it |
-| **Data Contract** | Typed inputs/outputs, validation, idempotency keys |
-| **AI Hooks** | Predictions, anomaly probes, summarization slots |
-| **Analytics** | Self-reporting telemetry — every render, every interaction |
-| **Economics** | Cost-to-render, cost-to-fetch, profit attribution |
-
-Blocks **trade with each other** at runtime. A high-cost block on a
-low-end device negotiates downgrade. A block whose AI prediction is
-stale defers its own render. The UI is a **marketplace of blocks**,
-governed by the Composer.
+**نفس الكود. كائنات مختلفة.**
+الـ DNA يتطوّر مع الزمن عبر `Event Bus` — يتعلّم من السلوك، لا من الإعدادات.
 
 ---
 
-### 1.4 🤖 AI Operational Intelligence (Hakim)
+## 4. الرسم البياني للسمعة والاقتصاد (Reputation & Economic Graph)
 
-The AI in Salsabil OS is **not** a chatbot bolted to a sidebar.
-It is a **proactive operating partner** named **Hakim**, embedded into
-the runtime itself:
+كل كيان في المنظومة (إنسان، شركة، أسرة منتجة، سائق، مستثمر) له **عقدة**
+واحدة في رسم بياني سيادي يحوي:
 
-- **Predicts rush hours** 90 minutes ahead and pre-warms driver pools.
-- **Warns about stock** before the buyer notices the gap.
-- **Detects anomalies** in cashier sessions in real time.
-- **Rewrites flows** on the fly when a user struggles (DNA feedback).
-- **Negotiates** between blocks (see §1.3) on resource scarcity.
-- **Speaks Arabic natively** — not translated, *thought* in Arabic.
+- **سجل الثقة:** المعاملات، التقييمات، التزامات السداد، الاستجابة للشكاوى.
+- **سجل القدرات:** الشهادات من نور الدين، الأدوار المُمنوحة، السقوف المالية.
+- **سجل الاقتصاد:** التدفقات النقدية، الزكاة المدفوعة، رأس المال المتاح.
 
-Hakim is **never** asked. Hakim **observes, decides, and acts**, with
-auditable traces for every decision (`sovereignTracing.ts`).
+**التحوّل السلس بين الأدوار** هو القدرة المركزية:
+- تاجر ناجح في ريف → بنقرة واحدة يصبح **مورّداً** للأسر المنتجة.
+- عميل ذو سجل ممتاز → يُمنح حد ائتماني من تيسير دون طلب.
+- مسوّق وصل لحجم معيّن → يفتح له بناء واجهة "إطلاق شركتك".
+- سائق متميّز → يُرشَّح لقيادة Hub لوجستي مستقل في برق.
 
-The chat interface is the *least interesting* surface of Hakim — the
-**operational** surface is where the civilization lives.
+**السمعة عملة سيادية** — تتبع الإنسان عبر كل المدن، وتُستخدم كضمان مالي
+في تيسير، كأولوية في برق، كقبول في بناء.
 
----
-
-## 2. The Ten Civilizational Laws
-
-1. **No screen is ever final.** Every UI is a runtime composition.
-2. **No user is single-role.** Identity is plural and switchable.
-3. **No tenant bleeds into another.** Isolation is structural, not policy.
-4. **No price is hardcoded.** All economics flow through the Pricing Engine.
-5. **No write is unaudited.** Every mutation has a trace and idempotency key.
-6. **No latency is acceptable.** Local-first, optimistic, offline-tolerant.
-7. **No role is privileged in code.** Permissions live in `user_roles` + RLS.
-8. **No AI is decorative.** Every AI surface must change an outcome.
-9. **No block is mute.** Every block self-reports cost and value.
-10. **No future is foreclosed.** Architecture must absorb the unknown.
+> الإنسان لا يُسجَّل في كل خدمة من جديد. الإنسان **يَنمو** داخل الحضارة.
 
 ---
 
-## 3. The Civilizational Roadmap
+## 5. القوانين الحضارية العشرة
 
-This is the *long arc*. Phases are milestones, not endpoints.
+1. **لا واجهة نهائية.** كل شاشة تركيبة لحظية.
+2. **لا إنسان أحادي الدور.** الهوية متعددة وقابلة للتبديل بنقرة.
+3. **لا تَسرُّب بين المستأجرين.** العزل بنيوي، لا سياسي.
+4. **لا سعر مكتوب يدوياً.** كل المال يمر عبر Pricing Engine.
+5. **لا كتابة بلا تتبّع.** كل تغيير له idempotency key وسجل أبدي.
+6. **لا انتظار للشبكة.** Local-first، optimistic، offline-tolerant.
+7. **لا صلاحية في الكود.** الأدوار في `user_roles` + RLS فقط.
+8. **لا ذكاء زخرفي.** كل سطح للـ AI يجب أن يغيّر نتيجة.
+9. **لا كتلة صامتة.** كل Block يُبلّغ عن تكلفته وقيمته.
+10. **لا مستقبل مغلق.** المعمارية تستوعب المجهول.
 
-| Era | Theme | Outcome |
+---
+
+## 6. الأفق الحضاري (Civilizational Roadmap)
+
+| العصر | المحور | الثمرة |
 |---|---|---|
-| **I — Foundation** | Stem-cell modules, pricing engine, RLS | Single-tenant retail |
-| **II — Identity** | Multi-role, DNA, role-switcher | One human, many faces |
-| **III — Marketplace** | Multi-vendor, hubs, productive families | Many sellers, one trust |
-| **IV — Reverse Commerce** | Affiliates, dropshipping, marketers | Customer becomes seller |
-| **V — Intelligence** | Hakim operational AI, predictive ops | System runs itself |
-| **VI — Composer** | Full SDUI, capability registry, DNA-driven | Pages disappear |
-| **VII — Civilization** | Asrab, Khalil, Nabd super-apps on shared OS | One OS, many worlds |
+| **I — التأسيس** | الخلايا الجذعية، محرك التسعير، RLS | تجارة أحادية المستأجر |
+| **II — الهوية** | تيسير، DNA، تبديل الأدوار | إنسان واحد، وجوه متعددة |
+| **III — السوق** | متعدد البائعين، Hubs، الأسر المنتجة | بائعون كثر، ثقة واحدة |
+| **IV — التجارة العكسية** | المسوّقون، التسويق بالعمولة | العميل يصبح بائعاً |
+| **V — الذكاء** | Hakim التشغيلي، التنبؤات | النظام يدير نفسه |
+| **VI — المُؤلِّف** | SDUI كامل، Capability Registry | الصفحات تختفي |
+| **VII — الحضارة** | برق، نور الدين، بناء فوق سلسبيل | OS واحد، عوالم متعدّدة |
 
 ---
 
-## 4. What This Document Forbids
+## 7. ما تَحرُمه هذه الوثيقة
 
-- ❌ Treating Salsabil OS as a "delivery app with extras."
-- ❌ Adding a feature without asking *which capability* it extends.
-- ❌ Hardcoding any role-specific UI inside a shared component.
-- ❌ Building a dashboard before defining the DNA it serves.
-- ❌ Calling AI "a feature." AI is the **substrate**.
+- ❌ التعامل مع سلسبيل كـ "تطبيق توصيل بمزايا إضافية".
+- ❌ إضافة ميزة دون السؤال: *أيّ قدرة (Capability) تَمتدّ منها؟*
+- ❌ ترميز أي UI خاص بدور بعينه داخل مكوّن مشترك.
+- ❌ بناء لوحة قبل تعريف الـ DNA التي تخدمها.
+- ❌ تسمية الذكاء "ميزة". الذكاء **هو الأرضية**، لا طبقة فوقها.
 
 ---
 
-> **The Emperor's mandate:**
-> *"Every line of code we write today must serve a million humans tomorrow.
-> Build it like you are laying the first stone of a pyramid — because you are."*
+> **مرسوم الإمبراطور:**
+> *كل سطر كود يُكتب اليوم سيخدم مليون إنسان غداً.*
+> *اكتبه كأنك تضع أول حجرٍ في هرم — لأنك بالفعل كذلك.*
 
-— *Principal Enterprise Architect, Salsabil OS*
+— *كبير المهندسين السيادي، Salsabil OS*
