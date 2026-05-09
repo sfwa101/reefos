@@ -27,6 +27,7 @@ import type { SectionConfig, SectionKey } from "../types/sdui.types";
 import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
 import type { CatId } from "../types";
 import { SectionFrame } from "@/core-os/sdui-engine/SectionFrame";
+import { SDUIErrorBoundary } from "@/core-os/sdui-engine/components/SDUIErrorBoundary";
 
 // Phase 26 — Main Hub stem cells (orchestrator-free, self-contained)
 import { MainSearchHeader } from "@/apps/reef-al-madina/features/main-hub/components/MainSearchHeader";
