@@ -73,9 +73,9 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-full bg-success animate-pulse" />
-              <p className="text-[11px] text-foreground-tertiary">ورديّة مفتوحة</p>
+              <p className="text-[11px] text-muted-foreground">ورديّة مفتوحة</p>
             </div>
-            <p className="font-display text-[16px] num">{fmtMoney(shift.total_sales)} <span className="text-[11px] text-foreground-tertiary">({shift.total_orders} طلب)</span></p>
+            <p className="font-display text-[16px] num">{fmtMoney(shift.total_sales)} <span className="text-[11px] text-muted-foreground">({shift.total_orders} طلب)</span></p>
           </div>
           <button
             onClick={() => setClosing(true)}
