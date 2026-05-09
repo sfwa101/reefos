@@ -158,7 +158,13 @@ export function usePosEngine() {
         // Heuristic: scanners deliver ≥6 chars in one burst
         if (code.length >= 6) {
           const p = findByBarcode(code);
-          if (p) { e.preventDefault(); addProduct(p); toast.success(`+ ${p.name}`); }
+          if (p) {
+            e.preventDefault();
+            addProduct(p);
+            // Subtle success haptic — Phase 63 Zero-Friction
+            try { if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate([15, 30, 15]); } catch { /* noop */ }
+            toast.success(`+ ${p.name}`);
+          }
           else if (!inField) { toast.error("باركود غير معروف"); }
         }
         return;
