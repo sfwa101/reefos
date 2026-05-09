@@ -46,7 +46,7 @@ export const useWalletBalance = () => {
           .maybeSingle(),
         supabase
           .from("profiles")
-          .select("full_name")
+          .select("full_name, short_id")
           .eq("id", user.id)
           .maybeSingle(),
         supabase.rpc("user_trust_limit", { _user_id: user.id }),
@@ -56,7 +56,7 @@ export const useWalletBalance = () => {
 
       if (!mounted) return;
       setBalance(bal ?? { balance: 0, points: 0, coupons: 0, cashback: 0 });
-      setProfile(prof ?? { full_name: null });
+      setProfile(prof ?? { full_name: null, short_id: null });
       setTrustLimit(Number(trust ?? 0));
       setTier(tierProgress(Number(spent ?? 0)).tier);
       setLoading(false);
