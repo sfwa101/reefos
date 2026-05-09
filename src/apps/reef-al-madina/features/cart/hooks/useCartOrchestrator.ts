@@ -442,11 +442,17 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           // canonical Tayseer ledger (balance + credit_limit). The cart UI
           // waits for this RPC before declaring success, so the order's
           // payment_status flips to 'paid' inside the same user action.
-          if (payment === "wallet" && walletApplied > 0) {
+          // Phase 54 — Wakalah lines are not yet owned; never deduct upfront.
+          const wakalahTotal = lines.reduce((acc, l) => {
+            const mode = (l.meta?.properties as Record<string, unknown> | undefined)?.procurement_mode;
+            return mode === "wakalah" ? acc + (l.product.price * l.qty) : acc;
+          }, 0);
+          const tayseerCharge = Math.max(0, walletApplied - wakalahTotal);
+          if (payment === "wallet" && tayseerCharge > 0) {
             try {
               await callTayseerPayment({
                 order_id: savedOrderId,
-                amount: walletApplied,
+                amount: tayseerCharge,
               });
               toast.success("تم الدفع بنجاح من محفظة تيسير");
               void logSovereignEvent({
