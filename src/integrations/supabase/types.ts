@@ -5362,6 +5362,8 @@ export type Database = {
           delivery_info: Json
           id: string
           idempotency_key: string | null
+          paid_at: string | null
+          payment_status: string
           status: string
           total_amount: number
           updated_at: string
@@ -5372,6 +5374,8 @@ export type Database = {
           delivery_info?: Json
           id?: string
           idempotency_key?: string | null
+          paid_at?: string | null
+          payment_status?: string
           status?: string
           total_amount?: number
           updated_at?: string
@@ -5382,6 +5386,8 @@ export type Database = {
           delivery_info?: Json
           id?: string
           idempotency_key?: string | null
+          paid_at?: string | null
+          payment_status?: string
           status?: string
           total_amount?: number
           updated_at?: string
@@ -8640,6 +8646,10 @@ export type Database = {
       }
       process_successful_referral: {
         Args: { _referral_id: string }
+        Returns: Json
+      }
+      process_tayseer_payment: {
+        Args: { p_amount: number; p_order_id: string }
         Returns: Json
       }
       pull_catalog_sync: { Args: { p_last_sync?: string }; Returns: Json }

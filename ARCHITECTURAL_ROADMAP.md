@@ -1979,3 +1979,40 @@ The Constitution is now the **highest authority** in the codebase. It
 overrides convenience, overrides speed, overrides any individual feature
 request that contradicts it.
 
+
+---
+
+## Phase 51 — Tayseer Rapid Pay Kernel (Smart Balance Reserve)
+
+**Status:** Sealed.
+
+The first financial kernel of Tayseer OS. Eliminates checkout friction by
+allowing one-tap payment from a pre-funded wallet, atomically settled
+through the existing double-entry sovereign ledger.
+
+### Schema (reuses existing tables — Law 2: Stem Cell, no parallel system)
+- `wallets` (existing) — Tayseer Ledger v1 user balances.
+- `ledger_entries` (existing) — immutable double-entry log with balanced-group trigger.
+- `salsabil_master_orders` — added `payment_status ∈ {unpaid, paid, refunded}` + `paid_at`.
+- System treasury wallet seeded at `00000000-0000-0000-0000-000000000777`.
+
+### RPC: `process_tayseer_payment(p_order_id uuid, p_amount numeric)`
+- `SECURITY DEFINER`, `SET search_path = public`, `EXECUTE` granted to `authenticated` only (Law 6).
+- Locks order row → verifies `customer_id = auth.uid()` → short-circuits if already paid.
+- Locks user EGP wallet → checks `balance ≥ amount` → raises `insufficient_funds` otherwise.
+- Atomically: debits user wallet, posts balanced ledger pair (−X user / +X treasury),
+  credits treasury balance, marks order paid, promotes status `pending → confirmed`.
+- Idempotency key derived from `order:<uuid>` (per-order-unique on `ledger_entries`).
+- Entire flow rolls back on any failure (single transaction).
+
+### Client surface
+- `src/hooks/useTayseerRapidPay.ts` — `useTayseerRapidPay()` + `callTayseerPayment()`.
+- Arabic success toast: **"تم الدفع بنجاح من محفظة تيسير"**.
+- Friendly Arabic error mapping for insufficient funds, missing/frozen wallets, forbidden access.
+- Auto-invalidates `tayseer` wallet/ledger and order query keys for optimistic refresh.
+
+### Verification
+- Atomicity: enforced by single `plpgsql` transaction + `FOR UPDATE` row locks on both order and wallet.
+- Double-entry: `ledger_entries_balanced_check` trigger guarantees `Σ(group) = 0`.
+- Authorization: `auth.uid()` check inside RPC + RLS on `wallets`/`ledger_entries` block any direct write path.
+- Insufficient balance: surfaces as toast "رصيد محفظة تيسير غير كافٍ لإتمام الدفع" — no partial state.
