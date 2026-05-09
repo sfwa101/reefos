@@ -9,6 +9,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { tenantQueryKey } from "@/lib/tenantScope";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
 // Generic category fallback (Meat, Sweets, Pharmacy, Home Goods, etc.)
@@ -121,7 +122,7 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
   const status: LayoutStatus = statusOverride ?? readPreviewMode();
 
   const query = useQuery({
-    queryKey: ["ui_layouts", pageKey, status],
+    queryKey: tenantQueryKey("ui_layouts", pageKey, status),
     queryFn: () => fetchUiLayout(pageKey, status),
     staleTime: 60 * 60 * 1000, // Phase 39 — SDUI layouts: 1h fresh.
     gcTime: 24 * 60 * 60 * 1000,

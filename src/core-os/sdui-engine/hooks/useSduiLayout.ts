@@ -12,6 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
+import { tenantQueryKey } from "@/lib/tenantScope";
 import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 
@@ -62,7 +63,7 @@ export function useSduiLayout(slug: string): State {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ["sdui_layouts", slug],
+    queryKey: tenantQueryKey("sdui_layouts", slug),
     queryFn: () => fetchSduiBlocks(slug),
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
@@ -81,7 +82,7 @@ export function useSduiLayout(slug: string): State {
           filter: `slug=eq.${slug}`,
         },
         () => {
-          void queryClient.invalidateQueries({ queryKey: ["sdui_layouts", slug] });
+          void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
         },
       )
       .subscribe();

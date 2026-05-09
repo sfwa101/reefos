@@ -31,6 +31,7 @@ import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 import { SovereignSpiritBootstrap } from "@/core-os/spirit/SovereignSpiritBootstrap";
 import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
+import { TenantProvider } from "@/context/TenantContext";
 
 function NotFoundComponent() {
   return (
@@ -146,6 +147,7 @@ function RootComponent() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
+        <TenantProvider>
         <ThemeProvider>
           <LocaleProvider>
           <UIProvider>
@@ -178,6 +180,7 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
+        </TenantProvider>
         {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
         {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
