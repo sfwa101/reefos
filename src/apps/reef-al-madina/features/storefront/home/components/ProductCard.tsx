@@ -172,9 +172,9 @@ export const ProductCard = ({
       onClick={onOpen}
       className={`group relative flex cursor-pointer flex-col overflow-hidden rounded-2xl bg-card text-right shadow-soft ring-1 ring-border/50 transition active:scale-[0.99] ${
         isPre ? "ring-2 ring-amber-300/60" : ""
-      }`}
+      } ${isHardOOS ? "opacity-60 saturate-50" : ""} ${isWakalah ? "ring-2 ring-amber-400/60" : ""}`}
       style={{ contentVisibility: "auto", containIntrinsicSize: "320px 340px" }}
-    >
+    ></article-stub>` 
       {isPre && (
         <div
           aria-hidden
