@@ -100,9 +100,6 @@ const Wallet = () => {
             <p className="text-[11px] font-bold tracking-[0.18em] uppercase text-muted-foreground">
               تيسير · المحفظة السيادية
             </p>
-            <h1 className="font-display text-[26px] font-black tracking-tight mt-0.5 text-foreground truncate">
-              أهلاً، {ownerName.split(" ")[0]}
-            </h1>
             {shortId && (
               <p className="mt-0.5 text-[11px] font-bold text-muted-foreground tabular-nums tracking-wider">
                 <span className="text-primary">ID</span> · {toLatin(shortId)}
@@ -134,9 +131,9 @@ const Wallet = () => {
               key={a.id}
               type="button"
               onClick={a.onClick}
-              className="group flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-tayseer-surface text-tayseer-cream py-3.5 shadow-md active:scale-95 transition"
+              className="group flex flex-col items-center justify-center gap-1.5 rounded-[20px] bg-secondary text-secondary-foreground hover:bg-secondary/80 py-3.5 shadow-sm ring-1 ring-border active:scale-95 transition"
             >
-              <a.icon className="h-5 w-5 text-tayseer-gold" strokeWidth={2.2} />
+              <a.icon className="h-5 w-5 text-primary" strokeWidth={2.2} />
               <span className="text-[11px] font-extrabold">{a.label}</span>
             </button>
           ))}
@@ -145,18 +142,18 @@ const Wallet = () => {
         {/* AFFILIATE PROMOTION — sovereign tokenized banner */}
         <Link
           to="/affiliate"
-          className="flex items-center justify-between rounded-2xl bg-tayseer-surface text-tayseer-cream p-3 shadow-sm active:scale-[0.99] transition"
+          className="flex items-center justify-between rounded-2xl bg-card text-card-foreground p-3 shadow-sm ring-1 ring-border active:scale-[0.99] transition"
         >
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-tayseer-gold/15 text-tayseer-gold">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-primary/10 text-primary">
               <Sparkles className="h-4 w-4" />
             </span>
             <div>
               <p className="text-[12.5px] font-extrabold">برنامج الإحالة السيادي</p>
-              <p className="text-[10.5px] text-tayseer-cream/70">اربح عمولة على كل دعوة ناجحة</p>
+              <p className="text-[10.5px] text-muted-foreground">اربح عمولة على كل دعوة ناجحة</p>
             </div>
           </div>
-          <span className="text-[11px] font-bold text-tayseer-gold">افتح ←</span>
+          <span className="text-[11px] font-bold text-primary">افتح ←</span>
         </Link>
 
         {/* MINI-APP DOCK */}
@@ -275,40 +272,40 @@ const UnifiedBalanceCard = ({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: 0.05 }}
-      className="relative overflow-hidden rounded-3xl bg-tayseer-night text-tayseer-cream p-5 shadow-elegant"
+      className="relative overflow-hidden rounded-3xl bg-card text-card-foreground p-7 sm:p-8 shadow-md ring-1 ring-border"
     >
-      {/* layered sovereign glow */}
-      <div className="pointer-events-none absolute -top-16 -end-16 h-48 w-48 rounded-full bg-tayseer-gold/25 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-20 -start-20 h-56 w-56 rounded-full bg-tayseer-green/20 blur-3xl" />
+      {/* soft adaptive glow */}
+      <div className="pointer-events-none absolute -top-20 -end-20 h-56 w-56 rounded-full bg-primary/15 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -start-24 h-64 w-64 rounded-full bg-accent/15 blur-3xl" />
 
       <div className="relative flex items-start justify-between">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-tayseer-cream/60">
+          <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             الرصيد الكلي
           </p>
-          <p className="mt-1 font-display text-5xl font-black tabular-nums text-tayseer-cream">
+          <p className="mt-2 font-display text-6xl sm:text-7xl font-black tabular-nums leading-none text-foreground">
             {hidden ? "•••••" : toLatin(balance.toLocaleString("en-US"))}
-            <span className="ms-1.5 align-top text-sm font-bold text-tayseer-gold">
+            <span className="ms-2 align-top text-base font-bold text-primary">
               ج.م
             </span>
           </p>
         </div>
-        <span className="inline-flex items-center gap-1 rounded-full bg-tayseer-green/20 text-tayseer-green px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-tayseer-green/30">
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1 text-[10px] font-extrabold ring-1 ring-primary/20">
           <ShieldCheck className="h-3 w-3" />
           مؤمَّنة بـ تيسير
         </span>
       </div>
 
-      <div className="relative mt-6 flex items-end justify-between">
+      <div className="relative mt-8 flex items-end justify-between">
         <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-tayseer-cream/60">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
             معرّف تيسير السيادي
           </p>
-          <p className="mt-0.5 font-mono text-base font-black tabular-nums tracking-[0.2em] text-tayseer-gold">
+          <p className="mt-1 font-mono text-base font-black tabular-nums tracking-[0.2em] text-primary">
             {masked}
           </p>
         </div>
-        <p className="text-[11px] font-extrabold text-tayseer-cream/85 truncate max-w-[55%] text-end">
+        <p className="text-[11px] font-extrabold text-foreground/80 truncate max-w-[55%] text-end">
           {ownerName}
         </p>
       </div>
