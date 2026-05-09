@@ -53,6 +53,14 @@ export class SDUIErrorBoundary extends Component<Props, State> {
     } catch {
       /* swallow — boundary must not throw */
     }
+    // Phase 46 — feed the autonomous Watchdog (sliding-window circuit breaker).
+    try {
+      void import("../engine/SduiWatchdog").then(({ recordSduiFailure }) =>
+        recordSduiFailure(this.props.blockId ?? null),
+      );
+    } catch {
+      /* never throw from a boundary */
+    }
   }
 
   render() {

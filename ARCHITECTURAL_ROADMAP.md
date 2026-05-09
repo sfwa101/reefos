@@ -1751,3 +1751,30 @@ Forensic, read-only admin dashboard over `salsabil_event_timeline` (Phase 38) fo
 - Query key uses `tenantQueryKey('admin', 'sovereign-tracing', filters)` — partitioned by tenant in IndexedDB cache.
 - Payload viewer wraps `JSON.stringify` in try/catch — malformed/circular payloads render as `[unserialisable payload]` instead of crashing.
 - No mutations exposed — page is strictly read-only.
+
+---
+
+## Phase 46 — Autonomous Governance (Self-Healing & Circuit Breakers)
+
+### Audit
+- Kill switches stored in `app_settings` (jsonb). RLS allows admin/finance writes via `app_settings_staff_write`.
+- `salsabil_event_timeline` is append-only (trigger blocks UPDATE/DELETE); admin SELECT only.
+- Last 100 `block_render_failed` events: 0 in production — baseline is healthy.
+
+### Execution
+- **SQL:** Added `admin_trigger_circuit_breaker(p_setting_key, p_reason)` `SECURITY DEFINER` RPC.
+  Whitelists keys (`ai_orchestration_enabled`, `payments_enabled`, `system_maintenance`),
+  flips value to `false`, and appends a `system.circuit_breaker_tripped` event in one
+  atomic call. Granted EXECUTE to authenticated; role enforcement inside function body.
+- **Watchdog (`src/core-os/sdui-engine/engine/SduiWatchdog.ts`):** Sliding 60s window,
+  threshold = 5 failures, 15-minute cool-down between trips. Singleton, idempotent.
+- **`SDUIErrorBoundary`:** Now feeds `recordSduiFailure(blockId)` alongside the existing
+  sovereign-tracing log — boundary still cannot throw.
+- **`SovereignControlPlane`:** Added `SystemHealthBanner` (1-hour breaker scan) + per-switch
+  "⚠️ مُعطَّل بواسطة قاطع الدائرة الذكي" badge that shows the trip reason and timestamp.
+
+### Verification
+- Cool-down enforced via `lastTripAt` guard → no infinite RPC loops even under sustained failures.
+- RPC denies non-admin/finance callers (`forbidden`) — only one privileged tab can trip the breaker.
+- Whitelist on `p_setting_key` prevents arbitrary `app_settings` rows being flipped.
+- `trippedActive` badge in UI cross-references latest `circuit_breaker_tripped` event with the live setting value.
