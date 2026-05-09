@@ -32,17 +32,17 @@ export function PosShiftManager({ shift, loading, onOpen, onClose }: Props) {
             <LogIn className="h-6 w-6" />
           </div>
           <h2 className="font-display text-[22px] mb-1">افتح ورديّة جديدة</h2>
-          <p className="text-[12px] text-foreground-secondary mb-4">أدخل رصيد الدُرج الافتتاحي لبدء البيع.</p>
-          <label className="text-[12px] text-foreground-secondary block mb-1">رصيد افتتاحي (نقد)</label>
+          <p className="text-[12px] text-muted-foreground mb-4">أدخل رصيد الدُرج الافتتاحي لبدء البيع.</p>
+          <label className="text-[12px] text-muted-foreground block mb-1">رصيد افتتاحي (نقد)</label>
           <input
             type="number" inputMode="decimal" min="0" step="0.01"
             value={opening} onChange={(e) => setOpening(e.target.value)}
-            className="w-full bg-surface-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+            className="w-full bg-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
           <button
             disabled={busy}
             onClick={async () => { setBusy(true); await onOpen(Number(opening) || 0); setBusy(false); }}
-            className="mt-4 w-full h-12 rounded-2xl bg-gradient-to-r from-primary to-primary-glow text-primary-foreground font-semibold press flex items-center justify-center gap-2"
+            className="mt-4 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold press flex items-center justify-center gap-2 ring-1 ring-border disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogIn className="h-5 w-5" />} فتح الورديّة
           </button>
