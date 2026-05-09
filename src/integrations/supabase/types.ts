@@ -8120,6 +8120,16 @@ export type Database = {
         }
         Returns: Json
       }
+      admin_manage_staff_role: {
+        Args: {
+          p_action: string
+          p_is_active?: boolean
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_role_id?: string
+          p_user_id: string
+        }
+        Returns: Json
+      }
       admin_schema_rollback: {
         Args: { p_entity_id: string; p_mode: string }
         Returns: Json
@@ -8136,6 +8146,10 @@ export type Database = {
           _transfer_reference: string
           _user_id: string
         }
+        Returns: Json
+      }
+      admin_update_partner_ledger: {
+        Args: { p_ledger_id: string; p_mark_paid?: boolean; p_status?: string }
         Returns: Json
       }
       approve_advance_request: { Args: { _request_id: string }; Returns: Json }
