@@ -80,6 +80,10 @@ export const ProductCard = ({
       toast.error("المنتج غير متاح حالياً");
       return;
     }
+    if (isHardOOS) {
+      toast.error("نفد المخزون");
+      return;
+    }
     if (isPre) {
       add(product, 1, {
         payDeposit: true,
@@ -88,6 +92,15 @@ export const ProductCard = ({
       });
       toast.success("تم تأكيد الحجز", {
         description: `دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
+      });
+      return;
+    }
+    if (isWakalah) {
+      add(product, 1, {
+        properties: { procurement_mode: "wakalah" },
+      });
+      toast.success("سنوفّره بالوكالة", {
+        description: "يضيفه السائق عند توفّره — لا خصم مسبق",
       });
       return;
     }
