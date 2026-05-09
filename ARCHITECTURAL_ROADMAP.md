@@ -2621,3 +2621,49 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
 - `src/docs/NOOR_ELDIN_MANIFESTO.md` — University constitution: Learning
   Journeys, Sovereign Skill Graph, Digital Apprenticeships, Hakim as Coach,
   Reputation Economy. Sovereign Stem Cell binding under Law 2.
+
+---
+
+## Phase 65 — The Master Switch (Contextual Capability Engine)
+**Codename:** Federation Permissions — workspace-scoped capabilities replace static roles.
+
+### Database
+- New enum `workspace_kind` ('reef','tayseer','noor_eldin','family','global').
+- `public.workspace_contexts(id, kind, owner_id, label, theme_overlay, is_active)` —
+  one row per (owner_id, kind). RLS: owners read/manage own.
+- `public.user_capabilities(user_id, workspace_id, capability, granted_by, expires_at)` —
+  unique on (user, workspace, capability). RLS: owner read; admin manages.
+- `has_capability(p_uid, p_wid, p_cap)` SECURITY DEFINER — admin bypass built-in.
+- `ensure_workspace(owner, kind, label?)` and `my_workspaces()` RPC helpers.
+- **Bridge**: `sync_user_capabilities_from_roles(uid)` projects existing
+  `user_roles × role_permissions` into the new capability table; trigger
+  `trg_user_roles_sync_caps` keeps it live.
+
+### Client
+- `useSovereignContext` extended with `activeWorkspaceId` + `activeWorkspaceKind`,
+  persisted in localStorage (`salsabil_active_workspace*`).
+- `src/hooks/useCapability.ts` — `useCapabilities()` hydrates workspaces +
+  caps for the active workspace; `useCapability(cap)` returns
+  `{ allowed, loading }` with admin bypass.
+- `src/components/auth/CapabilityGuard.tsx` — `<CapabilityGuard cap=…>`
+  wrapper, render-time gate.
+
+### Migration sweep (representative)
+- `src/pages/POS.tsx` — `useUserRole` matrix → `useCapability("reef.pos.access")`.
+- `src/pages/admin/SystemSettings.tsx` — `hasRole("admin")` →
+  `useCapability("global.system.manage")`.
+- Remaining `hasRole(...)` sites continue to function via the legacy
+  `useUserRoles` path while incrementally migrating to capability keys.
+
+### Hakim integration (Phase 64 ↔ 65)
+- `FloatingGuardian` now filters `hakim_user_insights` by
+  `activeWorkspaceId` (both initial fetch and realtime channel),
+  so the same pill morphs context with the persona switch.
+
+### Doctrine compliance
+- **Law 2 (Stem Cell)** — capabilities are namespaced per stem cell
+  (`reef.*`, `tayseer.*`, `noor_eldin.*`, `family.*`, `global.*`).
+- **Law 5 (Autonomous)** — `has_capability` is the single server-side
+  gate; UI guards never trust the client persona alone.
+- **Doctrine VIII (Progressive Disclosure)** — `CapabilityGuard`
+  collapses silently when not allowed.

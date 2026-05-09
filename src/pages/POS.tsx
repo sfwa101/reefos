@@ -1,15 +1,15 @@
-import { useUserRole } from "@/hooks/useUserRole";
 import { usePosEngine } from "@/apps/reef-al-madina/features/pos/hooks/usePosEngine";
 import { PosShiftManager } from "@/apps/reef-al-madina/features/pos/components/PosShiftManager";
 import { PosBarcodeCart } from "@/apps/reef-al-madina/features/pos/components/PosBarcodeCart";
 import { PosQuickPay } from "@/apps/reef-al-madina/features/pos/components/PosQuickPay";
 import { PosSyncPill } from "@/components/pos/PosSyncPill";
 import { FloatingGuardian } from "@/components/hakim/FloatingGuardian";
+import { useCapability } from "@/hooks/useCapability";
 import { ShieldAlert, Loader2, Store } from "lucide-react";
 
 export default function POSPage() {
-  const { role, loading: roleLoading } = useUserRole();
-  const allowed = role === "cashier" || role === "branch_manager" || role === "admin";
+  // Phase 65 — capability-driven gate (admin bypass + reef.pos.access).
+  const { allowed, loading: roleLoading } = useCapability("reef.pos.access");
 
   const e = usePosEngine();
 

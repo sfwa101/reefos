@@ -7113,6 +7113,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_capabilities: {
+        Row: {
+          capability: string
+          created_at: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          capability: string
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          capability?: string
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_capabilities_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "workspace_contexts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_mini_programs: {
         Row: {
           installed_at: string
@@ -8023,6 +8061,39 @@ export type Database = {
           },
         ]
       }
+      workspace_contexts: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          kind: Database["public"]["Enums"]["workspace_kind"]
+          label: string
+          owner_id: string
+          theme_overlay: Json
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind: Database["public"]["Enums"]["workspace_kind"]
+          label: string
+          owner_id: string
+          theme_overlay?: Json
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          kind?: Database["public"]["Enums"]["workspace_kind"]
+          label?: string
+          owner_id?: string
+          theme_overlay?: Json
+          updated_at?: string
+        }
+        Relationships: []
+      }
       zakat_assessments: {
         Row: {
           cash_balances: number
@@ -8542,6 +8613,14 @@ export type Database = {
       }
       enablelongtransactions: { Args: never; Returns: string }
       ensure_referral_code: { Args: { _user_id?: string }; Returns: string }
+      ensure_workspace: {
+        Args: {
+          p_kind: Database["public"]["Enums"]["workspace_kind"]
+          p_label?: string
+          p_owner: string
+        }
+        Returns: string
+      }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
       explode_bom: {
         Args: { p_product_id: string; p_target_qty: number }
@@ -8703,6 +8782,10 @@ export type Database = {
         Args: { p_days?: number; p_user_id: string }
         Returns: Json
       }
+      has_capability: {
+        Args: { p_cap: string; p_uid: string; p_wid: string }
+        Returns: boolean
+      }
       has_family_role: {
         Args: { p_group_id: string; p_roles: string[]; p_user_id: string }
         Returns: boolean
@@ -8819,6 +8902,15 @@ export type Database = {
         }[]
       }
       mint_universal_asset: { Args: { payload: Json }; Returns: string }
+      my_workspaces: {
+        Args: never
+        Returns: {
+          id: string
+          kind: Database["public"]["Enums"]["workspace_kind"]
+          label: string
+          theme_overlay: Json
+        }[]
+      }
       nested_stock_breakdown: { Args: { _product_id: string }; Returns: Json }
       open_escrow_for_order: {
         Args: {
@@ -9589,6 +9681,10 @@ export type Database = {
         Args: { geom: unknown; move: number; wrap: number }
         Returns: unknown
       }
+      sync_user_capabilities_from_roles: {
+        Args: { p_uid: string }
+        Returns: number
+      }
       tayseer_place_limit_order: {
         Args: {
           p_amount: number
@@ -9747,6 +9843,7 @@ export type Database = {
         | "category"
         | "restaurant"
         | "sponsored"
+      workspace_kind: "reef" | "tayseer" | "noor_eldin" | "family" | "global"
     }
     CompositeTypes: {
       geometry_dump: {
@@ -9960,6 +10057,7 @@ export const Constants = {
         "restaurant",
         "sponsored",
       ],
+      workspace_kind: ["reef", "tayseer", "noor_eldin", "family", "global"],
     },
   },
 } as const

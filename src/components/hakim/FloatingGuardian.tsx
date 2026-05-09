@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignContext";
 
 type Severity = "info" | "advisory" | "warning" | "critical";
 
@@ -60,6 +61,8 @@ const fmt = (n?: number): string =>
 export function FloatingGuardian({ workspace = "wallet", inline = false }: Props) {
   const { user } = useAuth();
   const userId = user?.id ?? null;
+  // Phase 65 — filter insights by the active workspace context.
+  const activeWorkspaceId = useSovereignContext((s) => s.activeWorkspaceId);
 
   const [insights, setInsights] = useState<InsightRow[]>([]);
   const [open, setOpen] = useState(false);
@@ -76,18 +79,31 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
     let active = true;
 
     void (async () => {
-      const { data } = await supabase
-        .from("hakim_user_insights" as never)
-        .select("*")
-        .is("read_at", null)
-        .order("created_at", { ascending: false })
-        .limit(20);
+      let q = (supabase.from("hakim_user_insights" as never) as unknown as {
+        select: (s: string) => {
+          is: (c: string, v: null) => {
+            order: (c: string, o: { ascending: boolean }) => {
+              limit: (n: number) => Promise<{ data: InsightRow[] | null }>;
+            };
+          };
+          eq: (c: string, v: string) => {
+            is: (c: string, v: null) => {
+              order: (c: string, o: { ascending: boolean }) => {
+                limit: (n: number) => Promise<{ data: InsightRow[] | null }>;
+              };
+            };
+          };
+        };
+      }).select("*");
+      const result = activeWorkspaceId
+        ? await q.eq("workspace_id", activeWorkspaceId).is("read_at", null).order("created_at", { ascending: false }).limit(20)
+        : await q.is("read_at", null).order("created_at", { ascending: false }).limit(20);
       if (!active) return;
-      setInsights(((data ?? []) as unknown as InsightRow[]));
+      setInsights(((result.data ?? []) as unknown as InsightRow[]));
     })();
 
     const ch = supabase
-      .channel(`hakim_insights_${userId}`)
+      .channel(`hakim_insights_${userId}_${activeWorkspaceId ?? "all"}`)
       .on(
         "postgres_changes",
         {
@@ -99,6 +115,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
         (payload) => {
           const row = payload.new as InsightRow;
           if (row.read_at) return;
+          if (activeWorkspaceId && row.workspace_id !== activeWorkspaceId) return;
           setInsights((prev) => [row, ...prev].slice(0, 20));
         },
       )
@@ -108,7 +125,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
       active = false;
       void supabase.removeChannel(ch);
     };
-  }, [userId]);
+  }, [userId, activeWorkspaceId]);
 
   const top = insights[0];
   const highSeverity = insights.some(
