@@ -153,7 +153,8 @@ export const useKdsEngine = () => {
 
       const { error: upErr } = await supabase
         .from("salsabil_fulfillment_nodes")
-        .update(updates)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        .update(updates as any)
         .eq("id", nodeId);
       if (upErr) throw upErr;
 
