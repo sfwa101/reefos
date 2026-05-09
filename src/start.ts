@@ -31,16 +31,23 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   const headers = result.response?.headers;
   if (!headers) return result;
 
-  // Phase 47-Hotfix — In DEV (Lovable preview) we must allow iframe embedding.
-  // PROD keeps the strict clickjacking lockdown.
-  const isDev = import.meta.env.DEV;
+  // Phase 47-Hotfix v2 — Host-based gating. The Lovable preview is served by
+  // the production Worker bundle (so import.meta.env.DEV is false), but it
+  // still needs iframe embedding. Detect Lovable/localhost hosts from the
+  // incoming request and relax framing only there.
+  const host = new URL(request.url).hostname;
+  const isLovableHost =
+    host.endsWith(".lovable.app") ||
+    host.endsWith(".lovable.dev") ||
+    host.includes("localhost") ||
+    host === "127.0.0.1";
 
   // HSTS — only meaningful over HTTPS, but harmless to set in dev.
   headers.set(
     "Strict-Transport-Security",
     "max-age=63072000; includeSubDomains; preload",
   );
-  if (!isDev) {
+  if (!isLovableHost) {
     headers.set("X-Frame-Options", "DENY");
   }
   headers.set("X-Content-Type-Options", "nosniff");
@@ -53,7 +60,7 @@ const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   // Inline scripts/styles allowed for TanStack hydration; refine to nonces
   // in a follow-up phase once SSR shell is stable.
   if (!headers.has("Content-Security-Policy")) {
-    const frameAncestors = isDev
+    const frameAncestors = isLovableHost
       ? "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev"
       : "frame-ancestors 'none'";
     headers.set(
