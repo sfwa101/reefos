@@ -8215,6 +8215,10 @@ export type Database = {
         Args: { _driver_id: string; _order_total: number }
         Returns: number
       }
+      confirm_handover: {
+        Args: { p_channel: string; p_node_id: string; p_otp: string }
+        Returns: Json
+      }
       convert_to_pieces: {
         Args: { _product_id: string; _qty: number; _unit_code: string }
         Returns: number
