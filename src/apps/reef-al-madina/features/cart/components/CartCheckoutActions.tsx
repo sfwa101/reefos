@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
-import { Loader2, MessageCircle } from "lucide-react";
-import { fmtMoney, toLatin } from "@/lib/format";
+import { toLatin } from "@/lib/format";
+import { ZeroFrictionButton } from "@/components/ui/ZeroFrictionButton";
 
 type Props = {
   grand: number;
@@ -10,8 +10,9 @@ type Props = {
 };
 
 /**
- * Sticky bottom checkout bar — shows minimum-order warning, animated entrance,
- * and the WhatsApp-driven submit button with grand total pill.
+ * Phase 60.1 — Zero-Friction sticky checkout bar.
+ * Uses ZeroFrictionButton: tap-to-pay under 200 ج.م, hold-to-pay above.
+ * Pure semantic tokens for full light/dark adaptivity.
  */
 export const CartCheckoutActions = ({
   grand,
@@ -29,35 +30,26 @@ export const CartCheckoutActions = ({
       style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
     >
       {blocked && (
-        <div className="mx-auto mb-2 max-w-md rounded-2xl border border-amber-500/40 bg-amber-50 px-3 py-2 text-center text-[11.5px] font-bold text-amber-800 shadow-sm dark:bg-amber-500/10 dark:text-amber-200">
+        <div className="mx-auto mb-2 max-w-md rounded-2xl border border-border bg-card px-3 py-2 text-center text-[11.5px] font-bold text-foreground shadow-sm">
           ⚠️ الحد الأدنى للطلب هو {toLatin(minOrderTotal)} ج.م — أضف بـ {toLatin(Math.ceil(minOrderTotal - grand))} ج.م لإتمام الطلب
         </div>
       )}
-      <div
-        className={`mx-auto max-w-md rounded-[20px] p-0.5 shadow-[0_10px_30px_-10px_hsl(var(--primary)/0.55)] ${
-          blocked ? "bg-foreground/20" : "bg-gradient-to-r from-primary via-[hsl(var(--primary)/0.85)] to-primary"
-        }`}
-      >
-        <motion.button
-          whileTap={{ scale: 0.98 }}
-          onClick={onCheckout}
-          disabled={submitting || blocked}
-          className="flex w-full items-center justify-between gap-3 rounded-[18px] bg-primary px-4 py-3.5 font-extrabold text-primary-foreground transition disabled:cursor-not-allowed disabled:bg-foreground/30 disabled:text-foreground/60 disabled:opacity-90"
-        >
-          <span className="flex items-center gap-2">
-            {submitting ? <Loader2 className="h-5 w-5 animate-spin" /> : <MessageCircle className="h-5 w-5" />}
-            <span className="text-sm">
-              {blocked
-                ? `الحد الأدنى ${toLatin(minOrderTotal)} ج.م`
-                : submitting
-                  ? "جاري إرسال طلبك..."
-                  : "إتمام عبر واتساب"}
-            </span>
-          </span>
-          <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold">
-            {fmtMoney(grand)}
-          </span>
-        </motion.button>
+      <div className="mx-auto max-w-md">
+        <ZeroFrictionButton
+          amount={grand}
+          onPay={onCheckout}
+          isPending={submitting}
+          disabled={blocked}
+          label={
+            blocked
+              ? `الحد الأدنى ${toLatin(minOrderTotal)} ج.م`
+              : submitting
+                ? "جاري إرسال طلبك..."
+                : grand > 200
+                  ? `اضغط مطوّلاً للدفع · ${toLatin(grand)} ج.م`
+                  : `ادفع ${toLatin(grand)} ج.م`
+          }
+        />
       </div>
     </motion.div>
   );
