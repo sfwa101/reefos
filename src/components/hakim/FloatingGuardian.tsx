@@ -139,8 +139,11 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
 
   async function dismiss(id: string) {
     setInsights((prev) => prev.filter((i) => i.id !== id));
-    await supabase
-      .from("hakim_user_insights" as never)
+    await (supabase.from("hakim_user_insights" as never) as unknown as {
+      update: (v: Record<string, unknown>) => {
+        eq: (c: string, v: string) => Promise<unknown>;
+      };
+    })
       .update({ read_at: new Date().toISOString() })
       .eq("id", id);
   }
