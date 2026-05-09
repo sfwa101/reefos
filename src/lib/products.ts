@@ -107,7 +107,11 @@ export const productAvailableInZone = (
  * key `["catalog","products"]`, owned by `useProductsQuery`. This
  * module just reads from it. */
 
-export const PRODUCTS_QUERY_KEY = ["catalog", "products"] as const;
+// Phase 41 — Tenant Isolation: every cache entry is partitioned by the
+// active tenant so the persisted IndexedDB store can never bleed across
+// workspaces. `getActiveTenantId()` is sync-resolved from env/hostname.
+import { getActiveTenantId } from "@/context/TenantContext";
+export const PRODUCTS_QUERY_KEY = ["tenant", getActiveTenantId(), "catalog", "products"] as const;
 
 let boundClient: QueryClient | null = null;
 const extraProducts: Product[] = [];
