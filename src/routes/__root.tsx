@@ -32,6 +32,7 @@ import { SovereignSpiritBootstrap } from "@/core-os/spirit/SovereignSpiritBootst
 import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
 import { TenantProvider } from "@/context/TenantContext";
+import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
 
 function NotFoundComponent() {
   return (
