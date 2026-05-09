@@ -123,8 +123,8 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
   const query = useQuery({
     queryKey: ["ui_layouts", pageKey, status],
     queryFn: () => fetchUiLayout(pageKey, status),
-    staleTime: 5 * 60 * 1000,
-    gcTime: 30 * 60 * 1000,
+    staleTime: 60 * 60 * 1000, // Phase 39 — SDUI layouts: 1h fresh.
+    gcTime: 24 * 60 * 60 * 1000,
   });
 
   const layout = useMemo<UiLayout | null>(() => {
