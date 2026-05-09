@@ -7,6 +7,16 @@
 
 ---
 
+## 🧬 Phase 61 — Sovereign Family Graph & Wallet Limits (Social Finance OS · Schema Genesis)
+
+- **Identity Graph Genesis.** New tables `tayseer_family_groups` + `tayseer_family_members(role ∈ head|admin|spouse|child|dependent)`. Creator auto-bootstrapped as `head` via `tayseer_family_bootstrap_head()` AFTER-INSERT trigger. RLS via SECURITY DEFINER helpers `is_family_member(group, uid)` and `has_family_role(group, uid, roles[])` — no recursive policies.
+- **Wallet Sovereign Limits.** New table `tayseer_wallet_limits(wallet_id, set_by, period ∈ daily|weekly|monthly, max_amount, active)` — UNIQUE per `(wallet_id, period)`. SECURITY DEFINER `check_wallet_limit(wallet_id, amount)` rolls debits over `date_trunc(period, now())` from `ledger_entries` (where `amount < 0`) and `RAISE EXCEPTION 'limit_exceeded:%:%:%'` if the new amount would breach an active cap. Ready to be wired into `process_tayseer_payment` in Phase 62. RLS gate `can_set_wallet_limit(wallet_id, setter)` admits self-caps OR a `head`/`admin` of any family group containing the wallet's owner.
+- **Shared Vaults Primitive.** New tables `tayseer_shared_vaults(group_id?, target_amount, current_balance, status ∈ active|locked|closed)` + `tayseer_shared_vault_members(role ∈ owner|contributor|viewer)`. Creator auto-bootstrapped as `owner` via `tayseer_shared_vault_bootstrap_owner()` trigger. Helpers `is_shared_vault_member` / `has_shared_vault_role` mirror the family pattern. Family-bound vaults are visible to the whole family for contribution discovery; mutation gated to `owner` role.
+- **Stem-Cell, Additive.** Zero changes to `wallets`, `wallet_vaults`, `savings_jar`, `gam_eyas`, or `ledger_entries`. The Sovereign Ledger remains immutable and append-only; new spend-limit enforcement reads the ledger but never mutates historical rows.
+- **Result.** Foundation laid for the Social Finance OS — guardian/dependent relationships, daily/weekly/monthly spend caps, and joint family savings goals are all schema-ready and RLS-locked. Awaiting Phase 62 to surface the family management UI and wire `check_wallet_limit` into the Tayseer payment kernel.
+
+---
+
 ## 🔥 Phase 43 — The Great Sovereign Purge (Tech Debt & Leak Resolution)
 
 - **God Mode Eradication.** `src/lib/godMode.ts` and `src/components/system/DevOSNavigator.tsx` now wrap every `localStorage` read/write and `window.__SALSABIL_GOD_MODE__` exposure in `if (import.meta.env.DEV)`. Vite statically eliminates the dev-only branches in production builds — there is no admin-bypass surface in the prod bundle.
