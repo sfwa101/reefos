@@ -2368,3 +2368,73 @@ a triage projection on every product card.
 - Existing `/driver`, `/driver/map`, `/driver/wallet` routes remain
   intact; `/driver-ops` is the upgraded operator surface and is linked
   from the new shell's bottom-nav.
+
+---
+
+## Phase 59 (Pre-Audit) — Tayseer Sovereign Wallet Redesign
+
+**Date:** 2026-05-09 · **Mode:** Read-only diagnostic.
+
+### Surface Map
+- Shell `src/routes/_app/wallet.tsx` (token-pure, Phase 52 Progressive KYC banner).
+- Page `src/pages/Wallet.tsx` — header + `NeoCardsCarousel` + 5-action ribbon
+  (Send/Topup/Convert/QR/Cashback) + 4-tab dock (Ops/Gameyas/Vaults/Insights)
+  + 5 sheets (Topup, Transfer, POS Barcode, SavingsJar, AssetConvert).
+- Module `src/core-os/finance/` — 28 components, 9 hooks.
+- Sister surfaces: `/driver/wallet`, `/vendor/wallet`, `/admin/wallets`,
+  `/admin/finance/ledger`.
+
+### Pollution Inventory (Law 4)
+31 hardcoded color hits across `src/core-os/finance/`. Hotspots:
+| File | Hits |
+|---|---|
+| `WalletCharityHub.tsx` | 7 (rose/amber gradients, raw `text-white`) |
+| `WalletTransferDialog.tsx` | 6 (rose KYC blocker, amber advisory) |
+| `GameyaDetailsSheet.tsx` | 5 (emerald/amber tier chips) |
+| `OperationsDockContent.tsx` | 3 (`text-emerald-500` for credits) |
+| `WalletPosBarcode.tsx` | 3 (amber security pill) |
+| `WalletAffiliateHub.tsx` | 2 (amber premium badge) |
+| Insights/Vaults/Convert | 1 each |
+
+Pattern: raw Tailwind palette names used to convey *semantics*. Phase 59
+must mint tokens: `--color-credit`, `--color-debit`, `--color-warn`,
+`--color-premium`.
+
+### Data Source Status (Law 6)
+| Surface | Source | Status |
+|---|---|---|
+| Customer txn list (`useWalletTransactions`) | `wallet_transactions` | 🔴 Legacy mirror |
+| Operations / Insights docks | `wallet_transactions` | 🔴 Legacy mirror |
+| Tayseer balance (`useTayseer`) | `ledger_entries` | ✅ Sovereign |
+| Affiliate commissions (Phase 57) | `ledger_entries` via `pay_commission_from_treasury` | ✅ Sovereign — invisible to UI |
+| Vendor settlement | sovereign trigger | ✅ Sovereign |
+
+**Gap:** Phase 57 sovereign commission payouts hit `ledger_entries` but
+the customer never sees them — `OperationsDockContent` reads the legacy
+mirror only.
+
+### KYC / Permission Gates
+- Page shell: ✅ Phase 52 progressive (dismissible, Sovereign Override
+  bypass).
+- `WalletTransferDialog`: ⚠️ hard-blocks `kycLevel < 1` with rose
+  full-bleed wall; no Sovereign Override path.
+- `GameyasTab`: ⚠️ silent filter on `min_kyc_tier` — no explanation.
+
+### UX Gaps
+1. 14 entry points on a 375px viewport — no primary CTA hierarchy.
+2. No trust signals (sync time, treasury-backed pill).
+3. Tayseer 6-digit Short ID (Phase 57) not surfaced in wallet header.
+4. Affiliate UI duplicated (`finance/WalletAffiliateHub` vs sovereign
+   `reef-al-madina/affiliate/AffiliateDashboard`).
+5. `useHideBalance` is per-device, not synced via profile.
+6. Transactions capped at 100, no pagination.
+7. No empty-state parity with KDS / Hakim shells.
+
+### Phase 59 Execution Targets
+- Tokenize all 31 violations (`--credit`, `--debit`, `--warn`, `--premium`).
+- Migrate `useWalletTransactions` → `ledger_entries` (or unified view).
+- Consolidate Affiliate hubs into the sovereign component.
+- Surface Tayseer Short ID + treasury trust pill in wallet header.
+- Soften the Transfer KYC wall + add Sovereign Override.
+- Audit RTL logical-prop usage across the finance module.
+
