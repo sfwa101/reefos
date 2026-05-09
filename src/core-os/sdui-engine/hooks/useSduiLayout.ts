@@ -11,8 +11,26 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
+import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
 import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
+
+/**
+ * Emergency fallback block — guaranteed valid against the SDUI schema.
+ * Used when the entire payload is corrupted so the user never sees
+ * a blank screen (Phase 40 — Graceful Degradation).
+ */
+const EMERGENCY_FALLBACK: SduiBlock[] = [
+  {
+    type: "hero",
+    id: "fallback_hero",
+    props: {
+      title: "جاري تحضير المحتوى",
+      subtitle: "نقوم بتحديث الواجهة، حاول مجدداً خلال لحظات.",
+      tone: "sand",
+    },
+  },
+];
 
 type State = {
   blocks: SduiBlock[];
@@ -91,17 +109,29 @@ export function useSduiLayout(slug: string): State {
   const blocks = useMemo<SduiBlock[]>(() => {
     if (!query.data) return [];
     // 1. Try the augmented payload first (only when AI is enabled).
+    //    Phase 40 — pass through `sanitizeAiBlocks` BEFORE Zod parsing so
+    //    AI-injected payloads with unsafe HTML / deep recursion / forbidden
+    //    keys are silently stripped.
     if (aiOrchestrationEnabled) {
       try {
         const augmented = HakimGenerativeOverlay.applyToLayout(query.data, slug);
-        const parsed = parseBlocks(augmented);
+        const sanitized = sanitizeAiBlocks(augmented);
+        const parsed = parseBlocks(sanitized);
         if (parsed.length > 0) return parsed;
       } catch {
         /* fall through to stable layout */
       }
     }
-    // 2. Fallback: original payload (Zod safety guarantee).
-    return parseBlocks(query.data);
+    // 2. Fallback: original DB payload (Zod safety guarantee).
+    const stable = parseBlocks(query.data);
+    if (stable.length > 0) return stable;
+    // 3. Emergency fallback: never render an empty page when the DB
+    //    payload is wholly corrupted.
+    if (typeof console !== "undefined") {
+      // eslint-disable-next-line no-console
+      console.warn(`[SDUI] payload for "${slug}" produced 0 valid blocks — using emergency fallback`);
+    }
+    return EMERGENCY_FALLBACK;
     // overlayTick triggers recompute when intent scores change.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query.data, slug, overlayTick, aiOrchestrationEnabled]);
