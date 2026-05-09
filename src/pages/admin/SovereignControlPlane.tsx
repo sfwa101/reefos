@@ -228,9 +228,12 @@ export default function SovereignControlPlane() {
           </p>
         </div>
 
+        <SystemHealthBanner />
+
         {SWITCHES.map((s) => (
           <SwitchRow key={s.key} def={s} />
         ))}
+
 
         <div className="rounded-3xl border border-amber-500/30 bg-amber-500/5 p-4 text-[12px] text-amber-800 dark:text-amber-200 leading-relaxed">
           ⚠️ هذه المفاتيح تؤثر فوراً على جميع المستخدمين. استخدمها بحذر.
