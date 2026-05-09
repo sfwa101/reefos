@@ -21,6 +21,7 @@ import {
 } from "./useCartValidation";
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
