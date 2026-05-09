@@ -2133,3 +2133,42 @@ Law 6 (Zero-Trust SECURITY DEFINER settlement).
 - Operator UX: Dense DNA (12px HUD, 14px sidebar icons, mono numerics,
   no chrome). Cart clears on the same frame as the toast — no blocking
   spinner between customers.
+
+## Phase 54 — Inventory Triage & Wakalah Engine
+
+Out-of-stock items must not silently fail or hard-block checkout. Phase 54
+introduces a Sharia-compliant Wakalah ("agency") add-mode for OOS SKUs and
+a triage projection on every product card.
+
+### Schema (Law 2 — JSONB, no DDL)
+- Three flags read from `salsabil_skus.attributes`:
+  - `wakalah_eligible: boolean` — driver may procure en route.
+  - `hide_on_zero: boolean` — fully hide card when stock = 0.
+  - `low_stock_threshold: number` — defaults to `10` when unset.
+
+### Catalog projection
+- `src/lib/sovereignCatalog.ts → assetToProduct` now projects `stock`,
+  `wakalahEligible`, `hideOnZero`, `lowStockThreshold` onto the public
+  `Product` type and mirrors them into `metadata` for legacy consumers.
+- `Product` type extended (`src/lib/products.ts`) with the four optional
+  triage fields.
+- `HGProduct` (storefront view-model) and `productToHGView` carry the
+  flags through to the `ProductCard`.
+
+### UI behaviour (`ProductCard.tsx`)
+| State | Render |
+|---|---|
+| `stock > 0` | Normal CTA "للسلة" / "احجز الآن". |
+| `stock === 0 && hide_on_zero` | Card returns `null` (hidden). |
+| `stock === 0 && wakalah_eligible` | Amber-ringed card; CTA = "أضفه إن توفر" (amber); not disabled. Adds line with `meta.properties.procurement_mode = "wakalah"`. |
+| `stock === 0 && !wakalah && !hidden` | Card dimmed (`opacity-60 saturate-50`); CTA = "نفد"; button `disabled`. |
+
+### Cart & checkout (soft-fail)
+- `useCartOrchestrator.ts` computes `wakalahTotal` from cart lines whose
+  `meta.properties.procurement_mode === "wakalah"` and subtracts it from
+  the Tayseer upfront charge:
+  `tayseerCharge = max(0, walletApplied - wakalahTotal)`.
+- The Tayseer RPC is only called when `tayseerCharge > 0`, preventing
+  upfront deduction for items not yet owned (Sharia: no sale of what you
+  don't possess). The order itself still records the wakalah lines for
+  the driver/back-office to fulfil and settle later.
