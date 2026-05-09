@@ -93,23 +93,23 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
               <AlertTriangle className="h-6 w-6" />
             </div>
             <h2 className="font-display text-[22px] mb-1">إغلاق الورديّة</h2>
-            <p className="text-[12px] text-foreground-secondary mb-3">احسب نقد الدُرج الفعلي وأدخله.</p>
+            <p className="text-[12px] text-muted-foreground mb-3">احسب نقد الدُرج الفعلي وأدخله.</p>
             <div className="grid grid-cols-2 gap-2 text-[12px] mb-3">
               <Stat label="افتتاحي" value={fmtMoney(shift.opening_balance)} />
               <Stat label="مبيعات" value={fmtMoney(shift.total_sales)} />
               <Stat label="متوقَّع" value={fmtMoney(expected)} highlight />
               <Stat label="عدد الطلبات" value={String(shift.total_orders)} />
             </div>
-            <label className="text-[12px] text-foreground-secondary block mb-1">رصيد الدُرج الفعلي</label>
+            <label className="text-[12px] text-muted-foreground block mb-1">رصيد الدُرج الفعلي</label>
             <input
               type="number" inputMode="decimal" min="0" step="0.01" autoFocus
               value={actual} onChange={(e) => setActual(e.target.value)}
-              className="w-full bg-surface-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              className="w-full bg-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <div className="flex gap-2 mt-4">
               <button
                 onClick={() => setClosing(false)}
-                className="flex-1 h-12 rounded-2xl bg-surface-muted font-semibold press"
+                className="flex-1 h-12 rounded-2xl bg-muted text-foreground font-semibold press"
               >إلغاء</button>
               <button
                 disabled={busy}
