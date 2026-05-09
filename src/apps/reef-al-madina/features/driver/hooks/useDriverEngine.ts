@@ -351,6 +351,16 @@ export const useDriverEngine = (): DriverEngine => {
       setBusyTaskId(null);
 
       if (error) {
+        if (isLikelyNetworkError(error)) {
+          await enqueueOfflineMutation({
+            op: "table.update",
+            table: "salsabil_fulfillment_nodes",
+            match: { id: task.id },
+            patch,
+          });
+          toast.success("تم الحفظ محلياً، ستتم المزامنة عند عودة الاتصال");
+          return;
+        }
         toast.error(error.message);
         return;
       }
