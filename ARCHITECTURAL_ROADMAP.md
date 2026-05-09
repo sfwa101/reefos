@@ -2016,3 +2016,61 @@ through the existing double-entry sovereign ledger.
 - Double-entry: `ledger_entries_balanced_check` trigger guarantees `Σ(group) = 0`.
 - Authorization: `auth.uid()` check inside RPC + RLS on `wallets`/`ledger_entries` block any direct write path.
 - Insufficient balance: surfaces as toast "رصيد محفظة تيسير غير كافٍ لإتمام الدفع" — no partial state.
+
+---
+
+## Phase 52 — Tayseer Kernel Integration & Progressive KYC
+
+**Status:** Sealed.
+
+Closes the F5/F6/F3 gaps surfaced in the Phase 51 audit. Connects the
+Tayseer kernel to live checkout, unifies the ledger source of truth, and
+demolishes the rigid KYC wall in favor of progressive disclosure.
+
+### 1. Smart Balance Reserve (F2)
+- `public.wallets.credit_limit numeric(18,4) NOT NULL DEFAULT 0` added.
+- Constraint replaced: `wallets_balance_nonneg` → `wallets_balance_within_credit`
+  (`balance >= -credit_limit`) so customers may overdraft up to their assigned
+  Tayseer line.
+- `process_tayseer_payment` now checks `balance + credit_limit >= amount` and
+  returns `credit_used` in the success payload.
+
+### 2. Ledger Unification (F6 — Law 2)
+- Cart orchestrator now reads strictly from `public.wallets` (currency='EGP')
+  for both `balance` and `credit_limit`. Legacy `wallet_balances` reads and the
+  `user_trust_limit` RPC call were retired from the cart path.
+- `wallet_balances` is COMMENTed as deprecated. Drop deferred until legacy
+  RPCs migrate.
+- Pre-flight checkout guard updated to compare against `balance + credit_limit`.
+
+### 3. Checkout Wire-Up (F5)
+- `useCartOrchestrator.submit` — after `process_checkout_sovereign` resolves,
+  if `payment === "wallet"` the orchestrator awaits `callTayseerPayment(order_id, walletApplied)`.
+- Success → toast `"تم الدفع بنجاح من محفظة تيسير"` + sovereign trace
+  `wallet/tayseer_payment_success`.
+- Failure → trace `wallet/tayseer_payment_failed`, toast the friendly Arabic
+  error, abort the success flow (cart is NOT cleared, user can retry).
+
+### 4. Progressive KYC (F3 / F4)
+- `src/routes/_app/wallet.tsx` — `KycUpgradeGate` wrapper REMOVED.
+- Replaced with a small, dismissible `ProgressiveKycBanner` advising (not
+  forcing) verification to unlock higher credit limits. Verified users see
+  nothing; unverified users have full access to balance, history, and basic
+  Tayseer features.
+- The `KycUpgradeGate` component remains in the codebase for future high-trust
+  surfaces (e.g. business persona) but is no longer mounted on the wallet.
+
+### Verification
+- Atomicity: payment RPC still single-transaction with row locks + balanced
+  ledger trigger. Failure leaves the order `payment_status='unpaid'`, never partial.
+- Credit purchases: ledger debit can take user balance negative; the new
+  CHECK constraint enforces the floor at `-credit_limit`. Treasury credit is
+  unchanged. Refund/reversal path is the natural inverse via balanced groups.
+- UX: the wallet route is now reachable by any signed-in user; the banner is
+  advisory and dismissible per session.
+
+### Compliance map
+- Law 2 (Stem Cell): one wallet table, one ledger table.
+- Law 4 (Cognitive UI): hard wall replaced with progressive token-driven advisory.
+- Law 6 (Zero-Trust): every wallet write still funnels through one
+  `SECURITY DEFINER` RPC; RLS on `wallets`/`ledger_entries` blocks direct writes.
