@@ -112,6 +112,7 @@ const groups = [
     { to: "/admin/role-permissions", icon: KeyRound, label: "مصفوفة الصلاحيات" },
     { to: "/admin/support", icon: MessagesSquare, label: "الدعم" },
     { to: "/admin/audit-log", icon: FileClock, label: "سجل العمليات" },
+    { to: "/admin/tracing", icon: Radar, label: "مراقب الأحداث" },
     { to: "/admin/settings", icon: Settings, label: "الإعدادات" },
   ]},
 ];

@@ -30,6 +30,7 @@ import { Route as DriverMapRouteImport } from './routes/driver.map'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
 import { Route as AdminZakatRouteImport } from './routes/admin.zakat'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
+import { Route as AdminTracingRouteImport } from './routes/admin.tracing'
 import { Route as AdminTopupApprovalsRouteImport } from './routes/admin.topup-approvals'
 import { Route as AdminSystemSettingsRouteImport } from './routes/admin.system-settings'
 import { Route as AdminSupportRouteImport } from './routes/admin.support'
@@ -249,6 +250,11 @@ const AdminZakatRoute = AdminZakatRouteImport.update({
 const AdminWalletsRoute = AdminWalletsRouteImport.update({
   id: '/wallets',
   path: '/wallets',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminTracingRoute = AdminTracingRouteImport.update({
+  id: '/tracing',
+  path: '/tracing',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminTopupApprovalsRoute = AdminTopupApprovalsRouteImport.update({
@@ -919,6 +925,7 @@ export interface FileRoutesByFullPath {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
@@ -1052,6 +1059,7 @@ export interface FileRoutesByTo {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
@@ -1192,6 +1200,7 @@ export interface FileRoutesById {
   '/admin/support': typeof AdminSupportRoute
   '/admin/system-settings': typeof AdminSystemSettingsRoute
   '/admin/topup-approvals': typeof AdminTopupApprovalsRoute
+  '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
@@ -1333,6 +1342,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
+    | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
     | '/driver/dashboard'
@@ -1466,6 +1476,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
+    | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
     | '/driver/dashboard'
@@ -1605,6 +1616,7 @@ export interface FileRouteTypes {
     | '/admin/support'
     | '/admin/system-settings'
     | '/admin/topup-approvals'
+    | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
     | '/driver/dashboard'
@@ -1819,6 +1831,13 @@ declare module '@tanstack/react-router' {
       path: '/wallets'
       fullPath: '/admin/wallets'
       preLoaderRoute: typeof AdminWalletsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/tracing': {
+      id: '/admin/tracing'
+      path: '/tracing'
+      fullPath: '/admin/tracing'
+      preLoaderRoute: typeof AdminTracingRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/topup-approvals': {
@@ -2869,6 +2888,7 @@ interface AdminRouteChildren {
   AdminSupportRoute: typeof AdminSupportRoute
   AdminSystemSettingsRoute: typeof AdminSystemSettingsRoute
   AdminTopupApprovalsRoute: typeof AdminTopupApprovalsRoute
+  AdminTracingRoute: typeof AdminTracingRoute
   AdminWalletsRoute: typeof AdminWalletsRoute
   AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
@@ -2943,6 +2963,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminSupportRoute: AdminSupportRoute,
   AdminSystemSettingsRoute: AdminSystemSettingsRoute,
   AdminTopupApprovalsRoute: AdminTopupApprovalsRoute,
+  AdminTracingRoute: AdminTracingRoute,
   AdminWalletsRoute: AdminWalletsRoute,
   AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
