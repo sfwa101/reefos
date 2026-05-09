@@ -76,7 +76,13 @@ export default function StaffAdmin() {
 
   const onDelete = async (r: any) => {
     if (!confirm(`حذف دور ${ROLE_LABEL[r.role] ?? r.role}؟`)) return;
-    const { error } = await supabase.from("user_roles").delete().eq("id", r.id);
+    // Phase 43 — routed through SECURITY DEFINER RPC (no raw client delete).
+    const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
+      p_user_id: r.user_id,
+      p_role: r.role,
+      p_action: "delete",
+      p_role_id: r.id,
+    });
     if (error) return toast.error("فشل الحذف: " + error.message);
     toast.success("تم الحذف");
     refresh();
@@ -89,17 +95,24 @@ export default function StaffAdmin() {
     setSaving(true);
     try {
       if (editing.id) {
-        const { error } = await supabase
-          .from("user_roles")
-          .update({ role: editing.role, is_active: editing.is_active ?? true })
-          .eq("id", editing.id);
+        // Phase 43 — routed through SECURITY DEFINER RPC.
+        const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
+          p_user_id: editing.user_id,
+          p_role: editing.role,
+          p_action: "update",
+          p_role_id: editing.id,
+          p_is_active: editing.is_active ?? true,
+        });
         if (error) throw error;
         toast.success("تم تحديث الدور");
       } else {
         if (!editing.user_id) { toast.error("اختر المستخدم"); setSaving(false); return; }
-        const { error } = await supabase
-          .from("user_roles")
-          .insert({ user_id: editing.user_id, role: editing.role, is_active: editing.is_active ?? true });
+        const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
+          p_user_id: editing.user_id,
+          p_role: editing.role,
+          p_action: "insert",
+          p_is_active: editing.is_active ?? true,
+        });
         if (error) throw error;
         toast.success("تم إسناد الدور");
       }
