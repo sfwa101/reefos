@@ -72,6 +72,12 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
+  // Phase 47-Alt — Sentinel client-side cooldown. After any submit attempt
+  // (success or failure) we reject re-submits for 3s as a defense-in-depth
+  // burst guard layered on top of the in-flight `submittingRef` lock and
+  // the server-side idempotency key.
+  const lastSubmitAtRef = useRef<number>(0);
+  const SUBMIT_COOLDOWN_MS = 3_000;
   const [waFallback, setWaFallback] = useState<WaFallbackPayload | null>(null);
   const [walletBalance, setWalletBalance] = useState<number>(0);
   const [trustLimit, setTrustLimit] = useState<number>(0);
