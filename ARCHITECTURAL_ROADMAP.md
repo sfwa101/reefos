@@ -2308,3 +2308,63 @@ a triage projection on every product card.
   unique across `profiles.referral_code` + `referral_codes.code`.
 - Payout RPC enforces staff-only access and produces zero-sum
   `ledger_entries` per `transaction_group_id`.
+
+---
+
+## Phase 58 — Barq Awakening & Sovereign OTP
+
+### Schema (migration `20260509_phase58_barq_otp.sql`)
+- `profiles.vehicle_dna jsonb DEFAULT '{}'::jsonb` — groundwork for
+  weighted driver/vehicle compatibility (mode, capabilities,
+  efficiency_range).
+- `issue_handover_otp(p_node_id uuid) → text` — `SECURITY DEFINER`,
+  pinned `search_path = public`. Mints a random 4-digit OTP and writes
+  `delivery_snapshot.handover = { otp, issued_at }`.
+- `auto_issue_handover_otp` BEFORE-UPDATE trigger on
+  `salsabil_fulfillment_nodes` mints the OTP automatically the first
+  time a node transitions to `ready_for_pickup` (idempotent: skipped if
+  one already exists).
+- `confirm_handover` hardened — the MVP bypass is removed. The function
+  now reads `delivery_snapshot->'handover'->>'otp'`, raises
+  `otp_not_issued` when missing and `invalid_otp` on any mismatch
+  before transitioning the node to `shipped` (driver) or
+  `delivered_walkin` (walk-in).
+- `get_handover_otp(p_node_id uuid) → text` — `SECURITY DEFINER`
+  RPC that returns the issued OTP only to the order's customer, the
+  assigned driver, or staff/admin (`has_role(admin|staff|manager)`).
+  Everyone else gets `forbidden`.
+
+### Barq Operator Workspace
+- `src/routes/_driver.tsx` — pathless layout matching the KDS / Dispatch
+  DNA. RTL, `dark` shell, semantic tokens only (no zinc/gray literals).
+  Top-bar shows the Barq Fleet badge, the driver's name, an
+  online/offline pill, and a pulsing radar pip whenever
+  `useDispatchRadar` reports pending offers. Bottom-nav exposes Tasks,
+  Map, Earnings.
+- `src/routes/_driver.driver-ops.tsx` — new `/driver-ops` Tasks page
+  rendered inside the layout. Surfaces a dedicated "Pickup OTP" banner
+  for any of this driver's nodes in `assigned` or `ready_for_pickup`,
+  reading `delivery_snapshot.handover.otp` directly (with a realtime
+  `salsabil_fulfillment_nodes` subscription scoped by `driver_id`).
+  Active deliveries continue to use the existing `useDriverEngine`
+  feed.
+- `IncomingOfferModal` is mounted inside the layout so radar offers
+  appear regardless of the active sub-route.
+
+### Customer Walk-in OTP
+- `src/pages/OrderSuccess.tsx` — after the order is created the page
+  reads the master order's first fulfillment node, displays the
+  `handover.otp` in a token-pure card, and falls back to the new
+  `get_handover_otp` RPC when RLS hides the snapshot.
+
+### Verification
+- Wrong OTPs against `confirm_handover` raise `invalid_otp` (verified
+  against the RPC contract; previous "any non-empty string" behavior is
+  removed).
+- `_driver.tsx` and `_driver.driver-ops.tsx` use only semantic tokens
+  (`bg-background`, `bg-card`, `text-foreground`, `bg-primary`, etc.).
+  Status colors come from existing emerald/amber utilities used
+  elsewhere in the operator shells (KDS, Dispatch).
+- Existing `/driver`, `/driver/map`, `/driver/wallet` routes remain
+  intact; `/driver-ops` is the upgraded operator surface and is linked
+  from the new shell's bottom-nav.
