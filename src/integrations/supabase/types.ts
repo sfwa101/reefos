@@ -6628,6 +6628,173 @@ export type Database = {
         }
         Relationships: []
       }
+      tayseer_family_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      tayseer_family_members: {
+        Row: {
+          group_id: string
+          joined_at: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          group_id: string
+          joined_at?: string
+          role: string
+          user_id: string
+        }
+        Update: {
+          group_id?: string
+          joined_at?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tayseer_family_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "tayseer_family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tayseer_shared_vault_members: {
+        Row: {
+          joined_at: string
+          role: string
+          user_id: string
+          vault_id: string
+        }
+        Insert: {
+          joined_at?: string
+          role: string
+          user_id: string
+          vault_id: string
+        }
+        Update: {
+          joined_at?: string
+          role?: string
+          user_id?: string
+          vault_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tayseer_shared_vault_members_vault_id_fkey"
+            columns: ["vault_id"]
+            isOneToOne: false
+            referencedRelation: "tayseer_shared_vaults"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tayseer_shared_vaults: {
+        Row: {
+          created_at: string
+          created_by: string
+          current_balance: number
+          group_id: string | null
+          id: string
+          name: string
+          status: string
+          target_amount: number | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          current_balance?: number
+          group_id?: string | null
+          id?: string
+          name: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          current_balance?: number
+          group_id?: string | null
+          id?: string
+          name?: string
+          status?: string
+          target_amount?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tayseer_shared_vaults_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "tayseer_family_groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tayseer_wallet_limits: {
+        Row: {
+          active: boolean
+          created_at: string
+          id: string
+          max_amount: number
+          period: string
+          set_by: string
+          updated_at: string
+          wallet_id: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          max_amount: number
+          period: string
+          set_by: string
+          updated_at?: string
+          wallet_id: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          id?: string
+          max_amount?: number
+          period?: string
+          set_by?: string
+          updated_at?: string
+          wallet_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tayseer_wallet_limits_wallet_id_fkey"
+            columns: ["wallet_id"]
+            isOneToOne: false
+            referencedRelation: "wallets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trades: {
         Row: {
           execute_amount: number
@@ -8177,6 +8344,10 @@ export type Database = {
         Args: { p_order_id: string; p_user_id: string }
         Returns: boolean
       }
+      can_set_wallet_limit: {
+        Args: { p_setter: string; p_wallet_id: string }
+        Returns: boolean
+      }
       category_affinity: {
         Args: { _user_id: string }
         Returns: {
@@ -8186,6 +8357,10 @@ export type Database = {
       }
       check_kyc_status: { Args: { p_user_id: string }; Returns: boolean }
       check_phone_exists: { Args: { p_phone: string }; Returns: boolean }
+      check_wallet_limit: {
+        Args: { p_amount: number; p_wallet_id: string }
+        Returns: undefined
+      }
       clear_sovereign_settlements: {
         Args: { p_vendor_id: string }
         Returns: number
@@ -8467,6 +8642,10 @@ export type Database = {
         Returns: number
       }
       hakim_pulse_stats: { Args: { _minutes?: number }; Returns: Json }
+      has_family_role: {
+        Args: { p_group_id: string; p_roles: string[]; p_user_id: string }
+        Returns: boolean
+      }
       has_permission: {
         Args: { _permission_key: string; _user_id: string }
         Returns: boolean
@@ -8476,6 +8655,10 @@ export type Database = {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
+        Returns: boolean
+      }
+      has_shared_vault_role: {
+        Args: { p_roles: string[]; p_user_id: string; p_vault_id: string }
         Returns: boolean
       }
       home_layout: { Args: { _user_id?: string }; Returns: Json }
@@ -8496,6 +8679,10 @@ export type Database = {
         Returns: boolean
       }
       is_driver: { Args: { _user_id: string }; Returns: boolean }
+      is_family_member: {
+        Args: { p_group_id: string; p_user_id: string }
+        Returns: boolean
+      }
       is_gam_eya_member: {
         Args: { _circle: string; _user: string }
         Returns: boolean
@@ -8506,6 +8693,10 @@ export type Database = {
       }
       is_shared_cart_participant: {
         Args: { _cart_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_shared_vault_member: {
+        Args: { p_user_id: string; p_vault_id: string }
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
