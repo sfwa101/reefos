@@ -699,7 +699,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     hasBooking, hasNonBookingItems, hasInstantSweets, hasFreshSweets,
     vendorGroups, instantGroups, scheduledGroups, showFulfillmentSections,
     isMultiVendor, totalCashback, groupIsMixedScheduled, crossSell,
-    submitting, waFallback,
+    submitting, waFallback, paymentsEnabled,
     isSharedMode, sharedCartId, shared,
     logisticsQuote, logisticsBlocked, effectiveDelivery, effectiveGrand, codAllowed,
     giftMode, giftMessage, giftRecipientName, giftRecipientPhone, giftRecipientAddress,
