@@ -3048,6 +3048,45 @@ export type Database = {
         }
         Relationships: []
       }
+      hakim_user_insights: {
+        Row: {
+          created_at: string
+          id: string
+          kind: string
+          read_at: string | null
+          severity: string
+          suggestions: Json
+          summary: string | null
+          title: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          kind: string
+          read_at?: string | null
+          severity?: string
+          suggestions?: Json
+          summary?: string | null
+          title: string
+          user_id: string
+          workspace_id?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          kind?: string
+          read_at?: string | null
+          severity?: string
+          suggestions?: Json
+          summary?: string | null
+          title?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: []
+      }
       incentive_milestones: {
         Row: {
           created_at: string
@@ -3277,34 +3316,43 @@ export type Database = {
       ledger_entries: {
         Row: {
           amount: number
+          category: string | null
           counterparty_wallet_id: string | null
           created_at: string
           currency: string
           description: string | null
           id: string
           idempotency_key: string
+          merchant_name: string | null
+          tags: string[] | null
           transaction_group_id: string
           wallet_id: string
         }
         Insert: {
           amount: number
+          category?: string | null
           counterparty_wallet_id?: string | null
           created_at?: string
           currency: string
           description?: string | null
           id?: string
           idempotency_key: string
+          merchant_name?: string | null
+          tags?: string[] | null
           transaction_group_id: string
           wallet_id: string
         }
         Update: {
           amount?: number
+          category?: string | null
           counterparty_wallet_id?: string | null
           created_at?: string
           currency?: string
           description?: string | null
           id?: string
           idempotency_key?: string
+          merchant_name?: string | null
+          tags?: string[] | null
           transaction_group_id?: string
           wallet_id?: string
         }
@@ -8483,6 +8531,15 @@ export type Database = {
           }
         | { Args: { schema_name: string; table_name: string }; Returns: string }
         | { Args: { table_name: string }; Returns: string }
+      emit_sovereign_event: {
+        Args: {
+          p_domain: string
+          p_payload?: Json
+          p_trace_id?: string
+          p_type: string
+        }
+        Returns: string
+      }
       enablelongtransactions: { Args: never; Returns: string }
       ensure_referral_code: { Args: { _user_id?: string }; Returns: string }
       equals: { Args: { geom1: unknown; geom2: unknown }; Returns: boolean }
@@ -8642,6 +8699,10 @@ export type Database = {
         Returns: number
       }
       hakim_pulse_stats: { Args: { _minutes?: number }; Returns: Json }
+      hakim_user_financial_snapshot: {
+        Args: { p_days?: number; p_user_id: string }
+        Returns: Json
+      }
       has_family_role: {
         Args: { p_group_id: string; p_roles: string[]; p_user_id: string }
         Returns: boolean
