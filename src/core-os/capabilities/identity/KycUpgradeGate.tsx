@@ -29,6 +29,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { decodeEgyptianId, normalizeIdInput, type DecodedEgyptianId } from "./egyptianIdDecoder";
+import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { cn } from "@/lib/utils";
 
 // 6 Sovereign Avatar slots for the Modesty Library (female-only path).
@@ -51,8 +52,9 @@ type Props = {
 
 const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoProfile = true }: Props) => {
   const { user, profile, refreshProfile } = useAuth();
+  const hasSovereignOverride = useSovereignOverride();
   const isVerified = !!profile?.is_kyc_verified;
-  const needs = !isVerified && (forceWhenNoProfile || !!profile);
+  const needs = !isVerified && (forceWhenNoProfile || !!profile) && !hasSovereignOverride;
 
   const [open, setOpen] = useState<boolean>(needs);
   useEffect(() => { setOpen(needs); }, [needs]);
@@ -109,8 +111,8 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
     }
   }, [user, decoded, idDigits, avatarKey, photoFile, refreshProfile]);
 
-  // Verified users see the wrapped surface untouched.
-  if (isVerified) return <>{children}</>;
+  // Verified users — and Sovereign admins — see the wrapped surface untouched.
+  if (isVerified || hasSovereignOverride) return <>{children}</>;
 
   return (
     <>

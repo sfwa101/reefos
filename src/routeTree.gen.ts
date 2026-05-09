@@ -15,6 +15,7 @@ import { Route as DriverRouteImport } from './routes/driver'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as PosRouteImport } from './routes/_pos'
+import { Route as KdsRouteImport } from './routes/_kds'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
@@ -98,6 +99,7 @@ import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affil
 import { Route as AdminAdvanceApprovalsRouteImport } from './routes/admin.advance-approvals'
 import { Route as AdminEntityRouteImport } from './routes/admin.$entity'
 import { Route as PosPosRouteImport } from './routes/_pos.pos'
+import { Route as KdsKdsRouteImport } from './routes/_kds.kds'
 import { Route as AppWalletRouteImport } from './routes/_app/wallet'
 import { Route as AppSectionsRouteImport } from './routes/_app/sections'
 import { Route as AppSearchRouteImport } from './routes/_app/search'
@@ -179,6 +181,10 @@ const AdminRoute = AdminRouteImport.update({
 } as any)
 const PosRoute = PosRouteImport.update({
   id: '/_pos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KdsRoute = KdsRouteImport.update({
+  id: '/_kds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppRoute = AppRouteImport.update({
@@ -597,6 +603,11 @@ const PosPosRoute = PosPosRouteImport.update({
   path: '/pos',
   getParentRoute: () => PosRoute,
 } as any)
+const KdsKdsRoute = KdsKdsRouteImport.update({
+  id: '/kds',
+  path: '/kds',
+  getParentRoute: () => KdsRoute,
+} as any)
 const AppWalletRoute = AppWalletRouteImport.update({
   id: '/wallet',
   path: '/wallet',
@@ -881,6 +892,7 @@ export interface FileRoutesByFullPath {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
@@ -1019,6 +1031,7 @@ export interface FileRoutesByTo {
   '/search': typeof AppSearchRoute
   '/sections': typeof AppSectionsRoute
   '/wallet': typeof AppWalletRoute
+  '/kds': typeof KdsKdsRoute
   '/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
@@ -1148,6 +1161,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_kds': typeof KdsRouteWithChildren
   '/_pos': typeof PosRouteWithChildren
   '/admin': typeof AdminRouteWithChildren
   '/auth': typeof AuthRoute
@@ -1163,6 +1177,7 @@ export interface FileRoutesById {
   '/_app/search': typeof AppSearchRoute
   '/_app/sections': typeof AppSectionsRoute
   '/_app/wallet': typeof AppWalletRoute
+  '/_kds/kds': typeof KdsKdsRoute
   '/_pos/pos': typeof PosPosRouteWithChildren
   '/admin/$entity': typeof AdminEntityRouteWithChildren
   '/admin/advance-approvals': typeof AdminAdvanceApprovalsRoute
@@ -1308,6 +1323,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/kds'
     | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
@@ -1446,6 +1462,7 @@ export interface FileRouteTypes {
     | '/search'
     | '/sections'
     | '/wallet'
+    | '/kds'
     | '/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
@@ -1574,6 +1591,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_kds'
     | '/_pos'
     | '/admin'
     | '/auth'
@@ -1589,6 +1607,7 @@ export interface FileRouteTypes {
     | '/_app/search'
     | '/_app/sections'
     | '/_app/wallet'
+    | '/_kds/kds'
     | '/_pos/pos'
     | '/admin/$entity'
     | '/admin/advance-approvals'
@@ -1719,6 +1738,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  KdsRoute: typeof KdsRouteWithChildren
   PosRoute: typeof PosRouteWithChildren
   AdminRoute: typeof AdminRouteWithChildren
   AuthRoute: typeof AuthRoute
@@ -1769,6 +1789,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof PosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_kds': {
+      id: '/_kds'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof KdsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_app': {
@@ -2352,6 +2379,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PosPosRouteImport
       parentRoute: typeof PosRoute
     }
+    '/_kds/kds': {
+      id: '/_kds/kds'
+      path: '/kds'
+      fullPath: '/kds'
+      preLoaderRoute: typeof KdsKdsRouteImport
+      parentRoute: typeof KdsRoute
+    }
     '/_app/wallet': {
       id: '/_app/wallet'
       path: '/wallet'
@@ -2826,6 +2860,16 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface KdsRouteChildren {
+  KdsKdsRoute: typeof KdsKdsRoute
+}
+
+const KdsRouteChildren: KdsRouteChildren = {
+  KdsKdsRoute: KdsKdsRoute,
+}
+
+const KdsRouteWithChildren = KdsRoute._addFileChildren(KdsRouteChildren)
+
 interface PosPosRouteChildren {
   PosPosCloseShiftRoute: typeof PosPosCloseShiftRoute
   PosPosInventoryRoute: typeof PosPosInventoryRoute
@@ -3109,6 +3153,7 @@ const VendorRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  KdsRoute: KdsRouteWithChildren,
   PosRoute: PosRouteWithChildren,
   AdminRoute: AdminRouteWithChildren,
   AuthRoute: AuthRoute,
