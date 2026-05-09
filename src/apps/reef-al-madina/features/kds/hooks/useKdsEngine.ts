@@ -146,7 +146,9 @@ export const useKdsEngine = () => {
       const snapshot = (cur?.delivery_snapshot ?? {}) as Record<string, unknown>;
       const merged = { ...snapshot, prep_meta };
 
-      const updates: Record<string, unknown> = { delivery_snapshot: merged };
+      const updates: { delivery_snapshot: Record<string, unknown>; status?: string } = {
+        delivery_snapshot: merged,
+      };
       if (next === "ready") updates.status = "ready_for_pickup";
 
       const { error: upErr } = await supabase
