@@ -50,6 +50,7 @@ const Wallet = () => {
   const { assets, loading: assetsLoading } = useWalletAssets(c.userId);
   const { hidden, toggle: toggleHide } = useHideBalance(c.userId);
   const txnsData = useWalletTransactions(c.userId);
+  const navigate = useNavigate();
   const [dock, setDock] = useState<DockKey>("ops");
 
   if (c.loading || assetsLoading) {
