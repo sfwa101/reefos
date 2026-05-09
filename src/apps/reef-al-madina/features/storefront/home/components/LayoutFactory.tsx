@@ -210,9 +210,15 @@ export const LayoutFactory = ({
         if (!node) return null;
         const customTitle = layout.section_titles?.[key] ?? null;
         return (
-          <SectionFrame key={`${key}-${idx}`} cfg={cfg} customTitle={customTitle}>
-            {node}
-          </SectionFrame>
+          <SDUIErrorBoundary
+            key={`${key}-${idx}`}
+            blockId={key}
+            blockKind="layout_section"
+          >
+            <SectionFrame cfg={cfg} customTitle={customTitle}>
+              {node}
+            </SectionFrame>
+          </SDUIErrorBoundary>
         );
       })}
     </>
