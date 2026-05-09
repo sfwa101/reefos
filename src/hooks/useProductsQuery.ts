@@ -24,8 +24,9 @@ import {
   type ProductAddon,
 } from "@/lib/products";
 
-const STALE_MS = 60_000;
-const GC_MS = 5 * 60_000;
+// Phase 39 — Catalog SWR window: 5 min fresh, 24 h cached on disk.
+const STALE_MS = 5 * 60 * 1000;
+const GC_MS = 24 * 60 * 60 * 1000;
 const isBrowser = typeof window !== "undefined";
 
 const FALLBACK_IMG =
