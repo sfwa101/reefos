@@ -52,6 +52,12 @@
   --color-teal: hsl(var(--teal));
   --color-indigo: hsl(var(--indigo));
 
+  /* Phase 59 — Tayseer Sovereign financial state tokens */
+  --color-credit: hsl(var(--credit));
+  --color-debit: hsl(var(--debit));
+  --color-warn: hsl(var(--warn));
+  --color-premium: hsl(var(--premium));
+
   --font-display: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
 }
 
