@@ -117,7 +117,7 @@ export function HakimFAB() {
         onClick={() => setOpen(true)}
         aria-label="افتح حكيم"
         className={cn(
-          "fixed z-50 bottom-20 lg:bottom-6 left-4 lg:left-6",
+          "fixed z-50 bottom-28 lg:bottom-6 left-4 lg:left-6",
           "h-14 w-14 rounded-full",
           "bg-gradient-to-br from-[hsl(var(--purple))] via-[hsl(var(--indigo))] to-[hsl(var(--info))]",
           "text-white shadow-[0_10px_40px_-8px_hsl(var(--purple)/0.6)]",
