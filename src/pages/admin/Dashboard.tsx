@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { HakimSovereignCard } from "@/components/admin/HakimSovereignCard";
 import { BentoStats } from "@/components/admin/BentoStats";
+import { LiveEventStream } from "@/components/admin/LiveEventStream";
+import { SmartKpiStrip } from "@/components/admin/SmartKpiStrip";
 import { OrderSlideOver } from "@/components/admin/OrderSlideOver";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -313,41 +315,18 @@ export default function Dashboard() {
         {/* Hakim sovereign — kept */}
         <HakimSovereignCard />
 
-        {/* KPI Strip — desktop only; mobile uses BentoStats below */}
-        <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-4">
-          <KpiCard
-            label="إيرادات اليوم"
-            value={fmtMoney(bento.todayRevenue)}
-            hint={`أمس: ${fmtMoney(yesterdayTotal)}`}
-            delta={dayDelta}
-            icon={TrendingUp}
-            tone="success"
-            to="/admin/orders"
+        {/* KPI Strip + Live Stream — desktop only */}
+        <div className="hidden lg:grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_340px] gap-5">
+          <SmartKpiStrip
+            todayRevenue={bento.todayRevenue}
+            yesterdayTotal={yesterdayTotal}
+            dayDelta={dayDelta}
+            todayOrders={bento.todayOrders}
+            inDelivery={bento.inDelivery}
+            totalCustomers={bento.totalCustomers}
+            lowStock={bento.lowStock}
           />
-          <KpiCard
-            label="طلبات اليوم"
-            value={fmtNum(bento.todayOrders)}
-            hint={`نشطة: ${fmtNum(bento.inDelivery)}`}
-            icon={ShoppingBag}
-            tone="primary"
-            to="/admin/orders"
-          />
-          <KpiCard
-            label="إجمالي العملاء"
-            value={fmtNum(bento.totalCustomers)}
-            icon={Users}
-            tone="info"
-            to="/admin/customers"
-          />
-          <KpiCard
-            label="مخزون منخفض"
-            value={fmtNum(bento.lowStock)}
-            hint="منتج يحتاج تجديد"
-            icon={AlertTriangle}
-            tone="warning"
-            to="/admin/low-stock"
-            urgent={bento.lowStock > 0}
-          />
+          <LiveEventStream />
         </div>
 
         {/* Mobile bento — kept for parity */}
