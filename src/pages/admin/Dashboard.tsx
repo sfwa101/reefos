@@ -3,6 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { HakimSovereignCard } from "@/components/admin/HakimSovereignCard";
 import { BentoStats } from "@/components/admin/BentoStats";
+import { LiveEventStream } from "@/components/admin/LiveEventStream";
+import { SmartKpiStrip } from "@/components/admin/SmartKpiStrip";
 import { OrderSlideOver } from "@/components/admin/OrderSlideOver";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
