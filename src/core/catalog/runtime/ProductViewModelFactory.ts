@@ -55,7 +55,7 @@ export function buildProductCard(input: BuildCardInput): ProductCardVM {
     tags: input.product.tags,
     rating: input.product.rating,
     capabilities,
-    attributes: Object.freeze({ ...input.product.attributes }),
+    attributes: Object.freeze({ ...input.product.attributes }) as Readonly<Record<string, import("../types").JsonValue>>,
   };
 }
 

@@ -2,7 +2,7 @@
  * Section Identity — يحدد كيف يُقدَّم القسم بصرياً وسلوكياً.
  * كل القيم مفاتيح ثابتة (string keys) لا enums — قابلة للتوسع من DB دون redeploy.
  */
-import type { I18nText } from "@/core/catalog/types";
+import type { I18nText, JsonValue } from "@/core/catalog/types";
 
 export interface SectionIdentity {
   id: string;
@@ -30,5 +30,5 @@ export interface SectionIdentity {
   /** قدرات مفعّلة (مفاتيح من capability_registry). */
   capabilities: readonly string[];
   /** خصائص حرة لـ adapters. */
-  attributes: Readonly<Record<string, unknown>>;
+  attributes: Readonly<Record<string, JsonValue>>;
 }

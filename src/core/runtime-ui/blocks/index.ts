@@ -1,0 +1,1 @@
+export { registerCoreBlocks } from "./registerCoreBlocks";
