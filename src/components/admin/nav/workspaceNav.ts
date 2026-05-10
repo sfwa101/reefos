@@ -82,7 +82,7 @@ const NOOR: NavGroup[] = [
 const FAMILY: NavGroup[] = [
   { title: "العائلة", items: [
     { to: "/admin/wallets", icon: Wallet, label: "محفظة العائلة" },
-    { to: "/admin/customers", icon: Users, label: "الأفراد" },
+    { to: "/admin/humans", icon: Users, label: "الأفراد" },
   ]},
 ];
 
