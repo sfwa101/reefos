@@ -9,13 +9,13 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useSovereignContext, type WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
+import { SmartProductComposer } from "@/apps/reef-al-madina/features/admin/product-editor/SmartProductComposer";
 
 type Action = {
   key: string;
@@ -23,16 +23,16 @@ type Action = {
   hint: string;
   icon: typeof HandCoins;
   cap?: string;
-  /** When set, clicking the action navigates instead of showing the stub. */
-  href?: string;
+  /** Special intent handled inline by the composer (e.g. open product dialog). */
+  intent?: "new-product";
 };
 
 const NEW_PRODUCT: Action = {
   key: "new-product",
   label: "منتج جديد",
-  hint: "أسقِط صورة — وحكيم يكتب الباقي",
+  hint: "أسقِط صورة — وحكيم ينتظر أمرك",
   icon: Sparkles,
-  href: "/admin/products/new",
+  intent: "new-product",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
@@ -66,8 +66,8 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
 export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
+  const [productOpen, setProductOpen] = useState(false);
   const { activeWorkspaceKind } = useSovereignContext();
-  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
@@ -76,10 +76,9 @@ export function SmartActionComposer() {
   }
 
   function handlePick(a: Action) {
-    if (a.href) {
+    if (a.intent === "new-product") {
       close();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      navigate({ to: a.href as any });
+      setProductOpen(true);
       return;
     }
     setPicked(a);
@@ -178,6 +177,8 @@ export function SmartActionComposer() {
           </div>
         </DialogContent>
       </Dialog>
+
+      <SmartProductComposer open={productOpen} onOpenChange={setProductOpen} />
     </>
   );
 }

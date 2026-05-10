@@ -2667,3 +2667,35 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
   gate; UI guards never trust the client persona alone.
 - **Doctrine VIII (Progressive Disclosure)** — `CapabilityGuard`
   collapses silently when not allowed.
+
+---
+
+## Phase 66.2 — The Sovereign Product Cortex (Command Modal)
+**Codename:** Human Veto — AI assists, never dictates.
+
+### UI
+- `SmartProductComposer` rebuilt as a controlled `Dialog` (`max-w-[90vw] h-[90vh]`),
+  preserving the underlying page state. Two-pane split:
+  - **Left 30% — Multimedia Hub**: primary drop zone + secondary slots
+    (label/ingredients, barcode). No auto-processing.
+  - **Right 70% — Granular Control Surface**: explicit sections for
+    Basics, Financials (cost/price/discount/tax), Logistics (SKU/barcode/
+    weight/dimensions). Every field manually editable.
+- **Opt-in AI buttons** under the primary image:
+  - `✨ تنظيف` → `useAestheticProcessor`
+  - `🤖 تحليل` → `useVisionGenesis` (+ `fairTick` price polish)
+- AI-filled fields wear a subtle `ring-primary/30` cue with a "· حكيم" tag;
+  the cue clears the moment the human edits the field.
+
+### Wiring
+- `SmartActionComposer` now opens the composer **inline** via local state
+  instead of navigating to `/admin/products/new` — page context preserved.
+- Standalone route `/admin/products/new` still works (deep-link/bookmark);
+  it mounts the dialog open and returns to `/admin` on close.
+
+### Doctrine compliance
+- **Human Sovereignty** — zero AI side effects without an explicit click.
+- **Progressive Disclosure** — secondary slots and AI tags only appear
+  when relevant; ring fades on edit.
+- **Adaptive Tokens** — surface-muted/primary/border tokens only;
+  no hardcoded hex.
