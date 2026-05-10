@@ -33,6 +33,7 @@ export function AdminShell() {
         </main>
       </div>
       <BottomTabBar />
+      <SmartActionComposer />
       <HakimFAB />
     </div>
   );
