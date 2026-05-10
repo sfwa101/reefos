@@ -67,14 +67,14 @@ export function DesktopTopbar() {
           const q = String(fd.get("q") ?? "").trim();
           if (q) window.location.assign(`/admin/orders?q=${encodeURIComponent(q)}`);
         }}
-        className="flex-1 max-w-xl"
+        className="flex-1 min-w-0 max-w-sm"
       >
         <label className="group flex items-center gap-2 h-10 rounded-2xl bg-surface-muted/70 hover:bg-surface-muted border border-border/40 px-3 transition focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-card">
           <Search className="h-4 w-4 text-foreground-tertiary shrink-0" />
           <input
             name="q"
             placeholder="ابحث في الطلبات، العملاء، المنتجات…"
-            className="flex-1 bg-transparent outline-none text-[13px] placeholder:text-foreground-tertiary"
+            className="flex-1 min-w-0 bg-transparent outline-none text-[13px] placeholder:text-foreground-tertiary"
           />
           <span className="hidden xl:inline-flex items-center gap-1 text-[10.5px] text-foreground-tertiary border border-border/50 rounded-md px-1.5 py-0.5">
             <Command className="h-3 w-3" /> K
@@ -82,13 +82,13 @@ export function DesktopTopbar() {
         </label>
       </form>
 
+      {/* Sovereign Notch — center workspace switcher */}
+      <div className="flex-1 flex justify-center">
+        <WorkspaceSwitcher />
+      </div>
+
       <div className="flex items-center gap-1.5">
-        <Link
-          to="/admin/assets"
-          className="hidden md:inline-flex items-center gap-1.5 h-10 px-3 rounded-2xl bg-foreground text-background text-[12.5px] font-semibold press shadow-soft hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" strokeWidth={2.5} /> أصل جديد
-        </Link>
+        <SmartActionComposer />
         <Link
           to="/admin/marketing/notifications"
           className="relative h-10 w-10 rounded-2xl hover:bg-surface-muted flex items-center justify-center press"
