@@ -13,7 +13,6 @@ import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignCo
 import { useCapabilities } from "@/hooks/useCapability";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { buildNavForKind, type NavItem } from "./nav/workspaceNav";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 function useCanShow() {
   const { capabilities } = useCapabilities();
@@ -40,9 +39,6 @@ export function DesktopSidebar() {
           <p className="font-display text-[15px] leading-tight">سَلسَبيل</p>
           <p className="text-[10px] text-foreground-tertiary leading-tight">قُرطُبة الإدارة السيادية</p>
         </div>
-      </div>
-      <div className="px-3 pt-3 pb-2 border-b border-border/40">
-        <WorkspaceSwitcher className="w-full justify-center" />
       </div>
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 no-scrollbar">
         {groups.length === 0 && (

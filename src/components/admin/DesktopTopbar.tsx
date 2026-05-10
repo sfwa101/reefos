@@ -5,8 +5,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
-import { SmartActionComposer } from "./SmartActionComposer";
 
 /**
  * DesktopTopbar — sticky top bar for the admin shell on lg+ screens.
@@ -82,13 +80,10 @@ export function DesktopTopbar() {
         </label>
       </form>
 
-      {/* Sovereign Notch — center workspace switcher */}
-      <div className="flex-1 flex justify-center">
-        <WorkspaceSwitcher />
-      </div>
+      {/* Spacer reserves the visual slot for the global fixed Notch above. */}
+      <div className="flex-1" aria-hidden />
 
       <div className="flex items-center gap-1.5">
-        <SmartActionComposer />
         <Link
           to="/admin/marketing/notifications"
           className="relative h-10 w-10 rounded-2xl hover:bg-surface-muted flex items-center justify-center press"
