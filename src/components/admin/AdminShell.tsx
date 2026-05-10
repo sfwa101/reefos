@@ -4,18 +4,18 @@ import { DesktopTopbar } from "./DesktopTopbar";
 import { BottomTabBar } from "./BottomTabBar";
 import { HakimFAB } from "./HakimFAB";
 import { SmartActionComposer } from "./SmartActionComposer";
-import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 
 /**
- * AdminShell — Phase 66.x Command Cortex.
+ * AdminShell — Phase 66.x Command Cortex (rebuilt).
  *
- * Global fixed layers (visible on EVERY viewport, every admin route):
- *  • The Sovereign Notch — fixed top-center pill (WorkspaceSwitcher), z-50.
- *  • The Bottom Dock — fixed bottom-center adaptive nav (BottomTabBar), z-40.
- *  • Smart Action Composer (+) — floating, owned by the Notch family.
- *  • Hakim FAB — floating coach.
- *
- * Desktop adds the side rail + slim topbar (search/profile only).
+ * Layer stack:
+ *  • SovereignTopbar (DesktopTopbar) — fixed top, all viewports, hosts the
+ *    Notch (centre), Back-to-Store (right in RTL), Bell + Avatar (left).
+ *  • DesktopSidebar — desktop only side rail.
+ *  • BottomTabBar — fixed bottom-center dock, all viewports, z-40.
+ *  • SmartActionComposer (+) — floating mobile FAB (bottom-28 right-4, z-50)
+ *    + inline desktop button (rendered by composer itself).
+ *  • HakimFAB — floating coach (bottom-28 left-4 mobile, z-50).
  */
 export function AdminShell() {
   return (
@@ -27,25 +27,14 @@ export function AdminShell() {
       <DesktopSidebar />
       <div className="flex-1 min-w-0 flex flex-col">
         <DesktopTopbar />
-        <main className="flex-1 min-w-0 pt-16 pb-24">
+        <main className="flex-1 min-w-0 pt-20 pb-32">
           <Outlet />
         </main>
       </div>
 
-      {/* Sovereign Notch — fixed top-center, all viewports */}
-      <div
-        className="fixed top-3 left-1/2 -translate-x-1/2 z-50 pointer-events-none"
-        style={{ paddingTop: "env(safe-area-inset-top)" }}
-      >
-        <div className="pointer-events-auto flex items-center gap-2">
-          <WorkspaceSwitcher />
-          <SmartActionComposer />
-        </div>
-      </div>
-
-      {/* Bottom Dock — fixed bottom-center, all viewports */}
+      {/* Floating layers — not duplicated inside the topbar */}
+      <SmartActionComposer />
       <BottomTabBar />
-
       <HakimFAB />
     </div>
   );
