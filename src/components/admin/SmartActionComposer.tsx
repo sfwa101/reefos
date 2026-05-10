@@ -9,13 +9,13 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useSovereignContext, type WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
+import { SmartProductComposer } from "@/apps/reef-al-madina/features/admin/product-editor/SmartProductComposer";
 
 type Action = {
   key: string;
@@ -23,16 +23,16 @@ type Action = {
   hint: string;
   icon: typeof HandCoins;
   cap?: string;
-  /** When set, clicking the action navigates instead of showing the stub. */
-  href?: string;
+  /** Special intent handled inline by the composer (e.g. open product dialog). */
+  intent?: "new-product";
 };
 
 const NEW_PRODUCT: Action = {
   key: "new-product",
   label: "منتج جديد",
-  hint: "أسقِط صورة — وحكيم يكتب الباقي",
+  hint: "أسقِط صورة — وحكيم ينتظر أمرك",
   icon: Sparkles,
-  href: "/admin/products/new",
+  intent: "new-product",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
