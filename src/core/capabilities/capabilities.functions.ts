@@ -4,10 +4,12 @@
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 
+import type { JsonValue } from "@/core/catalog/types";
+
 export interface CapabilityRow {
   key: string;
   domain: string;
-  schema: Record<string, unknown>;
+  schema: Record<string, JsonValue>;
 }
 
 export const listCapabilitiesFn = createServerFn({ method: "GET" }).handler(
@@ -22,9 +24,9 @@ export const listCapabilitiesFn = createServerFn({ method: "GET" }).handler(
       domain: r.domain ?? "general",
       schema:
         r.schema && typeof r.schema === "object" && !Array.isArray(r.schema)
-          ? (r.schema as Record<string, unknown>)
+          ? (r.schema as Record<string, JsonValue>)
           : {},
     }));
-    return rows as unknown as { key: string; domain: string; schema: Record<string, unknown> }[];
+    return rows;
   },
 );
