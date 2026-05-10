@@ -133,9 +133,22 @@ export function KpiCard({
       <p className="font-display text-[22px] lg:text-[24px] num leading-tight mt-0.5 tracking-tight">
         {value}
       </p>
-      {hint && (
+      {hint && !insight && (
         <p className="text-[11px] text-foreground-tertiary leading-tight mt-1 truncate">
           {hint}
+        </p>
+      )}
+      {insight && (
+        <p
+          className={cn(
+            "text-[11px] leading-snug mt-2 line-clamp-2 transition-colors",
+            insightTone === "critical" && "text-destructive",
+            insightTone === "warning" && "text-warning",
+            insightTone === "positive" && "text-success",
+            (!insightTone || insightTone === "neutral") && "text-foreground-secondary",
+          )}
+        >
+          {insight}
         </p>
       )}
       {urgent && (
@@ -145,9 +158,11 @@ export function KpiCard({
   );
 
   const cls = cn(
-    "relative overflow-hidden rounded-3xl p-4 lg:p-5 bg-card border border-border/50 shadow-soft min-h-[124px]",
-    to && "hover:shadow-tile hover:-translate-y-0.5 transition-all press cursor-pointer",
+    "relative overflow-hidden rounded-3xl p-4 lg:p-5 bg-card border border-border/50 shadow-soft min-h-[124px] transition-all",
+    to && "hover:shadow-tile hover:-translate-y-0.5 press cursor-pointer",
     urgent && "border-[hsl(var(--accent))]/40",
+    insightTone === "warning" && "border-warning/50 shadow-[0_0_0_1px_hsl(var(--warning)/0.15),0_8px_24px_-12px_hsl(var(--warning)/0.35)]",
+    insightTone === "critical" && "border-destructive/60 shadow-[0_0_0_1px_hsl(var(--destructive)/0.2),0_8px_24px_-12px_hsl(var(--destructive)/0.4)]",
   );
 
   if (to) return <Link to={to} className={cls}>{inner}</Link>;
