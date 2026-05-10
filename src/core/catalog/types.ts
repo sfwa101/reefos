@@ -11,6 +11,11 @@
 export type LocaleCode = "ar" | "en";
 export type CurrencyCode = "EGP" | "USD" | "EUR";
 
+/** قيمة JSON قابلة للـ serialization عبر server function boundary. */
+export type JsonValue =
+  | string | number | boolean | null
+  | JsonValue[]
+  | { [k: string]: JsonValue };
 /** قيمة مترجمة — تعرض حسب لغة المستخدم في runtime. */
 export interface I18nText {
   ar: string;
@@ -107,7 +112,7 @@ export interface ProductCardVM {
   /** قدرات مفعّلة على هذا المنتج (مشتقّة من القسم + الـ attributes). Array للسماح بالـ serialization. */
   capabilities: readonly string[];
   /** سياق إضافي يحتاجه القسم لتقديم Card مخصّص (jsonb من attributes). */
-  attributes: Readonly<Record<string, unknown>>;
+  attributes: Readonly<Record<string, JsonValue>>;
 }
 
 /** Details view — صفحة منتج كاملة. */
