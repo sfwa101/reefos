@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Bell, Command, Search, Plus } from "lucide-react";
+import { Bell, Command, Search } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import { SmartActionComposer } from "./SmartActionComposer";
 
 /**
  * DesktopTopbar — sticky top bar for the admin shell on lg+ screens.
