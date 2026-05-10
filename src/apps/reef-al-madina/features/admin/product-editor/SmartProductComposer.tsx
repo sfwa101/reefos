@@ -166,21 +166,20 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
     if (!name.trim() || price <= 0) { toast.error("الاسم والسعر مطلوبان"); return; }
     setStage("publishing");
     try {
-      const base = genesis ?? {
+      const base: USAGenesisPayload = genesis ?? {
         asset: {
           name, description,
-          asset_type: category || "physical_good",
-          traits: [] as string[],
+          asset_type: "physical",
+          traits: [],
           media: primaryUrl ? [primaryUrl] : [],
         },
-        skus: [] as USAGenesisPayload["skus"],
+        skus: [],
         financial_contract: { currency: "EGP", base_price: price } as USAGenesisPayload["financial_contract"],
       };
       await mint.mutateAsync({
         asset: {
           ...base.asset,
           name, description,
-          asset_type: category || base.asset.asset_type,
           media: primaryUrl ? [primaryUrl] : base.asset.media,
         },
         skus: base.skus,
