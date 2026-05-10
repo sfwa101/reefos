@@ -73,7 +73,7 @@ const TAYSEER: NavGroup[] = [
 const NOOR: NavGroup[] = [
   { title: "نور الدين — الجامعة", items: [
     { to: "/admin/dashboard", icon: GraduationCap, label: "رحلات التعلم" },
-    { to: "/admin/customers", icon: Users, label: "المتعلمون" },
+    { to: "/admin/humans", icon: Users, label: "المتعلمون" },
     { to: "/admin/hakim-insights", icon: BookOpen, label: "كتاب الذات" },
     { to: "/admin/personalized-picks", icon: Compass, label: "الإرشاد" },
   ]},
