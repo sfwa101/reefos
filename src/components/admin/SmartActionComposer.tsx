@@ -35,6 +35,13 @@ const NEW_PRODUCT: Action = {
   intent: "new-product",
 };
 
+const NEW_HUMAN: Action = {
+  key: "new-human",
+  label: "إضافة إنسان جديد",
+  hint: "عميل، تاجر، أو موظف — كائن واحد، علاقات متعددة",
+  icon: UserPlus,
+};
+
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
     NEW_PRODUCT,
