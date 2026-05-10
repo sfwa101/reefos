@@ -1,24 +1,27 @@
 /**
- * SmartProductComposer — Phase 66.2 "Product Cortex".
+ * SmartProductComposer — Phase 66.2 "Sovereign Product Cortex".
  *
- * One-tap product creation. The user drops an image; Hakim runs:
- *   1) Aesthetic processor (clean background → white)
- *   2) Vision Genesis (name_ar, description, asset_type, traits, base_price)
- *   3) Predictive Pricing (rounds Hakim's base_price to a fair retail tick)
- * Then we show a "Confirmation Surface" — text fields pre-filled with
- * Hakim's predictions, editable only if needed. Single CTA: تأكيد ونشر.
+ * The Command Modal: a 90vw × 90vh Dialog preserving page context.
+ * Split view:
+ *   - LEFT (30%): Multimedia Hub — primary drop zone + secondary slots
+ *     (label, barcode). Two opt-in buttons control AI:
+ *       ✨ تنظيف وتحسين الصورة → useAestheticProcessor
+ *       🤖 تحليل واستخراج البيانات → useVisionGenesis
+ *   - RIGHT (70%): Granular Control Surface — every field is human-editable.
+ *     AI-filled fields wear a subtle ring-primary/30 cue, cleared on edit.
  *
- * Persistence uses the existing `mint_universal_asset` RPC via `useMintUSA`.
- *
- * Zero manual data entry where Hakim can predict.
+ * The Human Veto rules: nothing runs without an explicit click.
  */
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Camera, CheckCircle2, ImagePlus, Loader2, Sparkles, UploadCloud, X,
+  Wand2, Brain, Tags, Barcode, FileImage,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  Dialog, DialogContent, DialogTitle, DialogDescription,
+} from "@/components/ui/dialog";
 import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
 import {
   useVisionGenesis,
@@ -26,23 +29,9 @@ import {
 } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 
-type Stage =
-  | "idle"
-  | "cleaning"
-  | "describing"
-  | "pricing"
-  | "ready"
-  | "publishing"
-  | "done";
+type Stage = "idle" | "cleaning" | "describing" | "publishing" | "done";
 
-const STAGE_LABEL: Record<Exclude<Stage, "idle" | "ready" | "done">, string> = {
-  cleaning:   "جاري إزالة الخلفية…",
-  describing: "حكيم يكتب الوصف…",
-  pricing:    "حساب التسعير العادل…",
-  publishing: "جاري النشر…",
-};
-
-/** Round to a "fair" retail tick: nearest 5 EGP, ceiling, with .99 polish above 50. */
+/** Round to a "fair" retail tick. */
 function fairTick(value: number): number {
   if (!value || value <= 0) return 0;
   if (value < 50) return Math.max(1, Math.round(value));
@@ -59,300 +48,541 @@ function dataUrlToFile(dataUrl: string, name = "clean.png"): File {
   return new File([arr], name, { type: mime });
 }
 
-export function SmartProductComposer() {
-  const navigate = useNavigate();
-  const inputRef = useRef<HTMLInputElement>(null);
+type AIField =
+  | "name" | "description" | "category" | "cost" | "price"
+  | "discount" | "taxCode" | "sku" | "barcode" | "weight" | "dimensions";
 
+export interface SmartProductComposerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onPublished?: () => void;
+}
+
+export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartProductComposerProps) {
   const aesthetic = useAestheticProcessor();
   const vision    = useVisionGenesis();
   const mint      = useMintUSA();
 
   const [stage, setStage] = useState<Stage>("idle");
-  const [cleanUrl, setCleanUrl] = useState<string | null>(null);
+
+  // Multimedia Hub
+  const [primaryFile, setPrimaryFile] = useState<File | null>(null);
+  const [primaryUrl, setPrimaryUrl] = useState<string | null>(null);
+  const [labelUrl, setLabelUrl] = useState<string | null>(null);
+  const [barcodeUrl, setBarcodeUrl] = useState<string | null>(null);
+
+  // Genesis snapshot (from Vision)
   const [genesis, setGenesis] = useState<USAGenesisPayload | null>(null);
 
-  // Editable confirmation surface (pre-filled with Hakim's values).
-  const [name, setName] = useState("");
+  // Granular form state
+  const [name, setName]               = useState("");
   const [description, setDescription] = useState("");
-  const [price, setPrice] = useState<number>(0);
+  const [category, setCategory]       = useState("");
+  const [cost, setCost]               = useState<number>(0);
+  const [price, setPrice]             = useState<number>(0);
+  const [discount, setDiscount]       = useState<number>(0);
+  const [taxCode, setTaxCode]         = useState("VAT_14");
+  const [sku, setSku]                 = useState("");
+  const [barcode, setBarcode]         = useState("");
+  const [weight, setWeight]           = useState<number>(0);
+  const [dimensions, setDimensions]   = useState("");
+
+  // Track fields filled by AI; cleared when user edits.
+  const [aiFilled, setAiFilled] = useState<Set<AIField>>(new Set());
+  const markAI = (keys: AIField[]) => setAiFilled(new Set(keys));
+  const clearAI = (k: AIField) => setAiFilled((prev) => {
+    if (!prev.has(k)) return prev;
+    const next = new Set(prev); next.delete(k); return next;
+  });
 
   const reset = useCallback(() => {
     setStage("idle");
-    setCleanUrl(null);
+    setPrimaryFile(null); setPrimaryUrl(null);
+    setLabelUrl(null); setBarcodeUrl(null);
     setGenesis(null);
-    setName(""); setDescription(""); setPrice(0);
+    setName(""); setDescription(""); setCategory("");
+    setCost(0); setPrice(0); setDiscount(0); setTaxCode("VAT_14");
+    setSku(""); setBarcode(""); setWeight(0); setDimensions("");
+    setAiFilled(new Set());
   }, []);
 
-  /** The full Hakim pipeline. */
-  const runPipeline = useCallback(async (file: File) => {
+  // Reset when the dialog closes.
+  useEffect(() => { if (!open) reset(); }, [open, reset]);
+
+  const onPickFile = useCallback(
+    (slot: "primary" | "label" | "barcode") =>
+      (file: File | null | undefined) => {
+        if (!file) return;
+        if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
+        const url = URL.createObjectURL(file);
+        if (slot === "primary") { setPrimaryFile(file); setPrimaryUrl(url); }
+        if (slot === "label")   setLabelUrl(url);
+        if (slot === "barcode") setBarcodeUrl(url);
+      },
+    [],
+  );
+
+  /** OPT-IN: aesthetic clean. */
+  async function runClean() {
+    if (!primaryFile) { toast.error("أضف صورة أولًا"); return; }
     try {
-      // 1) Clean background
       setStage("cleaning");
-      const cleaned = await aesthetic.mutateAsync({ file, style: "white" });
-      setCleanUrl(cleaned.imageDataUrl);
-
-      // 2) Describe
-      setStage("describing");
-      const cleanFile = dataUrlToFile(cleaned.imageDataUrl);
-      const usa = await vision.mutateAsync({ file: cleanFile });
-      setGenesis(usa);
-      setName(usa.asset.name);
-      setDescription(usa.asset.description);
-
-      // 3) Price
-      setStage("pricing");
-      await new Promise((r) => setTimeout(r, 350)); // brief beat — visual cadence
-      setPrice(fairTick(usa.financial_contract.base_price));
-
-      setStage("ready");
+      const cleaned = await aesthetic.mutateAsync({ file: primaryFile, style: "white" });
+      setPrimaryUrl(cleaned.imageDataUrl);
+      setPrimaryFile(dataUrlToFile(cleaned.imageDataUrl));
+      toast.success("تم تحسين الصورة");
     } catch (err) {
-      toast.error("فشل تحليل الصورة. حاول بصورة أوضح.");
-      console.error("[SmartProductComposer] pipeline error", err);
+      console.error("[Composer] clean error", err);
+      toast.error("فشل تحسين الصورة");
+    } finally {
       setStage("idle");
-    }
-  }, [aesthetic, vision]);
-
-  const onFile = useCallback((file: File | null | undefined) => {
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("اختر صورة فقط");
-      return;
-    }
-    void runPipeline(file);
-  }, [runPipeline]);
-
-  // Drag & drop wiring
-  const [dragOver, setDragOver] = useState(false);
-  useEffect(() => {
-    const stop = (e: DragEvent) => { e.preventDefault(); e.stopPropagation(); };
-    window.addEventListener("dragover", stop);
-    window.addEventListener("drop", stop);
-    return () => {
-      window.removeEventListener("dragover", stop);
-      window.removeEventListener("drop", stop);
-    };
-  }, []);
-
-  async function publish() {
-    if (!genesis) return;
-    setStage("publishing");
-    try {
-      await mint.mutateAsync({
-        asset: {
-          ...genesis.asset,
-          name,
-          description,
-          media: cleanUrl ? [cleanUrl] : genesis.asset.media,
-        },
-        skus: genesis.skus,
-        financial_contract: {
-          ...genesis.financial_contract,
-          base_price: price,
-        },
-      });
-      setStage("done");
-      setTimeout(() => navigate({ to: "/admin/product-units" }), 1100);
-    } catch (err) {
-      console.error("[SmartProductComposer] mint error", err);
-      setStage("ready");
     }
   }
 
-  const busy = stage !== "idle" && stage !== "ready" && stage !== "done";
+  /** OPT-IN: Vision Genesis — fills fields with subtle AI ring. */
+  async function runAnalyze() {
+    if (!primaryFile) { toast.error("أضف صورة أولًا"); return; }
+    try {
+      setStage("describing");
+      const usa = await vision.mutateAsync({ file: primaryFile });
+      setGenesis(usa);
+      setName(usa.asset.name);
+      setDescription(usa.asset.description);
+      setCategory(usa.asset.asset_type);
+      const fairPrice = fairTick(usa.financial_contract.base_price);
+      setPrice(fairPrice);
+      setCost(Number((fairPrice * 0.6).toFixed(2)));
+      markAI(["name", "description", "category", "price", "cost"]);
+      toast.success("تم استخراج البيانات");
+    } catch (err) {
+      console.error("[Composer] analyze error", err);
+      toast.error("فشل تحليل الصورة");
+    } finally {
+      setStage("idle");
+    }
+  }
+
+  async function publish() {
+    if (!name.trim() || price <= 0) { toast.error("الاسم والسعر مطلوبان"); return; }
+    setStage("publishing");
+    try {
+      const base = genesis ?? {
+        asset: {
+          name, description,
+          asset_type: category || "physical_good",
+          traits: [] as string[],
+          media: primaryUrl ? [primaryUrl] : [],
+        },
+        skus: [] as USAGenesisPayload["skus"],
+        financial_contract: { currency: "EGP", base_price: price } as USAGenesisPayload["financial_contract"],
+      };
+      await mint.mutateAsync({
+        asset: {
+          ...base.asset,
+          name, description,
+          asset_type: category || base.asset.asset_type,
+          media: primaryUrl ? [primaryUrl] : base.asset.media,
+        },
+        skus: base.skus,
+        financial_contract: { ...base.financial_contract, base_price: price },
+      });
+      setStage("done");
+      toast.success("تم نشر المنتج");
+      onPublished?.();
+      setTimeout(() => onOpenChange(false), 900);
+    } catch (err) {
+      console.error("[Composer] mint error", err);
+      toast.error("فشل النشر");
+      setStage("idle");
+    }
+  }
+
+  const cleaning   = stage === "cleaning";
+  const describing = stage === "describing";
+  const publishing = stage === "publishing";
+  const done       = stage === "done";
+  const busy       = cleaning || describing || publishing;
 
   return (
-    <div dir="rtl" className="max-w-2xl mx-auto p-4 lg:p-8 space-y-6">
-      <header className="space-y-1.5">
-        <h1 className="font-display text-[26px] leading-tight">منتج جديد بنقرة واحدة</h1>
-        <p className="text-[13px] text-foreground-secondary">
-          أسقِط صورة المنتج — وحكيم يكتب الاسم والوصف ويقترح السعر.
-        </p>
-      </header>
-
-      {/* DROP ZONE */}
-      <div
-        onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-        onDragLeave={() => setDragOver(false)}
-        onDrop={(e) => {
-          e.preventDefault(); setDragOver(false);
-          onFile(e.dataTransfer.files?.[0]);
-        }}
-        onClick={() => !busy && stage === "idle" && inputRef.current?.click()}
-        className={cn(
-          "relative rounded-3xl border-2 border-dashed transition-base overflow-hidden",
-          "min-h-[280px] lg:min-h-[360px] flex items-center justify-center text-center p-6",
-          "bg-gradient-to-br from-surface-muted/40 to-card",
-          dragOver ? "border-primary bg-primary/5 shadow-glow"
-                   : "border-border/60 hover:border-primary/50",
-          stage === "idle" && "cursor-pointer press",
-        )}
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent
+        dir="rtl"
+        className="max-w-[90vw] w-[90vw] h-[90vh] p-0 overflow-hidden rounded-3xl flex flex-col"
       >
-        <input
-          ref={inputRef}
-          type="file"
-          accept="image/*"
-          capture="environment"
-          className="hidden"
-          onChange={(e) => onFile(e.target.files?.[0])}
-        />
-        {cleanUrl ? (
-          <img
-            src={cleanUrl}
-            alt="معاينة المنتج"
-            className="absolute inset-0 w-full h-full object-contain bg-card"
-          />
-        ) : stage === "idle" ? (
-          <div className="space-y-3">
-            <div className="mx-auto h-16 w-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center">
-              <UploadCloud className="h-8 w-8" />
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 py-3 border-b border-border/50 shrink-0">
+          <div className="flex items-center gap-2">
+            <div className="h-8 w-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+              <Sparkles className="h-4 w-4" />
             </div>
             <div>
-              <p className="font-display text-[18px]">أسقِط صورة المنتج هنا</p>
-              <p className="text-[12.5px] text-foreground-tertiary mt-1">
-                أو انقر للاختيار من الجهاز
-              </p>
+              <DialogTitle className="font-display text-[16px] leading-tight">
+                منتج جديد — قشرة القيادة
+              </DialogTitle>
+              <DialogDescription className="text-[11.5px] text-foreground-tertiary leading-tight">
+                أنت السيد. حكيم لا يعمل إلا بأمرك.
+              </DialogDescription>
             </div>
-            <div className="flex items-center justify-center gap-2 pt-1">
+          </div>
+          <button
+            onClick={() => onOpenChange(false)}
+            className="h-9 w-9 rounded-xl hover:bg-surface-muted flex items-center justify-center press"
+            aria-label="إغلاق"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Split body */}
+        <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-[30%_70%] divide-y lg:divide-y-0 lg:divide-x lg:divide-x-reverse divide-border/50 overflow-hidden">
+          {/* LEFT — Multimedia Hub */}
+          <aside className="overflow-y-auto p-5 space-y-4 bg-surface-muted/30">
+            <PrimarySlot
+              url={primaryUrl}
+              busy={busy}
+              busyLabel={cleaning ? "جاري التحسين…" : describing ? "جاري التحليل…" : ""}
+              onFile={onPickFile("primary")}
+              onClear={() => { setPrimaryFile(null); setPrimaryUrl(null); }}
+            />
+
+            <div className="grid grid-cols-2 gap-2">
               <button
                 type="button"
-                onClick={(e) => { e.stopPropagation(); inputRef.current?.click(); }}
-                className="inline-flex items-center gap-1.5 h-9 px-3 rounded-xl bg-foreground text-background text-[12px] font-semibold press"
+                disabled={!primaryFile || busy}
+                onClick={runClean}
+                className={cn(
+                  "h-11 rounded-2xl text-[12px] font-semibold press transition-base",
+                  "bg-foreground/5 hover:bg-foreground/10 border border-border/50",
+                  "flex items-center justify-center gap-1.5",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                )}
               >
-                <ImagePlus className="h-4 w-4" /> اختر صورة
+                {cleaning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
+                ✨ تنظيف
               </button>
-              <span className="inline-flex items-center gap-1 text-[11px] text-foreground-tertiary">
-                <Camera className="h-3.5 w-3.5" /> أو الكاميرا على الجوال
-              </span>
+              <button
+                type="button"
+                disabled={!primaryFile || busy}
+                onClick={runAnalyze}
+                className={cn(
+                  "h-11 rounded-2xl text-[12px] font-semibold press transition-base",
+                  "bg-gradient-primary text-primary-foreground shadow-glow",
+                  "flex items-center justify-center gap-1.5",
+                  "disabled:opacity-40 disabled:cursor-not-allowed",
+                )}
+              >
+                {describing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
+                🤖 تحليل
+              </button>
             </div>
-          </div>
-        ) : null}
 
-        {/* Pipeline overlay */}
-        {busy && (
-          <div className="absolute inset-0 bg-card/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
-            <Loader2 className="h-8 w-8 text-primary animate-spin" />
-            <p className="text-[14px] font-semibold">{STAGE_LABEL[stage as keyof typeof STAGE_LABEL]}</p>
-            <PipelineSteps stage={stage} />
-          </div>
-        )}
-
-        {stage === "ready" && (
-          <button
-            type="button"
-            onClick={(e) => { e.stopPropagation(); reset(); }}
-            className="absolute top-3 left-3 h-8 w-8 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
-            aria-label="ابدأ من جديد"
-          >
-            <X className="h-4 w-4" />
-          </button>
-        )}
-      </div>
-
-      {/* CONFIRMATION SURFACE */}
-      {(stage === "ready" || stage === "publishing" || stage === "done") && genesis && (
-        <section className="rounded-3xl border border-border/50 bg-card shadow-soft p-5 space-y-4">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <p className="text-[12px] font-semibold text-primary">قراءة حكيم — عدّل فقط ما يلزم</p>
-          </div>
-
-          <Field label="اسم المنتج">
-            <input
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="w-full bg-transparent outline-none text-[16px] font-display"
-            />
-          </Field>
-
-          <Field label="الوصف">
-            <textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-              className="w-full bg-transparent outline-none text-[13.5px] leading-relaxed resize-none"
-            />
-          </Field>
-
-          <div className="grid grid-cols-2 gap-3">
-            <Field label={`السعر (${genesis.financial_contract.currency})`}>
-              <input
-                type="number"
-                step="0.01"
-                value={price}
-                onChange={(e) => setPrice(Number(e.target.value))}
-                className="w-full bg-transparent outline-none text-[16px] font-display"
+            <div className="grid grid-cols-2 gap-2 pt-2">
+              <SecondarySlot
+                label="ملصق / مكونات"
+                icon={FileImage}
+                url={labelUrl}
+                onFile={onPickFile("label")}
+                onClear={() => setLabelUrl(null)}
               />
-            </Field>
-            <Field label="النوع">
-              <p className="text-[14px] font-semibold">{genesis.asset.asset_type}</p>
-            </Field>
-          </div>
-
-          {genesis.asset.traits.length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
-              {genesis.asset.traits.slice(0, 8).map((t) => (
-                <span key={t} className="text-[10.5px] px-2 py-0.5 rounded-full bg-surface-muted text-foreground-secondary">
-                  {t}
-                </span>
-              ))}
+              <SecondarySlot
+                label="باركود"
+                icon={Barcode}
+                url={barcodeUrl}
+                onFile={onPickFile("barcode")}
+                onClear={() => setBarcodeUrl(null)}
+              />
             </div>
-          )}
 
-          <button
-            type="button"
-            onClick={publish}
-            disabled={busy || stage === "done" || !name.trim() || price <= 0}
-            className={cn(
-              "w-full h-12 rounded-2xl font-display text-[15px]",
-              "bg-gradient-primary text-primary-foreground shadow-glow press transition-base",
-              "disabled:opacity-50 disabled:cursor-not-allowed",
-              "flex items-center justify-center gap-2",
-            )}
-          >
-            {stage === "publishing" && <Loader2 className="h-4 w-4 animate-spin" />}
-            {stage === "done" && <CheckCircle2 className="h-5 w-5" />}
-            {stage === "done" ? "تم النشر" : "تأكيد ونشر"}
-          </button>
-        </section>
+            {genesis?.asset.traits?.length ? (
+              <div className="pt-2">
+                <p className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary mb-1.5 flex items-center gap-1">
+                  <Tags className="h-3 w-3" /> سمات مكتشفة
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {genesis.asset.traits.slice(0, 10).map((t) => (
+                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-full bg-card border border-border/40 text-foreground-secondary">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+          </aside>
+
+          {/* RIGHT — Granular Control Surface */}
+          <section className="overflow-y-auto p-6 space-y-5">
+            <FieldGroup title="الأساسيات">
+              <Field label="اسم المنتج" ai={aiFilled.has("name")}>
+                <input
+                  value={name}
+                  onChange={(e) => { setName(e.target.value); clearAI("name"); }}
+                  placeholder="مثال: زيت زيتون عضوي 500مل"
+                  className="w-full bg-transparent outline-none text-[15px] font-display"
+                />
+              </Field>
+              <Field label="الوصف" ai={aiFilled.has("description")}>
+                <textarea
+                  value={description}
+                  onChange={(e) => { setDescription(e.target.value); clearAI("description"); }}
+                  rows={3}
+                  placeholder="اكتب وصفًا قصيرًا أو دع حكيم يفعل."
+                  className="w-full bg-transparent outline-none text-[13px] leading-relaxed resize-none"
+                />
+              </Field>
+              <Field label="التصنيف" ai={aiFilled.has("category")}>
+                <input
+                  value={category}
+                  onChange={(e) => { setCategory(e.target.value); clearAI("category"); }}
+                  placeholder="غذاء، ملابس، إلكترونيات…"
+                  className="w-full bg-transparent outline-none text-[13.5px]"
+                />
+              </Field>
+            </FieldGroup>
+
+            <FieldGroup title="المالية">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="التكلفة (ج.م)" ai={aiFilled.has("cost")}>
+                  <input
+                    type="number" step="0.01"
+                    value={cost}
+                    onChange={(e) => { setCost(Number(e.target.value)); clearAI("cost"); }}
+                    className="w-full bg-transparent outline-none text-[14px] font-display"
+                  />
+                </Field>
+                <Field label="السعر (ج.م)" ai={aiFilled.has("price")}>
+                  <input
+                    type="number" step="0.01"
+                    value={price}
+                    onChange={(e) => { setPrice(Number(e.target.value)); clearAI("price"); }}
+                    className="w-full bg-transparent outline-none text-[14px] font-display"
+                  />
+                </Field>
+                <Field label="خصم (%)" ai={aiFilled.has("discount")}>
+                  <input
+                    type="number" step="1" min={0} max={100}
+                    value={discount}
+                    onChange={(e) => { setDiscount(Number(e.target.value)); clearAI("discount"); }}
+                    className="w-full bg-transparent outline-none text-[14px]"
+                  />
+                </Field>
+                <Field label="رمز الضريبة" ai={aiFilled.has("taxCode")}>
+                  <input
+                    value={taxCode}
+                    onChange={(e) => { setTaxCode(e.target.value); clearAI("taxCode"); }}
+                    className="w-full bg-transparent outline-none text-[13px]"
+                  />
+                </Field>
+              </div>
+            </FieldGroup>
+
+            <FieldGroup title="اللوجستيات">
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="SKU" ai={aiFilled.has("sku")}>
+                  <input
+                    value={sku}
+                    onChange={(e) => { setSku(e.target.value); clearAI("sku"); }}
+                    placeholder="auto"
+                    className="w-full bg-transparent outline-none text-[13px] font-mono"
+                  />
+                </Field>
+                <Field label="الباركود" ai={aiFilled.has("barcode")}>
+                  <input
+                    value={barcode}
+                    onChange={(e) => { setBarcode(e.target.value); clearAI("barcode"); }}
+                    className="w-full bg-transparent outline-none text-[13px] font-mono"
+                  />
+                </Field>
+                <Field label="الوزن (كجم)" ai={aiFilled.has("weight")}>
+                  <input
+                    type="number" step="0.001"
+                    value={weight}
+                    onChange={(e) => { setWeight(Number(e.target.value)); clearAI("weight"); }}
+                    className="w-full bg-transparent outline-none text-[13px]"
+                  />
+                </Field>
+                <Field label="الأبعاد (س×ع×ع)" ai={aiFilled.has("dimensions")}>
+                  <input
+                    value={dimensions}
+                    onChange={(e) => { setDimensions(e.target.value); clearAI("dimensions"); }}
+                    placeholder="20×10×5"
+                    className="w-full bg-transparent outline-none text-[13px]"
+                  />
+                </Field>
+              </div>
+            </FieldGroup>
+          </section>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-between gap-3 px-5 py-3 border-t border-border/50 shrink-0 bg-surface-muted/30">
+          <div className="text-[11.5px] text-foreground-tertiary">
+            {aiFilled.size > 0
+              ? <>الحقول المُحاطة بهالة <span className="text-primary font-semibold">من حكيم</span> — حررها بحرية.</>
+              : <>لن يُلمس شيء بدون أمرك. اضغط <span className="font-semibold">تحليل</span> لتفعيل حكيم.</>}
+          </div>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => onOpenChange(false)}
+              className="h-10 px-4 rounded-2xl text-[12.5px] font-semibold press hover:bg-surface-muted"
+            >
+              إلغاء
+            </button>
+            <button
+              type="button"
+              onClick={publish}
+              disabled={busy || done || !name.trim() || price <= 0}
+              className={cn(
+                "h-11 px-6 rounded-2xl font-display text-[14px]",
+                "bg-gradient-primary text-primary-foreground shadow-glow press transition-base",
+                "disabled:opacity-50 disabled:cursor-not-allowed",
+                "flex items-center justify-center gap-2",
+              )}
+            >
+              {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
+              {done && <CheckCircle2 className="h-4 w-4" />}
+              {done ? "تم النشر" : "تأكيد ونشر"}
+            </button>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+/* ===================== sub-components ===================== */
+
+function PrimarySlot({
+  url, busy, busyLabel, onFile, onClear,
+}: {
+  url: string | null; busy: boolean; busyLabel: string;
+  onFile: (file: File | null | undefined) => void; onClear: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [drag, setDrag] = useState(false);
+  return (
+    <div
+      onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+      onDragLeave={() => setDrag(false)}
+      onDrop={(e) => { e.preventDefault(); setDrag(false); onFile(e.dataTransfer.files?.[0]); }}
+      onClick={() => !url && !busy && inputRef.current?.click()}
+      className={cn(
+        "relative rounded-2xl border-2 border-dashed transition-base overflow-hidden",
+        "aspect-square flex items-center justify-center text-center p-4 bg-card",
+        drag ? "border-primary bg-primary/5 shadow-glow" : "border-border/60 hover:border-primary/50",
+        !url && "cursor-pointer press",
+      )}
+    >
+      <input
+        ref={inputRef} type="file" accept="image/*" capture="environment"
+        className="hidden" onChange={(e) => onFile(e.target.files?.[0])}
+      />
+      {url ? (
+        <img src={url} alt="معاينة المنتج" className="absolute inset-0 w-full h-full object-contain" />
+      ) : (
+        <div className="space-y-2">
+          <div className="mx-auto h-12 w-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <UploadCloud className="h-6 w-6" />
+          </div>
+          <p className="font-display text-[13.5px] leading-tight">أسقِط الصورة الرئيسية</p>
+          <p className="text-[10.5px] text-foreground-tertiary">
+            <Camera className="h-3 w-3 inline" /> أو الكاميرا
+          </p>
+        </div>
+      )}
+      {busy && (
+        <div className="absolute inset-0 bg-card/85 backdrop-blur-sm flex flex-col items-center justify-center gap-2">
+          <Loader2 className="h-6 w-6 text-primary animate-spin" />
+          <p className="text-[12px] font-semibold">{busyLabel}</p>
+        </div>
+      )}
+      {url && !busy && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClear(); }}
+          className="absolute top-2 left-2 h-7 w-7 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
+          aria-label="حذف"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
       )}
     </div>
   );
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function SecondarySlot({
+  label, icon: Icon, url, onFile, onClear,
+}: {
+  label: string;
+  icon: typeof FileImage;
+  url: string | null;
+  onFile: (file: File | null | undefined) => void;
+  onClear: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <label className="block rounded-2xl bg-surface-muted/50 border border-border/40 px-3 py-2.5 focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-card transition">
-      <span className="block text-[10.5px] uppercase tracking-wider text-foreground-tertiary mb-0.5">{label}</span>
-      {children}
-    </label>
+    <div
+      onClick={() => !url && inputRef.current?.click()}
+      className={cn(
+        "relative rounded-xl border border-dashed border-border/60 hover:border-primary/50",
+        "aspect-[4/3] bg-card flex items-center justify-center overflow-hidden",
+        !url && "cursor-pointer press",
+      )}
+    >
+      <input
+        ref={inputRef} type="file" accept="image/*" capture="environment"
+        className="hidden" onChange={(e) => onFile(e.target.files?.[0])}
+      />
+      {url ? (
+        <img src={url} alt={label} className="absolute inset-0 w-full h-full object-cover" />
+      ) : (
+        <div className="text-center">
+          <Icon className="h-5 w-5 mx-auto text-foreground-tertiary" />
+          <p className="text-[10.5px] text-foreground-tertiary mt-1">{label}</p>
+          <p className="text-[9.5px] text-foreground-tertiary opacity-70">+ إضافة</p>
+        </div>
+      )}
+      {url && (
+        <button
+          type="button"
+          onClick={(e) => { e.stopPropagation(); onClear(); }}
+          className="absolute top-1 left-1 h-6 w-6 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
+          aria-label="حذف"
+        >
+          <X className="h-3 w-3" />
+        </button>
+      )}
+    </div>
   );
 }
 
-function PipelineSteps({ stage }: { stage: Stage }) {
-  const steps: Array<{ key: Stage; label: string }> = [
-    { key: "cleaning",   label: "تنقية" },
-    { key: "describing", label: "وصف" },
-    { key: "pricing",    label: "تسعير" },
-  ];
-  const order: Stage[] = ["cleaning", "describing", "pricing", "ready"];
-  const idx = order.indexOf(stage);
+function FieldGroup({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <ol className="flex items-center gap-2 text-[11px] text-foreground-tertiary">
-      {steps.map((s, i) => {
-        const done = order.indexOf(s.key) < idx;
-        const active = s.key === stage;
-        return (
-          <li key={s.key} className="flex items-center gap-1.5">
-            <span className={cn(
-              "h-1.5 w-6 rounded-full transition-base",
-              done ? "bg-primary" : active ? "bg-primary/60 animate-pulse" : "bg-border",
-            )} />
-            <span className={cn(active && "text-foreground font-semibold")}>{s.label}</span>
-            {i < steps.length - 1 && <span className="opacity-40">·</span>}
-          </li>
-        );
-      })}
-    </ol>
+    <div className="space-y-2">
+      <p className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary font-semibold">
+        {title}
+      </p>
+      <div className="space-y-2">{children}</div>
+    </div>
+  );
+}
+
+function Field({
+  label, ai, children,
+}: { label: string; ai?: boolean; children: React.ReactNode }) {
+  return (
+    <label
+      className={cn(
+        "block rounded-xl bg-surface-muted/50 border border-border/40 px-3 py-2",
+        "focus-within:ring-2 focus-within:ring-primary/40 focus-within:bg-card transition",
+        ai && "ring-2 ring-primary/30 bg-card",
+      )}
+    >
+      <span className="block text-[10px] uppercase tracking-wider text-foreground-tertiary mb-0.5">
+        {label}
+        {ai && <span className="ms-1.5 text-primary normal-case tracking-normal">· حكيم</span>}
+      </span>
+      {children}
+    </label>
   );
 }
 
