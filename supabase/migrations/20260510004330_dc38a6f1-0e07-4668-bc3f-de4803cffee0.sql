@@ -1,0 +1,1 @@
+ALTER VIEW public.human_relationships SET (security_invoker = true);
