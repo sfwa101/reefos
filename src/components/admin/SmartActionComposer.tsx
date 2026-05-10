@@ -67,11 +67,22 @@ export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
   const { activeWorkspaceKind } = useSovereignContext();
+  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
     setOpen(false);
     setTimeout(() => setPicked(null), 150);
+  }
+
+  function handlePick(a: Action) {
+    if (a.href) {
+      close();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigate({ to: a.href as any });
+      return;
+    }
+    setPicked(a);
   }
 
   return (
