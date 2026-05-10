@@ -167,6 +167,8 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
     setStage("publishing");
     try {
       const base: USAGenesisPayload = genesis ?? {
+        ok: true,
+        generated_at: new Date().toISOString(),
         asset: {
           name, description,
           asset_type: "physical",
@@ -174,7 +176,12 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
           media: primaryUrl ? [primaryUrl] : [],
         },
         skus: [],
-        financial_contract: { currency: "EGP", base_price: price } as USAGenesisPayload["financial_contract"],
+        financial_contract: {
+          pricing_model: "flat",
+          base_price: price,
+          currency: "EGP",
+          contract_rules: {},
+        },
       };
       await mint.mutateAsync({
         asset: {
