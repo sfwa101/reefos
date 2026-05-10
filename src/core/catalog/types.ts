@@ -104,8 +104,8 @@ export interface ProductCardVM {
   badges: BadgeVM[];
   tags: string[];
   rating: { avg: number; count: number };
-  /** قدرات مفعّلة على هذا المنتج (مشتقّة من القسم + الـ attributes). */
-  capabilities: ReadonlySet<string>;
+  /** قدرات مفعّلة على هذا المنتج (مشتقّة من القسم + الـ attributes). Array للسماح بالـ serialization. */
+  capabilities: readonly string[];
   /** سياق إضافي يحتاجه القسم لتقديم Card مخصّص (jsonb من attributes). */
   attributes: Readonly<Record<string, unknown>>;
 }

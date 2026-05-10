@@ -30,7 +30,7 @@ export function resolveSectionIdentity(
   row: SectionRow,
   capabilities: readonly string[],
 ): SectionIdentity {
-  const attrs = isObj(row.attributes) ? row.attributes : {};
+  const attrs = isObj(row.metadata) ? row.metadata : {};
   const identity = isObj(attrs.identity) ? attrs.identity : {};
   return {
     id: row.id,

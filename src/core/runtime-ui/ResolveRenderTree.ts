@@ -47,7 +47,7 @@ export function resolveDetailsTree(
   section: SectionIdentity,
   product: ProductDetailsVM,
 ): RenderDescriptor {
-  const caps = product.capabilities;
+  const caps = new Set(product.capabilities);
   const blocks: RenderBlock[] = [
     block("product.gallery", "gallery", { hero: product.hero, gallery: product.gallery }),
     block("product.heading", "heading", { name: product.name, badges: product.badges }),

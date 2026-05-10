@@ -15,7 +15,7 @@ export interface CapabilityResolverInput {
 
 export function resolveProductCapabilities(
   input: CapabilityResolverInput,
-): ReadonlySet<string> {
+): readonly string[] {
   const enabled = new Set<string>(input.sectionCapabilities);
   const attrs = input.product.attributes;
 
@@ -29,5 +29,5 @@ export function resolveProductCapabilities(
   for (const a of additions) enabled.add(a);
   for (const r of removals) enabled.delete(r);
 
-  return enabled;
+  return Array.from(enabled);
 }

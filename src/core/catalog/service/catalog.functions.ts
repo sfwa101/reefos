@@ -47,8 +47,7 @@ export const listProductsBySectionFn = createServerFn({ method: "POST" })
     const { data: caps } = await supabase
       .from("section_capabilities")
       .select("capability_key")
-      .eq("section_id", section.id)
-      .eq("is_enabled", true);
+      .eq("section_id", section.id);
     const capabilityKeys = (caps ?? []).map((c) => c.capability_key);
 
     // 2) products
@@ -133,8 +132,7 @@ export const getProductDetailsFn = createServerFn({ method: "POST" })
     const { data: caps } = await supabase
       .from("section_capabilities")
       .select("capability_key")
-      .eq("section_id", section.id)
-      .eq("is_enabled", true);
+      .eq("section_id", section.id);
     const capabilityKeys = (caps ?? []).map((c) => c.capability_key);
 
     return buildDetails({

@@ -77,9 +77,10 @@ const toRecord = (v: unknown): Record<string, unknown> =>
   isI18n(v) ? (v as Record<string, unknown>) : {};
 
 const toSeasonal = (v: unknown): NormalizedProduct["seasonalWindow"] => {
-  if (!isI18n(v)) return undefined;
-  const startsAt = typeof v.startsAt === "string" ? v.startsAt : undefined;
-  const endsAt = typeof v.endsAt === "string" ? v.endsAt : undefined;
+  if (!v || typeof v !== "object" || Array.isArray(v)) return undefined;
+  const obj = v as Record<string, unknown>;
+  const startsAt = typeof obj.startsAt === "string" ? obj.startsAt : undefined;
+  const endsAt = typeof obj.endsAt === "string" ? obj.endsAt : undefined;
   return startsAt && endsAt ? { startsAt, endsAt } : undefined;
 };
 

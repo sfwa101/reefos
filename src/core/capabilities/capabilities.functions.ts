@@ -1,23 +1,27 @@
 /**
- * Server function — تحميل سجل القدرات الكامل.
- * يستدعى مرة واحدة عند bootstrap لـ hydrate الـ in-memory registry.
+ * Server function — تحميل سجل القدرات الكامل من DB.
  */
 import { createServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
-import type { CapabilityDescriptor } from "./CapabilityRegistry";
+
+export interface CapabilityRow {
+  key: string;
+  domain: string;
+  schema: Record<string, unknown>;
+}
 
 export const listCapabilitiesFn = createServerFn({ method: "GET" }).handler(
-  async (): Promise<CapabilityDescriptor[]> => {
+  async (): Promise<CapabilityRow[]> => {
     const { data, error } = await supabase
       .from("capability_registry")
-      .select("key, category, requires_aux, metadata");
+      .select("key, domain, schema")
+      .eq("is_active", true);
     if (error) throw error;
     return (data ?? []).map((r) => ({
       key: r.key,
-      category: r.category ?? "general",
-      requiresAux: Boolean(r.requires_aux),
-      metadata: (r.metadata && typeof r.metadata === "object" && !Array.isArray(r.metadata))
-        ? (r.metadata as Record<string, unknown>)
+      domain: r.domain ?? "general",
+      schema: (r.schema && typeof r.schema === "object" && !Array.isArray(r.schema))
+        ? (r.schema as Record<string, unknown>)
         : {},
     }));
   },
