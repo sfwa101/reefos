@@ -50,7 +50,7 @@ const REEF: NavGroup[] = [
     { to: "/admin/stores", icon: Store, label: "المتاجر" },
   ]},
   { title: "ريف — الجمهور", items: [
-    { to: "/admin/customers", icon: Users, label: "العملاء" },
+    { to: "/admin/humans", icon: Users, label: "الشبكة البشرية" },
     { to: "/admin/marketing/promos", icon: Sparkles, label: "العروض" },
     { to: "/admin/delivery", icon: Truck, label: "التوصيل" },
   ]},
