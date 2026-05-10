@@ -3,6 +3,7 @@ import { DesktopSidebar } from "./DesktopSidebar";
 import { DesktopTopbar } from "./DesktopTopbar";
 import { BottomTabBar } from "./BottomTabBar";
 import { HakimFAB } from "./HakimFAB";
+import { SmartActionComposer } from "./SmartActionComposer";
 
 /**
  * AdminShell — Phase 21: premium operating-system layout.
