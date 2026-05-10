@@ -27,13 +27,10 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass-strong border border-border/50 rounded-3xl shadow-float max-w-[min(680px,calc(100vw-1.5rem))]"
+      className="fixed bottom-3 inset-x-3 z-40 glass-strong border border-border/50 rounded-3xl shadow-float mx-auto max-w-[680px]"
       style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
-      <ul
-        className="grid px-2 py-1.5 gap-1"
-        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(64px, 1fr))` }}
-      >
+      <ul className="grid grid-cols-5 gap-1 px-2 py-1.5">
         {tabs.map(({ to, icon: Icon, label, exact }) => {
           const isActive = exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
           return (

@@ -103,7 +103,7 @@ export function SmartActionComposer() {
         onClick={() => setOpen(true)}
         aria-label="إضافة سريعة"
         className={cn(
-          "fixed z-50 lg:hidden bottom-28 right-4",
+          "fixed z-50 lg:hidden bottom-32 right-4",
           "h-14 w-14 rounded-2xl bg-gradient-primary text-primary-foreground",
           "shadow-glow flex items-center justify-center press transition-base",
         )}
