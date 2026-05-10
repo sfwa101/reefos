@@ -32,19 +32,23 @@ export function resolveSectionIdentity(
 ): SectionIdentity {
   const attrs = isObj(row.metadata) ? row.metadata : {};
   const identity = isObj(attrs.identity) ? attrs.identity : {};
+  // Resolver يقبل شكلين: nested (metadata.identity.*) أو flat (metadata.*).
+  // كلاهما صالح من DB — لا hardcoded per slug.
+  const pick = (k: string, fb: string) =>
+    str(identity[k], str(attrs[k], fb));
   return {
     id: row.id,
     slug: row.slug,
     name: toI18n(row.name_i18n, row.slug),
     parentId: row.parent_id ?? undefined,
     sortOrder: row.sort_order,
-    visualTone: str(identity.visualTone, "neutral"),
-    cardStyle: str(identity.cardStyle, "compact"),
-    interactionPattern: str(identity.interactionPattern, "tap_buy"),
-    sortStrategy: str(identity.sortStrategy, "popularity"),
-    recommendationStrategy: str(identity.recommendationStrategy, "similar"),
-    searchBehavior: str(identity.searchBehavior, "keyword"),
-    badgeAllowlist: stringArray(identity.badgeAllowlist),
+    visualTone: pick("visualTone", str(attrs.tone, "neutral")),
+    cardStyle: pick("cardStyle", "compact"),
+    interactionPattern: pick("interactionPattern", "tap_buy"),
+    sortStrategy: pick("sortStrategy", "popularity"),
+    recommendationStrategy: pick("recommendationStrategy", "similar"),
+    searchBehavior: pick("searchBehavior", "keyword"),
+    badgeAllowlist: stringArray(identity.badgeAllowlist ?? attrs.badgeAllowlist),
     capabilities,
     attributes: Object.freeze({ ...attrs }),
   };
