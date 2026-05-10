@@ -66,8 +66,8 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
 export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
+  const [productOpen, setProductOpen] = useState(false);
   const { activeWorkspaceKind } = useSovereignContext();
-  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
@@ -76,10 +76,9 @@ export function SmartActionComposer() {
   }
 
   function handlePick(a: Action) {
-    if (a.href) {
+    if (a.intent === "new-product") {
       close();
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      navigate({ to: a.href as any });
+      setProductOpen(true);
       return;
     }
     setPicked(a);
