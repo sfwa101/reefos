@@ -4,7 +4,7 @@
  */
 import { resolveFeed } from "@/core/feeds";
 import { CAP } from "@/core/capabilities";
-import type { SearchFilter, SearchProvider, SearchQuery, SearchResult } from "./SearchRegistry";
+import type { SearchFilter, SearchProvider, SearchQuery, SearchResult } from "../SearchRegistry";
 
 const universalFilters: SearchFilter[] = [
   { capabilityKey: null, key: "in_stock", label: { ar: "متوفر فقط", en: "In stock" }, kind: "toggle" },
@@ -37,7 +37,7 @@ export const defaultSearchProvider: SearchProvider = {
     });
     return { items: r.items, total: r.items.length, facets: {} };
   },
-  filtersFor(capabilities) {
+  filtersFor(capabilities: readonly string[]) {
     const out = [...universalFilters];
     for (const cap of capabilities) {
       if (capabilityFilters[cap]) out.push(...capabilityFilters[cap]);
