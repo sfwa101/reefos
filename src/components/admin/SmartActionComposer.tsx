@@ -9,7 +9,7 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
+import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -35,28 +35,40 @@ const NEW_PRODUCT: Action = {
   intent: "new-product",
 };
 
+const NEW_HUMAN: Action = {
+  key: "new-human",
+  label: "إضافة إنسان جديد",
+  hint: "عميل، تاجر، أو موظف — كائن واحد، علاقات متعددة",
+  icon: UserPlus,
+};
+
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
     NEW_PRODUCT,
+    NEW_HUMAN,
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins },
     { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt },
     { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus },
   ],
   tayseer: [
+    NEW_HUMAN,
     { key: "expense",        label: "إضافة مصروف",     hint: "تصنيف ذكي عبر حكيم",     icon: Receipt },
     { key: "wallet-topup",   label: "شحن محفظة",       hint: "للعميل أو للموظف",        icon: Wallet },
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "تسجيل في دفتر الأستاذ",  icon: HandCoins },
   ],
   noor_eldin: [
+    NEW_HUMAN,
     { key: "enroll",   label: "تسجيل متعلم",  hint: "في رحلة تعلم",      icon: GraduationCap },
     { key: "mentor",   label: "إسناد مرشد",   hint: "حكيم يقترح أفضل توافق", icon: Users },
   ],
   family: [
+    NEW_HUMAN,
     { key: "wallet-topup", label: "شحن محفظة",   hint: "لأحد أفراد العائلة",  icon: Wallet },
     { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt },
   ],
   global: [
     NEW_PRODUCT,
+    NEW_HUMAN,
     { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt },
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins },
     { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus },

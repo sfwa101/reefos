@@ -2699,3 +2699,36 @@ The audit confirmed two critical violations: 31 hardcoded color literals (`emera
   when relevant; ring fades on edit.
 - **Adaptive Tokens** — surface-muted/primary/border tokens only;
   no hardcoded hex.
+
+## Phase 66.3 — The Unified Human Profile (Identity Resolution)
+
+The fragmented CRM (Customers / Vendors / Partners / Staff) is destroyed.
+There is only one Sovereign Human Entity, anchored to `public.profiles.id`.
+
+### Database
+- `product_partners.profile_id` (FK → profiles) — backfilled by phone match.
+- `idx_vendors_owner_user` for fast 360 lookups.
+- `public.human_relationships` view (security_invoker) — UNIONs Customer /
+  Vendor (legacy + Salsabil) / Partner / Staff / Workspace Member rows into
+  one stream of `(profile_id, kind, ref_id, started_at)`.
+- `public.get_human_360(p_profile_id)` — admin-only `SECURITY DEFINER` RPC
+  returning a single JSONB blob: identity + relationships + customer +
+  vendor + staff + partner + capabilities + fetched_at.
+
+### UI
+- `/admin/humans` → `HumanDirectory.tsx`: search-first index, filter chips
+  per relationship kind, no separate Vendors/Staff pages.
+- `HumanProfileSheet.tsx`: 90vw / 90vh Command Modal with identity rail
+  + Tabs (Overview / Customer / Vendor / Staff / Capabilities). Empty
+  facets render a "Promote to ..." capability action instead of blanks.
+- `workspaceNav.ts`: every legacy link to `/admin/customers` redirected to
+  `/admin/humans`.
+- `SmartActionComposer`: stub action "إضافة إنسان جديد" exposed in every
+  workspace kind.
+
+### Principles
+- **One Human, Many Relationships** — never duplicate identity rows.
+- **Single-Read 360°** — one RPC populates the whole sheet.
+- **RLS-Safe** — view runs as the caller; RPC checks `has_role(admin)`.
+- **Capability-Driven Surfaces** — facets stay empty UI when the human
+  has no relationship there, replaced by a promotion action.

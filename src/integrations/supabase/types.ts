@@ -4309,6 +4309,7 @@ export type Database = {
           partner_user_id: string | null
           percentage: number
           product_id: string
+          profile_id: string | null
           split_type: string
           updated_at: string
         }
@@ -4322,6 +4323,7 @@ export type Database = {
           partner_user_id?: string | null
           percentage: number
           product_id: string
+          profile_id?: string | null
           split_type: string
           updated_at?: string
         }
@@ -4335,10 +4337,19 @@ export type Database = {
           partner_user_id?: string | null
           percentage?: number
           product_id?: string
+          profile_id?: string | null
           split_type?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "product_partners_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       product_requests: {
         Row: {
@@ -8246,6 +8257,15 @@ export type Database = {
         }
         Relationships: []
       }
+      human_relationships: {
+        Row: {
+          kind: string | null
+          profile_id: string | null
+          ref_id: string | null
+          started_at: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _gen_unique_6digit_code: { Args: never; Returns: string }
@@ -8757,6 +8777,7 @@ export type Database = {
       }
       geomfromewkt: { Args: { "": string }; Returns: unknown }
       get_handover_otp: { Args: { p_node_id: string }; Returns: string }
+      get_human_360: { Args: { p_profile_id: string }; Returns: Json }
       get_sovereign_logistics_quote: {
         Args: {
           p_cart_total: number

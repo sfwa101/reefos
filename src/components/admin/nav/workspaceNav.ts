@@ -50,7 +50,7 @@ const REEF: NavGroup[] = [
     { to: "/admin/stores", icon: Store, label: "المتاجر" },
   ]},
   { title: "ريف — الجمهور", items: [
-    { to: "/admin/customers", icon: Users, label: "العملاء" },
+    { to: "/admin/humans", icon: Users, label: "الشبكة البشرية" },
     { to: "/admin/marketing/promos", icon: Sparkles, label: "العروض" },
     { to: "/admin/delivery", icon: Truck, label: "التوصيل" },
   ]},
@@ -73,7 +73,7 @@ const TAYSEER: NavGroup[] = [
 const NOOR: NavGroup[] = [
   { title: "نور الدين — الجامعة", items: [
     { to: "/admin/dashboard", icon: GraduationCap, label: "رحلات التعلم" },
-    { to: "/admin/customers", icon: Users, label: "المتعلمون" },
+    { to: "/admin/humans", icon: Users, label: "المتعلمون" },
     { to: "/admin/hakim-insights", icon: BookOpen, label: "كتاب الذات" },
     { to: "/admin/personalized-picks", icon: Compass, label: "الإرشاد" },
   ]},
@@ -82,7 +82,7 @@ const NOOR: NavGroup[] = [
 const FAMILY: NavGroup[] = [
   { title: "العائلة", items: [
     { to: "/admin/wallets", icon: Wallet, label: "محفظة العائلة" },
-    { to: "/admin/customers", icon: Users, label: "الأفراد" },
+    { to: "/admin/humans", icon: Users, label: "الأفراد" },
   ]},
 ];
 
