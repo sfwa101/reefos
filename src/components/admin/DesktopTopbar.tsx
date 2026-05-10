@@ -1,29 +1,32 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Bell, Command, Search } from "lucide-react";
+import { Bell, Store } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
+import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
+import {
+  Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 /**
- * DesktopTopbar — sticky top bar for the admin shell on lg+ screens.
+ * SovereignTopbar — Phase 66.x unified shell topbar.
  *
- * Houses global search, notifications, quick-create action and the user chip.
- * Mobile uses MobileTopbar inside each page (unchanged) so we don't disturb
- * existing screens.
+ * Visible on ALL viewports (mobile + desktop). Three zones:
+ *  • Left   → "Back to Store" (customer view) link.
+ *  • Center → WorkspaceSwitcher (the Notch), absolutely centred so it never
+ *             pushes side actions around.
+ *  • Right  → Notifications bell + profile avatar.
  *
- * The search input is `command-palette-ready`: the same handler will later open
- * a CMDK panel. For now, Enter routes to /admin/orders?q= which already works.
+ * The SmartActionComposer (+) lives separately as a floating FAB on mobile
+ * and may be re-mounted in shell on desktop if needed; not duplicated here.
  */
 export function DesktopTopbar() {
   const { profile, user } = useAuth();
   const display = profile?.full_name ?? user?.email ?? "؟";
   const initials = display.trim().split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
   const [unread, setUnread] = useState(0);
-  const [shrunk, setShrunk] = useState(false);
 
-  /* Best-effort unread count — falls back to 0 if RLS blocks. */
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -34,55 +37,39 @@ export function DesktopTopbar() {
           .select("id", { count: "exact", head: true })
           .eq("read", false);
         if (!cancelled && typeof count === "number") setUnread(count);
-      } catch {
-        /* ignore */
-      }
+      } catch { /* ignore */ }
     })();
     return () => { cancelled = true; };
   }, []);
 
-  useEffect(() => {
-    const onScroll = () => setShrunk(window.scrollY > 8);
-    window.addEventListener("scroll", onScroll, { passive: true });
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
     <header
-      data-shrunk={shrunk}
-      className={cn(
-        "hidden lg:flex sticky top-0 z-30 items-center gap-3 px-6 h-14",
-        "bg-card/65 backdrop-blur-xl border-b border-border/0 transition-[background,border-color,box-shadow] duration-300 ease-apple",
-        "data-[shrunk=true]:bg-card/90 data-[shrunk=true]:border-border/60 data-[shrunk=true]:shadow-soft",
-      )}
+      className="fixed top-0 inset-x-0 z-40 h-16 px-4 flex items-center justify-between bg-background/80 backdrop-blur-md border-b border-border/40"
+      style={{ paddingTop: "env(safe-area-inset-top)" }}
+      dir="rtl"
     >
-      {/* Search — command-palette-ready */}
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          const fd = new FormData(e.currentTarget);
-          const q = String(fd.get("q") ?? "").trim();
-          if (q) window.location.assign(`/admin/orders?q=${encodeURIComponent(q)}`);
-        }}
-        className="flex-1 min-w-0 max-w-sm"
-      >
-        <label className="group flex items-center gap-2 h-10 rounded-2xl bg-surface-muted/70 hover:bg-surface-muted border border-border/40 px-3 transition focus-within:ring-2 focus-within:ring-primary/30 focus-within:bg-card">
-          <Search className="h-4 w-4 text-foreground-tertiary shrink-0" />
-          <input
-            name="q"
-            placeholder="ابحث في الطلبات، العملاء، المنتجات…"
-            className="flex-1 min-w-0 bg-transparent outline-none text-[13px] placeholder:text-foreground-tertiary"
-          />
-          <span className="hidden xl:inline-flex items-center gap-1 text-[10.5px] text-foreground-tertiary border border-border/50 rounded-md px-1.5 py-0.5">
-            <Command className="h-3 w-3" /> K
-          </span>
-        </label>
-      </form>
+      {/* RIGHT (in RTL: visually right) — Back to Store */}
+      <TooltipProvider delayDuration={200}>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Link
+              to="/"
+              aria-label="واجهة العميل"
+              className="h-10 w-10 rounded-2xl flex items-center justify-center hover:bg-surface-muted press border border-border/40"
+            >
+              <Store className="h-[18px] w-[18px] text-foreground-secondary" />
+            </Link>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">واجهة العميل</TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
-      {/* Spacer reserves the visual slot for the global fixed Notch above. */}
-      <div className="flex-1" aria-hidden />
+      {/* CENTER — Sovereign Notch (absolute centred) */}
+      <div className="absolute left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2">
+        <WorkspaceSwitcher />
+      </div>
 
+      {/* LEFT (in RTL: visually left) — Bell + Avatar */}
       <div className="flex items-center gap-1.5">
         <Link
           to="/admin/marketing/notifications"
@@ -98,13 +85,9 @@ export function DesktopTopbar() {
         </Link>
         <Link
           to="/admin/settings"
-          className="flex items-center gap-2 h-10 pr-1 pl-3 rounded-2xl hover:bg-surface-muted press"
+          className="flex items-center gap-2 h-10 pr-1 pl-2 rounded-2xl hover:bg-surface-muted press"
           aria-label="الملف الشخصي"
         >
-          <div className="text-right hidden xl:block">
-            <p className="text-[12px] leading-tight font-semibold truncate max-w-[140px]">{display}</p>
-            <p className="text-[10px] leading-tight text-foreground-tertiary">مدير النظام</p>
-          </div>
           <Avatar className="h-8 w-8 border border-border/40">
             <AvatarFallback className="bg-gradient-primary text-primary-foreground text-[11px] font-display">
               {initials || "؟"}
