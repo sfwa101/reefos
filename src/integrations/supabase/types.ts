@@ -3048,6 +3048,33 @@ export type Database = {
         }
         Relationships: []
       }
+      hakim_pulse_cache: {
+        Row: {
+          created_at: string
+          hour_bucket: string
+          id: string
+          insights: Json
+          metrics_hash: string
+          page: string
+        }
+        Insert: {
+          created_at?: string
+          hour_bucket: string
+          id?: string
+          insights: Json
+          metrics_hash: string
+          page: string
+        }
+        Update: {
+          created_at?: string
+          hour_bucket?: string
+          id?: string
+          insights?: Json
+          metrics_hash?: string
+          page?: string
+        }
+        Relationships: []
+      }
       hakim_user_insights: {
         Row: {
           created_at: string
