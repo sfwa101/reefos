@@ -77,6 +77,8 @@ export function KpiCard({
   tone = "primary",
   to,
   urgent,
+  insight,
+  insightTone,
 }: {
   label: string;
   value: React.ReactNode;
@@ -86,6 +88,8 @@ export function KpiCard({
   tone?: "primary" | "info" | "success" | "warning" | "destructive" | "accent";
   to?: string;
   urgent?: boolean;
+  insight?: string;
+  insightTone?: "positive" | "neutral" | "warning" | "critical";
 }) {
   const toneBg: Record<string, string> = {
     primary: "bg-primary/10 text-primary",
