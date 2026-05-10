@@ -9,7 +9,7 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
+import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
