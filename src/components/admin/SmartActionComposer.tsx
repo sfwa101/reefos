@@ -9,7 +9,8 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -22,10 +23,21 @@ type Action = {
   hint: string;
   icon: typeof HandCoins;
   cap?: string;
+  /** When set, clicking the action navigates instead of showing the stub. */
+  href?: string;
+};
+
+const NEW_PRODUCT: Action = {
+  key: "new-product",
+  label: "منتج جديد",
+  hint: "أسقِط صورة — وحكيم يكتب الباقي",
+  icon: Sparkles,
+  href: "/admin/products/new",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
+    NEW_PRODUCT,
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins },
     { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt },
     { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus },
@@ -44,6 +56,7 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
     { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt },
   ],
   global: [
+    NEW_PRODUCT,
     { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt },
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins },
     { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus },
@@ -54,11 +67,22 @@ export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
   const { activeWorkspaceKind } = useSovereignContext();
+  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
     setOpen(false);
     setTimeout(() => setPicked(null), 150);
+  }
+
+  function handlePick(a: Action) {
+    if (a.href) {
+      close();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      navigate({ to: a.href as any });
+      return;
+    }
+    setPicked(a);
   }
 
   return (
@@ -116,7 +140,7 @@ export function SmartActionComposer() {
                   <li key={a.key}>
                     <button
                       type="button"
-                      onClick={() => setPicked(a)}
+                      onClick={() => handlePick(a)}
                       className={cn(
                         "w-full flex items-center gap-3 p-3 rounded-2xl",
                         "bg-surface-muted/60 hover:bg-surface-muted border border-border/40",

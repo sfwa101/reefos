@@ -44,6 +44,7 @@ const SYSTEM: NavGroup = { title: "إعدادات النظام", items: [
 const REEF: NavGroup[] = [
   { title: "ريف — العمليات", items: [
     { to: "/admin/orders", icon: ShoppingBag, label: "الطلبات" },
+    { to: "/admin/products/new", icon: Sparkles, label: "منتج جديد بحكيم" },
     { to: "/admin/assets", icon: Layers, label: "الأصول" },
     { to: "/admin/product-units", icon: Package, label: "المنتجات" },
     { to: "/admin/stores", icon: Store, label: "المتاجر" },

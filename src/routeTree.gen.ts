@@ -116,6 +116,7 @@ import { Route as AppAffiliateRouteImport } from './routes/_app/affiliate'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
+import { Route as AdminProductsNewRouteImport } from './routes/admin.products.new'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
 import { Route as AdminMarketingReferralsRouteImport } from './routes/admin.marketing.referrals'
 import { Route as AdminMarketingPromosRouteImport } from './routes/admin.marketing.promos'
@@ -691,6 +692,11 @@ const AppAccountIndexRoute = AppAccountIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppAccountRoute,
 } as any)
+const AdminProductsNewRoute = AdminProductsNewRouteImport.update({
+  id: '/products/new',
+  path: '/products/new',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminOrdersOrderIdRoute = AdminOrdersOrderIdRouteImport.update({
   id: '/orders/$orderId',
   path: '/orders/$orderId',
@@ -1047,6 +1053,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketing/promos': typeof AdminMarketingPromosRoute
   '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/products/new': typeof AdminProductsNewRoute
   '/account/': typeof AppAccountIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
@@ -1189,6 +1196,7 @@ export interface FileRoutesByTo {
   '/admin/marketing/promos': typeof AdminMarketingPromosRoute
   '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/products/new': typeof AdminProductsNewRoute
   '/account': typeof AppAccountIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
 }
@@ -1341,6 +1349,7 @@ export interface FileRoutesById {
   '/admin/marketing/promos': typeof AdminMarketingPromosRoute
   '/admin/marketing/referrals': typeof AdminMarketingReferralsRoute
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
+  '/admin/products/new': typeof AdminProductsNewRoute
   '/_app/account/': typeof AppAccountIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
@@ -1489,6 +1498,7 @@ export interface FileRouteTypes {
     | '/admin/marketing/promos'
     | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
+    | '/admin/products/new'
     | '/account/'
     | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
@@ -1631,6 +1641,7 @@ export interface FileRouteTypes {
     | '/admin/marketing/promos'
     | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
+    | '/admin/products/new'
     | '/account'
     | '/admin/orders'
   id:
@@ -1782,6 +1793,7 @@ export interface FileRouteTypes {
     | '/admin/marketing/promos'
     | '/admin/marketing/referrals'
     | '/admin/orders/$orderId'
+    | '/admin/products/new'
     | '/_app/account/'
     | '/admin/orders/'
   fileRoutesById: FileRoutesById
@@ -2550,6 +2562,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAccountIndexRouteImport
       parentRoute: typeof AppAccountRoute
     }
+    '/admin/products/new': {
+      id: '/admin/products/new'
+      path: '/products/new'
+      fullPath: '/admin/products/new'
+      preLoaderRoute: typeof AdminProductsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/orders/$orderId': {
       id: '/admin/orders/$orderId'
       path: '/orders/$orderId'
@@ -3144,6 +3163,7 @@ interface AdminRouteChildren {
   AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
+  AdminProductsNewRoute: typeof AdminProductsNewRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
 
@@ -3219,6 +3239,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
+  AdminProductsNewRoute: AdminProductsNewRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
 
