@@ -9,7 +9,8 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
-import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -22,10 +23,21 @@ type Action = {
   hint: string;
   icon: typeof HandCoins;
   cap?: string;
+  /** When set, clicking the action navigates instead of showing the stub. */
+  href?: string;
+};
+
+const NEW_PRODUCT: Action = {
+  key: "new-product",
+  label: "منتج جديد",
+  hint: "أسقِط صورة — وحكيم يكتب الباقي",
+  icon: Sparkles,
+  href: "/admin/products/new",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
+    NEW_PRODUCT,
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins },
     { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt },
     { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus },
@@ -44,6 +56,7 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
     { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt },
   ],
   global: [
+    NEW_PRODUCT,
     { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt },
     { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins },
     { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus },
