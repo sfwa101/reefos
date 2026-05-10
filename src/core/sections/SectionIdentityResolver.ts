@@ -50,6 +50,6 @@ export function resolveSectionIdentity(
     searchBehavior: pick("searchBehavior", "keyword"),
     badgeAllowlist: stringArray(identity.badgeAllowlist ?? attrs.badgeAllowlist),
     capabilities,
-    attributes: Object.freeze({ ...attrs }),
+    attributes: Object.freeze({ ...attrs }) as Readonly<Record<string, import("@/core/catalog/types").JsonValue>>,
   };
 }
