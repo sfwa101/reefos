@@ -140,7 +140,7 @@ export function SmartActionComposer() {
                   <li key={a.key}>
                     <button
                       type="button"
-                      onClick={() => setPicked(a)}
+                      onClick={() => handlePick(a)}
                       className={cn(
                         "w-full flex items-center gap-3 p-3 rounded-2xl",
                         "bg-surface-muted/60 hover:bg-surface-muted border border-border/40",
