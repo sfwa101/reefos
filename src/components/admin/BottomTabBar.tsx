@@ -27,12 +27,12 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="lg:hidden fixed bottom-0 inset-x-0 z-40 glass-strong border-t border-border/50"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40 glass-strong border border-border/50 rounded-3xl shadow-float max-w-[min(680px,calc(100vw-1.5rem))]"
+      style={{ marginBottom: "env(safe-area-inset-bottom)" }}
     >
       <ul
-        className="grid px-1 pt-1.5 pb-1"
-        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }}
+        className="grid px-2 py-1.5 gap-1"
+        style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(64px, 1fr))` }}
       >
         {tabs.map(({ to, icon: Icon, label, exact }) => {
           const isActive = exact ? pathname === to : pathname === to || pathname.startsWith(to + "/");
