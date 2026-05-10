@@ -1,74 +1,139 @@
-# Phase 29 — The Sovereign Unification Strike
+# Wave 2 — Catalog Runtime Infrastructure (خطة التنفيذ السيادية)
 
-## Pre-flight findings (must confirm before coding)
+نطاق المهمة ضخم (12 نظامًا فرعيًا، ~40 ملفًا جديدًا، Seed لـ 24 قسم + 120 منتج + صور AI). تنفيذها دفعة واحدة في رد واحد سينتج عنه:
+- ضغط معماري وأخطاء tsc متراكمة
+- استحالة المراجعة البشرية
+- تجاوز نوافذ الـ tool calls
+- صور AI تستهلك 15-45 دقيقة من tool execution
 
-A quick audit of the codebase shows the request's premises don't all match reality. Calling it out so we don't do redundant work:
+لذلك أقترح تقسيمها إلى **4 موجات فرعية** (Wave 2.A → 2.D)، كل موجة قابلة للتسليم والاختبار مستقلة، مع التزام كامل بالقواعد الصارمة (لا hardcoded، لا UI coupling، لا queries في components).
 
-1. **Vertical storefronts are already SDUI shells, not hardcoded JSX.**
-   - 8 of the 17 store pages (`Meat`, `Sweets`, `Pharmacy`, `Kitchen`, `Produce`, `Recipes`, `Dairy`, `Village`) are 7-line shells that already mount `SduiCategoryPage` with page keys like `category_meat`, `category_pharmacy`, etc.
-   - `HomeGoods.tsx` already uses `LayoutFactory` directly.
-   - The remaining heavyweights (`Restaurants`, `Subscriptions`, `Baskets*`, `Wholesale`, `CompareHomeGoods`, `SchoolLibrary`) are **domain-specific surfaces** (restaurant menus, subscription wizards, basket builders) — not generic product rails. Forcing them through a `vertical_storefront` rail registry would either lose functionality or require us to register a dozen one-off block types (RestaurantList, SubscriptionWizard, BasketBuilder) that have no reuse value.
-   - Recommendation: scope Task 2 to migrating `SduiCategoryPage`'s underlying engine from the legacy `sdui_layouts` runtime to `LayoutFactory` + `ui_layouts` (one change cascades to all 8 generic verticals). Leave domain pages as-is — they already follow stem-cell rules, just don't share the rail-grid pattern.
+---
 
-2. **`SduiCategoryPage` engine status.** Need to read `src/apps/reef-al-madina/features/storefront/components/SduiCategoryPage.tsx` to confirm which engine it currently runs on. If it's already on `LayoutFactory`, Task 2 collapses to seeding `ui_layouts` rows for the 8 categories.
+## الموجات الفرعية
 
-3. **`registry.ts` PageKey union** is currently `"main_hub" | "home" | "sections" | "offers"`. We need to widen it to include `offers_hub`, `maeen_hub`, and the `category_*` keys, and seed corresponding `ui_layouts` rows.
+### Wave 2.A — Domain Core (الأساس النظيف، بدون بيانات)
+**الهدف:** بناء طبقة `src/core/catalog/` و `src/core/sections/` كاملةً بـ types/interfaces نقية، صفر اعتماد على Supabase داخل الواجهات.
 
-## Scope (after pre-flight)
+**الملفات (جديدة):**
+```
+src/core/catalog/
+├── types.ts                          # ProductCardVM, ProductDetailsVM, ProductVariantVM, ProductAddonVM, ProductNutritionVM, ProductRelationVM
+├── service/
+│   ├── CatalogService.ts             # facade وحيد للواجهات
+│   └── catalog.functions.ts          # createServerFn handlers (RLS-aware)
+├── runtime/
+│   ├── ProductRuntimeEngine.ts       # orchestrates fetch → transform → hydrate
+│   ├── ProductTransformers.ts        # DB row → domain entity
+│   ├── ProductHydrationPipeline.ts   # i18n resolve, price calc, badge derive
+│   └── ProductViewModelFactory.ts    # entity → VM (Card/Details/List)
+├── adapters/
+│   └── SectionAdapters.ts            # per-section view shape resolver
+├── resolvers/
+│   ├── ProductCapabilityResolver.ts  # which capabilities apply to this product?
+│   └── RecommendationResolver.ts     # hybrid: manual + similarity + frequency
+└── index.ts                          # public API barrel
 
-### Task 1 — Offers + Maeen Hub ascension (Level-3 → Level-4)
-- Rewrite `src/pages/Offers.tsx` to mount `<LayoutFactory pageKey="offers_hub" />`, removing `SduiRenderer`, `parseBlocks`, and the `useSpatioTemporalOffers → block mapping` glue. The spatio-temporal data still flows — but as a registered section (`SpatioTemporalOffersRail`) the LayoutFactory renders, not as ad-hoc JSX.
-- Rewrite `src/apps/khalil/pages/Hub.tsx` similarly to `<LayoutFactory pageKey="maeen_hub" />`. Move the `HakimGenerativeOverlay` injection logic into a registered section (`MaeenAppGrid` or kept as side-effect hook).
-- Register two new sections in `src/core-os/sdui-engine/registry.ts` and add their renderers to `LayoutFactory`'s REGISTRY:
-  - `SpatioTemporalOffersRail` (wraps current Offers logic)
-  - `MaeenLauncherGrid` (wraps current Hub launcher SDUI consumption)
-- Seed `ui_layouts` rows for `offers_hub` and `maeen_hub` with locked Golden Order.
+src/core/sections/
+├── types.ts                          # SectionIdentity, SectionTone, SectionBehavior
+├── SectionRegistry.ts                # runtime lookup (DB-backed, cached)
+├── SectionIdentityResolver.ts        # tone/cardStyle/sortStrategy/badges
+└── index.ts
 
-### Task 2 — Vertical storefronts (revised)
-- Read `SduiCategoryPage` to see which engine it uses.
-- If legacy: refactor it once to use `LayoutFactory` + `ui_layouts` with page keys `category_<slug>`. All 8 verticals inherit the upgrade for free.
-- Seed `ui_layouts` rows for `category_meat`, `category_sweets`, `category_pharmacy`, `category_kitchen`, `category_produce`, `category_recipes`, `category_dairy`, `category_village` with the Golden Order `[SearchAndFilters, CategoriesGrid, BundlesRail, BestSellersRail, ProductsGrid]`.
-- Domain-specific pages (Restaurants, Subscriptions, Baskets*, Wholesale, CompareHomeGoods, SchoolLibrary) stay as-is and are documented as "domain stem cells, intentionally outside the generic rail registry."
+src/core/capabilities/
+├── CapabilityRegistry.ts             # central capability catalog
+├── capabilities.functions.ts         # server fn: load active capabilities
+└── index.ts                          # exported keys (constants only, NOT enums)
 
-### Task 3 — Token compliance purge
-- Add CSS variables to `src/styles.css` in the `:root` and `.dark` blocks:
-  - `--tier-bronze`, `--tier-silver`, `--tier-gold`, `--tier-platinum` (HSL triplets)
-  - `--surface-mint` (replacement for the inline `#E8F8EF`)
-- Refactor `src/components/LoyaltyProgress.tsx` to read `hsl(var(--tier-*))` (no inline hex).
-- Refactor `src/components/MegaEventBanner.tsx` `#dc2626` → `hsl(var(--destructive))`.
-- Refactor `src/pages/store/SchoolLibrary.tsx` inline `#E8F8EF` → `bg-[hsl(var(--surface-mint))]` (or a Tailwind class via `styles.css`).
+src/core/runtime-ui/
+├── types.ts                          # RenderDescriptor, BlockKind
+├── RuntimeRenderer.tsx               # consumes descriptor → renders blocks
+├── blocks/                           # ProductCardBlock, GridBlock, RecommendationBlock
+└── ResolveRenderTree.ts              # section + capabilities → descriptor tree
+```
 
-### Task 4 — Archive sync
-- Append Phase 29 entry to `ARCHITECTURAL_ROADMAP.md` summarizing the engine unification, the corrected scope on verticals, and the token purge.
-- Bump SDUI Level-4 coverage figure in the manifest (will be ~85% after this strike, not 100% — domain stem cells are intentional).
+**اختبار التسليم:** `bun run build:dev` يعبر بدون أخطاء، الـ types مكتملة.
 
-## Files touched (≈12)
+---
 
-Created:
-- `src/core-os/sdui-engine/blocks/SduiSpatioTemporalOffersRail.tsx`
-- `src/core-os/sdui-engine/blocks/SduiMaeenLauncherGrid.tsx`
-- migration: seed `ui_layouts` rows for `offers_hub`, `maeen_hub`, and `category_*` (8 rows)
+### Wave 2.B — Data Plane (Seed الأقسام والقدرات + Server Functions)
+**الهدف:** ملء جداول Wave 1 ببيانات الهوية الديناميكية، ووصل CatalogService بالـ DB عبر createServerFn.
 
-Edited:
-- `src/pages/Offers.tsx` (full rewrite, ~30 lines)
-- `src/apps/khalil/pages/Hub.tsx` (full rewrite, ~40 lines)
-- `src/apps/reef-al-madina/features/storefront/components/SduiCategoryPage.tsx` (engine swap)
-- `src/apps/reef-al-madina/features/storefront/home/components/LayoutFactory.tsx` (register 2 new sections)
-- `src/core-os/sdui-engine/registry.ts` (widen PageKey, add 2 SectionMeta entries)
-- `src/core-os/sdui-engine/types.ts` (add 2 SectionKey literals)
-- `src/apps/reef-al-madina/features/storefront/home/hooks/useUiLayout.ts` (add fallback orders)
-- `src/styles.css` (4 tier tokens + 1 surface token, light + dark)
-- `src/components/LoyaltyProgress.tsx` (hex → token)
-- `src/components/MegaEventBanner.tsx` (hex → token)
-- `src/pages/store/SchoolLibrary.tsx` (hex → token)
-- `ARCHITECTURAL_ROADMAP.md` (Phase 29 entry)
+**التنفيذ:**
+1. **Seed 12 capabilities** في `capability_registry`:
+   `supports_nutrition, supports_variants, supports_addons, supports_wholesale, supports_cold_shipping, supports_family_mode, supports_quick_buy, supports_meal_mode, supports_subscription, supports_health_filters, supports_seasonal, supports_b2b_pricing`
+2. **Seed 24 sections** في `sections` مع `attributes jsonb` (tone, cardStyle, sortStrategy, badgeStrategy, interactionPattern):
+   السوبرماركت، الخضار، الفواكه، اللحوم، الدواجن، الأسماك، منتجات القرية، العطارة، الحلويات، المجمدات، المشروبات، المخبوزات، الأطفال، الحيوانات، المطاعم، السلال، الجملة، الصحي، الرياضي، الموسمي، رمضان، العيد، الهدايا، الأسرة
+3. **Seed `section_capabilities`** — كل قسم يفعّل قدراته (مثلاً اللحوم تفعّل cold_shipping + nutrition + b2b_pricing)
+4. **Server Functions في `catalog.functions.ts`:**
+   - `listProductsBySection({ sectionSlug, limit, offset, sort })`
+   - `getProductDetails({ slug })`
+   - `getProductRelations({ productId, types })`
+   - `searchProducts({ query, filters })`
+   كلها `.middleware([requireSupabaseAuth])` للقراءة العامة (RLS يسمح).
 
-## Honest "100% coverage" caveat
-The Emperor's brief asks for 100% Level-4 coverage. After this strike the **generic SDUI rail surfaces** will be 100% on LayoutFactory + ui_layouts. The 6 domain-specific surfaces (Restaurants menu, Subscriptions wizard, Baskets builder, etc.) are intentionally NOT generic-rail-shaped — they're stem-cell components for one-of-a-kind flows. I'll document them as "Tier-2 stem cells" rather than retrofitting fake SDUI on top of bespoke UX. If you want them ascended too, that's Phase 30 with proper section primitives (FormStep, WizardChain, MenuList).
+**اختبار التسليم:** استعلام `SELECT * FROM sections` يرجع 24 صف، CatalogService.listBySection يعمل من devtools.
 
-## Approval requested
-Confirm:
-1. ✅ Proceed with revised Task 2 scope (engine swap inside `SduiCategoryPage` + 8 seed rows; leave 6 domain pages)?
-2. ✅ Acceptable that final Level-4 figure is ~85% (generic surfaces 100%, domain pages tracked separately)?
+---
 
-On approval I'll execute end-to-end in one pass.
+### Wave 2.C — Search + Image Pipeline + Performance
+**الهدف:** إضافة الطبقات الذكية حول CatalogService.
+
+**الملفات:**
+```
+src/core/search/
+├── SearchRuntime.ts                  # intent parser + filter composer
+├── intents/                          # SemanticIntent, NutritionIntent, MealIntent, FamilyIntent
+└── search.functions.ts
+
+src/core/media/
+├── ImagePipeline.ts                  # responsive srcset, blur hash, AVIF/WebP
+├── ImageTransform.ts                 # supabase storage transform URL builder
+└── BlurPlaceholder.ts
+
+src/core/catalog/hooks/
+├── useProductsBySection.ts           # TanStack Query + ensureQueryData
+├── useProductDetails.ts
+├── useRecommendations.ts
+└── queryKeys.ts                      # central query key factory
+```
+
+**TanStack Query integration:**
+- `queryOptions` factories في `queryKeys.ts`
+- استخدام `ensureQueryData` في loaders + `useSuspenseQuery` في components
+- `defaultPreloadStaleTime: 0` (موجود مسبقًا)
+- Pagination عبر search params + `loaderDeps`
+
+**اختبار التسليم:** صفحة متجر اختبارية تعرض منتجات قسم باستخدام VM فقط، صفر `supabase.from(...)` في component.
+
+---
+
+### Wave 2.D — Product Generator + AI Images
+**الهدف:** توليد 120 منتج واقعي + 120 صورة احترافية.
+
+**التنفيذ:**
+- `scripts/seed-products-wave2.mjs` يقرأ الأقسام والقدرات من DB
+- يستدعي `google/gemini-2.5-pro` مرة لكل قسم → 5 منتجات JSON منظمة (name_i18n, description_i18n, price, variants based on capabilities, addons, nutrition if supports_nutrition)
+- يستدعي `google/gemini-3-pro-image-preview` لكل منتج → يرفع لـ `product-media` bucket
+- يولد `product_relations` post-hoc بناءً على tags المشتركة + بنية القسم (مثلاً البيض↔الجبن↔الخبز)
+
+**ملاحظة هامة:** هذه الموجة قد تستغرق 30-45 دقيقة من تنفيذ السكربت (محدود بـ rate limits لـ AI gateway). سأشغّلها كـ background job مع progress logs.
+
+**اختبار التسليم:** 120 منتج في `usa_products`، 120 صورة في `product_media`، علاقات منطقية في `product_relations`.
+
+---
+
+## أسئلة قبل البدء
+
+1. **هل تريد التسليم بالموجات (2.A الآن، ثم 2.B، ثم 2.C، ثم 2.D)** كل موجة في رد منفصل بعد موافقتك؟ هذا الأسلوم الأسلم.
+   - البديل: تنفيذ 2.A + 2.B دفعة واحدة (الأساس + البيانات) ثم انتظار، ثم 2.C + 2.D.
+
+2. **في Wave 2.B**، هل تفضّل:
+   - **(أ)** أن أرفع `attributes` الهوية البصرية للأقسام كـ JSON tokens (tone, cardStyle, badge keys) — مرنة لكن تحتاج resolvers
+   - **(ب)** أم أن أربطها بـ `capability_registry` مباشرةً (capabilities هي مصدر الحقيقة الوحيد)؟
+
+3. **في Wave 2.D**، هل المنتج يحمل:
+   - **(أ)** صورة hero واحدة فقط (120 صورة، أسرع)
+   - **(ب)** أم gallery 3 صور (360 صورة، ×3 وقت/تكلفة، أكثر واقعية)؟
+
+أنتظر أمرك للبدء بـ **Wave 2.A**.
