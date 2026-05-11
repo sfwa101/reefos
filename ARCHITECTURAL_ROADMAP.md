@@ -2732,3 +2732,63 @@ There is only one Sovereign Human Entity, anchored to `public.profiles.id`.
 - **RLS-Safe** — view runs as the caller; RPC checks `has_role(admin)`.
 - **Capability-Driven Surfaces** — facets stay empty UI when the human
   has no relationship there, replaced by a promotion action.
+
+## Phase 60 — Capability-Driven Card System
+
+### Goal
+Eliminate every section-slug switch in the storefront render path.
+What a card looks like is decided by the product's `capabilities[]`,
+nothing else.
+
+### Shipped
+- `src/core/runtime-ui/cards/CardTemplateRegistry.ts` — pure resolver
+  with priority `meal > wholesale > subscription > health > configurable
+  > standard`. Built on the `CAP` constants.
+- `src/core/runtime-ui/cards/templates/types.ts` — shared
+  `CardTemplateProps` ({ vm, onOpen, onAddToCart }) + `pickName()` i18n
+  helper.
+- `src/core/runtime-ui/cards/templates/MealCard.tsx` — first
+  template (RTL, 16:9 hero, portion chips when `supports_variants`,
+  ETA badge, semantic tokens only).
+- `useHomeOrchestrator` rewired to `usa_products` via `catalogGateway`;
+  `salsabil_assets` path retired for storefront.
+- `ProductsGrid` now passes raw `ProductCardVM` (capabilities preserved)
+  into `SmartProductCard`.
+
+### Remaining (Phase 60.x)
+- Templates: `StandardCard`, `WholesaleCard`, `SubscriptionCard`,
+  `HealthCard`, `ConfigurableCard` — all conforming to
+  `CardTemplateProps`.
+- `SmartProductCard` registry wiring + Storybook smoke tests
+  per template.
+- `section_capabilities` SQL seed for the 12 sections still missing
+  capability rows.
+
+### Doctrine compliance
+- **Capability over Identity** — zero `if (section.slug === ...)` in
+  `core/runtime-ui/`.
+- **Stem-Cell** — every template imports only from `core/`, `lib/`,
+  `components/ui/`.
+- **Adaptive Tokens** — all surfaces semantic; zero hex.
+
+## Phase 60.1 — Dynamic Subcategory Pills
+
+### Goal
+Kill the hardcoded `CATS` dictionary leaking Home-Goods categories
+into every section.
+
+### Shipped
+- `src/core/catalog/hooks/useSectionSubcategories.ts` — fetches the
+  top-12 most frequent `tags[]` for the active section from
+  `usa_products`.
+- `useHomeOrchestrator` — `cat` widened to `string`; filtering uses
+  `p.tags.includes(cat)` when `dynamicCats` are present, falls back
+  to legacy CatId logic only for `home-goods`.
+- `CategoriesGrid` / `ProductsGrid` / `LayoutFactory` — accept and
+  render `dynamicCats` with a generic icon, resolve section titles
+  from whichever source is active.
+- `productToHGView` and `HGProduct` carry the raw `tags[]` array.
+
+### Outcome
+Meat shows real meat tags. Sweets shows real sweets tags. Home Goods
+keeps its bespoke icon-rich grid. The DB is the taxonomy.
