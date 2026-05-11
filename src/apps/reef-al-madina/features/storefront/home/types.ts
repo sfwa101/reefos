@@ -45,6 +45,8 @@ export type HGProduct = {
   wakalahEligible?: boolean;
   hideOnZero?: boolean;
   lowStockThreshold?: number;
+  /** Raw tag list from DB — used for dynamic subcategory filtering. */
+  tags?: string[];
 };
 
 export type Bundle = {

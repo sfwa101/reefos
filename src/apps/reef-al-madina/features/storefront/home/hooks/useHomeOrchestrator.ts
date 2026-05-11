@@ -20,6 +20,8 @@ import { catalogGateway } from "@/core/catalog/gateway";
 import type { ProductCardVM } from "@/core/catalog/types";
 import type { Product, ProductSource } from "@/lib/products";
 
+import { useSectionSubcategories, type SubcategoryItem } from "@/core/catalog/hooks/useSectionSubcategories";
+
 import { BESTSELLER_IDS } from "../dictionaries";
 
 // Wave 2.E — wire orchestrator to the runtime catalog gateway (usa_products
@@ -48,7 +50,7 @@ const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
     source,
     badge,
     perishable: typeof attrs.perishable === "boolean" ? attrs.perishable : undefined,
-    metadata: { ...attrs, vm_capabilities: vm.capabilities },
+    metadata: { ...attrs, vm_capabilities: vm.capabilities, tags: vm.tags },
     description: vm.shortDescription?.ar,
   };
 };
@@ -62,8 +64,8 @@ import type {
 
 export type HomeOrchestrator = {
   // ─── primitive state ───
-  cat: CatId;
-  setCat: (c: CatId) => void;
+  cat: string;
+  setCat: (c: string) => void;
   q: string;
   setQ: (q: string) => void;
   openId: string | null;
@@ -89,6 +91,11 @@ export type HomeOrchestrator = {
   openedRaw: Product | null;
   filtersActive: boolean;
   loading: boolean;
+  /**
+   * DB-derived subcategory pills for non-Home sections. `undefined` for
+   * the Home Goods page so it keeps using the hardcoded `CATS` list.
+   */
+  dynamicCats?: SubcategoryItem[];
 
   // ─── compound actions ───
   resetAll: () => void;
@@ -115,7 +122,14 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     [rawProducts],
   );
 
-  const [cat, setCat] = useState<CatId>("all");
+  // Home Goods keeps the curated hardcoded `CATS` list. Every other
+  // section derives subcategory pills live from the DB (tags).
+  const { data: subCats = [] } = useSectionSubcategories(
+    source === "home" ? undefined : slug,
+  );
+  const dynamicCats = source === "home" ? undefined : subCats;
+
+  const [cat, setCat] = useState<string>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortId>("relevance");
@@ -134,7 +148,14 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
   const filtered = useMemo(() => {
     const term = q.trim();
     let list = catalog.filter((p) => {
-      if (cat !== "all" && p.category !== cat) return false;
+      if (cat !== "all") {
+        if (dynamicCats) {
+          // DB-driven: match against the raw `tags` array.
+          if (!p.tags || !p.tags.includes(cat)) return false;
+        } else if (p.category !== cat) {
+          return false;
+        }
+      }
       if (fulFilter !== "all" && p.fulfillment !== fulFilter) return false;
       if (p.price > effectivePriceMax) return false;
       if (!term) return true;
@@ -165,7 +186,7 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
         break;
     }
     return list;
-  }, [catalog, cat, q, sort, fulFilter, effectivePriceMax]);
+  }, [catalog, cat, q, sort, fulFilter, effectivePriceMax, dynamicCats]);
 
   const bestSellers = useMemo(
     () => catalog.filter((p) => BESTSELLER_IDS.includes(p.id)),
@@ -220,6 +241,7 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     openedRaw,
     filtersActive,
     loading: isLoading,
+    dynamicCats,
     resetAll,
     resetFilters,
   };
