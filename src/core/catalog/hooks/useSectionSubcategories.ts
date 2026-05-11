@@ -1,11 +1,12 @@
 /**
- * useSectionSubcategories — fetch the distinct `sub_category` strings
- * used by live products in a given section, straight from the DB.
+ * useSectionSubcategories — fetch the distinct subcategory labels used
+ * by live products in a given section, straight from the DB.
  *
- * This replaces the hardcoded `CATS` list (which was Home-Goods specific)
- * for every other section. Returns the raw Arabic strings as both `id`
- * and `name` — used for the pill label AND for direct equality
- * filtering against `Product.subCategory`.
+ * NOTE: `usa_products` has no `sub_category` column. The closest real
+ * signal is the `tags` text[] array, so we aggregate unique tag values
+ * per section and surface them as subcategory pills. The pill `id` is
+ * the raw tag string — used for the label AND for direct membership
+ * filtering against `Product.metadata.tags`.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,23 +32,27 @@ export function useSectionSubcategories(sectionSlug: string | undefined) {
 
       const { data } = await supabase
         .from("usa_products")
-        .select("sub_category")
+        .select("tags")
         .eq("section_id", section.id)
         .eq("is_active", true)
-        .is("deleted_at", null)
-        .not("sub_category", "is", null)
-        .order("sub_category");
+        .is("deleted_at", null);
 
       if (!data) return [];
 
-      const unique = Array.from(
-        new Set(
-          data
-            .map((r) => (r as { sub_category: string | null }).sub_category)
-            .filter((s): s is string => !!s && s.trim().length > 0),
-        ),
-      );
-      return unique.map((s) => ({ id: s, name: s }));
+      const counts = new Map<string, number>();
+      for (const row of data as Array<{ tags: string[] | null }>) {
+        for (const t of row.tags ?? []) {
+          if (typeof t !== "string") continue;
+          const v = t.trim();
+          if (!v) continue;
+          counts.set(v, (counts.get(v) ?? 0) + 1);
+        }
+      }
+
+      return Array.from(counts.entries())
+        .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+        .slice(0, 12)
+        .map(([id]) => ({ id, name: id }));
     },
     staleTime: 5 * 60 * 1000,
     enabled: !!sectionSlug,
