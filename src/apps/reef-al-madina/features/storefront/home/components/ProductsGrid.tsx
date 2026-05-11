@@ -42,11 +42,7 @@ export const ProductsGrid = ({
     <section className="mt-6 px-4">
       <RailHeader
         icon={Layers3}
-        title={
-          cat === "all"
-            ? "كل المنتجات"
-            : CATS.find((c) => c.id === cat)?.name ?? ""
-        }
+        title={title}
         sub={`${toLatin(filtered.length)} منتج`}
         hue={hue}
       />
