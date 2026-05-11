@@ -1,15 +1,14 @@
 /**
- * Dairy storefront — Phase 20+ SDUI shell migrated to the
- * HomeGoods gold-standard pattern (Wave 2.E).
- *
- * Thin orchestration layer: BackHeader + LayoutFactory + overlays.
- * Data flows through `useHomeOrchestrator("dairy")` which projects the
- * Sovereign Catalog to the legacy HG view-model used by every block.
+ * Dairy storefront — Wave 2.E migration to the HomeGoods gold-standard
+ * pattern. Thin orchestration shell: BackHeader + LayoutFactory + overlays.
+ * Data flows through `useHomeOrchestrator("dairy")` (Sovereign Catalog →
+ * HG view-model). Pricing/Cart/business logic untouched.
  */
 import BackHeader from "@/components/BackHeader";
 import { useUI } from "@/context/UIContext";
 import { storeThemes } from "@/lib/storeThemes";
 
+import SduiCategoryPage from "@/apps/reef-al-madina/features/storefront/components/SduiCategoryPage";
 import { CompareBar } from "@/apps/reef-al-madina/features/storefront/home/components/CompareBar";
 import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
@@ -25,10 +24,7 @@ const Dairy = () => {
   const o = useHomeOrchestrator("dairy");
 
   if (!USE_GATEWAY) {
-    // Fallback path retained intentionally; toggle the flag to restore.
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const Legacy = require("@/apps/reef-al-madina/features/storefront/components/SduiCategoryPage").default;
-    return <Legacy themeKey="dairy" pageKey="category_dairy" title="الألبان والأجبان" />;
+    return <SduiCategoryPage themeKey="dairy" pageKey="category_dairy" title="الألبان والأجبان" />;
   }
 
   return (
