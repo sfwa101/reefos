@@ -36,10 +36,11 @@ export function DesktopSidebar() {
         <div className="h-9 w-9 rounded-xl bg-gradient-primary flex items-center justify-center shadow-glow">
           <span className="text-primary-foreground font-display text-sm">س</span>
         </div>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="font-display text-[15px] leading-tight">سَلسَبيل</p>
           <p className="text-[10px] text-foreground-tertiary leading-tight">قُرطُبة الإدارة السيادية</p>
         </div>
+        <HakimPulseBadge />
       </div>
       <div className="flex-1 overflow-y-auto px-3 py-4 space-y-5 no-scrollbar">
         {groups.length === 0 && (
