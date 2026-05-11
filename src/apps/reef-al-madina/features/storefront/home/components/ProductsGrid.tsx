@@ -6,7 +6,7 @@ import { Layers3 } from "lucide-react";
 import { toLatin } from "@/lib/format";
 
 import { CATS } from "../dictionaries";
-import type { CatId, HGProduct } from "../types";
+import type { HGProduct } from "../types";
 import { ProductCard } from "./ProductCard";
 import { RailHeader } from "./RailHeader";
 
@@ -18,18 +18,26 @@ export const ProductsGrid = ({
   onResetAll,
   catalogTotal,
   isLoading,
+  dynamicCats,
 }: {
-  cat: CatId;
+  cat: string;
   filtered: HGProduct[];
   hue: string;
   onOpen: (id: string) => void;
   onResetAll: () => void;
   catalogTotal?: number;
   isLoading?: boolean;
+  dynamicCats?: Array<{ id: string; name: string }>;
 }) => {
   const sectionEmpty =
     !isLoading && (catalogTotal ?? filtered.length) === 0;
   const filtersEmpty = !sectionEmpty && filtered.length === 0;
+  const title =
+    cat === "all"
+      ? "كل المنتجات"
+      : dynamicCats
+        ? dynamicCats.find((c) => c.id === cat)?.name ?? ""
+        : CATS.find((c) => c.id === cat)?.name ?? "";
   return (
     <section className="mt-6 px-4">
       <RailHeader
