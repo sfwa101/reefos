@@ -67,34 +67,18 @@ export const useWalletTransactions = (userId: string | null) => {
       return;
     }
     let mounted = true;
-    (async () => {
-      setLoading(true);
+    let walletId: string | null = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channel: any = null;
 
-      // Resolve the user's EGP sovereign wallet first.
-      const { data: wallet } = await supabase
-        .from("wallets")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("currency", "EGP")
-        .maybeSingle();
-
-      if (!wallet?.id) {
-        if (mounted) {
-          setRows([]);
-          setLoading(false);
-        }
-        return;
-      }
-
+    const loadEntries = async (wid: string) => {
       const { data } = await supabase
         .from("ledger_entries")
         .select("id, amount, description, created_at")
-        .eq("wallet_id", wallet.id)
+        .eq("wallet_id", wid)
         .order("created_at", { ascending: false })
         .limit(100);
-
       if (!mounted) return;
-
       const mapped: WalletTxn[] = ((data ?? []) as Array<{
         id: string;
         amount: number;
@@ -114,12 +98,50 @@ export const useWalletTransactions = (userId: string | null) => {
           created_at: r.created_at,
         };
       });
-
       setRows(mapped);
       setLoading(false);
+    };
+
+    (async () => {
+      setLoading(true);
+      const { data: wallet } = await supabase
+        .from("wallets")
+        .select("id")
+        .eq("user_id", userId)
+        .eq("currency", "EGP")
+        .maybeSingle();
+
+      if (!wallet?.id) {
+        if (mounted) {
+          setRows([]);
+          setLoading(false);
+        }
+        return;
+      }
+      walletId = wallet.id;
+      await loadEntries(wallet.id);
+
+      // Realtime — append new ledger entries as they're written server-side.
+      channel = supabase
+        .channel(`wallet-ledger:${wallet.id}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "ledger_entries",
+            filter: `wallet_id=eq.${wallet.id}`,
+          },
+          () => {
+            if (walletId) loadEntries(walletId);
+          },
+        )
+        .subscribe();
     })();
+
     return () => {
       mounted = false;
+      if (channel) supabase.removeChannel(channel);
     };
   }, [userId]);
 
