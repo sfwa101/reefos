@@ -13,6 +13,7 @@ import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignCo
 import { useCapabilities } from "@/hooks/useCapability";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { buildNavForKind, type NavItem } from "./nav/workspaceNav";
+import { HakimPulseBadge } from "@/features/hakim/components/HakimPulseBadge";
 
 function useCanShow() {
   const { capabilities } = useCapabilities();
