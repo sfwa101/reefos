@@ -84,4 +84,16 @@ const WalletShell = () => (
   </>
 );
 
-export const Route = createFileRoute("/_app/wallet")({ component: WalletShell });
+export const Route = createFileRoute("/_app/wallet")({
+  // Auth gate — wallet exposes financial state, must redirect anon → /auth.
+  beforeLoad: async ({ location }) => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({
+        to: "/auth",
+        search: { redirect: location.href } as never,
+      });
+    }
+  },
+  component: WalletShell,
+});
