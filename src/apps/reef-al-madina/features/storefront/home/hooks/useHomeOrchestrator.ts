@@ -64,8 +64,8 @@ import type {
 
 export type HomeOrchestrator = {
   // ─── primitive state ───
-  cat: CatId;
-  setCat: (c: CatId) => void;
+  cat: string;
+  setCat: (c: string) => void;
   q: string;
   setQ: (q: string) => void;
   openId: string | null;
@@ -91,6 +91,11 @@ export type HomeOrchestrator = {
   openedRaw: Product | null;
   filtersActive: boolean;
   loading: boolean;
+  /**
+   * DB-derived subcategory pills for non-Home sections. `undefined` for
+   * the Home Goods page so it keeps using the hardcoded `CATS` list.
+   */
+  dynamicCats?: SubcategoryItem[];
 
   // ─── compound actions ───
   resetAll: () => void;
