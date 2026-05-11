@@ -96,9 +96,19 @@ export type HomeOrchestrator = {
 };
 
 export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, source);
-  // [Phase 28] Diagnostic console.debug removed — was firing on every render
-  // and inflating React commit time on mobile during scroll.
+  const slug = SOURCE_TO_SLUG[source] ?? source;
+  const { data: rawProducts = [], isLoading } = useQuery({
+    queryKey: ["catalog", "section", slug, 48],
+    queryFn: async (): Promise<Product[]> => {
+      const r = await catalogGateway.listSection({ slug, limit: 48, sort: "popularity" });
+      if (!r.items.length) {
+        console.warn("[CatalogGateway] Section returned 0 products for slug:", slug);
+      }
+      return r.items.map((vm) => vmToProduct(vm, source));
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+  });
 
   const catalog = useMemo(
     () => rawProducts.map(productToHGView),
