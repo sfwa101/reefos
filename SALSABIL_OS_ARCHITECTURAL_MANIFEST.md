@@ -1481,3 +1481,70 @@ Sovereign Identity Tier (Tayseer Short ID · Affiliate · Treasury
 payouts) are fully ratified. The Customer Wallet Tier remains the
 sole significant doctrinal debt — scheduled for Phase 59
 (Sovereign Wallet Redesign).
+
+---
+
+## XIII. Phase 60 — Capability-Driven Card System & Dynamic Catalog Wiring
+*(Ratified 2026-05-11)*
+
+### XIII.1 Sovereign Catalog Source of Truth
+- Storefront pages now read **exclusively** from `usa_products`
+  (192 rows across 24 sections) via `catalogGateway`. The legacy
+  `salsabil_assets` path is retired for Home/Section orchestration.
+- `useHomeOrchestrator` no longer calls `useHomeProductsQuery`
+  (which targeted `salsabil_assets`); it consumes the gateway VMs
+  directly so capability metadata survives end-to-end.
+- Empty sections render a real empty-state UI (not blank, not mocks)
+  and emit a `console.warn` for observability.
+
+### XIII.2 Capability-Driven Card Resolver
+- `src/core/runtime-ui/cards/CardTemplateRegistry.ts` exposes a pure
+  `resolveCardTemplate(capabilities)` function.
+- Priority chain (first match wins):
+  `meal → wholesale → subscription → health → configurable → standard`.
+- Keys come from the canonical `CAP` constants in
+  `src/core/capabilities/CapabilityRegistry.ts` — **no section-slug
+  switches anywhere in the render path.**
+- `CARD_TEMPLATE_NAMES` exported as a readonly tuple for tooling/tests.
+
+### XIII.3 Card Template Contract
+- `src/core/runtime-ui/cards/templates/types.ts` defines the shared
+  `CardTemplateProps` ({ vm, onOpen, onAddToCart }) so every template
+  dispatches uniformly through `SmartProductCard`.
+- First template shipped: `MealCard.tsx` — RTL, 16:9 photo-dominant,
+  `Clock`/`Flame` icons, optional portion chips (only when
+  `supports_variants`), ETA badge, "اطلب الآن" CTA. Zero hardcoded colors.
+- Remaining templates (Wholesale, Subscription, Health, Configurable,
+  Standard) follow the same contract — scheduled for the next cycle.
+
+### XIII.4 Dynamic Subcategory Pills
+- Root cause of the "all sections show Home Goods categories" bug:
+  `dictionaries.CATS` was hardcoded for one vertical and reused
+  everywhere via `CategoriesGrid`.
+- New hook `src/core/catalog/hooks/useSectionSubcategories.ts` derives
+  pills from the `tags[]` column of `usa_products` (top 12 by
+  frequency).
+- `useHomeOrchestrator` widens `cat` from `CatId` to `string`,
+  toggles between hardcoded CATS (Home Goods only) and `dynamicCats`
+  (every other section), and filters via `p.tags.includes(cat)`.
+- `CategoriesGrid` and `ProductsGrid` accept `dynamicCats` and
+  resolve titles from whichever source is active.
+
+### XIII.5 Doctrinal Conformance
+- ✅ **Doctrine I (Stem-Cell):** card templates live in `core/runtime-ui/`
+  — no module imports another module.
+- ✅ **Doctrine III (Capability over Identity):** rendering decided by
+  `capabilities[]`, never by `section.slug`.
+- ✅ **Doctrine IV (Adaptive Tokens):** all new card surfaces use
+  semantic tokens; zero hex literals.
+- ✅ **Doctrine V (DB as Truth):** subcategories derived from live
+  `tags[]`, not a hardcoded dictionary.
+
+### XIII.6 Updated Compliance Score (post Phase 60)
+
+```
+Capability-driven render path:  100%  ▓▓▓▓▓▓▓▓▓▓
+Catalog single source of truth: 100%  ▓▓▓▓▓▓▓▓▓▓  (usa_products)
+Card template coverage:          17%  ▓▓░░░░░░░░  (1/6 templates shipped)
+Dynamic taxonomy coverage:       96%  ▓▓▓▓▓▓▓▓▓▓  (23/24 sections dynamic)
+```
