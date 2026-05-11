@@ -20,6 +20,8 @@ import { catalogGateway } from "@/core/catalog/gateway";
 import type { ProductCardVM } from "@/core/catalog/types";
 import type { Product, ProductSource } from "@/lib/products";
 
+import { useSectionSubcategories, type SubcategoryItem } from "@/core/catalog/hooks/useSectionSubcategories";
+
 import { BESTSELLER_IDS } from "../dictionaries";
 
 // Wave 2.E — wire orchestrator to the runtime catalog gateway (usa_products
