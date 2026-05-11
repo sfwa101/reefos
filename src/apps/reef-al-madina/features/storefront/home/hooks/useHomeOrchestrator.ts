@@ -14,11 +14,44 @@
  *   - loading flag for skeleton states
  */
 import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 
-import { useHomeProductsQuery } from "@/hooks/useProductsQuery";
+import { catalogGateway } from "@/core/catalog/gateway";
+import type { ProductCardVM } from "@/core/catalog/types";
 import type { Product, ProductSource } from "@/lib/products";
 
 import { BESTSELLER_IDS } from "../dictionaries";
+
+// Wave 2.E — wire orchestrator to the runtime catalog gateway (usa_products
+// via CatalogService) instead of the legacy salsabil_assets path. Source
+// names map 1:1 to section slugs except for these aliases.
+const SOURCE_TO_SLUG: Partial<Record<ProductSource, string>> = {
+  home: "home-goods",
+  library: "school-library",
+};
+
+const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
+  const attrs = (vm.attributes ?? {}) as Record<string, unknown>;
+  const brand = typeof attrs.brand === "string" ? attrs.brand : undefined;
+  const badge = (typeof attrs.badge === "string" ? attrs.badge : undefined) as Product["badge"];
+  return {
+    id: vm.id,
+    name: vm.name.ar,
+    brand,
+    unit: vm.saleUnit,
+    price: vm.price.amount,
+    oldPrice: vm.price.compareAt,
+    image: vm.hero?.url ?? "",
+    rating: vm.rating?.avg,
+    category: vm.sectionSlug,
+    subCategory: typeof attrs.sub_category === "string" ? attrs.sub_category : undefined,
+    source,
+    badge,
+    perishable: typeof attrs.perishable === "boolean" ? attrs.perishable : undefined,
+    metadata: { ...attrs, vm_capabilities: vm.capabilities },
+    description: vm.shortDescription?.ar,
+  };
+};
 import { productToHGView } from "../mapper";
 import type {
   CatId,
@@ -63,9 +96,19 @@ export type HomeOrchestrator = {
 };
 
 export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
-  const { data: rawProducts = [], isLoading } = useHomeProductsQuery(48, source);
-  // [Phase 28] Diagnostic console.debug removed — was firing on every render
-  // and inflating React commit time on mobile during scroll.
+  const slug = SOURCE_TO_SLUG[source] ?? source;
+  const { data: rawProducts = [], isLoading } = useQuery({
+    queryKey: ["catalog", "section", slug, 48],
+    queryFn: async (): Promise<Product[]> => {
+      const r = await catalogGateway.listSection({ slug, limit: 48, sort: "popularity" });
+      if (!r.items.length) {
+        console.warn("[CatalogGateway] Section returned 0 products for slug:", slug);
+      }
+      return r.items.map((vm) => vmToProduct(vm, source));
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 24 * 60 * 60 * 1000,
+  });
 
   const catalog = useMemo(
     () => rawProducts.map(productToHGView),

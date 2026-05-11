@@ -16,41 +16,60 @@ export const ProductsGrid = ({
   hue,
   onOpen,
   onResetAll,
+  catalogTotal,
+  isLoading,
 }: {
   cat: CatId;
   filtered: HGProduct[];
   hue: string;
   onOpen: (id: string) => void;
   onResetAll: () => void;
-}) => (
-  <section className="mt-6 px-4">
-    <RailHeader
-      icon={Layers3}
-      title={
-        cat === "all"
-          ? "كل المنتجات"
-          : CATS.find((c) => c.id === cat)?.name ?? ""
-      }
-      sub={`${toLatin(filtered.length)} منتج`}
-      hue={hue}
-    />
-    <div className="mt-3 grid grid-cols-2 gap-3">
-      {filtered.map((p) => (
-        <ProductCard key={p.id} p={p} onOpen={() => onOpen(p.id)} />
-      ))}
-    </div>
-    {filtered.length === 0 && (
-      <div className="mt-10 flex flex-col items-center gap-2 text-center">
-        <p className="text-sm font-bold text-muted-foreground">
-          لا توجد نتائج تطابق بحثك
-        </p>
-        <button
-          onClick={onResetAll}
-          className="rounded-full bg-primary px-4 py-2 text-[11px] font-extrabold text-primary-foreground shadow-pill"
-        >
-          إعادة ضبط الفلاتر
-        </button>
+  catalogTotal?: number;
+  isLoading?: boolean;
+}) => {
+  const sectionEmpty =
+    !isLoading && (catalogTotal ?? filtered.length) === 0;
+  const filtersEmpty = !sectionEmpty && filtered.length === 0;
+  return (
+    <section className="mt-6 px-4">
+      <RailHeader
+        icon={Layers3}
+        title={
+          cat === "all"
+            ? "كل المنتجات"
+            : CATS.find((c) => c.id === cat)?.name ?? ""
+        }
+        sub={`${toLatin(filtered.length)} منتج`}
+        hue={hue}
+      />
+      <div className="mt-3 grid grid-cols-2 gap-3">
+        {filtered.map((p) => (
+          <ProductCard key={p.id} p={p} onOpen={() => onOpen(p.id)} />
+        ))}
       </div>
-    )}
-  </section>
-);
+      {sectionEmpty && (
+        <div className="mt-10 flex flex-col items-center gap-2 rounded-3xl border border-dashed border-border bg-muted/30 px-6 py-10 text-center">
+          <p className="text-sm font-bold text-foreground">
+            لا توجد منتجات متاحة في هذا القسم حالياً
+          </p>
+          <p className="text-xs text-muted-foreground">
+            سيتم إضافة المنتجات قريباً
+          </p>
+        </div>
+      )}
+      {filtersEmpty && (
+        <div className="mt-10 flex flex-col items-center gap-2 text-center">
+          <p className="text-sm font-bold text-muted-foreground">
+            لا توجد نتائج تطابق بحثك
+          </p>
+          <button
+            onClick={onResetAll}
+            className="rounded-full bg-primary px-4 py-2 text-[11px] font-extrabold text-primary-foreground shadow-pill"
+          >
+            إعادة ضبط الفلاتر
+          </button>
+        </div>
+      )}
+    </section>
+  );
+};

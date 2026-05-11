@@ -109,6 +109,8 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
         hue={theme.hue}
         onOpen={(id) => o.setOpenId(id)}
         onResetAll={o.resetAll}
+        catalogTotal={o.catalog.length}
+        isLoading={o.loading}
       />
     ) : null,
 
