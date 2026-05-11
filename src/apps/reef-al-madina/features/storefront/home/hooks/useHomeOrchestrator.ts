@@ -241,6 +241,7 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     openedRaw,
     filtersActive,
     loading: isLoading,
+    dynamicCats,
     resetAll,
     resetFilters,
   };
