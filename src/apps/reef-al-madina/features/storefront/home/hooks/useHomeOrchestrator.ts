@@ -122,6 +122,13 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     [rawProducts],
   );
 
+  // Home Goods keeps the curated hardcoded `CATS` list. Every other
+  // section derives subcategory pills live from the DB (tags).
+  const { data: subCats = [] } = useSectionSubcategories(
+    source === "home" ? undefined : slug,
+  );
+  const dynamicCats = source === "home" ? undefined : subCats;
+
   const [cat, setCat] = useState<string>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
