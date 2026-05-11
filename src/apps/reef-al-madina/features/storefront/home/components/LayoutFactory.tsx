@@ -90,7 +90,14 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
       />
     ) : null,
   CategoriesGrid: ({ orchestrator: o, theme }) =>
-    o ? <MemoCategoriesGrid cat={o.cat} setCat={o.setCat} hue={theme.hue} /> : null,
+    o ? (
+      <MemoCategoriesGrid
+        cat={o.cat}
+        setCat={o.setCat}
+        hue={theme.hue}
+        dynamicCats={o.dynamicCats}
+      />
+    ) : null,
   BundlesRail: ({ orchestrator: o, theme, showRails }) =>
     showRails && o ? <MemoBundlesRail catalog={o.catalog} hue={theme.hue} /> : null,
   BestSellersRail: ({ orchestrator: o, theme, showRails }) =>
@@ -104,13 +111,14 @@ const REGISTRY: Partial<Record<SectionKey, SectionRenderer>> = {
   ProductsGrid: ({ orchestrator: o, theme }) =>
     o ? (
       <MemoProductsGrid
-        cat={o.cat as CatId}
+        cat={o.cat}
         filtered={o.filtered}
         hue={theme.hue}
         onOpen={(id) => o.setOpenId(id)}
         onResetAll={o.resetAll}
         catalogTotal={o.catalog.length}
         isLoading={o.loading}
+        dynamicCats={o.dynamicCats}
       />
     ) : null,
 
