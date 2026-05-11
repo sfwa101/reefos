@@ -186,7 +186,7 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
         break;
     }
     return list;
-  }, [catalog, cat, q, sort, fulFilter, effectivePriceMax]);
+  }, [catalog, cat, q, sort, fulFilter, effectivePriceMax, dynamicCats]);
 
   const bestSellers = useMemo(
     () => catalog.filter((p) => BESTSELLER_IDS.includes(p.id)),
