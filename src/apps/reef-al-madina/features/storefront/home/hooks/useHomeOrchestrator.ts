@@ -48,7 +48,7 @@ const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
     source,
     badge,
     perishable: typeof attrs.perishable === "boolean" ? attrs.perishable : undefined,
-    metadata: { ...attrs, vm_capabilities: vm.capabilities },
+    metadata: { ...attrs, vm_capabilities: vm.capabilities, tags: vm.tags },
     description: vm.shortDescription?.ar,
   };
 };
