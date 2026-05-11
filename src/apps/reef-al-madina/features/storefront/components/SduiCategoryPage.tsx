@@ -18,6 +18,14 @@ import { useHomeOrchestrator } from "../home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "../home/components/LayoutFactory";
 import { DetailSheet } from "../home/components/DetailSheet";
 import { FiltersSheet } from "../home/components/FiltersSheet";
+import { getSectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { SectionHeroBanner } from "@/core/runtime-ui/sections/SectionHeroBanner";
+
+// Maps theme keys → SectionIdentityRegistry slugs.
+const themeKeyToIdentitySlug: Partial<Record<StoreThemeKey, string>> = {
+  homeTools: "home-goods",
+  library: "school-library",
+};
 
 export type SduiCategoryPageProps = {
   /** Theme slug from `storeThemes` (drives hue / soft / gradient). */
