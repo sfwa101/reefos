@@ -1,137 +1,74 @@
+# Wave 2 — Runtime Product Infrastructure (خطة تنفيذ مرحلية)
 
-# Audit (current state)
+## السياق الحالي
+- لدينا بالفعل: `SectionIdentityRegistry`, `SmartProductCard`, `useSectionSubcategories`, seed pipeline (`scripts/seeds/run-seed.ts`)، وقسم اللحوم مكتمل (15 منتج).
+- الواجهات لا تزال تستدعي Supabase مباشرة في عدة أماكن (orchestrator, hooks).
+- لا يوجد طبقة ViewModel موحدة، ولا CapabilityRegistry حقيقي، ولا RuntimeRenderingEngine منفصل.
 
-Legacy product paths still wired into UI:
-
-- `src/lib/products.ts` — legacy `Product` type + direct `supabase.from('products')`.
-- `src/lib/sovereignCatalog.ts` — secondary catalog reader.
-- `src/hooks/useProductsQuery.ts`, `useInfiniteCatalog`, `useBuyAgainProducts`, `useFeaturedCategories` — all hit legacy tables.
-- `useHomeOrchestrator` → `productToHGView(Product)` → `HGProduct` → `ProductsGrid/ProductCard` (storefront/home).
-- 17 section pages in `src/pages/store/*` each rendering its own list.
-- Multiple ProductCard implementations (storefront/home, pharmacy, components/ProductCard.tsx, ProductCarousel).
-- Detail sheet: `DetailSheet.tsx` + `pages/ProductDetail.tsx` (direct supabase).
-- New `usa_products` schema + `CatalogService` exists but **zero UI consumes it** yet.
-
-Dual source of truth = `products` (legacy) vs `usa_products` (new). Migrating all 17 pages + every rail in one go is high risk and will break the live storefront.
-
-# Strategy
-
-Audit-first, incremental. Build the runtime spine completely (gateway, feeds, blocks, search, media), migrate **one pilot section** end-to-end through it (Home Goods), then roll the remaining 16 sections behind a feature flag. No legacy file is deleted in this wave — they are quarantined and replaced page-by-page in Wave 2.D.
-
-Stem-cell discipline enforced by:
-- single `catalogGateway` is the only allowed import for product reads outside `src/core/catalog/`
-- ESLint `no-restricted-imports` blocks `@/lib/products`, `supabase.from('products'|'usa_products')` from `src/pages/**`, `src/components/**`, `src/apps/**/storefront/**`
-- block visibility derived from capabilities, never section slug
-
-# Wave 2.B — Data Plane + Gateway + Blocks
-
-### Step 1 — Seed capabilities + sections (DB)
-One migration:
-- 12 rows into `capability_registry` (keys from `CAP` constants)
-- 24 rows into `sections` with `metadata` JSON (tone, cardStyle, sortStrategy, badgeStrategy, interactionPattern)
-- ~40 rows into `section_capabilities` linking each section to its caps
-- Idempotent (`ON CONFLICT DO UPDATE`)
-
-### Step 2 — Catalog Gateway
-New `src/core/catalog/gateway/`:
+## المبدأ المعماري
+```text
+DB (Supabase)
+   │
+   ▼
+CatalogService (الوحيد المسموح له بالـ queries)
+   │
+   ▼
+ProductHydrationPipeline → ProductTransformers → CapabilityResolver
+   │
+   ▼
+ViewModelFactory  ──►  ProductCardVM / DetailsVM / ListVM
+   │
+   ▼
+RuntimeRenderingEngine (يقرر Card/Layout/Blocks حسب capabilities)
+   │
+   ▼
+UI Components (نظيفة، تستهلك VM فقط)
 ```
-catalogGateway.ts     // single facade — list/details/search/recos/offers/trending/related
-catalogQueries.ts     // queryOptions (TanStack Query keys + fns calling CatalogService)
-catalogCache.ts       // invalidation helpers, prefetch helpers
-```
-All UI hooks (next step) import only from `gateway`.
 
-### Step 3 — Feed Runtime
-New `src/core/feeds/`:
-```
-types.ts              // FeedDescriptor { source, params, sort, capabilities }
-FeedRuntime.ts        // resolveFeed(descriptor) -> ProductCardVM[]
-sources/
-  homeFeed.ts
-  sectionFeed.ts
-  offersFeed.ts
-  recommendationsFeed.ts
-  trendingFeed.ts
-  searchFeed.ts
-```
-Each source is a function `(params) => Promise<ProductCardVM[]>`. Zero section-specific branching — driven by the descriptor.
+## التنفيذ على 6 موجات (Waves)
 
-### Step 4 — Block Registry (capability-driven)
-Register in `src/core/runtime-ui/blocks/`:
-- `section.header`, `product.grid`, `product.list`, `product.gallery`
-- `product.heading`, `product.price`, `product.variants`, `product.addons`
-- `product.description`, `product.nutrition`, `product.diet_flags`, `product.relations`
-- `commerce.add_to_cart`, `commerce.quick_buy_bar`, `commerce.subscribe_cta`
+### Wave 2.1 — Catalog Runtime Core (الأساس)
+**ملفات جديدة تحت `src/core/catalog/`:**
+- `types/ProductDomain.ts` — domain types مستقلة عن DB
+- `viewmodels/ProductCardVM.ts`, `ProductDetailsVM.ts`, `ProductListVM.ts`, `ProductVariantVM.ts`, `ProductAddonVM.ts`, `ProductNutritionVM.ts`, `ProductRelationVM.ts`
+- `services/CatalogService.ts` — الواجهة الوحيدة للـ DB (list, get, search, related)
+- `pipeline/ProductHydrationPipeline.ts` — DB row → Domain
+- `pipeline/ProductTransformers.ts` — Domain → VM
+- `pipeline/ProductViewModelFactory.ts` — composition root
+- `adapters/SectionAdapters.ts` — per-section overrides (badges, sort, filter)
 
-Each block reads its slice of `ProductCardVM`/`ProductDetailsVM`. Visibility resolved by `ResolveRenderTree` from `capabilities`, never `section.slug`.
+### Wave 2.2 — Capability Registry
+**ملفات جديدة تحت `src/core/capabilities/`:**
+- `CapabilityRegistry.ts` — enum + metadata (`supports_nutrition`, `supports_variants`, `supports_addons`, `supports_wholesale`, `supports_cold_shipping`, `supports_family_mode`, `supports_quick_buy`, `supports_meal_mode`, `supports_subscription`, `supports_health_filters`)
+- `CapabilityResolver.ts` — يحل قدرات قسم/منتج وقت التشغيل
+- `SectionCapabilityMap.ts` — ربط slug → capabilities (config، ليس hardcoded في UI)
+- توسيع `SectionIdentityRegistry` بحقل `capabilities: Capability[]`
 
-### Step 5 — Pilot migration: Home Goods
-- Replace `useHomeOrchestrator`'s data source with `gateway.listSection({slug:'home-goods'})`
-- Page renders via `<RuntimeRenderer descriptor={resolveListTree(...)} />`
-- Old `ProductCard`/`DetailSheet` kept as registered block implementations (adapter wraps them around VM)
-- All 16 other sections continue using legacy path (untouched) — feature flag `USE_RUNTIME_STOREFRONT` per-section
+### Wave 2.3 — Runtime Rendering Engine
+**ملفات جديدة تحت `src/core/runtime-ui/`:**
+- `engine/RenderingEngine.ts` — يقرر أي Card/Layout/Blocks يُعرض
+- `engine/CardResolver.ts` — يختار variant من `SmartProductCard` حسب capabilities
+- `engine/LayoutResolver.ts` — يختار layout من `LayoutFactory`
+- `engine/BlockResolver.ts` — يقرر أي blocks (nutrition, variants, addons, recommendations) تظهر
+- `blocks/` — مكونات صغيرة قابلة للتركيب (NutritionBlock, VariantPicker, AddonStrip, RelationsStrip)
 
-# Wave 2.C — Search + Media + Enforcement
+### Wave 2.4 — Refactor الواجهات على الـ Runtime
+- `ProductsGrid` و `useHomeOrchestrator` و `SduiCategoryPage` يستهلكون `CatalogService` + `RenderingEngine` فقط (لا Supabase queries).
+- إزالة أي mapping صلب من الـ hooks وحقنه في `SectionAdapters`.
+- TanStack Query: مفاتيح موحدة `['catalog', section, filters]` مع cache مشترك.
 
-### Step 6 — Search foundation
-`src/core/search/`:
-```
-SearchRegistry.ts          // pluggable providers
-providers/PostgresSearch.ts // current default — uses pg_trgm/tsvector on usa_products
-filters/                    // schema + capability-driven filter resolvers
-types.ts                    // SearchQuery, SearchFacet, SearchResult
-```
-No section branching. Filters declared from capabilities.
+### Wave 2.5 — Section Seeds + Capabilities (24 قسم)
+- ملف `scripts/seeds/sections/<slug>.seed.json` لكل قسم بقدراته الخاصة.
+- توليد 5 منتجات مبدئية لكل قسم (متوسط 120 منتج إجمالاً)، بالأنماط نفسها التي طبقناها على اللحوم.
+- صور: Pro للحلويات/السلال/المطاعم، Flash للباقي.
+- Relations engine: manual + tag similarity + section co-occurrence.
 
-### Step 7 — Media pipeline
-`src/core/media/`:
-```
-MediaResolver.ts        // hero/gallery selection from MediaRefVM[]
-ResponsiveSrcSet.ts     // srcset/sizes generation from CDN url
-BlurHash.tsx            // tiny placeholder component
-LazyImage.tsx           // IntersectionObserver-based lazy
-```
-Drop-in for `product.grid` / `product.gallery` blocks.
+### Wave 2.6 — Search + Image Pipeline
+- `src/core/search/SearchRuntime.ts` — semantic-friendly (tags + intent + capabilities)، fallback إلى ILIKE.
+- `src/core/media/ImagePipeline.ts` — responsive `srcSet`, blur placeholder من `tiny_thumb`, WebP first.
 
-### Step 8 — Architecture enforcement
-- ESLint config additions:
-  - `no-restricted-imports` on `@/lib/products`, `@/lib/sovereignCatalog`, `@/hooks/useProductsQuery` from `src/pages/**`, `src/components/**`, `src/apps/**`
-  - `no-restricted-syntax` against `supabase.from('products'|'usa_products')` outside `src/core/catalog/**`
-- Dev-only runtime assertion in `RuntimeRenderer` warning when a block reads non-VM shapes
-- Architectural README in each new folder
+## ما الذي يُسلَّم في هذه الجولة (الموجة الفعلية)
+لتجنب PR ضخم غير قابل للمراجعة، أقترح **تنفيذ 2.1 + 2.2 + 2.3 + 2.4 الآن** (الأساس المعماري الكامل بدون توسيع المحتوى)، مع الإبقاء على قسم اللحوم كقسم حي للاختبار، ثم 2.5 و 2.6 في موجات لاحقة.
 
-# Out of scope (this wave)
-
-- Migrating remaining 16 section pages — Wave 2.D
-- Deleting `lib/products.ts` / legacy hooks — Wave 2.E (once all pages migrated)
-- Generating 120 products + AI images — Wave 2.F
-- Vector search — future
-
-# Risks & mitigations
-
-| Risk | Mitigation |
-|---|---|
-| Live storefront breaks during migration | Pilot only Home Goods; feature flag; legacy untouched |
-| Empty `usa_products` table → empty UI | Pilot page shows runtime empty state; user can run seed before flipping flag |
-| TS strict failures on block props | All blocks consume strongly-typed VM slices; `tsc` after each step |
-| ESLint rules break unrelated code | Scope rules to UI dirs only; legacy core libs allowed |
-
-# Acceptance
-
-- `bun run build:dev` green after each step
-- Home Goods page rendered fully via `RuntimeRenderer` with zero `supabase.from()` in component tree
-- Adding a new capability row + linking it to a section makes a new block appear with **zero code change**
-- Adding a new section row makes it queryable through `gateway.listSection(slug)` with **zero code change**
-
-# Execution order
-
-1. DB migration (caps + sections + links) — needs your approval
-2. Gateway + queries + cache (no UI change)
-3. Feed runtime + sources
-4. Block registry + 15 blocks
-5. Pilot Home Goods migration behind flag
-6. Search foundation
-7. Media pipeline
-8. ESLint guards + dev assertions
-
-I will pause for your approval after step 1 (DB migration) and after step 5 (pilot live), so you can verify before I touch the remaining sections in Wave 2.D.
+## نقطة قرار
+هل أبدأ بـ **2.1 → 2.4 دفعة واحدة** (تغيير معماري كبير، يتطلب اختبار كل الأقسام بعدها)، أم تفضّل **2.1 + 2.2 فقط الآن** (آمن، بدون لمس الواجهات)، ثم 2.3 + 2.4 في رسالة تالية؟
