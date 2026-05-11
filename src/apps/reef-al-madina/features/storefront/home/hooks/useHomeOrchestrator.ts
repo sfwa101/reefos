@@ -148,7 +148,14 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
   const filtered = useMemo(() => {
     const term = q.trim();
     let list = catalog.filter((p) => {
-      if (cat !== "all" && p.category !== cat) return false;
+      if (cat !== "all") {
+        if (dynamicCats) {
+          // DB-driven: match against the raw `tags` array.
+          if (!p.tags || !p.tags.includes(cat)) return false;
+        } else if (p.category !== cat) {
+          return false;
+        }
+      }
       if (fulFilter !== "all" && p.fulfillment !== fulFilter) return false;
       if (p.price > effectivePriceMax) return false;
       if (!term) return true;
