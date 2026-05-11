@@ -122,7 +122,7 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     [rawProducts],
   );
 
-  const [cat, setCat] = useState<CatId>("all");
+  const [cat, setCat] = useState<string>("all");
   const [q, setQ] = useState("");
   const [openId, setOpenId] = useState<string | null>(null);
   const [sort, setSort] = useState<SortId>("relevance");
