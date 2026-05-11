@@ -49,6 +49,10 @@ const subCatToCatId = (subCat: string | undefined): CatId => {
 
 export const productToHGView = (p: Product): HGProduct => {
   const meta = asHomeMeta(p.metadata);
+  const rawTags = (p.metadata as { tags?: unknown } | undefined)?.tags;
+  const tags = Array.isArray(rawTags)
+    ? rawTags.filter((t): t is string => typeof t === "string")
+    : undefined;
   return {
     id: p.id,
     name: p.name,
@@ -70,5 +74,6 @@ export const productToHGView = (p: Product): HGProduct => {
     wakalahEligible: p.wakalahEligible,
     hideOnZero: p.hideOnZero,
     lowStockThreshold: p.lowStockThreshold,
+    tags,
   };
 };
