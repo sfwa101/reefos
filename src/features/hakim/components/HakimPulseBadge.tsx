@@ -26,7 +26,7 @@ export function HakimPulseBadge({ className }: { className?: string }) {
 
   return (
     <Link
-      to="/admin/anomalies"
+      to="/admin/hakim-anomalies"
       aria-label={`حكيم — ${count} تنبيه نشط`}
       className={cn(
         "relative inline-flex items-center justify-center h-9 w-9 rounded-xl border transition-base press",
