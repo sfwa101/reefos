@@ -1,0 +1,388 @@
+{
+  "section_slug": "meat",
+  "image_model": "google/gemini-2.5-flash-image",
+  "image_style": "Professional studio product photograph, pure white seamless background, soft diffused top lighting, slight shadow under product, ultra-sharp focus, high detail meat texture, butcher counter quality, vivid natural colors, no text, no watermark, no props, centered, square framing",
+  "products": [
+    {
+      "slug": "meat-beef-fillet-ar",
+      "sku": "MEAT-FIL-001",
+      "name": { "ar": "فيليه بقري بلدي طازج", "en": "Fresh Local Beef Fillet" },
+      "short_description": {
+        "ar": "أنعم قطعيات اللحم البقري — مثالية للستيك والشوي السريع.",
+        "en": "The most tender beef cut — perfect for steak and quick grilling."
+      },
+      "description": {
+        "ar": "فيليه بقري بلدي مختار يدويًا من جزارين موثوقين. خالٍ من الدهن الزائد، يُقطع طازجًا عند الطلب، ومُبرّد فورًا للحفاظ على نضارته. مثالي للستيك على الجريل أو السوتيه السريع.",
+        "en": "Hand-selected local beef fillet from trusted butchers. Lean, cut fresh on demand, and chilled instantly. Perfect for grilled steaks or quick sauté."
+      },
+      "story": {
+        "ar": "نعمل مع مزارع صغيرة في الدلتا تربي ماشيتها على أعلاف طبيعية بدون هرمونات — الفرق يظهر في الطعم.",
+        "en": "Sourced from small Delta farms raising cattle on natural feed — you taste the difference."
+      },
+      "image_prompt": "A premium cut of fresh red beef fillet steak, glistening, deep marbling, on a black slate butcher board, professional studio lighting, hyper-realistic",
+      "base_price": 480,
+      "compare_at_price": 540,
+      "wholesale_price": 430,
+      "member_price": 460,
+      "sale_unit": "kg",
+      "stock_qty": 25,
+      "low_stock_threshold": 5,
+      "is_perishable": true,
+      "shelf_life_days": 3,
+      "storage_conditions": { "ar": "يُحفظ مبردًا 0–4°م، أو مجمدًا حتى 90 يومًا", "en": "Refrigerate 0–4°C, or freeze up to 90 days" },
+      "badges": ["best", "premium"],
+      "tags": ["beef", "fillet", "steak", "halal", "fresh", "local"],
+      "attributes": {
+        "cut_type": "fillet",
+        "origin": "بلدي",
+        "preparation": "whole",
+        "halal_certified": true,
+        "fat_pct": 4
+      },
+      "popularity_score": 92,
+      "rating_avg": 4.8,
+      "rating_count": 142,
+      "is_featured": true,
+      "variants": [
+        { "axis": "weight", "value": "500g", "label": { "ar": "نصف كيلو", "en": "500g" }, "price_delta": -240, "is_default": false },
+        { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true },
+        { "axis": "weight", "value": "2000g", "label": { "ar": "2 كيلو", "en": "2kg" }, "price_delta": 950 }
+      ],
+      "addons": [
+        { "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "تقطيع ستيك (2.5سم)", "en": "Steak cut (2.5cm)" }, "price_delta": 0 },
+        { "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "تقطيع شرائح رفيعة", "en": "Thin slice" }, "price_delta": 5 },
+        { "group": "marinade", "group_name": { "ar": "تتبيل", "en": "Marinade" }, "name": { "ar": "تتبيل بهارات بلدي", "en": "House spices marinade" }, "price_delta": 25 },
+        { "group": "packaging", "group_name": { "ar": "تغليف", "en": "Packaging" }, "name": { "ar": "فاكيوم محكم", "en": "Vacuum sealed" }, "price_delta": 15 }
+      ],
+      "nutrition": {
+        "per_100g": { "calories": 250, "protein": 26, "fat": 15, "carbs": 0, "sodium": 60 },
+        "serving_size_g": 200,
+        "allergens": [],
+        "diet_flags": { "keto": true, "diabetic_friendly": true, "kid_friendly": true }
+      },
+      "relations": [
+        { "to_slug": "meat-beef-ribeye-ar", "type": "similar", "strength": 0.85 },
+        { "to_slug": "meat-beef-mince-ar", "type": "alternative", "strength": 0.55 },
+        { "to_slug": "meat-spice-mix-ar", "type": "complement", "strength": 0.7 }
+      ]
+    },
+    {
+      "slug": "meat-beef-ribeye-ar",
+      "sku": "MEAT-RIB-002",
+      "name": { "ar": "ريب آي بقري معتق", "en": "Aged Beef Ribeye" },
+      "short_description": { "ar": "ريب آي معتق 21 يومًا، نكهة عميقة وعصارة لا تُقاوم.", "en": "21-day aged ribeye with deep flavor and irresistible juiciness." },
+      "description": { "ar": "قطعية ريب آي مختارة، معتقة جافًا 21 يومًا في غرف تبريد متخصصة. الدهون المتخللة (Marbling) تمنحه طراوة استثنائية.", "en": "Hand-selected ribeye, dry-aged 21 days. Marbling delivers exceptional tenderness." },
+      "story": { "ar": "التعتيق الجاف فن قديم نعيد إحياءه — كل قطعة تروي قصة صبر.", "en": "Dry aging is an old craft — every cut tells a story of patience." },
+      "image_prompt": "Premium aged ribeye steak with rich marbling, fresh red color, on dark wood butcher board, dramatic studio lighting, photorealistic",
+      "base_price": 620, "compare_at_price": 680, "wholesale_price": 560, "member_price": 595,
+      "sale_unit": "kg", "stock_qty": 18, "low_stock_threshold": 4,
+      "is_perishable": true, "shelf_life_days": 4,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": ["premium", "trending"],
+      "tags": ["beef", "ribeye", "aged", "steak", "halal", "premium"],
+      "attributes": { "cut_type": "ribeye", "origin": "بلدي معتق", "preparation": "whole", "halal_certified": true, "fat_pct": 18, "aging_days": 21 },
+      "popularity_score": 88, "rating_avg": 4.9, "rating_count": 96, "is_featured": true,
+      "variants": [
+        { "axis": "weight", "value": "500g", "label": { "ar": "نصف كيلو", "en": "500g" }, "price_delta": -310 },
+        { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true }
+      ],
+      "addons": [
+        { "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "ستيك سميك 3سم", "en": "Thick steak 3cm" }, "price_delta": 0 },
+        { "group": "marinade", "group_name": { "ar": "تتبيل", "en": "Marinade" }, "name": { "ar": "زبدة الثوم والروزماري", "en": "Garlic-rosemary butter" }, "price_delta": 35 }
+      ],
+      "nutrition": { "per_100g": { "calories": 291, "protein": 24, "fat": 22, "carbs": 0, "sodium": 65 }, "serving_size_g": 250, "allergens": [], "diet_flags": { "keto": true } },
+      "relations": [
+        { "to_slug": "meat-beef-fillet-ar", "type": "similar", "strength": 0.85 },
+        { "to_slug": "meat-spice-mix-ar", "type": "complement", "strength": 0.75 }
+      ]
+    },
+    {
+      "slug": "meat-beef-mince-ar",
+      "sku": "MEAT-MIN-003",
+      "name": { "ar": "لحم بقري مفروم طازج", "en": "Fresh Ground Beef" },
+      "short_description": { "ar": "مفروم طازجًا أمامك — مثالي للكفتة والبرجر.", "en": "Ground fresh — perfect for kofta and burgers." },
+      "description": { "ar": "لحم بقري بلدي يُفرم لحظيًا بدرجة الخشونة التي تختارها. خالٍ من المواد الحافظة.", "en": "Local beef ground on demand to your preferred coarseness. No preservatives." },
+      "story": { "ar": "الفرم الطازج هو سر طعم الكفتة الحقيقي.", "en": "Fresh grinding is the secret behind real kofta flavor." },
+      "image_prompt": "Fresh ground beef mince in a stainless steel tray, vibrant red, finely ground texture, professional studio lighting, white background",
+      "base_price": 320, "compare_at_price": null, "wholesale_price": 285, "member_price": 305,
+      "sale_unit": "kg", "stock_qty": 40, "low_stock_threshold": 8,
+      "is_perishable": true, "shelf_life_days": 2,
+      "storage_conditions": { "ar": "يُستهلك خلال 24 ساعة من الفرم", "en": "Use within 24h of grinding" },
+      "badges": ["best"], "tags": ["beef", "mince", "kofta", "burger", "halal", "fresh"],
+      "attributes": { "cut_type": "ground", "origin": "بلدي", "preparation": "ground", "halal_certified": true, "fat_pct": 15 },
+      "popularity_score": 95, "rating_avg": 4.7, "rating_count": 218, "is_featured": true,
+      "variants": [
+        { "axis": "weight", "value": "500g", "label": { "ar": "نصف كيلو", "en": "500g" }, "price_delta": -160 },
+        { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true },
+        { "axis": "fat_level", "value": "lean", "label": { "ar": "قليل الدهن (10%)", "en": "Lean (10%)" }, "price_delta": 25 },
+        { "axis": "fat_level", "value": "regular", "label": { "ar": "عادي (15%)", "en": "Regular (15%)" }, "price_delta": 0, "is_default": true }
+      ],
+      "addons": [
+        { "group": "seasoning", "group_name": { "ar": "تتبيل كفتة", "en": "Kofta seasoning" }, "name": { "ar": "بهارات كفتة جاهزة", "en": "Kofta spice mix" }, "price_delta": 20 },
+        { "group": "shaping", "group_name": { "ar": "تشكيل", "en": "Shaping" }, "name": { "ar": "أصابع كفتة جاهزة للشوي", "en": "Pre-shaped kofta skewers" }, "price_delta": 30 },
+        { "group": "shaping", "group_name": { "ar": "تشكيل", "en": "Shaping" }, "name": { "ar": "أقراص برجر (4 قطع)", "en": "Burger patties (4)" }, "price_delta": 25 }
+      ],
+      "nutrition": { "per_100g": { "calories": 254, "protein": 17, "fat": 20, "carbs": 0, "sodium": 75 }, "serving_size_g": 150, "allergens": [], "diet_flags": { "keto": true, "kid_friendly": true } },
+      "relations": [
+        { "to_slug": "meat-beef-fillet-ar", "type": "alternative", "strength": 0.55 },
+        { "to_slug": "meat-spice-mix-ar", "type": "frequently_bought", "strength": 0.9 }
+      ]
+    },
+    {
+      "slug": "meat-beef-shank-ar",
+      "sku": "MEAT-SHK-004",
+      "name": { "ar": "موزة بقري على العضمة", "en": "Beef Shank on Bone" },
+      "short_description": { "ar": "الخيار الأمثل للحساء والطبخ البطيء.", "en": "Perfect for soups and slow cooking." },
+      "description": { "ar": "موزة بقري بلدية على العضمة، غنية بالكولاجين. مثالية للشوربة، الفتة، والطبخات الطويلة.", "en": "Local beef shank on bone, rich in collagen. Ideal for broth, fatta, and slow stews." },
+      "story": { "ar": "وصفة جدتي للشوربة لا تكتمل إلا بموزة بلدية حقيقية.", "en": "Grandma's broth recipe needs a real local shank." },
+      "image_prompt": "Bone-in beef shank cross-section showing bone marrow, fresh red meat, on white butcher paper, studio lighting, photorealistic",
+      "base_price": 280, "wholesale_price": 250, "member_price": 265,
+      "sale_unit": "kg", "stock_qty": 30, "low_stock_threshold": 6,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": [], "tags": ["beef", "shank", "soup", "halal", "slow-cook"],
+      "attributes": { "cut_type": "shank", "origin": "بلدي", "preparation": "cut", "halal_certified": true, "fat_pct": 10 },
+      "popularity_score": 70, "rating_avg": 4.6, "rating_count": 64,
+      "variants": [
+        { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true },
+        { "axis": "weight", "value": "2000g", "label": { "ar": "2 كيلو", "en": "2kg" }, "price_delta": 555 }
+      ],
+      "addons": [
+        { "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "قطع لشوربة (4سم)", "en": "Soup chunks (4cm)" }, "price_delta": 0 }
+      ],
+      "nutrition": { "per_100g": { "calories": 205, "protein": 22, "fat": 13, "carbs": 0 }, "serving_size_g": 200, "allergens": [], "diet_flags": {} },
+      "relations": []
+    },
+    {
+      "slug": "meat-lamb-chops-ar",
+      "sku": "MEAT-LMB-005",
+      "name": { "ar": "ريش ضأن بلدي", "en": "Local Lamb Chops" },
+      "short_description": { "ar": "ريش ضأن طري للشوي على الفحم.", "en": "Tender lamb chops for charcoal grilling." },
+      "description": { "ar": "ريش ضأن صغير السن، طري ومتبّل بأبسط البهارات. الكلاسيكي الذي لا يخيب.", "en": "Young, tender lamb chops — the classic charcoal favorite." },
+      "story": { "ar": "ضأن من مرتفعات سيناء، يتغذى على أعشاب برية تمنحه نكهة مميزة.", "en": "Sinai highland lamb feeding on wild herbs for distinctive flavor." },
+      "image_prompt": "Premium lamb chops with bone, fresh pink-red meat, neat row arrangement on slate board, studio lighting, photorealistic",
+      "base_price": 540, "compare_at_price": 590, "wholesale_price": 490, "member_price": 515,
+      "sale_unit": "kg", "stock_qty": 22, "low_stock_threshold": 5,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": ["premium"], "tags": ["lamb", "chops", "grill", "halal", "premium"],
+      "attributes": { "cut_type": "chops", "origin": "سيناء", "preparation": "cut", "halal_certified": true, "fat_pct": 16 },
+      "popularity_score": 82, "rating_avg": 4.8, "rating_count": 87, "is_featured": true,
+      "variants": [
+        { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true }
+      ],
+      "addons": [
+        { "group": "marinade", "group_name": { "ar": "تتبيل", "en": "Marinade" }, "name": { "ar": "زعتر وليمون", "en": "Thyme & lemon" }, "price_delta": 25 }
+      ],
+      "nutrition": { "per_100g": { "calories": 282, "protein": 25, "fat": 21, "carbs": 0 }, "serving_size_g": 250, "allergens": [], "diet_flags": { "keto": true } },
+      "relations": [
+        { "to_slug": "meat-lamb-leg-ar", "type": "similar", "strength": 0.8 },
+        { "to_slug": "meat-spice-mix-ar", "type": "complement", "strength": 0.7 }
+      ]
+    },
+    {
+      "slug": "meat-lamb-leg-ar",
+      "sku": "MEAT-LMB-006",
+      "name": { "ar": "فخدة ضأن كاملة", "en": "Whole Lamb Leg" },
+      "short_description": { "ar": "للمناسبات الكبيرة — تكفي 6-8 أشخاص.", "en": "For grand occasions — serves 6-8." },
+      "description": { "ar": "فخدة ضأن كاملة، بوزن 2.5-3 كجم. مثالية للشواء البطيء أو الفرن.", "en": "Whole lamb leg, 2.5-3kg. Perfect for slow roasting or oven." },
+      "image_prompt": "Whole lamb leg on bone, fresh, on rustic wood board with rosemary garnish, studio lighting, photorealistic",
+      "base_price": 1450, "wholesale_price": 1300, "member_price": 1380,
+      "sale_unit": "piece", "stock_qty": 8, "low_stock_threshold": 2,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": ["premium"], "tags": ["lamb", "leg", "occasion", "halal"],
+      "attributes": { "cut_type": "whole", "origin": "سيناء", "preparation": "whole", "halal_certified": true },
+      "popularity_score": 65, "rating_avg": 4.9, "rating_count": 31,
+      "variants": [],
+      "addons": [
+        { "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "تشريح للفرن", "en": "Score for oven" }, "price_delta": 30 }
+      ],
+      "nutrition": { "per_100g": { "calories": 263, "protein": 24, "fat": 19, "carbs": 0 }, "serving_size_g": 300, "allergens": [], "diet_flags": { "keto": true } },
+      "relations": [{ "to_slug": "meat-lamb-chops-ar", "type": "similar", "strength": 0.8 }]
+    },
+    {
+      "slug": "meat-veal-cutlet-ar",
+      "sku": "MEAT-VEL-007",
+      "name": { "ar": "بتلو إسكالوب", "en": "Veal Escalope" },
+      "short_description": { "ar": "شرائح بتلو رفيعة للقلي السريع.", "en": "Thin veal slices for quick pan-frying." },
+      "description": { "ar": "بتلو طري مقطّع شرائح رفيعة جاهزة للإسكالوب أو السكالوبيني.", "en": "Tender veal sliced thin, ready for schnitzel or scaloppini." },
+      "image_prompt": "Thin veal escalope slices fanned out on white plate, pale pink meat, professional studio lighting",
+      "base_price": 510, "wholesale_price": 460, "member_price": 488,
+      "sale_unit": "kg", "stock_qty": 15, "low_stock_threshold": 3,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": [], "tags": ["veal", "escalope", "schnitzel", "halal"],
+      "attributes": { "cut_type": "fillet", "origin": "بلدي", "preparation": "cut", "halal_certified": true, "fat_pct": 6 },
+      "popularity_score": 60, "rating_avg": 4.6, "rating_count": 42,
+      "variants": [{ "axis": "weight", "value": "500g", "label": { "ar": "نصف كيلو", "en": "500g" }, "price_delta": -255 }, { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true }],
+      "addons": [{ "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "ضرب وتطرية", "en": "Pounded thin" }, "price_delta": 15 }],
+      "nutrition": { "per_100g": { "calories": 172, "protein": 23, "fat": 8, "carbs": 0 }, "serving_size_g": 180, "allergens": [], "diet_flags": { "keto": true } },
+      "relations": []
+    },
+    {
+      "slug": "meat-veal-osso-ar",
+      "sku": "MEAT-VEL-008",
+      "name": { "ar": "أوسوبوكو بتلو", "en": "Veal Osso Buco" },
+      "short_description": { "ar": "قطعيات بتلو على العضمة للطبخات الإيطالية.", "en": "Bone-in veal cuts for Italian braising." },
+      "description": { "ar": "شرائح ساق بتلو سميكة على العضمة، مثالية للأوسوبوكو الإيطالي الكلاسيكي.", "en": "Thick bone-in veal shank slices, perfect for classic Italian osso buco." },
+      "image_prompt": "Veal osso buco cross-section slices showing bone marrow, fresh, on dark slate, professional food photography",
+      "base_price": 420, "wholesale_price": 380, "member_price": 400,
+      "sale_unit": "kg", "stock_qty": 12, "low_stock_threshold": 3,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": [], "tags": ["veal", "osso-buco", "slow-cook", "halal"],
+      "attributes": { "cut_type": "shank", "origin": "بلدي", "preparation": "cut", "halal_certified": true, "fat_pct": 9 },
+      "popularity_score": 55, "rating_avg": 4.7, "rating_count": 28,
+      "variants": [],
+      "addons": [],
+      "nutrition": { "per_100g": { "calories": 190, "protein": 22, "fat": 11, "carbs": 0 }, "serving_size_g": 220, "allergens": [], "diet_flags": {} },
+      "relations": []
+    },
+    {
+      "slug": "meat-camel-fillet-ar",
+      "sku": "MEAT-CML-009",
+      "name": { "ar": "فيليه جمل سيناوي", "en": "Sinai Camel Fillet" },
+      "short_description": { "ar": "بديل صحي قليل الدهن وغني بالحديد.", "en": "Healthy lean alternative, iron-rich." },
+      "description": { "ar": "لحم جمل من رعاة سيناء التقليديين، قليل الدهن (3%) وعالي البروتين. مثالي لمن يبحث عن البروتين الصحي.", "en": "Camel meat from traditional Sinai herders, very lean (3%) and high in protein." },
+      "story": { "ar": "نحفظ تراث رعاة الإبل بدعمهم وشراء منتجاتهم بأسعار عادلة.", "en": "We preserve camel herders' heritage with fair-trade sourcing." },
+      "image_prompt": "Lean dark red camel meat fillet on white butcher paper, professional studio lighting, photorealistic",
+      "base_price": 380, "wholesale_price": 340, "member_price": 360,
+      "sale_unit": "kg", "stock_qty": 14, "low_stock_threshold": 3,
+      "is_perishable": true, "shelf_life_days": 4,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": ["new"], "tags": ["camel", "lean", "healthy", "halal", "high-protein"],
+      "attributes": { "cut_type": "fillet", "origin": "سيناء", "preparation": "whole", "halal_certified": true, "fat_pct": 3 },
+      "popularity_score": 45, "rating_avg": 4.5, "rating_count": 19,
+      "variants": [{ "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true }],
+      "addons": [],
+      "nutrition": { "per_100g": { "calories": 160, "protein": 26, "fat": 5, "carbs": 0, "sodium": 50 }, "serving_size_g": 200, "allergens": [], "diet_flags": { "keto": true, "diabetic_friendly": true, "lean": true } },
+      "relations": []
+    },
+    {
+      "slug": "meat-beef-liver-ar",
+      "sku": "MEAT-OFF-010",
+      "name": { "ar": "كبدة بقري طازجة", "en": "Fresh Beef Liver" },
+      "short_description": { "ar": "كبدة بلدية طازجة لذيذة وغنية بالحديد.", "en": "Fresh local liver, iron-rich." },
+      "description": { "ar": "كبدة بقري بلدية، تنظف وتقطع حسب الطلب.", "en": "Local beef liver, cleaned and sliced on demand." },
+      "image_prompt": "Fresh beef liver slices, deep red-brown, on white tray, professional studio lighting, photorealistic",
+      "base_price": 220, "wholesale_price": 195, "member_price": 210,
+      "sale_unit": "kg", "stock_qty": 28, "low_stock_threshold": 5,
+      "is_perishable": true, "shelf_life_days": 2,
+      "storage_conditions": { "ar": "يُستهلك خلال 24 ساعة", "en": "Use within 24h" },
+      "badges": [], "tags": ["liver", "offal", "halal", "iron-rich"],
+      "attributes": { "cut_type": "ground", "origin": "بلدي", "preparation": "cut", "halal_certified": true },
+      "popularity_score": 68, "rating_avg": 4.5, "rating_count": 53,
+      "variants": [],
+      "addons": [{ "group": "preparation", "group_name": { "ar": "التجهيز", "en": "Preparation" }, "name": { "ar": "تقطيع مكعبات إسكندراني", "en": "Alex-style cubes" }, "price_delta": 10 }],
+      "nutrition": { "per_100g": { "calories": 135, "protein": 20, "fat": 4, "carbs": 4 }, "serving_size_g": 150, "allergens": [], "diet_flags": { "iron_rich": true } },
+      "relations": []
+    },
+    {
+      "slug": "meat-beef-tongue-ar",
+      "sku": "MEAT-OFF-011",
+      "name": { "ar": "لسان بقري", "en": "Beef Tongue" },
+      "short_description": { "ar": "للمشويات الفاخرة والسلطات الباردة.", "en": "For premium grills and cold cuts." },
+      "description": { "ar": "لسان بقري كامل، يُسلق ويقدم شرائح أو يُشوى.", "en": "Whole beef tongue, boil-and-slice or grill." },
+      "image_prompt": "Whole beef tongue, raw, on white plate, professional food photography, studio lighting",
+      "base_price": 340, "wholesale_price": 305, "member_price": 325,
+      "sale_unit": "kg", "stock_qty": 10, "low_stock_threshold": 2,
+      "is_perishable": true, "shelf_life_days": 3,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": [], "tags": ["tongue", "offal", "halal"],
+      "attributes": { "cut_type": "whole", "origin": "بلدي", "preparation": "whole", "halal_certified": true },
+      "popularity_score": 40, "rating_avg": 4.6, "rating_count": 22,
+      "variants": [], "addons": [],
+      "nutrition": { "per_100g": { "calories": 224, "protein": 16, "fat": 17, "carbs": 4 }, "serving_size_g": 180, "allergens": [], "diet_flags": {} },
+      "relations": []
+    },
+    {
+      "slug": "meat-marinated-skewers-ar",
+      "sku": "MEAT-SKW-012",
+      "name": { "ar": "أسياخ كباب متبّلة", "en": "Marinated Kebab Skewers" },
+      "short_description": { "ar": "كباب متبّل جاهز للشوي — وصفة بيتي.", "en": "Marinated kebab ready to grill — house recipe." },
+      "description": { "ar": "كباب لحم بقري وضأن مفروم، متبّل ببهارات بلدي وبصل، مشكّل على أسياخ خشبية.", "en": "Beef-lamb kebab, seasoned with house spices and onion, on wooden skewers." },
+      "image_prompt": "Six raw marinated kebab skewers on wooden sticks, ground meat shaped around, on grill tray, professional studio lighting",
+      "base_price": 180, "compare_at_price": 210, "wholesale_price": 160, "member_price": 172,
+      "sale_unit": "piece", "stock_qty": 60, "low_stock_threshold": 12,
+      "is_perishable": true, "shelf_life_days": 1,
+      "storage_conditions": { "ar": "يُشوى خلال 24 ساعة", "en": "Grill within 24h" },
+      "badges": ["trending"], "tags": ["kebab", "skewers", "ready-to-cook", "halal"],
+      "attributes": { "cut_type": "ground", "preparation": "skewers", "halal_certified": true },
+      "popularity_score": 90, "rating_avg": 4.7, "rating_count": 134, "is_featured": true,
+      "variants": [
+        { "axis": "pack", "value": "6", "label": { "ar": "6 أسياخ", "en": "6 skewers" }, "price_delta": 0, "is_default": true },
+        { "axis": "pack", "value": "12", "label": { "ar": "12 سيخ", "en": "12 skewers" }, "price_delta": 165 }
+      ],
+      "addons": [
+        { "group": "spice", "group_name": { "ar": "حدة التتبيل", "en": "Spice level" }, "name": { "ar": "خفيف", "en": "Mild" }, "price_delta": 0 },
+        { "group": "spice", "group_name": { "ar": "حدة التتبيل", "en": "Spice level" }, "name": { "ar": "حار", "en": "Hot" }, "price_delta": 0 }
+      ],
+      "nutrition": { "per_100g": { "calories": 240, "protein": 18, "fat": 18, "carbs": 2, "sodium": 320 }, "serving_size_g": 100, "allergens": [], "diet_flags": { "kid_friendly": true } },
+      "relations": [{ "to_slug": "meat-beef-mince-ar", "type": "alternative", "strength": 0.6 }]
+    },
+    {
+      "slug": "meat-beef-shawarma-ar",
+      "sku": "MEAT-SHW-013",
+      "name": { "ar": "شاورما لحم متبّلة", "en": "Marinated Beef Shawarma" },
+      "short_description": { "ar": "شرائح شاورما متبّلة جاهزة للقلي.", "en": "Marinated shawarma slices, ready to fry." },
+      "description": { "ar": "شرائح لحم رفيعة متبّلة بخلطة شاورما تركية أصلية. تقلى في 8 دقائق.", "en": "Thin meat slices in authentic Turkish shawarma marinade. Cooks in 8 minutes." },
+      "image_prompt": "Thin marinated beef shawarma slices in a metal bowl, deep amber spice color, professional studio lighting",
+      "base_price": 260, "wholesale_price": 230, "member_price": 248,
+      "sale_unit": "kg", "stock_qty": 35, "low_stock_threshold": 7,
+      "is_perishable": true, "shelf_life_days": 2,
+      "storage_conditions": { "ar": "يُطبخ خلال 48 ساعة", "en": "Cook within 48h" },
+      "badges": ["best"], "tags": ["shawarma", "marinated", "ready-to-cook", "halal"],
+      "attributes": { "cut_type": "ground", "preparation": "marinated", "halal_certified": true },
+      "popularity_score": 87, "rating_avg": 4.7, "rating_count": 109,
+      "variants": [{ "axis": "weight", "value": "500g", "label": { "ar": "نصف كيلو", "en": "500g" }, "price_delta": -130 }, { "axis": "weight", "value": "1000g", "label": { "ar": "كيلو", "en": "1kg" }, "price_delta": 0, "is_default": true }],
+      "addons": [],
+      "nutrition": { "per_100g": { "calories": 220, "protein": 20, "fat": 14, "carbs": 4, "sodium": 380 }, "serving_size_g": 150, "allergens": [], "diet_flags": {} },
+      "relations": []
+    },
+    {
+      "slug": "meat-burger-patties-ar",
+      "sku": "MEAT-BRG-014",
+      "name": { "ar": "أقراص برجر بلدي", "en": "House Beef Burger Patties" },
+      "short_description": { "ar": "أقراص برجر طازجة 150g — لذيذة كأنها من ستيك هاوس.", "en": "Fresh 150g patties — steakhouse quality." },
+      "description": { "ar": "أقراص برجر مشكّلة يدويًا من لحم بقري مفروم طازج بنسبة دهن 20%.", "en": "Hand-formed burger patties from fresh ground beef with 20% fat for juiciness." },
+      "image_prompt": "Four raw beef burger patties stacked, fresh, on parchment paper, professional studio lighting, white background",
+      "base_price": 135, "compare_at_price": 160, "wholesale_price": 120, "member_price": 128,
+      "sale_unit": "piece", "stock_qty": 80, "low_stock_threshold": 16,
+      "is_perishable": true, "shelf_life_days": 2,
+      "storage_conditions": { "ar": "مبرد 0–4°م", "en": "Refrigerate 0–4°C" },
+      "badges": ["trending"], "tags": ["burger", "patty", "ready-to-cook", "halal", "kid-friendly"],
+      "attributes": { "cut_type": "ground", "preparation": "ground", "halal_certified": true, "fat_pct": 20 },
+      "popularity_score": 89, "rating_avg": 4.8, "rating_count": 156, "is_featured": true,
+      "variants": [
+        { "axis": "pack", "value": "4", "label": { "ar": "4 أقراص", "en": "4 patties" }, "price_delta": 0, "is_default": true },
+        { "axis": "pack", "value": "10", "label": { "ar": "10 أقراص", "en": "10 patties" }, "price_delta": 195 }
+      ],
+      "addons": [
+        { "group": "addon", "group_name": { "ar": "إضافات", "en": "Add" }, "name": { "ar": "جبنة شيدر بين القرصين", "en": "Cheddar inside" }, "price_delta": 25 },
+        { "group": "addon", "group_name": { "ar": "إضافات", "en": "Add" }, "name": { "ar": "بصل مكرمل", "en": "Caramelized onion" }, "price_delta": 15 }
+      ],
+      "nutrition": { "per_100g": { "calories": 270, "protein": 18, "fat": 22, "carbs": 1 }, "serving_size_g": 150, "allergens": [], "diet_flags": { "kid_friendly": true } },
+      "relations": [{ "to_slug": "meat-beef-mince-ar", "type": "alternative", "strength": 0.7 }]
+    },
+    {
+      "slug": "meat-spice-mix-ar",
+      "sku": "MEAT-SPC-015",
+      "name": { "ar": "خلطة بهارات الجزار البلدي", "en": "Butcher's House Spice Mix" },
+      "short_description": { "ar": "خلطة بهارات سرية للحوم المشوية.", "en": "Secret blend for grilled meats." },
+      "description": { "ar": "خلطة بهارات الجزار: كمون، كزبرة، فلفل أسود، حبهان، وقرفة. تكفي 2-3 كيلو لحم.", "en": "Cumin, coriander, black pepper, cardamom, cinnamon. Enough for 2-3kg meat." },
+      "image_prompt": "Aromatic spice mix in small wooden bowl, brown and red spices, on rustic surface, professional studio lighting",
+      "base_price": 45, "wholesale_price": 38, "member_price": 42,
+      "sale_unit": "piece", "stock_qty": 200, "low_stock_threshold": 30,
+      "is_perishable": false, "shelf_life_days": 365,
+      "storage_conditions": { "ar": "مكان جاف بارد", "en": "Cool dry place" },
+      "badges": [], "tags": ["spices", "marinade", "complement"],
+      "attributes": { "weight_g": 100 },
+      "popularity_score": 78, "rating_avg": 4.7, "rating_count": 98,
+      "variants": [],
+      "addons": [],
+      "nutrition": { "per_100g": { "calories": 280, "protein": 12, "fat": 10, "carbs": 45, "sodium": 120 }, "serving_size_g": 5, "allergens": [], "diet_flags": {} },
+      "relations": []
+    }
+  ]
+}
