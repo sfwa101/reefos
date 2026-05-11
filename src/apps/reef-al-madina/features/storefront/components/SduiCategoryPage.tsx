@@ -55,14 +55,21 @@ const SduiCategoryPage = ({
   const theme = storeThemes[themeKey];
   const source = themeToSource(themeKey);
   const orchestrator = useHomeOrchestrator(source ?? "home");
+  const identitySlug = themeKeyToIdentitySlug[themeKey] ?? (themeKey as string);
+  const identity = getSectionIdentity(identitySlug);
 
   useEffect(() => {
-    document.title = `${title} · ريف المدينة`;
-  }, [title]);
+    document.title = `${identity?.title ?? title} · ريف المدينة`;
+  }, [identity, title]);
 
   return (
     <div className="space-y-4 bg-background pb-32 text-foreground" dir="rtl">
-      <BackHeader title={title} subtitle={subtitle ?? theme.label} />
+      <BackHeader
+        title={identity?.title ?? title}
+        subtitle={identity?.subtitle ?? subtitle ?? theme.label}
+      />
+
+      {identity && <SectionHeroBanner identity={identity} />}
 
       <LayoutFactory
         pageKey={pageKey}
