@@ -25,7 +25,7 @@ import { SearchAndFilters } from "./SearchAndFilters";
 import { useUiLayout } from "../hooks/useUiLayout";
 import type { SectionConfig, SectionKey } from "../types/sdui.types";
 import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
-import type { CatId } from "../types";
+
 import { SectionFrame } from "@/core-os/sdui-engine/SectionFrame";
 import { SDUIErrorBoundary } from "@/core-os/sdui-engine/components/SDUIErrorBoundary";
 
