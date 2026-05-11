@@ -18,6 +18,14 @@ import { useHomeOrchestrator } from "../home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "../home/components/LayoutFactory";
 import { DetailSheet } from "../home/components/DetailSheet";
 import { FiltersSheet } from "../home/components/FiltersSheet";
+import { getSectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { SectionHeroBanner } from "@/core/runtime-ui/sections/SectionHeroBanner";
+
+// Maps theme keys → SectionIdentityRegistry slugs.
+const themeKeyToIdentitySlug: Partial<Record<StoreThemeKey, string>> = {
+  homeTools: "home-goods",
+  library: "school-library",
+};
 
 export type SduiCategoryPageProps = {
   /** Theme slug from `storeThemes` (drives hue / soft / gradient). */
@@ -47,14 +55,21 @@ const SduiCategoryPage = ({
   const theme = storeThemes[themeKey];
   const source = themeToSource(themeKey);
   const orchestrator = useHomeOrchestrator(source ?? "home");
+  const identitySlug = themeKeyToIdentitySlug[themeKey] ?? (themeKey as string);
+  const identity = getSectionIdentity(identitySlug);
 
   useEffect(() => {
-    document.title = `${title} · ريف المدينة`;
-  }, [title]);
+    document.title = `${identity?.title ?? title} · ريف المدينة`;
+  }, [identity, title]);
 
   return (
     <div className="space-y-4 bg-background pb-32 text-foreground" dir="rtl">
-      <BackHeader title={title} subtitle={subtitle ?? theme.label} />
+      <BackHeader
+        title={identity?.title ?? title}
+        subtitle={identity?.subtitle ?? subtitle ?? theme.label}
+      />
+
+      {identity && <SectionHeroBanner identity={identity} />}
 
       <LayoutFactory
         pageKey={pageKey}

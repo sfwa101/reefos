@@ -15,6 +15,10 @@ import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/comp
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
 import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
+import { getSectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { SectionHeroBanner } from "@/core/runtime-ui/sections/SectionHeroBanner";
+
+const identity = getSectionIdentity("home-goods")!;
 
 const HomeStore = () => {
   const theme = storeThemes.homeTools;
@@ -29,7 +33,9 @@ const HomeStore = () => {
         background: `linear-gradient(180deg, hsl(${theme.soft}) 0%, hsl(var(--background)) 320px)`,
       }}
     >
-      <BackHeader title="الأدوات المنزلية" />
+      <BackHeader title={identity.title} subtitle={identity.subtitle} />
+
+      <SectionHeroBanner identity={identity} />
 
       <LayoutFactory pageKey="home" orchestrator={o} theme={theme} />
 
