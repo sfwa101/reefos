@@ -1,9 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { ShieldCheck, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { lazyPage } from "@/routes/-lazyRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
+import { supabase } from "@/integrations/supabase/client";
 
 const Wallet = lazyPage(() => import("@/pages/Wallet"));
 
@@ -83,4 +84,16 @@ const WalletShell = () => (
   </>
 );
 
-export const Route = createFileRoute("/_app/wallet")({ component: WalletShell });
+export const Route = createFileRoute("/_app/wallet")({
+  // Auth gate — wallet exposes financial state, must redirect anon → /auth.
+  beforeLoad: async ({ location }) => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+      throw redirect({
+        to: "/auth",
+        search: { redirect: location.href } as never,
+      });
+    }
+  },
+  component: WalletShell,
+});
