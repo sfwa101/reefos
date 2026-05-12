@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { Loader2, Save, Plus, Percent } from "lucide-react";
+import { Loader2, Save, Plus, Percent, Trash2 } from "lucide-react";
 import {
   listAffiliateSettingsFn, createAffiliateSettingFn, updateAffiliateSettingFn,
+  deleteAffiliateSettingFn,
   type AffiliateSettingRow,
 } from "@/lib/finance.functions";
 
