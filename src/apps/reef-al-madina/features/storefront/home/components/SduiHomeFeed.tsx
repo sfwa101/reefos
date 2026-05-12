@@ -44,6 +44,7 @@ import {
 } from "@/lib/section-manager.types";
 import { useSectionManagerStore } from "@/components/admin/section-manager/useSectionManagerStore";
 import { EditableBlockWrapper } from "./EditableBlockWrapper";
+import { LiveBlockInspector } from "./LiveBlockInspector";
 import { cn } from "@/lib/utils";
 
 const KIND_ICON: Record<LayoutBlockKind, typeof Sparkles> = {
