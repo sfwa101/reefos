@@ -91,7 +91,7 @@ export const getOpsKpisFn = createServerFn({ method: "GET" })
       id: string;
       sku_id: string;
       location_code: string | null;
-      availability_data: Record<string, unknown> | null;
+      availability_data: Record<string, SbAny> | null;
       updated_at: string;
     };
     const invRows = (invRes.data ?? []) as InvRow[];
@@ -281,7 +281,7 @@ export type MasterOrderDetail = {
   status: string | null;
   created_at: string;
   customer_id: string;
-  delivery_info: Record<string, unknown> | null;
+  delivery_info: Record<string, SbAny> | null;
   node_ids: string[];
   node_statuses: string[];
   node_notes: string[];
@@ -350,7 +350,7 @@ export const getMasterOrderDetailFn = createServerFn({ method: "GET" })
       status: m.status ?? null,
       created_at: m.created_at,
       customer_id: m.customer_id,
-      delivery_info: (m.delivery_info as Record<string, unknown>) ?? null,
+      delivery_info: (m.delivery_info as Record<string, SbAny>) ?? null,
       node_ids: nodes.map((n) => n.id),
       node_statuses: nodes.map((n) => n.status),
       node_notes: nodes.map((n) => n.notes).filter(Boolean) as string[],
@@ -506,7 +506,7 @@ export const allocateOrderInventoryFn = createServerFn({ method: "POST" })
       _zone: data.zone,
     });
     if (error) throw new Error(error.message);
-    return (result ?? {}) as { allocated_items?: number; failed_items?: unknown[] };
+    return (result ?? {}) as { allocated_items?: number; failed_items?: SbAny[] };
   });
 
 export const getNestedStockBreakdownFn = createServerFn({ method: "GET" })
@@ -521,5 +521,5 @@ export const getNestedStockBreakdownFn = createServerFn({ method: "GET" })
       _product_id: data.productId,
     });
     if (error) throw new Error(error.message);
-    return (bd ?? null) as { human_readable?: string; total_pieces?: number; breakdown?: unknown[] } | null;
+    return (bd ?? null) as { human_readable?: string; total_pieces?: number; breakdown?: SbAny[] } | null;
   });
