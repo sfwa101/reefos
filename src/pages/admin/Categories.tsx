@@ -165,11 +165,12 @@ function CategoryEditor({
     }
     setSaving(true);
     try {
-      const payload = { name: name.trim(), icon: icon || null, sort_order: Number(sortOrder) || 0, parent_id: parent };
-      const { error } = isNew
-        ? await supabase.from("categories").insert(payload)
-        : await supabase.from("categories").update(payload).eq("id", category!.id);
-      if (error) throw error;
+      await upsertCategoryFn({
+        data: {
+          id: isNew ? null : category!.id,
+          values: { name: name.trim(), icon: icon || null, sort_order: Number(sortOrder) || 0, parent_id: parent },
+        },
+      });
       toast.success(isNew ? "تم الإنشاء" : "تم الحفظ");
       onSaved();
     } catch (err) {
