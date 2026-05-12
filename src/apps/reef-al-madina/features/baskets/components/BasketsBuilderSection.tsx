@@ -66,7 +66,8 @@ const BasketsBuilderSection = () => {
           <ChevronLeft className="absolute bottom-2 left-2 h-4 w-4 opacity-70 transition group-hover:translate-x-[-2px]" />
         </Link>
         <Link
-          to="/store/baskets-subs"
+          to="/store/$slug"
+          params={{ slug: "baskets-subs" }}
           className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 p-3.5 text-right text-white shadow-tile transition active:scale-[0.98]"
         >
           <CalendarClock className="mb-1.5 h-5 w-5" />
