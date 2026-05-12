@@ -158,21 +158,38 @@ Each hook falls back to `DEFAULT_MOBILE_HOME_LAYOUT` so no surface ever renders 
 ### 3.1 Layout (3-column workbench)
 
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ Header:  [محرر ترتيب الأقسام]  [Draft|Published]  [حفظ مسودة] [نشر] │
-├──────────────┬───────────────────────────────┬───────────────────────┤
-│ Block        │  Canvas (DnD Sortable List)   │  Inspector            │
-│ Palette      │                               │                       │
-│              │  ▦ Hero Banner       [👁][⋮]  │  Selected block:      │
-│ • Hero       │  ▦ Story Circles     [👁][⋮]  │  ─ id, kind           │
-│ • Carousel   │  ▦ Mega Offer        [👁][⋮]  │  ─ title / subtitle   │
-│ • Grid       │  ▦ Bundles Rail      [👁][⋮]  │  ─ config (variant,   │
-│ • Mega Offer │  ▦ Crepes Carousel   [👁][⋮]  │     padding, tone…)   │
-│ • Bundles    │  ▦ Ice Cream Grid    [👁][⋮]  │  ─ entity_refs picker │
-│ • Spacer     │  ▦ + Add block               │  ─ visibility window  │
-│              │                               │  ─ [حذف الكتلة]       │
-└──────────────┴───────────────────────────────┴───────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Header:  [محرر ترتيب الأقسام]  [Draft|Published]  [حفظ مسودة]  [نشر]        │
+├──────────────┬─────────────────────────────────────────┬─────────────────────┤
+│ Block        │  Canvas — Tabs: [الكل] [Home] [Stories] │  Inspector          │
+│ Palette      │                  [Categories Grid]      │                     │
+│              │                                         │  Selected block:    │
+│ • Hero       │  ▦ Hero Banner          🏠 ⭕ ▦  [⋮]    │  ─ id, kind         │
+│ • Carousel   │  ▦ Story Circles        ·  ⭕ ·  [⋮]    │  ─ title / subtitle │
+│ • Grid       │  ▦ Mega Offer           🏠 ·  ▦  [⋮]    │  ─ config           │
+│ • Mega Offer │  ▦ Crepes Carousel      🏠 ⭕ ▦  [⋮]    │  ─ entity_refs      │
+│ • Bundles    │  ▦ Ice Cream Grid       🏠 ⭕ ▦  [⋮]    │  ─ visibility       │
+│ • Spacer     │  ▦ + Add block                          │                     │
+│              │                                         │  ▼ Target Zones     │
+│              │  Legend: 🏠 Home Feed  ⭕ Stories  ▦ Grid│   ⬜ display_in_…   │
+│              │                                         │     home_feed       │
+│              │                                         │   ⬜ display_in_…   │
+│              │                                         │     stories         │
+│              │                                         │   ⬜ display_in_…   │
+│              │                                         │     grid            │
+│              │                                         │                     │
+│              │                                         │  ▼ Zone Overrides   │
+│              │                                         │   stories.icon_url  │
+│              │                                         │   grid.cover_url    │
+│              │                                         │   per-zone sort     │
+│              │                                         │                     │
+│              │                                         │  [حذف الكتلة]       │
+└──────────────┴─────────────────────────────────────────┴─────────────────────┘
 ```
+
+**Canvas Zone Tabs** — the canvas can be filtered to a single zone. Reordering inside a zone tab updates that zone's `zone_overrides.<zone>.sort_order`; reordering inside the **الكل** tab updates the canonical `sort_order`. This gives the admin precise per-surface control without losing the global stack.
+
+**Inline Zone Chips on each Block Card** — the three glyphs (🏠 ⭕ ▦) are clickable toggles for `display_in_home_feed`, `display_in_stories`, `display_in_grid` respectively. One click flips the flag; the chip dims when off. This is the fastest path to "Manage Once, Reflect Everywhere".
 
 ### 3.2 Library Choice
 
@@ -190,9 +207,11 @@ If `@dnd-kit` is not yet installed it will be added via `bun add @dnd-kit/core @
 src/pages/admin/SectionManager.tsx          // page shell, draft/publish toolbar
 src/components/admin/section-manager/
   ├─ BlockPalette.tsx                       // left rail, "drag to add"
-  ├─ LayoutCanvas.tsx                       // <DndContext><SortableContext>
-  ├─ BlockCard.tsx                          // sortable item, eye toggle, menu
+  ├─ LayoutCanvas.tsx                       // <DndContext><SortableContext> + zone tabs
+  ├─ ZoneTabs.tsx                           // [All|Home|Stories|Grid] filter
+  ├─ BlockCard.tsx                          // sortable item; inline zone chips 🏠⭕▦
   ├─ BlockInspector.tsx                     // right panel, controlled form
+  ├─ ZoneTogglePanel.tsx                    // 3 switches + zone_overrides editor
   ├─ EntityRefPicker.tsx                    // category/product/bundle search
   ├─ VisibilityWindowEditor.tsx             // tier + date range
   └─ useSectionManagerStore.ts              // Zustand local draft state
