@@ -314,17 +314,16 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: err } = await (supabase as any).from("shared_cart_items").insert({
-          cart_id: cart.id,
-          added_by: user.id,
-          product_id: input.product_id,
-          product_name: input.product_name,
-          unit_price: input.unit_price,
-          quantity: input.quantity,
-          meta: input.meta ?? {},
+        await insertSharedCartItemFn({
+          data: {
+            cartId: cart.id,
+            product_id: input.product_id,
+            product_name: input.product_name,
+            unit_price: input.unit_price,
+            quantity: input.quantity,
+            meta: (input.meta ?? {}) as Record<string, unknown>,
+          },
         });
-        if (err) throw err;
       } catch (err) {
         // Rollback to pre-mutation snapshot, then resync from server.
         setItems(snapshot);
