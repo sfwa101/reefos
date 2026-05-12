@@ -10,7 +10,11 @@ import {
 } from "@/lib/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
+import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Line = {
   product: Product;
@@ -242,6 +246,51 @@ export const useCartCalculations = ({
     // Only re-run on cart structure / promo changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lines, appliedPromo?.pct]);
+
+  /* ---------------- Cashier Brain shadow (Phase C3) ----------------
+   * Fires the sovereign Cashier gateway in parallel with the legacy
+   * calculation. Discrepancies are logged ONLY — UI continues to trust
+   * `useCartCalculations` until the cutover phase. Failures swallowed.
+   * ------------------------------------------------------------------ */
+  const cashierPreview = useCashierPreview();
+  const cashierMutate = cashierPreview.mutate;
+  useEffect(() => {
+    if (lines.length === 0) return;
+    // The DNA view is keyed by uuid; skip while any legacy slug-id lines
+    // remain in the cart (e.g. demo seeds like "water").
+    const items = lines
+      .filter((l) => UUID_RE.test(l.product.id))
+      .map((l) => ({ id: l.product.id, qty: l.qty }));
+    if (items.length === 0 || items.length !== lines.length) return;
+
+    cashierMutate(
+      { items, context: { member_tier: "guest" } },
+      {
+        onSuccess: (snapshot) => {
+          const delta = Math.abs(snapshot.totals.grand_total - grand);
+          if (delta > 0.01) {
+            console.warn(
+              `[CASHIER-SHADOW-MISMATCH] Legacy: ${grand}, Brain: ${snapshot.totals.grand_total}, Hash: ${snapshot.snapshot_hash}`,
+              {
+                legacy: { subtotal, discount, delivery, grand },
+                brain: snapshot.totals,
+              },
+            );
+          } else {
+            console.info("[cashier-shadow] match", {
+              grand,
+              hash: snapshot.snapshot_hash,
+            });
+          }
+        },
+        onError: (err) => {
+          // Fail-safe: never disrupt the cart UI.
+          console.warn("[cashier-shadow] preview failed:", err.message);
+        },
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lines, grand]);
 
   return {
     subtotal,
