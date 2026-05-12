@@ -15,6 +15,7 @@
 // proxied through `createServerFn`).
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { Json } from "@/integrations/supabase/types";
 
 // ─── Checkout Context (orchestrator hydration) ────────────────────
 export type CheckoutAddressRow = {
