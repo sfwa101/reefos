@@ -9,7 +9,7 @@
 import { useMemo } from "react";
 import { Soup } from "lucide-react";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 
 const KEYWORDS = ["مطبخ", "وجب", "أكل", "طعام", "جاهز", "kitchen", "meal", "ready", "restaurant", "food"];
 
