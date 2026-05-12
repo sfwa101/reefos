@@ -97,8 +97,8 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "من المزرعة إلى بابك مباشرة",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
-  dairy: {
     slug: "dairy",
     themeKey: "dairy",
     title: "منتجات الألبان",
