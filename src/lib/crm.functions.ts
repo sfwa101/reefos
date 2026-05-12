@@ -299,3 +299,97 @@ export const getHuman360Fn = createServerFn({ method: "GET" })
     }
     return out as Human360Result;
   });
+
+// ============= Wave R-2 Batch B.1 — Human CRUD =============
+export type HumanCreateInput = {
+  full_name: string;
+  phone?: string | null;
+  governorate?: string | null;
+  city?: string | null;
+  gender?: string | null;
+  birth_date?: string | null;
+  occupation?: string | null;
+};
+
+export type HumanUpdateInput = HumanCreateInput & { id: string };
+
+const PHONE_RE = /^[+0-9 \-()]{6,20}$/;
+
+function validateHumanPayload<T extends Partial<HumanCreateInput>>(d: T): T {
+  if (d.full_name !== undefined) {
+    const n = String(d.full_name ?? "").trim();
+    if (!n || n.length < 2 || n.length > 120) throw new Error("invalid_full_name");
+    d.full_name = n;
+  }
+  if (d.phone) {
+    const p = String(d.phone).trim();
+    if (!PHONE_RE.test(p)) throw new Error("invalid_phone");
+    d.phone = p;
+  }
+  if (d.governorate && String(d.governorate).length > 80) throw new Error("invalid_governorate");
+  if (d.city && String(d.city).length > 80) throw new Error("invalid_city");
+  if (d.gender && !["male", "female", "other"].includes(String(d.gender))) throw new Error("invalid_gender");
+  if (d.birth_date && !/^\d{4}-\d{2}-\d{2}$/.test(String(d.birth_date))) throw new Error("invalid_birth_date");
+  if (d.occupation && String(d.occupation).length > 120) throw new Error("invalid_occupation");
+  return d;
+}
+
+export const createHumanFn = createServerFn({ method: "POST" })
+  .inputValidator((d: HumanCreateInput) => {
+    if (!d?.full_name) throw new Error("full_name_required");
+    return validateHumanPayload({ ...d });
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ id: string }> => {
+    const sb = context.supabase as SbAny;
+    const id = (globalThis.crypto as Crypto).randomUUID();
+    const { data: row, error } = await sb
+      .from("profiles")
+      .insert({
+        id,
+        full_name: data.full_name,
+        phone: data.phone ?? null,
+        governorate: data.governorate ?? null,
+        city: data.city ?? null,
+        gender: data.gender ?? null,
+        birth_date: data.birth_date ?? null,
+        occupation: data.occupation ?? null,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id as string };
+  });
+
+export const updateHumanFn = createServerFn({ method: "POST" })
+  .inputValidator((d: HumanUpdateInput) => {
+    if (!d?.id) throw new Error("id_required");
+    return { id: String(d.id), ...validateHumanPayload({ ...d }) };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sb = context.supabase as SbAny;
+    const { id, ...patch } = data;
+    const { error } = await sb
+      .from("profiles")
+      .update({
+        ...patch,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteHumanFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return { id: String(d.id) };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("profiles").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
