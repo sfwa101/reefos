@@ -145,16 +145,11 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     setLoading(true);
     setError(null);
     try {
-      const [cartRes, partsRes, itemsRes] = await Promise.all([
-        supabase.from("shared_carts").select("*").eq("id", id).maybeSingle(),
-        supabase.from("shared_cart_participants").select("*").eq("cart_id", id),
-        supabase.from("shared_cart_items").select("*").eq("cart_id", id).order("created_at", { ascending: true }),
-      ]);
+      const result = await hydrateSharedCartFn({ data: { cartId: id } });
       if (cancelledRef.current) return;
-      if (cartRes.error) throw cartRes.error;
-      setCart((cartRes.data as SharedCart | null) ?? null);
-      setParticipants((partsRes.data as SharedCartParticipant[] | null) ?? []);
-      const nextItems = normalizeItems((itemsRes.data as SharedCartItem[] | null) ?? []);
+      setCart((result.cart as SharedCart | null) ?? null);
+      setParticipants((result.participants as SharedCartParticipant[] | null) ?? []);
+      const nextItems = normalizeItems((result.items as unknown as SharedCartItem[] | null) ?? []);
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
     } catch (e) {
