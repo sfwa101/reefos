@@ -522,7 +522,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       //    would otherwise resurrect the cart on the next page load.
       if (currentUser?.id) {
         try {
-          await supabase.from("cart_items").delete().eq("user_id", currentUser.id);
+          await clearMyCartFn();
         } catch (e) {
           console.warn("[checkout] failed to purge remote cart_items:", e);
         }
