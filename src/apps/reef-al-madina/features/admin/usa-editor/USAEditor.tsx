@@ -78,6 +78,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const update = useUpdateUSA();
   const mint = useMintUSA();
   const matchmaker = useAssetMatchmaker();
+  const { upload: uploadProductImage } = useProductImageUpload();
 
   const [tab, setTab] = useState<string>(isNew ? "basic" : "basic");
   const [name, setName] = useState("");
