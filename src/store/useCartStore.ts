@@ -55,7 +55,26 @@ export type CartLineMeta = {
   prepHours?: number;
 };
 
+/**
+ * Wave P-B (Static Catalog Killer) — `CartLine` shape.
+ *
+ * Canonical: identity + intent + display snapshot
+ *   (`productId`, `variantId?`, `qty`, `capturedPrice`, `capturedName`,
+ *   `capturedImage?`, `capturedAt?`).
+ *
+ * Transitional: `product: Product` is retained as a DEPRECATED bridge so
+ * existing cart UI compiles unchanged through Step B-3, where the leaves
+ * migrate to `useCartHydration`. New canonical fields are populated by
+ * `add()` and by `migrateLegacyCartShape()` for persisted carts.
+ */
 export type CartLine = {
+  productId?: string;
+  variantId?: string;
+  capturedPrice?: number;
+  capturedName?: string;
+  capturedImage?: string;
+  capturedAt?: string;
+  /** @deprecated Wave P-B B-3 — read live data via `useCartHydration` instead. */
   product: Product;
   qty: number;
   meta?: CartLineMeta;
