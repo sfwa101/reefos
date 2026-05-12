@@ -66,6 +66,55 @@ These patterns are **forbidden** anywhere in the codebase. Their presence is a d
 
 ---
 
+## 3a. The Anti-Hardcoding Law (Zero Domain Knowledge in Code)
+
+**Status:** Binding. Equal in severity to a security incident. Enforced by `lint:no-vertical-literals` and code review.
+
+### 3a.1 Statement
+
+The Salsabil OS codebase is **domain-blind**. No `.ts` / `.tsx` source file in `src/core/**`, `src/apps/**`, `src/pages/**`, `src/routes/**`, `src/components/**`, `src/hooks/**`, `src/features/**`, or `src/modules/**` may contain literals, identifiers, types, components, hooks, branches, or comments that encode knowledge of a **specific vertical, product category, store type, food item, cuisine, retail format, or physical-market expansion**.
+
+The kernel and presentation layers MUST be able to host crepes, potato sandwiches, ice cream, pharmacy, butchery, library, sweets, restaurants, wholesale, ceremonies, construction, lending, or any future vertical **without a single line of new application code**.
+
+### 3a.2 Forbidden patterns (illustrative, not exhaustive)
+
+- ❌ `if (section === "meat") { ... }` / `switch (slug) { case "pharmacy": ... }`
+- ❌ `type ProductKind = "crepe" | "sandwich" | "ice_cream"`
+- ❌ Component files named after a vertical: `MeatGrid.tsx`, `PharmacyHero.tsx`, `IceCreamCard.tsx`, `CrepesBuilder.tsx`.
+- ❌ Route files per vertical: `src/routes/meat.tsx`, `src/pages/store/Pharmacy.tsx`.
+- ❌ Hooks per vertical: `useCrepesCatalog`, `usePharmacyStock`.
+- ❌ Hardcoded SKU lists, hardcoded category slugs, hardcoded "specials" arrays.
+- ❌ Conditional UI chrome based on a vertical literal (`product.type === "potato_sandwich" && <PotatoBuilder/>`).
+- ❌ AI prompts in source code that name specific verticals as first-class concepts.
+
+### 3a.3 Allowed locations for vertical-specific knowledge
+
+Vertical knowledge MAY exist **only** as **declarative data**, never as code:
+
+- `SectionIdentityRegistry` rows (DB or seed JSON).
+- `CapabilityRegistry` bundle definitions (DB or seed JSON).
+- `RenderDescriptor` trees stored in `ui_layouts` (DB).
+- `CardTemplateRegistry` registrations (generic templates registered by descriptor key, never `if`-branched).
+- `i18n` catalogs (translated labels).
+- DB migrations and seed scripts (`scripts/seeds/**`, `supabase/migrations/**`).
+
+### 3a.4 The launch test
+
+A new vertical ships when:
+
+1. A `SectionIdentity` row is inserted.
+2. The required `Capability` keys are registered.
+3. A `RenderDescriptor` is published in `ui_layouts`.
+4. (Optional) A generic `CardTemplate` is registered if existing templates are insufficient — the template itself MUST remain vertical-agnostic, parameterized by descriptor data.
+
+The `git diff` for the launch MUST contain **no** `.ts` / `.tsx` application source changes — only DB seeds, registry data, layout JSON, and i18n strings. If application code must change, the kernel is missing a generic capability; **extend the kernel generically, never the vertical specifically.**
+
+### 3a.5 Rationale
+
+Domain literals in code are the single largest cause of architectural decay: they couple the kernel to a moment in time, multiply across consumers, resist deletion, and turn every new vertical into a multi-week engineering project instead of a multi-hour data operation. The Anti-Hardcoding Law makes the **100x Scale Doctrine** (Article 1, §11) physically achievable.
+
+---
+
 ## 4. Universal Mandates
 
 - ✅ All cross-boundary calls flow through **explicit gateways** (catalog gateway, identity gateway, finance gateway…).
