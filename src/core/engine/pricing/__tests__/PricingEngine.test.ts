@@ -117,7 +117,7 @@ describe("Scenario 2 — Meat (worst case composition)", () => {
       source: "meat",
       subCategory: "لحوم حمراء",
       price: 100,
-      name: `${HASSAN.name}'s favourite cut`,
+      // Customer name (${HASSAN.name}) intentionally not on PricingInput.
     });
 
     const selection: MeatSelection = {
