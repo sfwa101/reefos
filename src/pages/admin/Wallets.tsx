@@ -205,7 +205,173 @@ function TopupForm() {
   );
 }
 
-export default function AdminWallets() {
+function AdjustPanel() {
+  const searchProfiles = useServerFn(searchProfilesFn);
+  const adminAdjust = useServerFn(adminAdjustWalletFn);
+  const reverseEntry = useServerFn(reverseWalletEntryFn);
+
+  const [mode, setMode] = useState<"adjust" | "reverse">("adjust");
+  const [search, setSearch] = useState("");
+  const [matches, setMatches] = useState<Profile[]>([]);
+  const [selected, setSelected] = useState<Profile | null>(null);
+  const [kind, setKind] = useState<"credit" | "debit">("credit");
+  const [amount, setAmount] = useState("");
+  const [label, setLabel] = useState("");
+  const [note, setNote] = useState("");
+  const [entryId, setEntryId] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (search.trim().length < 2) { setMatches([]); return; }
+    let cancel = false;
+    const t = setTimeout(async () => {
+      try {
+        const data = await searchProfiles({ data: { term: search.trim() } });
+        if (!cancel) setMatches(data);
+      } catch { if (!cancel) setMatches([]); }
+    }, 300);
+    return () => { cancel = true; clearTimeout(t); };
+  }, [search, searchProfiles]);
+
+  const handleAdjust = async () => {
+    if (!selected) return toast.error("اختر العميل أولاً");
+    setBusy(true);
+    try {
+      await adminAdjust({ data: {
+        user_id: selected.id, kind, amount: Number(amount),
+        label: label.trim(), note: note.trim() || null,
+      }});
+      toast.success(kind === "credit" ? "تم إيداع المبلغ" : "تم خصم المبلغ");
+      setAmount(""); setLabel(""); setNote("");
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = {
+        invalid_amount: "مبلغ غير صحيح", amount_too_large: "المبلغ كبير جداً",
+        invalid_label: "الوصف 3-200 حرف", invalid_kind: "نوع غير صالح",
+      };
+      toast.error(map[msg] ?? msg);
+    } finally { setBusy(false); }
+  };
+
+  const handleReverse = async () => {
+    if (!entryId.trim()) return toast.error("معرف العملية مطلوب");
+    if (reason.trim().length < 3) return toast.error("سبب الإلغاء 3 أحرف على الأقل");
+    if (!confirm("تأكيد إلغاء هذه العملية؟ سيتم إنشاء قيد عكسي.")) return;
+    setBusy(true);
+    try {
+      await reverseEntry({ data: { id: entryId.trim(), reason: reason.trim() } });
+      toast.success("تم إلغاء العملية");
+      setEntryId(""); setReason("");
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = {
+        entry_not_found: "العملية غير موجودة", already_reversed: "أُلغيت من قبل",
+        invalid_id: "معرف غير صالح", invalid_reason: "السبب غير صالح",
+      };
+      toast.error(map[msg] ?? msg);
+    } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="bg-surface rounded-2xl border border-border/40 p-4 space-y-3" dir="rtl">
+      <div className="flex items-center gap-2 text-[13px] font-bold">
+        <Coins className="h-4 w-4 text-primary" /> تسوية يدوية / إلغاء قيد
+      </div>
+
+      <div className="grid grid-cols-2 gap-1.5">
+        <button onClick={() => setMode("adjust")}
+          className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
+            mode === "adjust" ? "border-primary bg-primary text-primary-foreground" : "border-border/40 bg-surface-muted")}>
+          تسوية يدوية
+        </button>
+        <button onClick={() => setMode("reverse")}
+          className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
+            mode === "reverse" ? "border-primary bg-primary text-primary-foreground" : "border-border/40 bg-surface-muted")}>
+          إلغاء قيد
+        </button>
+      </div>
+
+      {mode === "adjust" ? (
+        !selected ? (
+          <>
+            <div className="relative">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)}
+                placeholder="ابحث عن عميل بالاسم أو الهاتف"
+                className="w-full bg-surface-muted rounded-xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            </div>
+            {matches.length > 0 && (
+              <div className="space-y-1.5 max-h-60 overflow-y-auto">
+                {matches.map((m) => (
+                  <button key={m.id} onClick={() => { setSelected(m); setSearch(""); setMatches([]); }}
+                    className="w-full flex items-center justify-between bg-surface-muted hover:bg-primary/5 rounded-xl p-3 text-right press">
+                    <div>
+                      <p className="text-[13.5px] font-semibold">{m.full_name ?? "بدون اسم"}</p>
+                      <p className="text-[11.5px] text-foreground-tertiary num flex items-center gap-1 mt-0.5">
+                        <Phone className="h-3 w-3" /> {m.phone ?? "—"}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
+        ) : (
+          <>
+            <div className="bg-surface-muted rounded-xl p-3 flex items-center justify-between">
+              <div>
+                <p className="text-[12.5px] font-semibold">{selected.full_name ?? "بدون اسم"}</p>
+                <p className="num text-[11px] text-foreground-tertiary">{selected.phone ?? "—"}</p>
+              </div>
+              <button onClick={() => setSelected(null)} className="text-[11px] underline">تغيير</button>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button onClick={() => setKind("credit")}
+                className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
+                  kind === "credit" ? "border-success bg-success text-success-foreground" : "border-border/40 bg-success/10 text-success")}>
+                إيداع (Credit)
+              </button>
+              <button onClick={() => setKind("debit")}
+                className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
+                  kind === "debit" ? "border-destructive bg-destructive text-destructive-foreground" : "border-border/40 bg-destructive/10 text-destructive")}>
+                خصم (Debit)
+              </button>
+            </div>
+            <input type="number" inputMode="decimal" min="1" max="1000000" value={amount}
+              onChange={(e) => setAmount(e.target.value)} placeholder="المبلغ"
+              className="w-full h-11 rounded-xl bg-surface-muted px-3 text-[15px] num text-right font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="وصف القيد (3-200 حرف) *"
+              className="w-full h-10 rounded-xl bg-surface-muted px-3 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ملاحظة (اختياري)"
+              className="w-full h-10 rounded-xl bg-surface-muted px-3 text-[12.5px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+            <button onClick={handleAdjust} disabled={busy || !amount || label.trim().length < 3}
+              className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold text-[14px] press disabled:opacity-40 flex items-center justify-center gap-2">
+              {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+              {busy ? "جارٍ التنفيذ…" : (kind === "credit" ? `إيداع ${amount ? fmtMoney(Number(amount)) : "—"}` : `خصم ${amount ? fmtMoney(Number(amount)) : "—"}`)}
+            </button>
+          </>
+        )
+      ) : (
+        <>
+          <input value={entryId} onChange={(e) => setEntryId(e.target.value)} placeholder="معرف العملية (UUID)"
+            className="w-full h-11 rounded-xl bg-surface-muted px-3 text-[12px] num border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <textarea value={reason} onChange={(e) => setReason(e.target.value)}
+            placeholder="سبب الإلغاء (3-300 حرف) *" rows={2}
+            className="w-full rounded-xl bg-surface-muted px-3 py-2 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
+          <button onClick={handleReverse} disabled={busy}
+            className="w-full h-11 rounded-2xl bg-destructive text-destructive-foreground font-bold text-[14px] press disabled:opacity-40 flex items-center justify-center gap-2">
+            {busy && <Loader2 className="h-4 w-4 animate-spin" />}
+            {busy ? "جارٍ الإلغاء…" : "إلغاء القيد"}
+          </button>
+          <p className="text-[10.5px] text-foreground-tertiary">
+            ملاحظة: هذه الأداة تلغي قيد محفظة (wallet_transactions) عبر إنشاء قيد عكسي مساوٍ.
+          </p>
+        </>
+      )}
+    </div>
+  );
+}
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("store_manager");
 
