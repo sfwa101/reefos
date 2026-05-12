@@ -30,6 +30,7 @@ const REEF_PAGE_KEY: Record<string, string> = {
   "school-library": "reef_school_library",
   wholesale: "reef_wholesale",
   "home-goods": "home",
+  home: "home",
 };
 
 export function identityToPageKey(identity: RegistrySectionIdentity): string {
