@@ -95,8 +95,8 @@ export function useActiveDriverTracking({ nodeId, driverId, orderId }: Args) {
       });
     };
 
-    supabase.from("driver_positions").select("*").eq("driver_id", resolvedDriverId).maybeSingle()
-      .then(({ data }) => apply(data as Record<string, unknown> | null));
+    getDriverPositionFn({ data: { driverId: resolvedDriverId } })
+      .then((row) => apply(row as Record<string, unknown> | null));
 
     const channel = supabase
       .channel(`driver-pos-${resolvedDriverId}`)
