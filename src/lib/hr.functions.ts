@@ -38,18 +38,11 @@ export type EmployeeHubState = {
 
 const APPROVER_ROLES = ["admin", "finance", "branch_manager"] as const;
 
-async function assertApproverRole(
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => unknown },
-  userId: string,
-) {
+async function assertApproverRole(supabase: unknown, userId: string) {
+  const rpc = (supabase as { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: boolean | null; error: { message: string } | null }> }).rpc;
   for (const role of APPROVER_ROLES) {
     try {
-      const res = (await (
-        supabase.rpc as unknown as (
-          fn: string,
-          args: Record<string, unknown>,
-        ) => Promise<{ data: boolean | null; error: { message: string } | null }>
-      )("has_role", { _user_id: userId, _role: role }));
+      const res = await rpc("has_role", { _user_id: userId, _role: role });
       if (res.data === true) return role;
     } catch {
       // try next role
