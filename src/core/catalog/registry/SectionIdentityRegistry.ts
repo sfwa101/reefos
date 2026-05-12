@@ -307,6 +307,51 @@ SECTION_IDENTITY_REGISTRY.supermarket = {
   layoutVariant: "standard",
 };
 
+// Bespoke route collapse — Wave P-D · Phase D-3.
+// Three deferred bespoke pages now resolve through the dynamic `/store/$slug`
+// route via short-circuit branches in `resolveSectionTree`.
+SECTION_IDENTITY_REGISTRY["baskets-build"] = {
+  slug: "baskets-build",
+  themeKey: "baskets",
+  title: "ابني سلتك",
+  subtitle: "اختر مكوناتك واحفظ تركيبتك المفضلة",
+  searchPlaceholder: "ابحث عن صنف لإضافته…",
+  hero: {
+    eyebrow: "تخصيص كامل",
+    headline: "سلتك على مزاجك",
+    body: "أضف، استبدل، واحفظ تركيبتك للاشتراك الأسبوعي",
+  },
+  layoutVariant: "basket-builder",
+};
+
+SECTION_IDENTITY_REGISTRY["baskets-subs"] = {
+  slug: "baskets-subs",
+  themeKey: "baskets",
+  title: "اشتراكاتي",
+  subtitle: "إدارة سلالك المتكررة",
+  searchPlaceholder: "ابحث في اشتراكاتك…",
+  hero: {
+    eyebrow: "تجديد تلقائي",
+    headline: "سلالك جاهزة كل أسبوع",
+    body: "عدّل، أوقف مؤقتاً، أو ألغِ في أي وقت",
+  },
+  layoutVariant: "subscription-manager",
+};
+
+SECTION_IDENTITY_REGISTRY["home-compare"] = {
+  slug: "home-compare",
+  themeKey: "homeTools",
+  title: "قارن الأجهزة المنزلية",
+  subtitle: "اختر بثقة بمقارنة جنباً إلى جنب",
+  searchPlaceholder: "ابحث عن جهاز للمقارنة…",
+  hero: {
+    eyebrow: "قرار ذكي",
+    headline: "قارن قبل ما تشتري",
+    body: "مواصفات، أسعار، ومراجعات في مكان واحد",
+  },
+  layoutVariant: "compare-grid",
+};
+
 /** Lookup helper. Returns undefined for unknown slugs (caller decides fallback). */
 export function getSectionIdentity(slug: string): SectionIdentity | undefined {
   return SECTION_IDENTITY_REGISTRY[slug];
