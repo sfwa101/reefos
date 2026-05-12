@@ -24,7 +24,6 @@
  * a transparent unit-by-unit audit trail.
  */
 
-import type { Product } from "@/lib/products";
 import {
   DEPOSIT_PCT,
   DEPOSIT_THRESHOLD,

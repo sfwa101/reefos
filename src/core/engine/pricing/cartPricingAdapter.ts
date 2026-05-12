@@ -33,12 +33,12 @@
  *     explicit `strategyKey` (e.g. force "wholesale" for a B2B account).
  */
 
-import type { Product } from "@/lib/products";
 import { initPricingEngine, pricingEngine } from "./bootstrap";
 import {
   PricingEngineError,
   type PriceBreakdown,
   type PricingContext,
+  type PricingInput,
   type PricingSelection,
 } from "./types";
 
@@ -67,7 +67,7 @@ export type CartPricingResult =
 export interface EvaluateLineInput<
   TSelection extends PricingSelection = PricingSelection,
 > {
-  readonly product: Product;
+  readonly product: PricingInput;
   /** Quantity is duplicated into `selection.quantity` for engine validation. */
   readonly quantity: number;
   /** Domain selection (meat prep, sweets booking, wholesale tiers …). */
@@ -147,7 +147,7 @@ export function evaluateCartLineItem<
  * =================================================================== */
 
 export function isHandledByNewEngine(
-  product: Product,
+  product: PricingInput,
   strategyKey?: string,
 ): boolean {
   ensureEngineReady();

@@ -71,6 +71,8 @@ Definitions:
 |---|---|---:|---:|---|---:|---|---|
 | 2026-05-12 | P-0 | 74 | 58 | present | ≥17 | >0 | Baseline frozen. Guardrails installed (DEV watchdog + ESLint warn). |
 | 2026-05-12 | P-A | 74 | 58 | removed | ≥17 | >0 | HGProduct eradicated; home storefront now consumes canonical ProductCardVM exclusively. |
+| 2026-05-12 | P-B/B-3 | 74 | 62 | removed | ≥17 | >0 | Cart engine domain decoupled from `@/lib/products` (12 files migrated to `useCartHydration` + snapshot; legacy bridge retained for §2.E consumers). |
+| 2026-05-12 | P-B/B-4 | 74 | 54 | removed | ≥17 | >0 | Pricing engine decoupled — strategies + adapter + hook consume narrow `PricingInput` instead of legacy `Product`; 8 pricing files dropped `@/lib/products`. |
 
 > Append a new row for every wave that changes any counter. Never edit an existing row.
 

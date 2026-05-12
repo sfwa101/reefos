@@ -9,7 +9,37 @@
  * imports from or mutates the live cart pipeline. Wiring is a later phase.
  */
 
-import type { Product } from "@/lib/products";
+/* ===================================================================
+ * PricingInput — narrow, vertical-agnostic contract.
+ *
+ * Wave P-B Step B-4: the engine no longer accepts the legacy
+ * denormalized `Product` view-model. It consumes ONLY the fields it
+ * needs to price a line. This makes the engine reusable for VMs,
+ * sovereign feeds, snapshots, and synthetic test fixtures.
+ *
+ * Structural compatibility: the legacy `Product` shape (and the cart
+ * `capturedSnapshot`) are both structurally assignable to `PricingInput`,
+ * so existing callers (CartContext, ButcherSheet, …) need no changes.
+ * =================================================================== */
+export interface PricingInput {
+  /** Stable product identifier (used for receipt/audit and registry lookups). */
+  readonly id: string;
+  /**
+   * Vertical / source label. Kept loose (`string`) on purpose — strategies
+   * own the canonical mapping for their own vertical.
+   */
+  readonly source: string;
+  /** Human-readable unit ("كيلو", "علبة", …). Optional for sovereign VMs. */
+  readonly unit?: string;
+  /** Base unit price in EGP, before any modifier or discount. */
+  readonly price: number;
+  /** Optional pre-discount price for "static_old_price" badge (read by FlashPriceResolver). */
+  readonly oldPrice?: number;
+  /** Sub-vertical key — sweets fulfilment type, butchery rule key, etc. */
+  readonly subCategory?: string;
+  /** Free-form attributes — costPrice, bonusPoints, excludeFromLoyalty, capabilities, … */
+  readonly metadata?: Readonly<Record<string, unknown>>;
+}
 
 /* ===================================================================
  * Modifier kinds (mirrors legacy engine for forward-compat migration).
@@ -51,7 +81,7 @@ export interface PricingSelection {
 }
 
 export interface PricingContext {
-  readonly product: Readonly<Product>;
+  readonly product: Readonly<PricingInput>;
   readonly currency: "EGP";
   /** Optional zone hint — strategies may apply cold-chain fees, etc. */
   readonly zoneAcceptsPerishables?: boolean;

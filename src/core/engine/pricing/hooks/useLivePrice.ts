@@ -19,12 +19,12 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import type { Product } from "@/lib/products";
 import { initPricingEngine, pricingEngine } from "../bootstrap";
 import {
   PricingEngineError,
   type PriceBreakdown,
   type PricingContext,
+  type PricingInput,
   type PricingSelection,
 } from "../types";
 
@@ -62,7 +62,7 @@ export interface UseLivePriceResult {
  * useless recomputes — the hook's `useMemo` keys on identity.
  */
 export function useLivePrice<TSelection extends PricingSelection>(
-  product: Product | null | undefined,
+  product: PricingInput | null | undefined,
   selection: TSelection | null | undefined,
   context?: LivePriceContext,
   options?: UseLivePriceOptions,
