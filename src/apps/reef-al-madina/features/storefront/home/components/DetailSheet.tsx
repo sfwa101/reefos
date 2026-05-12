@@ -24,7 +24,7 @@ import { toast } from "sonner";
 import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 
-import { getById } from "@/lib/products";
+import { getById } from "@/core/catalog/legacy/legacyRuntime";
 import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
