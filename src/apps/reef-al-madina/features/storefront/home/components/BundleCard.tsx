@@ -1,6 +1,7 @@
 /**
- * BundleCard — multi-product bundle tile shown in the Bundles rail.
- * Verbatim extraction; talks to CartContext only.
+ * BundleCard — multi-product bundle tile.
+ *
+ * Wave P-A — consumes `ProductCardVM[]` directly.
  */
 import { Package } from "lucide-react";
 import { toast } from "sonner";
@@ -8,8 +9,9 @@ import { toast } from "sonner";
 import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 import { getById } from "@/lib/products";
+import type { ProductCardVM } from "@/core/catalog/types";
 
-import type { Bundle, HGProduct } from "../types";
+import type { Bundle } from "../types";
 
 export const BundleCard = ({
   bundle,
@@ -17,11 +19,11 @@ export const BundleCard = ({
   hue,
 }: {
   bundle: Bundle;
-  items: HGProduct[];
+  items: ProductCardVM[];
   hue: string;
 }) => {
   const { add } = useCartActions();
-  const original = items.reduce((s, i) => s + i.price, 0);
+  const original = items.reduce((s, i) => s + i.price.amount, 0);
 
   const onBuy = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -50,7 +52,7 @@ export const BundleCard = ({
           {items.slice(0, 2).map((it) => (
             <img
               key={it.id}
-              src={it.image}
+              src={it.hero?.url ?? ""}
               alt=""
               loading="lazy"
               decoding="async"
