@@ -185,9 +185,11 @@ function FlashDialog({
       reason: form.reason || null,
       rank: Number(form.rank) || 0,
     };
-    const { error } = await supabase.from(PRODUCTS).insert(payload as never);
+    try {
+      await upsertFlashSaleFn({ data: { values: payload } });
+      toast.success("تمت الإضافة"); setOpen(false); onSaved();
+    } catch { toast.error("فشل الحفظ"); }
     setSaving(false);
-    if (error) toast.error("فشل الحفظ"); else { toast.success("تمت الإضافة"); setOpen(false); onSaved(); }
   };
 
   return (
