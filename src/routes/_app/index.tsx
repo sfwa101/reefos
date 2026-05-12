@@ -25,7 +25,6 @@ const layoutQueryOptions = () =>
     queryFn: () => getPublicLayoutFn(),
     staleTime: 60 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
-    initialData: DEFAULT_MOBILE_HOME_LAYOUT,
   });
 
 export const Route = createFileRoute("/_app/")({
