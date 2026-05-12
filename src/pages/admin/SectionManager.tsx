@@ -165,17 +165,8 @@ export default function SectionManager() {
                     <div key={i} className="h-16 rounded-xl bg-surface-muted animate-pulse" />
                   ))}
                 </div>
-              ) : !draftDoc ? (
-                <div className="p-10 text-center">
-                  <p className="font-display text-[15px]">لا توجد مسودة بعد</p>
-                  <p className="text-[12px] text-foreground-tertiary mt-1">
-                    ابدأ بسحب كتلة من المكتبة على اليسار.
-                  </p>
-                </div>
               ) : (
-                <p className="text-[12px] text-foreground-tertiary">
-                  Canvas (DnD) — سيتم تركيبها في الخطوة التالية. عدد الكتل: {draftDoc.blocks.length}.
-                </p>
+                <LayoutCanvas />
               )}
             </div>
           </div>
