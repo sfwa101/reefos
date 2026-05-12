@@ -200,3 +200,20 @@ export const listCustomersFn = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return (data ?? []) as CustomerListRow[];
   });
+
+// ---- Support Tickets ------------------------------------------------------
+export const closeSupportTicketFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb
+      .from("support_tickets")
+      .update({ status: "resolved", resolved_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
