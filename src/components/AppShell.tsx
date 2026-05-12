@@ -29,7 +29,10 @@ const AppShell = () => {
   const cartUpdatedAtRef = useRef<number>(Date.now());
   const cartSnapshotRef = useRef<string>("");
   const cartItemsRef = useRef<Array<{ id: string; quantity: number }>>([]);
-  const sig = cartLines.map((l) => `${l.product.id}x${l.qty}`).join("|");
+  const sig = useMemo(
+    () => cartLines.map((l) => `${l.product.id}x${l.qty}`).join("|"),
+    [cartLines],
+  );
   if (sig !== cartSnapshotRef.current) {
     cartSnapshotRef.current = sig;
     cartUpdatedAtRef.current = Date.now();
