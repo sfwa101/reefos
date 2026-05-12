@@ -1,22 +1,16 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listSuppliersFullFn,
+  createSupplierFn,
+  type SupplierFullRow,
+} from "@/lib/admin-catalog.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Building2 } from "lucide-react";
 import { toast } from "sonner";
 
-type Supplier = {
-  id: string;
-  name: string;
-  contact_phone: string | null;
-  closing_day: number | null;
-  collection_days: number[] | null;
-  outstanding_balance: number;
-  total_purchased: number;
-  total_paid: number;
-  is_active: boolean;
-};
+type Supplier = SupplierFullRow;
 
 export default function Suppliers() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -28,10 +22,9 @@ export default function Suppliers() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase as any).from("suppliers").select("*").order("created_at", { ascending: false }).limit(1000);
-    if (error) toast.error(error.message);
-    else setRows((data || []) as Supplier[]);
-    setLoading(false);
+    try { setRows(await listSuppliersFullFn()); }
+    catch (e) { toast.error((e as Error).message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed]);
@@ -39,18 +32,21 @@ export default function Suppliers() {
   const create = async () => {
     if (!form.name.trim()) return toast.error("الاسم مطلوب");
     const days = form.collection_days.split(",").map((s) => parseInt(s.trim())).filter((n) => Number.isFinite(n));
-    const { error } = await (supabase as any).from("suppliers").insert({
-      name: form.name.trim(),
-      contact_phone: form.contact_phone || null,
-      closing_day: form.closing_day ? parseInt(form.closing_day) : null,
-      collection_days: days,
-      payment_terms_days: parseInt(form.payment_terms_days) || 30,
-    });
-    if (error) return toast.error(error.message);
-    toast.success("تم إضافة المورد");
-    setForm({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
-    setShowForm(false);
-    load();
+    try {
+      await createSupplierFn({
+        data: {
+          name: form.name.trim(),
+          contact_phone: form.contact_phone || null,
+          closing_day: form.closing_day ? parseInt(form.closing_day) : null,
+          collection_days: days,
+          payment_terms_days: parseInt(form.payment_terms_days) || 30,
+        },
+      });
+      toast.success("تم إضافة المورد");
+      setForm({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
+      setShowForm(false);
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
