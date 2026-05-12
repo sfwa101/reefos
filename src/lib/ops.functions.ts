@@ -15,11 +15,8 @@ export type OpsCriticalOrder = {
   customer_id: string | null;
   total_amount: number | null;
   status: string;
-  delivery_info: Record<string, unknown> | null;
+  delivery_info: { [x: string]: unknown } | null;
   created_at: string;
-};
-export type OpsCriticalOrderRaw = Omit<OpsCriticalOrder, "delivery_info"> & {
-  delivery_info: { [x: string]: {} } | null;
 };
 
 export type OpsLowStockItem = {
