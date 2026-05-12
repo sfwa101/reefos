@@ -511,3 +511,89 @@ export const mintUniversalAssetFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message ?? "mint_failed");
     return { id: String(id) };
   });
+
+// ============= Wave R-2 Batch B.1 — Supplier Update / Soft Delete =============
+export type SupplierUpdateInput = {
+  id: string;
+  name?: string;
+  contact_phone?: string | null;
+  closing_day?: number | null;
+  collection_days?: number[];
+  payment_terms_days?: number;
+  is_active?: boolean;
+};
+
+export const updateSupplierFn = createServerFn({ method: "POST" })
+  .inputValidator((d: SupplierUpdateInput) => {
+    if (!d?.id) throw new Error("id_required");
+    const out: SupplierUpdateInput = { id: String(d.id) };
+    if (d.name !== undefined) {
+      const n = String(d.name).trim();
+      if (!n || n.length > 200) throw new Error("invalid_name");
+      out.name = n;
+    }
+    if (d.contact_phone !== undefined) {
+      const p = d.contact_phone == null ? null : String(d.contact_phone).trim();
+      if (p && !/^[+0-9 \-()]{6,20}$/.test(p)) throw new Error("invalid_phone");
+      out.contact_phone = p;
+    }
+    if (d.closing_day !== undefined) {
+      if (d.closing_day !== null && (!Number.isInteger(d.closing_day) || d.closing_day < 1 || d.closing_day > 31)) {
+        throw new Error("invalid_closing_day");
+      }
+      out.closing_day = d.closing_day;
+    }
+    if (d.collection_days !== undefined) {
+      if (!Array.isArray(d.collection_days) || d.collection_days.some((x) => !Number.isInteger(x) || x < 0 || x > 6)) {
+        throw new Error("invalid_collection_days");
+      }
+      out.collection_days = d.collection_days;
+    }
+    if (d.payment_terms_days !== undefined) {
+      if (!Number.isInteger(d.payment_terms_days) || d.payment_terms_days < 0 || d.payment_terms_days > 365) {
+        throw new Error("invalid_payment_terms_days");
+      }
+      out.payment_terms_days = d.payment_terms_days;
+    }
+    if (d.is_active !== undefined) out.is_active = !!d.is_active;
+    return out;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { id, ...patch } = data;
+    if (Object.keys(patch).length === 0) return { ok: true };
+    const { error } = await sb.from("suppliers").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setSupplierActiveFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; is_active: boolean }) => {
+    if (!d?.id) throw new Error("id_required");
+    return { id: String(d.id), is_active: !!d.is_active };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { error } = await sb.from("suppliers").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteSupplierFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return { id: String(d.id) };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    // Soft delete: deactivate first; hard delete only if no references — let DB constraints decide.
+    const { error } = await sb.from("suppliers").update({ is_active: false }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
