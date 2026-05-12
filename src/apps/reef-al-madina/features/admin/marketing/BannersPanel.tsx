@@ -131,14 +131,22 @@ function BannerDialog({
 
   const upload = async (file: File) => {
     setUploading(true);
-    const ext = file.name.split(".").pop();
-    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-    const { error } = await supabase.storage.from("marketing-banners").upload(path, file, { cacheControl: "3600", upsert: false });
-    if (error) { toast.error("فشل الرفع"); setUploading(false); return; }
-    const { data } = supabase.storage.from("marketing-banners").getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: data.publicUrl }));
-    setUploading(false);
-    toast.success("تم رفع الصورة");
+    try {
+      const buf = await file.arrayBuffer();
+      let binary = "";
+      const bytes = new Uint8Array(buf);
+      for (let i = 0; i < bytes.byteLength; i++) binary += String.fromCharCode(bytes[i]);
+      const base64 = btoa(binary);
+      const { publicUrl } = await uploadBannerImageFn({
+        data: { filename: file.name, contentType: file.type || "image/png", base64 },
+      });
+      setForm((f) => ({ ...f, image_url: publicUrl }));
+      toast.success("تم رفع الصورة");
+    } catch (e) {
+      toast.error((e as Error).message || "فشل الرفع");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const save = async () => {
