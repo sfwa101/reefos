@@ -108,7 +108,6 @@ const Profile = () => {
     setErrorMessage("");
 
     const payload = {
-      id: user.id,
       full_name: form.fullName.trim(),
       phone: form.phone || extractPhoneFromPseudoEmail(user.email) || null,
       birth_date: form.birthDate || null,
@@ -122,12 +121,14 @@ const Profile = () => {
       budget_range: form.budgetRange || null,
     };
 
-    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
-    if (error) {
-      console.error("profile save error", error);
+    try {
+      await updateMyProfileFn({ data: payload });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "تعذّر الحفظ";
+      console.error("profile save error", e);
       setSaveState("error");
-      setErrorMessage(error.message);
-      toast.error(`تعذّر الحفظ — ${error.message}`);
+      setErrorMessage(message);
+      toast.error(`تعذّر الحفظ — ${message}`);
       return;
     }
     await refreshProfile();
