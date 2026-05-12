@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
