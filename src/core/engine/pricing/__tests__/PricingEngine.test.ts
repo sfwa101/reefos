@@ -11,7 +11,6 @@
  */
 
 import { beforeAll, describe, expect, it } from "vitest";
-import type { Product } from "@/lib/products";
 import {
   PricingEngine,
   pricingEngine,
@@ -21,6 +20,7 @@ import {
   PricingEngineError,
   type IPricingStrategy,
   type PricingContext,
+  type PricingInput,
   type PricingModifier,
   type PricingSelection,
 } from "../types";
@@ -31,11 +31,11 @@ import type { SweetsSelection } from "../strategies/SweetsPricingStrategy";
 
 const HASSAN = { name: "Hassan", tier: "vip" as const };
 
-const buildProduct = (overrides: Partial<Product> & Pick<Product, "id" | "source" | "price">): Product => ({
-  name: "Test Product",
+/** Build a minimal capability-keyed PricingInput fixture. */
+const buildProduct = (
+  overrides: Partial<PricingInput> & Pick<PricingInput, "id" | "source" | "price">,
+): PricingInput => ({
   unit: "1",
-  image: "test.jpg",
-  category: "test",
   ...overrides,
 });
 
