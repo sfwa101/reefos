@@ -36,12 +36,9 @@ export function identityToPageKey(identity: RegistrySectionIdentity): string {
   return REEF_PAGE_KEY[identity.slug] ?? `category_${identity.slug}`;
 }
 
-const block = (kind: string, id: string, props?: Record<string, unknown>): RenderBlock =>
-  ({ kind, id, props });
-
 /** قائمة منتجات قسم. */
 export function resolveListTree(
-  section: SectionIdentity,
+  section: KernelSectionIdentity,
   items: readonly ProductCardVM[],
 ): RenderDescriptor {
   const blocks: RenderBlock[] = [
