@@ -129,6 +129,28 @@ export function resolveSectionTree(
   identity: RegistrySectionIdentity,
   orchestrator: HomeOrchestrator,
 ): RenderDescriptor {
+  // Bespoke route collapse — Wave P-D · Phase D-3.
+  // Short-circuit identities whose layoutVariant maps 1:1 to a single
+  // bespoke block (no factory / hero / overlays needed).
+  const BESPOKE_BLOCK_BY_VARIANT: Record<string, string> = {
+    "basket-builder": "commerce.basket_builder",
+    "subscription-manager": "commerce.subscription_manager",
+    "compare-grid": "commerce.compare_grid",
+  };
+  const bespokeKind = BESPOKE_BLOCK_BY_VARIANT[identity.layoutVariant];
+  if (bespokeKind) {
+    return {
+      context: { sectionSlug: identity.slug, view: "section" },
+      blocks: [
+        block("nav.back_header", "back-header", {
+          title: identity.title,
+          subtitle: identity.subtitle,
+        }),
+        block(bespokeKind, "bespoke"),
+      ],
+    };
+  }
+
   const theme = storeThemes[identity.themeKey];
   const caps = new Set(identity.capabilities ?? []);
   const blocks: RenderBlock[] = [
