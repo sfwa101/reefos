@@ -101,6 +101,10 @@ export interface MobileHomeLayoutV1 {
 5. `config.columns ∈ {2,3,4}`; other enums validated against allow-lists from `sdui-engine/types`.
 6. Total blocks ≤ **40** (DoS guard).
 7. Total document size ≤ **64 KB** serialized (matches `app_settings.value` JSONB sanity bound).
+8. **At least one** `display_in_*` flag must be `true` per block — orphan blocks (invisible everywhere) are rejected with `block_orphaned:<id>`.
+9. `display_in_stories = true` requires either `zone_overrides.stories.icon_url` or a derivable icon from `entity_refs[0]` (category cover) — enforced at save.
+10. `display_in_grid = true` requires a label (block `title` or `zone_overrides.grid.label`) — enforced at save.
+11. Per-zone `sort_order` (when present in `zone_overrides`) must be unique within that zone; gateway re-normalizes.
 
 Any violation → reject with `invalid_layout:<reason>`. **Never persist a half-valid document.**
 
