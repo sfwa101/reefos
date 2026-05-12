@@ -141,6 +141,9 @@ const buildIndex = (items: Record<string, CartLine>): Record<string, string> => 
 
 const STORAGE_KEY = "reef-cart-v2";
 
+const FALLBACK_CART_IMG =
+  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
+
 // localStorage may be blocked in sandboxed iframes (Lovable preview).
 const memoryStore: Record<string, string> = {};
 const safeStorage = createJSONStorage<CartState>(() => ({
