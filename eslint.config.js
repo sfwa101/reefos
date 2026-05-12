@@ -62,12 +62,12 @@ export default tseslint.config(
       "no-restricted-imports": ["warn", SUPABASE_CLIENT_FORBIDDEN_IN_UI],
     },
   },
-  // Wave P-0 — Block the legacy static catalog everywhere (any new file).
+  // Wave P-B/B-10 — `src/lib/products.ts` vaporized. The ban is now an ERROR
+  // everywhere; C2 is locked at 0.
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/lib/products.ts", "src/lib/products/**"],
     rules: {
-      "no-restricted-imports": ["warn", LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE],
+      "no-restricted-imports": ["error", LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE],
     },
   },
   eslintPluginPrettier,
