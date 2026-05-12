@@ -2,7 +2,7 @@
 // All sub-pieces live in src/features/library/. This file only owns top-level
 // tab + KYC verification status state.
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ShoppingBag, Library, Printer, Lock, FileText,
@@ -12,7 +12,8 @@ import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useQuery } from "@tanstack/react-query";
+import { myKycStatusQueryOptions } from "@/lib/library.queries";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { PALETTE, useLibraryProducts, type TabKey } from "@/apps/reef-al-madina/features/library/data";
 import { BorrowCard } from "@/apps/reef-al-madina/features/library/components/BorrowCard";
@@ -27,15 +28,8 @@ const SchoolLibrarySection = () => {
   const [borrowProduct, setBorrowProduct] = useState<Product | null>(null);
   const [borrowOpen, setBorrowOpen] = useState(false);
   const { user } = useAuth();
-  const [isVerified, setIsVerified] = useState<boolean>(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!user) { setIsVerified(false); return; }
-    supabase.from("kyc_verifications").select("status").eq("user_id", user.id).eq("status", "approved").maybeSingle()
-      .then(({ data }) => { if (!cancelled) setIsVerified(!!data); });
-    return () => { cancelled = true; };
-  }, [user?.id]);
+  const { data: kyc } = useQuery(myKycStatusQueryOptions(!!user));
+  const isVerified = !!kyc?.verified;
 
   const products = useLibraryProducts();
 
