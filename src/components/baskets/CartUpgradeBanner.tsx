@@ -66,7 +66,8 @@ const CartUpgradeBanner = () => {
                 <ArrowLeftRight className="h-3 w-3" /> حوّل ووفّر
               </button>
               <Link
-                to="/store/baskets"
+                to="/store/$slug"
+                params={{ slug: "baskets" }}
                 className="flex items-center justify-center gap-1 rounded-full bg-white/15 px-3 py-1.5 text-[11px] font-extrabold"
               >
                 <ShoppingBasket className="h-3 w-3" /> تصفّح
