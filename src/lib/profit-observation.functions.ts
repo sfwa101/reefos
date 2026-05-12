@@ -17,7 +17,8 @@ export type OverrideLogRow = {
   overridden_grand_total: number | null;
   reason: string;
   loss_prevention_reason: string | null;
-  metadata: Record<string, unknown>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metadata: Record<string, any>;
   created_at: string;
 };
 
