@@ -167,8 +167,14 @@ export default function Partners() {
                   <p className="font-medium text-[14px] truncate">{p.partner_name}</p>
                   <p className="text-[11px] text-foreground-tertiary truncate">{p.products?.name} • {p.percentage}% من {p.split_type === "net_profit" ? "صافي الربح" : p.split_type === "gross_profit" ? "إجمالي الربح" : "الإيراد"}</p>
                 </div>
+                <button onClick={() => editPartner(p)} className="text-[11px] p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
                 <button onClick={() => togglePartner(p.id, p.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${p.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
                   {p.is_active ? "نشط" : "موقوف"}
+                </button>
+                <button onClick={() => removePartner(p)} className="text-[11px] p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}
