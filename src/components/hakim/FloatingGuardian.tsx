@@ -55,90 +55,30 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
   // Phase 65 — filter insights by the active workspace context.
   const activeWorkspaceId = useSovereignContext((s) => s.activeWorkspaceId);
 
-  const [insights, setInsights] = useState<InsightRow[]>([]);
+  const qc = useQueryClient();
   const [open, setOpen] = useState(false);
-  const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
-  const [snapLoading, setSnapLoading] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Initial load + realtime subscription
-  useEffect(() => {
-    if (!userId) return;
-    let active = true;
+  const { data: insightsData } = useQuery(
+    hakimInsightsQueryOptions(Boolean(userId), activeWorkspaceId ?? null),
+  );
+  const insights = useMemo<InsightRow[]>(
+    () => (insightsData ?? []) as InsightRow[],
+    [insightsData],
+  );
 
-    void (async () => {
-      let q = (supabase.from("hakim_user_insights" as never) as unknown as {
-        select: (s: string) => {
-          is: (c: string, v: null) => {
-            order: (c: string, o: { ascending: boolean }) => {
-              limit: (n: number) => Promise<{ data: InsightRow[] | null }>;
-            };
-          };
-          eq: (c: string, v: string) => {
-            is: (c: string, v: null) => {
-              order: (c: string, o: { ascending: boolean }) => {
-                limit: (n: number) => Promise<{ data: InsightRow[] | null }>;
-              };
-            };
-          };
-        };
-      }).select("*");
-      const result = activeWorkspaceId
-        ? await q.eq("workspace_id", activeWorkspaceId).is("read_at", null).order("created_at", { ascending: false }).limit(20)
-        : await q.is("read_at", null).order("created_at", { ascending: false }).limit(20);
-      if (!active) return;
-      setInsights(((result.data ?? []) as unknown as InsightRow[]));
-    })();
-
-    const ch = supabase
-      .channel(`hakim_insights_${userId}_${activeWorkspaceId ?? "all"}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "hakim_user_insights",
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          const row = payload.new as InsightRow;
-          if (row.read_at) return;
-          if (activeWorkspaceId && row.workspace_id !== activeWorkspaceId) return;
-          setInsights((prev) => [row, ...prev].slice(0, 20));
-        },
-      )
-      .subscribe();
-
-    return () => {
-      active = false;
-      void supabase.removeChannel(ch);
-    };
-  }, [userId, activeWorkspaceId]);
+  const { data: snapshotData, isFetching: snapLoading } = useQuery({
+    ...hakimSnapshotQueryOptions(Boolean(userId) && open, 30),
+  });
+  const snapshot: Snapshot | null = (snapshotData ?? null) as Snapshot | null;
 
   const top = insights[0];
   const highSeverity = insights.some(
     (i) => i.severity === "warning" || i.severity === "critical",
   );
-
-  // Load financial snapshot on open
-  useEffect(() => {
-    if (!open || !userId) return;
-    setSnapLoading(true);
-    void (async () => {
-      const { data } = await (supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: unknown }>)(
-        "hakim_user_financial_snapshot",
-        { p_user_id: userId, p_days: 30 },
-      );
-      setSnapshot((data as Snapshot) ?? null);
-      setSnapLoading(false);
-    })();
-  }, [open, userId]);
 
   // Auto-scroll chat
   useEffect(() => {
@@ -146,14 +86,20 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
   }, [messages.length]);
 
   async function dismiss(id: string) {
-    setInsights((prev) => prev.filter((i) => i.id !== id));
-    await (supabase.from("hakim_user_insights" as never) as unknown as {
-      update: (v: Record<string, unknown>) => {
-        eq: (c: string, v: string) => Promise<unknown>;
-      };
-    })
-      .update({ read_at: new Date().toISOString() })
-      .eq("id", id);
+    // optimistic update
+    qc.setQueryData<InsightRow[]>(
+      userKeys.hakimInsights(activeWorkspaceId ?? null),
+      (prev) => (prev ?? []).filter((i) => i.id !== id),
+    );
+    try {
+      await markHakimInsightReadFn({ data: { id } });
+    } catch (e) {
+      console.error("hakim insight dismiss error", e);
+    } finally {
+      void qc.invalidateQueries({
+        queryKey: userKeys.hakimInsights(activeWorkspaceId ?? null),
+      });
+    }
   }
 
   async function sendMessage() {
@@ -163,17 +109,9 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
     setInput("");
     setSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke("hakim-chat", {
-        body: {
-          message: text,
-          scope: workspace,
-          snapshot,
-        },
+      const { reply } = await chatHakimFn({
+        data: { message: text, scope: workspace, snapshot },
       });
-      const reply =
-        (data as { reply?: string; message?: string } | null)?.reply ??
-        (data as { reply?: string; message?: string } | null)?.message ??
-        (error ? "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." : "…");
       setMessages((m) => [...m, { role: "assistant", content: reply }]);
     } catch {
       setMessages((m) => [
