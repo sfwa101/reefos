@@ -89,9 +89,8 @@ export default function HumanDirectory() {
             />
           </div>
           <button
-            disabled
-            title="قريباً"
-            className="hidden lg:inline-flex items-center gap-1.5 h-11 px-4 rounded-2xl bg-primary/10 text-primary text-[12.5px] font-semibold opacity-60"
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex items-center gap-1.5 h-11 px-4 rounded-2xl bg-primary text-primary-foreground text-[12.5px] font-semibold press"
           >
             <UserPlus className="h-4 w-4" /> إضافة إنسان
           </button>
