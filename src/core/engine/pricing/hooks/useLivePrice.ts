@@ -19,12 +19,12 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
-import type { Product } from "@/lib/products";
 import { initPricingEngine, pricingEngine } from "../bootstrap";
 import {
   PricingEngineError,
   type PriceBreakdown,
   type PricingContext,
+  type PricingInput,
   type PricingSelection,
 } from "../types";
 
