@@ -20,6 +20,14 @@ import {
   SectionHeaderBlock,
   SubscribeCtaBlock,
 } from "./blocks";
+import {
+  BackHeaderBlock,
+  CompareBarBlock,
+  ProductDetailSheetBlock,
+  SectionFiltersSheetBlock,
+  SectionHeroBannerBlock,
+  SectionLayoutFactoryBlock,
+} from "./sectionPage";
 
 let registered = false;
 export function registerCoreBlocks() {
