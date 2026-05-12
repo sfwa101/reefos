@@ -2,11 +2,22 @@
 // Sanctioned `createServerFn` handlers for `app_settings` key/value store.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import {
+  LAYOUT_KEY_PREFIX,
+  MOBILE_HOME_LAYOUT_KEY,
+  MOBILE_HOME_LAYOUT_DRAFT_KEY,
+  MobileHomeLayoutSchema,
+} from "@/lib/section-manager.types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SbAny = any;
 
-const ALLOWED_KEYS = new Set(["general", "finance"]);
+const ALLOWED_KEYS = new Set([
+  "general",
+  "finance",
+  MOBILE_HOME_LAYOUT_KEY,
+  MOBILE_HOME_LAYOUT_DRAFT_KEY,
+]);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AppSettingsBundle = Record<string, Record<string, any>>;
@@ -43,6 +54,14 @@ export const upsertAppSettingFn = createServerFn({ method: "POST" })
       if (v.tax_pct != null && (v.tax_pct < 0 || v.tax_pct > 100)) throw new Error("invalid_tax_pct");
       if (v.default_shipping != null && v.default_shipping < 0) throw new Error("invalid_shipping");
       if (v.min_order_total != null && v.min_order_total < 0) throw new Error("invalid_min_order");
+    }
+    if (d.key.startsWith(LAYOUT_KEY_PREFIX)) {
+      const parsed = MobileHomeLayoutSchema.safeParse(d.value);
+      if (!parsed.success) {
+        const reason = parsed.error.issues[0]?.message ?? "invalid_layout";
+        throw new Error(`invalid_layout:${reason}`);
+      }
+      d.value = parsed.data as Record<string, any>;
     }
     return d;
   })
