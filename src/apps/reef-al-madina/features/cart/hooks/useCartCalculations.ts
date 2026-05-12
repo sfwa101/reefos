@@ -100,7 +100,7 @@ export const useCartCalculations = ({
           fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
       )
       .map((l) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
+        const unit = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
         const sub = unit * l.qty;
         const lineRequired = sub >= DEPOSIT_THRESHOLD;
         const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
