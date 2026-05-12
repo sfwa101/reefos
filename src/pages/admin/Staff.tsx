@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { Users, ShieldCheck, Truck, Store, Plus } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listStaffProfilesFn,
+  manageStaffRoleFn,
+  type StaffProfileRow,
+} from "@/lib/hr.functions";
 import { toast } from "sonner";
+
 
 const APP_ROLES = [
   "admin",
