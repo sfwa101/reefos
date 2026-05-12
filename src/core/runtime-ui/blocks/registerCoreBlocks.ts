@@ -20,6 +20,14 @@ import {
   SectionHeaderBlock,
   SubscribeCtaBlock,
 } from "./blocks";
+import {
+  BackHeaderBlock,
+  CompareBarBlock,
+  ProductDetailSheetBlock,
+  SectionFiltersSheetBlock,
+  SectionHeroBannerBlock,
+  SectionLayoutFactoryBlock,
+} from "./sectionPage";
 
 let registered = false;
 export function registerCoreBlocks() {
@@ -40,6 +48,12 @@ export function registerCoreBlocks() {
     "commerce.add_to_cart": AddToCartBlock,
     "commerce.quick_buy_bar": QuickBuyBarBlock,
     "commerce.subscribe_cta": SubscribeCtaBlock,
+    "nav.back_header": BackHeaderBlock,
+    "section.hero_banner": SectionHeroBannerBlock,
+    "section.layout_factory": SectionLayoutFactoryBlock,
+    "section.filters_sheet": SectionFiltersSheetBlock,
+    "commerce.compare_bar": CompareBarBlock,
+    "product.detail_sheet": ProductDetailSheetBlock,
   });
   registered = true;
 }
