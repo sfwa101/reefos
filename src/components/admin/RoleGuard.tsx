@@ -1,3 +1,8 @@
+// @constitutional-exemption: Article 5 — auth boot.
+// RoleGuard is the bootstrap primitive that resolves the current admin's
+// roles before the rest of the Admin shell mounts. It is permitted to import
+// the raw Supabase client only for `auth.getUser()` + `user_roles` lookup.
+// See docs/constitution/CAPABILITY_SYSTEM.md.
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
