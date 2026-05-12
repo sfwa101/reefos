@@ -21,7 +21,15 @@ export type RemoteLine = {
   meta: CartLineMeta;
 };
 
-export type LocalLine = { product: Product; qty: number; meta?: CartLineMeta };
+export type LocalLine = {
+  product: Product;
+  qty: number;
+  meta?: CartLineMeta;
+  /** Wave P-B — frozen unit price written into `meta.unitPrice` on push. */
+  capturedPrice?: number;
+  capturedName?: string;
+  capturedImage?: string;
+};
 
 /** Stable line identity (excludes product id; combined with product_id at the row level). */
 export const computeLineKey = (meta?: CartLineMeta): string => {
