@@ -37,7 +37,7 @@ const SchoolLibrarySection = () => {
     return () => { cancelled = true; };
   }, [user?.id]);
 
-  const products = useMemo(libraryProducts, []);
+  const products = useLibraryProducts();
 
   const onBorrowClick = (p: Product) => {
     if (!user) { toast.error("سجل الدخول أولاً"); return; }
