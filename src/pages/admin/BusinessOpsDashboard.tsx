@@ -78,13 +78,13 @@ export default function BusinessOpsDashboard() {
         {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <KpiTile icon={TrendingUp} label="مبيعات اليوم"
-            value={kpi ? fmtMoney(kpi.revenue) : "—"} loading={kpiQuery.isLoading} accent="success" />
+            value={kpi ? fmtMoney(kpi.revenue) : "—"} loading={isLoading} accent="success" />
           <KpiTile icon={ShoppingBag} label="طلبات اليوم"
-            value={kpi ? String(kpi.count) : "—"} loading={kpiQuery.isLoading} accent="info" />
+            value={kpi ? String(kpi.count) : "—"} loading={isLoading} accent="info" />
           <KpiTile icon={Activity} label="طلبات نشطة"
-            value={kpi ? String(kpi.active) : "—"} loading={kpiQuery.isLoading} accent="accent" />
+            value={kpi ? String(kpi.active) : "—"} loading={isLoading} accent="accent" />
           <KpiTile icon={Receipt} label="متوسط قيمة الطلب"
-            value={kpi ? fmtMoney(kpi.aov) : "—"} loading={kpiQuery.isLoading} accent="primary" />
+            value={kpi ? fmtMoney(kpi.aov) : "—"} loading={isLoading} accent="primary" />
         </div>
 
         {/* Critical orders */}
@@ -96,7 +96,7 @@ export default function BusinessOpsDashboard() {
             </div>
             <span className="text-[11px] text-foreground-tertiary">{critical.length} طلب</span>
           </header>
-          {criticalQuery.isLoading ? (
+          {isLoading ? (
             <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto h-5 w-5" /></div>
           ) : !critical.length ? (
             <div className="p-8 text-center text-sm text-foreground-secondary">لا طلبات نشطة الآن — راحة 🎉</div>
@@ -134,7 +134,7 @@ export default function BusinessOpsDashboard() {
             </div>
             <Link to="/admin/low-stock" className="text-[11px] text-primary">عرض الكل ←</Link>
           </header>
-          {lowStockQuery.isLoading ? (
+          {isLoading ? (
             <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto h-5 w-5" /></div>
           ) : !lowStock.length ? (
             <div className="p-8 text-center text-sm text-foreground-secondary">المخزون بحالة جيدة 👌</div>
