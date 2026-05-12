@@ -14,7 +14,7 @@
  *   5. Return breakdown   → immutable, with strategyKey for receipts
  */
 
-import type { Product } from "@/lib/products";
+import type { PricingInput } from "./types";
 import {
   PricingEngineError,
   DEFAULT_COST_RATIO,
