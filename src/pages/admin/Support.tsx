@@ -1,6 +1,7 @@
 import { LifeBuoy, AlertCircle, CheckCircle2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { closeSupportTicketFn } from "@/lib/crm.functions";
 import { UniversalAdminGrid, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
 
@@ -61,6 +62,7 @@ const columns: Column<Ticket>[] = [
 ];
 
 export default function Support() {
+  const closeTicket = useServerFn(closeSupportTicketFn);
   const rowActions: RowAction<Ticket>[] = [
     {
       label: "إغلاق",
@@ -71,20 +73,13 @@ export default function Support() {
           toast.info("التذكرة مغلقة بالفعل");
           return;
         }
-        const { error } = await (supabase as any)
-          .from("support_tickets")
-          .update({
-            status: "resolved",
-            resolved_at: new Date().toISOString(),
-          })
-          .eq("id", row.id);
-        if (error) {
+        try {
+          await closeTicket({ data: { id: row.id } });
+          toast.success("تم حل التذكرة ✅");
+          setTimeout(() => window.location.reload(), 400);
+        } catch {
           toast.error("تعذر إغلاق التذكرة");
-          return;
         }
-        toast.success("تم حل التذكرة ✅");
-        // Soft refresh
-        setTimeout(() => window.location.reload(), 400);
       },
     },
   ];
