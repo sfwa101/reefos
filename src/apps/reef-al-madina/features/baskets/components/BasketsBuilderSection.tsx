@@ -56,7 +56,8 @@ const BasketsBuilderSection = () => {
       {/* Quick actions */}
       <section className="grid grid-cols-2 gap-3">
         <Link
-          to="/store/baskets-build"
+          to="/store/$slug"
+          params={{ slug: "baskets-build" }}
           className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 p-3.5 text-right text-white shadow-tile transition active:scale-[0.98]"
         >
           <PackagePlus className="mb-1.5 h-5 w-5" />
