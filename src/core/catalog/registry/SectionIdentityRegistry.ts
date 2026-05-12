@@ -173,6 +173,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
         "linear-gradient(135deg, hsl(20 60% 28%), hsl(15 50% 40%) 60%, hsl(35 70% 60%))",
     },
     layoutVariant: "meal-menu",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   restaurants: {
     slug: "restaurants",
