@@ -108,12 +108,22 @@ export type HomeOrchestrator = {
   resetFilters: () => void;
 };
 
-export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
+/**
+ * Wave P-D (One Artery) — single canonical cache key for the home section.
+ * Both the route loader (`/_app/`) and `useHomeOrchestrator` consume this
+ * exact `queryOptions`, so there is exactly ONE network read of
+ * `salsabil_assets` per home visit. Other consumers can derive their shape
+ * via `select` against the same key — never a parallel duplicate fetch.
+ */
+export const homeSectionQueryOptions = (
+  source: ProductSource = "home",
+  limit = 48,
+) => {
   const slug = SOURCE_TO_SLUG[source] ?? source;
-  const { data: catalog = [], isLoading } = useQuery({
-    queryKey: ["catalog", "section", slug, 48, "vm"],
+  return queryOptions({
+    queryKey: ["catalog", "section", slug, limit, "vm"] as const,
     queryFn: async (): Promise<ProductCardVM[]> => {
-      const r = await catalogGateway.listSection({ slug, limit: 48, sort: "popularity" });
+      const r = await catalogGateway.listSection({ slug, limit, sort: "popularity" });
       if (!r.items.length) {
         console.warn("[CatalogGateway] Section returned 0 products for slug:", slug);
       }
@@ -122,6 +132,12 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
     staleTime: 5 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
   });
+};
+
+export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
+  const slug = SOURCE_TO_SLUG[source] ?? source;
+  const { data: catalog = [], isLoading } = useQuery(homeSectionQueryOptions(source));
+
 
   const rawProducts = useMemo(
     () => catalog.map((vm) => vmToProduct(vm, source)),
