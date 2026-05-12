@@ -40,6 +40,9 @@ import {
   RestaurantItemSheetBlock,
   SweetsSheetBlock,
   CompareSectionBlock,
+  BasketBuilderBlock,
+  SubscriptionManagerBlock,
+  CompareGridBlock,
 } from "./migratedSheets";
 
 let registered = false;
