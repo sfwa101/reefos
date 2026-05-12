@@ -309,7 +309,6 @@ export const endFlashSaleFn = createServerFn({ method: "POST" })
 export const listFlashSalesFn = getActiveFlashSaleFn;
 
 // ============= Wave R-1 Batch 2 — Banner Storage Upload =============
-import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 export const uploadBannerImageFn = createServerFn({ method: "POST" })
   .inputValidator((d: { filename: string; contentType: string; base64: string }) => {
