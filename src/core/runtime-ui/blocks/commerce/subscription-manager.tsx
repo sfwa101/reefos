@@ -12,7 +12,7 @@ import { toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { Pause, Play, Trash2, Clock, Lock, CalendarClock, Wallet, Sparkles, ShoppingBasket } from "lucide-react";
 
-const BasketsSubs = () => {
+const SubscriptionManagerBlock = () => {
   const { subs, isAuthed, updateSubscription, deleteSubscription } = useSubscriptions();
 
   const togglePause = async (s: SubscriptionRecord) => {
