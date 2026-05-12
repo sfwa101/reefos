@@ -92,6 +92,33 @@ export default function Partners() {
     }
   };
 
+  const editPartner = async (p: ProductPartnerRow) => {
+    const pctRaw = window.prompt(`النسبة الجديدة لـ "${p.partner_name}" (0-100):`, String(p.percentage));
+    if (pctRaw === null) return;
+    const pct = parseFloat(pctRaw);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) return toast.error("نسبة غير صالحة");
+    const splitRaw = window.prompt('نوع التقسيم: net_profit / gross_profit / revenue', p.split_type);
+    if (splitRaw === null) return;
+    try {
+      await updatePartnerFn({ data: { id: p.id, percentage: pct, split_type: splitRaw } });
+      toast.success("تم التحديث");
+      load();
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = { invalid_pct: "نسبة غير صالحة", invalid_split: "نوع تقسيم غير صالح" };
+      toast.error(map[msg] ?? msg);
+    }
+  };
+
+  const removePartner = async (p: ProductPartnerRow) => {
+    if (!confirm(`حذف الشريك "${p.partner_name}"؟ سيتم تعطيله.`)) return;
+    try {
+      await deletePartnerFn({ data: { id: p.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (e) { toast.error((e as Error).message); }
+  };
+
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (!allowed) return (<><MobileTopbar title="الشركاء" /><div className="p-8 text-center" dir="rtl"><ShieldAlert className="h-12 w-12 mx-auto text-foreground-tertiary mb-3" /><p>غير متاح</p></div></>);
 
