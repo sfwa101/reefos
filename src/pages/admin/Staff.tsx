@@ -84,7 +84,7 @@ export default function StaffAdmin() {
   const onDelete = async (r: any) => {
     if (!confirm(`حذف دور ${ROLE_LABEL[r.role] ?? r.role}؟`)) return;
     try {
-      await manageStaffRoleFn({ data: { action: "delete", role: r.role, role_id: r.id, user_id: r.user_id } });
+      await revokeRoleFn({ data: { role_id: r.id, role: r.role } });
       toast.success("تم الحذف");
       refresh();
     } catch (e) {
