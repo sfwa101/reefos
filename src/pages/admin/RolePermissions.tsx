@@ -1,12 +1,9 @@
 import { useCallback, useState } from "react";
 import { ShieldCheck, Key, Users, Lock } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import { getPermissionMatrixFn, togglePermissionFn, type AppRole } from "@/lib/rbac.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-
-type AppRole = Database["public"]["Enums"]["app_role"];
 
 const ROLES: { key: AppRole; label: string }[] = [
   { key: "admin", label: "مدير" },
@@ -31,24 +28,13 @@ type Row = {
 };
 
 async function fetchMatrix(): Promise<Row[]> {
-  const [permsRes, mapRes] = await Promise.all([
-    supabase.from("permissions").select("id,key,label,group_name").order("group_name").order("key"),
-    supabase.from("role_permissions").select("role,permission_key"),
-  ]);
-  if (permsRes.error) throw permsRes.error;
-  if (mapRes.error) throw mapRes.error;
-  const grants = new Map<string, Set<AppRole>>();
-  for (const m of mapRes.data ?? []) {
-    const set = grants.get(m.permission_key) ?? new Set<AppRole>();
-    set.add(m.role as AppRole);
-    grants.set(m.permission_key, set);
-  }
-  return (permsRes.data ?? []).map((p) => ({
+  const { matrix } = await getPermissionMatrixFn();
+  return matrix.map((p) => ({
     id: p.id,
     key: p.key,
     label: p.label,
     group_name: p.group_name,
-    granted: grants.get(p.key) ?? new Set<AppRole>(),
+    granted: new Set<AppRole>(p.roles),
   }));
 }
 
@@ -60,17 +46,10 @@ function MatrixRow({ row }: { row: Row }) {
     const has = granted.has(role);
     setBusy(role);
     try {
-      if (has) {
-        const { error } = await supabase.from("role_permissions")
-          .delete().eq("role", role).eq("permission_key", row.key);
-        if (error) throw error;
-        const next = new Set(granted); next.delete(role); setGranted(next);
-      } else {
-        const { error } = await supabase.from("role_permissions")
-          .insert({ role, permission_key: row.key });
-        if (error) throw error;
-        const next = new Set(granted); next.add(role); setGranted(next);
-      }
+      await togglePermissionFn({ data: { role, permissionKey: row.key, granted: !has } });
+      const next = new Set(granted);
+      if (has) next.delete(role); else next.add(role);
+      setGranted(next);
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "تعذّر تحديث الصلاحية");
     } finally {
