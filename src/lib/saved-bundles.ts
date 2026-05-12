@@ -23,7 +23,7 @@ import {
   STORAGE,
   type SubscriptionRecord,
   type SubFrequencyId,
-} from "./baskets";
+} from "./bundle-thresholds";
 
 type SubItemsBlob = {
   lines: Array<{ productId: string; qty?: number }>;

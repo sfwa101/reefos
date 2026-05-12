@@ -15,7 +15,7 @@ import {
   fulfillmentTypeFor,
   formatBookingShort,
   isSweetsProduct,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import { NumberFlow } from "./NumberFlow";
 
 /**

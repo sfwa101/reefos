@@ -3,7 +3,7 @@ import {
   fulfillmentMeta,
   fulfillmentTypeFor,
   isSweetsProduct,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import { Calendar, Truck } from "lucide-react";
 
 export type FulfillmentBadgeProps = {

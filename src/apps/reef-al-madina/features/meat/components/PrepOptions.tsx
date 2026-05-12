@@ -13,7 +13,7 @@ import {
 import {
   slaForPrep, slaMeta,
   type PrepOption, type PrepAddon, type PackagingOption,
-} from "@/lib/butcheryPrep";
+} from "@/lib/weighed-prep-rules";
 
 type Props = {
   preps: PrepOption[];

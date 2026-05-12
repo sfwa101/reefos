@@ -14,7 +14,7 @@ import {
   basketContents, basketMarketing, hydrateBasket, sumBasketRetail,
   subFrequencies, findFrequency,
   type SubFrequencyId,
-} from "@/lib/baskets";
+} from "@/lib/bundle-thresholds";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import SmartSwapSheet from "@/core/runtime-ui/blocks/commerce/smart-swap-sheet";
 import AnimatedNumber from "@/components/baskets/AnimatedNumber";

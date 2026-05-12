@@ -8,7 +8,7 @@ import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
-import type { Restaurant } from "@/lib/restaurants";
+import type { Restaurant } from "@/lib/vendor-menu-config";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 

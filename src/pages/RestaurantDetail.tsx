@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
 import { ArrowRight, Clock, Star, Wallet, Plus } from "lucide-react";
 import { motion } from "framer-motion";
-import { getRestaurant } from "@/lib/restaurants";
+import { getRestaurant } from "@/lib/vendor-menu-config";
 import { products as ALL_PRODUCTS } from "@/core/catalog/legacy/legacyRuntime";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { toLatin, fmtMoney } from "@/lib/format";

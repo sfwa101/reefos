@@ -4,7 +4,7 @@ import { toast } from "sonner";
 import { useCartActions } from "@/context/CartContext";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
-import { LIBRARY_BUNDLES } from "@/lib/library";
+import { LIBRARY_BUNDLES } from "@/lib/digital-borrowing";
 import { PALETTE } from "../data";
 
 export const BundlesGrid = () => {

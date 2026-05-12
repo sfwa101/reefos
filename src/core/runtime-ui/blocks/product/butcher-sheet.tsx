@@ -12,13 +12,13 @@ import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
-} from "@/lib/butcheryPrep";
+} from "@/lib/weighed-prep-rules";
 import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/meat/components/Panel";
 import { CutBuilder } from "@/apps/reef-al-madina/features/meat/components/CutBuilder";
 import { PrepOptions } from "@/apps/reef-al-madina/features/meat/components/PrepOptions";
 import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
-import type { MeatSelection } from "@/core/engine/pricing/strategies/MeatPricingStrategy";
+import type { WeighedSelection } from "@/core/engine/pricing/strategies/WeighedPricingStrategy";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 
@@ -78,8 +78,8 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
   });
 
   // ── Live Pricing Integration (Phase 5.1) ───────────────────────
-  // Build a stable MeatSelection that mirrors the engine contract.
-  const liveSelection = useMemo<MeatSelection | null>(() => {
+  // Build a stable WeighedSelection that mirrors the engine contract.
+  const liveSelection = useMemo<WeighedSelection | null>(() => {
     if (!weight || !prep) return null;
     return {
       quantity: qty,
@@ -91,7 +91,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
     };
   }, [qty, weight, prep, addonIds, packagingId, crossIds]);
 
-  const { supported, breakdown } = useLivePrice<MeatSelection>(
+  const { supported, breakdown } = useLivePrice<WeighedSelection>(
     product,
     liveSelection,
     { zoneAcceptsPerishables: true, customerTier: "bronze" },

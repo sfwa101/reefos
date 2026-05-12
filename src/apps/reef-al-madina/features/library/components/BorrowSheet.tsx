@@ -10,7 +10,7 @@ import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
   BORROW_DURATIONS, calcBorrowPrice, type BorrowDuration,
-} from "@/lib/library";
+} from "@/lib/digital-borrowing";
 import { libraryBorrowToModifiers } from "@/lib/pricingAdapters";
 import { PALETTE } from "../data";
 

@@ -1,6 +1,6 @@
 import { Repeat, ShieldCheck } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import type { villageMetaFor } from "@/lib/villageMeta";
+import type { villageMetaFor } from "@/lib/sourcing-meta";
 
 type Village = NonNullable<ReturnType<typeof villageMetaFor>>;
 

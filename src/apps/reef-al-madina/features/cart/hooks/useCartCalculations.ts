@@ -7,7 +7,7 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   DEPOSIT_THRESHOLD,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";

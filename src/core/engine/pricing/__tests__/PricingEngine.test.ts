@@ -24,8 +24,8 @@ import {
   type PricingModifier,
   type PricingSelection,
 } from "../types";
-import type { MeatSelection } from "../strategies/MeatPricingStrategy";
-import type { SweetsSelection } from "../strategies/SweetsPricingStrategy";
+import type { WeighedSelection } from "../strategies/WeighedPricingStrategy";
+import type { CustomFulfillmentSelection } from "../strategies/CustomFulfillmentPricingStrategy";
 
 /* ---------- Test fixtures ---------- */
 
@@ -120,7 +120,7 @@ describe("Scenario 2 — Meat (worst case composition)", () => {
       // Customer name (${HASSAN.name}) intentionally not on PricingInput.
     });
 
-    const selection: MeatSelection = {
+    const selection: WeighedSelection = {
       quantity: 12,
       weight: { id: "1", label: "1 كيلو", factor: 1 },
       prep: { id: "cubes", label: "تقطيع مكعبات", price: 10, tier: "clean" },
@@ -128,7 +128,7 @@ describe("Scenario 2 — Meat (worst case composition)", () => {
       packagingId: "vacuum",
     };
 
-    const result = pricingEngine.calculate<MeatSelection>({
+    const result = pricingEngine.calculate<WeighedSelection>({
       product,
       selection,
       context: { customerTier: HASSAN.tier },
@@ -154,14 +154,14 @@ describe("Scenario 2 — Meat (worst case composition)", () => {
       subCategory: "لحوم حمراء",
       price: 100,
     });
-    const selection: MeatSelection = {
+    const selection: WeighedSelection = {
       quantity: 1,
       weight: { id: "1", label: "1 كيلو", factor: 1 },
       prep: { id: "raw", label: "نيء", price: 0, tier: "raw" },
       addonIds: [],
       packagingId: "normal",
     };
-    const result = pricingEngine.calculate<MeatSelection>({
+    const result = pricingEngine.calculate<WeighedSelection>({
       product,
       selection,
       context: { customerTier: "guest" },
@@ -184,12 +184,12 @@ describe("Scenario 3 — Sweets Type C (deposit + zero silent failures)", () => 
   });
 
   it("computes a 50% deposit when booking is provided and subtotal ≥ 300", () => {
-    const selection: SweetsSelection = {
+    const selection: CustomFulfillmentSelection = {
       quantity: 1,
       booking: { date: "2026-05-10", slotId: "morning" },
     };
 
-    const result = pricingEngine.calculate<SweetsSelection>({
+    const result = pricingEngine.calculate<CustomFulfillmentSelection>({
       product: cake,
       selection,
       context: { customerTier: "guest" },
@@ -203,14 +203,14 @@ describe("Scenario 3 — Sweets Type C (deposit + zero silent failures)", () => 
   });
 
   it("THROWS a typed error when Type C booking is missing (no silent failure)", () => {
-    const selection: SweetsSelection = {
+    const selection: CustomFulfillmentSelection = {
       quantity: 1,
       // booking intentionally omitted
     };
 
     let caught: unknown;
     try {
-      pricingEngine.calculate<SweetsSelection>({
+      pricingEngine.calculate<CustomFulfillmentSelection>({
         product: cake,
         selection,
         context: { customerTier: "guest" },

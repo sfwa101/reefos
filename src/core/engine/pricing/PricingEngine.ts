@@ -241,7 +241,7 @@ export class PricingEngine {
 
   /**
    * Main entry point. Type parameter `T` keeps selection strongly typed
-   * at the call site (e.g. `engine.calculate<MeatSelection>(...)`).
+   * at the call site (e.g. `engine.calculate<WeighedSelection>(...)`).
    */
   calculate<T extends PricingSelection>(input: {
     product: PricingInput;

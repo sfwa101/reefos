@@ -14,7 +14,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import {
   calcPrintTotal, PRINT_PRICES, PRINT_PREP_HOURS,
   type BindingKey, type PrintConfig,
-} from "@/lib/library";
+} from "@/lib/digital-borrowing";
 import { PALETTE } from "../data";
 
 export const PrintWizard = () => {
