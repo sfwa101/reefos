@@ -550,6 +550,28 @@ These rules apply across **every** phase and wave. Violations are blocking.
    tenant/section/role, the design is wrong — convert to descriptor.
 10. **Apple-level UX.** Composition, restraint, motion-with-purpose, no
     generic AI aesthetics, no two surfaces look identical without intent.
+11. **100x Scale Doctrine.** Every architectural decision MUST assume
+    Reef Al Madina (and every federated ecosystem) will host **infinite
+    verticals, infinite tenants, infinite capabilities, infinite event
+    throughput**. "It's just for one section" is a banned argument. If
+    a design does not survive 100× the current scope, it is wrong.
+12. **Anti-Hardcoding Law (Zero Domain Knowledge in Code).** Application
+    source MUST contain **zero** literals, types, components, hooks, or
+    branches that encode knowledge of a specific vertical, product
+    category, store type, food item, or physical-market expansion.
+    Domain knowledge lives **only** in:
+    - `SectionIdentityRegistry` rows,
+    - `CapabilityRegistry` bundles,
+    - `RenderDescriptor` trees in `ui_layouts`,
+    - i18n catalogs and DB seeds.
+    The kernel and presentation layers must remain **domain-blind**.
+    Enforced by `lint:no-vertical-literals` (warn in P-0 → error in P-C).
+13. **Sovereign Interconnectivity.** Reef Al Madina (and every node)
+    consumes Barq (logistics), Taysir (finance/wallet/family graph),
+    Asrab (social finance), Hakim (AI), Maeen (delivery), Nabd, Afraa,
+    Benaa, Noor, Al-Muhannad as **external sovereign nodes** via
+    published gateway contracts. In-tree re-implementation of another
+    node's responsibilities is forbidden.
 
 ---
 
