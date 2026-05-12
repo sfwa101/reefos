@@ -21,6 +21,7 @@
  * This strategy makes every bulk decision an explicit modifier.
  */
 
+import type { Product, ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
 import {
   volumeDealFor,
   type VolumeDeal,
@@ -28,9 +29,28 @@ import {
 import type {
   IPricingStrategy,
   PricingContext,
+  PricingInput,
   PricingModifier,
   PricingSelection,
 } from "../types";
+
+/**
+ * Build a minimal `Product` envelope for the legacy `volumeDealFor`
+ * helper, which only inspects `id` and `subCategory`. Wave P-C/P-E will
+ * widen the helper to accept `PricingInput` directly.
+ */
+const toLegacyProductShape = (p: PricingInput): Product => ({
+  id: p.id,
+  name: "",
+  unit: p.unit ?? "",
+  price: p.price,
+  oldPrice: p.oldPrice,
+  image: "",
+  category: "",
+  subCategory: p.subCategory,
+  source: p.source as ProductSource,
+  metadata: p.metadata,
+});
 
 /** A wholesale tier break supplied by the catalog (e.g. ≥12 → -3 EGP/unit). */
 export interface WholesaleTierBreak {
