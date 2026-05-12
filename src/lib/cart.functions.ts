@@ -125,35 +125,27 @@ type HydrateSharedCartResult = {
 export const hydrateSharedCartFn = createServerFn({ method: "GET" })
   .inputValidator((d: { cartId: string }) => d)
   .middleware([requireSupabaseAuth])
-  .handler(
-    async ({
-      data,
-      context,
-    }): Promise<{
-      cart: SharedCartRow | null;
-      participants: SharedCartParticipantRow[];
-      items: SharedCartItemRow[];
-    }> => {
-      const { supabase } = context;
-      const [cartRes, partsRes, itemsRes] = await Promise.all([
-        supabase.from("shared_carts").select("*").eq("id", data.cartId).maybeSingle(),
-        supabase.from("shared_cart_participants").select("*").eq("cart_id", data.cartId),
-        supabase
-          .from("shared_cart_items")
-          .select("*")
-          .eq("cart_id", data.cartId)
-          .order("created_at", { ascending: true }),
-      ]);
-      if (cartRes.error) throw new Error(cartRes.error.message);
-      if (partsRes.error) throw new Error(partsRes.error.message);
-      if (itemsRes.error) throw new Error(itemsRes.error.message);
-      return {
-        cart: (cartRes.data as SharedCartRow | null) ?? null,
-        participants: (partsRes.data as SharedCartParticipantRow[] | null) ?? [],
-        items: (itemsRes.data as SharedCartItemRow[] | null) ?? [],
-      };
-    },
-  );
+  .handler(async ({ data, context }) => {
+    const { supabase } = context;
+    const [cartRes, partsRes, itemsRes] = await Promise.all([
+      supabase.from("shared_carts").select("*").eq("id", data.cartId).maybeSingle(),
+      supabase.from("shared_cart_participants").select("*").eq("cart_id", data.cartId),
+      supabase
+        .from("shared_cart_items")
+        .select("*")
+        .eq("cart_id", data.cartId)
+        .order("created_at", { ascending: true }),
+    ]);
+    if (cartRes.error) throw new Error(cartRes.error.message);
+    if (partsRes.error) throw new Error(partsRes.error.message);
+    if (itemsRes.error) throw new Error(itemsRes.error.message);
+    const result: HydrateSharedCartResult = {
+      cart: (cartRes.data as SharedCartRow | null) ?? null,
+      participants: (partsRes.data as SharedCartParticipantRow[] | null) ?? [],
+      items: ((itemsRes.data ?? []) as unknown as SharedCartItemRow[]),
+    };
+    return result;
+  });
 
 // ─── Shared Cart — FSM transitions ────────────────────────────────
 export const setSharedCartStatusFn = createServerFn({ method: "POST" })
