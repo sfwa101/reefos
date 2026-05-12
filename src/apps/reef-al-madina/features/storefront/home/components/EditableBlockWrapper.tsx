@@ -23,7 +23,7 @@ interface Props {
 export function EditableBlockWrapper({ block, index, total, active, children }: Props) {
   const moveBlock = useSectionManagerStore((s) => s.moveBlock);
   const removeBlock = useSectionManagerStore((s) => s.removeBlock);
-  const selectBlock = useSectionManagerStore((s) => s.selectBlock);
+  const openInspector = useSectionManagerStore((s) => s.openInspector);
 
   if (!active) return <>{children}</>;
 
