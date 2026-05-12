@@ -809,6 +809,33 @@ export type Database = {
           },
         ]
       }
+      cashier_snapshots: {
+        Row: {
+          actor_id: string | null
+          created_at: string
+          id: string
+          input_payload: Json
+          output_payload: Json
+          snapshot_hash: string
+        }
+        Insert: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          input_payload: Json
+          output_payload: Json
+          snapshot_hash: string
+        }
+        Update: {
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          input_payload?: Json
+          output_payload?: Json
+          snapshot_hash?: string
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
