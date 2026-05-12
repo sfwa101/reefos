@@ -11,7 +11,7 @@ import { listProductReviewsFn, listProductUnitsFn } from "@/lib/catalog.function
 import { logBehavior } from "@/lib/behavior";
 import { motion } from "framer-motion";
 import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/lib/productEnrichment";
-import { villageMetaFor } from "@/lib/villageMeta";
+import { villageMetaFor } from "@/lib/sourcing-meta";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
 import {

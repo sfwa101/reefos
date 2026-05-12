@@ -16,11 +16,11 @@ const SNAPSHOT_KEY = () =>
 import {
   vendorForProduct,
   type VendorKey,
-} from "@/lib/restaurants";
+} from "@/lib/vendor-menu-config";
 import {
   fulfillmentTypeFor,
   isSweetsProduct,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import type { VendorGroup } from "../types/cart.types";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };

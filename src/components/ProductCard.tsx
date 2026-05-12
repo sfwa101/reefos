@@ -10,10 +10,10 @@ import {
   fulfillmentMeta,
   fulfillmentTypeFor,
   isSweetsProduct,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import SweetsProductSheet from "@/core/runtime-ui/blocks/product/sweets-sheet";
 import ButcherSheet from "@/core/runtime-ui/blocks/product/butcher-sheet";
-import { isButcheryProduct } from "@/lib/butcheryPrep";
+import { isButcheryProduct } from "@/lib/weighed-prep-rules";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 
 interface ProductCardProps {

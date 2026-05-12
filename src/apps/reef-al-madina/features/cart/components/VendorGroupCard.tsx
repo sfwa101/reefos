@@ -4,7 +4,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 /** @deprecated Wave P-B B-3 — bridge type; will move to `ProductCardVM` once §2.E migrates. */
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
-import { vendorBrandHue, vendorLabel, type VendorKey } from "@/lib/restaurants";
+import { vendorBrandHue, vendorLabel, type VendorKey } from "@/lib/vendor-menu-config";
 import { CartLineItem } from "./CartLineItem";
 
 type VendorGroupCardProps = {

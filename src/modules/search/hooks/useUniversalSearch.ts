@@ -12,7 +12,7 @@ import { useDeferredValue, useEffect, useMemo, useRef } from "react";
 import MiniSearch, { type SearchResult } from "minisearch";
 import { type Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useInfiniteCatalog } from "@/hooks/useInfiniteCatalog";
-import { restaurants, type Restaurant } from "@/lib/restaurants";
+import { restaurants, type Restaurant } from "@/lib/vendor-menu-config";
 import { normalizeArabic, expandKeywords } from "@/core/search/utils/arabicLogic";
 import type { SearchableEntity, SearchHit } from "../types";
 

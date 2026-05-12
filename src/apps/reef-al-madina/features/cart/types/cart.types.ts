@@ -6,7 +6,7 @@
  */
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
-import type { VendorKey } from "@/lib/restaurants";
+import type { VendorKey } from "@/lib/vendor-menu-config";
 
 export type Addr = {
   id: string;

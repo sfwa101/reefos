@@ -1,5 +1,5 @@
 /**
- * SweetsPricingStrategy
+ * CustomFulfillmentPricingStrategy
  * ----------------------------------------------------------------
  * Translates the legacy `src/lib/sweetsFulfillment.ts` rules into
  * pure engine modifiers. Read-only consumption — no mutation.
@@ -31,7 +31,7 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   type FulfillmentType,
-} from "@/lib/sweetsFulfillment";
+} from "@/lib/custom-fulfillment-rules";
 import type {
   IPricingStrategy,
   PricingContext,
@@ -55,7 +55,7 @@ export interface SweetsBooking {
   readonly slotId: string;
 }
 
-export interface SweetsSelection extends PricingSelection {
+export interface CustomFulfillmentSelection extends PricingSelection {
   /** Optional explicit override; defaults to `fulfillmentTypeFor(...)`. */
   readonly fulfillmentType?: FulfillmentType;
   readonly addons?: ReadonlyArray<SweetsAddon>;
@@ -65,8 +65,8 @@ export interface SweetsSelection extends PricingSelection {
   readonly booking?: SweetsBooking;
 }
 
-export class SweetsPricingStrategy
-  implements IPricingStrategy<SweetsSelection>
+export class CustomFulfillmentPricingStrategy
+  implements IPricingStrategy<CustomFulfillmentSelection>
 {
   readonly key = "sweets";
 
@@ -75,7 +75,7 @@ export class SweetsPricingStrategy
   }
 
   buildModifiers(
-    selection: Readonly<SweetsSelection>,
+    selection: Readonly<CustomFulfillmentSelection>,
     context: PricingContext,
   ): ReadonlyArray<PricingModifier> {
     const product = context.product;
@@ -116,7 +116,7 @@ export class SweetsPricingStrategy
     if (type === "C") {
       if (!selection.booking) {
         throw new Error(
-          `SweetsPricingStrategy: product "${product.id}" requires a booking (date + slot)`,
+          `CustomFulfillmentPricingStrategy: product "${product.id}" requires a booking (date + slot)`,
         );
       }
       const lineSubtotal = product.price * selection.quantity;

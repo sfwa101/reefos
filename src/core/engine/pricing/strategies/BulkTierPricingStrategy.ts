@@ -1,5 +1,5 @@
 /**
- * WholesalePricingStrategy
+ * BulkTierPricingStrategy
  * ----------------------------------------------------------------
  * Bulk-quantity pricing for the wholesale vertical and any retail SKU
  * eligible for a volume deal.
@@ -60,7 +60,7 @@ export interface WholesaleTierBreak {
   readonly label?: string;
 }
 
-export interface WholesaleSelection extends PricingSelection {
+export interface BulkTierSelection extends PricingSelection {
   /** Optional tier breaks — typically loaded from `product_variants` meta. */
   readonly tierBreaks?: ReadonlyArray<WholesaleTierBreak>;
   /**
@@ -71,8 +71,8 @@ export interface WholesaleSelection extends PricingSelection {
   readonly applyVolumeDeals?: boolean;
 }
 
-export class WholesalePricingStrategy
-  implements IPricingStrategy<WholesaleSelection>
+export class BulkTierPricingStrategy
+  implements IPricingStrategy<BulkTierSelection>
 {
   readonly key = "wholesale";
 
@@ -84,7 +84,7 @@ export class WholesalePricingStrategy
   }
 
   buildModifiers(
-    selection: Readonly<WholesaleSelection>,
+    selection: Readonly<BulkTierSelection>,
     context: PricingContext,
   ): ReadonlyArray<PricingModifier> {
     const out: PricingModifier[] = [];

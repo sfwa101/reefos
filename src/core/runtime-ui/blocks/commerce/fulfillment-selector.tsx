@@ -5,7 +5,7 @@ import {
   Banknote, CalendarDays, Check, Clock, PackageCheck, Truck, Wallet,
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { bookingTimeSlots } from "@/lib/sweetsFulfillment";
+import { bookingTimeSlots } from "@/lib/custom-fulfillment-rules";
 
 type ShipMode = "split" | "wait";
 

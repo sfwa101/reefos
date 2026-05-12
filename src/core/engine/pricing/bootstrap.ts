@@ -18,9 +18,9 @@
  */
 
 import { pricingEngine, type PricingEngine } from "./PricingEngine";
-import { MeatPricingStrategy } from "./strategies/MeatPricingStrategy";
-import { SweetsPricingStrategy } from "./strategies/SweetsPricingStrategy";
-import { WholesalePricingStrategy } from "./strategies/WholesalePricingStrategy";
+import { WeighedPricingStrategy } from "./strategies/WeighedPricingStrategy";
+import { CustomFulfillmentPricingStrategy } from "./strategies/CustomFulfillmentPricingStrategy";
+import { BulkTierPricingStrategy } from "./strategies/BulkTierPricingStrategy";
 import { SupermarketPricingStrategy } from "./strategies/SupermarketPricingStrategy";
 import { LoyaltyTierDiscount } from "./discounts/LoyaltyTierDiscount";
 import { BulkQuantityDiscount } from "./discounts/BulkQuantityDiscount";
@@ -41,9 +41,9 @@ export function initPricingEngine(): PricingEngine {
   // universal supermarket fallback so any retail/piece SKU still gets
   // loyalty discounts + reward points instead of being skipped.
   pricingEngine
-    .registerStrategy(new MeatPricingStrategy())
-    .registerStrategy(new SweetsPricingStrategy())
-    .registerStrategy(new WholesalePricingStrategy())
+    .registerStrategy(new WeighedPricingStrategy())
+    .registerStrategy(new CustomFulfillmentPricingStrategy())
+    .registerStrategy(new BulkTierPricingStrategy())
     .registerStrategy(new SupermarketPricingStrategy());
 
   // Discount rules — order DOES matter (sequential application).

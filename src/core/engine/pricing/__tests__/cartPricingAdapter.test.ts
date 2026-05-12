@@ -15,9 +15,9 @@ import {
   isHandledByNewEngine,
 } from "../cartPricingAdapter";
 import type { PricingInput } from "../types";
-import type { MeatSelection } from "../strategies/MeatPricingStrategy";
-import type { SweetsSelection } from "../strategies/SweetsPricingStrategy";
-import type { WholesaleSelection } from "../strategies/WholesalePricingStrategy";
+import type { WeighedSelection } from "../strategies/WeighedPricingStrategy";
+import type { CustomFulfillmentSelection } from "../strategies/CustomFulfillmentPricingStrategy";
+import type { BulkTierSelection } from "../strategies/BulkTierPricingStrategy";
 
 const buildProduct = (
   overrides: Partial<PricingInput> & Pick<PricingInput, "id" | "source" | "price">,
@@ -39,7 +39,7 @@ describe("cartPricingAdapter — ok branch", () => {
       price: 100,
     });
 
-    const result = evaluateCartLineItem<MeatSelection>({
+    const result = evaluateCartLineItem<WeighedSelection>({
       product,
       quantity: 1,
       selection: {
@@ -64,7 +64,7 @@ describe("cartPricingAdapter — ok branch", () => {
       source: "wholesale",
       price: 50,
     });
-    const result = evaluateCartLineItem<WholesaleSelection>({
+    const result = evaluateCartLineItem<BulkTierSelection>({
       product,
       quantity: 12,
       selection: {
@@ -121,7 +121,7 @@ describe("cartPricingAdapter — engine_error branch", () => {
       price: 400,
     });
 
-    const result = evaluateCartLineItem<SweetsSelection>({
+    const result = evaluateCartLineItem<CustomFulfillmentSelection>({
       product: cake,
       quantity: 1,
       selection: {
@@ -143,7 +143,7 @@ describe("cartPricingAdapter — engine_error branch", () => {
       subCategory: "لحوم حمراء",
       price: 100,
     });
-    const result = evaluateCartLineItem<MeatSelection>({
+    const result = evaluateCartLineItem<WeighedSelection>({
       product,
       quantity: 0,
       selection: {

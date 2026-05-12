@@ -1,5 +1,5 @@
 /**
- * MeatPricingStrategy — Proof of Concept
+ * WeighedPricingStrategy — Proof of Concept
  * ----------------------------------------------------------------
  * Translates the legacy `computeButcheryPrice` (src/lib/butcheryPrep.ts)
  * into a pure Strategy that emits engine modifiers.
@@ -22,7 +22,7 @@ import {
   type ButcheryRules,
   type PrepOption,
   type WeightOption,
-} from "@/lib/butcheryPrep";
+} from "@/lib/weighed-prep-rules";
 import type {
   IPricingStrategy,
   PricingContext,
@@ -53,7 +53,7 @@ const toLegacyProductShape = (p: PricingInput): Product => ({
   metadata: p.metadata,
 });
 
-export interface MeatSelection extends PricingSelection {
+export interface WeighedSelection extends PricingSelection {
   readonly weight: WeightOption;
   readonly prep: PrepOption;
   readonly addonIds: ReadonlyArray<string>;
@@ -62,8 +62,8 @@ export interface MeatSelection extends PricingSelection {
   readonly crossSellIds?: ReadonlyArray<string>;
 }
 
-export class MeatPricingStrategy
-  implements IPricingStrategy<MeatSelection>
+export class WeighedPricingStrategy
+  implements IPricingStrategy<WeighedSelection>
 {
   readonly key = "meat";
 
@@ -72,7 +72,7 @@ export class MeatPricingStrategy
   }
 
   buildModifiers(
-    selection: Readonly<MeatSelection>,
+    selection: Readonly<WeighedSelection>,
     context: PricingContext,
   ): ReadonlyArray<PricingModifier> {
     const rules = this.requireRules(context.product);
@@ -158,7 +158,7 @@ export class MeatPricingStrategy
     const rules = getButcheryRules(toLegacyProductShape(product));
     if (!rules) {
       throw new Error(
-        `MeatPricingStrategy: product "${product.id}" is not a butchery item`,
+        `WeighedPricingStrategy: product "${product.id}" is not a butchery item`,
       );
     }
     return rules;

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { products } from "@/core/catalog/legacy/legacyRuntime";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
-import { getRestaurant } from "@/lib/restaurants";
+import { getRestaurant } from "@/lib/vendor-menu-config";
 import { ChefHat, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import OptimizedImage from "@/components/ui/OptimizedImage";

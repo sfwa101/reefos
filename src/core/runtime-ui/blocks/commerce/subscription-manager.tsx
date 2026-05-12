@@ -6,7 +6,7 @@ import {
   isLocked,
   LOCK_WINDOW_HOURS,
   type SubscriptionRecord,
-} from "@/lib/baskets";
+} from "@/lib/bundle-thresholds";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";

@@ -2,7 +2,7 @@
  * BulkQuantityDiscount
  * ----------------------------------------------------------------
  * Generic line-level discount triggered purely by quantity. Independent
- * from `WholesalePricingStrategy` tierBreaks: this rule is the engine's
+ * from `BulkTierPricingStrategy` tierBreaks: this rule is the engine's
  * default safety net — applied to ANY product when the customer crosses
  * configurable thresholds.
  *
@@ -13,7 +13,7 @@
  *
  * Override the ladder via the constructor for B2B / promo windows.
  *
- * NOTE — composition with WholesalePricingStrategy:
+ * NOTE — composition with BulkTierPricingStrategy:
  * The strategy emits its own `unit_delta` tier discount which lowers
  * `unitPrice` BEFORE this rule fires. This rule then applies its % on
  * the already-discounted line total. That stacking is intentional and

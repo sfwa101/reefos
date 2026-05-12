@@ -11,7 +11,7 @@ import {
   BUILD_BOX_THRESHOLDS,
   tierForSubtotal,
   nextTierForSubtotal,
-} from "@/lib/baskets";
+} from "@/lib/bundle-thresholds";
 import AnimatedNumber from "@/components/baskets/AnimatedNumber";
 import { PackagePlus, Plus, Minus, Sparkles, Check, ShoppingCart } from "lucide-react";
 
