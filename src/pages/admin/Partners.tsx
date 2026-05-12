@@ -1,79 +1,92 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listProductPartnersFn, listPartnerLedgersFn, createProductPartnerFn,
+  setProductPartnerActiveFn, markPartnerLedgerPaidFn,
+  type ProductPartnerRow, type PartnerLedgerRow,
+} from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Users } from "lucide-react";
 import { toast } from "sonner";
 
 type Product = { id: string; name: string };
-type Partner = {
-  id: string; product_id: string; partner_name: string; partner_phone: string | null;
-  split_type: "gross_profit" | "net_profit" | "revenue"; percentage: number; is_active: boolean;
-  products?: { name: string };
-};
-type Ledger = {
-  id: string; partner_name: string; product_name: string | null; amount_due: number;
-  status: string; created_at: string; split_type: string; percentage: number;
-};
 
 export default function Partners() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("finance");
+  const listPartners = useServerFn(listProductPartnersFn);
+  const listLedger = useServerFn(listPartnerLedgersFn);
+  const createPartner = useServerFn(createProductPartnerFn);
+  const togglePartnerFn = useServerFn(setProductPartnerActiveFn);
+  const markPaidFn = useServerFn(markPartnerLedgerPaidFn);
+
   const [products, setProducts] = useState<Product[]>([]);
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [ledger, setLedger] = useState<Ledger[]>([]);
+  const [partners, setPartners] = useState<ProductPartnerRow[]>([]);
+  const [ledger, setLedger] = useState<PartnerLedgerRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ product_id: "", partner_name: "", partner_phone: "", split_type: "net_profit", percentage: "10" });
 
   const load = async () => {
     setLoading(true);
-    const [sov, pp, pl] = await Promise.all([
-      import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
-      (supabase as any).from("product_partners").select("*, products(name)").order("created_at", { ascending: false }),
-      (supabase as any).from("partner_ledgers").select("*").order("created_at", { ascending: false }).limit(50),
-    ]);
-    setProducts(sov.map((r) => ({ id: r.id, name: r.name })) as Product[]);
-    setPartners((pp.data || []) as Partner[]);
-    setLedger((pl.data || []) as Ledger[]);
-    setLoading(false);
+    try {
+      const [sov, pp, pl] = await Promise.all([
+        import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
+        listPartners(),
+        listLedger(),
+      ]);
+      setProducts(sov.map((r) => ({ id: r.id, name: r.name })) as Product[]);
+      setPartners(pp);
+      setLedger(pl);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed]);
+  useEffect(() => { if (allowed) load(); else setLoading(false); /* eslint-disable-next-line */ }, [allowed]);
 
   const create = async () => {
-    if (!form.product_id || !form.partner_name) return toast.error("الحقول مطلوبة");
-    const pct = parseFloat(form.percentage);
-    if (!(pct > 0 && pct <= 100)) return toast.error("نسبة غير صالحة");
-    const { error } = await (supabase as any).from("product_partners").insert({
-      product_id: form.product_id,
-      partner_name: form.partner_name.trim(),
-      partner_phone: form.partner_phone || null,
-      split_type: form.split_type,
-      percentage: pct,
-    });
-    if (error) return toast.error(error.message);
-    toast.success("تم");
-    setForm({ product_id: "", partner_name: "", partner_phone: "", split_type: "net_profit", percentage: "10" });
-    setShowForm(false);
-    load();
+    try {
+      await createPartner({ data: {
+        product_id: form.product_id,
+        partner_name: form.partner_name,
+        partner_phone: form.partner_phone || null,
+        split_type: form.split_type,
+        percentage: parseFloat(form.percentage),
+      }});
+      toast.success("تم");
+      setForm({ product_id: "", partner_name: "", partner_phone: "", split_type: "net_profit", percentage: "10" });
+      setShowForm(false);
+      load();
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = {
+        product_required: "اختر المنتج", name_required: "اسم الشريك مطلوب",
+        invalid_pct: "نسبة غير صالحة", invalid_split: "نوع التقسيم غير صالح",
+      };
+      toast.error(map[msg] ?? msg);
+    }
   };
 
   const togglePartner = async (id: string, current: boolean) => {
-    await (supabase as any).from("product_partners").update({ is_active: !current }).eq("id", id);
-    load();
+    try {
+      await togglePartnerFn({ data: { id, is_active: !current } });
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   const markPaid = async (id: string) => {
-    // Phase 43 — routed through SECURITY DEFINER RPC (no raw client update).
-    const { error } = await (supabase.rpc as any)("admin_update_partner_ledger", {
-      p_ledger_id: id,
-      p_mark_paid: true,
-    });
-    if (error) return toast.error("فشل: " + error.message);
-    toast.success("تم تسجيل الدفع");
-    load();
+    try {
+      await markPaidFn({ data: { id } });
+      toast.success("تم تسجيل الدفع");
+      load();
+    } catch (e) {
+      toast.error("فشل: " + (e as Error).message);
+    }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
