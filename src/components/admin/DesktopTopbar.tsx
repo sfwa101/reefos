@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Bell, Store } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { countUnreadNotificationsFn } from "@/lib/notifications.functions";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
@@ -25,22 +26,13 @@ export function DesktopTopbar() {
   const { profile, user } = useAuth();
   const display = profile?.full_name ?? user?.email ?? "؟";
   const initials = display.trim().split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase();
-  const [unread, setUnread] = useState(0);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { count } = await (supabase as any)
-          .from("notifications")
-          .select("id", { count: "exact", head: true })
-          .eq("read", false);
-        if (!cancelled && typeof count === "number") setUnread(count);
-      } catch { /* ignore */ }
-    })();
-    return () => { cancelled = true; };
-  }, []);
+  const fetchUnread = useServerFn(countUnreadNotificationsFn);
+  const { data } = useQuery({
+    queryKey: ["admin", "notifications-unread"],
+    queryFn: () => fetchUnread(),
+    staleTime: 60_000,
+  });
+  const unread = data?.unread ?? 0;
 
   return (
     <header

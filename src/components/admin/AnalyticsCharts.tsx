@@ -1,13 +1,13 @@
 /**
- * AnalyticsCharts — Sovereign Matrix Edition (Phase 14 Part 3)
+ * AnalyticsCharts — Sovereign Matrix Edition (Wave R-2 · Batch A.2).
  *
- * Revenue timeline groups `salsabil_master_orders.total_amount` by day.
- * The status pie aggregates the *headline* status of each master order,
- * derived from its child `salsabil_fulfillment_nodes`.
+ * Pure presentation. All data flows through `getAnalyticsChartsDataFn`.
  */
-import { lazy, Suspense, useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { getAnalyticsChartsDataFn } from "@/lib/analytics.functions";
 
 const RevenueAreaChart = lazy(() =>
   import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })),
@@ -16,54 +16,19 @@ const StatusPieChart = lazy(() =>
   import("@/components/admin/PremiumCharts").then((m) => ({ default: m.StatusPieChart })),
 );
 
-type Row = { total: number | null; status: string; created_at: string };
-
 const STATUS_LABEL: Record<string, string> = {
   pending: "بانتظار", confirmed: "مؤكَّد", preparing: "تجهيز", ready: "جاهز",
   assigned: "مُسند", picked_up: "تم الالتقاط",
   out_for_delivery: "في الطريق", delivered: "مُسلَّم", cancelled: "ملغي", paid: "مدفوع",
 };
 
-const STATUS_PRIORITY = [
-  "pending", "confirmed", "paid", "preparing", "ready",
-  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
-];
-function aggregate(statuses: string[]): string {
-  if (!statuses.length) return "pending";
-  if (statuses.every((s) => s === "delivered")) return "delivered";
-  if (statuses.every((s) => s === "cancelled")) return "cancelled";
-  const active = statuses.filter((s) => s !== "delivered" && s !== "cancelled");
-  const pool = active.length ? active : statuses;
-  return pool.reduce((lo, s) =>
-    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
-  , pool[0]);
-}
-
 export default function AnalyticsCharts() {
-  const [rows, setRows] = useState<Row[] | null>(null);
-
-  useEffect(() => {
-    let cancel = false;
-    (async () => {
-      const since = new Date(); since.setDate(since.getDate() - 13); since.setHours(0, 0, 0, 0);
-      const { data } = await supabase
-        .from("salsabil_master_orders")
-        .select("total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
-        .gte("created_at", since.toISOString())
-        .order("created_at", { ascending: true })
-        .limit(2000);
-      if (cancel) return;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const mapped: Row[] = (data ?? []).map((m: any) => ({
-        total: Number(m.total_amount ?? 0),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        status: aggregate((m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status)) || (m.status ?? "pending"),
-        created_at: m.created_at,
-      }));
-      setRows(mapped);
-    })();
-    return () => { cancel = true; };
-  }, []);
+  const fetchCharts = useServerFn(getAnalyticsChartsDataFn);
+  const { data: rows } = useQuery({
+    queryKey: ["admin", "analytics-charts", 14],
+    queryFn: () => fetchCharts({ data: { days: 14 } }),
+    staleTime: 60_000,
+  });
 
   const series = useMemo(() => {
     if (!rows) return [];
