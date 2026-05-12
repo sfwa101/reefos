@@ -5,6 +5,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listProductPartnersFn, listPartnerLedgersFn, createProductPartnerFn,
   setProductPartnerActiveFn, markPartnerLedgerPaidFn,
+  updateProductPartnerFn, deleteProductPartnerFn,
   type ProductPartnerRow, type PartnerLedgerRow,
 } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
