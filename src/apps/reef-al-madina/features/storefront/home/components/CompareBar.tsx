@@ -42,7 +42,8 @@ export const CompareBar = () => {
           <X className="h-3.5 w-3.5" />
         </button>
         <Link
-          to="/store/home-compare"
+          to="/store/$slug"
+          params={{ slug: "home-compare" }}
           className="inline-flex items-center gap-1 rounded-full bg-primary px-3.5 py-1.5 text-[11px] font-extrabold text-primary-foreground shadow-pill"
         >
           <Scale className="h-3.5 w-3.5" />
