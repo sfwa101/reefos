@@ -133,8 +133,8 @@ export default function Expenses() {
           </div>
         </div>
 
-        <button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
-          <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : "تسجيل مصروف"}
+        <button onClick={() => { if (showForm) { setEditingId(null); resetForm(); } setShowForm(!showForm); }} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
+          <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : (editingId ? "تعديل مصروف" : "تسجيل مصروف")}
         </button>
 
         {showForm && (
@@ -157,7 +157,7 @@ export default function Expenses() {
               <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="مرجع" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
             </div>
             <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="ملاحظات" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-            <button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</button>
+            <button onClick={submit} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">{editingId ? "تحديث" : "حفظ"}</button>
           </div>
         )}
 
@@ -173,6 +173,12 @@ export default function Expenses() {
                 <p className="text-[11px] text-foreground-tertiary truncate">{r.expense_date} {r.paid_to ? `• ${r.paid_to}` : ""}</p>
               </div>
               <p className="font-display text-[14px] text-destructive">{fmtMoney(r.amount)}</p>
+              <button onClick={() => startEdit(r)} className="p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           ))}
           {rows.length === 0 && <p className="text-center text-foreground-tertiary py-8 text-[13px]">لا توجد مصروفات</p>}
