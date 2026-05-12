@@ -120,13 +120,24 @@ export async function pushRemoteCart(
     return;
   }
 
-  const rows = cleanLines.map((l) => ({
-    user_id: userId,
-    product_id: l.product.id,
-    line_key: computeLineKey(l.meta),
-    qty: l.qty,
-    meta: (l.meta ?? {}) as never,
-  }));
+  const rows = cleanLines.map((l) => {
+    // Wave P-B — preserve `capturedPrice` across the network boundary by
+    // pinning it into `meta.unitPrice`. The cart calc layer already prefers
+    // `meta.unitPrice → capturedPrice → product.price` in that order.
+    const meta: CartLineMeta = {
+      ...(l.meta ?? {}),
+      ...(l.capturedPrice !== undefined && l.meta?.unitPrice === undefined
+        ? { unitPrice: l.capturedPrice }
+        : {}),
+    };
+    return {
+      user_id: userId,
+      product_id: l.product.id,
+      line_key: computeLineKey(meta),
+      qty: l.qty,
+      meta: meta as never,
+    };
+  });
 
   // Upsert all rows in one round-trip.
   const up = await supabase
