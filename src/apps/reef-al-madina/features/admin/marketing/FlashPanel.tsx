@@ -29,46 +29,45 @@ export default function FlashPanel() {
 
   const load = async () => {
     setLoading(true);
-    const { data: sales } = await supabase
-      .from(SALES).select("*").eq("is_active", true)
-      .order("starts_at", { ascending: false }).limit(1);
-    const sale = ((sales ?? []) as FlashSale[])[0] ?? null;
-    setActiveSale(sale);
-    if (sale) {
-      const { data } = await supabase
-        .from(PRODUCTS).select("*").eq("flash_sale_id", sale.id).order("rank");
-      setProducts((data ?? []) as FlashSaleProduct[]);
-    } else setProducts([]);
+    try {
+      const { sale, products } = await getActiveFlashSaleFn();
+      setActiveSale((sale as unknown as FlashSale) ?? null);
+      setProducts((products ?? []) as unknown as FlashSaleProduct[]);
+    } catch {
+      setActiveSale(null);
+      setProducts([]);
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
 
   const ensureSale = async (): Promise<FlashSale | null> => {
     if (activeSale) return activeSale;
-    const ends = new Date(); ends.setHours(ends.getHours() + 24);
-    const { data, error } = await supabase
-      .from(SALES)
-      .insert({ ends_at: ends.toISOString(), is_active: true, cycle_label: "Flash 24h" } as never)
-      .select().single();
-    if (error || !data) { toast.error("تعذر إنشاء الحملة"); return null; }
-    const sale = data as FlashSale;
-    setActiveSale(sale);
-    return sale;
+    try {
+      const sale = (await ensureActiveFlashSaleFn()) as unknown as FlashSale;
+      setActiveSale(sale);
+      return sale;
+    } catch {
+      toast.error("تعذر إنشاء الحملة");
+      return null;
+    }
   };
 
   const remove = async (row: FlashSaleProduct) => {
     if (!confirm("إزالة من العرض؟")) return;
-    const { error } = await supabase.from(PRODUCTS).delete().eq("id", row.id);
-    if (error) toast.error("فشل الحذف"); else load();
+    try {
+      await deleteFlashSaleFn({ data: { productId: row.id } });
+      load();
+    } catch { toast.error("فشل الحذف"); }
   };
 
   const endSale = async () => {
     if (!activeSale) return;
     if (!confirm("إنهاء حملة الفلاش الحالية؟")) return;
-    await supabase.from(SALES)
-      .update({ is_active: false, ends_at: new Date().toISOString() } as never)
-      .eq("id", activeSale.id);
-    toast.success("تم إنهاء الحملة"); load();
+    try {
+      await endFlashSaleFn({ data: { saleId: activeSale.id } });
+      toast.success("تم إنهاء الحملة"); load();
+    } catch { toast.error("فشل الإنهاء"); }
   };
 
   const metrics = useMemo(() => {
