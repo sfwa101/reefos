@@ -31,8 +31,7 @@ export default function BannersPanel() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from(TABLE).select("*").order("sort_order", { ascending: true });
-    setRows((data ?? []) as Banner[]);
+    try { setRows(await listBannersFn()); } catch (e) { toast.error((e as Error).message); }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -44,13 +43,15 @@ export default function BannersPanel() {
   }), [rows]);
 
   const toggleActive = async (row: Banner) => {
-    const { error } = await supabase.from(TABLE).update({ is_active: !row.is_active } as never).eq("id", row.id);
-    if (error) toast.error("تعذر التحديث"); else { toast.success(row.is_active ? "تم الإيقاف" : "تم التفعيل"); load(); }
+    try {
+      await setBannerActiveFn({ data: { id: row.id, is_active: !row.is_active } });
+      toast.success(row.is_active ? "تم الإيقاف" : "تم التفعيل"); load();
+    } catch { toast.error("تعذر التحديث"); }
   };
   const remove = async (row: Banner) => {
     if (!confirm("حذف البانر؟")) return;
-    const { error } = await supabase.from(TABLE).delete().eq("id", row.id);
-    if (error) toast.error("فشل الحذف"); else { toast.success("تم الحذف"); load(); }
+    try { await deleteBannerFn({ data: { id: row.id } }); toast.success("تم الحذف"); load(); }
+    catch { toast.error("فشل الحذف"); }
   };
 
   return (
