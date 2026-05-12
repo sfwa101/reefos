@@ -25,9 +25,10 @@ import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 
 import { getById } from "@/lib/products";
+import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
-import type { HGProduct } from "../types";
+import { homeProductCardAdapter } from "../adapter";
 
 const TrustBadge = ({
   icon: Icon,
@@ -79,15 +80,22 @@ export const DetailSheet = ({
   product,
   onClose,
 }: {
-  product: HGProduct;
+  product: ProductCardVM;
   onClose: () => void;
 }) => {
   const { add } = useCartActions();
-  const isPre = product.fulfillment === "preorder";
+  const view = homeProductCardAdapter(product);
+  const isPre = view.isPreorder;
+  const price = product.price.amount;
+  const oldPrice = product.price.compareAt;
+  const name = product.name.ar;
+  const imageUrl = product.hero?.url ?? "";
+  const ratingAvg = product.rating?.avg ?? 0;
+  const ratingCount = product.rating?.count ?? 0;
   const deposit = isPre
-    ? Math.round((product.price * (product.depositPct ?? 25)) / 100)
+    ? Math.round((price * (view.depositPct ?? 25)) / 100)
     : 0;
-  const remaining = product.price - deposit;
+  const remaining = price - deposit;
 
   // Lock scroll
   useEffect(() => {
@@ -110,7 +118,7 @@ export const DetailSheet = ({
       isPre
         ? {
             payDeposit: true,
-            unitPrice: product.price,
+            unitPrice: price,
             bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م — المتبقي ${toLatin(remaining.toLocaleString("en-US"))} ج.م عند الاستلام`,
           }
         : undefined,
@@ -118,7 +126,7 @@ export const DetailSheet = ({
     toast.success(isPre ? "تم تأكيد الحجز" : "أُضيف إلى السلة", {
       description: isPre
         ? `دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`
-        : product.name,
+        : name,
     });
     onClose();
   };
@@ -151,8 +159,8 @@ export const DetailSheet = ({
         <div className="max-h-[calc(90vh-60px)] overflow-y-auto pb-32">
           <div className="relative aspect-[4/3] bg-secondary/40">
             <img
-              src={product.image}
-              alt={product.name}
+              src={imageUrl}
+              alt={name}
               loading="eager"
               decoding="async"
               className="h-full w-full object-cover"
@@ -160,7 +168,7 @@ export const DetailSheet = ({
             {isPre ? (
               <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-amber-500 to-amber-600 px-3 py-1.5 text-[11px] font-extrabold text-white shadow-pill">
                 <CalendarClock className="h-3.5 w-3.5" />
-                حجز مسبق · استلام خلال {toLatin(product.etaDays ?? 7)} أيام
+                حجز مسبق · استلام خلال {toLatin(view.etaDays ?? 7)} أيام
               </span>
             ) : (
               <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-3 py-1.5 text-[11px] font-extrabold text-white shadow-pill">
@@ -172,24 +180,24 @@ export const DetailSheet = ({
 
           <div className="px-4 pt-4">
             <p className="text-[11px] font-bold text-muted-foreground">
-              {product.brand}
+              {view.brand}
             </p>
             <h2 className="mt-0.5 font-display text-xl font-extrabold leading-tight text-foreground">
-              {product.name}
+              {name}
             </h2>
             <p className="mt-1 text-[12px] text-muted-foreground">
-              {product.tagline}
+              {view.tagline}
             </p>
 
             <div className="mt-2 flex items-center gap-2 text-[12px]">
               <span className="inline-flex items-center gap-1">
                 <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                 <span className="font-bold tabular-nums">
-                  {toLatin(product.rating)}
+                  {toLatin(ratingAvg)}
                 </span>
               </span>
               <span className="text-muted-foreground">
-                ({toLatin(product.reviews.toLocaleString("en-US"))} تقييم)
+                ({toLatin(ratingCount.toLocaleString("en-US"))} تقييم)
               </span>
             </div>
 
@@ -197,14 +205,14 @@ export const DetailSheet = ({
             <div className="mt-4 rounded-2xl bg-card p-4 ring-1 ring-border/60">
               <div className="flex items-baseline gap-2">
                 <span className="font-display text-3xl font-extrabold tabular-nums">
-                  {toLatin(product.price.toLocaleString("en-US"))}
+                  {toLatin(price.toLocaleString("en-US"))}
                 </span>
                 <span className="text-sm font-medium text-muted-foreground">
                   ج.م
                 </span>
-                {product.oldPrice && (
+                {oldPrice && (
                   <span className="text-[12px] text-muted-foreground line-through tabular-nums">
-                    {toLatin(product.oldPrice.toLocaleString("en-US"))} ج.م
+                    {toLatin(oldPrice.toLocaleString("en-US"))} ج.م
                   </span>
                 )}
               </div>
@@ -212,15 +220,15 @@ export const DetailSheet = ({
               <div className="mt-3 grid grid-cols-3 gap-2">
                 <TrustBadge
                   icon={ShieldCheck}
-                  label={product.warranty ? "ضمان وكيل" : "بضاعة أصلية"}
+                  label={view.warranty ? "ضمان وكيل" : "بضاعة أصلية"}
                 />
                 <TrustBadge icon={Wrench} label="صيانة معتمدة" />
                 <TrustBadge icon={Lock} label="دفع آمن" />
               </div>
 
-              {product.warranty && (
+              {view.warranty && (
                 <p className="mt-3 text-[11px] font-bold text-emerald-700">
-                  ✓ {product.warranty}
+                  ✓ {view.warranty}
                 </p>
               )}
             </div>
@@ -232,15 +240,15 @@ export const DetailSheet = ({
                   تفاصيل دفعة الحجز المسبق
                 </div>
                 <div className="space-y-2 bg-amber-50/60 px-4 py-3">
-                  <Row label="السعر الإجمالي" value={fmt(product.price)} bold />
+                  <Row label="السعر الإجمالي" value={fmt(price)} bold />
                   <Row
-                    label={`الدفعة المقدمة (${toLatin(product.depositPct ?? 25)}٪)`}
+                    label={`الدفعة المقدمة (${toLatin(view.depositPct ?? 25)}٪)`}
                     value={fmt(deposit)}
                     accent
                   />
                   <Row label="المتبقي عند الاستلام" value={fmt(remaining)} />
                   <p className="pt-1 text-[10.5px] text-amber-800">
-                    سيتم التواصل لتأكيد موعد التسليم خلال {toLatin(product.etaDays ?? 7)} أيام عمل.
+                    سيتم التواصل لتأكيد موعد التسليم خلال {toLatin(view.etaDays ?? 7)} أيام عمل.
                   </p>
                 </div>
               </div>
@@ -252,8 +260,8 @@ export const DetailSheet = ({
                 المواصفات الرئيسية
               </h3>
               <div className="mt-2 flex flex-wrap gap-2">
-                <Chip>{product.unit}</Chip>
-                {product.badges.map((b) => (
+                <Chip>{product.saleUnit}</Chip>
+                {view.badgeLabels.map((b) => (
                   <Chip key={b}>
                     <CheckCircle2 className="h-3 w-3 text-emerald-600" />
                     {b}

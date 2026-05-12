@@ -1,11 +1,14 @@
 /**
  * BestSellersRail — horizontal carousel of curated bestsellers.
+ *
+ * Wave P-A — consumes `ProductCardVM[]` directly.
  */
 import { Crown } from "lucide-react";
 
+import type { ProductCardVM } from "@/core/catalog/types";
+
 import { ProductCard } from "./ProductCard";
 import { RailHeader } from "./RailHeader";
-import type { HGProduct } from "../types";
 
 export const BestSellersRail = ({
   items,
@@ -14,7 +17,7 @@ export const BestSellersRail = ({
   title,
   sub,
 }: {
-  items: HGProduct[];
+  items: ProductCardVM[];
   hue: string;
   onOpen: (id: string) => void;
   title?: string;

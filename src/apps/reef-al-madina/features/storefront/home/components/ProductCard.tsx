@@ -1,8 +1,10 @@
 /**
- * ProductCard — single product tile for the Home Goods grid and rails.
+ * ProductCard — single product tile for the storefront grid and rails.
  *
- * Verbatim extraction from the legacy `pages/store/Home.tsx`. Stateful
- * (talks to CartContext + CompareContext) but is otherwise leaf-level.
+ * Wave P-A — consumes the canonical `ProductCardVM` directly. Legacy
+ * fields (brand, tagline, fulfillment, depositPct, etaDays, warranty,
+ * wakalah eligibility, stock visibility flags) are derived through the
+ * `homeProductCardAdapter` — they never re-enter the VM.
  *
  * The `toCompareItem` helper is exported for re-use by other rails that
  * surface the same domain model.
@@ -22,53 +24,64 @@ import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
 import { getById } from "@/lib/products";
+import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
-import type { HGProduct } from "../types";
+import { homeProductCardAdapter } from "../adapter";
 
-export const toCompareItem = (p: HGProduct): CompareItem => ({
-  id: p.id,
-  name: p.name,
-  brand: p.brand,
-  image: p.image,
-  price: p.price,
-  oldPrice: p.oldPrice,
-  unit: p.unit,
-  rating: p.rating,
-  reviews: p.reviews,
-  category: p.category,
-  fulfillment: p.fulfillment,
-  etaDays: p.etaDays,
-  warranty: p.warranty,
-  badges: p.badges,
-  tagline: p.tagline,
-});
+export const toCompareItem = (p: ProductCardVM): CompareItem => {
+  const view = homeProductCardAdapter(p);
+  return {
+    id: p.id,
+    name: p.name.ar,
+    brand: view.brand,
+    image: p.hero?.url ?? "",
+    price: p.price.amount,
+    oldPrice: p.price.compareAt,
+    unit: p.saleUnit,
+    rating: p.rating?.avg ?? 0,
+    reviews: p.rating?.count ?? 0,
+    category: view.catId,
+    fulfillment: view.fulfillment,
+    etaDays: view.etaDays,
+    warranty: view.warranty,
+    badges: view.badgeLabels,
+    tagline: view.tagline,
+  };
+};
 
 export const ProductCard = ({
   p,
   onOpen,
   variant = "standard",
 }: {
-  p: HGProduct;
+  p: ProductCardVM;
   onOpen: () => void;
   variant?: "standard" | "minimal";
 }) => {
   const { add } = useCartActions();
   const qty = useCartLineQty(p.id);
   const compare = useCompare();
-  const isPre = p.fulfillment === "preorder";
+  const view = homeProductCardAdapter(p);
+  const isPre = view.isPreorder;
+  const price = p.price.amount;
+  const oldPrice = p.price.compareAt;
+  const name = p.name.ar;
+  const imageUrl = p.hero?.url ?? "";
+  const ratingAvg = p.rating?.avg ?? 0;
+  const ratingCount = p.rating?.count ?? 0;
   const deposit = isPre
-    ? Math.round((p.price * (p.depositPct ?? 25)) / 100)
+    ? Math.round((price * (view.depositPct ?? 25)) / 100)
     : 0;
   const inCompare = compare.has(p.id);
   const compareFull = !inCompare && compare.items.length >= compare.max;
 
-  // Phase 54 — Inventory Triage & Wakalah
-  const stock = p.stock ?? Number.POSITIVE_INFINITY;
+  // Inventory triage — booleans only (raw stock count is not a VM concern).
+  const stock = view.stockQty ?? Number.POSITIVE_INFINITY;
   const isOOS = stock === 0;
-  const isWakalah = isOOS && p.wakalahEligible === true;
-  const isHidden = isOOS && p.hideOnZero === true && !isWakalah;
-  const isHardOOS = isOOS && !isWakalah && !p.hideOnZero;
+  const isWakalah = isOOS && view.isWakalah;
+  const isHidden = isOOS && view.hideOnZero && !isWakalah;
+  const isHardOOS = isOOS && !isWakalah && !view.hideOnZero;
 
   const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -87,7 +100,7 @@ export const ProductCard = ({
     if (isPre) {
       add(product, 1, {
         payDeposit: true,
-        unitPrice: p.price,
+        unitPrice: price,
         bookingNote: `حجز مسبق · دفعة مقدمة ${toLatin(deposit.toLocaleString("en-US"))} ج.م`,
       });
       toast.success("تم تأكيد الحجز", {
@@ -105,7 +118,7 @@ export const ProductCard = ({
       return;
     }
     add(product);
-    toast.success("أُضيف إلى السلة", { description: p.name });
+    toast.success("أُضيف إلى السلة", { description: name });
   };
 
   const handleCompare = (e: React.MouseEvent) => {
@@ -129,8 +142,8 @@ export const ProductCard = ({
       >
         <div className="relative aspect-square overflow-hidden bg-secondary/40">
           <OptimizedImage
-            src={p.image}
-            alt={p.name}
+            src={imageUrl}
+            alt={name}
             width={512}
             height={512}
             className="h-full w-full object-cover object-center"
@@ -139,11 +152,11 @@ export const ProductCard = ({
         </div>
         <div className="flex flex-1 flex-col gap-2 p-3">
           <h3 className="line-clamp-1 text-[13px] font-bold leading-tight text-foreground">
-            {p.name}
+            {name}
           </h3>
           <div className="mt-auto flex items-end justify-between">
             <span className="font-display text-lg font-extrabold tabular-nums">
-              {toLatin(p.price.toLocaleString("en-US"))}
+              {toLatin(price.toLocaleString("en-US"))}
               <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
             </span>
             <button
@@ -188,8 +201,8 @@ export const ProductCard = ({
 
       <div className="relative aspect-square overflow-hidden bg-secondary/40">
         <OptimizedImage
-          src={p.image}
-          alt={p.name}
+          src={imageUrl}
+          alt={name}
           width={768}
           height={768}
           className="h-full w-full object-cover object-center"
@@ -199,7 +212,7 @@ export const ProductCard = ({
         {isPre ? (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-gradient-to-l from-amber-500 to-amber-600 px-2 py-1 text-[10px] font-extrabold text-white shadow-pill">
             <CalendarClock className="h-3 w-3" />
-            حجز · {toLatin(p.etaDays ?? 7)} أيام
+            حجز · {toLatin(view.etaDays ?? 7)} أيام
           </span>
         ) : (
           <span className="absolute right-2 top-2 inline-flex items-center gap-1 rounded-full bg-emerald-600 px-2 py-1 text-[10px] font-extrabold text-white shadow-pill">
@@ -208,9 +221,9 @@ export const ProductCard = ({
           </span>
         )}
 
-        {p.oldPrice && (
+        {oldPrice && (
           <span className="absolute left-2 top-2 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground tabular-nums">
-            خصم {toLatin(Math.round(((p.oldPrice - p.price) / p.oldPrice) * 100))}٪
+            خصم {toLatin(Math.round(((oldPrice - price) / oldPrice) * 100))}٪
           </span>
         )}
 
@@ -237,29 +250,29 @@ export const ProductCard = ({
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
-        <p className="text-[10px] font-medium text-muted-foreground">{p.brand}</p>
+        <p className="text-[10px] font-medium text-muted-foreground">{view.brand}</p>
         <h3 className="line-clamp-2 text-[13px] font-extrabold leading-tight text-foreground">
-          {p.name}
+          {name}
         </h3>
-        <p className="line-clamp-1 text-[10.5px] text-muted-foreground">{p.tagline}</p>
+        <p className="line-clamp-1 text-[10.5px] text-muted-foreground">{view.tagline}</p>
 
         <div className="mt-1 flex items-center gap-1 text-[10.5px]">
           <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-          <span className="font-bold tabular-nums">{toLatin(p.rating)}</span>
+          <span className="font-bold tabular-nums">{toLatin(ratingAvg)}</span>
           <span className="text-muted-foreground">
-            ({toLatin(p.reviews.toLocaleString("en-US"))})
+            ({toLatin(ratingCount.toLocaleString("en-US"))})
           </span>
         </div>
 
         <div className="mt-2 flex items-end justify-between">
           <div className="leading-none">
             <span className="font-display text-lg font-extrabold tabular-nums">
-              {toLatin(p.price.toLocaleString("en-US"))}
+              {toLatin(price.toLocaleString("en-US"))}
             </span>
             <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
-            {p.oldPrice && (
+            {oldPrice && (
               <div className="text-[10px] text-muted-foreground line-through tabular-nums">
-                {toLatin(p.oldPrice.toLocaleString("en-US"))} ج.م
+                {toLatin(oldPrice.toLocaleString("en-US"))} ج.م
               </div>
             )}
           </div>
@@ -311,7 +324,7 @@ export const ProductCard = ({
 
         {isPre && (
           <p className="mt-1.5 text-[9.5px] font-bold text-amber-700">
-            ادفع {toLatin(p.depositPct ?? 25)}٪ مقدّم ({fmt(deposit)}) لإتمام الحجز
+            ادفع {toLatin(view.depositPct ?? 25)}٪ مقدّم ({fmt(deposit)}) لإتمام الحجز
           </p>
         )}
       </div>
