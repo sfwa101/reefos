@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, Clock, Eye } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
+import { getKycSignedUrlsFn, updateKycStatusFn } from "@/lib/hr.functions";
 import { fmtNum } from "@/lib/format";
 import { toast } from "sonner";
-
-const BUCKET = "kyc-documents";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "بانتظار", cls: "bg-warning/15 text-warning" },
@@ -35,13 +33,13 @@ export default function KycAdmin() {
   const [loadingDocs, setLoadingDocs] = useState(false);
 
   const update = async (id: string, status: "approved" | "rejected") => {
-    const { error } = await supabase
-      .from("kyc_verifications")
-      .update({ status, reviewed_at: new Date().toISOString() })
-      .eq("id", id);
-    if (error) return toast.error("فشل التحديث: " + error.message);
-    toast.success(status === "approved" ? "تم التوثيق" : "تم الرفض");
-    refresh();
+    try {
+      await updateKycStatusFn({ data: { id, status } });
+      toast.success(status === "approved" ? "تم التوثيق" : "تم الرفض");
+      refresh();
+    } catch (e) {
+      toast.error("فشل التحديث: " + (e as Error).message);
+    }
   };
 
   const openDocs = async (r: KycRow) => {
@@ -50,36 +48,11 @@ export default function KycAdmin() {
     setBackUrl(null);
     setLoadingDocs(true);
     try {
-      // Fetch full row to get image paths (the grid select doesn't include them)
-      const { data, error } = await supabase
-        .from("kyc_verifications")
-        .select("front_image_path, back_image_path")
-        .eq("id", r.id)
-        .maybeSingle();
-      if (error) throw error;
-      const fp = data?.front_image_path ?? null;
-      const bp = data?.back_image_path ?? null;
-
-      const tasks: Promise<void>[] = [];
-      if (fp) {
-        tasks.push(
-          supabase.storage.from(BUCKET).createSignedUrl(fp, 300).then(({ data, error }) => {
-            if (error) throw error;
-            setFrontUrl(data?.signedUrl ?? null);
-          })
-        );
-      }
-      if (bp) {
-        tasks.push(
-          supabase.storage.from(BUCKET).createSignedUrl(bp, 300).then(({ data, error }) => {
-            if (error) throw error;
-            setBackUrl(data?.signedUrl ?? null);
-          })
-        );
-      }
-      await Promise.all(tasks);
-    } catch (e: any) {
-      toast.error("فشل تحميل المستندات: " + (e?.message ?? ""));
+      const { frontUrl, backUrl } = await getKycSignedUrlsFn({ data: { id: r.id } });
+      setFrontUrl(frontUrl);
+      setBackUrl(backUrl);
+    } catch (e) {
+      toast.error("فشل تحميل المستندات: " + ((e as Error)?.message ?? ""));
     } finally {
       setLoadingDocs(false);
     }
