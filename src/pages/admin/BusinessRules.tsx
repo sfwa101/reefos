@@ -30,31 +30,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listLoyaltyTierRulesFn,
+  updateLoyaltyTierRuleFn,
+  listIncentiveMilestonesFn,
+  updateIncentiveMilestoneFn,
+  type TierRuleRow as TierRule,
+  type MilestoneRow as Milestone,
+} from "@/lib/business-rules.functions";
 
-/* ================================ Types ================================ */
-
-type TierKey = "bronze" | "silver" | "gold" | "platinum" | "vip";
-
-interface TierRule {
-  id: string;
-  tier: TierKey;
-  discount_pct: number;
-  points_multiplier: number;
-  min_lifetime_spend: number;
-  is_active: boolean;
-}
-
-interface Milestone {
-  id: string;
-  key: string;
-  threshold: number;
-  title: string;
-  reward: string;
-  icon: string;
-  sort_order: number;
-  is_active: boolean;
-}
+type TierKey = TierRule["tier"];
 
 const TIER_META: Record<
   TierKey,
