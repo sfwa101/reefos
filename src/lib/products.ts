@@ -36,6 +36,7 @@ import type {
   ProductSource,
   ProductVariant,
   ProductAddon,
+  DbRow,
 } from "@/core/catalog/legacy/legacyProduct.types";
 
 export const PRODUCT_COLUMNS =
