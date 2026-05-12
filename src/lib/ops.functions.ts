@@ -203,3 +203,323 @@ export const updateDeliverySettingsFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============= Wave R-1 Batch 2 — Orders, Allocation, Inventory =============
+
+export type MasterOrderListRow = {
+  id: string;
+  total_amount: number | null;
+  customer_id: string;
+  created_at: string;
+  status: string | null;
+  node_statuses: string[];
+  customer_name: string | null;
+  customer_phone: string | null;
+};
+
+export const listMasterOrdersFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<MasterOrderListRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("salsabil_master_orders")
+      .select(`
+        id, total_amount, customer_id, created_at, status,
+        salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk ( status )
+      `)
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    const rows = (data ?? []) as SbAny[];
+    const customerIds = Array.from(new Set(rows.map((r) => r.customer_id).filter(Boolean)));
+    const profileMap = new Map<string, { full_name: string | null; phone: string | null }>();
+    if (customerIds.length) {
+      const { data: profiles } = await sb
+        .from("profiles")
+        .select("id,full_name,phone")
+        .in("id", customerIds);
+      (profiles ?? []).forEach((p: SbAny) =>
+        profileMap.set(p.id, { full_name: p.full_name ?? null, phone: p.phone ?? null }),
+      );
+    }
+    return rows.map((m) => {
+      const nodes: SbAny[] = m.salsabil_fulfillment_nodes ?? [];
+      const prof = profileMap.get(m.customer_id);
+      return {
+        id: m.id,
+        total_amount: m.total_amount,
+        customer_id: m.customer_id,
+        created_at: m.created_at,
+        status: m.status ?? null,
+        node_statuses: nodes.map((n) => n.status),
+        customer_name: prof?.full_name ?? null,
+        customer_phone: prof?.phone ?? null,
+      };
+    });
+  });
+
+export const setOrderStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { orderId: string; status: string }) => {
+    if (!d?.orderId) throw new Error("orderId_required");
+    if (!d?.status) throw new Error("status_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.rpc("admin_set_order_status", {
+      p_order_id: data.orderId,
+      p_status: data.status,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export type MasterOrderDetail = {
+  id: string;
+  total_amount: number | null;
+  status: string | null;
+  created_at: string;
+  customer_id: string;
+  delivery_info: Record<string, unknown> | null;
+  node_ids: string[];
+  node_statuses: string[];
+  node_notes: string[];
+  items: Array<{
+    id: string;
+    quantity: number;
+    price: number;
+    product_name: string;
+    product_image: string | null;
+  }>;
+  customer: { full_name: string | null; phone: string | null } | null;
+};
+
+export const getMasterOrderDetailFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { orderId: string }) => {
+    if (!d?.orderId) throw new Error("orderId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<MasterOrderDetail | null> => {
+    const sb = context.supabase as SbAny;
+    const { data: master, error } = await sb
+      .from("salsabil_master_orders")
+      .select(`
+        id, total_amount, status, created_at, customer_id, delivery_info,
+        salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk (
+          id, status, notes,
+          salsabil_fulfillment_items (
+            id, quantity, price_at_time,
+            salsabil_skus ( salsabil_assets ( name, media ) )
+          )
+        )
+      `)
+      .eq("id", data.orderId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!master) return null;
+    const m = master as SbAny;
+    const nodes: SbAny[] = m.salsabil_fulfillment_nodes ?? [];
+    const items: MasterOrderDetail["items"] = [];
+    nodes.forEach((n) => {
+      (n.salsabil_fulfillment_items ?? []).forEach((it: SbAny) => {
+        const media = it?.salsabil_skus?.salsabil_assets?.media ?? {};
+        const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+        items.push({
+          id: it.id,
+          quantity: it.quantity,
+          price: Number(it.price_at_time ?? 0),
+          product_name: it?.salsabil_skus?.salsabil_assets?.name ?? "منتج",
+          product_image: image,
+        });
+      });
+    });
+    let customer: MasterOrderDetail["customer"] = null;
+    if (m.customer_id) {
+      const { data: cust } = await sb
+        .from("profiles")
+        .select("full_name,phone")
+        .eq("id", m.customer_id)
+        .maybeSingle();
+      customer = (cust as MasterOrderDetail["customer"]) ?? null;
+    }
+    return {
+      id: m.id,
+      total_amount: m.total_amount,
+      status: m.status ?? null,
+      created_at: m.created_at,
+      customer_id: m.customer_id,
+      delivery_info: (m.delivery_info as Record<string, unknown>) ?? null,
+      node_ids: nodes.map((n) => n.id),
+      node_statuses: nodes.map((n) => n.status),
+      node_notes: nodes.map((n) => n.notes).filter(Boolean) as string[],
+      items,
+      customer,
+    };
+  });
+
+export type AdminDriverRow = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+};
+
+export const listActiveDriversFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<AdminDriverRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("drivers")
+      .select("id,full_name,phone")
+      .eq("is_active", true)
+      .order("full_name")
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as AdminDriverRow[];
+  });
+
+export const assignDriverToOrderFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { nodeIds: string[]; driverId: string }) => {
+    if (!Array.isArray(d?.nodeIds) || d.nodeIds.length === 0) throw new Error("nodeIds_required");
+    if (!d?.driverId) throw new Error("driverId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb
+      .from("salsabil_fulfillment_nodes")
+      .update({
+        driver_id: data.driverId,
+        status: "out_for_delivery",
+        assigned_at: new Date().toISOString(),
+      })
+      .in("id", data.nodeIds);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export type UnassignedNodeRow = {
+  id: string;
+  master_order_id: string | null;
+  status: string;
+  total_amount: number | null;
+  created_at: string;
+  vendor_id: string | null;
+  pickup_lat: number | null;
+  pickup_lng: number | null;
+};
+
+export const listUnassignedNodesFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<UnassignedNodeRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("salsabil_fulfillment_nodes")
+      .select("id,master_order_id,status,total_amount,created_at,vendor_id,pickup_lat,pickup_lng")
+      .is("driver_id", null)
+      .in("status", ["pending", "confirmed", "preparing", "ready_for_pickup", "requires_admin_routing"])
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as UnassignedNodeRow[];
+  });
+
+export const broadcastSmartDispatchFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { nodeId: string }) => {
+    if (!d?.nodeId) throw new Error("nodeId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ count: number }> => {
+    const sb = context.supabase as SbAny;
+    const { data: count, error } = await sb.rpc("broadcast_smart_dispatch", {
+      p_node_id: data.nodeId,
+    });
+    if (error) throw new Error(error.message);
+    return { count: Number(count ?? 0) };
+  });
+
+export type RecentMasterOrderRow = {
+  id: string;
+  total_amount: number | null;
+  status: string;
+  created_at: string;
+  customer_id: string;
+  sub_count: number;
+};
+
+export const listRecentMasterOrdersWithSubCountFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<RecentMasterOrderRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("salsabil_master_orders")
+      .select(
+        "id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(id)",
+      )
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return ((data ?? []) as SbAny[]).map((m) => ({
+      id: m.id,
+      total_amount: m.total_amount,
+      status: m.status,
+      created_at: m.created_at,
+      customer_id: m.customer_id,
+      sub_count: (m.salsabil_fulfillment_nodes ?? []).length,
+    }));
+  });
+
+export type AllocationOverviewRow = {
+  sub_order_id: string;
+  status: string;
+  total: number;
+  notes: string | null;
+  items: Array<{ product_name: string; quantity: number; price: number }> | null;
+};
+
+export const getAllocationOverviewFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { orderId: string }) => {
+    if (!d?.orderId) throw new Error("orderId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<AllocationOverviewRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data: rows, error } = await sb.rpc("allocation_overview", { _order_id: data.orderId });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as AllocationOverviewRow[];
+  });
+
+export const allocateOrderInventoryFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { orderId: string; zone: string }) => {
+    if (!d?.orderId) throw new Error("orderId_required");
+    return { orderId: d.orderId, zone: (d.zone || "M").toUpperCase() };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { data: result, error } = await sb.rpc("allocate_order_inventory", {
+      _order_id: data.orderId,
+      _zone: data.zone,
+    });
+    if (error) throw new Error(error.message);
+    return (result ?? {}) as { allocated_items?: number; failed_items?: unknown[] };
+  });
+
+export const getNestedStockBreakdownFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { productId: string }) => {
+    if (!d?.productId) throw new Error("productId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { data: bd, error } = await sb.rpc("nested_stock_breakdown", {
+      _product_id: data.productId,
+    });
+    if (error) throw new Error(error.message);
+    return (bd ?? null) as { human_readable?: string; total_pieces?: number; breakdown?: unknown[] } | null;
+  });
