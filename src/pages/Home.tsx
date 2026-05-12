@@ -21,6 +21,7 @@ import { logBehavior } from "@/lib/behavior";
 import { storeThemes } from "@/lib/storeThemes";
 import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
+import { SduiHomeFeed } from "@/apps/reef-al-madina/features/storefront/home/components/SduiHomeFeed";
 import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
 import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
@@ -62,6 +63,8 @@ const HomePage = () => {
       }`}
       dir="rtl"
     >
+      <SduiHomeFeed />
+
       <LayoutFactory
         pageKey={HOME_PAGE_KEY}
         orchestrator={orchestrator}
