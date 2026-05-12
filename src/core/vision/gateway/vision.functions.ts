@@ -192,6 +192,7 @@ export const approveInferenceFn = createServerFn({ method: "POST" })
 export const rejectInferenceFn = createServerFn({ method: "POST" })
   .inputValidator((input) => rejectSchema.parse(input))
   .handler(async ({ data }): Promise<VisionInferenceTrace> => {
+    void data.reason; // reserved for future ledger annotation
     const { data: userRes } = await supabase.auth.getUser();
     const approverId = userRes?.user?.id ?? null;
 
