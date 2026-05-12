@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
-import { supabase } from "@/integrations/supabase/client";
+import { getCheckoutContextFn, clearMyCartFn } from "@/lib/cart.functions";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
 import {
