@@ -13,12 +13,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Search, Loader2, PackagePlus, Calculator } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import {
+  listSuppliersFn,
+  submitPurchaseInvoiceFn,
+} from "@/lib/admin-catalog.functions";
 
 type Supplier = { id: string; name: string };
 type Product = { id: string; name: string; cost_price: number | null; stock: number | null };
@@ -61,16 +64,21 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
     let cancel = false;
     (async () => {
       setLoadingRefs(true);
-      const [s, sov] = await Promise.all([
-        supabase.from("suppliers").select("id,name").eq("is_active", true).order("name"),
-        import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
-      ]);
-      if (cancel) return;
-      setSuppliers((s.data ?? []) as Supplier[]);
-      setProducts(sov.map((r) => ({
-        id: r.id, name: r.name, cost_price: r.cost_price, stock: r.stock,
-      })));
-      setLoadingRefs(false);
+      try {
+        const [s, sov] = await Promise.all([
+          listSuppliersFn(),
+          import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
+        ]);
+        if (cancel) return;
+        setSuppliers(s as Supplier[]);
+        setProducts(sov.map((r: { id: string; name: string; cost_price: number | null; stock: number | null }) => ({
+          id: r.id, name: r.name, cost_price: r.cost_price, stock: r.stock,
+        })));
+      } catch (err) {
+        if (!cancel) toast.error((err as Error).message);
+      } finally {
+        if (!cancel) setLoadingRefs(false);
+      }
     })();
     return () => { cancel = true; };
   }, []);
@@ -144,25 +152,25 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
 
     setSubmitting(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("submit_purchase_invoice", {
-        _supplier_id: form.supplier_id,
-        _items: lines.map((l) => ({
-          product_id: l.product_id,
-          product_name: l.product_name,
-          quantity: l.quantity,
-          unit_cost: l.unit_cost,
-        })),
-        _total_amount: total,
-        _invoice_number: form.invoice_number || undefined,
-        _invoice_date: form.invoice_date,
-        _paid_amount: paid,
-        _tax: tax,
-        _notes: form.notes || undefined,
+      const result = await submitPurchaseInvoiceFn({
+        data: {
+          supplier_id: form.supplier_id,
+          items: lines.map((l) => ({
+            product_id: l.product_id,
+            product_name: l.product_name,
+            quantity: l.quantity,
+            unit_cost: l.unit_cost,
+          })),
+          total_amount: total,
+          invoice_number: form.invoice_number || undefined,
+          invoice_date: form.invoice_date,
+          paid_amount: paid,
+          tax,
+          notes: form.notes || undefined,
+        },
       });
-      if (error) throw error;
       toast.success("تم حفظ الفاتورة + تحديث المخزون والتكلفة (MAC)", {
-        description: `فاتورة #${String((data as any)?.invoice_id ?? "").slice(0, 8)}`,
+        description: `فاتورة #${String(result.invoice_id ?? "").slice(0, 8)}`,
       });
       setLines([]);
       setForm((f) => ({

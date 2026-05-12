@@ -1,17 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, FolderTree, Folder } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
-
-type Category = {
-  id: string;
-  name: string;
-  parent_id: string | null;
-  icon: string | null;
-  sort_order: number;
-};
+import {
+  listCategoriesFn,
+  upsertCategoryFn,
+  deleteCategoryFn,
+  type CategoryRow as Category,
+} from "@/lib/admin-catalog.functions";
 
 export default function Categories() {
   const [items, setItems] = useState<Category[] | null>(null);
@@ -20,21 +17,25 @@ export default function Categories() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const { data, error } = await supabase.from("categories").select("*").order("sort_order").limit(500);
-    if (error) toast.error(error.message);
-    setItems((data ?? []) as Category[]);
+    try {
+      const data = await listCategoriesFn();
+      setItems(data);
+    } catch (err) {
+      toast.error((err as Error).message);
+      setItems([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async (c: Category) => {
     if (!confirm(`حذف الفئة "${c.name}"؟`)) return;
-    const { error } = await supabase.from("categories").delete().eq("id", c.id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await deleteCategoryFn({ data: { id: c.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
     }
-    toast.success("تم الحذف");
-    load();
   };
 
   const roots = (items ?? []).filter((c) => !c.parent_id);
@@ -164,11 +165,12 @@ function CategoryEditor({
     }
     setSaving(true);
     try {
-      const payload = { name: name.trim(), icon: icon || null, sort_order: Number(sortOrder) || 0, parent_id: parent };
-      const { error } = isNew
-        ? await supabase.from("categories").insert(payload)
-        : await supabase.from("categories").update(payload).eq("id", category!.id);
-      if (error) throw error;
+      await upsertCategoryFn({
+        data: {
+          id: isNew ? null : category!.id,
+          values: { name: name.trim(), icon: icon || null, sort_order: Number(sortOrder) || 0, parent_id: parent },
+        },
+      });
       toast.success(isNew ? "تم الإنشاء" : "تم الحفظ");
       onSaved();
     } catch (err) {

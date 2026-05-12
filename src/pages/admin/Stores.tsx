@@ -1,21 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, Store as StoreIcon } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
-
-type Store = {
-  id: string;
-  name: string;
-  slug: string;
-  type: string;
-  phone: string | null;
-  address: string | null;
-  logo_url: string | null;
-  commission_pct: number;
-  is_active: boolean;
-};
+import {
+  listStoresFn,
+  upsertStoreFn,
+  deleteStoreFn,
+  type StoreRow as Store,
+} from "@/lib/admin-catalog.functions";
 
 export default function Stores() {
   const [items, setItems] = useState<Store[] | null>(null);
@@ -24,18 +17,24 @@ export default function Stores() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const { data, error } = await supabase.from("stores").select("*").order("name").limit(1000);
-    if (error) toast.error(error.message);
-    setItems((data ?? []) as Store[]);
+    try {
+      setItems(await listStoresFn());
+    } catch (err) {
+      toast.error((err as Error).message);
+      setItems([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const del = async (s: Store) => {
     if (!confirm(`حذف "${s.name}"؟`)) return;
-    const { error } = await supabase.from("stores").delete().eq("id", s.id);
-    if (error) return toast.error(error.message);
-    toast.success("تم الحذف");
-    load();
+    try {
+      await deleteStoreFn({ data: { id: s.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
 
   return (
@@ -116,20 +115,21 @@ function StoreEditor({ store, onClose, onSaved }: { store: Store | null; onClose
     }
     setSaving(true);
     try {
-      const payload = {
-        name: f.name.trim(),
-        slug: f.slug.trim(),
-        type: f.type,
-        phone: f.phone || null,
-        address: f.address || null,
-        logo_url: f.logo_url || null,
-        commission_pct: Number(f.commission_pct) || 0,
-        is_active: f.is_active,
-      };
-      const { error } = isNew
-        ? await supabase.from("stores").insert(payload)
-        : await supabase.from("stores").update(payload).eq("id", store!.id);
-      if (error) throw error;
+      await upsertStoreFn({
+        data: {
+          id: isNew ? null : store!.id,
+          values: {
+            name: f.name.trim(),
+            slug: f.slug.trim(),
+            type: f.type,
+            phone: f.phone || null,
+            address: f.address || null,
+            logo_url: f.logo_url || null,
+            commission_pct: Number(f.commission_pct) || 0,
+            is_active: f.is_active,
+          },
+        },
+      });
       toast.success(isNew ? "تم الإنشاء" : "تم الحفظ");
       onSaved();
     } catch (err) {
