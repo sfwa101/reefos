@@ -13,12 +13,15 @@ import { useEffect, useMemo, useState } from "react";
 import { Plus, Trash2, Search, Loader2, PackagePlus, Calculator } from "lucide-react";
 import { z } from "zod";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import {
+  listSuppliersFn,
+  submitPurchaseInvoiceFn,
+} from "@/lib/admin-catalog.functions";
 
 type Supplier = { id: string; name: string };
 type Product = { id: string; name: string; cost_price: number | null; stock: number | null };
