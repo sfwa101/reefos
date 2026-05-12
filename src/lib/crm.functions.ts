@@ -254,7 +254,8 @@ export const listHumanDirectoryFn = createServerFn({ method: "GET" })
 
 // ============= Wave R-2 Batch A.2 — Human 360 Sheet =============
 export type Human360Result = {
-  identity: Record<string, unknown> & {
+  identity: {
+    [x: string]: unknown;
     id: string;
     full_name: string | null;
     phone: string | null;
