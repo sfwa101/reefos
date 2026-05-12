@@ -43,6 +43,18 @@ export type SectionLayoutVariant =
   | "restaurant-list"
   | "basket-builder";
 
+/**
+ * Section capabilities — Wave P-C · Phase C-3.
+ *
+ * Drives per-vertical block gating in `resolveSectionTree` without slug
+ * switches. Strings live in this module to keep the registry self-
+ * contained; the resolver matches on string equality.
+ */
+export const SECTION_CAP = {
+  COMPARE: "commerce.compare",
+} as const;
+export type SectionCapability = (typeof SECTION_CAP)[keyof typeof SECTION_CAP];
+
 export interface SectionIdentity {
   slug: string;
   themeKey: StoreThemeKey;
@@ -54,6 +66,8 @@ export interface SectionIdentity {
   quickActions?: SectionQuickAction[];
   /** Drives how ProductsGrid / LayoutFactory render this section */
   layoutVariant: SectionLayoutVariant;
+  /** Optional capability flags (Wave P-C · C-3). */
+  capabilities?: ReadonlyArray<SectionCapability>;
 }
 
 export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
