@@ -41,7 +41,9 @@ export type SectionLayoutVariant =
   | "meal-menu"
   | "subscription-builder"
   | "restaurant-list"
-  | "basket-builder";
+  | "basket-builder"
+  | "subscription-manager"
+  | "compare-grid";
 
 /**
  * Section capabilities — Wave P-C · Phase C-3.
