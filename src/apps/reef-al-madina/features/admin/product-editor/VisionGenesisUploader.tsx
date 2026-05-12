@@ -9,13 +9,31 @@ import { useCallback, useRef, useState } from "react";
 import { Camera, Loader2, Sparkles, UploadCloud, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import {
-  useVisionGenesis,
   type USAGenesisPayload,
   type VisionGenesisError,
 } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
 import { useProductImageUpload } from "@/hooks/useProductImageUpload";
+import {
+  useInferEntity,
+  useApproveInference,
+  useRejectInference,
+} from "@/core/vision/gateway/hooks";
+
+// Convert a File to a raw base64 string (no data URL prefix).
+async function fileToBase64(file: File): Promise<string> {
+  const buf = await file.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  let binary = "";
+  const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(
+      null,
+      Array.from(bytes.subarray(i, i + chunk)),
+    );
+  }
+  return btoa(binary);
+}
 
 const ERROR_MESSAGES: Record<VisionGenesisError, string> = {
   rate_limited: "تم تجاوز حد الطلبات، حاول بعد قليل.",
