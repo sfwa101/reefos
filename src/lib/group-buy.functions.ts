@@ -107,13 +107,13 @@ export const getMyGroupBuyPledgeFn = createServerFn({ method: "GET" })
 export const pledgeGroupBuyFn = createServerFn({ method: "POST" })
   .inputValidator((d: { campaignId: string; quantity: number }) => d)
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data, context }): Promise<{ ok: true; data: unknown }> => {
+  .handler(async ({ data, context }): Promise<{ ok: true; data: Record<string, unknown> | null }> => {
     const { supabase } = context;
     const { data: row, error } = await (
       supabase.rpc as unknown as (
         fn: string,
         args: Record<string, unknown>,
-      ) => Promise<{ data: unknown; error: { message: string } | null }>
+      ) => Promise<{ data: Record<string, unknown> | null; error: { message: string } | null }>
     )("pledge_group_buy", {
       _campaign_id: data.campaignId,
       _quantity: data.quantity,
