@@ -76,7 +76,7 @@ export const useCartCalculations = ({
           note: l.meta?.bookingNote,
         },
       });
-      buckets[t].subtotal += l.product.price * l.qty;
+      buckets[t].subtotal += (l.capturedPrice ?? l.product.price) * l.qty;
     }
     return buckets;
   }, [lines]);
