@@ -1,13 +1,13 @@
 /**
  * Phase T-B — Driver Telemetry (Zustand)
  * --------------------------------------
- * High-frequency GPS stream → throttled (10s) UPSERT into `driver_positions`.
- * Zustand selector subscriptions prevent re-renders on every GPS tick.
- *
- * RLS: writes succeed only when `auth.uid() = driver_id`.
+ * High-frequency GPS stream → throttled (10s) gateway publish via
+ * `publishDriverPositionFn` (server-side `requireSupabaseAuth` middleware
+ * resolves `driver_id`). Zustand selector subscriptions prevent re-renders
+ * on every GPS tick.
  */
 import { create } from "zustand";
-import { supabase } from "@/integrations/supabase/client";
+import { publishDriverPositionFn } from "@/lib/driver.functions";
 
 const THROTTLE_MS = 10_000;
 
@@ -34,25 +34,26 @@ type State = {
 };
 
 async function pushPosition(
-  driverId: string,
   pos: Position,
   status: DriverStatus,
   battery: number | null,
 ) {
-  const wkt = `SRID=4326;POINT(${pos.lng} ${pos.lat})`;
-  const { error } = await supabase.from("driver_positions").upsert({
-    driver_id: driverId,
-    position: wkt,
-    heading_deg: pos.heading != null ? Math.round(pos.heading) : null,
-    speed_kmh: pos.speed != null ? Math.round(pos.speed * 3.6) : null,
-    battery_pct: battery,
-    status,
-    updated_at: new Date(pos.ts).toISOString(),
-  });
-  if (error) {
+  try {
+    await publishDriverPositionFn({
+      data: {
+        lat: pos.lat,
+        lng: pos.lng,
+        heading: pos.heading != null ? Math.round(pos.heading) : null,
+        speedKmh: pos.speed != null ? Math.round(pos.speed * 3.6) : null,
+        batteryPct: battery,
+        status,
+        ts: pos.ts,
+      },
+    });
+  } catch (e) {
     // eslint-disable-next-line no-console
-    console.error("[driverTelemetry] upsert failed", error.message);
-    throw error;
+    console.error("[driverTelemetry] publish failed", (e as Error).message);
+    throw e;
   }
 }
 
@@ -95,12 +96,9 @@ export const useDriverTelemetry = create<State>((set, get) => ({
 
         if (now - get().lastPushAt < THROTTLE_MS) return;
 
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
         try {
           const battery = await readBattery();
-          await pushPosition(user.id, pos, get().status, battery);
+          await pushPosition(pos, get().status, battery);
           set({ lastPushAt: now });
         } catch (e) {
           set({ error: (e as Error).message });
@@ -123,11 +121,10 @@ export const useDriverTelemetry = create<State>((set, get) => ({
 
   setStatus: async (status) => {
     set({ status });
-    const { data: { user } } = await supabase.auth.getUser();
     const pos = get().lastPosition;
-    if (!user || !pos) return;
+    if (!pos) return;
     try {
-      await pushPosition(user.id, pos, status, await readBattery());
+      await pushPosition(pos, status, await readBattery());
       set({ lastPushAt: Date.now() });
     } catch {
       // already logged

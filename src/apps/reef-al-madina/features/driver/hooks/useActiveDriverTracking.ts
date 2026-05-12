@@ -6,7 +6,9 @@
  * Legacy `orders.driver_id` lookup is purged.
  */
 import { useEffect, useState } from "react";
+// EXEMPT: realtime channel subscription allowed (Wave P-D blueprint)
 import { supabase } from "@/integrations/supabase/client";
+import { getDriverPositionFn, resolveDriverIdFn } from "@/lib/driver.functions";
 import type { DriverStatus } from "@/apps/reef-al-madina/features/driver/store/useDriverTelemetry";
 
 export type DriverLivePosition = {
@@ -60,23 +62,13 @@ export function useActiveDriverTracking({ nodeId, driverId, orderId }: Args) {
     let active = true;
     const run = async () => {
       if (nodeId) {
-        const { data } = await supabase
-          .from("salsabil_fulfillment_nodes")
-          .select("driver_id")
-          .eq("id", nodeId)
-          .maybeSingle();
-        if (active && data?.driver_id) setResolvedDriverId(data.driver_id as string);
+        const { driverId: resolved } = await resolveDriverIdFn({ data: { nodeId } });
+        if (active && resolved) setResolvedDriverId(resolved);
         return;
       }
       if (orderId) {
-        const { data } = await supabase
-          .from("salsabil_fulfillment_nodes")
-          .select("driver_id")
-          .eq("master_order_id", orderId)
-          .not("driver_id", "is", null)
-          .limit(1)
-          .maybeSingle();
-        if (active && data?.driver_id) setResolvedDriverId(data.driver_id as string);
+        const { driverId: resolved } = await resolveDriverIdFn({ data: { orderId } });
+        if (active && resolved) setResolvedDriverId(resolved);
       }
     };
     run();
@@ -103,8 +95,8 @@ export function useActiveDriverTracking({ nodeId, driverId, orderId }: Args) {
       });
     };
 
-    supabase.from("driver_positions").select("*").eq("driver_id", resolvedDriverId).maybeSingle()
-      .then(({ data }) => apply(data as Record<string, unknown> | null));
+    getDriverPositionFn({ data: { driverId: resolvedDriverId } })
+      .then((row) => apply(row as Record<string, unknown> | null));
 
     const channel = supabase
       .channel(`driver-pos-${resolvedDriverId}`)

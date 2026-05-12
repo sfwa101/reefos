@@ -1,6 +1,14 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+// EXEMPT: realtime channel subscription allowed (Wave P-D blueprint)
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
+import { pledgeGroupBuyFn } from "@/lib/group-buy.functions";
+import {
+  groupBuyCampaignQueryOptions,
+  myGroupBuyPledgeQueryOptions,
+} from "@/lib/group-buy.queries";
 import type {
   GroupBuyCampaign,
   GroupBuyTier,
@@ -43,6 +51,8 @@ const computeTierState = (
 };
 
 export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGroupBuyEngineResult => {
+  const qc = useQueryClient();
+  const { user } = useAuth();
   const [campaign, setCampaign] = useState<GroupBuyCampaign | null>(null);
   const [tiers, setTiers] = useState<GroupBuyTier[]>([]);
   const [myPledge, setMyPledge] = useState<GroupBuyPledge | null>(null);
@@ -60,28 +70,14 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
     setLoading(true);
     setError(null);
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const uid = userData.user?.id;
-
-      const [{ data: c, error: ce }, { data: t, error: te }] = await Promise.all([
-        supabase.from("group_buy_campaigns" as never).select("*").eq("id", campaignId).maybeSingle(),
-        supabase.from("group_buy_tiers" as never).select("*").eq("campaign_id", campaignId),
-      ]);
-      if (ce) throw ce;
-      if (te) throw te;
-      setCampaign((c as GroupBuyCampaign | null) ?? null);
-      setTiers((t as GroupBuyTier[] | null) ?? []);
-
-      if (uid) {
-        const { data: p } = await supabase
-          .from("group_buy_pledges" as never)
-          .select("*")
-          .eq("campaign_id", campaignId)
-          .eq("user_id", uid)
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        setMyPledge((p as GroupBuyPledge | null) ?? null);
+      const state = await qc.fetchQuery(groupBuyCampaignQueryOptions(campaignId));
+      setCampaign(state.campaign);
+      setTiers(state.tiers);
+      if (user?.id) {
+        const pledge = await qc.fetchQuery(myGroupBuyPledgeQueryOptions(campaignId, true));
+        setMyPledge(pledge);
+      } else {
+        setMyPledge(null);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "load_failed";
@@ -89,13 +85,14 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
     } finally {
       setLoading(false);
     }
-  }, [campaignId]);
+  }, [campaignId, qc, user?.id]);
 
   useEffect(() => {
     fetchAll();
   }, [fetchAll]);
 
   // Realtime: campaign current_quantity & status updates for FOMO (Phase 44: visibility-aware)
+  // EXEMPT: realtime channel subscription allowed (Wave P-D blueprint)
   useVisibilitySocket(
     () => {
       if (!campaignId) return;
@@ -122,7 +119,6 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
       };
     },
     () => {
-      // Catch up campaign + pledge state after returning from background.
       if (campaignId) void fetchAll();
     },
     [campaignId, fetchAll],
@@ -141,23 +137,18 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
         prev ? { ...prev, current_quantity: prev.current_quantity + quantity } : prev,
       );
 
-      const { data, error: rpcErr } = await (supabase.rpc as unknown as (
-        fn: string,
-        args: Record<string, unknown>,
-      ) => Promise<{ data: unknown; error: { message: string } | null }>)("pledge_group_buy", {
-        _campaign_id: campaignId,
-        _quantity: quantity,
-      });
-
-      if (rpcErr) {
+      try {
+        const { data } = await pledgeGroupBuyFn({ data: { campaignId, quantity } });
+        await fetchAll();
+        return { ok: true, data };
+      } catch (e) {
         // Roll back optimistic bump
         setCampaign((prev) =>
           prev ? { ...prev, current_quantity: Math.max(0, prev.current_quantity - quantity) } : prev,
         );
-        return { ok: false, error: rpcErr.message };
+        const msg = e instanceof Error ? e.message : "pledge_failed";
+        return { ok: false, error: msg };
       }
-      await fetchAll();
-      return { ok: true, data };
     },
     [campaignId, fetchAll],
   );

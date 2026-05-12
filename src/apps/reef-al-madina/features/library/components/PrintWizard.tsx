@@ -40,9 +40,9 @@ export const PrintWizard = () => {
     setFile(f);
     setUploading(true);
     try {
-      const path = `${user.id}/${Date.now()}-${f.name}`;
-      const { error } = await supabase.storage.from("print-files").upload(path, f, { upsert: false });
-      if (error) throw error;
+      const fd = new FormData();
+      fd.append("file", f);
+      const { path } = await uploadPrintFileFn({ data: fd });
       setFilePath(path);
       toast.success("تم رفع الملف بنجاح");
     } catch {
@@ -56,11 +56,12 @@ export const PrintWizard = () => {
   const submit = async () => {
     if (!user) { toast.error("سجل الدخول أولاً"); return; }
     try {
-      const { error } = await supabase.from("print_jobs").insert({
-        user_id: user.id, file_path: filePath, file_name: file?.name,
-        pages, copies, color_mode: colorMode, sided, binding, total,
+      await submitPrintJobFn({
+        data: {
+          filePath, fileName: file?.name ?? null,
+          pages, copies, colorMode, sided, binding, total,
+        },
       });
-      if (error) throw error;
       const printProduct: Product = {
         id: `print-${Date.now()}`,
         name: `طلب طباعة: ${file?.name ?? "ملف"}`,
