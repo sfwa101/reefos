@@ -141,3 +141,65 @@ export const getOpsKpisFn = createServerFn({ method: "GET" })
 
     return { kpi: { revenue, count, aov, active }, critical, lowStock };
   });
+
+// ---- Wave R-1 Batch 1 additions ------------------------------------------
+export type LowStockItem = {
+  id: string;
+  name: string;
+  category: string;
+  stock: number;
+  price: number;
+  image_url: string | null;
+};
+
+export const listLowStockProductsFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { threshold: number }) => {
+    const n = Number(d?.threshold);
+    if (!Number.isFinite(n) || n < 1 || n > 100) throw new Error("invalid_threshold");
+    return { threshold: Math.floor(n) };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<LowStockItem[]> => {
+    const sb = context.supabase as SbAny;
+    const { data: rows, error } = await sb.rpc("low_stock_products", { _threshold: data.threshold });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as LowStockItem[];
+  });
+
+export type DeliverySettings = {
+  id: string;
+  require_barcode_default: boolean;
+  disable_barcode_for_express: boolean;
+  disable_barcode_zones: string[];
+  gps_proof_required_when_disabled: boolean;
+};
+
+export const getDeliverySettingsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<DeliverySettings | null> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("delivery_settings")
+      .select("*")
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return (data as DeliverySettings | null) ?? null;
+  });
+
+export const updateDeliverySettingsFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; patch: Partial<Omit<DeliverySettings, "id">> }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb
+      .from("delivery_settings")
+      .update({ ...data.patch, updated_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
