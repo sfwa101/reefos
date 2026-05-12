@@ -29,8 +29,12 @@ export default function CouponsPanel() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from(TABLE).select("*").order("created_at", { ascending: false });
-    setRows((data ?? []) as Coupon[]);
+    try {
+      const data = await listCouponsFn();
+      setRows((data ?? []) as unknown as Coupon[]);
+    } catch {
+      setRows([]);
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -42,13 +46,17 @@ export default function CouponsPanel() {
   }), [rows]);
 
   const toggleActive = async (row: Coupon) => {
-    const { error } = await supabase.from(TABLE).update({ is_active: !row.is_active } as never).eq("id", row.id);
-    if (error) toast.error("تعذر التحديث"); else load();
+    try {
+      await setCouponActiveFn({ data: { id: row.id, is_active: !row.is_active } });
+      load();
+    } catch { toast.error("تعذر التحديث"); }
   };
   const remove = async (row: Coupon) => {
     if (!confirm("حذف الكوبون؟")) return;
-    const { error } = await supabase.from(TABLE).delete().eq("id", row.id);
-    if (error) toast.error("فشل الحذف"); else { toast.success("تم الحذف"); load(); }
+    try {
+      await deleteCouponFn({ data: { id: row.id } });
+      toast.success("تم الحذف"); load();
+    } catch { toast.error("فشل الحذف"); }
   };
 
   return (
