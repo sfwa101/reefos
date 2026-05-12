@@ -57,7 +57,7 @@ export type SovereignEventRow = {
   actor_id: string | null;
   event_domain: string;
   event_type: string;
-  payload: unknown;
+  payload: Record<string, unknown> | null;
   created_at: string;
 };
 
