@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_salsabil_assets_home_load ON public.salsabil_assets (created_at DESC) WHERE is_active = true AND asset_type = 'physical';
