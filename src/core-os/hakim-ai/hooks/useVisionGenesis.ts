@@ -1,3 +1,4 @@
+/** @deprecated Replaced by Vision Cortex (`@/core/vision/gateway/hooks#useInferEntity`). */
 /**
  * useVisionGenesis — Phase 7 Part 2 client adapter.
  * Wraps the `vision_genesis` edge function in a TanStack mutation:
