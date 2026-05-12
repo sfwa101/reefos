@@ -132,24 +132,14 @@ import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
 import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
-import { Route as AppStoreWholesaleRouteImport } from './routes/_app/store.wholesale'
-import { Route as AppStoreVillageRouteImport } from './routes/_app/store.village'
-import { Route as AppStoreSweetsRouteImport } from './routes/_app/store.sweets'
 import { Route as AppStoreSupermarketRouteImport } from './routes/_app/store.supermarket'
-import { Route as AppStoreSubscriptionRouteImport } from './routes/_app/store.subscription'
-import { Route as AppStoreRestaurantsRouteImport } from './routes/_app/store.restaurants'
-import { Route as AppStoreRecipesRouteImport } from './routes/_app/store.recipes'
 import { Route as AppStoreProduceRouteImport } from './routes/_app/store.produce'
-import { Route as AppStorePharmacyRouteImport } from './routes/_app/store.pharmacy'
-import { Route as AppStoreMeatRouteImport } from './routes/_app/store.meat'
-import { Route as AppStoreLibraryRouteImport } from './routes/_app/store.library'
 import { Route as AppStoreKitchenRouteImport } from './routes/_app/store.kitchen'
 import { Route as AppStoreHomeCompareRouteImport } from './routes/_app/store.home-compare'
 import { Route as AppStoreHomeRouteImport } from './routes/_app/store.home'
 import { Route as AppStoreDairyRouteImport } from './routes/_app/store.dairy'
 import { Route as AppStoreBasketsSubsRouteImport } from './routes/_app/store.baskets-subs'
 import { Route as AppStoreBasketsBuildRouteImport } from './routes/_app/store.baskets-build'
-import { Route as AppStoreBasketsRouteImport } from './routes/_app/store.baskets'
 import { Route as AppStoreSlugRouteImport } from './routes/_app/store.$slug'
 import { Route as AppRestaurantIdRouteImport } from './routes/_app/restaurant.$id'
 import { Route as AppProductProductIdRouteImport } from './routes/_app/product.$productId'
@@ -777,59 +767,14 @@ const AppSubSlugRoute = AppSubSlugRouteImport.update({
   path: '/sub/$slug',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStoreWholesaleRoute = AppStoreWholesaleRouteImport.update({
-  id: '/store/wholesale',
-  path: '/store/wholesale',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreVillageRoute = AppStoreVillageRouteImport.update({
-  id: '/store/village',
-  path: '/store/village',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreSweetsRoute = AppStoreSweetsRouteImport.update({
-  id: '/store/sweets',
-  path: '/store/sweets',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStoreSupermarketRoute = AppStoreSupermarketRouteImport.update({
   id: '/store/supermarket',
   path: '/store/supermarket',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStoreSubscriptionRoute = AppStoreSubscriptionRouteImport.update({
-  id: '/store/subscription',
-  path: '/store/subscription',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreRestaurantsRoute = AppStoreRestaurantsRouteImport.update({
-  id: '/store/restaurants',
-  path: '/store/restaurants',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreRecipesRoute = AppStoreRecipesRouteImport.update({
-  id: '/store/recipes',
-  path: '/store/recipes',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStoreProduceRoute = AppStoreProduceRouteImport.update({
   id: '/store/produce',
   path: '/store/produce',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStorePharmacyRoute = AppStorePharmacyRouteImport.update({
-  id: '/store/pharmacy',
-  path: '/store/pharmacy',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreMeatRoute = AppStoreMeatRouteImport.update({
-  id: '/store/meat',
-  path: '/store/meat',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreLibraryRoute = AppStoreLibraryRouteImport.update({
-  id: '/store/library',
-  path: '/store/library',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStoreKitchenRoute = AppStoreKitchenRouteImport.update({
@@ -860,11 +805,6 @@ const AppStoreBasketsSubsRoute = AppStoreBasketsSubsRouteImport.update({
 const AppStoreBasketsBuildRoute = AppStoreBasketsBuildRouteImport.update({
   id: '/store/baskets-build',
   path: '/store/baskets-build',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreBasketsRoute = AppStoreBasketsRouteImport.update({
-  id: '/store/baskets',
-  path: '/store/baskets',
   getParentRoute: () => AppRoute,
 } as any)
 const AppStoreSlugRoute = AppStoreSlugRouteImport.update({
@@ -1043,24 +983,14 @@ export interface FileRoutesByFullPath {
   '/product/$productId': typeof AppProductProductIdRoute
   '/restaurant/$id': typeof AppRestaurantIdRoute
   '/store/$slug': typeof AppStoreSlugRoute
-  '/store/baskets': typeof AppStoreBasketsRoute
   '/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/store/dairy': typeof AppStoreDairyRoute
   '/store/home': typeof AppStoreHomeRoute
   '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/store/kitchen': typeof AppStoreKitchenRoute
-  '/store/library': typeof AppStoreLibraryRoute
-  '/store/meat': typeof AppStoreMeatRoute
-  '/store/pharmacy': typeof AppStorePharmacyRoute
   '/store/produce': typeof AppStoreProduceRoute
-  '/store/recipes': typeof AppStoreRecipesRoute
-  '/store/restaurants': typeof AppStoreRestaurantsRoute
-  '/store/subscription': typeof AppStoreSubscriptionRoute
   '/store/supermarket': typeof AppStoreSupermarketRoute
-  '/store/sweets': typeof AppStoreSweetsRoute
-  '/store/village': typeof AppStoreVillageRoute
-  '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1189,24 +1119,14 @@ export interface FileRoutesByTo {
   '/product/$productId': typeof AppProductProductIdRoute
   '/restaurant/$id': typeof AppRestaurantIdRoute
   '/store/$slug': typeof AppStoreSlugRoute
-  '/store/baskets': typeof AppStoreBasketsRoute
   '/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/store/dairy': typeof AppStoreDairyRoute
   '/store/home': typeof AppStoreHomeRoute
   '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/store/kitchen': typeof AppStoreKitchenRoute
-  '/store/library': typeof AppStoreLibraryRoute
-  '/store/meat': typeof AppStoreMeatRoute
-  '/store/pharmacy': typeof AppStorePharmacyRoute
   '/store/produce': typeof AppStoreProduceRoute
-  '/store/recipes': typeof AppStoreRecipesRoute
-  '/store/restaurants': typeof AppStoreRestaurantsRoute
-  '/store/subscription': typeof AppStoreSubscriptionRoute
   '/store/supermarket': typeof AppStoreSupermarketRoute
-  '/store/sweets': typeof AppStoreSweetsRoute
-  '/store/village': typeof AppStoreVillageRoute
-  '/store/wholesale': typeof AppStoreWholesaleRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1345,24 +1265,14 @@ export interface FileRoutesById {
   '/_app/product/$productId': typeof AppProductProductIdRoute
   '/_app/restaurant/$id': typeof AppRestaurantIdRoute
   '/_app/store/$slug': typeof AppStoreSlugRoute
-  '/_app/store/baskets': typeof AppStoreBasketsRoute
   '/_app/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/_app/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/_app/store/dairy': typeof AppStoreDairyRoute
   '/_app/store/home': typeof AppStoreHomeRoute
   '/_app/store/home-compare': typeof AppStoreHomeCompareRoute
   '/_app/store/kitchen': typeof AppStoreKitchenRoute
-  '/_app/store/library': typeof AppStoreLibraryRoute
-  '/_app/store/meat': typeof AppStoreMeatRoute
-  '/_app/store/pharmacy': typeof AppStorePharmacyRoute
   '/_app/store/produce': typeof AppStoreProduceRoute
-  '/_app/store/recipes': typeof AppStoreRecipesRoute
-  '/_app/store/restaurants': typeof AppStoreRestaurantsRoute
-  '/_app/store/subscription': typeof AppStoreSubscriptionRoute
   '/_app/store/supermarket': typeof AppStoreSupermarketRoute
-  '/_app/store/sweets': typeof AppStoreSweetsRoute
-  '/_app/store/village': typeof AppStoreVillageRoute
-  '/_app/store/wholesale': typeof AppStoreWholesaleRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
@@ -1497,24 +1407,14 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/restaurant/$id'
     | '/store/$slug'
-    | '/store/baskets'
     | '/store/baskets-build'
     | '/store/baskets-subs'
     | '/store/dairy'
     | '/store/home'
     | '/store/home-compare'
     | '/store/kitchen'
-    | '/store/library'
-    | '/store/meat'
-    | '/store/pharmacy'
     | '/store/produce'
-    | '/store/recipes'
-    | '/store/restaurants'
-    | '/store/subscription'
     | '/store/supermarket'
-    | '/store/sweets'
-    | '/store/village'
-    | '/store/wholesale'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1643,24 +1543,14 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/restaurant/$id'
     | '/store/$slug'
-    | '/store/baskets'
     | '/store/baskets-build'
     | '/store/baskets-subs'
     | '/store/dairy'
     | '/store/home'
     | '/store/home-compare'
     | '/store/kitchen'
-    | '/store/library'
-    | '/store/meat'
-    | '/store/pharmacy'
     | '/store/produce'
-    | '/store/recipes'
-    | '/store/restaurants'
-    | '/store/subscription'
     | '/store/supermarket'
-    | '/store/sweets'
-    | '/store/village'
-    | '/store/wholesale'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1798,24 +1688,14 @@ export interface FileRouteTypes {
     | '/_app/product/$productId'
     | '/_app/restaurant/$id'
     | '/_app/store/$slug'
-    | '/_app/store/baskets'
     | '/_app/store/baskets-build'
     | '/_app/store/baskets-subs'
     | '/_app/store/dairy'
     | '/_app/store/home'
     | '/_app/store/home-compare'
     | '/_app/store/kitchen'
-    | '/_app/store/library'
-    | '/_app/store/meat'
-    | '/_app/store/pharmacy'
     | '/_app/store/produce'
-    | '/_app/store/recipes'
-    | '/_app/store/restaurants'
-    | '/_app/store/subscription'
     | '/_app/store/supermarket'
-    | '/_app/store/sweets'
-    | '/_app/store/village'
-    | '/_app/store/wholesale'
     | '/_app/sub/$slug'
     | '/_pos/pos/close-shift'
     | '/_pos/pos/inventory'
@@ -2711,27 +2591,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSubSlugRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/store/wholesale': {
-      id: '/_app/store/wholesale'
-      path: '/store/wholesale'
-      fullPath: '/store/wholesale'
-      preLoaderRoute: typeof AppStoreWholesaleRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/village': {
-      id: '/_app/store/village'
-      path: '/store/village'
-      fullPath: '/store/village'
-      preLoaderRoute: typeof AppStoreVillageRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/sweets': {
-      id: '/_app/store/sweets'
-      path: '/store/sweets'
-      fullPath: '/store/sweets'
-      preLoaderRoute: typeof AppStoreSweetsRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/store/supermarket': {
       id: '/_app/store/supermarket'
       path: '/store/supermarket'
@@ -2739,53 +2598,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStoreSupermarketRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/store/subscription': {
-      id: '/_app/store/subscription'
-      path: '/store/subscription'
-      fullPath: '/store/subscription'
-      preLoaderRoute: typeof AppStoreSubscriptionRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/restaurants': {
-      id: '/_app/store/restaurants'
-      path: '/store/restaurants'
-      fullPath: '/store/restaurants'
-      preLoaderRoute: typeof AppStoreRestaurantsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/recipes': {
-      id: '/_app/store/recipes'
-      path: '/store/recipes'
-      fullPath: '/store/recipes'
-      preLoaderRoute: typeof AppStoreRecipesRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/store/produce': {
       id: '/_app/store/produce'
       path: '/store/produce'
       fullPath: '/store/produce'
       preLoaderRoute: typeof AppStoreProduceRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/pharmacy': {
-      id: '/_app/store/pharmacy'
-      path: '/store/pharmacy'
-      fullPath: '/store/pharmacy'
-      preLoaderRoute: typeof AppStorePharmacyRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/meat': {
-      id: '/_app/store/meat'
-      path: '/store/meat'
-      fullPath: '/store/meat'
-      preLoaderRoute: typeof AppStoreMeatRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/library': {
-      id: '/_app/store/library'
-      path: '/store/library'
-      fullPath: '/store/library'
-      preLoaderRoute: typeof AppStoreLibraryRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/store/kitchen': {
@@ -2828,13 +2645,6 @@ declare module '@tanstack/react-router' {
       path: '/store/baskets-build'
       fullPath: '/store/baskets-build'
       preLoaderRoute: typeof AppStoreBasketsBuildRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/baskets': {
-      id: '/_app/store/baskets'
-      path: '/store/baskets'
-      fullPath: '/store/baskets'
-      preLoaderRoute: typeof AppStoreBasketsRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/store/$slug': {
@@ -2969,24 +2779,14 @@ interface AppRouteChildren {
   AppProductProductIdRoute: typeof AppProductProductIdRoute
   AppRestaurantIdRoute: typeof AppRestaurantIdRoute
   AppStoreSlugRoute: typeof AppStoreSlugRoute
-  AppStoreBasketsRoute: typeof AppStoreBasketsRoute
   AppStoreBasketsBuildRoute: typeof AppStoreBasketsBuildRoute
   AppStoreBasketsSubsRoute: typeof AppStoreBasketsSubsRoute
   AppStoreDairyRoute: typeof AppStoreDairyRoute
   AppStoreHomeRoute: typeof AppStoreHomeRoute
   AppStoreHomeCompareRoute: typeof AppStoreHomeCompareRoute
   AppStoreKitchenRoute: typeof AppStoreKitchenRoute
-  AppStoreLibraryRoute: typeof AppStoreLibraryRoute
-  AppStoreMeatRoute: typeof AppStoreMeatRoute
-  AppStorePharmacyRoute: typeof AppStorePharmacyRoute
   AppStoreProduceRoute: typeof AppStoreProduceRoute
-  AppStoreRecipesRoute: typeof AppStoreRecipesRoute
-  AppStoreRestaurantsRoute: typeof AppStoreRestaurantsRoute
-  AppStoreSubscriptionRoute: typeof AppStoreSubscriptionRoute
   AppStoreSupermarketRoute: typeof AppStoreSupermarketRoute
-  AppStoreSweetsRoute: typeof AppStoreSweetsRoute
-  AppStoreVillageRoute: typeof AppStoreVillageRoute
-  AppStoreWholesaleRoute: typeof AppStoreWholesaleRoute
   AppSubSlugRoute: typeof AppSubSlugRoute
 }
 
@@ -3005,24 +2805,14 @@ const AppRouteChildren: AppRouteChildren = {
   AppProductProductIdRoute: AppProductProductIdRoute,
   AppRestaurantIdRoute: AppRestaurantIdRoute,
   AppStoreSlugRoute: AppStoreSlugRoute,
-  AppStoreBasketsRoute: AppStoreBasketsRoute,
   AppStoreBasketsBuildRoute: AppStoreBasketsBuildRoute,
   AppStoreBasketsSubsRoute: AppStoreBasketsSubsRoute,
   AppStoreDairyRoute: AppStoreDairyRoute,
   AppStoreHomeRoute: AppStoreHomeRoute,
   AppStoreHomeCompareRoute: AppStoreHomeCompareRoute,
   AppStoreKitchenRoute: AppStoreKitchenRoute,
-  AppStoreLibraryRoute: AppStoreLibraryRoute,
-  AppStoreMeatRoute: AppStoreMeatRoute,
-  AppStorePharmacyRoute: AppStorePharmacyRoute,
   AppStoreProduceRoute: AppStoreProduceRoute,
-  AppStoreRecipesRoute: AppStoreRecipesRoute,
-  AppStoreRestaurantsRoute: AppStoreRestaurantsRoute,
-  AppStoreSubscriptionRoute: AppStoreSubscriptionRoute,
   AppStoreSupermarketRoute: AppStoreSupermarketRoute,
-  AppStoreSweetsRoute: AppStoreSweetsRoute,
-  AppStoreVillageRoute: AppStoreVillageRoute,
-  AppStoreWholesaleRoute: AppStoreWholesaleRoute,
   AppSubSlugRoute: AppSubSlugRoute,
 }
 

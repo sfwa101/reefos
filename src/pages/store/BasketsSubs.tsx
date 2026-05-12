@@ -70,7 +70,8 @@ const BasketsSubs = () => {
             ابدأ اشتراك سلتك المفضلة ووفّر حتى ١٥٪ على كل توصيلة + كاشباك على المحفظة
           </p>
           <Link
-            to="/store/baskets"
+            to="/store/$slug"
+            params={{ slug: "baskets" }}
             className="inline-flex rounded-full bg-emerald-600 px-4 py-2 text-xs font-extrabold text-white shadow-pill"
           >
             تصفّح السلال

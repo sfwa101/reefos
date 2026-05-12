@@ -260,7 +260,8 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                   onClick={() => {
                     onClose();
                     navigate({
-                      to: "/store/recipes",
+                      to: "/store/$slug",
+                      params: { slug: "recipes" },
                       search: { tag: product.name } as never,
                     });
                   }}

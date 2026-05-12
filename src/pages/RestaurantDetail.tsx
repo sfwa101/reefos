@@ -79,7 +79,7 @@ const RestaurantDetail = () => {
       {/* ===== Brand hero header ===== */}
       <header className="relative px-4 pb-6 pt-4 text-white" style={{ background: banner }}>
         <button
-          onClick={() => navigate({ to: "/store/restaurants" })}
+          onClick={() => navigate({ to: "/store/$slug", params: { slug: "restaurants" } })}
           className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/25 transition active:scale-95"
           aria-label="رجوع"
         >
