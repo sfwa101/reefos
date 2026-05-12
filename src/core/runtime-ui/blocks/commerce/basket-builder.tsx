@@ -233,4 +233,4 @@ const BasketBuilderBlock = () => {
   );
 };
 
-export default BasketsBuild;
+export default BasketBuilderBlock;
