@@ -163,6 +163,64 @@ const safeStorage = createJSONStorage<CartState>(() => ({
   },
 }));
 
+// ---------------------------------------------------------------------------
+// Wave P-B (Static Catalog Killer)
+// ---------------------------------------------------------------------------
+// Capture a thin display snapshot at add-to-cart time, plus the canonical
+// identity (productId, variantId). Snapshot fields make the cart usable
+// offline and during hydration; live VMs come from `useCartHydration`.
+// ---------------------------------------------------------------------------
+
+const captureSnapshot = (
+  product: Product,
+  meta: CartLineMeta | undefined,
+): Pick<
+  CartLine,
+  | "productId"
+  | "variantId"
+  | "capturedPrice"
+  | "capturedName"
+  | "capturedImage"
+  | "capturedAt"
+> => ({
+  productId: product.id,
+  variantId: meta?.variantId ?? (meta as { variant_id?: string } | undefined)?.variant_id,
+  capturedPrice: meta?.unitPrice ?? product.price,
+  capturedName: product.name,
+  capturedImage: product.image,
+  capturedAt: new Date().toISOString(),
+});
+
+/**
+ * Wave P-B (Static Catalog Killer) — one-shot persisted-cart migration.
+ *
+ * Lifts pre-P-B persisted lines (`{ product, qty, meta }`) into the new
+ * canonical shape (`{ productId, variantId, capturedPrice, capturedName,
+ * capturedImage, capturedAt, product (deprecated bridge), qty, meta }`).
+ *
+ * - Idempotent: lines already in the new shape are left untouched.
+ * - Non-throwing: a malformed line is dropped, never crashes rehydration.
+ * - The `product` bridge is preserved during the B-3 transition; a follow-up
+ *   migration removes it once every UI leaf reads via `useCartHydration`.
+ */
+export const migrateLegacyCartShape = (
+  items: Record<string, CartLine>,
+): Record<string, CartLine> => {
+  const out: Record<string, CartLine> = {};
+  for (const [k, raw] of Object.entries(items)) {
+    if (!raw || typeof raw !== "object") continue;
+    const line = raw as CartLine;
+    if (!line.product || typeof line.product.id !== "string") continue;
+    if (line.productId && typeof line.capturedPrice === "number") {
+      out[k] = line; // already migrated
+      continue;
+    }
+    const snap = captureSnapshot(line.product, line.meta);
+    out[k] = { ...line, ...snap };
+  }
+  return out;
+};
+
 export const useCartStore = create<CartState & CartActions>()(
   persist(
     (set) => ({
@@ -171,7 +229,12 @@ export const useCartStore = create<CartState & CartActions>()(
 
       add: (product, qty = 1, meta) =>
         set((state) => {
-          const candidate: CartLine = { product, qty, meta };
+          const candidate: CartLine = {
+            product,
+            qty,
+            meta,
+            ...captureSnapshot(product, meta),
+          };
           const key = lineKey(candidate);
           const existing = state.items[key];
           const nextLine: CartLine = existing
@@ -227,11 +290,14 @@ export const useCartStore = create<CartState & CartActions>()(
           const items: Record<string, CartLine> = {};
           for (const l of lines) {
             const k = lineKey(l);
+            const enriched: CartLine = l.productId && typeof l.capturedPrice === "number"
+              ? l
+              : { ...l, ...captureSnapshot(l.product, l.meta) };
             const existing = items[k];
             // Use max() to defend against duplicate echoed rows from remote sync.
             items[k] = existing
-              ? { ...existing, qty: Math.max(existing.qty, l.qty) }
-              : l;
+              ? { ...existing, qty: Math.max(existing.qty, enriched.qty) }
+              : enriched;
           }
           return { items, productIndex: buildIndex(items) };
         }),
@@ -241,12 +307,16 @@ export const useCartStore = create<CartState & CartActions>()(
       storage: safeStorage,
       partialize: (s) => ({ items: s.items, productIndex: s.productIndex }),
       onRehydrateStorage: () => (state) => {
-        // Rebuild the index defensively in case persisted data is stale.
-        if (state) state.productIndex = buildIndex(state.items);
+        if (!state) return;
+        // Wave P-B: lift persisted legacy lines into the canonical shape.
+        state.items = migrateLegacyCartShape(state.items);
+        // Rebuild the index defensively against stale persisted data.
+        state.productIndex = buildIndex(state.items);
       },
     },
   ),
 );
+
 
 // ---------------------------------------------------------------------------
 // Selector hooks — granular, O(1) where possible
