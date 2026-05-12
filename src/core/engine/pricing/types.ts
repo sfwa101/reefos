@@ -81,7 +81,7 @@ export interface PricingSelection {
 }
 
 export interface PricingContext {
-  readonly product: Readonly<Product>;
+  readonly product: Readonly<PricingInput>;
   readonly currency: "EGP";
   /** Optional zone hint — strategies may apply cold-chain fees, etc. */
   readonly zoneAcceptsPerishables?: boolean;
