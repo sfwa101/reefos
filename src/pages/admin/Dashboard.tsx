@@ -69,20 +69,7 @@ type OrderRow = {
   profiles?: { full_name?: string | null } | null;
 };
 
-const STATUS_PRIORITY = [
-  "pending", "confirmed", "paid", "preparing", "ready",
-  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
-];
-function aggregateStatus(statuses: string[], fallback: string): string {
-  if (!statuses.length) return fallback;
-  if (statuses.every((s) => s === "delivered")) return "delivered";
-  if (statuses.every((s) => s === "cancelled")) return "cancelled";
-  const active = statuses.filter((s) => s !== "delivered" && s !== "cancelled");
-  const pool = active.length ? active : statuses;
-  return pool.reduce((lo, s) =>
-    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
-  , pool[0]);
-}
+
 
 export default function Dashboard() {
   const { profile } = useAuth();
