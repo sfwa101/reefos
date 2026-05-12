@@ -1,7 +1,27 @@
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCart, type CartLineMeta } from "@/context/CartContext";
 import { useSharedCartSync } from "./useSharedCartSync";
-import { products as allProducts, type Product } from "@/lib/products";
+/**
+ * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape kept only
+ * to populate the deprecated `CartLine.product` field for §2.E external
+ * consumers (CartContext / CartPanel / etc.) until they migrate to
+ * `useCartHydration`.
+ */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { getActiveTenantId } from "@/context/TenantContext";
+
+/**
+ * Wave P-B B-3 — read the catalog snapshot through the QueryClient cache
+ * (the same data formerly exposed by `@/lib/products`'s `products` proxy)
+ * so this hook no longer imports from the static catalog. Returns `[]`
+ * before the catalog hydrates; the shared-cart UI tolerates an empty
+ * lookup window because the corresponding lines are simply skipped (the
+ * existing pre-P-B code already had the same `productMap.get(...) →
+ * continue` semantics for unknown ids).
+ */
+const SNAPSHOT_KEY = () =>
+  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
 
 const sharedLineIdentity = (
   productId: string,
