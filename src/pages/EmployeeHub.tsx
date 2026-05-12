@@ -1,16 +1,21 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useAuth } from "@/context/AuthContext";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, MapPin, LogIn, LogOut, Plus, Wallet, ShieldAlert, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import {
+  checkInFn,
+  checkOutFn,
+  getEmployeeHubFn,
+  submitAdvanceRequestFn,
+  type AdvanceKind,
+  type AdvanceRequestRow,
+  type AttendanceRow,
+} from "@/lib/hr.functions";
 
-type Attendance = { id: string; check_in_at: string; check_out_at: string | null };
-type AdvanceReq = {
-  id: string; kind: string; amount: number; reason: string;
-  status: string; created_at: string; rejection_reason: string | null;
-};
+type Attendance = AttendanceRow;
+type AdvanceReq = AdvanceRequestRow;
 
 const KIND_LABEL: Record<string, string> = {
   advance: "سلفة", petty_cash: "نثرية", reimbursement: "استرداد",
@@ -30,23 +35,15 @@ export default function EmployeeHub() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
-    const start = new Date(); start.setHours(0, 0, 0, 0);
-    const [att, reqs] = await Promise.all([
-      supabase.from("staff_attendance")
-        .select("id, check_in_at, check_out_at")
-        .eq("user_id", user.id)
-        .gte("check_in_at", start.toISOString())
-        .order("check_in_at", { ascending: false })
-        .limit(1).maybeSingle(),
-      supabase.from("staff_advance_requests")
-        .select("id, kind, amount, reason, status, created_at, rejection_reason")
-        .eq("user_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
-    setTodayAtt((att.data as Attendance | null) ?? null);
-    setRequests((reqs.data as AdvanceReq[]) ?? []);
-    setLoading(false);
+    try {
+      const state = await getEmployeeHubFn();
+      setTodayAtt(state.todayAttendance);
+      setRequests(state.requests);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { if (allowed) load(); }, [allowed, user]);
@@ -54,9 +51,13 @@ export default function EmployeeHub() {
   const checkIn = async () => {
     setBusy(true);
     const finish = async (lat: number | null, lng: number | null) => {
-      const { error } = await supabase.from("staff_attendance")
-        .insert({ user_id: user!.id, branch_id: branchId, check_in_lat: lat, check_in_lng: lng });
-      if (error) toast.error(error.message); else { toast.success("تم تسجيل حضورك"); load(); }
+      try {
+        await checkInFn({ data: { branchId: branchId ?? null, lat, lng } });
+        toast.success("تم تسجيل حضورك");
+        load();
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
       setBusy(false);
     };
     if (!navigator.geolocation) return finish(null, null);
@@ -70,10 +71,13 @@ export default function EmployeeHub() {
     if (!todayAtt) return;
     setBusy(true);
     const finish = async (lat: number | null, lng: number | null) => {
-      const { error } = await supabase.from("staff_attendance")
-        .update({ check_out_at: new Date().toISOString(), check_out_lat: lat, check_out_lng: lng })
-        .eq("id", todayAtt.id);
-      if (error) toast.error(error.message); else { toast.success("تم تسجيل انصرافك"); load(); }
+      try {
+        await checkOutFn({ data: { attendanceId: todayAtt.id, lat, lng } });
+        toast.success("تم تسجيل انصرافك");
+        load();
+      } catch (e) {
+        toast.error((e as Error).message);
+      }
       setBusy(false);
     };
     if (!navigator.geolocation) return finish(null, null);
@@ -88,12 +92,22 @@ export default function EmployeeHub() {
     if (!amt || amt <= 0) { toast.error("أدخل مبلغًا صحيحًا"); return; }
     if (form.reason.trim().length < 3) { toast.error("اكتب سببًا واضحًا"); return; }
     setBusy(true);
-    const { error } = await supabase.from("staff_advance_requests").insert({
-      user_id: user!.id, branch_id: branchId, kind: form.kind,
-      amount: amt, reason: form.reason.trim(),
-    });
-    if (error) toast.error(error.message);
-    else { toast.success("تم إرسال طلبك للمدير"); setShowForm(false); setForm({ kind: "advance", amount: "", reason: "" }); load(); }
+    try {
+      await submitAdvanceRequestFn({
+        data: {
+          branchId: branchId ?? null,
+          kind: form.kind as AdvanceKind,
+          amount: amt,
+          reason: form.reason.trim(),
+        },
+      });
+      toast.success("تم إرسال طلبك للمدير");
+      setShowForm(false);
+      setForm({ kind: "advance", amount: "", reason: "" });
+      load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
     setBusy(false);
   };
 
