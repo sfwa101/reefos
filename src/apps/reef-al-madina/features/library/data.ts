@@ -1,7 +1,17 @@
-// Static palette + product helpers for the SchoolLibrary hub.
-// Extracted from src/pages/store/SchoolLibrary.tsx during decomposition.
+// SchoolLibrary hub — UI palette + live products feed.
+// ----------------------------------------------------------------
+// Wave P-B Step B-5 — Hooks & Queries: replaced the static
+// `products.filter(p => p.source === "library")` snapshot read of
+// `@/lib/products` with a TanStack-Query backed hook that wraps the
+// existing `useProductsBySourceQuery("library")`. The legacy synchronous
+// `libraryProducts()` helper is removed; the only consumer
+// (`SchoolLibrarySection`) now consumes the hook directly.
+//
+// The royal-blue palette stays here unchanged — it is UI configuration,
+// not catalog data.
 
-import { products as allProducts } from "@/lib/products";
+import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 
 // Royal blue palette specific to this hub
 export const PALETTE = {
@@ -11,7 +21,15 @@ export const PALETTE = {
   accent: "#2EA8E6",
 } as const;
 
-export const libraryProducts = () =>
-  allProducts.filter((p) => p.source === "library");
+/**
+ * Live SchoolLibrary catalog feed. Wraps `useProductsBySourceQuery`,
+ * which itself routes through the Sovereign Catalog SWR cache. The
+ * shape stays Product-compatible during the transition; downstream UI
+ * will migrate to `ProductCardVM` in a later sub-wave.
+ */
+export const useLibraryProducts = (): Product[] => {
+  const { data = [] } = useProductsBySourceQuery("library");
+  return data;
+};
 
 export type TabKey = "store" | "borrow" | "print";
