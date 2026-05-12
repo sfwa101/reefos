@@ -28,14 +28,14 @@ export const getAppSettingsFn = createServerFn({ method: "GET" })
       .in("key", data.keys);
     if (error) throw new Error(error.message);
     const out: AppSettingsBundle = {};
-    for (const r of (rows ?? []) as { key: string; value: Record<string, unknown> }[]) {
+    for (const r of (rows ?? []) as { key: string; value: Record<string, any> }[]) {
       out[r.key] = r.value ?? {};
     }
     return out;
   });
 
 export const upsertAppSettingFn = createServerFn({ method: "POST" })
-  .inputValidator((d: { key: string; value: Record<string, unknown> }) => {
+  .inputValidator((d: { key: string; value: Record<string, any> }) => {
     if (!ALLOWED_KEYS.has(d?.key)) throw new Error("forbidden_key");
     if (!d.value || typeof d.value !== "object") throw new Error("invalid_value");
     if (d.key === "finance") {
