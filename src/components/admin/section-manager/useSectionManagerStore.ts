@@ -12,11 +12,14 @@ interface SectionManagerState {
   publishedDoc: MobileHomeLayoutV1 | null;
   draftDoc: MobileHomeLayoutV1 | null;
   selectedBlockId: string | null;
+  inspectingBlockId: string | null;
   dirty: boolean;
   activeTab: ZoneTab;
 
   init: (published: MobileHomeLayoutV1 | null, draft: MobileHomeLayoutV1 | null) => void;
   selectBlock: (id: string | null) => void;
+  openInspector: (id: string) => void;
+  closeInspector: () => void;
   setTab: (tab: ZoneTab) => void;
   updateBlock: (id: string, patch: Partial<LayoutBlock>) => void;
   addBlock: (block: LayoutBlock) => void;
