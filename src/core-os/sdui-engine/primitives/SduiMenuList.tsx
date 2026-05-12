@@ -7,7 +7,7 @@ import { lazy, Suspense } from "react";
 import type { SectionConfig } from "../types";
 
 const RestaurantsMenuSection = lazy(
-  () => import("@/apps/reef-al-madina/features/restaurants/components/RestaurantsMenuSection"),
+  () => import("@/apps/reef-al-madina/features/vendor-menu/components/RestaurantsMenuSection"),
 );
 
 export const SduiMenuList = ({ cfg }: { cfg: SectionConfig & { variant?: string } }) => {

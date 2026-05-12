@@ -14,9 +14,9 @@ import {
   type PrepOption, type WeightOption,
 } from "@/lib/weighed-prep-rules";
 import { butcheryToModifiers } from "@/lib/pricingAdapters";
-import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/meat/components/Panel";
-import { CutBuilder } from "@/apps/reef-al-madina/features/meat/components/CutBuilder";
-import { PrepOptions } from "@/apps/reef-al-madina/features/meat/components/PrepOptions";
+import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/weighed-prep/components/Panel";
+import { CutBuilder } from "@/apps/reef-al-madina/features/weighed-prep/components/CutBuilder";
+import { PrepOptions } from "@/apps/reef-al-madina/features/weighed-prep/components/PrepOptions";
 import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
 import type { WeighedSelection } from "@/core/engine/pricing/strategies/WeighedPricingStrategy";
 

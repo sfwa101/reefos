@@ -9,13 +9,13 @@ import { lazy, Suspense } from "react";
 import type { SectionConfig } from "../types";
 
 const SubscriptionsBuilderSection = lazy(
-  () => import("@/apps/reef-al-madina/features/subscriptions/components/SubscriptionsBuilderSection"),
+  () => import("@/apps/reef-al-madina/features/recurring-orders/components/SubscriptionsBuilderSection"),
 );
 const BasketsBuilderSection = lazy(
-  () => import("@/apps/reef-al-madina/features/baskets/components/BasketsBuilderSection"),
+  () => import("@/apps/reef-al-madina/features/commerce-bundles/components/BasketsBuilderSection"),
 );
 const SchoolLibrarySection = lazy(
-  () => import("@/apps/reef-al-madina/features/library/sections/SchoolLibrarySection"),
+  () => import("@/apps/reef-al-madina/features/digital-borrowing/sections/SchoolLibrarySection"),
 );
 
 export const SduiWizardChain = ({ cfg }: { cfg: SectionConfig & { variant?: string } }) => {
