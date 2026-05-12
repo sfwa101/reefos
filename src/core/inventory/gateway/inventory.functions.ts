@@ -15,10 +15,13 @@ import {
   calculateStock,
   canReserve,
   createReservationEvent,
+  commitReservationEvent,
+  releaseReservationEvent,
   type InventoryStateSnapshot,
 } from "../domain/InventoryBrain";
 import type {
   InventoryReservation,
+  ReservationItem,
   StockLedgerEvent,
   StockLedgerEventType,
 } from "../domain/types";
