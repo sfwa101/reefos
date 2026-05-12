@@ -457,6 +457,8 @@ export function SduiHomeFeed() {
           onExit={() => setEditMode(false)}
         />
       ) : null}
+
+      {canEdit && isVisualEditMode ? <LiveBlockInspector /> : null}
     </div>
   );
 }
