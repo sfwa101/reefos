@@ -8296,6 +8296,45 @@ export type Database = {
           },
         ]
       }
+      vision_inferences: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          created_at: string
+          draft_payload: Json
+          id: string
+          input_hash: string
+          model: string
+          prompt_version: string
+          raw_output: Json
+          state: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          draft_payload: Json
+          id?: string
+          input_hash: string
+          model: string
+          prompt_version: string
+          raw_output: Json
+          state?: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          created_at?: string
+          draft_payload?: Json
+          id?: string
+          input_hash?: string
+          model?: string
+          prompt_version?: string
+          raw_output?: Json
+          state?: string
+        }
+        Relationships: []
+      }
       wallet_assets: {
         Row: {
           asset_type: string
