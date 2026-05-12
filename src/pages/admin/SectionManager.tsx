@@ -19,6 +19,8 @@ import {
   type ZoneTab,
 } from "@/components/admin/section-manager/useSectionManagerStore";
 import { LayoutCanvas } from "@/components/admin/section-manager/LayoutCanvas";
+import { BlockPalette } from "@/components/admin/section-manager/BlockPalette";
+import { BlockInspector } from "@/components/admin/section-manager/BlockInspector";
 import { cn } from "@/lib/utils";
 
 const TAB_LABELS: Record<ZoneTab, string> = {
@@ -130,12 +132,7 @@ export default function SectionManager() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Block Palette */}
         <aside className="lg:col-span-3">
-          <div className="bg-surface rounded-2xl border border-border/40 p-4 min-h-[400px]">
-            <h2 className="font-display text-sm mb-3">مكتبة الكتل</h2>
-            <p className="text-[11.5px] text-foreground-tertiary">
-              ستظهر هنا الكتل القابلة للسحب (Hero, Carousel, Grid, ...).
-            </p>
-          </div>
+          <BlockPalette />
         </aside>
 
         {/* Center: Canvas */}
@@ -174,12 +171,7 @@ export default function SectionManager() {
 
         {/* Right: Inspector */}
         <aside className="lg:col-span-3">
-          <div className="bg-surface rounded-2xl border border-border/40 p-4 min-h-[400px]">
-            <h2 className="font-display text-sm mb-3">المُفتش</h2>
-            <p className="text-[11.5px] text-foreground-tertiary">
-              اختر كتلة من الكنفا لتعديل عنوانها، إعداداتها، ومناطق العرض.
-            </p>
-          </div>
+          <BlockInspector />
         </aside>
       </div>
     </div>

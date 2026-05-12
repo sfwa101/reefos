@@ -19,6 +19,7 @@ interface SectionManagerState {
   selectBlock: (id: string | null) => void;
   setTab: (tab: ZoneTab) => void;
   updateBlock: (id: string, patch: Partial<LayoutBlock>) => void;
+  addBlock: (block: LayoutBlock) => void;
   reorderBlocks: (zone: ZoneTab, oldIndex: number, newIndex: number) => void;
   markClean: (newPublished?: MobileHomeLayoutV1) => void;
 }
@@ -64,6 +65,34 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
       return {
         draftDoc: { ...s.draftDoc, blocks, updated_at: new Date().toISOString() },
         dirty: true,
+      };
+    }),
+
+  addBlock: (block) =>
+    set((s) => {
+      const now = new Date().toISOString();
+      if (!s.draftDoc) {
+        return {
+          draftDoc: {
+            __v: 1,
+            page_key: "mobile_home",
+            updated_at: now,
+            updated_by: "admin",
+            blocks: [{ ...block, sort_order: 0 }],
+          } as MobileHomeLayoutV1,
+          dirty: true,
+          selectedBlockId: block.id,
+        };
+      }
+      const nextSort = s.draftDoc.blocks.length;
+      return {
+        draftDoc: {
+          ...s.draftDoc,
+          blocks: [...s.draftDoc.blocks, { ...block, sort_order: nextSort }],
+          updated_at: now,
+        },
+        dirty: true,
+        selectedBlockId: block.id,
       };
     }),
 
