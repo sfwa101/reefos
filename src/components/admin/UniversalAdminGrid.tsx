@@ -157,6 +157,7 @@ export function UniversalAdminGrid<T = any>({
   const limit = dataSource.limit ?? 50;
   const useServer = !!dataSource.table && !dataSource.fetcher;
   const searchKeys = (dataSource.searchKeys ?? []) as string[];
+  const fetchGrid = useServerFn(listAdminGridFn);
 
   // ---- Server-paginated mode ----
   const infinite = useInfiniteQuery({
@@ -174,27 +175,25 @@ export function UniversalAdminGrid<T = any>({
     initialPageParam: 0 as number,
     queryFn: async ({ pageParam }) => {
       const offset = pageParam as number;
-      let query: any = (supabase as any)
-        .from(dataSource.table!)
-        .select(dataSource.select ?? "*")
-        .range(offset, offset + limit - 1);
-      if (dataSource.orderBy) {
-        query = query.order(dataSource.orderBy.column, { ascending: dataSource.orderBy.ascending ?? false });
-      }
-      if (debouncedQ && searchKeys.length > 0) {
-        const safe = escapeIlike(debouncedQ);
-        const orExpr = searchKeys.map((k) => `${String(k)}.ilike.%${safe}%`).join(",");
-        query = query.or(orExpr);
-      }
-      const { data, error } = await query;
-      if (error) throw error;
-      const items = (data ?? []) as any[];
+      const page = await fetchGrid({
+        data: {
+          table: dataSource.table!,
+          select: dataSource.select ?? "*",
+          orderBy: dataSource.orderBy
+            ? { column: dataSource.orderBy.column, ascending: !!dataSource.orderBy.ascending }
+            : undefined,
+          offset,
+          limit,
+          search: debouncedQ || null,
+          searchKeys,
+        },
+      });
       return {
-        items,
-        nextOffset: items.length < limit ? null : offset + limit,
+        items: page.items,
+        nextOffset: page.hasMore ? offset + limit : null,
       };
     },
-    getNextPageParam: (last: any) => last.nextOffset,
+    getNextPageParam: (last: { nextOffset: number | null }) => last.nextOffset,
     staleTime: 30_000,
     gcTime: 5 * 60_000,
   });
