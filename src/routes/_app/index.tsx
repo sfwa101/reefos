@@ -3,10 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 import { lazyPage } from "@/routes/-lazyRoute";
 import HomeRedirector from "@/apps/reef-al-madina/features/account/components/HomeRedirector";
 import { homeSectionQueryOptions } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
-import {
-  getPublicLayoutFn,
-  DEFAULT_MOBILE_HOME_LAYOUT,
-} from "@/lib/section-manager.functions";
+import { getPublicLayoutFn } from "@/lib/section-manager.functions";
 
 const HomePage = lazyPage(() => import("@/pages/Home"));
 
