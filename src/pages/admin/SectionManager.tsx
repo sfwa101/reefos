@@ -171,12 +171,7 @@ export default function SectionManager() {
 
         {/* Right: Inspector */}
         <aside className="lg:col-span-3">
-          <div className="bg-surface rounded-2xl border border-border/40 p-4 min-h-[400px]">
-            <h2 className="font-display text-sm mb-3">المُفتش</h2>
-            <p className="text-[11.5px] text-foreground-tertiary">
-              اختر كتلة من الكنفا لتعديل عنوانها، إعداداتها، ومناطق العرض.
-            </p>
-          </div>
+          <BlockInspector />
         </aside>
       </div>
     </div>
