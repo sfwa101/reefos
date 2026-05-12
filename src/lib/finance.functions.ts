@@ -927,3 +927,222 @@ export const getAdminDashboardOverviewFn = createServerFn({ method: "GET" })
       topCats,
     };
   });
+
+// ============================================================================
+// Wave R-2 · Batch B.2 — Finance CRUD (Partners, Expenses, Wallet, Affiliate)
+// ============================================================================
+
+// ---- Product Partners: Update / Delete -----------------------------------
+export const updateProductPartnerFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    id: string;
+    partner_name?: string;
+    partner_phone?: string | null;
+    split_type?: string;
+    percentage?: number;
+  }) => {
+    if (!d?.id) throw new Error("id_required");
+    const out: Record<string, unknown> = { id: d.id };
+    if (d.partner_name !== undefined) {
+      const name = (d.partner_name ?? "").trim();
+      if (!name || name.length > 200) throw new Error("invalid_name");
+      out.partner_name = name;
+    }
+    if (d.partner_phone !== undefined) {
+      const ph = d.partner_phone?.trim() || null;
+      if (ph && !/^[+0-9 ()-]{4,20}$/.test(ph)) throw new Error("invalid_phone");
+      out.partner_phone = ph;
+    }
+    if (d.split_type !== undefined) {
+      if (!SPLIT_TYPES.includes(d.split_type)) throw new Error("invalid_split");
+      out.split_type = d.split_type;
+    }
+    if (d.percentage !== undefined) {
+      const pct = Number(d.percentage);
+      if (!Number.isFinite(pct) || pct <= 0 || pct > 100) throw new Error("invalid_pct");
+      out.percentage = pct;
+    }
+    return out as { id: string } & Record<string, unknown>;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { id, ...patch } = data;
+    const { error } = await sb.from("product_partners").update(patch).eq("id", id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const deleteProductPartnerFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    // Soft-delete via is_active=false to preserve ledger integrity.
+    const { error } = await sb.from("product_partners").update({ is_active: false }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// ---- Daily Expenses: Update / Delete -------------------------------------
+export const updateExpenseFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    id: string;
+    category?: string;
+    subcategory?: string | null;
+    amount?: number;
+    expense_date?: string;
+    paid_to?: string | null;
+    payment_method?: string;
+    reference?: string | null;
+    notes?: string | null;
+  }) => {
+    if (!d?.id) throw new Error("id_required");
+    const patch: Record<string, unknown> = {};
+    if (d.category !== undefined) {
+      if (!EXPENSE_CATEGORIES.includes(d.category)) throw new Error("invalid_category");
+      patch.category = d.category;
+    }
+    if (d.payment_method !== undefined) {
+      if (!EXPENSE_METHODS.includes(d.payment_method)) throw new Error("invalid_method");
+      patch.payment_method = d.payment_method;
+    }
+    if (d.amount !== undefined) {
+      const a = Number(d.amount);
+      if (!Number.isFinite(a) || a <= 0) throw new Error("invalid_amount");
+      patch.amount = a;
+    }
+    if (d.expense_date !== undefined) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d.expense_date)) throw new Error("invalid_date");
+      patch.expense_date = d.expense_date;
+    }
+    if (d.subcategory !== undefined) patch.subcategory = d.subcategory?.trim() || null;
+    if (d.paid_to !== undefined) patch.paid_to = d.paid_to?.trim() || null;
+    if (d.reference !== undefined) patch.reference = d.reference?.trim() || null;
+    if (d.notes !== undefined) patch.notes = d.notes?.trim() || null;
+    return { id: d.id, patch };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("daily_expenses").update(data.patch).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const deleteExpenseFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("daily_expenses").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// ---- Affiliate Settings: Delete ------------------------------------------
+export const deleteAffiliateSettingFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("affiliate_settings").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// ---- Wallet Adjustments (Manual Admin Debit/Credit) ----------------------
+const WALLET_ADJUST_KINDS = ["credit", "debit"] as const;
+
+export const adminAdjustWalletFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    user_id: string;
+    kind: "credit" | "debit";
+    amount: number;
+    label: string;
+    note?: string | null;
+  }) => {
+    if (!d?.user_id || !/^[0-9a-f-]{36}$/i.test(d.user_id)) throw new Error("invalid_user_id");
+    if (!WALLET_ADJUST_KINDS.includes(d.kind)) throw new Error("invalid_kind");
+    const amt = Number(d.amount);
+    if (!Number.isFinite(amt) || amt <= 0) throw new Error("invalid_amount");
+    if (amt > 1_000_000) throw new Error("amount_too_large");
+    const label = (d.label ?? "").trim();
+    if (label.length < 3 || label.length > 200) throw new Error("invalid_label");
+    return { user_id: d.user_id, kind: d.kind, amount: amt, label, note: d.note?.trim() || null };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { data: row, error } = await sb
+      .from("wallet_transactions")
+      .insert({
+        user_id: data.user_id,
+        kind: data.kind,
+        amount: data.amount,
+        label: data.label,
+        source: data.note ? `admin_adjustment: ${data.note}` : "admin_adjustment",
+        status: "cleared",
+        created_by_admin: context.userId,
+        approved_by: context.userId,
+        approved_at: new Date().toISOString(),
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    // Recompute the user's balance snapshot.
+    await sb.rpc("recompute_wallet_balance", { _user_id: data.user_id });
+    return { id: row.id as string };
+  });
+
+export const reverseWalletEntryFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; reason: string }) => {
+    if (!d?.id || !/^[0-9a-f-]{36}$/i.test(d.id)) throw new Error("invalid_id");
+    const r = (d.reason ?? "").trim();
+    if (r.length < 3 || r.length > 300) throw new Error("invalid_reason");
+    return { id: d.id, reason: r };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { data: orig, error: fe } = await sb
+      .from("wallet_transactions")
+      .select("id, user_id, kind, amount, label, status")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (fe) throw new Error(fe.message);
+    if (!orig) throw new Error("entry_not_found");
+    if (orig.status === "reversed") throw new Error("already_reversed");
+    const opposite = orig.kind === "credit" ? "debit" : "credit";
+
+    const { error: insErr } = await sb.from("wallet_transactions").insert({
+      user_id: orig.user_id,
+      kind: opposite,
+      amount: orig.amount,
+      label: `REVERSAL: ${orig.label}`,
+      source: `admin_reversal:${data.id}:${data.reason}`,
+      status: "cleared",
+      created_by_admin: context.userId,
+      approved_by: context.userId,
+      approved_at: new Date().toISOString(),
+    });
+    if (insErr) throw new Error(insErr.message);
+
+    const { error: upErr } = await sb
+      .from("wallet_transactions")
+      .update({ status: "reversed" })
+      .eq("id", data.id);
+    if (upErr) throw new Error(upErr.message);
+
+    await sb.rpc("recompute_wallet_balance", { _user_id: orig.user_id });
+    return { ok: true as const };
+  });
