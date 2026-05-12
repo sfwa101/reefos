@@ -1,17 +1,6 @@
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-type TimelineEvent = {
-  id: string;
-  trace_id: string | null;
-  actor_id: string | null;
-  event_domain: string | null;
-  event_type: string | null;
-  payload: Record<string, unknown> | null;
-  created_at: string;
-};
+import { useLiveEventStream } from "@/hooks/useLiveEventStream";
 
 const domainTone: Record<string, string> = {
   order: "bg-primary/10 text-primary",
@@ -32,39 +21,7 @@ function formatTime(iso: string) {
 }
 
 export function LiveEventStream({ limit = 20 }: { limit?: number }) {
-  const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [connected, setConnected] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    (async () => {
-      const { data } = await supabase
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .from("salsabil_event_timeline" as any)
-        .select("id,trace_id,actor_id,event_domain,event_type,payload,created_at")
-        .order("created_at", { ascending: false })
-        .limit(limit);
-      if (!cancelled && data) setEvents(data as unknown as TimelineEvent[]);
-    })();
-
-    const channel = supabase
-      .channel("admin-event-stream")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "salsabil_event_timeline" },
-        (payload) => {
-          const row = payload.new as TimelineEvent;
-          setEvents((prev) => [row, ...prev].slice(0, limit));
-        },
-      )
-      .subscribe((status) => setConnected(status === "SUBSCRIBED"));
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
-  }, [limit]);
+  const { events, connected } = useLiveEventStream(limit);
 
   return (
     <section className="rounded-3xl bg-card border border-border/50 shadow-soft overflow-hidden">
@@ -95,12 +52,7 @@ export function LiveEventStream({ limit = 20 }: { limit?: number }) {
           const chip = domainTone[domain] ?? "bg-muted text-foreground-secondary";
           return (
             <li key={ev.id} className="px-4 py-3 flex items-start gap-3 hover:bg-muted/30 transition-colors">
-              <span
-                className={cn(
-                  "shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium",
-                  chip,
-                )}
-              >
+              <span className={cn("shrink-0 mt-0.5 px-2 py-0.5 rounded-full text-[10px] font-medium", chip)}>
                 {domain}
               </span>
               <div className="min-w-0 flex-1">

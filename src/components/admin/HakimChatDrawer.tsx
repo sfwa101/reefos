@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Send, Sparkles, Loader2 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -13,13 +13,14 @@ export function HakimChatDrawer({
   open: boolean;
   onClose: () => void;
   contextLabel?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contextData?: Record<string, any>;
 }) {
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const { streaming, send: streamSend } = useHakimChatStream();
 
   useEffect(() => {
     if (open && messages.length === 0 && contextData) {
@@ -32,73 +33,36 @@ export function HakimChatDrawer({
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, busy]);
+  }, [messages, streaming]);
 
   const send = async () => {
     const text = input.trim();
-    if (!text || busy) return;
+    if (!text || streaming) return;
     setInput("");
-    setMessages((m) => [...m, { role: "user", content: text }]);
-    setBusy(true);
+    setMessages((m) => [...m, { role: "user", content: text }, { role: "assistant", content: "" }]);
 
-    // Prefix the user message with current page context (one-shot, not stored in UI)
     const ctxLine = contextData
       ? `[سياق الشاشة (${contextLabel ?? "data"}): ${JSON.stringify(contextData)}]\n\n`
       : "";
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-chat`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token ?? import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    await streamSend(
+      { session_id: sessionId, message: ctxLine + text, period_from: null, period_to: null },
+      {
+        onChunk: (acc) => {
+          setMessages((m) => {
+            const next = [...m];
+            next[next.length - 1] = { role: "assistant", content: acc };
+            return next;
+          });
         },
-        body: JSON.stringify({ message: ctxLine + text, session_id: sessionId }),
-      });
-
-      if (resp.status === 429) { toast.error("الطلبات كثيرة، حاول بعد دقيقة."); setBusy(false); return; }
-      if (resp.status === 402) { toast.error("نفد رصيد الذكاء الاصطناعي."); setBusy(false); return; }
-      if (!resp.ok || !resp.body) { toast.error("تعذر الاتصال بحكيم"); setBusy(false); return; }
-
-      // Append empty assistant message and stream into it
-      setMessages((m) => [...m, { role: "assistant", content: "" }]);
-
-      const reader = resp.body.getReader();
-      const decoder = new TextDecoder();
-      let buf = ""; let acc = ""; let done = false;
-      while (!done) {
-        const r = await reader.read();
-        if (r.done) break;
-        buf += decoder.decode(r.value, { stream: true });
-        let idx;
-        while ((idx = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, idx); buf = buf.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") { done = true; break; }
-          try {
-            const p = JSON.parse(json);
-            if (p?.meta?.session_id) setSessionId(p.meta.session_id);
-            const c = p?.choices?.[0]?.delta?.content;
-            if (c) {
-              acc += c;
-              setMessages((m) => {
-                const next = [...m];
-                next[next.length - 1] = { role: "assistant", content: acc };
-                return next;
-              });
-            }
-          } catch { /* partial */ }
-        }
-      }
-    } catch (e: any) {
-      toast.error(e?.message ?? "خطأ");
-    } finally {
-      setBusy(false);
-    }
+        onSession: (sid) => setSessionId(sid),
+        onError: (code) => {
+          if (code === "rate_limited") toast.error("الطلبات كثيرة، حاول بعد دقيقة.");
+          else if (code === "payment_required") toast.error("نفد رصيد الذكاء الاصطناعي.");
+          else toast.error("تعذر الاتصال بحكيم");
+        },
+      },
+    );
   };
 
   return (
@@ -148,13 +112,6 @@ export function HakimChatDrawer({
               </div>
             </div>
           ))}
-          {busy && messages[messages.length - 1]?.role !== "assistant" && (
-            <div className="flex justify-end">
-              <div className="bg-surface border border-border/40 rounded-2xl rounded-bl-md px-3.5 py-2.5">
-                <Loader2 className="h-4 w-4 animate-spin text-foreground-tertiary" />
-              </div>
-            </div>
-          )}
         </div>
 
         <footer className="border-t border-border/50 p-3 bg-surface">
@@ -169,10 +126,10 @@ export function HakimChatDrawer({
             />
             <button
               onClick={send}
-              disabled={busy || !input.trim()}
+              disabled={streaming || !input.trim()}
               className="h-10 w-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm disabled:opacity-50 press"
             >
-              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+              {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             </button>
           </div>
         </footer>

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Sparkles, TrendingUp, ArrowLeft, Wallet, Coins } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
+import { Sparkles, TrendingUp, ArrowLeft, Wallet, Coins, Loader2 } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts";
 import ReactMarkdown from "react-markdown";
-import { Loader2 } from "lucide-react";
+import { getExecutiveDashboardStatsFn } from "@/lib/finance.functions";
+import { getHakimAdvisorReportFn } from "@/lib/hakim.functions";
 
 type Stats = {
   period_days: number;
@@ -29,13 +30,20 @@ export function HakimSovereignCard() {
   const [reportLoading, setReportLoading] = useState(false);
   const [reportText, setReportText] = useState<string>("");
 
+  const fetchStats = useServerFn(getExecutiveDashboardStatsFn);
+  const fetchReport = useServerFn(getHakimAdvisorReportFn);
+
   // KPIs
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("executive_dashboard_stats", { _days: days })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then(({ data }: any) => { if (data) setStats(data as Stats); });
-  }, [days]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const out = await fetchStats({ data: { days } });
+        if (!cancelled && out) setStats(out as Stats);
+      } catch { /* ignore */ }
+    })();
+    return () => { cancelled = true; };
+  }, [days]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pulses: Pulse[] = (() => {
     if (!stats) return [{ tone: "good", text: "🌿 جاري قراءة بيانات اليوم..." }];
@@ -63,20 +71,8 @@ export function HakimSovereignCard() {
     if (reportText) return;
     setReportLoading(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-advisor`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}` },
-        body: JSON.stringify({}),
-      });
-      if (resp.ok) {
-        const j = await resp.json();
-        setReportText(j.report || j.content || j.text || "تعذّر إنشاء التقرير الآن.");
-      } else {
-        setReportText("تعذّر إنشاء التقرير الآن. حاول لاحقاً.");
-      }
+      const out = await fetchReport({ data: { kind: "on_demand", days } });
+      setReportText(out?.report || "تعذّر إنشاء التقرير الآن.");
     } catch {
       setReportText("تعذّر إنشاء التقرير الآن.");
     } finally {

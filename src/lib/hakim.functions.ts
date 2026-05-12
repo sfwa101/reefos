@@ -171,3 +171,60 @@ export const summonHakimArchitectFn = createServerFn({ method: "POST" })
     if (!out?.ok || !out?.blueprint) throw new Error(out?.error ?? "no_blueprint");
     return out.blueprint as HakimArchitectBlueprint;
   });
+
+// ============= Wave R-2 Batch A.2 — Hakim Pulse Banner & Advisor Report =============
+export type HakimPulseBannerResult = {
+  pulse?: string;
+  insights?: Record<string, { text: string; tone: "positive" | "neutral" | "warning" | "critical" }>;
+  error?: "rate_limited" | "credits_exhausted" | "failed";
+};
+
+export const getHakimPulseBannerFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { metrics: Record<string, unknown>; page?: string }) => {
+    const page = String(d?.page ?? "finance").trim().slice(0, 60);
+    const metrics =
+      d?.metrics && typeof d.metrics === "object" ? (d.metrics as Record<string, unknown>) : {};
+    return { metrics, page };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<HakimPulseBannerResult> => {
+    const sb = context.supabase as SbAny;
+    try {
+      const { data: out, error } = await sb.functions.invoke("hakim-pulse", { body: data });
+      if (error) return { error: "failed" };
+      const o = (out ?? {}) as Record<string, unknown>;
+      if (o.error === "rate_limited") return { error: "rate_limited" };
+      if (o.error === "credits_exhausted") return { error: "credits_exhausted" };
+      return {
+        pulse: typeof o.pulse === "string" ? (o.pulse as string) : undefined,
+        insights: o.insights as HakimPulseBannerResult["insights"],
+      };
+    } catch {
+      return { error: "failed" };
+    }
+  });
+
+export const getHakimAdvisorReportFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { kind?: string; days?: number; question?: string }) => {
+    const kind = String(d?.kind ?? "on_demand").trim().slice(0, 40);
+    const days = Number.isFinite(Number(d?.days))
+      ? Math.max(1, Math.min(90, Math.floor(Number(d?.days))))
+      : 30;
+    const raw = String(d?.question ?? "").trim();
+    const question = raw ? raw.slice(0, 1000) : undefined;
+    return { kind, days, question };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ report: string }> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
+    if (error) throw new Error(error.message ?? "advisor_failed");
+    const o = (out ?? {}) as Record<string, unknown>;
+    if (o.error) throw new Error(String(o.error));
+    const report =
+      (typeof o.report === "string" && o.report) ||
+      (typeof o.content === "string" && o.content) ||
+      (typeof o.text === "string" && o.text) ||
+      "";
+    return { report: report || "تعذّر إنشاء التقرير الآن." };
+  });
