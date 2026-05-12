@@ -3,6 +3,7 @@
 // All gated by `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // ---- Types ----------------------------------------------------------------
 export type BannerRow = {
