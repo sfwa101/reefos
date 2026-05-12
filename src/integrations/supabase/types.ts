@@ -4415,6 +4415,13 @@ export type Database = {
             referencedRelation: "usa_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_addons_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "view_product_financial_dna"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_batches: {
@@ -4548,6 +4555,13 @@ export type Database = {
             referencedRelation: "usa_products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "product_media_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "view_product_financial_dna"
+            referencedColumns: ["id"]
+          },
         ]
       }
       product_nutrition: {
@@ -4590,6 +4604,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: true
             referencedRelation: "usa_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_nutrition_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: true
+            referencedRelation: "view_product_financial_dna"
             referencedColumns: ["id"]
           },
         ]
@@ -4681,10 +4702,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "product_relations_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "view_product_financial_dna"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "product_relations_related_id_fkey"
             columns: ["related_id"]
             isOneToOne: false
             referencedRelation: "usa_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_relations_related_id_fkey"
+            columns: ["related_id"]
+            isOneToOne: false
+            referencedRelation: "view_product_financial_dna"
             referencedColumns: ["id"]
           },
         ]
@@ -4878,6 +4913,13 @@ export type Database = {
             columns: ["product_id"]
             isOneToOne: false
             referencedRelation: "usa_products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "product_variants_v2_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "view_product_financial_dna"
             referencedColumns: ["id"]
           },
         ]
@@ -8904,6 +8946,30 @@ export type Database = {
           profile_id: string | null
           ref_id: string | null
           started_at: string | null
+        }
+        Relationships: []
+      }
+      view_product_financial_dna: {
+        Row: {
+          base_price: number | null
+          currency: string | null
+          id: string | null
+          pricing_rules: Json | null
+          tax_class: string | null
+        }
+        Insert: {
+          base_price?: number | null
+          currency?: never
+          id?: string | null
+          pricing_rules?: never
+          tax_class?: string | null
+        }
+        Update: {
+          base_price?: number | null
+          currency?: never
+          id?: string | null
+          pricing_rules?: never
+          tax_class?: string | null
         }
         Relationships: []
       }
