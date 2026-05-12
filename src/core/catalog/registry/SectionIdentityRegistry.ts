@@ -282,6 +282,14 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
   },
 };
 
+// Slug aliases — preserve legacy URLs after Wave P-C route collapse so old
+// links / bookmarks (`/store/home`) keep resolving to the canonical
+// identity (`home-goods`). Aliases inherit everything except `slug`.
+SECTION_IDENTITY_REGISTRY.home = {
+  ...SECTION_IDENTITY_REGISTRY["home-goods"],
+  slug: "home",
+};
+
 /** Lookup helper. Returns undefined for unknown slugs (caller decides fallback). */
 export function getSectionIdentity(slug: string): SectionIdentity | undefined {
   return SECTION_IDENTITY_REGISTRY[slug];
