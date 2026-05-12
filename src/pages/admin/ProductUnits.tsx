@@ -75,8 +75,11 @@ export default function ProductUnits() {
   const removeRow = async (idx: number) => {
     const row = rows[idx];
     if (row.id) {
-      const { error } = await db.from("product_units").delete().eq("id", row.id);
-      if (error) return toast.error(error.message);
+      try {
+        await deleteProductUnitFn({ data: { id: row.id } });
+      } catch (e) {
+        return toast.error((e as Error).message);
+      }
     }
     setRows((rs) => rs.filter((_, i) => i !== idx));
   };
@@ -85,36 +88,7 @@ export default function ProductUnits() {
     if (!selected) return;
     setSaving(true);
     try {
-      // Validate pricing per unit
-      for (const r of rows) {
-        if (r.selling_price && r.selling_price > 0) {
-          const { data: v } = await db.rpc("validate_unit_pricing", {
-            _product_id: r.product_id,
-            _unit_code: r.unit_code,
-            _selling_price: r.selling_price,
-          });
-          if (v && v.ok === false) {
-            toast.error(`${r.unit_code}: ${v.message ?? "تسعير غير صالح"}`);
-            setSaving(false);
-            return;
-          }
-        }
-      }
-
-      const payload = rows.map((r) => ({
-        ...(r.id ? { id: r.id } : {}),
-        product_id: r.product_id,
-        unit_code: r.unit_code,
-        conversion_factor: r.conversion_factor,
-        selling_price: r.selling_price,
-        is_default_sell: r.is_default_sell,
-        is_active: r.is_active,
-      }));
-
-      const { error } = await db.from("product_units").upsert(payload, {
-        onConflict: "product_id,unit_code",
-      });
-      if (error) throw error;
+      await upsertProductUnitsFn({ data: { rows } });
       toast.success("تم الحفظ");
       loadProductUnits(selected);
     } catch (e: unknown) {
