@@ -18,6 +18,11 @@ import type {
   ProductListVM,
   ProductRelationVM,
 } from "../types";
+import {
+  projectProductDNA,
+  type UsaProductRow,
+} from "@/core/dna/projectors/projectProductDNA";
+import type { ProductCivilizationEntity } from "@/core/dna/types";
 
 /**
  * ملاحظة: نستخدم supabase publishable client (anon) لأن قراءة المنتجات عامة
