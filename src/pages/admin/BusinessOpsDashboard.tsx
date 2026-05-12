@@ -65,9 +65,6 @@ export default function BusinessOpsDashboard() {
     );
   }
 
-  const kpi = kpiQuery.data;
-  const critical = criticalQuery.data ?? [];
-  const lowStock = lowStockQuery.data ?? [];
 
   return (
     <>
