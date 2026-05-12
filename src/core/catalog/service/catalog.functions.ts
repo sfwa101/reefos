@@ -13,6 +13,7 @@ import {
 } from "../runtime/ProductRuntimeEngine";
 import { normalizeRelation } from "../runtime/ProductTransformers";
 import type {
+  ProductCardVM,
   ProductDetailsVM,
   ProductListVM,
   ProductRelationVM,
