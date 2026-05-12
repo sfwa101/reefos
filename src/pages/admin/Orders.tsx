@@ -13,10 +13,11 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Package, Clock, TrendingUp, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { listMasterOrdersFn, setOrderStatusFn } from "@/lib/ops.functions";
+import { useAdminOrdersRealtime } from "@/hooks/useAdminOrdersRealtime";
 
 interface MasterOrderRow {
   id: string;
