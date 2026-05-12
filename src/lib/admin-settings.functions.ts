@@ -8,7 +8,8 @@ type SbAny = any;
 
 const ALLOWED_KEYS = new Set(["general", "finance"]);
 
-export type AppSettingsBundle = Record<string, Record<string, unknown>>;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AppSettingsBundle = Record<string, Record<string, any>>;
 
 export const getAppSettingsFn = createServerFn({ method: "GET" })
   .inputValidator((d: { keys: string[] }) => {
