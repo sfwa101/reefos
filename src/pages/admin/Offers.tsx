@@ -1,40 +1,22 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  createMegaEventFn,
+  createOfferCouponFn,
+  createOfferDiscountFn,
+  listOffersWorkbenchFn,
+  toggleMegaEventFn,
+  toggleOfferCouponFn,
+  toggleOfferDiscountFn,
+  type OfferCouponRow as Coupon,
+  type OfferDiscountRow as Discount,
+  type OfferMegaEventRow as MegaEvent,
+} from "@/lib/marketing.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-
-type Coupon = { id: string; code: string; description: string | null; discount_pct: number | null; discount_amount: number | null; min_order_total: number | null; min_user_level: string | null; max_uses: number | null; uses_count: number; is_active: boolean; ends_at: string | null };
-type Discount = { id: string; name: string; scope: string; scope_value: string | null; discount_pct: number | null; discount_amount: number | null; min_user_level: string | null; is_active: boolean };
-type MegaEvent = { id: string; name: string; trigger_kind: string; active_date: string | null; banner_title: string | null; banner_subtitle: string | null; global_discount_pct: number | null; is_active: boolean };
-
-type CouponInsert = Omit<Coupon, "id" | "uses_count" | "discount_amount"> & { discount_amount: number | null };
-type DiscountInsert = Omit<Discount, "id" | "discount_amount"> & { discount_amount?: number | null };
-type MegaEventInsert = Omit<MegaEvent, "id">;
-
-// Supabase generated types don't yet include these tables — use a typed bridge
-// instead of `as any` so call sites stay strongly checked.
-type OffersDb = {
-  from(table: "coupons"): {
-    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Coupon[] | null }> };
-    insert(payload: CouponInsert): Promise<{ error: { message: string } | null }>;
-    update(patch: Partial<Coupon>): { eq(col: string, val: string): Promise<unknown> };
-  };
-  from(table: "discounts"): {
-    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: Discount[] | null }> };
-    insert(payload: DiscountInsert): Promise<{ error: { message: string } | null }>;
-    update(patch: Partial<Discount>): { eq(col: string, val: string): Promise<unknown> };
-  };
-  from(table: "mega_events"): {
-    select(s: string): { order(c: string, o: { ascending: boolean }): Promise<{ data: MegaEvent[] | null }> };
-    insert(payload: MegaEventInsert): Promise<{ error: { message: string } | null }>;
-    update(patch: Partial<MegaEvent>): { eq(col: string, val: string): Promise<unknown> };
-  };
-};
-const db = supabase as unknown as OffersDb;
 
 export default function Offers() {
   const [coupons, setCoupons] = useState<Coupon[]>([]);
@@ -47,85 +29,82 @@ export default function Offers() {
   const [eForm, setEForm] = useState({ name: "", trigger_kind: "manual", active_date: "", banner_title: "", banner_subtitle: "", global_discount_pct: "" });
 
   const loadAll = async () => {
-    const [c, d, e] = await Promise.all([
-      db.from("coupons").select("*").order("created_at", { ascending: false }),
-      db.from("discounts").select("*").order("created_at", { ascending: false }),
-      db.from("mega_events").select("*").order("created_at", { ascending: false }),
-    ]);
-    setCoupons((c.data ?? []) as Coupon[]);
-    setDiscounts((d.data ?? []) as Discount[]);
-    setEvents((e.data ?? []) as MegaEvent[]);
+    try {
+      const { coupons, discounts, events } = await listOffersWorkbenchFn();
+      setCoupons(coupons);
+      setDiscounts(discounts);
+      setEvents(events);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   };
   useEffect(() => { void loadAll(); }, []);
 
   const saveCoupon = async () => {
     if (!cForm.code.trim()) return toast.error("الكود مطلوب");
-    const payload: CouponInsert = {
-      code: cForm.code.trim().toUpperCase(),
-      description: cForm.description || null,
-      discount_pct: cForm.discount_pct ? Number(cForm.discount_pct) : null,
-      discount_amount: cForm.discount_amount ? Number(cForm.discount_amount) : null,
-      min_order_total: cForm.min_order_total ? Number(cForm.min_order_total) : null,
-      min_user_level: cForm.min_user_level || null,
-      max_uses: cForm.max_uses ? Number(cForm.max_uses) : null,
-      ends_at: cForm.ends_at || null,
-      is_active: true,
-    };
-    const { error } = await db.from("coupons").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("تم إنشاء الكوبون");
-    setCForm({ code: "", description: "", discount_pct: "", discount_amount: "", min_order_total: "", min_user_level: "", max_uses: "", ends_at: "" });
-    void loadAll();
+    try {
+      await createOfferCouponFn({ data: {
+        code: cForm.code.trim(),
+        description: cForm.description || null,
+        discount_pct: cForm.discount_pct ? Number(cForm.discount_pct) : null,
+        discount_amount: cForm.discount_amount ? Number(cForm.discount_amount) : null,
+        min_order_total: cForm.min_order_total ? Number(cForm.min_order_total) : null,
+        min_user_level: cForm.min_user_level || null,
+        max_uses: cForm.max_uses ? Number(cForm.max_uses) : null,
+        ends_at: cForm.ends_at || null,
+      } });
+      toast.success("تم إنشاء الكوبون");
+      setCForm({ code: "", description: "", discount_pct: "", discount_amount: "", min_order_total: "", min_user_level: "", max_uses: "", ends_at: "" });
+      void loadAll();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   const toggleCoupon = async (id: string, current: boolean) => {
-    await db.from("coupons").update({ is_active: !current }).eq("id", id);
-    void loadAll();
+    try { await toggleOfferCouponFn({ data: { id, is_active: !current } }); void loadAll(); }
+    catch (e) { toast.error((e as Error).message); }
   };
 
   const saveDiscount = async () => {
     if (!dForm.name) return toast.error("الاسم مطلوب");
-    const payload: DiscountInsert = {
-      name: dForm.name,
-      scope: dForm.scope,
-      scope_value: dForm.scope_value || null,
-      discount_pct: dForm.discount_pct ? Number(dForm.discount_pct) : null,
-      min_user_level: dForm.min_user_level || null,
-      is_active: true,
-    };
-    const { error } = await db.from("discounts").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("تم إنشاء الخصم");
-    setDForm({ name: "", scope: "global", scope_value: "", discount_pct: "", min_user_level: "" });
-    void loadAll();
+    try {
+      await createOfferDiscountFn({ data: {
+        name: dForm.name,
+        scope: dForm.scope,
+        scope_value: dForm.scope_value || null,
+        discount_pct: dForm.discount_pct ? Number(dForm.discount_pct) : null,
+        min_user_level: dForm.min_user_level || null,
+      } });
+      toast.success("تم إنشاء الخصم");
+      setDForm({ name: "", scope: "global", scope_value: "", discount_pct: "", min_user_level: "" });
+      void loadAll();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   const toggleDiscount = async (id: string, current: boolean) => {
-    await db.from("discounts").update({ is_active: !current }).eq("id", id);
-    void loadAll();
+    try { await toggleOfferDiscountFn({ data: { id, is_active: !current } }); void loadAll(); }
+    catch (e) { toast.error((e as Error).message); }
   };
 
   const saveEvent = async () => {
     if (!eForm.name) return toast.error("الاسم مطلوب");
-    const payload: MegaEventInsert = {
-      name: eForm.name,
-      trigger_kind: eForm.trigger_kind,
-      active_date: eForm.active_date || null,
-      banner_title: eForm.banner_title || null,
-      banner_subtitle: eForm.banner_subtitle || null,
-      global_discount_pct: eForm.global_discount_pct ? Number(eForm.global_discount_pct) : null,
-      is_active: true,
-    };
-    const { error } = await db.from("mega_events").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("تم إنشاء الحدث");
-    setEForm({ name: "", trigger_kind: "manual", active_date: "", banner_title: "", banner_subtitle: "", global_discount_pct: "" });
-    void loadAll();
+    try {
+      await createMegaEventFn({ data: {
+        name: eForm.name,
+        trigger_kind: eForm.trigger_kind,
+        active_date: eForm.active_date || null,
+        banner_title: eForm.banner_title || null,
+        banner_subtitle: eForm.banner_subtitle || null,
+        global_discount_pct: eForm.global_discount_pct ? Number(eForm.global_discount_pct) : null,
+      } });
+      toast.success("تم إنشاء الحدث");
+      setEForm({ name: "", trigger_kind: "manual", active_date: "", banner_title: "", banner_subtitle: "", global_discount_pct: "" });
+      void loadAll();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   const toggleEvent = async (id: string, current: boolean) => {
-    await db.from("mega_events").update({ is_active: !current }).eq("id", id);
-    void loadAll();
+    try { await toggleMegaEventFn({ data: { id, is_active: !current } }); void loadAll(); }
+    catch (e) { toast.error((e as Error).message); }
   };
 
   return (
