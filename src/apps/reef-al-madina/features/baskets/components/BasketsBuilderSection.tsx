@@ -90,7 +90,8 @@ const BasketsBuilderSection = () => {
               return (
                 <Link
                   key={s.id}
-                  to="/store/baskets-subs"
+                  to="/store/$slug"
+                  params={{ slug: "baskets-subs" }}
                   className="relative flex w-44 shrink-0 items-center gap-2.5 rounded-2xl bg-card p-2 ring-1 ring-border/60 shadow-soft"
                 >
                   <img src={s.basketImage} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
