@@ -12,7 +12,7 @@ import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fetchRestaurantAssets, type RestoProductRow } from "@/lib/sovereignCatalog";
 
 type RestoProduct = RestoProductRow;

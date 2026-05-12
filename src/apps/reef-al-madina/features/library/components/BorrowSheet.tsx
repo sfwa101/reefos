@@ -6,7 +6,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useCartActions } from "@/context/CartContext";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
   BORROW_DURATIONS, calcBorrowPrice, type BorrowDuration,

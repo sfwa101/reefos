@@ -2,7 +2,7 @@
 
 import { toast } from "sonner";
 import { useCartActions } from "@/context/CartContext";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
 import { LIBRARY_BUNDLES } from "@/lib/library";
 import { PALETTE } from "../data";

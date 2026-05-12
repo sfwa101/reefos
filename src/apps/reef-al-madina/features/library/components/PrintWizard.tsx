@@ -9,7 +9,7 @@ import {
 import { useCartActions } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
   calcPrintTotal, PRINT_PRICES, PRINT_PREP_HOURS,
