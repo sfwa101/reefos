@@ -1,7 +1,7 @@
 import { Eye, Lightbulb, Sparkles, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
+import { markHakimInsightReadFn } from "@/lib/hakim.functions";
 import { fmtNum, fmtRelative } from "@/lib/format";
 
 interface InsightRow {
@@ -38,13 +38,13 @@ const KIND_LABEL: Record<InsightRow["kind"], string> = {
 
 export default function HakimInsights() {
   const markRead = async (row: InsightRow) => {
-    const { error } = await (supabase as any).from("hakim_insights").update({ is_read: true }).eq("id", row.id);
-    if (error) {
+    try {
+      await markHakimInsightReadFn({ data: { id: row.id } });
+      toast.success("تم وضع العلامة كمقروء");
+      setTimeout(() => window.location.reload(), 400);
+    } catch {
       toast.error("تعذر التحديث");
-      return;
     }
-    toast.success("تم وضع العلامة كمقروء");
-    setTimeout(() => window.location.reload(), 400);
   };
 
   return (
