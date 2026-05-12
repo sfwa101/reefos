@@ -80,7 +80,7 @@ export class WholesalePricingStrategy
     if (context.product.source === "wholesale") return true;
     // Also handle any retail product carrying a configured volume deal —
     // lets supermarket SKUs benefit from the same audit-friendly path.
-    return volumeDealFor(context.product) !== null;
+    return volumeDealFor(toLegacyProductShape(context.product)) !== null;
   }
 
   buildModifiers(
@@ -107,7 +107,7 @@ export class WholesalePricingStrategy
     // 2. Legacy volume deal — applied as repeated bundle savings.
     const allowVolume = selection.applyVolumeDeals ?? true;
     if (allowVolume) {
-      const deal = volumeDealFor(context.product);
+      const deal = volumeDealFor(toLegacyProductShape(context.product));
       if (deal) {
         const bundleSavings = this.computeBundleSavings(deal, qty);
         if (bundleSavings > 0) {
