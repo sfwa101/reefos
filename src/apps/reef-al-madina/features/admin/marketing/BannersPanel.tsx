@@ -11,8 +11,12 @@ import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Kpi, Field } from "./shared";
 import { PLACEMENTS, type Banner, type BannerForm } from "./types";
-
-const TABLE = "banners" as never;
+import {
+  listBannersFn,
+  upsertBannerFn,
+  setBannerActiveFn,
+  deleteBannerFn,
+} from "@/lib/marketing.functions";
 
 const blankForm: BannerForm = {
   title: "", subtitle: "", image_url: "", placement: "hero",
