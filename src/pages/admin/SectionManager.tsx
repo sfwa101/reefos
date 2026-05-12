@@ -132,12 +132,7 @@ export default function SectionManager() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left: Block Palette */}
         <aside className="lg:col-span-3">
-          <div className="bg-surface rounded-2xl border border-border/40 p-4 min-h-[400px]">
-            <h2 className="font-display text-sm mb-3">مكتبة الكتل</h2>
-            <p className="text-[11.5px] text-foreground-tertiary">
-              ستظهر هنا الكتل القابلة للسحب (Hero, Carousel, Grid, ...).
-            </p>
-          </div>
+          <BlockPalette />
         </aside>
 
         {/* Center: Canvas */}
