@@ -18,6 +18,7 @@ import {
   useSectionManagerStore,
   type ZoneTab,
 } from "@/components/admin/section-manager/useSectionManagerStore";
+import { LayoutCanvas } from "@/components/admin/section-manager/LayoutCanvas";
 import { cn } from "@/lib/utils";
 
 const TAB_LABELS: Record<ZoneTab, string> = {
