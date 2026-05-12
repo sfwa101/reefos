@@ -3,14 +3,17 @@ import { Zap, Plus, Trash2, Calendar, Percent } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { fmtNum } from "@/lib/format";
 import { Kpi, Field } from "./shared";
 import type { FlashSale, FlashSaleProduct, FlashProductForm } from "./types";
-
-const SALES = "flash_sales" as never;
-const PRODUCTS = "flash_sale_products" as never;
+import {
+  getActiveFlashSaleFn,
+  ensureActiveFlashSaleFn,
+  upsertFlashSaleFn,
+  deleteFlashSaleFn,
+  endFlashSaleFn,
+} from "@/lib/marketing.functions";
 
 const blankForm: FlashProductForm = {
   product_id: "", product_name: "", category: "",
