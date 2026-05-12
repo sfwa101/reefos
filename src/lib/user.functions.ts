@@ -224,7 +224,7 @@ export type HakimInsight = {
   kind: string;
   title: string;
   summary: string | null;
-  suggestions: unknown;
+  suggestions: unknown | null;
   created_at: string;
   read_at: string | null;
 };
