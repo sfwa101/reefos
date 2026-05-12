@@ -144,12 +144,16 @@ function BannerDialog({
   const save = async () => {
     if (!form.title || !form.image_url) { toast.error("العنوان والصورة مطلوبان"); return; }
     setSaving(true);
-    const payload = { ...form, sort_order: Number(form.sort_order) || 0 };
-    const res = editing
-      ? await supabase.from(TABLE).update(payload as never).eq("id", editing.id)
-      : await supabase.from(TABLE).insert(payload as never);
-    setSaving(false);
-    if (res.error) toast.error("فشل الحفظ"); else { toast.success("تم الحفظ"); setOpen(false); onSaved(); }
+    try {
+      await upsertBannerFn({
+        data: {
+          id: editing?.id ?? null,
+          values: { ...form, sort_order: Number(form.sort_order) || 0 },
+        },
+      });
+      toast.success("تم الحفظ"); setOpen(false); onSaved();
+    } catch (e) { toast.error((e as Error).message || "فشل الحفظ"); }
+    finally { setSaving(false); }
   };
 
   return (
