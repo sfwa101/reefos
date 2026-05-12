@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getExecutiveDashboardStatsFn } from "@/lib/finance.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, TrendingUp, ShoppingCart, DollarSign, AlertTriangle, Package } from "lucide-react";
@@ -29,14 +29,13 @@ export default function ExecutiveDashboard() {
 
   useEffect(() => {
     if (rolesLoading || !allowed) return;
+    let cancelled = false;
     setLoading(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("executive_dashboard_stats", { _days: days })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then(({ data, error }: any) => {
-        if (!error && data) setStats(data as Stats);
-        setLoading(false);
-      });
+    getExecutiveDashboardStatsFn({ data: { days } })
+      .then((data) => { if (!cancelled && data) setStats(data as Stats); })
+      .catch(() => { /* admin-gated; ignore */ })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [days, allowed, rolesLoading]);
 
   if (rolesLoading) return <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto" /></div>;

@@ -1,7 +1,7 @@
 import { AlertOctagon, AlertTriangle, CheckCircle2, Radar, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
+import { resolveHakimAnomalyFn } from "@/lib/hakim.functions";
 import { fmtNum, fmtRelative } from "@/lib/format";
 
 interface AnomalyRow {
@@ -34,16 +34,13 @@ const SEV_LABEL: Record<AnomalyRow["severity"], string> = {
 
 export default function HakimAnomalies() {
   const resolveAnomaly = async (row: AnomalyRow) => {
-    const { error } = await (supabase as any)
-      .from("hakim_anomalies")
-      .update({ resolved: true, resolved_at: new Date().toISOString() })
-      .eq("id", row.id);
-    if (error) {
+    try {
+      await resolveHakimAnomalyFn({ data: { id: row.id } });
+      toast.success("تم إغلاق التنبيه");
+      setTimeout(() => window.location.reload(), 400);
+    } catch {
       toast.error("تعذر إغلاق التنبيه");
-      return;
     }
-    toast.success("تم إغلاق التنبيه");
-    setTimeout(() => window.location.reload(), 400);
   };
 
   return (

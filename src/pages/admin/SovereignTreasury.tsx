@@ -8,7 +8,7 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { listVendorSettlementsFn, clearSovereignSettlementsFn } from "@/lib/sovereign.functions";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, Crown, Hourglass, Banknote, Send } from "lucide-react";
@@ -40,14 +40,8 @@ export default function SovereignTreasury() {
   const { data, isLoading } = useQuery({
     queryKey: QKEY,
     queryFn: async (): Promise<SettlementRow[]> => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from("salsabil_vendor_settlements")
-        .select("*, vendor:salsabil_vendors(business_name)")
-        .order("created_at", { ascending: false })
-        .limit(1000);
-      if (error) throw error;
-      return (data ?? []) as SettlementRow[];
+      const rows = await listVendorSettlementsFn();
+      return (rows ?? []) as SettlementRow[];
     },
   });
 
@@ -88,13 +82,7 @@ export default function SovereignTreasury() {
 
   const clearMut = useMutation({
     mutationFn: async (vendorId: string) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc(
-        "clear_sovereign_settlements",
-        { p_vendor_id: vendorId },
-      );
-      if (error) throw error;
-      return Number(data ?? 0);
+      return await clearSovereignSettlementsFn({ data: { vendor_id: vendorId } });
     },
     onSuccess: (count) => {
       toast.success(`تم صرف المستحقات بنجاح (${count})`);

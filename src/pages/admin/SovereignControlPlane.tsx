@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { useSystemSetting, setSystemSetting } from "@/hooks/useSystemSettings";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
-import { supabase } from "@/integrations/supabase/client";
+import { getCircuitBreakerForKeyFn, getSystemHealthBreakerFn } from "@/lib/sovereign.functions";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -63,20 +63,11 @@ function useLatestBreaker(key: string): BreakerInfo {
   const q = useQuery({
     queryKey: ["control-plane", "circuit-breaker", key],
     queryFn: async (): Promise<BreakerInfo> => {
-      const { data, error } = await supabase
-        .from("salsabil_event_timeline")
-        .select("payload, created_at")
-        .eq("event_domain", "system")
-        .eq("event_type", "circuit_breaker_tripped")
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (error) return null;
-      const hit = (data ?? []).find(
-        (row) => (row.payload as { setting_key?: string } | null)?.setting_key === key,
-      );
-      if (!hit) return null;
-      const p = hit.payload as { reason?: string };
-      return { reason: p?.reason ?? "circuit breaker", tripped_at: hit.created_at as string };
+      try {
+        return await getCircuitBreakerForKeyFn({ data: { key } });
+      } catch {
+        return null;
+      }
     },
     refetchInterval: 30_000,
     staleTime: 15_000,
@@ -155,16 +146,11 @@ function SystemHealthBanner() {
   const { data: anyTrip } = useQuery({
     queryKey: ["control-plane", "system-health"],
     queryFn: async () => {
-      const since = new Date(Date.now() - 60 * 60_000).toISOString();
-      const { data } = await supabase
-        .from("salsabil_event_timeline")
-        .select("created_at")
-        .eq("event_domain", "system")
-        .eq("event_type", "circuit_breaker_tripped")
-        .gte("created_at", since)
-        .order("created_at", { ascending: false })
-        .limit(1);
-      return (data ?? [])[0] ?? null;
+      try {
+        return await getSystemHealthBreakerFn();
+      } catch {
+        return null;
+      }
     },
     refetchInterval: 30_000,
   });

@@ -1,9 +1,8 @@
-import { useEffect, useState } from "react";
 import { Layers, Loader2, Network, ShieldAlert, Sparkles, Target, TrendingUp } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
-import { supabase } from "@/integrations/supabase/client";
+import { getCategoryAffinityFn } from "@/lib/hakim.functions";
 import { fmtNum } from "@/lib/format";
 
 interface AffinityRow {
@@ -25,46 +24,12 @@ export default function CategoryAffinity() {
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
 
   const fetchAffinity = async (): Promise<AffinityRow[]> => {
-    const sinceIso = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
-    const { data, error } = await (supabase as any)
-      .from("user_behavior_logs")
-      .select("event_type,category,user_id,weight")
-      .not("category", "is", null)
-      .gte("created_at", sinceIso)
-      .limit(5000);
-    if (error || !data) return [];
-
-    const buckets = new Map<string, AffinityRow & { _users: Set<string> }>();
-    for (const row of data as Array<{ event_type: string; category: string; user_id: string | null; weight: number }>) {
-      const cat = row.category;
-      if (!cat) continue;
-      let b = buckets.get(cat);
-      if (!b) {
-        b = { category: cat, views: 0, add_to_cart: 0, purchases: 0, affinity_score: 0, unique_users: 0, _users: new Set() };
-        buckets.set(cat, b);
-      }
-      const w = row.weight ?? 1;
-      if (row.event_type === "view_product" || row.event_type === "view_category") b.views += w;
-      else if (row.event_type === "add_to_cart") b.add_to_cart += w;
-      else if (row.event_type === "purchase") b.purchases += w;
-      if (row.user_id) b._users.add(row.user_id);
+    try {
+      const rows = await getCategoryAffinityFn();
+      return (rows ?? []) as AffinityRow[];
+    } catch {
+      return [];
     }
-    const result: AffinityRow[] = [];
-    for (const b of buckets.values()) {
-      b.unique_users = b._users.size;
-      // weighted score: purchases x5, cart x2, views x1
-      b.affinity_score = b.purchases * 5 + b.add_to_cart * 2 + b.views;
-      result.push({
-        category: b.category,
-        views: b.views,
-        add_to_cart: b.add_to_cart,
-        purchases: b.purchases,
-        affinity_score: b.affinity_score,
-        unique_users: b.unique_users,
-      });
-    }
-    result.sort((a, b) => b.affinity_score - a.affinity_score);
-    return result;
   };
 
   if (rolesLoading) {
