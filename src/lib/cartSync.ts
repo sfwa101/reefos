@@ -88,10 +88,16 @@ export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
   for (const row of data) {
     const product = productMap.get(row.product_id);
     if (!product) continue;
+    const meta = (row.meta ?? {}) as CartLineMeta;
+    // Wave P-B — derive captured snapshot from persisted meta + product fallback.
+    const capturedPrice = meta.unitPrice ?? product.price;
     lines.push({
       product,
       qty: Math.max(1, Number(row.qty) || 1),
-      meta: (row.meta ?? {}) as CartLineMeta,
+      meta,
+      capturedPrice,
+      capturedName: product.name,
+      capturedImage: product.image,
     });
   }
   return lines;
