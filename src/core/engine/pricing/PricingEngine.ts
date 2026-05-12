@@ -31,7 +31,7 @@ import { LossPreventionRule } from "./guardrails/LossPreventionRule";
 const lossPreventionRule = new LossPreventionRule();
 
 /** Reads `product.metadata.costPrice` (per-unit) when present. */
-function readCostPerUnit(product: Product): number | null {
+function readCostPerUnit(product: PricingInput): number | null {
   const meta = (product as { metadata?: Readonly<Record<string, unknown>> })
     .metadata;
   if (!meta) return null;
@@ -152,7 +152,7 @@ function foldModifiers(
  * configured `DEFAULT_COST_RATIO` of the post-discount unit price.
  */
 function deriveCostPrice(
-  product: Product,
+  product: PricingInput,
   unitPrice: number,
   qty: number,
 ): number {
@@ -201,7 +201,7 @@ export class PricingEngine {
    * `calculate()` to decide whether to delegate to the new engine or
    * fall back to the legacy pricing pipeline.
    */
-  canPrice(product: Product, explicitKey?: string): boolean {
+  canPrice(product: PricingInput, explicitKey?: string): boolean {
     if (explicitKey) return this.strategies.has(explicitKey);
     const ctx: PricingContext = { product, currency: "EGP" };
     for (const s of this.strategies.values()) {
@@ -244,7 +244,7 @@ export class PricingEngine {
    * at the call site (e.g. `engine.calculate<MeatSelection>(...)`).
    */
   calculate<T extends PricingSelection>(input: {
-    product: Product;
+    product: PricingInput;
     selection: T;
     context?: Omit<PricingContext, "product" | "currency">;
     strategyKey?: string;
