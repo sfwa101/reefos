@@ -61,6 +61,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const mutation = useVisionGenesis();
   const mintMutation = useMintUSA();
   const aestheticMutation = useAestheticProcessor();
+  const { upload: uploadProductImage } = useProductImageUpload();
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
