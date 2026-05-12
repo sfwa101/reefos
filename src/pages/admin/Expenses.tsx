@@ -28,9 +28,12 @@ export default function Expenses() {
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
   const listExpenses = useServerFn(listExpensesFn);
   const createExpense = useServerFn(createExpenseFn);
+  const updateExpense = useServerFn(updateExpenseFn);
+  const deleteExpense = useServerFn(deleteExpenseFn);
   const [rows, setRows] = useState<ExpenseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     category: "operations", subcategory: "", amount: "", expense_date: new Date().toISOString().slice(0, 10),
     paid_to: "", payment_method: "cash", reference: "", notes: "",
