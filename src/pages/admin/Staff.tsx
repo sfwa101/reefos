@@ -106,10 +106,7 @@ export default function StaffAdmin() {
         toast.success("تم تحديث الدور");
       } else {
         if (!editing.user_id) { toast.error("اختر المستخدم"); setSaving(false); return; }
-        await manageStaffRoleFn({ data: {
-          action: "insert", role: editing.role,
-          user_id: editing.user_id, is_active: editing.is_active ?? true,
-        } });
+        await assignRoleFn({ data: { user_id: editing.user_id, role: editing.role } });
         toast.success("تم إسناد الدور");
       }
       setEditing(null);
