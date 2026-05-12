@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Outlet, useLocation } from "@tanstack/react-router";
 import TopBar from "@/components/TopBar";
 import TabBar from "@/components/TabBar";
@@ -17,6 +17,25 @@ const HIDE_TABBAR_ROUTES = [
 ];
 
 const AppShell = () => {
+  // Wave P-C (Payload Diet) — one-shot rescue: nuke any pre-diet cart
+  // payload that ballooned past 1MB (typically inlined base64 product
+  // images persisted into the bridge `product` field). Runs once on mount.
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem("reef-cart-v2");
+      if (raw && raw.length > 1024 * 1024) {
+        console.warn(
+          "[AppShell] reef-cart-v2 exceeded 1MB (",
+          raw.length,
+          "bytes) — clearing to unfreeze the UI.",
+        );
+        localStorage.removeItem("reef-cart-v2");
+      }
+    } catch {
+      /* sandboxed iframe — ignore */
+    }
+  }, []);
+
   const { pathname } = useLocation();
   const hideTabBar = HIDE_TABBAR_ROUTES.some((p) =>
     p.endsWith("/") ? pathname.startsWith(p) : pathname === p

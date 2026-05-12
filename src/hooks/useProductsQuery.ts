@@ -239,14 +239,29 @@ export function useProductQuery(id: string | undefined) {
   });
 }
 
-/* ── Cold-start fast path (source-aware, capped) ── */
+/* ── Cold-start fast path (source-aware, capped) ──
+ *
+ * Wave P-C (Payload Diet) — the home grid uses a MINIMAL select that
+ * EXCLUDES the heavy `media` column (which historically inlined multi-MB
+ * base64 blobs). We hydrate `image` with the lightweight FALLBACK_IMG
+ * placeholder; product detail pages use the full select to fetch real media.
+ */
+const MINIMAL_SOVEREIGN_SELECT = `
+  id, name, description, category_path, traits,
+  salsabil_skus (
+    id, sku_code, attributes, sort_order, is_active,
+    salsabil_financial_contracts ( base_price, currency ),
+    salsabil_inventory_matrix ( availability_data )
+  )
+`;
+
 async function fetchHomeProducts(
   limit: number,
   source?: ProductSource,
 ): Promise<Product[]> {
   let q = supabase
     .from("salsabil_assets")
-    .select(SOVEREIGN_SELECT)
+    .select(MINIMAL_SOVEREIGN_SELECT)
     .eq("is_active", true)
     .eq("asset_type", "physical")
     .order("created_at", { ascending: false })
@@ -262,7 +277,7 @@ async function fetchHomeProducts(
   }
   const rows = (data ?? []) as unknown as SovereignRow[];
   const mapped = rows
-    .map(rowToProduct)
+    .map((r) => rowToProduct({ ...r, media: null }))
     .filter((p): p is Product => p != null);
   const filtered = source ? mapped.filter((p) => p.source === source) : mapped;
   const sliced = filtered.slice(0, limit);
