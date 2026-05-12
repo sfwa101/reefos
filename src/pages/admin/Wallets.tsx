@@ -444,7 +444,7 @@ export default function AdminWallets() {
           compute: (rows) => fmtNum(rows.length),
         },
       ]}
-      topSlot={<TopupForm />}
+      topSlot={<div className="grid gap-3 lg:grid-cols-2"><TopupForm /><AdjustPanel /></div>}
       columns={[
         {
           key: "info",
