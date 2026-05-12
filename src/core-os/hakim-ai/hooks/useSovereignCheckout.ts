@@ -133,7 +133,7 @@ export const callSovereignCheckout = async (
   })();
 
   return data;
-}
+};
 
 /** TanStack mutation variant for component callers. */
 export function useSovereignCheckout() {
