@@ -1,17 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, FolderTree, Folder } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
-
-type Category = {
-  id: string;
-  name: string;
-  parent_id: string | null;
-  icon: string | null;
-  sort_order: number;
-};
+import {
+  listCategoriesFn,
+  upsertCategoryFn,
+  deleteCategoryFn,
+  type CategoryRow as Category,
+} from "@/lib/admin-catalog.functions";
 
 export default function Categories() {
   const [items, setItems] = useState<Category[] | null>(null);
