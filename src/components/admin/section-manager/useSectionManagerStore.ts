@@ -68,6 +68,34 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
       };
     }),
 
+  addBlock: (block) =>
+    set((s) => {
+      const now = new Date().toISOString();
+      if (!s.draftDoc) {
+        return {
+          draftDoc: {
+            __v: 1,
+            page_key: "mobile_home",
+            updated_at: now,
+            updated_by: "admin",
+            blocks: [{ ...block, sort_order: 0 }],
+          } as MobileHomeLayoutV1,
+          dirty: true,
+          selectedBlockId: block.id,
+        };
+      }
+      const nextSort = s.draftDoc.blocks.length;
+      return {
+        draftDoc: {
+          ...s.draftDoc,
+          blocks: [...s.draftDoc.blocks, { ...block, sort_order: nextSort }],
+          updated_at: now,
+        },
+        dirty: true,
+        selectedBlockId: block.id,
+      };
+    }),
+
   reorderBlocks: (zone, oldIndex, newIndex) =>
     set((s) => {
       if (!s.draftDoc) return s;
