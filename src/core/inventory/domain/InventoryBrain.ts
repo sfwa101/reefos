@@ -144,6 +144,26 @@ export function createReservationEvent(
   });
 }
 
+/** Generates a `release` event — cancels/expires a hold, returns qty to available. */
+export function releaseReservationEvent(
+  entity_id: string,
+  location_id: string,
+  qty: number,
+  order_ref: string,
+  idempotency_key: string,
+  extras: { actor_id?: string | null; context?: JsonObject; occurred_at?: ISODateString } = {},
+): DraftStockLedgerEvent {
+  const magnitude = Math.abs(qty);
+  return buildEvent("release", magnitude, {
+    entity_id,
+    location_id,
+    qty: magnitude,
+    order_ref,
+    idempotency_key,
+    ...extras,
+  });
+}
+
 /** Generates a `commit` event — realized sale, decrements on-hand, releases hold. */
 export function commitReservationEvent(
   entity_id: string,
