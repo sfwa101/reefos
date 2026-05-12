@@ -10,7 +10,11 @@ import {
 } from "@/lib/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
+import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 type Line = {
   product: Product;
