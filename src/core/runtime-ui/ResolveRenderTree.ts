@@ -4,12 +4,37 @@
  * منطق نقي: يبني شجرة بلوكات حسب القسم والقدرات. لا React هنا.
  * يستخدمه RuntimeRenderer + اختبارات unit.
  */
-import type { SectionIdentity } from "@/core/sections/types";
+import type { SectionIdentity as KernelSectionIdentity } from "@/core/sections/types";
 import type { ProductCardVM, ProductDetailsVM } from "@/core/catalog/types";
 import { CAP } from "@/core/capabilities";
 import type { RenderBlock, RenderDescriptor } from "./types";
+import type { SectionIdentity as RegistrySectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { storeThemes } from "@/lib/storeThemes";
+import type { HomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 
-export type ViewMode = "list" | "details";
+export type ViewMode = "list" | "details" | "section";
+
+const block = (kind: string, id: string, props?: Record<string, unknown>): RenderBlock =>
+  ({ kind, id, props });
+
+/**
+ * Map a registry SectionIdentity to its `ui_layouts.page_key`.
+ * γ-group (pure SDUI verticals) use the `reef_*` namespace; everything
+ * else falls back to the `category_<slug>` namespace, with the legacy
+ * `home-goods → home` alias preserved.
+ */
+const REEF_PAGE_KEY: Record<string, string> = {
+  restaurants: "reef_restaurants",
+  baskets: "reef_baskets",
+  subscriptions: "reef_subscriptions",
+  "school-library": "reef_school_library",
+  wholesale: "reef_wholesale",
+  "home-goods": "home",
+};
+
+export function identityToPageKey(identity: RegistrySectionIdentity): string {
+  return REEF_PAGE_KEY[identity.slug] ?? `category_${identity.slug}`;
+}
 
 const block = (kind: string, id: string, props?: Record<string, unknown>): RenderBlock =>
   ({ kind, id, props });
