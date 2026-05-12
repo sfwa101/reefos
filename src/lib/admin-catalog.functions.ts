@@ -334,7 +334,8 @@ export type SupplierFullRow = {
 export const listSuppliersFullFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<SupplierFullRow[]> => {
-    const sb = context.supabase as unknown as SbAny;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
     const { data, error } = await sb
       .from("suppliers")
       .select("*")
