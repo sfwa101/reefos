@@ -712,3 +712,218 @@ export const getCfoDashboardStatsFn = createServerFn({ method: "GET" })
     if (error) throw new Error(error.message);
     return data as CfoDashboardStats;
   });
+
+// ---- Finance Dashboard (Wave R-1 · Batch 6) -------------------------------
+export type FinanceTopSupplier = {
+  id: string;
+  name: string;
+  outstanding_balance: number;
+  payment_terms_days: number | null;
+};
+export type FinanceOverview = {
+  revenueToday: number;
+  revenue30d: number;
+  ordersCompleted: number;
+  ordersToday: number;
+  suppliersDebt: number;
+  overdueSuppliersCount: number;
+  expenses30d: number;
+  netRoughProfit: number;
+  topSuppliers: FinanceTopSupplier[];
+};
+
+export const getFinanceOverviewFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<FinanceOverview> => {
+    const sb = context.supabase as SbAny;
+    const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+    const since30 = new Date(); since30.setDate(since30.getDate() - 30); since30.setHours(0, 0, 0, 0);
+    const since30Iso = since30.toISOString();
+    const today = new Date().toISOString().slice(0, 10);
+
+    const [ordersRes, suppliersRes, expensesRes, overdueRes, topSupRes] = await Promise.all([
+      sb
+        .from("salsabil_master_orders")
+        .select("id,total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+        .gte("created_at", since30Iso),
+      sb.from("suppliers").select("outstanding_balance").eq("is_active", true),
+      sb.from("daily_expenses").select("amount,expense_date").gte("expense_date", since30Iso.slice(0, 10)),
+      sb.from("purchase_invoices").select("id", { count: "exact", head: true })
+        .eq("status", "open").lt("due_date", today),
+      sb.from("suppliers").select("id,name,outstanding_balance,payment_terms_days")
+        .eq("is_active", true).gt("outstanding_balance", 0)
+        .order("outstanding_balance", { ascending: false }).limit(6),
+    ]);
+
+    const masters: SbAny[] = ordersRes.data ?? [];
+    const orders = masters.map((m) => {
+      const nodeStatuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: SbAny) => n.status);
+      const allDelivered = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "delivered");
+      const allCancelled = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "cancelled");
+      const headline = allDelivered ? "delivered" : allCancelled ? "cancelled" : (m.status ?? "pending");
+      return { total: Number(m.total_amount ?? 0), status: headline, created_at: m.created_at };
+    });
+
+    const completed = orders.filter((o) => ["delivered", "paid"].includes(o.status));
+    const todayOrders = orders.filter((o) => new Date(o.created_at) >= startToday);
+    const revenueToday = todayOrders
+      .filter((o) => o.status !== "cancelled")
+      .reduce((s, o) => s + Number(o.total ?? 0), 0);
+    const revenue30d = completed.length
+      ? completed.reduce((s, o) => s + Number(o.total ?? 0), 0)
+      : orders.filter((o) => o.status !== "cancelled").reduce((s, o) => s + Number(o.total ?? 0), 0);
+
+    const suppliersDebt = (suppliersRes.data ?? [])
+      .reduce((s: number, x: SbAny) => s + Number(x.outstanding_balance ?? 0), 0);
+    const expenses30d = (expensesRes.data ?? [])
+      .reduce((s: number, x: SbAny) => s + Number(x.amount ?? 0), 0);
+
+    return {
+      revenueToday,
+      revenue30d,
+      ordersCompleted: completed.length,
+      ordersToday: todayOrders.length,
+      suppliersDebt,
+      overdueSuppliersCount: overdueRes.count ?? 0,
+      expenses30d,
+      netRoughProfit: revenue30d - expenses30d,
+      topSuppliers: (topSupRes.data ?? []) as FinanceTopSupplier[],
+    };
+  });
+
+// ---- Admin Dashboard Overview --------------------------------------------
+export type AdminDashOrderRow = {
+  id: string;
+  total: number | null;
+  status: string;
+  created_at: string;
+  user_id: string;
+  full_name: string | null;
+};
+export type AdminDashWeekRow = {
+  id: string;
+  total: number | null;
+  created_at: string;
+  status: string;
+};
+export type AdminDashOverview = {
+  bento: {
+    todayOrders: number;
+    todayRevenue: number;
+    inDelivery: number;
+    totalCustomers: number;
+    lowStock: number;
+    partnersDue: number;
+  };
+  orders: AdminDashOrderRow[];
+  week: AdminDashWeekRow[];
+  topCats: { label: string; value: number }[];
+};
+
+const STATUS_PRIORITY = [
+  "pending", "confirmed", "paid", "preparing", "ready",
+  "assigned", "picked_up", "out_for_delivery", "delivered", "cancelled",
+];
+function aggregateStatus(statuses: string[], fallback: string): string {
+  if (!statuses.length) return fallback;
+  if (statuses.every((s) => s === "delivered")) return "delivered";
+  if (statuses.every((s) => s === "cancelled")) return "cancelled";
+  const active = statuses.filter((s) => s !== "delivered" && s !== "cancelled");
+  const pool = active.length ? active : statuses;
+  return pool.reduce((lo, s) =>
+    STATUS_PRIORITY.indexOf(s) < STATUS_PRIORITY.indexOf(lo) ? s : lo
+  , pool[0]);
+}
+
+export const getAdminDashboardOverviewFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<AdminDashOverview> => {
+    const sb = context.supabase as SbAny;
+    const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
+    const start7 = new Date(); start7.setDate(start7.getDate() - 6); start7.setHours(0, 0, 0, 0);
+
+    const [ordersRes, profilesRes, weekRes, catsRes] = await Promise.all([
+      sb
+        .from("salsabil_master_orders")
+        .select("id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+        .order("created_at", { ascending: false })
+        .limit(60),
+      sb.from("profiles").select("id", { count: "exact", head: true }),
+      sb
+        .from("salsabil_master_orders")
+        .select("id,total_amount,created_at,status, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+        .gte("created_at", start7.toISOString())
+        .order("created_at", { ascending: true }),
+      sb
+        .from("salsabil_fulfillment_items")
+        .select("quantity,price_at_time,created_at, salsabil_skus(salsabil_assets(category_path))")
+        .gte("created_at", start7.toISOString())
+        .limit(500),
+    ]);
+
+    const masters: SbAny[] = Array.isArray(ordersRes?.data) ? ordersRes.data : [];
+    const customerIds = Array.from(new Set(masters.map((m) => m.customer_id).filter(Boolean)));
+    const nameMap = new Map<string, string | null>();
+    if (customerIds.length) {
+      const { data: profs } = await sb
+        .from("profiles")
+        .select("id,full_name")
+        .in("id", customerIds);
+      (profs ?? []).forEach((p: SbAny) => nameMap.set(p.id, p.full_name));
+    }
+
+    const orders: AdminDashOrderRow[] = masters.map((m) => {
+      const statuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: SbAny) => n.status);
+      return {
+        id: m.id,
+        total: Number(m.total_amount ?? 0),
+        status: aggregateStatus(statuses, m.status ?? "pending"),
+        created_at: m.created_at,
+        user_id: m.customer_id,
+        full_name: nameMap.get(m.customer_id) ?? null,
+      };
+    });
+
+    const today = orders.filter((o) => new Date(o.created_at) >= startToday);
+    const inDelivery = orders.filter((o) =>
+      ["out_for_delivery", "preparing", "ready", "confirmed", "assigned", "picked_up"].includes(o.status),
+    ).length;
+    const todayRev = today.reduce((s, o) => s + Number(o.total ?? 0), 0);
+
+    const items: SbAny[] = Array.isArray(catsRes?.data) ? catsRes.data : [];
+    const catMap = new Map<string, number>();
+    for (const it of items) {
+      const cat = it?.salsabil_skus?.salsabil_assets?.category_path?.split("/")?.[0] ?? "غير مصنّف";
+      const lineTotal = Number(it?.price_at_time ?? 0) * Number(it?.quantity ?? 0);
+      catMap.set(cat, (catMap.get(cat) ?? 0) + lineTotal);
+    }
+    const topCats = [...catMap.entries()]
+      .map(([label, value]) => ({ label, value }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 5);
+
+    const weekMasters: SbAny[] = Array.isArray(weekRes?.data) ? weekRes.data : [];
+    const week: AdminDashWeekRow[] = weekMasters.map((m) => ({
+      id: m.id,
+      total: Number(m.total_amount ?? 0),
+      created_at: m.created_at,
+      status: aggregateStatus(
+        (m.salsabil_fulfillment_nodes ?? []).map((n: SbAny) => n.status),
+        m.status ?? "pending",
+      ),
+    }));
+
+    return {
+      bento: {
+        todayOrders: today.length,
+        todayRevenue: todayRev,
+        inDelivery,
+        totalCustomers: profilesRes?.count ?? 0,
+        lowStock: 0,
+        partnersDue: 0,
+      },
+      orders,
+      week,
+      topCats,
+    };
+  });

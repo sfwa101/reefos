@@ -30,31 +30,16 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listLoyaltyTierRulesFn,
+  updateLoyaltyTierRuleFn,
+  listIncentiveMilestonesFn,
+  updateIncentiveMilestoneFn,
+  type TierRuleRow as TierRule,
+  type MilestoneRow as Milestone,
+} from "@/lib/business-rules.functions";
 
-/* ================================ Types ================================ */
-
-type TierKey = "bronze" | "silver" | "gold" | "platinum" | "vip";
-
-interface TierRule {
-  id: string;
-  tier: TierKey;
-  discount_pct: number;
-  points_multiplier: number;
-  min_lifetime_spend: number;
-  is_active: boolean;
-}
-
-interface Milestone {
-  id: string;
-  key: string;
-  threshold: number;
-  title: string;
-  reward: string;
-  icon: string;
-  sort_order: number;
-  is_active: boolean;
-}
+type TierKey = TierRule["tier"];
 
 const TIER_META: Record<
   TierKey,
@@ -124,17 +109,15 @@ const LoyaltyEditor = () => {
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const { data, error } = await supabase
-        .from("loyalty_tier_rules")
-        .select("*")
-        .order("min_lifetime_spend", { ascending: true });
-      if (!alive) return;
-      if (error) {
-        toast.error(error.message);
+      try {
+        const data = await listLoyaltyTierRulesFn();
+        if (!alive) return;
+        setRows(data);
+      } catch (e) {
+        if (!alive) return;
+        toast.error((e as Error).message);
         setRows([]);
-        return;
       }
-      setRows((data as TierRule[]) ?? []);
     })();
     return () => {
       alive = false;
@@ -149,21 +132,22 @@ const LoyaltyEditor = () => {
 
   const persistRow = async (row: TierRule) => {
     setSavingId(row.id);
-    const { error } = await supabase
-      .from("loyalty_tier_rules")
-      .update({
-        discount_pct: row.discount_pct,
-        points_multiplier: row.points_multiplier,
-        min_lifetime_spend: row.min_lifetime_spend,
-        is_active: row.is_active,
-      })
-      .eq("id", row.id);
-    setSavingId(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await updateLoyaltyTierRuleFn({
+        data: {
+          id: row.id,
+          discount_pct: row.discount_pct,
+          points_multiplier: row.points_multiplier,
+          min_lifetime_spend: row.min_lifetime_spend,
+          is_active: row.is_active,
+        },
+      });
+      toast.success(`تم حفظ ${TIER_META[row.tier]?.label ?? row.tier}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingId(null);
     }
-    toast.success(`تم حفظ ${TIER_META[row.tier]?.label ?? row.tier}`);
   };
 
   if (rows === null) {
@@ -259,17 +243,15 @@ const IncentiveEditor = () => {
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const { data, error } = await supabase
-        .from("incentive_milestones")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (!alive) return;
-      if (error) {
-        toast.error(error.message);
+      try {
+        const data = await listIncentiveMilestonesFn();
+        if (!alive) return;
+        setRows(data);
+      } catch (e) {
+        if (!alive) return;
+        toast.error((e as Error).message);
         setRows([]);
-        return;
       }
-      setRows((data as Milestone[]) ?? []);
     })();
     return () => {
       alive = false;
@@ -284,22 +266,23 @@ const IncentiveEditor = () => {
 
   const persistRow = async (row: Milestone) => {
     setSavingId(row.id);
-    const { error } = await supabase
-      .from("incentive_milestones")
-      .update({
-        threshold: row.threshold,
-        title: row.title,
-        reward: row.reward,
-        sort_order: row.sort_order,
-        is_active: row.is_active,
-      })
-      .eq("id", row.id);
-    setSavingId(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await updateIncentiveMilestoneFn({
+        data: {
+          id: row.id,
+          threshold: row.threshold,
+          title: row.title,
+          reward: row.reward,
+          sort_order: row.sort_order,
+          is_active: row.is_active,
+        },
+      });
+      toast.success(`تم حفظ "${row.title}"`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingId(null);
     }
-    toast.success(`تم حفظ "${row.title}"`);
   };
 
   if (rows === null) {

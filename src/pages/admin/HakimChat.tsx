@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { listHakimSessionsFn, listHakimMessagesFn, type HakimSessionRow, type HakimMessageRow } from "@/lib/hakim-chat.functions";
+import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 import { Loader2, ShieldAlert, Sparkles, Send, Calendar, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import { HakimPulseMonitor } from "@/core-os/hakim-ai/components/HakimPulseMonitor";
 
 type Msg = { role: "user" | "assistant"; content: string; id?: string };
-type Session = { id: string; title: string | null; updated_at: string };
+type Session = HakimSessionRow;
 
 export default function HakimChat() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -18,22 +19,24 @@ export default function HakimChat() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
-  const [streaming, setStreaming] = useState(false);
+  const { streaming, send: streamSend } = useHakimChatStream();
   const [from, setFrom] = useState<string>("");
   const [to, setTo] = useState<string>("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const loadSessions = async () => {
-    const { data } = await (supabase as any).from("hakim_chat_sessions")
-      .select("id,title,updated_at").order("updated_at", { ascending: false }).limit(20);
-    setSessions((data || []) as Session[]);
+    try { setSessions(await listHakimSessionsFn()); } catch { setSessions([]); }
   };
 
   const loadMessages = async (sid: string) => {
-    const { data } = await (supabase as any).from("hakim_chat_messages")
-      .select("id,role,content").eq("session_id", sid).order("created_at");
-    setMessages((data || []) as Msg[]);
-    setSessionId(sid);
+    try {
+      const rows = await listHakimMessagesFn({ data: { session_id: sid } });
+      setMessages(rows as HakimMessageRow[] as Msg[]);
+      setSessionId(sid);
+    } catch {
+      setMessages([]);
+      setSessionId(sid);
+    }
   };
 
   useEffect(() => { if (allowed) loadSessions(); }, [allowed]);
@@ -44,69 +47,28 @@ export default function HakimChat() {
     if (!message || streaming) return;
     setInput("");
     setMessages((m) => [...m, { role: "user", content: message }, { role: "assistant", content: "" }]);
-    setStreaming(true);
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-chat`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    let newSid: string | null = null;
+    await streamSend(
+      { session_id: sessionId, message, period_from: from || null, period_to: to || null },
+      {
+        onChunk: (assistantSoFar) => {
+          setMessages((m) => {
+            const copy = [...m];
+            copy[copy.length - 1] = { role: "assistant", content: assistantSoFar };
+            return copy;
+          });
         },
-        body: JSON.stringify({
-          session_id: sessionId,
-          message,
-          period_from: from || null,
-          period_to: to || null,
-        }),
-      });
-
-      if (resp.status === 429) { toast.error("تم تجاوز الحد، حاول لاحقاً"); throw new Error("429"); }
-      if (resp.status === 402) { toast.error("الرصيد منتهٍ، أضف مدفوعات"); throw new Error("402"); }
-      if (!resp.ok || !resp.body) throw new Error("stream_failed");
-
-      const reader = resp.body.getReader();
-      const dec = new TextDecoder();
-      let buf = "";
-      let assistantSoFar = "";
-      let newSid: string | null = null;
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        let idx;
-        while ((idx = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, idx); buf = buf.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") continue;
-          try {
-            const p = JSON.parse(json);
-            if (p.meta?.session_id) { newSid = p.meta.session_id; continue; }
-            const c = p.choices?.[0]?.delta?.content;
-            if (c) {
-              assistantSoFar += c;
-              setMessages((m) => {
-                const copy = [...m];
-                copy[copy.length - 1] = { role: "assistant", content: assistantSoFar };
-                return copy;
-              });
-            }
-          } catch { buf = line + "\n" + buf; break; }
-        }
-      }
-
-      if (newSid && newSid !== sessionId) { setSessionId(newSid); loadSessions(); }
-    } catch (e: any) {
-      if (!["429", "402"].includes(e?.message)) toast.error("فشل الاتصال بحكيم");
-      setMessages((m) => m.slice(0, -2));
-    } finally {
-      setStreaming(false);
-    }
+        onSession: (sid) => { newSid = sid; },
+        onError: (code) => {
+          if (code === "rate_limited") toast.error("تم تجاوز الحد، حاول لاحقاً");
+          else if (code === "payment_required") toast.error("الرصيد منتهٍ، أضف مدفوعات");
+          else toast.error("فشل الاتصال بحكيم");
+          setMessages((m) => m.slice(0, -2));
+        },
+      },
+    );
+    if (newSid && newSid !== sessionId) { setSessionId(newSid); loadSessions(); }
   };
 
   const newSession = () => { setSessionId(null); setMessages([]); };

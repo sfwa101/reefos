@@ -1,15 +1,11 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { listHakimInsightsFn, runHakimAdvisorFn, type HakimInsightRow } from "@/lib/hakim.functions";
 import { Loader2, ShieldAlert, Sparkles, Send, AlertTriangle, Info, CheckCircle2, AlertOctagon } from "lucide-react";
 import { toast } from "sonner";
 
-type Insight = {
-  id: string; kind: string; severity: "info" | "warning" | "critical" | "success";
-  title: string; summary: string; recommendations: Array<{ action: string; priority: string }>;
-  generated_for_date: string; created_at: string; is_read: boolean;
-};
+type Insight = HakimInsightRow;
 
 const SEV = {
   info: { icon: Info, cls: "from-info/10 to-indigo-500/10 border-info/30 text-info" },
@@ -28,9 +24,14 @@ export default function HakimAdvisor() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("hakim_insights").select("*").order("created_at", { ascending: false }).limit(20);
-    setInsights((data || []) as Insight[]);
-    setLoading(false);
+    try {
+      const data = await listHakimInsightsFn();
+      setInsights(data);
+    } catch {
+      setInsights([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed]);
@@ -38,16 +39,12 @@ export default function HakimAdvisor() {
   const ask = async () => {
     setGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke("hakim-advisor", {
-        body: { kind: "on_demand", days: 7, question: question || undefined },
-      });
-      if (error) throw error;
-      if ((data as any)?.error) throw new Error((data as any).error);
+      await runHakimAdvisorFn({ data: { kind: "on_demand", days: 7, question: question || undefined } });
       toast.success("تم توليد الرؤية");
       setQuestion("");
       load();
-    } catch (e: any) {
-      toast.error(e?.message || "فشل التوليد");
+    } catch (e) {
+      toast.error((e as Error)?.message || "فشل التوليد");
     } finally {
       setGenerating(false);
     }

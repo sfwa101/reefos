@@ -6,92 +6,30 @@ import { HakimPulseBanner } from "@/components/admin/HakimPulseBanner";
 import { HakimChatDrawer } from "@/components/admin/HakimChatDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtMoney, fmtNum } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import { getFinanceOverviewFn, type FinanceOverview, type FinanceTopSupplier } from "@/lib/finance.functions";
 import { cn } from "@/lib/utils";
 
-type Metrics = {
-  revenueToday: number;
-  revenue30d: number;
-  ordersCompleted: number;
-  ordersToday: number;
-  suppliersDebt: number;
-  overdueSuppliersCount: number;
-  expenses30d: number;
-  netRoughProfit: number;
-};
-
-const startOfDay = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
-const daysAgo = (n: number) => { const d = new Date(); d.setDate(d.getDate()-n); d.setHours(0,0,0,0); return d; };
-
 export default function FinanceDashboard() {
-  const [m, setM] = useState<Metrics | null>(null);
+  const [m, setM] = useState<Omit<FinanceOverview, "topSuppliers"> | null>(null);
   const [loading, setLoading] = useState(true);
-  const [topSuppliers, setTopSuppliers] = useState<any[]>([]);
+  const [topSuppliers, setTopSuppliers] = useState<FinanceTopSupplier[]>([]);
   const [chatOpen, setChatOpen] = useState(false);
 
   useEffect(() => {
+    let alive = true;
     (async () => {
       setLoading(true);
-      const today = startOfDay().toISOString();
-      const since30 = daysAgo(30).toISOString();
-
-      const [ordersRes, suppliersRes, expensesRes, overdueRes, topSupRes] = await Promise.all([
-        // Sovereign Matrix: revenue is sum of master_orders.total_amount; status comes from
-        // aggregated fulfillment node statuses, but for KPI cards we treat any non-cancelled
-        // master order as recognized revenue (parity with the legacy "delivered/paid" filter).
-        supabase
-          .from("salsabil_master_orders")
-          .select("id,total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
-          .gte("created_at", since30),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("suppliers").select("outstanding_balance").eq("is_active", true),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("daily_expenses").select("amount,expense_date").gte("expense_date", since30.slice(0, 10)),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("purchase_invoices").select("id", { count: "exact", head: true })
-          .eq("status", "open").lt("due_date", new Date().toISOString().slice(0, 10)),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).from("suppliers").select("id,name,outstanding_balance,payment_terms_days")
-          .eq("is_active", true).gt("outstanding_balance", 0).order("outstanding_balance", { ascending: false }).limit(6),
-      ]);
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const orders: any[] = (ordersRes.data ?? []).map((m: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const nodeStatuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status);
-        const allDelivered = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "delivered");
-        const allCancelled = nodeStatuses.length > 0 && nodeStatuses.every((s) => s === "cancelled");
-        const headline = allDelivered ? "delivered" : allCancelled ? "cancelled" : (m.status ?? "pending");
-        return { total: Number(m.total_amount ?? 0), status: headline, created_at: m.created_at };
-      });
-      const completed = orders.filter((o) => ["delivered", "paid"].includes(o.status));
-      const todayOrders = orders.filter((o) => new Date(o.created_at) >= startOfDay());
-      const revenueToday = todayOrders
-        .filter((o) => o.status !== "cancelled")
-        .reduce((s: number, o) => s + Number(o.total ?? 0), 0);
-      const revenue30d = completed.length
-        ? completed.reduce((s: number, o) => s + Number(o.total ?? 0), 0)
-        : orders.filter((o) => o.status !== "cancelled").reduce((s: number, o) => s + Number(o.total ?? 0), 0);
-
-      const suppliersDebt = (suppliersRes.data ?? [])
-        .reduce((s: number, x: any) => s + Number(x.outstanding_balance ?? 0), 0);
-
-      const expenses30d = (expensesRes.data ?? [])
-        .reduce((s: number, x: any) => s + Number(x.amount ?? 0), 0);
-
-      setM({
-        revenueToday,
-        revenue30d,
-        ordersCompleted: completed.length,
-        ordersToday: todayOrders.length,
-        suppliersDebt,
-        overdueSuppliersCount: overdueRes.count ?? 0,
-        expenses30d,
-        netRoughProfit: revenue30d - expenses30d,
-      });
-      setTopSuppliers(topSupRes.data ?? []);
-      setLoading(false);
+      try {
+        const out = await getFinanceOverviewFn();
+        if (!alive) return;
+        const { topSuppliers: ts, ...rest } = out;
+        setM(rest);
+        setTopSuppliers(ts);
+      } finally {
+        if (alive) setLoading(false);
+      }
     })();
+    return () => { alive = false; };
   }, []);
 
   // Frozen metrics passed to Hakim — only update when loading completes

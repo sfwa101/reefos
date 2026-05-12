@@ -98,3 +98,48 @@ export const getCategoryAffinityFn = createServerFn({ method: "GET" })
     result.sort((a, b) => b.affinity_score - a.affinity_score);
     return result;
   });
+
+// ---- Hakim Insights & Advisor (Wave R-1 · Batch 6) ------------------------
+export type HakimInsightRow = {
+  id: string;
+  kind: string;
+  severity: "info" | "warning" | "critical" | "success";
+  title: string;
+  summary: string;
+  recommendations: Array<{ action: string; priority: string }>;
+  generated_for_date: string;
+  created_at: string;
+  is_read: boolean;
+};
+
+export const listHakimInsightsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<HakimInsightRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("hakim_insights")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as HakimInsightRow[];
+  });
+
+export const runHakimAdvisorFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { kind?: string; days?: number; question?: string }) => {
+    const kind = String(d?.kind ?? "on_demand").trim().slice(0, 40);
+    const days = Number.isFinite(Number(d?.days)) ? Math.max(1, Math.min(90, Math.floor(Number(d?.days)))) : 7;
+    const raw = String(d?.question ?? "").trim();
+    const question = raw ? raw.slice(0, 1000) : undefined;
+    return { kind, days, question };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
+    if (error) throw new Error(error.message ?? "advisor_failed");
+    if (out && typeof out === "object" && "error" in out && out.error) {
+      throw new Error(String((out as { error: unknown }).error));
+    }
+    return { ok: true };
+  });
