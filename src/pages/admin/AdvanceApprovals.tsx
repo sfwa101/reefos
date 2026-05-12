@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { useUserRole } from "@/hooks/useUserRole";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
+import {
+  approveAdvanceFn,
+  listAdvanceRequestsFn,
+  rejectAdvanceFn,
+  type AdvanceRequestRow,
+  type EmployeeProfileRow,
+} from "@/lib/hr.functions";
 
-type Req = {
-  id: string; user_id: string; kind: string; amount: number; reason: string;
-  status: string; created_at: string; branch_id: string | null;
-  rejection_reason: string | null;
-};
-type Profile = { id: string; full_name: string | null; phone: string | null };
+type Req = AdvanceRequestRow;
+type Profile = EmployeeProfileRow;
 
 const KIND: Record<string, string> = { advance: "سلفة", petty_cash: "نثرية", reimbursement: "استرداد" };
 
@@ -26,37 +28,41 @@ export default function AdvanceApprovals() {
 
   const load = async () => {
     setLoading(true);
-    let q = supabase.from("staff_advance_requests")
-      .select("id, user_id, kind, amount, reason, status, created_at, branch_id, rejection_reason")
-      .order("created_at", { ascending: false }).limit(100);
-    if (filter === "pending") q = q.eq("status", "pending");
-    const { data } = await q;
-    const list = (data as Req[]) ?? [];
-    setRows(list);
-    if (list.length) {
-      const ids = Array.from(new Set(list.map((r) => r.user_id)));
-      const { data: profs } = await supabase.from("profiles").select("id, full_name, phone").in("id", ids);
-      const map: Record<string, Profile> = {};
-      (profs ?? []).forEach((p) => { map[p.id] = p as Profile; });
-      setProfiles(map);
+    try {
+      const state = await listAdvanceRequestsFn({ data: { filter } });
+      setRows(state.rows);
+      setProfiles(state.profiles);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   useEffect(() => { if (allowed) load(); }, [allowed, filter]);
 
   const approve = async (id: string) => {
     setBusyId(id);
-    const { error } = await supabase.rpc("approve_advance_request", { _request_id: id });
-    if (error) toast.error(error.message); else { toast.success("تمت الموافقة"); load(); }
+    try {
+      await approveAdvanceFn({ data: { requestId: id } });
+      toast.success("تمت الموافقة");
+      load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
     setBusyId(null);
   };
   const reject = async (id: string) => {
     const reason = window.prompt("سبب الرفض؟");
     if (!reason) return;
     setBusyId(id);
-    const { error } = await supabase.rpc("reject_advance_request", { _request_id: id, _reason: reason });
-    if (error) toast.error(error.message); else { toast.success("تم الرفض"); load(); }
+    try {
+      await rejectAdvanceFn({ data: { requestId: id, reason } });
+      toast.success("تم الرفض");
+      load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
     setBusyId(null);
   };
 
