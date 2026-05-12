@@ -360,7 +360,8 @@ export const createSupplierFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ id: string }> => {
-    const sb = context.supabase as unknown as SbAny;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
     const { data: row, error } = await sb
       .from("suppliers")
       .insert({
