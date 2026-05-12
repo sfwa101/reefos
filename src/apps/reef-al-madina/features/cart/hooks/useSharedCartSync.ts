@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// EXEMPT (Wave P-D Phase D-2): `@/integrations/supabase/client` is imported
+// here ONLY for the realtime `supabase.channel(...)` subscription below. All
+// reads/writes are routed through `@/lib/cart.functions` per the blueprint.
 import { supabase } from "@/integrations/supabase/client";
+import {
+  hydrateSharedCartFn,
+  setSharedCartStatusFn,
+  resetSharedCartApprovalsFn,
+  setMyApprovalFn,
+  insertSharedCartItemFn,
+  updateSharedCartItemQtyFn,
+  deleteSharedCartItemFn,
+} from "@/lib/cart.functions";
 import { useAuth } from "@/context/AuthContext";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 
@@ -133,16 +145,11 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     setLoading(true);
     setError(null);
     try {
-      const [cartRes, partsRes, itemsRes] = await Promise.all([
-        supabase.from("shared_carts").select("*").eq("id", id).maybeSingle(),
-        supabase.from("shared_cart_participants").select("*").eq("cart_id", id),
-        supabase.from("shared_cart_items").select("*").eq("cart_id", id).order("created_at", { ascending: true }),
-      ]);
+      const result = await hydrateSharedCartFn({ data: { cartId: id } });
       if (cancelledRef.current) return;
-      if (cartRes.error) throw cartRes.error;
-      setCart((cartRes.data as SharedCart | null) ?? null);
-      setParticipants((partsRes.data as SharedCartParticipant[] | null) ?? []);
-      const nextItems = normalizeItems((itemsRes.data as SharedCartItem[] | null) ?? []);
+      setCart((result.cart as SharedCart | null) ?? null);
+      setParticipants((result.participants as SharedCartParticipant[] | null) ?? []);
+      const nextItems = normalizeItems((result.items as unknown as SharedCartItem[] | null) ?? []);
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
     } catch (e) {
@@ -237,11 +244,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const setStatus = useCallback(
     async (next: SharedCartStatus) => {
       if (!cart) return;
-      const { error: err } = await supabase
-        .from("shared_carts")
-        .update({ status: next })
-        .eq("id", cart.id);
-      if (err) throw err;
+      await setSharedCartStatusFn({ data: { cartId: cart.id, status: next } });
     },
     [cart],
   );
@@ -250,11 +253,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     if (!cart || !isOwner) throw new Error("forbidden");
     if (cart.status !== "active") throw new Error("invalid_transition");
     // Reset all non-owner participants to pending
-    await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "pending", approved_at: null })
-      .eq("cart_id", cart.id)
-      .neq("role", "owner");
+    await resetSharedCartApprovalsFn({ data: { cartId: cart.id } });
     await setStatus("pending_approvals");
   }, [cart, isOwner, setStatus]);
 
@@ -267,21 +266,13 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const approve = useCallback(async () => {
     if (!cart || !myParticipant) throw new Error("forbidden");
     if (cart.status !== "pending_approvals") throw new Error("invalid_state");
-    const { error: err } = await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "approved", approved_at: new Date().toISOString() })
-      .eq("id", myParticipant.id);
-    if (err) throw err;
+    await setMyApprovalFn({ data: { participantId: myParticipant.id, status: "approved" } });
   }, [cart, myParticipant]);
 
   const reject = useCallback(async () => {
     if (!cart || !myParticipant) throw new Error("forbidden");
     if (cart.status !== "pending_approvals") throw new Error("invalid_state");
-    const { error: err } = await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "rejected", approved_at: null })
-      .eq("id", myParticipant.id);
-    if (err) throw err;
+    await setMyApprovalFn({ data: { participantId: myParticipant.id, status: "rejected" } });
   }, [cart, myParticipant]);
 
   const cancelCart = useCallback(async () => {
@@ -323,17 +314,16 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
       try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { error: err } = await (supabase as any).from("shared_cart_items").insert({
-          cart_id: cart.id,
-          added_by: user.id,
-          product_id: input.product_id,
-          product_name: input.product_name,
-          unit_price: input.unit_price,
-          quantity: input.quantity,
-          meta: input.meta ?? {},
+        await insertSharedCartItemFn({
+          data: {
+            cartId: cart.id,
+            product_id: input.product_id,
+            product_name: input.product_name,
+            unit_price: input.unit_price,
+            quantity: input.quantity,
+            meta: (input.meta ?? {}) as Record<string, unknown>,
+          },
         });
-        if (err) throw err;
       } catch (err) {
         // Rollback to pre-mutation snapshot, then resync from server.
         setItems(snapshot);
@@ -358,15 +348,10 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       setItems(nextItems);
       try {
         if (quantity <= 0) {
-          const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
-          if (err) throw err;
+          await deleteSharedCartItemFn({ data: { itemId } });
           return;
         }
-        const { error: err } = await supabase
-          .from("shared_cart_items")
-          .update({ quantity })
-          .eq("id", itemId);
-        if (err) throw err;
+        await updateSharedCartItemQtyFn({ data: { itemId, quantity } });
       } catch (err) {
         setItems(snapshot);
         lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
@@ -386,8 +371,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
       try {
-        const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
-        if (err) throw err;
+        await deleteSharedCartItemFn({ data: { itemId } });
       } catch (err) {
         setItems(snapshot);
         lastLocalItemsSignatureRef.current = itemsSignature(snapshot);

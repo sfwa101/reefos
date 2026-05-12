@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
-import { supabase } from "@/integrations/supabase/client";
+import { getCheckoutContextFn, clearMyCartFn } from "@/lib/cart.functions";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
 import {
@@ -111,32 +111,20 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       // Phase 52 — Tayseer Kernel Integration. Reads balance + credit_limit
       // strictly from the canonical `public.wallets` table (EGP). The legacy
       // `wallet_balances` + `user_trust_limit` path is retired (Law 2).
-      const [
-        { data: addrData },
-        { data: walletRow },
-        { data: profileData },
-      ] = await Promise.all([
-        supabase
-          .from("addresses")
-          .select("id,label,city,district,street,building,is_default")
-          .eq("user_id", user.id)
-          .order("is_default", { ascending: false }),
-        supabase
-          .from("wallets")
-          .select("balance,credit_limit")
-          .eq("user_id", user.id)
-          .eq("currency", "EGP")
-          .maybeSingle(),
-        supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-      ]);
-      const list = (addrData as Addr[]) ?? [];
-      setAddresses(list);
-      const def = list.find((a) => a.is_default) ?? list[0];
-      if (def) setAddrId(def.id);
-      const w = walletRow as { balance?: number | string; credit_limit?: number | string } | null;
-      setWalletBalance(Number(w?.balance ?? 0));
-      setTrustLimit(Number(w?.credit_limit ?? 0));
-      setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
+      // Wave P-D Phase D-2 — routed through the sanctioned Cart Gateway
+      // (`getCheckoutContextFn`) instead of direct `supabase.from(...)`.
+      try {
+        const ctx = await getCheckoutContextFn();
+        const list = (ctx.addresses as Addr[]) ?? [];
+        setAddresses(list);
+        const def = list.find((a) => a.is_default) ?? list[0];
+        if (def) setAddrId(def.id);
+        setWalletBalance(Number(ctx.wallet?.balance ?? 0));
+        setTrustLimit(Number(ctx.wallet?.credit_limit ?? 0));
+        setCustomerName(ctx.fullName);
+      } catch (e) {
+        console.warn("[cart] failed to hydrate checkout context:", e);
+      }
     })();
   }, [user]);
 
@@ -320,10 +308,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setSubmitting(true);
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const currentUser = (user ?? session?.user) || null;
+      // Wave P-D Phase D-2 — `useAuth` is the single source of truth for the
+      // signed-in user; the orchestrator no longer reaches into
+      // `supabase.auth.getSession()` directly.
+      const currentUser = user ?? null;
       const isGuest = !currentUser;
 
       if (isGuest) {
@@ -534,7 +522,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       //    would otherwise resurrect the cart on the next page load.
       if (currentUser?.id) {
         try {
-          await supabase.from("cart_items").delete().eq("user_id", currentUser.id);
+          await clearMyCartFn();
         } catch (e) {
           console.warn("[checkout] failed to purge remote cart_items:", e);
         }
