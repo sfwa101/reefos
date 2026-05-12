@@ -26,6 +26,10 @@ type Action = {
   cap?: string;
   /** Special intent handled inline by the composer (e.g. open product dialog). */
   intent?: "new-product";
+  /** Target route — when provided, picking the action navigates instead of opening a placeholder. */
+  to?: string;
+  /** Marks the action as not-yet-available (Coming Soon). */
+  soon?: boolean;
 };
 
 const NEW_PRODUCT: Action = {
@@ -41,38 +45,39 @@ const NEW_HUMAN: Action = {
   label: "إضافة إنسان جديد",
   hint: "عميل، تاجر، أو موظف — كائن واحد، علاقات متعددة",
   icon: UserPlus,
+  to: "/admin/humans",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
     NEW_PRODUCT,
     NEW_HUMAN,
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins },
-    { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt },
-    { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins, to: "/admin/suppliers" },
+    { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt, to: "/admin/expenses" },
+    { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus, to: "/admin/inventory" },
   ],
   tayseer: [
     NEW_HUMAN,
-    { key: "expense",        label: "إضافة مصروف",     hint: "تصنيف ذكي عبر حكيم",     icon: Receipt },
-    { key: "wallet-topup",   label: "شحن محفظة",       hint: "للعميل أو للموظف",        icon: Wallet },
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "تسجيل في دفتر الأستاذ",  icon: HandCoins },
+    { key: "expense",        label: "إضافة مصروف",     hint: "تصنيف ذكي عبر حكيم",     icon: Receipt, to: "/admin/expenses" },
+    { key: "wallet-topup",   label: "شحن محفظة",       hint: "للعميل أو للموظف",        icon: Wallet, to: "/admin/wallets" },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "تسجيل في دفتر الأستاذ",  icon: HandCoins, to: "/admin/suppliers" },
   ],
   noor_eldin: [
     NEW_HUMAN,
-    { key: "enroll",   label: "تسجيل متعلم",  hint: "في رحلة تعلم",      icon: GraduationCap },
-    { key: "mentor",   label: "إسناد مرشد",   hint: "حكيم يقترح أفضل توافق", icon: Users },
+    { key: "enroll",   label: "تسجيل متعلم",  hint: "في رحلة تعلم",      icon: GraduationCap, soon: true },
+    { key: "mentor",   label: "إسناد مرشد",   hint: "حكيم يقترح أفضل توافق", icon: Users, soon: true },
   ],
   family: [
     NEW_HUMAN,
-    { key: "wallet-topup", label: "شحن محفظة",   hint: "لأحد أفراد العائلة",  icon: Wallet },
-    { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt },
+    { key: "wallet-topup", label: "شحن محفظة",   hint: "لأحد أفراد العائلة",  icon: Wallet, to: "/admin/wallets" },
+    { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt, to: "/admin/expenses" },
   ],
   global: [
     NEW_PRODUCT,
     NEW_HUMAN,
-    { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt },
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins },
-    { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus },
+    { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt, to: "/admin/expenses" },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins, to: "/admin/suppliers" },
+    { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus, to: "/admin/inventory" },
   ],
 };
 
