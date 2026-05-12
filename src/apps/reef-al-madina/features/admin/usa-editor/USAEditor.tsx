@@ -198,13 +198,13 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     if (!aiFile) return undefined;
     try {
       const ext = aiFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `usa-genesis/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("product-images")
-        .upload(path, aiFile, { contentType: aiFile.type, upsert: false });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-      return data.publicUrl ? [data.publicUrl] : undefined;
+      const url = await uploadProductImage({
+        file: aiFile,
+        prefix: "usa-genesis",
+        contentType: aiFile.type,
+        ext,
+      });
+      return url ? [url] : undefined;
     } catch (e) {
       console.warn("[USAEditor] media upload failed", e);
       toast.error("تعذّر رفع الصورة — سيُسكّ الأصل بدون صورة");
