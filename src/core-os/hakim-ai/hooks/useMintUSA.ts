@@ -1,3 +1,4 @@
+/** @deprecated Replaced by Vision Cortex (`@/core/vision/gateway/hooks#useApproveInference`). */
 /**
  * useMintUSA — Phase 7 Part 3.
  * Calls the `mint_universal_asset(payload jsonb)` RPC to atomically persist
