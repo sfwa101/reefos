@@ -370,3 +370,52 @@ export const getKycSignedUrlsFn = createServerFn({ method: "POST" })
     }
     return { frontUrl, backUrl };
   });
+
+// ============================================================================
+// Wave R-2 · Batch B.2 — Role lifecycle wrappers (UI-friendly)
+// Thin façades over `manageStaffRoleFn` so the UI consumes a clear vocabulary
+// (assign / revoke / create) without having to thread the `action` discriminator.
+// ============================================================================
+
+export const assignRoleFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { user_id: string; role: string }) => {
+    if (!d?.user_id || !/^[0-9a-f-]{36}$/i.test(d.user_id)) throw new Error("invalid_user_id");
+    if (!APP_ROLES_LIST.includes(d.role as typeof APP_ROLES_LIST[number])) throw new Error("invalid_role");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { error } = await sb.rpc("admin_manage_staff_role", {
+      p_user_id: data.user_id,
+      p_role: data.role,
+      p_action: "insert",
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+// Alias — semantic synonym for first-time grants. Identical to assign but
+// leaves room for future divergence (e.g. provisioning side-effects).
+export const createRoleFn = assignRoleFn;
+
+export const revokeRoleFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { role_id: string; role: string }) => {
+    if (!d?.role_id || !/^[0-9a-f-]{36}$/i.test(d.role_id)) throw new Error("invalid_role_id");
+    if (!APP_ROLES_LIST.includes(d.role as typeof APP_ROLES_LIST[number])) throw new Error("invalid_role");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { error } = await sb.rpc("admin_manage_staff_role", {
+      p_user_id: null,
+      p_role: data.role,
+      p_action: "delete",
+      p_role_id: data.role_id,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
