@@ -61,9 +61,9 @@ const ProductDetail = () => {
     if (!product) return;
     let cancelled = false;
     (async () => {
-      const [{ count }, { data: units }] = await Promise.all([
-        supabase.from("reviews").select("id", { count: "exact", head: true }).eq("product_id", product.id),
-        (supabase as any).from("product_units").select("id,unit_code,conversion_factor,selling_price,is_default_sell").eq("product_id", product.id).eq("is_active", true).order("conversion_factor", { ascending: true }),
+      const [{ count }, units] = await Promise.all([
+        listProductReviewsFn({ data: { productId: product.id } }),
+        listProductUnitsFn({ data: { productId: product.id } }),
       ]);
       if (cancelled) return;
       setReviewCount(count ?? 0);
