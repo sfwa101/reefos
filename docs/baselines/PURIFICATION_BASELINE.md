@@ -70,6 +70,7 @@ Definitions:
 | Date | Wave | C1 | C2 | C3 | C4 | C5 | Notes |
 |---|---|---:|---:|---|---:|---|---|
 | 2026-05-12 | P-0 | 74 | 58 | present | ≥17 | >0 | Baseline frozen. Guardrails installed (DEV watchdog + ESLint warn). |
+| 2026-05-12 | P-A | 74 | 58 | removed | ≥17 | >0 | HGProduct eradicated; home storefront now consumes canonical ProductCardVM exclusively. |
 
 > Append a new row for every wave that changes any counter. Never edit an existing row.
 
