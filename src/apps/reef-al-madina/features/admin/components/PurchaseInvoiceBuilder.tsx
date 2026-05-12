@@ -152,25 +152,25 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
 
     setSubmitting(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any).rpc("submit_purchase_invoice", {
-        _supplier_id: form.supplier_id,
-        _items: lines.map((l) => ({
-          product_id: l.product_id,
-          product_name: l.product_name,
-          quantity: l.quantity,
-          unit_cost: l.unit_cost,
-        })),
-        _total_amount: total,
-        _invoice_number: form.invoice_number || undefined,
-        _invoice_date: form.invoice_date,
-        _paid_amount: paid,
-        _tax: tax,
-        _notes: form.notes || undefined,
+      const result = await submitPurchaseInvoiceFn({
+        data: {
+          supplier_id: form.supplier_id,
+          items: lines.map((l) => ({
+            product_id: l.product_id,
+            product_name: l.product_name,
+            quantity: l.quantity,
+            unit_cost: l.unit_cost,
+          })),
+          total_amount: total,
+          invoice_number: form.invoice_number || undefined,
+          invoice_date: form.invoice_date,
+          paid_amount: paid,
+          tax,
+          notes: form.notes || undefined,
+        },
       });
-      if (error) throw error;
       toast.success("تم حفظ الفاتورة + تحديث المخزون والتكلفة (MAC)", {
-        description: `فاتورة #${String((data as any)?.invoice_id ?? "").slice(0, 8)}`,
+        description: `فاتورة #${String(result.invoice_id ?? "").slice(0, 8)}`,
       });
       setLines([]);
       setForm((f) => ({
