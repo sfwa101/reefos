@@ -38,8 +38,9 @@ import {
   Activity,
 } from "lucide-react";
 import { fmtMoney, fmtNum } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
+import { getAdminDashboardOverviewFn } from "@/lib/finance.functions";
+import { useAdminDashboardRealtime } from "@/hooks/useAdminDashboardRealtime";
 
 const greeting = () => {
   const h = new Date().getHours();
