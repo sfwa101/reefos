@@ -282,6 +282,32 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
     },
     layoutVariant: "standard",
   },
+  "ice-cream": {
+    slug: "ice-cream",
+    themeKey: "sweets",
+    title: "آيس كريم ومرطبات",
+    subtitle: "أشهى نكهات الآيس كريم لتبريد صيفك",
+    searchPlaceholder: "ابحث عن نكهتك المفضلة…",
+    hero: {
+      eyebrow: "صيف ريف",
+      headline: "آيس كريم السلسبيل",
+      body: "نكهات طازجة · توصيل بارد خلال 30 دقيقة",
+    },
+    layoutVariant: "standard",
+  },
+  "crepes-fries": {
+    slug: "crepes-fries",
+    themeKey: "kitchen",
+    title: "كريب وبطاطس",
+    subtitle: "وجبات سريعة طازجة على الطلب",
+    searchPlaceholder: "ابحث عن كريب، بطاطس، صوص…",
+    hero: {
+      eyebrow: "تحضير فوري",
+      headline: "كريب وبطاطس على ذوقك",
+      body: "اختر حشوتك · جاهز خلال 15 دقيقة",
+    },
+    layoutVariant: "standard",
+  },
 };
 
 // Slug aliases — preserve legacy URLs after Wave P-C route collapse so old
