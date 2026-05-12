@@ -14,7 +14,7 @@ import type { Product } from "@/lib/products";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PALETTE, libraryProducts, type TabKey } from "@/apps/reef-al-madina/features/library/data";
+import { PALETTE, useLibraryProducts, type TabKey } from "@/apps/reef-al-madina/features/library/data";
 import { BorrowCard } from "@/apps/reef-al-madina/features/library/components/BorrowCard";
 import { KYCGateDialog } from "@/apps/reef-al-madina/features/library/components/KYCGateDialog";
 import { BorrowSheet } from "@/apps/reef-al-madina/features/library/components/BorrowSheet";
