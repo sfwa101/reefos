@@ -244,11 +244,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const setStatus = useCallback(
     async (next: SharedCartStatus) => {
       if (!cart) return;
-      const { error: err } = await supabase
-        .from("shared_carts")
-        .update({ status: next })
-        .eq("id", cart.id);
-      if (err) throw err;
+      await setSharedCartStatusFn({ data: { cartId: cart.id, status: next } });
     },
     [cart],
   );
@@ -257,11 +253,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
     if (!cart || !isOwner) throw new Error("forbidden");
     if (cart.status !== "active") throw new Error("invalid_transition");
     // Reset all non-owner participants to pending
-    await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "pending", approved_at: null })
-      .eq("cart_id", cart.id)
-      .neq("role", "owner");
+    await resetSharedCartApprovalsFn({ data: { cartId: cart.id } });
     await setStatus("pending_approvals");
   }, [cart, isOwner, setStatus]);
 
@@ -274,21 +266,13 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   const approve = useCallback(async () => {
     if (!cart || !myParticipant) throw new Error("forbidden");
     if (cart.status !== "pending_approvals") throw new Error("invalid_state");
-    const { error: err } = await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "approved", approved_at: new Date().toISOString() })
-      .eq("id", myParticipant.id);
-    if (err) throw err;
+    await setMyApprovalFn({ data: { participantId: myParticipant.id, status: "approved" } });
   }, [cart, myParticipant]);
 
   const reject = useCallback(async () => {
     if (!cart || !myParticipant) throw new Error("forbidden");
     if (cart.status !== "pending_approvals") throw new Error("invalid_state");
-    const { error: err } = await supabase
-      .from("shared_cart_participants")
-      .update({ approval_status: "rejected", approved_at: null })
-      .eq("id", myParticipant.id);
-    if (err) throw err;
+    await setMyApprovalFn({ data: { participantId: myParticipant.id, status: "rejected" } });
   }, [cart, myParticipant]);
 
   const cancelCart = useCallback(async () => {
