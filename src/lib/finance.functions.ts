@@ -657,3 +657,58 @@ export const computeZakatAssessmentFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return out as ZakatAssessmentRow;
   });
+
+// ---- Executive & CFO Dashboards (Wave R-1 · Batch 5) ----------------------
+export type ExecutiveDashboardStats = {
+  period_days: number;
+  orders_count: number;
+  gross_sales: number;
+  items_revenue: number;
+  items_cost: number;
+  net_profit: number;
+  profit_margin_pct: number;
+  top_categories: { category: string; revenue: number; units: number }[];
+  low_stock_count: number;
+};
+
+export const getExecutiveDashboardStatsFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { days: number }) => {
+    const n = Number(d?.days);
+    if (!Number.isFinite(n) || ![7, 30, 90].includes(n)) throw new Error("invalid_days");
+    return { days: n };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<ExecutiveDashboardStats> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.rpc("executive_dashboard_stats", { _days: data.days });
+    if (error) throw new Error(error.message);
+    return out as ExecutiveDashboardStats;
+  });
+
+export type CfoErodedMargin = {
+  id: string;
+  name: string;
+  category: string;
+  selling_price: number;
+  cost_price: number;
+  packaging_cost: number;
+  margin: number;
+  margin_pct: number;
+};
+export type CfoDashboardStats = {
+  discounts_this_month: number;
+  commissions_pending_vest: number;
+  commissions_paid_this_month: number;
+  wallet_liabilities_total: number;
+  eroded_margin_products: CfoErodedMargin[];
+  generated_at: string;
+};
+
+export const getCfoDashboardStatsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<CfoDashboardStats> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb.rpc("cfo_dashboard_stats");
+    if (error) throw new Error(error.message);
+    return data as CfoDashboardStats;
+  });
