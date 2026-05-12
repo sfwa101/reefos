@@ -251,3 +251,51 @@ export const listHumanDirectoryFn = createServerFn({ method: "GET" })
       relationships: (rels ?? []) as HumanRelationship[],
     };
   });
+
+// ============= Wave R-2 Batch A.2 — Human 360 Sheet =============
+export type Human360Result = {
+  identity: Record<string, unknown> & {
+    id: string;
+    full_name: string | null;
+    phone: string | null;
+    governorate: string | null;
+    city: string | null;
+    is_kyc_verified: boolean;
+    loyalty_tier: string;
+  };
+  relationships: string[];
+  customer: { lifetime_spend: number; loyalty_points: number; loyalty_tier: string };
+  vendor: {
+    legacy_vendors: Array<{ id: string; name: string; type: string; commission_pct: number; is_active: boolean }>;
+    salsabil_memberships: Array<{ vendor_id: string; business_name: string; role: string; is_active: boolean }>;
+    wallet_available: number;
+  };
+  staff: {
+    roles: Array<{ role: string; branch_id: string | null; is_active: boolean }>;
+    open_advances: Array<{ id: string; kind: string; amount: number; status: string; created_at: string }>;
+    open_advance_total: number;
+  };
+  partner: {
+    partnerships: Array<{ id: string; product_id: string; split_type: string; percentage: number; is_active: boolean }>;
+    amount_due: number;
+    amount_paid: number;
+  };
+  capabilities: Array<{ workspace_id: string; workspace_kind: string | null; capability: string; expires_at: string | null }>;
+};
+
+export const getHuman360Fn = createServerFn({ method: "GET" })
+  .inputValidator((d: { profileId: string }) => {
+    const id = String(d?.profileId ?? "").trim();
+    if (!id) throw new Error("profile_id_required");
+    return { profileId: id };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<Human360Result> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.rpc("get_human_360", { p_profile_id: data.profileId });
+    if (error) throw new Error(error.message);
+    if (out && typeof out === "object" && "error" in out && (out as { error: unknown }).error) {
+      throw new Error(String((out as { error: unknown }).error));
+    }
+    return out as Human360Result;
+  });
