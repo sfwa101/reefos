@@ -111,32 +111,20 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       // Phase 52 — Tayseer Kernel Integration. Reads balance + credit_limit
       // strictly from the canonical `public.wallets` table (EGP). The legacy
       // `wallet_balances` + `user_trust_limit` path is retired (Law 2).
-      const [
-        { data: addrData },
-        { data: walletRow },
-        { data: profileData },
-      ] = await Promise.all([
-        supabase
-          .from("addresses")
-          .select("id,label,city,district,street,building,is_default")
-          .eq("user_id", user.id)
-          .order("is_default", { ascending: false }),
-        supabase
-          .from("wallets")
-          .select("balance,credit_limit")
-          .eq("user_id", user.id)
-          .eq("currency", "EGP")
-          .maybeSingle(),
-        supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle(),
-      ]);
-      const list = (addrData as Addr[]) ?? [];
-      setAddresses(list);
-      const def = list.find((a) => a.is_default) ?? list[0];
-      if (def) setAddrId(def.id);
-      const w = walletRow as { balance?: number | string; credit_limit?: number | string } | null;
-      setWalletBalance(Number(w?.balance ?? 0));
-      setTrustLimit(Number(w?.credit_limit ?? 0));
-      setCustomerName(((profileData as { full_name?: string } | null)?.full_name ?? "").trim());
+      // Wave P-D Phase D-2 — routed through the sanctioned Cart Gateway
+      // (`getCheckoutContextFn`) instead of direct `supabase.from(...)`.
+      try {
+        const ctx = await getCheckoutContextFn();
+        const list = (ctx.addresses as Addr[]) ?? [];
+        setAddresses(list);
+        const def = list.find((a) => a.is_default) ?? list[0];
+        if (def) setAddrId(def.id);
+        setWalletBalance(Number(ctx.wallet?.balance ?? 0));
+        setTrustLimit(Number(ctx.wallet?.credit_limit ?? 0));
+        setCustomerName(ctx.fullName);
+      } catch (e) {
+        console.warn("[cart] failed to hydrate checkout context:", e);
+      }
     })();
   }, [user]);
 
