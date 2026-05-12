@@ -244,7 +244,6 @@ async function fetchHomeProducts(
   limit: number,
   source?: ProductSource,
 ): Promise<Product[]> {
-  if (!isBrowser) return [];
   let q = supabase
     .from("salsabil_assets")
     .select(SOVEREIGN_SELECT)
