@@ -11,6 +11,7 @@ import { listHumanDirectoryFn, type HumanProfile, type HumanRelationship } from 
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { HumanProfileSheet } from "@/components/admin/crm/HumanProfileSheet";
+import { CreateHumanDialog } from "@/components/admin/crm/CreateHumanDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
