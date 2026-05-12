@@ -1,7 +1,7 @@
 /**
  * useHomeOrchestrator — single source of truth for the storefront page state.
  *
- * Wave P-A (Storefront Purity) — `HGProduct` has been eradicated. The
+ * Wave P-A (Storefront Purity) — the legacy view-model has been eradicated. The
  * orchestrator now consumes `ProductCardVM[]` directly from
  * `catalogGateway.listSection` (the canonical sovereign catalog) and emits
  * the same shape to all leaf components. The `homeProductCardAdapter`
