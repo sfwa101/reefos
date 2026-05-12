@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { productsWithVolumeDeals, volumeDealFor } from "@/lib/volumeDeals";
 import ProductCard from "@/components/ProductCard";
 import { Layers } from "lucide-react";

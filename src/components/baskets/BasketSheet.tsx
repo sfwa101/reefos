@@ -5,7 +5,7 @@ import {
   Calendar, Wallet as WalletIcon, Lock, Mail,
 } from "lucide-react";
 import { toast } from "sonner";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { fireMiniConfetti } from "@/lib/confetti";

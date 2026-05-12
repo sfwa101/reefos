@@ -1,6 +1,6 @@
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/lib/products";
+import { products } from "@/core/catalog/legacy/legacyRuntime";
 import { useFavorites } from "@/lib/favorites";
 import { Heart } from "lucide-react";
 import { Link } from "@tanstack/react-router";

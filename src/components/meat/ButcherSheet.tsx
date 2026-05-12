@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,

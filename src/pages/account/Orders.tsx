@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
-import { getById } from "@/lib/products";
+import { getById } from "@/core/catalog/legacy/legacyRuntime";
 import { toast } from "sonner";
 
 /**

@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
-import { products, type Product } from "@/lib/products";
+import { products } from "@/core/catalog/legacy/legacyRuntime";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { fireConfetti } from "@/lib/confetti";

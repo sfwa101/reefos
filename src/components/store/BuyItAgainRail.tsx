@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import type { Product } from "@/lib/products";
-import { products as allProducts } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { products as allProducts } from "@/core/catalog/legacy/legacyRuntime";
 import ProductCard from "@/components/ProductCard";
 import { History } from "lucide-react";
 

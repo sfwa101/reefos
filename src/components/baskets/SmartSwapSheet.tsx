@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, ArrowRightLeft, TrendingUp, TrendingDown } from "lucide-react";
 import { swapsFor, productById } from "@/lib/baskets";
 import { toLatin } from "@/lib/format";
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 
 type Props = {
   open: boolean;
