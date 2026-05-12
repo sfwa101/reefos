@@ -12,6 +12,7 @@ import {
   Home, ShoppingBag, Package, Users, Wallet, Receipt, BarChart3, Truck,
   Brain, Settings, Layers, Store, Sparkles, Coins, Scale, FileClock,
   GraduationCap, BookOpen, Compass, KeyRound, ShieldCheck, Banknote,
+  LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
 import type { WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
@@ -45,7 +46,7 @@ const REEF: NavGroup[] = [
   { title: "ريف — العمليات", items: [
     { to: "/admin/orders/", icon: ShoppingBag, label: "الطلبات" },
     { to: "/admin/products/new", icon: Sparkles, label: "منتج جديد بحكيم" },
-    { to: "/admin/assets", icon: Layers, label: "الأصول" },
+    { to: "/admin/hub", icon: LayoutGrid, label: "المحركات" },
     { to: "/admin/product-units", icon: Package, label: "المنتجات" },
     { to: "/admin/stores", icon: Store, label: "المتاجر" },
   ]},
