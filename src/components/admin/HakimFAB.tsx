@@ -2,8 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { useLocation, Link } from "@tanstack/react-router";
 import { Sparkles, X, Send, Loader2, Maximize2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
+import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
