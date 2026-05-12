@@ -17,12 +17,29 @@
 import { queryOptions, useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  PRODUCTS_QUERY_KEY,
   type Product,
   type ProductSource,
   type ProductVariant,
   type ProductAddon,
-} from "@/lib/products";
+} from "@/core/catalog/legacy/legacyProduct.types";
+import { getActiveTenantId } from "@/context/TenantContext";
+
+/**
+ * Tenant-scoped catalog cache key. Inlined here (was previously imported
+ * from `@/lib/products`) as part of Wave P-B Step B-5 — Hooks & Queries
+ * now own their own cache identity instead of leaning on the legacy
+ * `@/lib/products` re-export.
+ *
+ * Kept identical to the legacy tuple shape so `boundClient.getQueryData`
+ * lookups in `src/lib/products.ts` keep hitting the same entry while the
+ * cart-side bridge is being phased out.
+ */
+export const PRODUCTS_QUERY_KEY = [
+  "tenant",
+  getActiveTenantId(),
+  "catalog",
+  "products",
+] as const;
 
 // Phase 39 — Catalog SWR window: 5 min fresh, 24 h cached on disk.
 const STALE_MS = 5 * 60 * 1000;
