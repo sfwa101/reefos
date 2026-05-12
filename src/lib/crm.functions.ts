@@ -364,7 +364,8 @@ export const createHumanFn = createServerFn({ method: "POST" })
 export const updateHumanFn = createServerFn({ method: "POST" })
   .inputValidator((d: HumanUpdateInput) => {
     if (!d?.id) throw new Error("id_required");
-    return { id: String(d.id), ...validateHumanPayload({ ...d }) };
+    const { id: _id, ...rest } = d;
+    return { ...validateHumanPayload({ ...rest }), id: String(d.id) };
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
