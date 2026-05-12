@@ -16,30 +16,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { fmtMoney, fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type Human360 = {
-  identity: Record<string, unknown> & {
-    id: string; full_name: string | null; phone: string | null;
-    governorate: string | null; city: string | null;
-    is_kyc_verified: boolean; loyalty_tier: string;
-  };
-  relationships: string[];
-  customer: { lifetime_spend: number; loyalty_points: number; loyalty_tier: string };
-  vendor: {
-    legacy_vendors: Array<{ id: string; name: string; type: string; commission_pct: number; is_active: boolean }>;
-    salsabil_memberships: Array<{ vendor_id: string; business_name: string; role: string; is_active: boolean }>;
-    wallet_available: number;
-  };
-  staff: {
-    roles: Array<{ role: string; branch_id: string | null; is_active: boolean }>;
-    open_advances: Array<{ id: string; kind: string; amount: number; status: string; created_at: string }>;
-    open_advance_total: number;
-  };
-  partner: {
-    partnerships: Array<{ id: string; product_id: string; split_type: string; percentage: number; is_active: boolean }>;
-    amount_due: number; amount_paid: number;
-  };
-  capabilities: Array<{ workspace_id: string; workspace_kind: string | null; capability: string; expires_at: string | null }>;
-};
+type Human360 = Human360Result;
 
 const CHIP_STYLES: Record<string, string> = {
   customer: "bg-info/10 text-info border-info/20",
@@ -58,19 +35,22 @@ export function HumanProfileSheet({
   const [data, setData] = useState<Human360 | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const fetchHuman = useServerFn(getHuman360Fn);
 
   useEffect(() => {
     if (!open || !profileId) return;
     setLoading(true); setError(null); setData(null);
     void (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data: res, error: err } = await (supabase.rpc as any)("get_human_360", { p_profile_id: profileId });
-      if (err) { setError(err.message); setLoading(false); return; }
-      if (res?.error) { setError(String(res.error)); setLoading(false); return; }
-      setData(res as Human360);
-      setLoading(false);
+      try {
+        const res = await fetchHuman({ data: { profileId } });
+        setData(res);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "failed");
+      } finally {
+        setLoading(false);
+      }
     })();
-  }, [open, profileId]);
+  }, [open, profileId]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
