@@ -243,17 +243,15 @@ const IncentiveEditor = () => {
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const { data, error } = await supabase
-        .from("incentive_milestones")
-        .select("*")
-        .order("sort_order", { ascending: true });
-      if (!alive) return;
-      if (error) {
-        toast.error(error.message);
+      try {
+        const data = await listIncentiveMilestonesFn();
+        if (!alive) return;
+        setRows(data);
+      } catch (e) {
+        if (!alive) return;
+        toast.error((e as Error).message);
         setRows([]);
-        return;
       }
-      setRows((data as Milestone[]) ?? []);
     })();
     return () => {
       alive = false;
@@ -268,22 +266,23 @@ const IncentiveEditor = () => {
 
   const persistRow = async (row: Milestone) => {
     setSavingId(row.id);
-    const { error } = await supabase
-      .from("incentive_milestones")
-      .update({
-        threshold: row.threshold,
-        title: row.title,
-        reward: row.reward,
-        sort_order: row.sort_order,
-        is_active: row.is_active,
-      })
-      .eq("id", row.id);
-    setSavingId(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await updateIncentiveMilestoneFn({
+        data: {
+          id: row.id,
+          threshold: row.threshold,
+          title: row.title,
+          reward: row.reward,
+          sort_order: row.sort_order,
+          is_active: row.is_active,
+        },
+      });
+      toast.success(`تم حفظ "${row.title}"`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingId(null);
     }
-    toast.success(`تم حفظ "${row.title}"`);
   };
 
   if (rows === null) {
