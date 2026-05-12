@@ -35,6 +35,7 @@ interface FrequentlyBoughtRow {
  */
 export const useCartVendorGrouping = (lines: Line[], payment: string) => {
   const [coPurchaseIds, setCoPurchaseIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const lineIdsKey = lines.map((l) => l.product.id).join(",");
   useEffect(() => {
