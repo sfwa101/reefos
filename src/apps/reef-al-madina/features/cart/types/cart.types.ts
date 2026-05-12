@@ -29,15 +29,16 @@ export type Addr = {
  *     `capturedPrice` over `product.price`. Removed in B-3.
  */
 export type CartLine = {
-  productId: string;
+  /** Canonical identity (Wave P-B). Optional during the B-3 transition so legacy shapes still type-check. */
+  productId?: string;
   variantId?: string;
   qty: number;
-  capturedPrice: number;
-  capturedName: string;
+  capturedPrice?: number;
+  capturedName?: string;
   capturedImage?: string;
   capturedAt?: string;
   meta?: CartLineMeta;
-  /** @deprecated Wave P-B B-3 — read via `useCartHydration` instead. */
+  /** @deprecated Wave P-B B-3 — read live data via `useCartHydration` instead. */
   product: Product;
 };
 
