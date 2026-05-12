@@ -11,7 +11,13 @@ import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
-type Line = { product: Product; qty: number; meta?: CartLineMeta };
+type Line = {
+  product: Product;
+  qty: number;
+  meta?: CartLineMeta;
+  /** Wave P-B — frozen unit price; preferred over `product.price` for totals. */
+  capturedPrice?: number;
+};
 type Zone = {
   id?: string | null;
   deliveryFee: number;
@@ -76,7 +82,7 @@ export const useCartCalculations = ({
           note: l.meta?.bookingNote,
         },
       });
-      buckets[t].subtotal += l.product.price * l.qty;
+      buckets[t].subtotal += (l.capturedPrice ?? l.product.price) * l.qty;
     }
     return buckets;
   }, [lines]);
@@ -94,7 +100,7 @@ export const useCartCalculations = ({
           fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
       )
       .map((l) => {
-        const unit = l.meta?.unitPrice ?? l.product.price;
+        const unit = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
         const sub = unit * l.qty;
         const lineRequired = sub >= DEPOSIT_THRESHOLD;
         const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
@@ -200,7 +206,7 @@ export const useCartCalculations = ({
       let shadowSubtotal = 0;
       let shadowDeposit = 0;
       for (const l of lines) {
-        const base = l.meta?.unitPrice ?? l.product.price;
+        const base = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
         const mods: Modifier[] = [];
         // Domain-agnostic projection: any preserved meta.appliedModifiers
         // bubbles straight through; otherwise we treat the line as flat.

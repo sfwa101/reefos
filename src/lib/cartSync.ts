@@ -21,7 +21,15 @@ export type RemoteLine = {
   meta: CartLineMeta;
 };
 
-export type LocalLine = { product: Product; qty: number; meta?: CartLineMeta };
+export type LocalLine = {
+  product: Product;
+  qty: number;
+  meta?: CartLineMeta;
+  /** Wave P-B — frozen unit price written into `meta.unitPrice` on push. */
+  capturedPrice?: number;
+  capturedName?: string;
+  capturedImage?: string;
+};
 
 /** Stable line identity (excludes product id; combined with product_id at the row level). */
 export const computeLineKey = (meta?: CartLineMeta): string => {
@@ -80,10 +88,16 @@ export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
   for (const row of data) {
     const product = productMap.get(row.product_id);
     if (!product) continue;
+    const meta = (row.meta ?? {}) as CartLineMeta;
+    // Wave P-B — derive captured snapshot from persisted meta + product fallback.
+    const capturedPrice = meta.unitPrice ?? product.price;
     lines.push({
       product,
       qty: Math.max(1, Number(row.qty) || 1),
-      meta: (row.meta ?? {}) as CartLineMeta,
+      meta,
+      capturedPrice,
+      capturedName: product.name,
+      capturedImage: product.image,
     });
   }
   return lines;
@@ -106,13 +120,24 @@ export async function pushRemoteCart(
     return;
   }
 
-  const rows = cleanLines.map((l) => ({
-    user_id: userId,
-    product_id: l.product.id,
-    line_key: computeLineKey(l.meta),
-    qty: l.qty,
-    meta: (l.meta ?? {}) as never,
-  }));
+  const rows = cleanLines.map((l) => {
+    // Wave P-B — preserve `capturedPrice` across the network boundary by
+    // pinning it into `meta.unitPrice`. The cart calc layer already prefers
+    // `meta.unitPrice → capturedPrice → product.price` in that order.
+    const meta: CartLineMeta = {
+      ...(l.meta ?? {}),
+      ...(l.capturedPrice !== undefined && l.meta?.unitPrice === undefined
+        ? { unitPrice: l.capturedPrice }
+        : {}),
+    };
+    return {
+      user_id: userId,
+      product_id: l.product.id,
+      line_key: computeLineKey(meta),
+      qty: l.qty,
+      meta: meta as never,
+    };
+  });
 
   // Upsert all rows in one round-trip.
   const up = await supabase
