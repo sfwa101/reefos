@@ -4,7 +4,7 @@ import { CircleAlert, LockKeyhole, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { getMyProfileFn, updateMyProfileFn } from "@/lib/user.functions";
 
 import { AVATAR_GALLERY } from "@/apps/reef-al-madina/features/account/profile/data";
 import { EMPTY_FORM, type DbProfile, type PageState, type ProfileForm, type SaveState, type TabKey } from "@/apps/reef-al-madina/features/account/profile/types";
@@ -37,25 +37,23 @@ const Profile = () => {
     if (!user) return null;
     if (!silent) setPageState("loading");
     setErrorMessage("");
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, full_name, phone, birth_date, gender, avatar_key, occupation, household_size, lifestyle_tags, likes, dislikes, budget_range")
-      .eq("id", user.id)
-      .maybeSingle<DbProfile>();
-    if (error) {
-      console.error("profile fetch error", error);
+    try {
+      const data = await getMyProfileFn();
+      const next = buildForm(user, (data ?? profile) as Partial<DbProfile> | null);
+      setForm(next);
+      setInitialForm(next);
+      setPageState("ready");
+      return next;
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "تعذّر التحميل";
+      console.error("profile fetch error", e);
       const fallback = buildForm(user, profile as Partial<DbProfile> | null);
       setForm(fallback);
       setInitialForm(fallback);
       setPageState("error");
-      setErrorMessage(error.message);
+      setErrorMessage(message);
       return null;
     }
-    const next = buildForm(user, data ?? (profile as Partial<DbProfile> | null));
-    setForm(next);
-    setInitialForm(next);
-    setPageState("ready");
-    return next;
   };
 
   useEffect(() => {
@@ -110,7 +108,6 @@ const Profile = () => {
     setErrorMessage("");
 
     const payload = {
-      id: user.id,
       full_name: form.fullName.trim(),
       phone: form.phone || extractPhoneFromPseudoEmail(user.email) || null,
       birth_date: form.birthDate || null,
@@ -124,12 +121,14 @@ const Profile = () => {
       budget_range: form.budgetRange || null,
     };
 
-    const { error } = await supabase.from("profiles").upsert(payload, { onConflict: "id" });
-    if (error) {
-      console.error("profile save error", error);
+    try {
+      await updateMyProfileFn({ data: payload });
+    } catch (e) {
+      const message = e instanceof Error ? e.message : "تعذّر الحفظ";
+      console.error("profile save error", e);
       setSaveState("error");
-      setErrorMessage(error.message);
-      toast.error(`تعذّر الحفظ — ${error.message}`);
+      setErrorMessage(message);
+      toast.error(`تعذّر الحفظ — ${message}`);
       return;
     }
     await refreshProfile();

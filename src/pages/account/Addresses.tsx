@@ -6,7 +6,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { deleteAddressFn, listMyAddressesFn, setDefaultAddressFn } from "@/lib/user.functions";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
@@ -109,14 +109,15 @@ const Addresses = () => {
   const load = async () => {
     if (!user) { setLoading(false); return; }
     setLoading(true);
-    const { data } = await supabase
-      .from("addresses")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("is_default", { ascending: false })
-      .order("created_at", { ascending: false });
-    setList((data as Addr[]) ?? []);
-    setLoading(false);
+    try {
+      const data = await listMyAddressesFn();
+      setList(data as Addr[]);
+    } catch (e) {
+      console.error("addresses load error", e);
+      setList([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user?.id]);
@@ -129,16 +130,25 @@ const Addresses = () => {
 
   const setDefault = async (id: string) => {
     if (!user) return;
-    await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
-    await supabase.from("addresses").update({ is_default: true }).eq("id", id);
-    toast.success("تم تعيين العنوان الافتراضي");
-    load();
+    try {
+      await setDefaultAddressFn({ data: { id } });
+      toast.success("تم تعيين العنوان الافتراضي");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر التحديث";
+      toast.error(m);
+    }
   };
 
   const remove = async (id: string) => {
-    await supabase.from("addresses").delete().eq("id", id);
-    toast("تم حذف العنوان");
-    load();
+    try {
+      await deleteAddressFn({ data: { id } });
+      toast("تم حذف العنوان");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر الحذف";
+      toast.error(m);
+    }
   };
 
   return (

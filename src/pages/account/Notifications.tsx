@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
 import { Bell, Tag, Truck, Sparkles, Gift, Loader2, CheckCheck, type LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { listMyNotificationsFn, markAllNotificationsReadFn } from "@/lib/user.functions";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 
@@ -32,13 +32,15 @@ const Notifications = () => {
 
   const load = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from("notifications")
-      .select("*")
-      .eq("user_id", user.id)
-      .order("created_at", { ascending: false });
-    setList((data as Notif[]) ?? []);
-    setLoading(false);
+    try {
+      const data = await listMyNotificationsFn();
+      setList(data as Notif[]);
+    } catch (e) {
+      console.error("notifications load error", e);
+      setList([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { load(); }, [user]);
@@ -51,9 +53,14 @@ const Notifications = () => {
 
   const markAllRead = async () => {
     if (!user) return;
-    await supabase.from("notifications").update({ read: true }).eq("user_id", user.id).eq("read", false);
-    toast.success("تم تعليم الكل كمقروء");
-    load();
+    try {
+      await markAllNotificationsReadFn();
+      toast.success("تم تعليم الكل كمقروء");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر التحديث";
+      toast.error(m);
+    }
   };
 
   return (
