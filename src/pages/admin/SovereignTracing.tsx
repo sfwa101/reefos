@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Activity, Search, ShieldCheck, ChevronDown, ChevronRight, RefreshCw, AlertTriangle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { listEventTimelineFn } from "@/lib/sovereign.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -100,19 +100,14 @@ export default function SovereignTracingPage() {
     placeholderData: keepPreviousData,
     enabled: !rolesLoading && hasRole("admin"),
     queryFn: async (): Promise<EventRow[]> => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let q: any = (supabase as any)
-        .from("salsabil_event_timeline")
-        .select("id, trace_id, actor_id, event_domain, event_type, payload, created_at")
-        .order("created_at", { ascending: false })
-        .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE - 1);
-
-      if (validTrace && traceFilter) q = q.eq("trace_id", traceFilter);
-      if (validActor && actorFilter) q = q.eq("actor_id", actorFilter);
-      if (domain !== "all") q = q.eq("event_domain", domain);
-
-      const { data: rows, error: err } = await q;
-      if (err) throw err;
+      const rows = await listEventTimelineFn({
+        data: {
+          trace_id: validTrace ? traceFilter : "",
+          actor_id: validActor ? actorFilter : "",
+          domain,
+          page,
+        },
+      });
       return (rows ?? []) as EventRow[];
     },
   });
