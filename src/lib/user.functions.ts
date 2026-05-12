@@ -298,3 +298,26 @@ export const getHakimSnapshotFn = createServerFn({ method: "GET" })
     });
     return ((rows as unknown) as HakimSnapshot | null) ?? null;
   });
+
+// ─── Hakim Chat (proxy to hakim-chat edge function) ───────────────
+export type HakimChatReply = { reply: string };
+
+export const chatHakimFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { message: string; scope?: string; snapshot?: HakimSnapshot | null }) => d)
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }): Promise<HakimChatReply> => {
+    const { supabase } = context;
+    const { data: res, error } = await supabase.functions.invoke("hakim-chat", {
+      body: {
+        message: data.message,
+        scope: data.scope ?? "wallet",
+        snapshot: data.snapshot ?? null,
+      },
+    });
+    if (error) {
+      console.error("hakim-chat error", error);
+      return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
+    }
+    const r = (res as { reply?: string; message?: string } | null) ?? null;
+    return { reply: r?.reply ?? r?.message ?? "…" };
+  });
