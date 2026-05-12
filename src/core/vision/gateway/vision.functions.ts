@@ -201,10 +201,6 @@ export const rejectInferenceFn = createServerFn({ method: "POST" })
         state: "rejected",
         approved_by: approverId,
         approved_at: new Date().toISOString(),
-        // reason is preserved by appending into raw_output.context if provided
-        ...(data.reason
-          ? { raw_output: { rejection_reason: data.reason } as JsonObject }
-          : {}),
       })
       .eq("id", data.inference_id)
       .eq("state", "pending")
