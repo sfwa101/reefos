@@ -9,6 +9,7 @@
  * Mounted globally inside `AdminShell`. Adapts to active workspace kind.
  */
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus, X, ArrowLeft, HandCoins, Receipt, PackagePlus, Wallet, Users, GraduationCap, Sparkles, UserPlus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -25,6 +26,10 @@ type Action = {
   cap?: string;
   /** Special intent handled inline by the composer (e.g. open product dialog). */
   intent?: "new-product";
+  /** Target route — when provided, picking the action navigates instead of opening a placeholder. */
+  to?: string;
+  /** Marks the action as not-yet-available (Coming Soon). */
+  soon?: boolean;
 };
 
 const NEW_PRODUCT: Action = {
@@ -40,38 +45,39 @@ const NEW_HUMAN: Action = {
   label: "إضافة إنسان جديد",
   hint: "عميل، تاجر، أو موظف — كائن واحد، علاقات متعددة",
   icon: UserPlus,
+  to: "/admin/humans",
 };
 
 const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
   reef: [
     NEW_PRODUCT,
     NEW_HUMAN,
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins },
-    { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt },
-    { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "حكيم سيقترح المبلغ تلقائيًا", icon: HandCoins, to: "/admin/suppliers" },
+    { key: "expense",          label: "إضافة مصروف",   hint: "صنف + مبلغ — والباقي مؤتمت", icon: Receipt, to: "/admin/expenses" },
+    { key: "stock-in",         label: "استلام مخزون",  hint: "امسح الباركود فقط",          icon: PackagePlus, to: "/admin/inventory" },
   ],
   tayseer: [
     NEW_HUMAN,
-    { key: "expense",        label: "إضافة مصروف",     hint: "تصنيف ذكي عبر حكيم",     icon: Receipt },
-    { key: "wallet-topup",   label: "شحن محفظة",       hint: "للعميل أو للموظف",        icon: Wallet },
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "تسجيل في دفتر الأستاذ",  icon: HandCoins },
+    { key: "expense",        label: "إضافة مصروف",     hint: "تصنيف ذكي عبر حكيم",     icon: Receipt, to: "/admin/expenses" },
+    { key: "wallet-topup",   label: "شحن محفظة",       hint: "للعميل أو للموظف",        icon: Wallet, to: "/admin/wallets" },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "تسجيل في دفتر الأستاذ",  icon: HandCoins, to: "/admin/suppliers" },
   ],
   noor_eldin: [
     NEW_HUMAN,
-    { key: "enroll",   label: "تسجيل متعلم",  hint: "في رحلة تعلم",      icon: GraduationCap },
-    { key: "mentor",   label: "إسناد مرشد",   hint: "حكيم يقترح أفضل توافق", icon: Users },
+    { key: "enroll",   label: "تسجيل متعلم",  hint: "في رحلة تعلم",      icon: GraduationCap, soon: true },
+    { key: "mentor",   label: "إسناد مرشد",   hint: "حكيم يقترح أفضل توافق", icon: Users, soon: true },
   ],
   family: [
     NEW_HUMAN,
-    { key: "wallet-topup", label: "شحن محفظة",   hint: "لأحد أفراد العائلة",  icon: Wallet },
-    { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt },
+    { key: "wallet-topup", label: "شحن محفظة",   hint: "لأحد أفراد العائلة",  icon: Wallet, to: "/admin/wallets" },
+    { key: "expense",      label: "تسجيل مصروف", hint: "تصنيف منزلي",         icon: Receipt, to: "/admin/expenses" },
   ],
   global: [
     NEW_PRODUCT,
     NEW_HUMAN,
-    { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt },
-    { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins },
-    { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus },
+    { key: "expense",          label: "إضافة مصروف",   hint: "متعدد المساحات",   icon: Receipt, to: "/admin/expenses" },
+    { key: "supplier-collect", label: "تحصيل من مورد", hint: "أي مساحة",         icon: HandCoins, to: "/admin/suppliers" },
+    { key: "stock-in",         label: "استلام مخزون",  hint: "أي متجر",          icon: PackagePlus, to: "/admin/inventory" },
   ],
 };
 
@@ -80,6 +86,7 @@ export function SmartActionComposer() {
   const [picked, setPicked] = useState<Action | null>(null);
   const [productOpen, setProductOpen] = useState(false);
   const { activeWorkspaceKind } = useSovereignContext();
+  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
@@ -88,9 +95,15 @@ export function SmartActionComposer() {
   }
 
   function handlePick(a: Action) {
+    if (a.soon) return;
     if (a.intent === "new-product") {
       close();
       setProductOpen(true);
+      return;
+    }
+    if (a.to) {
+      close();
+      navigate({ to: a.to as never });
       return;
     }
     setPicked(a);
@@ -152,17 +165,26 @@ export function SmartActionComposer() {
                     <button
                       type="button"
                       onClick={() => handlePick(a)}
+                      disabled={a.soon}
                       className={cn(
                         "w-full flex items-center gap-3 p-3 rounded-2xl",
                         "bg-surface-muted/60 hover:bg-surface-muted border border-border/40",
                         "text-right press transition-base",
+                        a.soon && "opacity-60 cursor-not-allowed hover:bg-surface-muted/60",
                       )}
                     >
                       <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <a.icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-semibold leading-tight">{a.label}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[14px] font-semibold leading-tight">{a.label}</p>
+                          {a.soon && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                              قريباً
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11.5px] text-foreground-tertiary leading-tight mt-0.5">{a.hint}</p>
                       </div>
                     </button>
