@@ -192,11 +192,15 @@ export const getMyAccountHubFn = createServerFn({ method: "GET" })
         .select("id", { count: "exact", head: true })
         .eq("customer_id", userId),
       // user_total_spent RPC may not exist in all environments — tolerate
-      (supabase as unknown as {
-        rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }>;
-      })
-        .rpc("user_total_spent", { _user_id: userId })
-        .catch(() => ({ data: 0 })),
+      (async () => {
+        try {
+          return await (supabase as unknown as {
+            rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }>;
+          }).rpc("user_total_spent", { _user_id: userId });
+        } catch {
+          return { data: 0 };
+        }
+      })(),
       supabase
         .from("kyc_verifications")
         .select("status")
