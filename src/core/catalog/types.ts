@@ -6,7 +6,18 @@
  *
  * تغيير قاعدة البيانات لاحقاً (مثلاً نقل nutrition لخدمة منفصلة) لن يكسر
  * أي مكوّن، فقط Transformers تحتاج تحديث.
+ *
+ * Constitution v2.0 lineage:
+ *   ProductCardVM / ProductDetailsVM are the Layer-5 (Presentation) projection
+ *   of the Layer-4 ProductDNA layers (`identity` + `financial` + slices of
+ *   `behavioral` and `supply`). They remain structurally independent to keep
+ *   the storefront UI 100% non-breaking.
  */
+
+import type {
+  ProductIdentityDNA,
+  ProductFinancialDNA,
+} from "@/core/dna/types";
 
 export type LocaleCode = "ar" | "en";
 export type CurrencyCode = "EGP" | "USD" | "EUR";
