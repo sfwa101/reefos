@@ -5,8 +5,9 @@ import { Layers3 } from "lucide-react";
 
 import { toLatin } from "@/lib/format";
 
+import type { ProductCardVM } from "@/core/catalog/types";
+
 import { CATS } from "../dictionaries";
-import type { HGProduct } from "../types";
 import { ProductCard } from "./ProductCard";
 import { RailHeader } from "./RailHeader";
 
@@ -21,7 +22,7 @@ export const ProductsGrid = ({
   dynamicCats,
 }: {
   cat: string;
-  filtered: HGProduct[];
+  filtered: ProductCardVM[];
   hue: string;
   onOpen: (id: string) => void;
   onResetAll: () => void;
