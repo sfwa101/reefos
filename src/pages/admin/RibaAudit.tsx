@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listRibaFlagsFn,
+  scanRibaSuspicionsFn,
+  updateRibaFlagStatusFn,
+  type RibaFlag,
+} from "@/lib/finance.functions";
 import { Loader2, ShieldAlert, ScanSearch, AlertOctagon, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 
-type Flag = {
-  id: string; source_table: string; source_id: string;
-  category: string; severity: string; amount: number | null;
-  description: string; recommendation: string | null;
-  status: string; created_at: string;
-};
+type Flag = RibaFlag;
 
 export default function RibaAudit() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -23,11 +23,9 @@ export default function RibaAudit() {
 
   const load = async () => {
     setLoading(true);
-    let q = (supabase as any).from("riba_audit_log").select("*").order("created_at", { ascending: false });
-    if (filter !== "all") q = q.eq("status", filter);
-    const { data } = await q.limit(50);
-    setFlags((data || []) as Flag[]);
-    setLoading(false);
+    try { setFlags(await listRibaFlagsFn({ data: { status: filter } })); }
+    catch (e) { toast.error((e as Error).message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed, filter]);
@@ -35,20 +33,19 @@ export default function RibaAudit() {
   const scan = async () => {
     setScanning(true);
     try {
-      const { data, error } = await (supabase as any).rpc("scan_riba_suspicions");
-      if (error) throw error;
-      const d = data as any;
+      const d = await scanRibaSuspicionsFn();
       toast.success(d.flagged_now > 0 ? `تم رصد ${d.flagged_now} حالة جديدة` : "لا شبهات جديدة — الحمد لله");
       load();
-    } catch (e: any) { toast.error(e?.message || "فشل"); }
+    } catch (e) { toast.error((e as Error).message || "فشل"); }
     finally { setScanning(false); }
   };
 
   const updateStatus = async (id: string, status: string) => {
-    const { error } = await (supabase as any).from("riba_audit_log")
-      .update({ status, reviewed_at: new Date().toISOString() }).eq("id", id);
-    if (error) toast.error(error.message);
-    else { toast.success("تم"); load(); }
+    try {
+      await updateRibaFlagStatusFn({ data: { id, status } });
+      toast.success("تم");
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

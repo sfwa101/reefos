@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { getDeliverySettingsFn, updateDeliverySettingsFn, type DeliverySettings as DS } from "@/lib/ops.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,12 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
-type S = {
-  id: string; require_barcode_default: boolean;
-  disable_barcode_for_express: boolean;
-  disable_barcode_zones: string[];
-  gps_proof_required_when_disabled: boolean;
-};
+type S = DS;
 
 export default function DeliverySettings() {
   return (
@@ -30,19 +25,17 @@ function Inner() {
   const [zoneInput, setZoneInput] = useState("");
 
   const load = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any).from("delivery_settings").select("*").order("updated_at", { ascending: false }).limit(1).maybeSingle();
-    setS(data as S);
+    try { setS(await getDeliverySettingsFn()); } catch (e) { toast.error((e as Error).message); }
   };
   useEffect(() => { load(); }, []);
 
   const update = async (patch: Partial<S>) => {
     if (!s) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).from("delivery_settings").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", s.id);
-    if (error) return toast.error(error.message);
-    setS({ ...s, ...patch });
-    toast.success("تم الحفظ");
+    try {
+      await updateDeliverySettingsFn({ data: { id: s.id, patch } });
+      setS({ ...s, ...patch });
+      toast.success("تم الحفظ");
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (!s) return <p className="text-center py-8 text-foreground-tertiary">جارٍ التحميل…</p>;

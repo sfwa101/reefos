@@ -175,3 +175,28 @@ export const broadcastNotificationFn = createServerFn({ method: "POST" })
 
     return { recipients: userIds.length };
   });
+
+// ---- Wave R-1 Batch 1 additions ------------------------------------------
+export type CustomerListRow = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  birth_date: string | null;
+  gender: string | null;
+  budget_range: string | null;
+  created_at: string;
+};
+
+export const listCustomersFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<CustomerListRow[]> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { data, error } = await sb
+      .from("profiles")
+      .select("id,full_name,phone,birth_date,gender,budget_range,created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as CustomerListRow[];
+  });

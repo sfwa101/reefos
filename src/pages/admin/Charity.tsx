@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  getCharityOverviewFn,
+  createCharityRuleFn,
+  setCharityRuleActiveFn,
+  type CharityRule as Rule,
+  type CharityDue as Due,
+} from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, HeartHandshake } from "lucide-react";
 import { toast } from "sonner";
-
-type Rule = {
-  id: string; name: string; base: "gross_sales" | "net_profit" | "custom_amount";
-  percentage: number | null; fixed_amount: number | null; frequency: "daily" | "weekly" | "monthly"; is_active: boolean;
-};
-
-type Due = { rule_id: string; rule_name: string; base: string; frequency: string; percentage: number | null; base_amount: number; due_amount: number };
 
 export default function Charity() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -26,42 +25,46 @@ export default function Charity() {
 
   const load = async () => {
     setLoading(true);
-    const start = new Date(Date.now() - periodDays * 86400000).toISOString().slice(0, 10);
-    const end = new Date().toISOString().slice(0, 10);
-    const [r, d] = await Promise.all([
-      (supabase as any).from("charity_rules").select("*").order("created_at", { ascending: false }).limit(1000),
-      (supabase as any).rpc("compute_charity_dues", { _start: start, _end: end }),
-    ]);
-    setRules((r.data || []) as Rule[]);
-    if (d.data) {
-      setDues((d.data.rules || []) as Due[]);
-      setSnapshot({ gross_sales: d.data.gross_sales, net_profit: d.data.net_profit });
-    }
-    setLoading(false);
+    try {
+      const overview = await getCharityOverviewFn({ data: { period_days: periodDays } });
+      setRules(overview.rules);
+      if (overview.dues) {
+        setDues(overview.dues.rules);
+        setSnapshot({ gross_sales: overview.dues.gross_sales, net_profit: overview.dues.net_profit });
+      } else {
+        setDues([]);
+        setSnapshot(null);
+      }
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed, periodDays]);
 
   const create = async () => {
     if (!form.name.trim()) return toast.error("الاسم مطلوب");
-    const payload: any = {
-      name: form.name.trim(),
-      base: form.base,
-      frequency: form.frequency,
-      percentage: form.base === "custom_amount" ? null : parseFloat(form.percentage) || 0,
-      fixed_amount: form.base === "custom_amount" ? parseFloat(form.fixed_amount) || 0 : null,
-    };
-    const { error } = await (supabase as any).from("charity_rules").insert(payload);
-    if (error) return toast.error(error.message);
-    toast.success("تم");
-    setForm({ name: "", base: "net_profit", percentage: "2.5", fixed_amount: "", frequency: "monthly" });
-    setShowForm(false);
-    load();
+    try {
+      await createCharityRuleFn({
+        data: {
+          name: form.name.trim(),
+          base: form.base as Rule["base"],
+          frequency: form.frequency as Rule["frequency"],
+          percentage: form.base === "custom_amount" ? null : parseFloat(form.percentage) || 0,
+          fixed_amount: form.base === "custom_amount" ? parseFloat(form.fixed_amount) || 0 : null,
+        },
+      });
+      toast.success("تم");
+      setForm({ name: "", base: "net_profit", percentage: "2.5", fixed_amount: "", frequency: "monthly" });
+      setShowForm(false);
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   const toggle = async (id: string, current: boolean) => {
-    await (supabase as any).from("charity_rules").update({ is_active: !current }).eq("id", id);
-    load();
+    try {
+      await setCharityRuleActiveFn({ data: { id, is_active: !current } });
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

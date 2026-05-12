@@ -1,34 +1,25 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Phone, Users, ChevronLeft } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { listCustomersFn, type CustomerListRow } from "@/lib/crm.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
-type Customer = {
-  id: string;
-  full_name: string | null;
-  phone: string | null;
-  birth_date: string | null;
-  gender: string | null;
-  budget_range: string | null;
-  created_at: string;
-};
+type Customer = CustomerListRow;
 
 export default function Customers() {
   const [customers, setCustomers] = useState<Customer[] | null>(null);
   const [q, setQ] = useState("");
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).from("profiles")
-      .select("id,full_name,phone,birth_date,gender,budget_range,created_at")
-      .order("created_at", { ascending: false })
-      .limit(500)
-      .then(({ data }: { data: Customer[] | null }) => setCustomers(data ?? []));
+    let cancelled = false;
+    listCustomersFn()
+      .then((data) => { if (!cancelled) setCustomers(data); })
+      .catch(() => { if (!cancelled) setCustomers([]); });
+    return () => { cancelled = true; };
   }, []);
 
   const filtered = useMemo(() => {

@@ -1,31 +1,32 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { getPaymentsScheduleFn, type PaymentsScheduleRow } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CalendarClock, AlertTriangle } from "lucide-react";
-
-type Row = {
-  id: string; invoice_number: string | null; invoice_date: string; due_date: string | null;
-  total: number; paid_amount: number; remaining: number; status: string;
-  supplier_id: string; supplier_name: string; closing_day: number | null; collection_days: number[] | null;
-};
 
 export default function PaymentsSchedule() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
-  const [rows, setRows] = useState<Row[]>([]);
+  const [rows, setRows] = useState<PaymentsScheduleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(14);
 
   useEffect(() => {
     if (!allowed) { setLoading(false); return; }
+    let cancelled = false;
     (async () => {
       setLoading(true);
-      const { data, error } = await (supabase as any).rpc("payments_schedule", { _days_ahead: days });
-      if (!error) setRows((data || []) as Row[]);
-      setLoading(false);
+      try {
+        const data = await getPaymentsScheduleFn({ data: { days_ahead: days } });
+        if (!cancelled) setRows(data);
+      } catch {
+        if (!cancelled) setRows([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     })();
+    return () => { cancelled = true; };
   }, [allowed, days]);
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

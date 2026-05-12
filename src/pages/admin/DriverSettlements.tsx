@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listDriverWalletsFn,
+  settleDriverCashFn,
+  type DriverWalletRow,
+} from "@/lib/finance.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,10 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 
-type Row = {
-  driver_id: string; full_name: string; driver_type: string;
-  cash_in_hand: number; earned_balance: number; lifetime_earned: number; lifetime_settled: number;
-};
+type Row = DriverWalletRow;
 
 export default function DriverSettlements() {
   return (
@@ -30,29 +31,28 @@ function Inner() {
   const [form, setForm] = useState({ amount: "", kind: "cash_handover", bank_reference: "", notes: "" });
 
   const load = async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any).from("driver_wallets")
-      .select("*, drivers!inner(full_name, driver_type)")
-      .order("cash_in_hand", { ascending: false });
-    type DwRow = { driver_id: string; cash_in_hand: number; earned_balance: number; lifetime_earned: number; lifetime_settled: number; drivers: { full_name: string; driver_type: string } };
-    setRows((data ?? []).map((r: DwRow) => ({
-      driver_id: r.driver_id, cash_in_hand: r.cash_in_hand, earned_balance: r.earned_balance,
-      lifetime_earned: r.lifetime_earned, lifetime_settled: r.lifetime_settled,
-      full_name: r.drivers.full_name, driver_type: r.drivers.driver_type,
-    })));
+    try { setRows(await listDriverWalletsFn()); }
+    catch (e) { toast.error((e as Error).message); }
   };
   useEffect(() => { load(); }, []);
 
   const settle = async () => {
     if (!picked || !form.amount) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).rpc("driver_settle_cash", {
-      _driver_id: picked.driver_id, _amount: Number(form.amount), _kind: form.kind,
-      _bank_reference: form.bank_reference || null, _notes: form.notes || null,
-    });
-    if (error) return toast.error(error.message);
-    toast.success("تمت التصفية");
-    setPicked(null); setForm({ amount: "", kind: "cash_handover", bank_reference: "", notes: "" }); load();
+    try {
+      await settleDriverCashFn({
+        data: {
+          driver_id: picked.driver_id,
+          amount: Number(form.amount),
+          kind: form.kind,
+          bank_reference: form.bank_reference || null,
+          notes: form.notes || null,
+        },
+      });
+      toast.success("تمت التصفية");
+      setPicked(null);
+      setForm({ amount: "", kind: "cash_handover", bank_reference: "", notes: "" });
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   return (

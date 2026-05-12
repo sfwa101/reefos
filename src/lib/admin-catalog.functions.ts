@@ -317,3 +317,62 @@ export const submitPurchaseInvoiceFn = createServerFn({ method: "POST" })
     const invoiceId = (result as { invoice_id?: string } | null)?.invoice_id ?? null;
     return { invoice_id: invoiceId };
   });
+
+// ---- Wave R-1 Batch 1: full supplier admin -------------------------------
+export type SupplierFullRow = {
+  id: string;
+  name: string;
+  contact_phone: string | null;
+  closing_day: number | null;
+  collection_days: number[] | null;
+  outstanding_balance: number;
+  total_purchased: number;
+  total_paid: number;
+  is_active: boolean;
+};
+
+export const listSuppliersFullFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<SupplierFullRow[]> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { data, error } = await sb
+      .from("suppliers")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(1000);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SupplierFullRow[];
+  });
+
+export type SupplierCreateInput = {
+  name: string;
+  contact_phone: string | null;
+  closing_day: number | null;
+  collection_days: number[];
+  payment_terms_days: number;
+};
+
+export const createSupplierFn = createServerFn({ method: "POST" })
+  .inputValidator((d: SupplierCreateInput) => {
+    if (!d?.name?.trim()) throw new Error("name_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ id: string }> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { data: row, error } = await sb
+      .from("suppliers")
+      .insert({
+        name: data.name.trim(),
+        contact_phone: data.contact_phone || null,
+        closing_day: data.closing_day,
+        collection_days: data.collection_days,
+        payment_terms_days: data.payment_terms_days || 30,
+      })
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { id: row.id as string };
+  });

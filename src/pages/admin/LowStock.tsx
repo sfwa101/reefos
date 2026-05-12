@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { listLowStockProductsFn, type LowStockItem } from "@/lib/ops.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, AlertTriangle, Package } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Item = { id: string; name: string; category: string; stock: number; price: number; image_url: string | null };
+type Item = LowStockItem;
 
 export default function LowStock() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -17,14 +17,12 @@ export default function LowStock() {
 
   useEffect(() => {
     if (!allowed) return;
+    let cancelled = false;
     setLoading(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("low_stock_products", { _threshold: threshold })
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .then(({ data }: any) => {
-        setItems((data ?? []) as Item[]);
-        setLoading(false);
-      });
+    listLowStockProductsFn({ data: { threshold } })
+      .then((data) => { if (!cancelled) { setItems(data); setLoading(false); } })
+      .catch(() => { if (!cancelled) { setItems([]); setLoading(false); } });
+    return () => { cancelled = true; };
   }, [threshold, allowed]);
 
   if (rolesLoading) return <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto" /></div>;
