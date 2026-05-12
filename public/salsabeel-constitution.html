@@ -1,0 +1,1299 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>الميثاق المعماري السيادي — سلسبيل OS v2.0</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Cairo:wght@300;400;600;700;900&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --ink: #0d0f12;
+    --paper: #f7f4ef;
+    --gold: #b8960c;
+    --gold-light: #d4af37;
+    --gold-dim: rgba(184,150,12,0.15);
+    --red: #8b1a1a;
+    --red-dim: rgba(139,26,26,0.07);
+    --green: #1a4a2e;
+    --green-dim: rgba(26,74,46,0.07);
+    --steel: #2c3e50;
+    --muted: #6b7280;
+    --border: #d6cfc2;
+    --border-light: #ede9e2;
+    --seal-bg: #0d0f12;
+    --blue: #1a3a5c;
+    --blue-dim: rgba(26,58,92,0.07);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Cairo', sans-serif;
+    line-height: 1.9;
+    font-size: 16px;
+  }
+
+  /* ══ COVER ══ */
+  .cover {
+    min-height: 100vh;
+    background: var(--seal-bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content:'';
+    position:absolute;
+    inset:0;
+    background:
+      radial-gradient(ellipse at 20% 20%, rgba(184,150,12,.08) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 80%, rgba(184,150,12,.06) 0%, transparent 60%);
+  }
+  .cover-ornament { width:130px; height:130px; margin:0 auto 2.5rem; }
+  .cover-ornament svg { width:100%; height:100%; }
+  .cover-label {
+    font-family:'Cairo',sans-serif; font-weight:300; font-size:.72rem;
+    letter-spacing:.4em; color:var(--gold); text-transform:uppercase; margin-bottom:1.5rem;
+  }
+  .cover-title {
+    font-family:'Amiri',serif; font-size:clamp(2.5rem,6vw,4.8rem);
+    color:#fff; font-weight:700; line-height:1.3; margin-bottom:.5rem;
+  }
+  .cover-subtitle {
+    font-family:'Amiri',serif; font-size:clamp(1rem,2.5vw,1.45rem);
+    color:var(--gold-light); margin-bottom:.75rem; font-style:italic;
+  }
+  .cover-version {
+    font-family:'IBM Plex Mono',monospace; font-size:.7rem;
+    color:rgba(255,255,255,.3); letter-spacing:.2em; margin-bottom:3rem;
+  }
+  .cover-divider {
+    width:220px; height:1px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
+    margin:0 auto 3rem;
+  }
+  .cover-meta {
+    display:grid; grid-template-columns:repeat(3,1fr);
+    gap:2rem; max-width:620px; width:100%;
+  }
+  .cover-meta-item .label {
+    font-size:.62rem; letter-spacing:.25em; color:var(--gold);
+    text-transform:uppercase; display:block; margin-bottom:.3rem;
+  }
+  .cover-meta-item .value { font-size:.88rem; color:rgba(255,255,255,.65); font-weight:300; }
+  .cover-warning {
+    margin-top:3.5rem; border:1px solid rgba(139,26,26,.5);
+    background:rgba(139,26,26,.1); padding:1rem 2rem;
+    border-radius:2px; max-width:640px;
+  }
+  .cover-warning p { font-size:.78rem; color:#e07070; letter-spacing:.04em; }
+
+  /* ══ TOC ══ */
+  .toc-section {
+    background: var(--ink); color:#fff;
+    padding:4rem 2rem;
+  }
+  .toc-inner { max-width:860px; margin:0 auto; }
+  .toc-title {
+    font-family:'Amiri',serif; font-size:1.6rem;
+    color:var(--gold-light); margin-bottom:2.5rem; text-align:center;
+  }
+  .toc-grid {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(360px,1fr));
+    gap:.5rem;
+  }
+  .toc-item {
+    display:flex; align-items:center; gap:1rem;
+    padding:.6rem .75rem; border-right:2px solid rgba(184,150,12,.2);
+    transition:border-color .2s;
+  }
+  .toc-item:hover { border-right-color:var(--gold); }
+  .toc-num {
+    font-family:'IBM Plex Mono',monospace; font-size:.62rem;
+    color:var(--gold); flex-shrink:0; min-width:42px;
+  }
+  .toc-text { font-size:.82rem; color:rgba(255,255,255,.7); }
+  .toc-badge {
+    font-family:'IBM Plex Mono',monospace; font-size:.55rem;
+    background:rgba(184,150,12,.2); color:var(--gold);
+    padding:.15rem .4rem; border-radius:2px; flex-shrink:0; margin-right:auto;
+  }
+
+  /* ══ DOCUMENT ══ */
+  .document { max-width:880px; margin:0 auto; padding:4rem 2rem; }
+
+  /* ══ PREAMBLE ══ */
+  .preamble {
+    background:var(--ink); color:#fff; padding:3rem; margin-bottom:4rem; position:relative;
+  }
+  .preamble::before {
+    content:'"'; font-family:'Amiri',serif; font-size:8rem;
+    color:var(--gold); opacity:.12; position:absolute; top:-1rem; right:2rem; line-height:1;
+  }
+  .preamble h2 {
+    font-family:'Amiri',serif; font-size:1.1rem; color:var(--gold-light);
+    margin-bottom:1.5rem; letter-spacing:.1em; font-weight:400;
+  }
+  .preamble p { font-size:.95rem; line-height:2; color:rgba(255,255,255,.82); margin-bottom:1rem; }
+
+  /* ══ CHAPTER ══ */
+  .chapter { margin-bottom:4.5rem; }
+  .chapter-header {
+    display:flex; align-items:center; gap:1.5rem;
+    margin-bottom:2rem; padding-bottom:1rem; border-bottom:2px solid var(--ink);
+  }
+  .chapter-number {
+    font-family:'IBM Plex Mono',monospace; font-size:.72rem;
+    color:var(--gold); background:var(--ink); padding:.25rem .65rem;
+    letter-spacing:.12em; flex-shrink:0; white-space:nowrap;
+  }
+  .chapter-title { font-family:'Cairo',sans-serif; font-size:1.25rem; font-weight:700; }
+
+  /* ══ ARTICLES ══ */
+  .article { margin-bottom:2rem; padding-right:1.5rem; border-right:3px solid var(--border); transition:border-color .2s; }
+  .article:hover { border-right-color:var(--gold); }
+  .article-number {
+    font-family:'IBM Plex Mono',monospace; font-size:.62rem;
+    color:var(--gold); letter-spacing:.2em; display:block; margin-bottom:.3rem;
+  }
+  .article h3 { font-size:.98rem; font-weight:700; margin-bottom:.5rem; }
+  .article p { font-size:.9rem; color:#374151; line-height:1.85; }
+  .article p + p { margin-top:.5rem; }
+
+  /* ══ LAW BLOCK ══ */
+  .law-block {
+    background:#fff; border:1px solid var(--border); padding:1.5rem; margin:1.5rem 0;
+  }
+  .law-block h4 {
+    font-size:.75rem; font-weight:700; letter-spacing:.15em;
+    color:var(--steel); margin-bottom:1rem; text-transform:uppercase;
+  }
+
+  /* ══ LISTS ══ */
+  .forbidden-list { list-style:none; }
+  .forbidden-list li {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.45rem 0; border-bottom:1px solid #f3f0ea;
+    font-size:.86rem; color:#374151;
+  }
+  .forbidden-list li:last-child { border-bottom:none; }
+  .forbidden-list li::before { content:'✕'; color:var(--red); font-weight:700; font-size:.72rem; margin-top:.18rem; flex-shrink:0; }
+
+  .required-list { list-style:none; }
+  .required-list li {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.45rem 0; border-bottom:1px solid #f3f0ea;
+    font-size:.86rem; color:#374151;
+  }
+  .required-list li:last-child { border-bottom:none; }
+  .required-list li::before { content:'✓'; color:var(--green); font-weight:700; font-size:.72rem; margin-top:.18rem; flex-shrink:0; }
+
+  .neutral-list { list-style:none; }
+  .neutral-list li {
+    display:flex; align-items:flex-start; gap:.75rem;
+    padding:.4rem 0; border-bottom:1px solid #f3f0ea;
+    font-size:.86rem; color:#374151;
+  }
+  .neutral-list li:last-child { border-bottom:none; }
+  .neutral-list li::before { content:'◆'; color:var(--gold); font-size:.55rem; margin-top:.32rem; flex-shrink:0; }
+
+  /* ══ CODE ══ */
+  .code-block {
+    background:var(--ink); color:#a8d8a8;
+    font-family:'IBM Plex Mono',monospace; font-size:.76rem;
+    padding:1.25rem 1.5rem; margin:1rem 0;
+    overflow-x:auto; direction:ltr; text-align:left; line-height:1.75;
+    border-right:3px solid var(--gold);
+  }
+  .code-block .comment { color:#6b7280; }
+  .code-block .bad { color:#f87171; }
+  .code-block .good { color:#86efac; }
+  .code-block .keyword { color:var(--gold-light); }
+  .code-block .string { color:#93c5fd; }
+
+  /* ══ BOXES ══ */
+  .critical-box {
+    border:2px solid var(--red); background:var(--red-dim);
+    padding:1.5rem; margin:2rem 0;
+  }
+  .critical-box .critical-label {
+    font-family:'IBM Plex Mono',monospace; font-size:.62rem;
+    letter-spacing:.3em; color:var(--red); font-weight:700;
+    margin-bottom:.75rem; display:block;
+  }
+  .critical-box p { font-size:.88rem; color:var(--ink); line-height:1.85; }
+
+  .note-box {
+    border-right:4px solid var(--gold); background:var(--gold-dim);
+    padding:1.25rem 1.5rem; margin:1.5rem 0;
+  }
+  .note-box p { font-size:.87rem; color:#374151; line-height:1.8; }
+
+  .blue-box {
+    border-right:4px solid var(--blue); background:var(--blue-dim);
+    padding:1.25rem 1.5rem; margin:1.5rem 0;
+  }
+  .blue-box p { font-size:.87rem; color:#374151; line-height:1.8; }
+
+  .green-box {
+    border-right:4px solid var(--green); background:var(--green-dim);
+    padding:1.25rem 1.5rem; margin:1.5rem 0;
+  }
+  .green-box p { font-size:.87rem; color:#374151; line-height:1.8; }
+
+  /* ══ MATRIX ══ */
+  .matrix {
+    display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+    gap:1rem; margin:1.5rem 0;
+  }
+  .matrix-cell { background:#fff; border:1px solid var(--border); padding:1rem; }
+  .matrix-cell .cell-title {
+    font-size:.68rem; font-weight:700; letter-spacing:.15em;
+    color:var(--gold); text-transform:uppercase; margin-bottom:.5rem;
+    font-family:'IBM Plex Mono',monospace;
+  }
+  .matrix-cell .cell-badge {
+    display:inline-block; font-size:.58rem; padding:.1rem .35rem;
+    border-radius:2px; margin-bottom:.4rem; font-family:'IBM Plex Mono',monospace;
+    letter-spacing:.08em;
+  }
+  .badge-red { background:rgba(139,26,26,.1); color:var(--red); }
+  .badge-green { background:rgba(26,74,46,.1); color:var(--green); }
+  .badge-gold { background:rgba(184,150,12,.1); color:#8a6f00; }
+  .badge-blue { background:rgba(26,58,92,.1); color:var(--blue); }
+  .matrix-cell p { font-size:.8rem; color:#374151; line-height:1.6; }
+
+  /* ══ COMPARE TABLE ══ */
+  .compare-table { width:100%; border-collapse:collapse; margin:1.5rem 0; font-size:.83rem; }
+  .compare-table th {
+    background:var(--ink); color:#fff; padding:.75rem 1rem;
+    text-align:right; font-weight:600; font-size:.75rem; letter-spacing:.05em;
+  }
+  .compare-table th.bad-col { background:var(--red); }
+  .compare-table th.good-col { background:var(--green); }
+  .compare-table td { padding:.6rem 1rem; border-bottom:1px solid var(--border); vertical-align:top; }
+  .compare-table tr:last-child td { border-bottom:none; }
+  .compare-table td.bad-cell { color:var(--red); }
+  .compare-table td.good-cell { color:var(--green); font-weight:600; }
+
+  /* ══ ENGINE MAP TABLE ══ */
+  .engine-table { width:100%; border-collapse:collapse; margin:1.5rem 0; font-size:.82rem; }
+  .engine-table th {
+    background:var(--seal-bg); color:var(--gold-light); padding:.7rem 1rem;
+    text-align:right; font-weight:600; font-size:.72rem; letter-spacing:.08em;
+    border-bottom:1px solid rgba(184,150,12,.3);
+  }
+  .engine-table td {
+    padding:.55rem 1rem; border-bottom:1px solid var(--border-light); vertical-align:top;
+  }
+  .engine-table tr:hover td { background:#faf8f4; }
+  .engine-table .level-0 td:first-child { border-right:3px solid #dc2626; }
+  .engine-table .level-1 td:first-child { border-right:3px solid #ea580c; }
+  .engine-table .level-2 td:first-child { border-right:3px solid #d97706; }
+  .engine-table .level-3 td:first-child { border-right:3px solid #65a30d; }
+  .engine-table .level-4 td:first-child { border-right:3px solid #0891b2; }
+  .engine-table .level-5 td:first-child { border-right:3px solid #7c3aed; }
+  .engine-table .level-6 td:first-child { border-right:3px solid #6b7280; }
+  .status-missing { color:var(--red); font-size:.72rem; font-family:'IBM Plex Mono',monospace; }
+  .status-exists { color:var(--green); font-size:.72rem; font-family:'IBM Plex Mono',monospace; }
+
+  /* ══ PHASE LIST ══ */
+  .phase-timeline { position:relative; padding-right:2.5rem; margin:1.5rem 0; }
+  .phase-timeline::before {
+    content:''; position:absolute; right:.4rem; top:.5rem; bottom:.5rem;
+    width:2px; background:var(--border);
+  }
+  .phase-item { position:relative; padding:.75rem 0 .75rem 0; margin-bottom:.25rem; }
+  .phase-item::before {
+    content:''; position:absolute; right:-2.1rem; top:1.1rem;
+    width:10px; height:10px; background:var(--gold); border-radius:50%;
+    border:2px solid var(--paper); box-shadow:0 0 0 2px var(--gold);
+  }
+  .phase-item strong { color:var(--ink); font-weight:700; display:block; margin-bottom:.2rem; font-size:.9rem; }
+  .phase-item p { font-size:.83rem; color:#4b5563; line-height:1.65; }
+
+  /* ══ DIVIDER ══ */
+  .section-break { text-align:center; margin:3rem 0; color:var(--border); font-size:1.1rem; letter-spacing:.6em; }
+
+  /* ══ PROMPT TEMPLATE ══ */
+  .prompt-template {
+    background:#f0f7ff; border:1px solid #bcd4f0; padding:1.5rem; margin:1.5rem 0;
+    direction:ltr; text-align:left; font-family:'IBM Plex Mono',monospace; font-size:.76rem;
+    line-height:1.8; color:#1e3a5f;
+  }
+
+  /* ══ SIGNATURE ══ */
+  .signature-block {
+    background:var(--ink); color:#fff; padding:3.5rem; margin-top:5rem; text-align:center;
+  }
+  .signature-block h2 { font-family:'Amiri',serif; font-size:1.6rem; color:var(--gold-light); margin-bottom:2rem; }
+  .signature-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:2rem; max-width:600px; margin:0 auto 2rem; }
+  .sig-item { border-top:1px solid rgba(184,150,12,.4); padding-top:1rem; }
+  .sig-item .sig-label { font-size:.62rem; letter-spacing:.2em; color:var(--gold); text-transform:uppercase; display:block; margin-bottom:.5rem; }
+  .sig-item .sig-value { font-size:.84rem; color:rgba(255,255,255,.65); }
+  .final-seal { margin-top:2rem; font-family:'Amiri',serif; font-size:.9rem; color:rgba(255,255,255,.35); font-style:italic; }
+
+  @media(max-width:640px){
+    .cover-meta,.signature-grid { grid-template-columns:1fr; }
+    .matrix { grid-template-columns:1fr; }
+    .preamble { padding:2rem; }
+    .document { padding:2rem 1rem; }
+    .toc-grid { grid-template-columns:1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ COVER ═══════════════ -->
+<div class="cover">
+  <div class="cover-ornament">
+    <svg viewBox="0 0 130 130" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="65" cy="65" r="63" stroke="#b8960c" stroke-width="1" opacity=".35"/>
+      <circle cx="65" cy="65" r="50" stroke="#b8960c" stroke-width=".5" opacity=".25"/>
+      <circle cx="65" cy="65" r="37" stroke="#b8960c" stroke-width=".5" opacity=".2"/>
+      <polygon points="65,10 77,45 114,45 85,67 96,102 65,80 34,102 45,67 16,45 53,45" fill="none" stroke="#b8960c" stroke-width="1" opacity=".55"/>
+      <circle cx="65" cy="65" r="11" fill="#b8960c" opacity=".75"/>
+      <circle cx="65" cy="65" r="5" fill="#fff" opacity=".9"/>
+    </svg>
+  </div>
+  <p class="cover-label">سلسبيل OS — منظومة الحضارة الرقمية السيادية</p>
+  <h1 class="cover-title">الميثاق المعماري السيادي</h1>
+  <p class="cover-subtitle">دستور بناء سلسبيل وريف المدينة — النسخة الكاملة</p>
+  <p class="cover-version">v2.0 — النسخة الموحدة الشاملة</p>
+  <div class="cover-divider"></div>
+  <div class="cover-meta">
+    <div class="cover-meta-item"><span class="label">الإصدار</span><span class="value">v2.0 — موحّد</span></div>
+    <div class="cover-meta-item"><span class="label">الحالة</span><span class="value">ساري ونافذ</span></div>
+    <div class="cover-meta-item"><span class="label">الصلاحية</span><span class="value">جميع الفرق والأدوات</span></div>
+  </div>
+  <div class="cover-warning">
+    <p>⚠ هذا الدستور ملزم لكل من يعمل على المشروع — مطوراً بشرياً كان أم ذكاءً اصطناعياً. لا استثناء ولا تفاوض.</p>
+  </div>
+</div>
+
+<!-- ═══════════════ TOC ═══════════════ -->
+<div class="toc-section">
+  <div class="toc-inner">
+    <h2 class="toc-title">— فهرس المواد —</h2>
+    <div class="toc-grid">
+      <div class="toc-item"><span class="toc-num">باب ١</span><span class="toc-text">الفلسفة التأسيسية والمبادئ العليا</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٢</span><span class="toc-text">المحظورات المطلقة</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٣</span><span class="toc-text">الواجبات الإلزامية</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٤</span><span class="toc-text">معمارية الطبقات السبع</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٥</span><span class="toc-text">نظام الكيانات والقدرات</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٦</span><span class="toc-text">نظام الصلاحيات السيادي</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٧</span><span class="toc-text">المعمارية المالية اللامحيدة</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٨</span><span class="toc-text">قانون حكيم والذكاء الاصطناعي</span></div>
+      <div class="toc-item"><span class="toc-num">باب ٩</span><span class="toc-text">قواعد البناء بـ Lovable</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٠</span><span class="toc-text">الخريطة الكاملة للمحركات — ٣٠ محرك</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١١</span><span class="toc-text">ترتيب البناء الزمني الصحيح</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٢</span><span class="toc-text">محرك المنتجات — Product DNA</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٣</span><span class="toc-text">نظام شركاء النجاح</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٤</span><span class="toc-text">Event Cortex — الجهاز العصبي</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٥</span><span class="toc-text">Stem Cell Architecture</span><span class="toc-badge">جديد</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٦</span><span class="toc-text">خريطة كيانات سلسبيل التسعة</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٧</span><span class="toc-text">الأمان وZero Trust</span></div>
+      <div class="toc-item"><span class="toc-num">باب ١٨</span><span class="toc-text">اتفاقيات التسمية وهيكل الملفات</span></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ DOCUMENT ═══════════════ -->
+<div class="document">
+
+  <!-- PREAMBLE -->
+  <div class="preamble">
+    <h2>— ديباجة الميثاق —</h2>
+    <p>سلسبيل ليست تطبيقاً. سلسبيل نظام تشغيل حضاري سيادي، يهدف إلى بناء طبقة اقتصادية واجتماعية وتعليمية وصحية ومالية موحدة، تخدم الإنسان المسلم وتحترم شريعته وكرامته وخصوصيته.</p>
+    <p>ريف المدينة ليس متجراً إلكترونياً. هو دولة اقتصادية رقمية لها مؤسساتها وصلاحياتها ومناطقها وسياساتها وعملاتها الداخلية وشركاؤها. وكل سطر كود يُكتب في هذا المشروع يجب أن يكون واعياً بهذه الرؤية.</p>
+    <p>هذا الدستور النسخة الثانية الموحدة — يجمع المبادئ المعمارية الأصلية مع خريطة المحركات الكاملة (١٦ محركاً حضارياً + ١٤ محركاً تجارياً) ونظام شركاء النجاح وبنية الخلايا الجذعية. لا مكان للحلول المؤقتة، ولا للمنطق المُرمَّز، ولا للتفكير بعقلية المتجر.</p>
+  </div>
+
+
+  <!-- ═══ CHAPTER 1 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الأول</span>
+      <h2 class="chapter-title">الفلسفة التأسيسية والمبادئ العليا</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.١</span>
+      <h3>سلسبيل كيان سيادي لا تطبيق</h3>
+      <p>يُبنى كل مكون في المشروع بعقلية "نظام دولة"، لا بعقلية "صفحة ويب". كل قرار معماري يجب أن يصمد أمام سؤال: هل هذا القرار يخدم منصة تخدم مليار إنسان؟ ريف المدينة ليس متجراً — هو دولة اقتصادية مصغرة لها مؤسساتها وسياساتها.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.٢</span>
+      <h3>الشريعة الإسلامية دستور علوي</h3>
+      <p>الشريعة الإسلامية المرجعية العليا في كل قرار — في الخصوصية، والفصل بين الجنسين، والمعاملات المالية، وأخلاقيات البيانات، وعدالة الوصول. تُترجم الشريعة إلى Policy Engine وليس إلى قيود ترميز ثابتة.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.٣</span>
+      <h3>الإنسان أولاً — البيانات خادمة</h3>
+      <p>البيانات أمانة، لا سلعة ولا سلاح مراقبة. لا يُباع بيانات العملاء. لا يُستغل البيانات الطبية. الخصوصية حق أصيل يسبق أي اعتبار تجاري. البيانات ملك سيادي للكيانات والبشر — لا للشركة.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.٤</span>
+      <h3>الذكاء الاصطناعي مستشار لا سيد</h3>
+      <p>حكيم يقترح ويحلل ويحذر — لكنه لا يقرر سيادياً أبداً. القرار النهائي للإنسان دائماً. الذكاء الاصطناعي لا يملك صلاحية تعديل السياسات أو الثيمات أو الصلاحيات أو العقود تلقائياً دون موافقة بشرية صريحة.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.٥</span>
+      <h3>Civilization As Runtime — الحضارة كنظام تشغيل</h3>
+      <p>الهدف النهائي ليس بناء تطبيقات منفصلة — بل بناء نواة تشغيل حضارية واحدة يعمل فوقها ريف المدينة، نبض، تيسير، نور الدين، برق، وأي كيان مستقبلي. كل كيان يضيف قدرات (Capabilities) فوق نفس النواة — لا يُعاد بناء النواة من الصفر.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١.٦</span>
+      <h3>ريف المدينة يبيع أولاً</h3>
+      <p>القاعدة الذهبية للأولويات: ريف المدينة يجب أن يُصدر فاتورة حقيقية أولاً قبل بناء أي محرك حضاري. لا تُبنى features متقدمة قبل وجود حركة تجارية حقيقية. الرؤية العملاقة تُبنى طبقة فوق طبقة — كل طبقة تعمل وحدها وتولد قيمة حقيقية.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 2 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثاني</span>
+      <h2 class="chapter-title">المحظورات المطلقة — ABSOLUTE FORBIDDEN</h2>
+    </div>
+
+    <div class="critical-box">
+      <span class="critical-label">⚠ تحذير سيادي — أي انتهاك يُوقف العمل فوراً</span>
+      <p>هذه القوانين غير قابلة للتفاوض. لا يوجد سبب كافٍ لانتهاكها — لا الوقت، ولا الضغط، ولا "الحل المؤقت". كل Hack اليوم يتحول إلى كارثة بعد سنة.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>المحظورات المعمارية المطلقة</h4>
+      <ul class="forbidden-list">
+        <li>أي استدعاء مباشر لقاعدة البيانات من داخل مكونات الواجهة (UI Components)</li>
+        <li>أي <code>supabase.from("table")</code> خارج طبقة الـ Gateway والـ Services</li>
+        <li>أي منطق تجاري (Business Logic) داخل مكونات React أو الصفحات</li>
+        <li>أي <code>if (section === "restaurant")</code> أو تفريع بالاسم في أي مكان</li>
+        <li>أي قيم مرمّزة Hardcoded — أسماء أقسام، معرّفات، سياسات — في الكود</li>
+        <li>أي تكرار لنفس الـ Hook أو الـ Component بتعديل طفيف لكل حالة</li>
+        <li>أي تجاوز للـ Runtime Renderer ببناء صفحة مخصصة لكيان بعينه</li>
+        <li>أي استخدام لـ localStorage أو sessionStorage لبيانات حساسة أو صلاحيات</li>
+        <li>أي God Mode أو bypass في بيئة الإنتاج Production</li>
+        <li>أي تعديل مباشر على سجلات محاسبية أو مالية (UPDATE balance = balance - x)</li>
+        <li>أي وصول لبيانات tenant آخر تحت أي ظرف</li>
+        <li>أي key خاص (service role, AI key) في بيئات الـ frontend أو الـ logs</li>
+        <li>بناء صفحة React جديدة لكل نوع نشاط — بدلاً من seed + capabilities</li>
+        <li>أي AI يعمل باستقلالية كاملة دون Human Veto في الإنتاج</li>
+        <li>نظام عمولات مرتبط بالتجنيد لا بالخدمة الحقيقية (MLM محظور)</li>
+      </ul>
+    </div>
+
+    <div class="note-box">
+      <p><strong>قاعدة الاختبار الذهبية:</strong> إذا كنت تفكر "سأضع هذا مؤقتاً وأصلحه لاحقاً" — هذا الإحساس بالضبط هو إشارة التوقف. لا توجد "لاحقاً" في المشاريع الضخمة.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 3 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثالث</span>
+      <h2 class="chapter-title">الواجبات الإلزامية — ABSOLUTE REQUIRED</h2>
+    </div>
+
+    <div class="law-block">
+      <h4>الواجبات المعمارية الإلزامية</h4>
+      <ul class="required-list">
+        <li>كل قراءة للبيانات تمر عبر <strong>catalogGateway</strong> أو <strong>entityService</strong> المختص</li>
+        <li>كل واجهة تستقبل فقط <strong>ViewModel</strong> جاهز — لا raw data من DB</li>
+        <li>كل قسم يُعرَّف عبر <strong>capabilities</strong> و<strong>policies</strong> — لا صفحة خاصة</li>
+        <li>كل block في الواجهة مسجّل في <strong>blockRegistry</strong> بشروط ظهور capability-driven</li>
+        <li>كل عملية مالية تُسجَّل كـ <strong>immutable ledger event</strong> — لا تعديل مباشر</li>
+        <li>كل طلب يحمل <strong>tenant_id</strong> موثّقاً من السيرفر فقط</li>
+        <li>كل عملية حساسة تملك <strong>idempotency_key</strong> لمنع التكرار</li>
+        <li>كل تغيير جوهري يُسجَّل في <strong>audit_events</strong> غير قابل للتعديل</li>
+        <li>كل capability جديد يُسجَّل في <strong>capabilityRegistry</strong> قبل الاستخدام</li>
+        <li>كل نوع بيانات يُعرَّف في <strong>TypeScript interface</strong> مركزي موحّد</li>
+        <li>كل حدث في النظام يُنشر عبر <strong>EventBus</strong> — لا مزامنة مباشرة بين المحركات</li>
+        <li>كل منتج يمتلك <strong>Product DNA</strong> كاملاً — لا مجرد اسم وسعر</li>
+        <li>كل شريك نجاح تربط عمولته بـ<strong>نجاح العميل</strong> لا بعدد التجنيد</li>
+        <li>كل output من AI يمر عبر <strong>Human Veto</strong> قبل التنفيذ</li>
+      </ul>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>الموضوع</th>
+          <th class="bad-col">❌ الطريقة الخاطئة</th>
+          <th class="good-col">✓ الطريقة الصحيحة</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>قراءة المنتجات</td><td class="bad-cell">supabase.from("usa_products")</td><td class="good-cell">catalogGateway.list(params)</td></tr>
+        <tr><td>واجهة قسم</td><td class="bad-cell">if (type==="meat") return &lt;MeatPage/&gt;</td><td class="good-cell">RuntimeRenderer.render(descriptor)</td></tr>
+        <tr><td>صلاحية</td><td class="bad-cell">role === "admin"</td><td class="good-cell">capabilities.has("order.approve")</td></tr>
+        <tr><td>عملية مالية</td><td class="bad-cell">UPDATE wallet SET balance=balance-100</td><td class="good-cell">appendLedgerEvent({type:'debit',amount:100})</td></tr>
+        <tr><td>قسم جديد</td><td class="bad-cell">إنشاء صفحة React جديدة</td><td class="good-cell">seed section + capabilities فقط</td></tr>
+        <tr><td>حدث في النظام</td><td class="bad-cell">UPDATE products SET stock=5</td><td class="good-cell">emit('StockThresholdReached', payload)</td></tr>
+        <tr><td>عمولة الشريك</td><td class="bad-cell">عمولة على عدد المدعوّين</td><td class="good-cell">عمولة على نشاط العميل + رضاه</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+
+  <!-- ═══ CHAPTER 4 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الرابع</span>
+      <h2 class="chapter-title">معمارية الطبقات — Sovereign Layered OS</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٤.١</span>
+      <h3>الطبقات السبع — لا تخلط بينها أبداً</h3>
+      <p>المشروع مبني على سبع طبقات مفصولة تماماً. كل طبقة لا تتواصل مع ما تحتها مباشرة — بل عبر الطبقة التي تليها فقط.</p>
+    </div>
+
+    <div class="matrix">
+      <div class="matrix-cell"><div class="cell-title">Layer 7 — UI</div><p>مكونات React فقط. تستقبل ViewModels. لا تعرف DB. لا تعرف Supabase.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 6 — Runtime</div><p>RuntimeRenderer + BlockRegistry + FeedEngine. يولّد الواجهة من descriptors.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 5 — Application</div><p>UseCases + ViewModels + Transformers. Business logic هنا فقط.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 4 — Domain</div><p>Entities + Capabilities + Policies + Workflows + Product DNA.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 3 — Gateway</div><p>CatalogGateway + EntityService + FinanceGateway. الوسيط الوحيد مع DB.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 2 — Infrastructure</div><p>Supabase + Storage + Queue + Cache. Implementation details فقط.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Layer 1 — Events</div><p>Event Bus (NATS/Supabase Realtime). كل تغيير مهم ينشر event. لا coupling مباشر.</p></div>
+    </div>
+
+    <div class="critical-box">
+      <span class="critical-label">قانون الطبقات المطلق</span>
+      <p>Layer 7 (UI) لا تعرف وجود Supabase. Layer 6 (Runtime) لا تعرف أسماء الجداول. Layer 5 (Application) لا تعرف طريقة التخزين. Layer 1 (Events) هو الجهاز العصبي — كل حدث ينتشر عبره لا مباشرة.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 5 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الخامس</span>
+      <h2 class="chapter-title">نظام الكيانات والقدرات — Entity & Capability System</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٥.١</span>
+      <h3>كل شيء كيان — Everything is an Entity</h3>
+      <p>لا يوجد "متجر" أو "مطعم" أو "صيدلية" كصفحات ثابتة. كل هذه مجرد Entities بـ capabilities مختلفة. الـ Runtime يقرر كيف يعرضها. حتى المنتج نفسه كيان حي — له DNA، وذاكرة، وسلوك، ودورة حياة.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// كل كيان له هذا الهيكل الأساسي</span>
+<span class="keyword">interface</span> Entity {
+  entity_id:     <span class="string">"UUID"</span>;
+  entity_type:   <span class="string">"Human" | "Store" | "Product" | "Ministry"</span>;
+  state:         <span class="string">"Active" | "Draft" | "Suspended"</span>;
+  context:       Record&lt;string, unknown&gt;;
+  relationships: Relationship[];
+  capabilities:  Capability[];
+  memory:        EntityMemory;
+  events:        Event[];
+  policies:      Policy[];
+}
+
+<span class="comment">// ❌ خاطئ — تفريع بالاسم</span>
+<span class="bad">if (sectionType === 'restaurant') return &lt;RestaurantPage /&gt;;</span>
+
+<span class="comment">// ✓ صحيح — capability-driven</span>
+<span class="good">const caps = capabilityRegistry.resolve(section.id);
+const descriptor = buildRenderDescriptor(caps);
+return &lt;RuntimeRenderer descriptor={descriptor} /&gt;;</span>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٥.٢</span>
+      <h3>Capability Registry — سجل القدرات الموحد</h3>
+      <p>كل capability اسم منطقي يُمكّن سلوكاً معيناً. لا يُضاف capability جديد بدون تسجيله هنا أولاً.</p>
+    </div>
+
+    <div class="code-block">
+<span class="keyword">export const</span> CAPABILITIES = {
+  <span class="comment">// تجاري</span>
+  SUPPORTS_VARIANTS:      <span class="string">'supports_variants'</span>,
+  SUPPORTS_ADDONS:        <span class="string">'supports_addons'</span>,
+  SUPPORTS_NUTRITION:     <span class="string">'supports_nutrition'</span>,
+  SUPPORTS_WHOLESALE:     <span class="string">'supports_wholesale'</span>,
+  SUPPORTS_SUBSCRIPTION:  <span class="string">'supports_subscription'</span>,
+  SUPPORTS_COLD_CHAIN:    <span class="string">'supports_cold_chain'</span>,
+  SUPPORTS_KITCHEN_MODE:  <span class="string">'supports_kitchen_mode'</span>,
+  SUPPORTS_QUICK_BUY:     <span class="string">'supports_quick_buy'</span>,
+  SUPPORTS_PRESCRIPTION:  <span class="string">'supports_prescription'</span>,
+  <span class="comment">// مالي</span>
+  SUPPORTS_LEDGER:        <span class="string">'supports_ledger'</span>,
+  SUPPORTS_DEFERRED_PAY:  <span class="string">'supports_deferred_pay'</span>,
+  SUPPORTS_COMMISSION:    <span class="string">'supports_commission'</span>,
+  SUPPORTS_OFFLINE_POS:   <span class="string">'supports_offline_pos'</span>,
+  <span class="comment">// ذكاء</span>
+  SUPPORTS_AI_PRICING:    <span class="string">'supports_ai_pricing'</span>,
+  SUPPORTS_VISION:        <span class="string">'supports_vision'</span>,
+  SUPPORTS_PRODUCT_DNA:   <span class="string">'supports_product_dna'</span>,
+  SUPPORTS_AGENTS:        <span class="string">'supports_agents'</span>,
+};
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 6 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب السادس</span>
+      <h2 class="chapter-title">نظام الصلاحيات — Sovereign Permission Model</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٦.١</span>
+      <h3>الصلاحيات سياقية متعددة الأبعاد</h3>
+      <p>الصلاحية لا تُعرَّف بـ role بسيط. تُعرَّف بـ ٤ أبعاد: من أنت + في أي كيان + في أي نطاق + ماذا تفعل.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// ❌ خاطئ</span>
+<span class="bad">if (user.role === 'admin') { showInventory(); }</span>
+
+<span class="comment">// ✓ صحيح — multi-dimensional</span>
+<span class="good">const canView = permissionEngine.check({
+  actor:    user.id,
+  action:   'inventory.view',
+  resource: branchId,
+  scope:    { region: 'egypt', entity: 'reef-madina' }
+});</span>
+    </div>
+
+    <div class="law-block">
+      <h4>قواعد الصلاحيات الإلزامية</h4>
+      <ul class="forbidden-list">
+        <li>لا يُقرأ tenant_id من الـ client أو الـ route أو الـ URL — السيرفر فقط</li>
+        <li>لا تُمنح صلاحية Admin عامة — كل صلاحية مقيّدة بنطاق محدد</li>
+        <li>لا يرى مستخدم بيانات خارج نطاق صلاحيته مطلقاً</li>
+        <li>لا تُخزَّن الصلاحيات في localStorage أو حالة الـ client</li>
+        <li>كل escalation صلاحية يُسجَّل في audit log فوراً</li>
+        <li>شريك النجاح لا يرى بيانات العملاء الشخصية — فقط مؤشرات الأداء</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 7 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب السابع</span>
+      <h2 class="chapter-title">المعمارية المالية — Immutable Financial Architecture</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٧.١</span>
+      <h3>كل عملية مالية حدث لا يُحذف</h3>
+      <p>لا يوجد UPDATE أو DELETE على سجلات مالية. كل عملية Append-Only Event. الرصيد الحالي مشتق من مجموع الأحداث — لا يُخزَّن مباشرة. ينطبق هذا على: محفظة العميل، عمولة الشريك، فاتورة المورد، كل شيء مالي.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// ❌ ممنوع مطلقاً</span>
+<span class="bad">UPDATE wallet SET balance = balance - 150 WHERE user_id = $1</span>
+
+<span class="comment">// ✓ الطريقة الوحيدة المقبولة</span>
+<span class="good">INSERT INTO ledger_events (
+  id, wallet_id, type, amount,
+  idempotency_key, reference, created_at
+) VALUES (
+  gen_random_uuid(), $wallet_id, 'debit',
+  150, $idempotency_key, $order_id, now()
+);</span>
+
+<span class="comment">-- الرصيد يُحسب دائماً من السجل</span>
+<span class="good">SELECT SUM(CASE type WHEN 'credit' THEN amount ELSE -amount END)
+FROM ledger_events WHERE wallet_id = $1;</span>
+    </div>
+
+    <div class="law-block">
+      <h4>قواعد المالية الإلزامية</h4>
+      <ul class="required-list">
+        <li>كل عملية دفع تملك idempotency_key فريداً لمنع الخصم المزدوج</li>
+        <li>كل تحويل يستخدم double-entry ledger (مدين وائتمان معاً)</li>
+        <li>كل عملية مالية تُلاحَق بـ trace_id طوال دورة حياتها</li>
+        <li>عمولات شركاء النجاح تُحسب من نفس Ledger Engine — لا نظام منفصل</li>
+        <li>لا يُنفَّذ دفع بدون تحقق من الرصيد على السيرفر — لا على الـ client</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 8 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثامن</span>
+      <h2 class="chapter-title">قانون الذكاء الاصطناعي — حكيم في حدوده</h2>
+    </div>
+
+    <div class="matrix">
+      <div class="matrix-cell"><div class="cell-title">Advisory — مستشار</div><p>يقترح، يحلل، يحذر. لا ينفذ. المستخدم يقرر.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Assisted — مساعد</div><p>يُنفّذ بعد موافقة صريحة Human Veto. كل تنفيذ يُسجَّل.</p></div>
+      <div class="matrix-cell"><div class="cell-title">Autonomous — محظور</div><p>لا AI يعمل باستقلالية كاملة في الإنتاج أبداً.</p></div>
+    </div>
+
+    <div class="law-block">
+      <h4>ما يُمنع على حكيم مطلقاً</h4>
+      <ul class="forbidden-list">
+        <li>تعديل ثيمات أو هوية بصرية تلقائياً</li>
+        <li>تغيير صلاحيات مستخدمين بدون موافقة صريحة</li>
+        <li>تنفيذ عمليات مالية أو عمولات بدون تأكيد بشري</li>
+        <li>تعديل سياسات النظام أو قوانين الـ runtime</li>
+        <li>الوصول لبيانات المستخدمين الشخصية خارج سياق الطلب</li>
+        <li>تنفيذ أوامر حذف على بيانات حقيقية</li>
+        <li>تعديل هيكل قاعدة البيانات أو الـ Schema</li>
+      </ul>
+    </div>
+
+    <div class="law-block">
+      <h4>Pipeline إلزامي لكل output من AI</h4>
+      <ul class="required-list">
+        <li><strong>Schema Validation</strong> — هل الشكل صحيح؟</li>
+        <li><strong>Business Validation</strong> — هل المنطق مقبول؟</li>
+        <li><strong>Permission Validation</strong> — هل مسموح؟</li>
+        <li><strong>Rate Limiting</strong> — هل ضمن الحدود؟</li>
+        <li><strong>Human Veto</strong> — هل وافق الإنسان؟</li>
+        <li><strong>Execution + Audit Log</strong> — التنفيذ مع التوثيق الكامل</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 9 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب التاسع</span>
+      <h2 class="chapter-title">قواعد البناء بـ Lovable</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ٩.١</span>
+      <h3>Lovable مصنع — لا مهندس معمارية</h3>
+      <p>Lovable ينفّذ ما يُملى عليه بدقة. المعمارية قرار بشري يُملى عليه. مهمته: بناء الـ blocks والـ components والـ services وفق الدستور فقط.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>هيكل كل Prompt لـ Lovable — إلزامي</h4>
+      <ul class="required-list">
+        <li><strong>السياق المعماري:</strong> في أي Layer نعمل؟ ما موقعه في النظام؟</li>
+        <li><strong>الملفات المحددة:</strong> ماذا يلمس بالضبط وماذا لا يلمس؟</li>
+        <li><strong>الممنوعات الصريحة:</strong> اذكر بالاسم ما لا يفعله</li>
+        <li><strong>معايير القبول:</strong> كيف تعرف أن الناتج صحيح؟</li>
+        <li><strong>حجم المهمة:</strong> لا تعطِ مهمة تستغرق أكثر من ٣٠ دقيقة مراجعة</li>
+      </ul>
+    </div>
+
+    <div class="prompt-template">
+"""
+السياق: نحن في Layer 5 (Application). نبني ProductViewModelFactory.
+
+المهمة: أنشئ ملف src/core/catalog/factories/ProductViewModelFactory.ts
+يحول ProductEntity → ProductCardVM.
+
+الممنوع:
+- لا تستدعِ Supabase مباشرة
+- لا تضع business logic خارج هذا الملف
+- لا تعدّل أي ملف آخر
+- لا any types
+
+معايير القبول:
+- ProductCardVM يحتوي: id, title, price, thumbnail, capabilities[], dna
+- الدالة تقبل ProductEntity[] وتُرجع ProductCardVM[]
+- TypeScript strict mode
+"""
+    </div>
+
+    <div class="critical-box">
+      <span class="critical-label">قانون الـ Micro-Prompt</span>
+      <p>المهام الكبيرة تُقسَّم إلى مهام صغيرة متتالية. كل مهمة تُراجَع وتُعتمَد قبل الانتقال للتالية. هذا يوفر ٧٠٪ من الكريديت ويمنع الـ architecture drift الذي يدمر المشاريع.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 10 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب العاشر</span>
+      <h2 class="chapter-title">الخريطة الكاملة للمحركات — ٣٠ محركاً</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٠.١</span>
+      <h3>المحركات الـ١٦ الحضارية + ١٤ محركاً تجارياً</h3>
+      <p>المحركات الـ١٦ في الوثيقة الأصلية كُتبت بمنظور حضاري فلسفي — سلسبيل في أقصى نضجها بعد ١٥+ سنة. أما المحركات التجارية الـ١٤ فهي محركات تشغيلية يومية تحتاجها ريف المدينة الآن. كلاهما إلزامي — لكن بترتيب مختلف.</p>
+    </div>
+
+    <table class="engine-table">
+      <thead>
+        <tr>
+          <th>المستوى</th>
+          <th>المحرك</th>
+          <th>في الـ١٦؟</th>
+          <th>الدور</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="level-0"><td>🔴 نواة صلبة</td><td>Universal Entity Engine</td><td><span class="status-exists">✓ محرك ١</span></td><td>كل شيء كيان — بدونه لا يوجد نظام</td></tr>
+        <tr class="level-0"><td>🔴 نواة صلبة</td><td>Capability Runtime Engine</td><td><span class="status-exists">✓ محرك ٥</span></td><td>بدونه كل شيء Hardcoded</td></tr>
+        <tr class="level-0"><td>🔴 نواة صلبة</td><td>Event Cortex Engine</td><td><span class="status-exists">✓ محرك ٣</span></td><td>الجهاز العصبي — بدونه النظام أصم</td></tr>
+        <tr class="level-1"><td>🟠 Commerce MVP</td><td>Product DNA Engine</td><td><span class="status-missing">✗ غائب</span></td><td>كل منتج كيان حي بـ DNA كامل</td></tr>
+        <tr class="level-1"><td>🟠 Commerce MVP</td><td>Vision Cortex</td><td><span class="status-missing">✗ غائب</span></td><td>Camera-to-Commerce، OCR، Barcode</td></tr>
+        <tr class="level-1"><td>🟠 Commerce MVP</td><td>Cashier Brain / Smart POS</td><td><span class="status-missing">✗ غائب</span></td><td>الكاشير الذكي مع Morph UI</td></tr>
+        <tr class="level-1"><td>🟠 Commerce MVP</td><td>Inventory Brain</td><td><span class="status-missing">✗ غائب</span></td><td>المخزون الحي مع توقعات</td></tr>
+        <tr class="level-1"><td>🟠 Commerce MVP</td><td>Offline-First Sync Engine</td><td><span class="status-exists">✓ طبقة في ١٦</span></td><td>يعمل بلا إنترنت + مزامنة ذكية</td></tr>
+        <tr class="level-2"><td>🟡 Intelligence</td><td>Semantic Memory Engine</td><td><span class="status-exists">✓ محرك ٤</span></td><td>الأحداث تصبح معنى وذاكرة</td></tr>
+        <tr class="level-2"><td>🟡 Intelligence</td><td>Commerce & Civic Intelligence</td><td><span class="status-exists">✓ محرك ٦</span></td><td>العقل الاقتصادي — يفهم السوق</td></tr>
+        <tr class="level-2"><td>🟡 Intelligence</td><td>AI Pricing Cortex</td><td><span class="status-missing">✗ غائب</span></td><td>تسعير ذكي + موسمي + نفسي</td></tr>
+        <tr class="level-2"><td>🟡 Intelligence</td><td>Supplier Intelligence Engine</td><td><span class="status-missing">✗ غائب</span></td><td>يختار المورد، يتوقع التأخير</td></tr>
+        <tr class="level-2"><td>🟡 Intelligence</td><td>Fraud & Manipulation Detection</td><td><span class="status-missing">✗ غائب</span></td><td>يكتشف التلاعب والشذوذ</td></tr>
+        <tr class="level-3"><td>🟢 Decision</td><td>Autonomous Decision Engine</td><td><span class="status-exists">✓ محرك ٧</span></td><td>يقرر لا يعرض فقط</td></tr>
+        <tr class="level-3"><td>🟢 Decision</td><td>Autonomous Commerce Engine</td><td><span class="status-exists">✓ محرك ١٣</span></td><td>اقتصاد حي ذاتي الحركة</td></tr>
+        <tr class="level-3"><td>🟢 Decision</td><td>Autonomous Agents Engine</td><td><span class="status-exists">✓ محرك ٩</span></td><td>وكلاء مستقلون لكل كيان</td></tr>
+        <tr class="level-3"><td>🟢 Decision</td><td>Shelf Intelligence</td><td><span class="status-missing">✗ غائب</span></td><td>الرفوف، الحرارة البيعية، الزوايا الميتة</td></tr>
+        <tr class="level-3"><td>🟢 Decision</td><td>Human Behavior Engine</td><td><span class="status-missing">✗ غائب</span></td><td>يدرس الكاشير، العملاء، الطوابير</td></tr>
+        <tr class="level-4"><td>🔵 Identity</td><td>Adaptive Identity Engine</td><td><span class="status-exists">✓ محرك ٢</span></td><td>هوية حية متعددة الأبعاد</td></tr>
+        <tr class="level-4"><td>🔵 Identity</td><td>Partners & Success Network</td><td><span class="status-missing">✗ غائب</span></td><td>شركاء النجاح، المفوضون، السفراء</td></tr>
+        <tr class="level-4"><td>🔵 Identity</td><td>Commission & Reputation Ledger</td><td><span class="status-missing">✗ غائب</span></td><td>عمولات مرتبطة بالنجاح الحقيقي</td></tr>
+        <tr class="level-4"><td>🔵 Identity</td><td>Trust & Governance Engine</td><td><span class="status-exists">✓ محرك ١١</span></td><td>الدستور الرقمي والسيادة</td></tr>
+        <tr class="level-5"><td>🟣 Evolution</td><td>Self-Evolving Engine</td><td><span class="status-exists">✓ محرك ١٠</span></td><td>يطور نفسه بنفسه</td></tr>
+        <tr class="level-5"><td>🟣 Evolution</td><td>Universal Interface Engine</td><td><span class="status-exists">✓ محرك ١٢</span></td><td>الواجهة تختفي وتصبح واقعاً</td></tr>
+        <tr class="level-5"><td>🟣 Evolution</td><td>Global Product Memory</td><td><span class="status-missing">✗ غائب</span></td><td>Google Brain للمنتجات</td></tr>
+        <tr class="level-5"><td>🟣 Evolution</td><td>Universal Product Translator</td><td><span class="status-missing">✗ غائب</span></td><td>Pepsi = بيبسي = كيان واحد</td></tr>
+        <tr class="level-5"><td>🟣 Evolution</td><td>Simulation Universe</td><td><span class="status-exists">✓ محرك ٨</span></td><td>يحاكي المستقبل قبل القرار</td></tr>
+        <tr class="level-6"><td>⚫ Civilization</td><td>Knowledge & Cognitive Engine</td><td><span class="status-exists">✓ محرك ١٥</span></td><td>العقل المعرفي للحضارة</td></tr>
+        <tr class="level-6"><td>⚫ Civilization</td><td>Human Identity Runtime</td><td><span class="status-exists">✓ محرك ١٤</span></td><td>الإنسان كيان حي عبر حياته كلها</td></tr>
+        <tr class="level-6"><td>⚫ Civilization</td><td>Universal Capability OS</td><td><span class="status-exists">✓ محرك ١٦</span></td><td>نواة القلوب — كل شيء capability</td></tr>
+        <tr class="level-6"><td>⚫ Civilization</td><td>Hakim Agent (محرك مستقل)</td><td><span class="status-missing">✗ غائب</span></td><td>يجمع كل شيء — المستشار+المنفذ</td></tr>
+      </tbody>
+    </table>
+
+    <div class="note-box">
+      <p><strong>القانون الذهبي:</strong> المحركات المُشار إليها بـ "غائب" هي محركات تجارية عملية غابت عن الـ١٦ الحضارية لأن الـ١٦ كُتبت بمنظور فلسفي. كلها إلزامية في الوقت المناسب.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 11 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الحادي عشر</span>
+      <h2 class="chapter-title">ترتيب البناء الزمني الصحيح</h2>
+    </div>
+
+    <div class="phase-timeline">
+      <div class="phase-item">
+        <strong>المرحلة صفر — النواة الصلبة (الأسبوعان الأولان)</strong>
+        <p>Entity Engine + Capability Registry + Event Bus (NATS/Supabase Realtime) + هيكل الطبقات السبع. لا شيء قبل هذا وإلا انهار كل شيء لاحقاً.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة الأولى — ريف المدينة يبيع (شهر ١-٢)</strong>
+        <p>Product DNA Engine + Vision Cortex الأساسي (كاميرا + Barcode) + Cashier Brain + Smart POS مع Morph UI + Inventory Brain + Offline-First Sync + Universal Printing.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة الثانية — ريف المدينة يفهم (شهر ٢-٣)</strong>
+        <p>Semantic Memory Engine + AI Pricing Cortex + Supplier Intelligence + Fraud Detection + Commerce Intelligence الأساسي.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة الثالثة — ريف المدينة يقرر (شهر ٣-٤)</strong>
+        <p>Autonomous Decision Engine + Partners & Success Network + Commission & Reputation Ledger + Shelf Intelligence.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة الرابعة — سلسبيل تتوسع (شهر ٤-٦)</strong>
+        <p>Adaptive Identity Engine + Autonomous Agents + Human Behavior Engine + Global Product Memory + Hakim Agent MVP.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة الخامسة — سلسبيل تتطور (شهر ٦-١٢)</strong>
+        <p>Self-Evolving Engine + Universal Interface Engine + Autonomous Commerce Engine + Simulation Universe + Universal Product Translator.</p>
+      </div>
+      <div class="phase-item">
+        <strong>المرحلة السادسة — سلسبيل حضارة (سنة ٢+)</strong>
+        <p>Trust & Governance Engine + Knowledge & Cognitive Engine + Human Identity Runtime + Universal Capability OS + Cross-Civilization Runtime.</p>
+      </div>
+    </div>
+
+    <div class="critical-box">
+      <span class="critical-label">قانون الأولويات الذهبي</span>
+      <p>لا تُبنى محركات الفهم قبل محركات الأحداث. لا تُبنى محركات القرار قبل محركات الفهم. لا تُبنى محركات الوكلاء قبل محركات القرار. ريف المدينة يجب أن يُصدر فاتورة حقيقية قبل أي محرك حضاري.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 12 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثاني عشر</span>
+      <h2 class="chapter-title">محرك المنتجات — Product DNA Engine</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٢.١</span>
+      <h3>المنتج كيان حي لا مجرد سجل</h3>
+      <p>المنتج في سلسبيل ليس اسماً وسعراً في جدول. هو كيان حي يحمل DNA كاملاً يشمل الهوية والاقتصاد والسلوك والإمداد. هذا ما يجعل سلسبيل Commerce Intelligence وليس مجرد POS.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// Product DNA — الهيكل الإلزامي لكل منتج</span>
+<span class="keyword">interface</span> ProductDNA {
+  identity: {
+    brand:    <span class="string">string</span>;
+    category: <span class="string">string</span>;
+    variant:  <span class="string">string</span>;
+    size:     <span class="string">string</span>;
+    barcode:  <span class="string">string[]</span>;
+    fingerprint: <span class="string">string</span>; <span class="comment">// بصمة فريدة حتى لو تغير الاسم</span>
+  };
+  financial: {
+    cost:            <span class="string">number</span>;
+    suggested_price: <span class="string">number</span>;
+    margin_target:   <span class="string">number</span>;
+    price_history:   <span class="string">PriceEvent[]</span>;
+  };
+  behavioral: {
+    peak_hours:      <span class="string">string[]</span>;
+    linked_products: <span class="string">string[]</span>; <span class="comment">// يُشترى معه</span>
+    seasonal_demand: <span class="string">SeasonMap</span>;
+    target_segments: <span class="string">string[]</span>;
+  };
+  supply: {
+    supplier_id:  <span class="string">string</span>;
+    lead_time:    <span class="string">number</span>;
+    alternatives: <span class="string">string[]</span>;
+    shelf_life:   <span class="string">number</span>;
+  };
+  intelligence: {
+    velocity:       <span class="string">'fast' | 'medium' | 'slow' | 'dead'</span>;
+    ai_description: <span class="string">string</span>;
+    seo_tags:       <span class="string">string[]</span>;
+    risk_flags:     <span class="string">string[]</span>;
+  };
+}
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٢.٢</span>
+      <h3>Vision Cortex — Camera-to-Commerce</h3>
+      <p>الكاميرا تحل مشكلة إدخال المنتجات يدوياً. النظام يرى المنتج ويبني الـ DNA تلقائياً. الإنسان يراجع ويعتمد (Human Veto). لا يُنشر منتج بدون مراجعة بشرية.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>مراحل Vision Cortex الإلزامية</h4>
+      <ul class="required-list">
+        <li><strong>Image Enhancement</strong> — تنظيف الصورة وتحسينها</li>
+        <li><strong>Barcode Detection</strong> — قراءة EAN13, QR, UPC, CODE128 تلقائياً</li>
+        <li><strong>OCR Extraction</strong> — قراءة الاسم، الوزن، الصلاحية، بلد المنشأ</li>
+        <li><strong>Category Classification</strong> — تصنيف تلقائي بالـ capabilities</li>
+        <li><strong>Duplicate Check</strong> — Global Product Memory تمنع التكرار</li>
+        <li><strong>Human Veto</strong> — مراجعة وتعديل قبل النشر</li>
+      </ul>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٢.٣</span>
+      <h3>AI Pricing Cortex — التسعير الذكي</h3>
+      <p>السعر ليس رقماً ثابتاً. هو قرار حي يتغير حسب: الطلب، المنطقة، الموسم، المنافسة، السلوك الشرائي، انتهاء الصلاحية. التسعير النفسي الذكي يُطبَّق حسب الثقافة والسوق.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 13 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثالث عشر</span>
+      <h2 class="chapter-title">نظام شركاء النجاح — Partners & Success Network</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٣.١</span>
+      <h3>شريك النجاح — مفوّض حضاري لا مندوب مبيعات</h3>
+      <p>شريك النجاح ليس مندوب مبيعات يجلب عملاء ويختفي. هو مفوّض حضاري يقدم خدمة حقيقية، يتابع نجاح العميل، ويبني الثقة بالنيابة عن سلسبيل. الناس تثق فيمن تعرف — وهذا أقوى من كل إعلان.</p>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٣.٢</span>
+      <h3>هيكل مستويات شركاء النجاح</h3>
+    </div>
+
+    <div class="matrix">
+      <div class="matrix-cell"><div class="cell-title">المستوى ١ — عضو</div><span class="cell-badge badge-gold">Entry</span><p>مشاركة رابط، دعوة أصدقاء، مكافآت بسيطة. سمعة تبدأ من الصفر.</p></div>
+      <div class="matrix-cell"><div class="cell-title">المستوى ٢ — شريك</div><span class="cell-badge badge-gold">Partner</span><p>يساعد العملاء، يحل المشاكل، يتابع الرضا. عمولة متكررة.</p></div>
+      <div class="matrix-cell"><div class="cell-title">المستوى ٣ — مفوّض</div><span class="cell-badge badge-blue">Delegate</span><p>يدخل المتاجر والشركات، يُقنع بالانضمام، يبقى مسؤولاً.</p></div>
+      <div class="matrix-cell"><div class="cell-title">المستوى ٤ — قائد منطقة</div><span class="cell-badge badge-green">Leader</span><p>يدير شبكة مفوضين، هدف جماعي، تقارير حية.</p></div>
+      <div class="matrix-cell"><div class="cell-title">المستوى ٥ — سفير مدينة</div><span class="cell-badge badge-green">Ambassador</span><p>يمثل سلسبيل في مدينة كاملة. نفوذ + أدوات + دخل متميز.</p></div>
+      <div class="matrix-cell"><div class="cell-title">المستوى ٦ — شريك سيادي</div><span class="cell-badge badge-red">Sovereign</span><p>شريك استراتيجي. حصة في النمو الإقليمي. مقعد استشاري.</p></div>
+    </div>
+
+    <div class="law-block">
+      <h4>قوانين العمولة — إلزامية</h4>
+      <ul class="required-list">
+        <li>العمولة مرتبطة بـ <strong>نشاط العميل الحقيقي</strong> لا بعدد المدعوّين</li>
+        <li>استمرار نشاط العميل = دخل متكرر للشريك</li>
+        <li>تقييم العميل لتجربته يؤثر مباشرة على عمولة الشريك</li>
+        <li>تحقيق Target الشهري = Bonus إضافي</li>
+        <li>انخفاض churn Rate = حوافز الاحتفاظ</li>
+        <li>كل عمولة تُسجَّل في Ledger Engine الموحد — لا نظام منفصل</li>
+      </ul>
+      <ul class="forbidden-list" style="margin-top:1rem;">
+        <li>عمولة على عدد الأشخاص المدعوّين فقط بدون قيمة حقيقية</li>
+        <li>هياكل هرمية يربح فيها الشريك من جهد من تحته (MLM محظور)</li>
+        <li>شريك يصل لبيانات العملاء الشخصية أو المالية</li>
+        <li>ترقية شريك بدون تقييم أداء موضوعي من حكيم</li>
+      </ul>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٣.٣</span>
+      <h3>نظام سمعة الشريك — Reputation Engine</h3>
+      <p>كل شريك يمتلك ملف سمعة حي يشمل: تقييم العملاء، سرعة الاستجابة، معدل الاحتفاظ، عدد الشكاوى، كفاءة التدريب. إذا انخفضت السمعة: إنذار، ثم تجميد، ثم سحب العملاء منه وإعادة تعيينهم. النظام ينظف نفسه ذاتياً عبر حكيم.</p>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 14 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الرابع عشر</span>
+      <h2 class="chapter-title">Event Cortex — الجهاز العصبي الحي</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٤.١</span>
+      <h3>Nothing Happens Silently — لا شيء يحدث بصمت</h3>
+      <p>كل تغيير في سلسبيل يجب أن يصبح حدثاً حياً ينتشر عبر Event Bus. بدون Events: لا AI حقيقي، لا تعلم، لا توقع، لا Automation. Events هي الجهاز العصبي — بدونها النظام أصم وأعمى.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// ❌ خاطئ — تعديل صامت</span>
+<span class="bad">UPDATE products SET stock = 5 WHERE id = $1
+UPDATE wallet SET balance = balance - 150</span>
+
+<span class="comment">// ✓ صحيح — كل شيء Event</span>
+<span class="good">emit('StockReduced',         { product_id, qty, branch_id, actor })
+emit('StockThresholdReached',{ product_id, level: 'low' })
+emit('SaleCompleted',        { order_id, items, cashier, branch, time })
+emit('PriceChanged',         { product_id, old_price, new_price, reason })
+emit('PartnerCommissionDue', { partner_id, amount, trigger: 'customer_order' })
+emit('LowStockDetected',     { product_id, suggestion: 'reorder' })</span>
+
+<span class="comment">// هيكل كل Event — إلزامي</span>
+<span class="keyword">interface</span> CivilizationEvent {
+  event:      <span class="string">string</span>;      <span class="comment">// SaleCompleted, StockReduced...</span>
+  entity_id:  <span class="string">string</span>;
+  actor_id:   <span class="string">string</span>;
+  timestamp:  <span class="string">string</span>;
+  context:    <span class="string">Record&lt;string, unknown&gt;</span>;
+  payload:    <span class="string">Record&lt;string, unknown&gt;</span>;
+  idempotency_key: <span class="string">string</span>;
+}
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٤.٢</span>
+      <h3>Event Multiplier — حدث واحد يحرّك المنظومة كلها</h3>
+      <p>قوة الـ Event Architecture تظهر في التسلسل: حدث SaleCompleted واحد يُطلق: تحديث المخزون + تحديث توقعات الطلب + تحليل احتمالية الاحتيال + توليد توصيات المنتجات المرتبطة + حساب عمولة الشريك + تحديث Semantic Memory. كل هذا من event واحد.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>قائمة Events الإلزامية — MVP</h4>
+      <ul class="neutral-list">
+        <li>SaleCompleted / SaleCancelled / SaleRefunded</li>
+        <li>ProductAdded / ProductUpdated / ProductDeactivated</li>
+        <li>StockReduced / StockThresholdReached / StockRestocked</li>
+        <li>PriceChanged / DiscountApplied / PromotionTriggered</li>
+        <li>PartnerReferralConverted / PartnerCommissionDue / PartnerReputationChanged</li>
+        <li>UserRoleShifted / PermissionGranted / PermissionRevoked</li>
+        <li>FraudSuspected / AnomalyDetected / SystemAlert</li>
+        <li>SupplierOrderPlaced / DeliveryCompleted / InvoiceGenerated</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 15 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الخامس عشر</span>
+      <h2 class="chapter-title">Stem Cell Architecture — بنية الخلايا الجذعية</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٥.١</span>
+      <h3>النواة الفارغة تنمو حسب البيئة</h3>
+      <p>بدلاً من بناء نظام بقالة + نظام مطعم + نظام صيدلية، تُبنى نواة ذكية واحدة تكتشف نوع النشاط تلقائياً وتنمو حسبه. لا يُثبَّت نسخة جديدة لكل قطاع — نفس النواة تتشكل.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>آلية الـ Morphing الإلزامية</h4>
+      <ul class="required-list">
+        <li>النظام يكتشف نوع النشاط من capabilities المسجّلة — لا من if/else</li>
+        <li>الواجهة تتشكل Morph UI حسب: الجهاز + الدور + السياق + البيئة</li>
+        <li>الهاتف → أزرار ضخمة / الكمبيوتر → لوحة تحكم / التابلت → وضع لمس سريع</li>
+        <li>مطعم → يظهر تلقائياً: Kitchen Mode + Table Management + KDS</li>
+        <li>صيدلية → يظهر: Prescription + Medical Capability + Cold Chain</li>
+        <li>هايبر ماركت → يظهر: Shelf Intelligence + Scale Integration + Batch POS</li>
+        <li>Universal Printing: يتعرف على أي طابعة تلقائياً بدون تعريف يدوي</li>
+        <li>Smart Barcode: يلتقط أي Input Stream دون الحاجة للوقوف في خانة محددة</li>
+      </ul>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٥.٢</span>
+      <h3>Offline-First — يعمل بدون إنترنت دائماً</h3>
+      <p>الكاشير لا يتوقف إذا انقطع الإنترنت. النظام يعمل Offline-First مع مزامنة ذكية عند عودة الاتصال. Conflict Resolution عبر Event Sourcing — لا بيانات تضيع.</p>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// Stem Cell DNA — كل قطاع يُضاف هكذا فقط</span>
+<span class="good">seed({
+  entity_type: <span class="string">'pharmacy'</span>,
+  capabilities: [
+    CAPABILITIES.SUPPORTS_PRESCRIPTION,
+    CAPABILITIES.SUPPORTS_COLD_CHAIN,
+    CAPABILITIES.SUPPORTS_NUTRITION,
+    CAPABILITIES.SUPPORTS_OFFLINE_POS,
+  ],
+  policies: [IslamicFinancePolicy, PrivacyPolicy],
+  ui_morphing: <span class="string">'pharmacy_mode'</span>,
+})
+
+<span class="comment">// لا صفحة React جديدة — فقط seed + capabilities</span></span>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 16 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب السادس عشر</span>
+      <h2 class="chapter-title">خريطة كيانات سلسبيل التسعة</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٦.١</span>
+      <h3>سلسبيل نظام تشغيل لا مجموعة تطبيقات</h3>
+      <p>كل كيان في المنظومة ليس تطبيقاً مستقلاً — بل Domain فوق نفس النواة. الاختلاف بين الكيانات هو في الـ capabilities والـ policies والـ workflows فقط. القانون الذهبي: أي كيان جديد لا يتطلب صفحة React جديدة — فقط seed + capabilities.</p>
+    </div>
+
+    <div class="matrix">
+      <div class="matrix-cell"><div class="cell-title">ريف المدينة</div><span class="cell-badge badge-red">الأولوية القصوى</span><p>نظام تشغيل التجارة اليومية. تجزئة + جملة. دولة اقتصادية رقمية. نقطة البداية الحقيقية.</p></div>
+      <div class="matrix-cell"><div class="cell-title">تيسير</div><span class="cell-badge badge-gold">المرحلة الثانية</span><p>الطبقة المالية الموحدة. محفظة + حوالة + زكاة + أسرة + استثمار إسلامي.</p></div>
+      <div class="matrix-cell"><div class="cell-title">برق</div><span class="cell-badge badge-gold">المرحلة الثانية</span><p>الحركة الفيزيائية. توصيل + شحن + لوجستيات + تواصل وتعاون.</p></div>
+      <div class="matrix-cell"><div class="cell-title">نبض</div><span class="cell-badge badge-blue">المرحلة الثالثة</span><p>البنية الصحية الموحدة. عيادات + صيدليات + ملف صحي + وقاية.</p></div>
+      <div class="matrix-cell"><div class="cell-title">نور الدين</div><span class="cell-badge badge-blue">المرحلة الثالثة</span><p>مصنع الإنسان المتكامل. تعليم حي + مهارات + اقتصاد تعليمي.</p></div>
+      <div class="matrix-cell"><div class="cell-title">معين</div><span class="cell-badge badge-blue">المرحلة الثالثة</span><p>نظام تشغيل الحياة الاجتماعية. تواصل + عمل + Commerce + AI.</p></div>
+      <div class="matrix-cell"><div class="cell-title">بناء</div><span class="cell-badge badge-green">مستقبل</span><p>مصنع الشركات. يولّد كيانات أعمال جاهزة فوق نفس النواة.</p></div>
+      <div class="matrix-cell"><div class="cell-title">أسراب</div><span class="cell-badge badge-green">مستقبل</span><p>خدمات عمودية متخصصة. سياحة + عقار + خدمات + توظيف.</p></div>
+      <div class="matrix-cell"><div class="cell-title">حكيم</div><span class="cell-badge badge-red">موازٍ لكل مرحلة</span><p>العقل الموزع. مستشار + محلل + مهندس. يخدم جميع الكيانات. ليس chatbot.</p></div>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 17 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب السابع عشر</span>
+      <h2 class="chapter-title">الأمان — Zero Trust Architecture</h2>
+    </div>
+
+    <div class="article">
+      <span class="article-number">المادة ١٧.١</span>
+      <h3>لا ثقة بأحد — Zero Trust بلا استثناء</h3>
+      <p>لا يُصدَّق على أي طلب من الـ client دون تحقق سيرفر. لا يُصدَّق على أي Role مُرسَل من الـ frontend. لا يُصدَّق على أي tenant_id غير موثّق من السيرفر.</p>
+    </div>
+
+    <div class="law-block">
+      <h4>قواعد الأمان الإلزامية</h4>
+      <ul class="required-list">
+        <li>كل Supabase Edge Function تتحقق من الـ JWT قبل أي عملية</li>
+        <li>RLS مُفعَّل على كل جدول — لا جداول بدون Row Level Security</li>
+        <li>Service Role Key محظور في أي context مُعرَّض للويب</li>
+        <li>CSP مُفعَّل خصوصاً مع Dynamic UI</li>
+        <li>Rate Limiting على كل endpoint خصوصاً: AI, Auth, Payments, Partner APIs</li>
+        <li>كل secrets في Vault — لا في .env frontend ولا في logs</li>
+        <li>Signed Layouts — كل layout يحمل checksum ويُتحقق منه قبل الـ render</li>
+        <li>كل Event يحمل idempotency_key لمنع التكرار</li>
+        <li>Partner endpoints لها Rate Limiting مستقل لمنع Spam</li>
+      </ul>
+    </div>
+  </div>
+
+
+  <!-- ═══ CHAPTER 18 ═══ -->
+  <div class="chapter">
+    <div class="chapter-header">
+      <span class="chapter-number">الباب الثامن عشر</span>
+      <h2 class="chapter-title">اتفاقيات التسمية وهيكل الملفات</h2>
+    </div>
+
+    <div class="code-block">
+<span class="comment">// ── هيكل المجلدات المعتمد ──</span>
+src/
+  core/
+    catalog/
+      gateway/       <span class="comment">// catalogGateway.ts — الوصول الوحيد للـ DB</span>
+      factories/     <span class="comment">// ProductVMFactory.ts, ProductDNAFactory.ts</span>
+      resolvers/     <span class="comment">// CapabilityResolver.ts</span>
+    runtime/         <span class="comment">// RuntimeRenderer + BlockRegistry + MorphEngine</span>
+    identity/        <span class="comment">// UserGraph + PermissionEngine + TenantResolver</span>
+    finance/         <span class="comment">// LedgerEngine + WalletGateway + CommissionEngine</span>
+    events/          <span class="comment">// EventBus + EventTypes + EventHandlers</span>
+    vision/          <span class="comment">// VisionCortex + OCR + BarcodeReader + DNABuilder</span>
+    partners/        <span class="comment">// PartnerEngine + ReputationEngine + CommissionLedger</span>
+  domains/
+    commerce/        <span class="comment">// Order + Cart + Checkout + Delivery</span>
+    pos/             <span class="comment">// CashierBrain + ShiftEngine + PrintEngine</span>
+    inventory/       <span class="comment">// InventoryBrain + StockPrediction + SupplierIntel</span>
+    pricing/         <span class="comment">// AIPricingCortex + SeasonalEngine + FraudDetection</span>
+  ui/
+    blocks/          <span class="comment">// UI Blocks المسجّلة في blockRegistry فقط</span>
+    layouts/         <span class="comment">// Layout templates — Morph UI</span>
+    design-system/   <span class="comment">// Tokens + Components + Theme</span>
+
+<span class="comment">// ── اتفاقيات التسمية ──</span>
+<span class="good">ProductCardVM        </span><span class="comment">// ViewModel — يصل للـ UI</span>
+<span class="good">ProductDNA           </span><span class="comment">// DNA — الهيكل الكامل للمنتج</span>
+<span class="good">CatalogGateway       </span><span class="comment">// Gateway — يصل للـ DB</span>
+<span class="good">CapabilityResolver   </span><span class="comment">// Resolver — يحسم قرارات</span>
+<span class="good">SaleCompletedEvent   </span><span class="comment">// Event — حدث في النظام</span>
+<span class="good">IslamicFinancePolicy </span><span class="comment">// Policy — قاعدة عمل</span>
+<span class="good">PartnerReputationScore </span><span class="comment">// Score — مؤشر أداء</span>
+    </div>
+  </div>
+
+
+  <!-- ═══ SIGNATURE ═══ -->
+  <div class="signature-block">
+    <h2>هذا الميثاق ساري ونافذ</h2>
+    <p style="color:rgba(255,255,255,.45); font-size:.83rem; margin-bottom:2rem; max-width:600px; margin-left:auto; margin-right:auto; line-height:1.9;">
+      على كل من يعمل في المشروع — مطوراً بشرياً، أداة ذكاء اصطناعي، أو مستشاراً — الالتزام التام بجميع مواد هذا الميثاق. لا استثناء ولا تفاوض في المحظورات المطلقة.
+    </p>
+    <div class="signature-grid">
+      <div class="sig-item"><span class="sig-label">النظام</span><span class="sig-value">سلسبيل OS v2.0</span></div>
+      <div class="sig-item"><span class="sig-label">الحالة</span><span class="sig-value">نافذ فوراً</span></div>
+      <div class="sig-item"><span class="sig-label">المراجعة</span><span class="sig-value">بعد كل مرحلة كبرى</span></div>
+    </div>
+    <p class="final-seal">
+      "ابنِ النواة التي يمكن أن تتحول منها الحضارة كلها — لا الحضارة كلها دفعة واحدة.<br>
+      ريف المدينة يجب أن يُصدر فاتورة حقيقية أولاً."
+    </p>
+  </div>
+
+</div><!-- /document -->
+</body>
+</html>
