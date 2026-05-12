@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { listExpensesFn, createExpenseFn, type ExpenseRow } from "@/lib/finance.functions";
+import {
+  listExpensesFn, createExpenseFn, updateExpenseFn, deleteExpenseFn,
+  type ExpenseRow,
+} from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Receipt } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Receipt, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
