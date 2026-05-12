@@ -11,7 +11,13 @@ import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
-type Line = { product: Product; qty: number; meta?: CartLineMeta };
+type Line = {
+  product: Product;
+  qty: number;
+  meta?: CartLineMeta;
+  /** Wave P-B — frozen unit price; preferred over `product.price` for totals. */
+  capturedPrice?: number;
+};
 type Zone = {
   id?: string | null;
   deliveryFee: number;
