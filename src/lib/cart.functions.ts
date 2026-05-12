@@ -216,15 +216,17 @@ export const insertSharedCartItemFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
-    const { error } = await supabase.from("shared_cart_items").insert({
-      cart_id: data.cartId,
-      added_by: userId,
-      product_id: data.product_id,
-      product_name: data.product_name,
-      unit_price: data.unit_price,
-      quantity: data.quantity,
-      meta: data.meta ?? {},
-    });
+    const { error } = await supabase.from("shared_cart_items").insert([
+      {
+        cart_id: data.cartId,
+        added_by: userId,
+        product_id: data.product_id,
+        product_name: data.product_name,
+        unit_price: data.unit_price,
+        quantity: data.quantity,
+        meta: (data.meta ?? {}) as never,
+      },
+    ]);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
