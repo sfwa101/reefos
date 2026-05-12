@@ -12,7 +12,34 @@ export type Addr = {
   is_default: boolean;
 };
 
-export type CartLine = { product: Product; qty: number; meta?: CartLineMeta };
+/**
+ * Wave P-B (Static Catalog Killer) — Cart line shape.
+ *
+ * Canonical (post-P-B): identity + intent + display snapshot.
+ *   - `productId`, `variantId?`, `qty`
+ *   - `capturedPrice`     — frozen at add-to-cart, immune to upstream drift
+ *   - `capturedName`      — display fallback (offline / pre-hydration)
+ *   - `capturedImage?`    — display fallback (offline / pre-hydration)
+ *
+ * Transitional (active until Wave P-B Step B-3 migrates UI leaves):
+ *   - `product?: Product` — DEPRECATED bridge so the existing cart UI keeps
+ *     compiling and rendering while we migrate. Always populated by
+ *     `add(product, ...)` and the legacy-cart migration shim. The engine
+ *     layers (`useCartCalculations`, `cartSync`) already prefer
+ *     `capturedPrice` over `product.price`. Removed in B-3.
+ */
+export type CartLine = {
+  productId: string;
+  variantId?: string;
+  qty: number;
+  capturedPrice: number;
+  capturedName: string;
+  capturedImage?: string;
+  capturedAt?: string;
+  meta?: CartLineMeta;
+  /** @deprecated Wave P-B B-3 — read via `useCartHydration` instead. */
+  product: Product;
+};
 
 export type VendorGroup = {
   key: string;
