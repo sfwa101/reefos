@@ -74,6 +74,7 @@ Definitions:
 | 2026-05-12 | P-B/B-3 | 74 | 62 | removed | ≥17 | >0 | Cart engine domain decoupled from `@/lib/products` (12 files migrated to `useCartHydration` + snapshot; legacy bridge retained for §2.E consumers). |
 | 2026-05-12 | P-B/B-4 | 74 | 54 | removed | ≥17 | >0 | Pricing engine decoupled — strategies + adapter + hook consume narrow `PricingInput` instead of legacy `Product`; 8 pricing files dropped `@/lib/products`. |
 | 2026-05-12 | P-B/B-5 | 74 | 49 | removed | ≥17 | >0 | Hooks & queries domain (§2.C) decoupled — 5 files (`useProductsQuery`, `useInfiniteCatalog`, `useBuyAgainProducts`, pharmacy/library data) now own their cache key + import legacy `Product` only from `@/core/catalog/legacy/legacyProduct.types`. `libraryProducts()` static read replaced by `useLibraryProducts()` hook wrapping `useProductsBySourceQuery("library")`. |
+| 2026-05-12 | P-B/B-6 | 74 | 46 | removed | ≥17 | >0 | Search & feeds (§2.B) decoupled — `CatalogBootstrap` eradicated (deleted + unmounted from `__root.tsx`); `useUniversalSearch` and `sovereignCatalog` swapped legacy type imports to `@/core/catalog/legacy/legacyProduct.types`. Legacy proxy in `src/lib/products.ts` now degrades to `[]` when no `bindCatalogSource()` caller is mounted; remaining §2.E external consumers tracked for B-7. |
 
 > Append a new row for every wave that changes any counter. Never edit an existing row.
 
