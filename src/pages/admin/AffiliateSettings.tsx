@@ -19,6 +19,7 @@ export default function AffiliateSettings() {
   const listFn = useServerFn(listAffiliateSettingsFn);
   const createFn = useServerFn(createAffiliateSettingFn);
   const updateFn = useServerFn(updateAffiliateSettingFn);
+  const deleteFn = useServerFn(deleteAffiliateSettingFn);
   const [rows, setRows] = useState<AffiliateSettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
