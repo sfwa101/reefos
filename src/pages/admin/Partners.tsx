@@ -9,7 +9,7 @@ import {
   type ProductPartnerRow, type PartnerLedgerRow,
 } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Users } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Users, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Product = { id: string; name: string };
