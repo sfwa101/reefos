@@ -43,8 +43,7 @@ export default function Inventory() {
     if (breakdowns[productId] !== undefined) return;
     setLoadingBreakdown((s) => ({ ...s, [productId]: true }));
     try {
-      const { data, error } = await (supabase as any).rpc("nested_stock_breakdown", { _product_id: productId });
-      if (error) throw error;
+      const data = await getNestedStockBreakdownFn({ data: { productId } });
       setBreakdowns((s) => ({ ...s, [productId]: formatBreakdown(data) }));
     } catch {
       setBreakdowns((s) => ({ ...s, [productId]: "" }));
