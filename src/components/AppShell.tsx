@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Outlet, useLocation } from "@tanstack/react-router";
 import TopBar from "@/components/TopBar";
 import TabBar from "@/components/TabBar";
