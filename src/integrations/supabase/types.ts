@@ -3203,6 +3203,45 @@ export type Database = {
         }
         Relationships: []
       }
+      inventory_ledger_events: {
+        Row: {
+          actor_id: string | null
+          context: Json
+          created_at: string
+          delta: number
+          entity_id: string
+          event_type: string
+          id: string
+          idempotency_key: string
+          location_id: string
+          occurred_at: string
+        }
+        Insert: {
+          actor_id?: string | null
+          context?: Json
+          created_at?: string
+          delta: number
+          entity_id: string
+          event_type: string
+          id?: string
+          idempotency_key: string
+          location_id: string
+          occurred_at?: string
+        }
+        Update: {
+          actor_id?: string | null
+          context?: Json
+          created_at?: string
+          delta?: number
+          entity_id?: string
+          event_type?: string
+          id?: string
+          idempotency_key?: string
+          location_id?: string
+          occurred_at?: string
+        }
+        Relationships: []
+      }
       inventory_locations: {
         Row: {
           created_at: string
@@ -3246,6 +3285,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      inventory_reservations: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          items: Json
+          order_ref: string
+          state: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at: string
+          id?: string
+          items?: Json
+          order_ref: string
+          state?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          items?: Json
+          order_ref?: string
+          state?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       kyc_documents: {
         Row: {
