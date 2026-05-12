@@ -22,6 +22,12 @@ export default function Suppliers() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; contact_phone: string; closing_day: string; collection_days: string; payment_terms_days: string }>({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const updateSupplier = useServerFn(updateSupplierFn);
+  const deleteSupplier = useServerFn(deleteSupplierFn);
 
   const load = async () => {
     setLoading(true);
