@@ -28,15 +28,8 @@ const SchoolLibrarySection = () => {
   const [borrowProduct, setBorrowProduct] = useState<Product | null>(null);
   const [borrowOpen, setBorrowOpen] = useState(false);
   const { user } = useAuth();
-  const [isVerified, setIsVerified] = useState<boolean>(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    if (!user) { setIsVerified(false); return; }
-    supabase.from("kyc_verifications").select("status").eq("user_id", user.id).eq("status", "approved").maybeSingle()
-      .then(({ data }) => { if (!cancelled) setIsVerified(!!data); });
-    return () => { cancelled = true; };
-  }, [user?.id]);
+  const { data: kyc } = useQuery(myKycStatusQueryOptions(!!user));
+  const isVerified = !!kyc?.verified;
 
   const products = useLibraryProducts();
 
