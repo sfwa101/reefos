@@ -10,22 +10,19 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { Product } from "@/lib/products";
 import {
   evaluateCartLineItem,
   isHandledByNewEngine,
 } from "../cartPricingAdapter";
+import type { PricingInput } from "../types";
 import type { MeatSelection } from "../strategies/MeatPricingStrategy";
 import type { SweetsSelection } from "../strategies/SweetsPricingStrategy";
 import type { WholesaleSelection } from "../strategies/WholesalePricingStrategy";
 
 const buildProduct = (
-  overrides: Partial<Product> & Pick<Product, "id" | "source" | "price">,
-): Product => ({
-  name: "Test Product",
+  overrides: Partial<PricingInput> & Pick<PricingInput, "id" | "source" | "price">,
+): PricingInput => ({
   unit: "1",
-  image: "test.jpg",
-  category: "test",
   ...overrides,
 });
 
