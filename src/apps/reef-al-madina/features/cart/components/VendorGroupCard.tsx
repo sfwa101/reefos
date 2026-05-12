@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, ChefHat, Store, Utensils, Wallet as WalletIcon } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import type { Product } from "@/lib/products";
+/** @deprecated Wave P-B B-3 — bridge type; will move to `ProductCardVM` once §2.E migrates. */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 import { vendorBrandHue, vendorLabel, type VendorKey } from "@/lib/restaurants";
 import { CartLineItem } from "./CartLineItem";
