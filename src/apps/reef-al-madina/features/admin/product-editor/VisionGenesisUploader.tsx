@@ -115,15 +115,12 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
         });
         // Convert data URL → Blob → upload to product-images bucket.
         const blob = await (await fetch(purified.imageDataUrl)).blob();
-        const path = `usa/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-        const { error: upErr } = await supabase.storage
-          .from("product-images")
-          .upload(path, blob, { contentType: "image/png", upsert: false });
-        if (upErr) throw new Error(upErr.message);
-        const { data: pub } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(path);
-        mediaUrl = pub.publicUrl;
+        mediaUrl = await uploadProductImage({
+          file: blob,
+          prefix: "usa",
+          contentType: "image/png",
+          ext: "png",
+        });
       }
 
       const enrichedAsset = mediaUrl
