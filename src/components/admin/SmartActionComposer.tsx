@@ -165,17 +165,26 @@ export function SmartActionComposer() {
                     <button
                       type="button"
                       onClick={() => handlePick(a)}
+                      disabled={a.soon}
                       className={cn(
                         "w-full flex items-center gap-3 p-3 rounded-2xl",
                         "bg-surface-muted/60 hover:bg-surface-muted border border-border/40",
                         "text-right press transition-base",
+                        a.soon && "opacity-60 cursor-not-allowed hover:bg-surface-muted/60",
                       )}
                     >
                       <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
                         <a.icon className="h-5 w-5" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-[14px] font-semibold leading-tight">{a.label}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-[14px] font-semibold leading-tight">{a.label}</p>
+                          {a.soon && (
+                            <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-warning/15 text-warning">
+                              قريباً
+                            </span>
+                          )}
+                        </div>
                         <p className="text-[11.5px] text-foreground-tertiary leading-tight mt-0.5">{a.hint}</p>
                       </div>
                     </button>
