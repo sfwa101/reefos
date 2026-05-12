@@ -51,9 +51,12 @@ export const useSharedCartAdapter = (sharedCartId: string | null) => {
   const local = useCart();
   const shared = useSharedCartSync(sharedCartId);
   const isSharedMode = !!sharedCartId;
+  const queryClient = useQueryClient();
 
   const sharedLines = useMemo(() => {
     if (!isSharedMode) return [] as { product: Product; qty: number; meta?: CartLineMeta }[];
+    const allProducts =
+      queryClient.getQueryData<Product[]>(SNAPSHOT_KEY()) ?? [];
     const out: { product: Product; qty: number; meta?: CartLineMeta }[] = [];
     for (const it of shared.items) {
       const product = allProducts.find((p) => p.id === it.product_id);
@@ -61,7 +64,7 @@ export const useSharedCartAdapter = (sharedCartId: string | null) => {
       out.push({ product, qty: it.quantity, meta: it.meta as CartLineMeta | undefined });
     }
     return out;
-  }, [isSharedMode, shared.items]);
+  }, [isSharedMode, shared.items, queryClient]);
 
   const lines = isSharedMode ? sharedLines : local.lines;
   const count = isSharedMode ? sharedLines.reduce((s, l) => s + l.qty, 0) : local.count;
