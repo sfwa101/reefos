@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Loader2, Package, RefreshCcw, MapPin, AlertTriangle, Radio, Snowflake } from "lucide-react";
 import { toast } from "sonner";
+import {
+  listUnassignedNodesFn,
+  broadcastSmartDispatchFn,
+  listRecentMasterOrdersWithSubCountFn,
+  getAllocationOverviewFn,
+  allocateOrderInventoryFn,
+} from "@/lib/ops.functions";
 
 type UnassignedNode = {
   id: string;
@@ -48,95 +54,80 @@ export default function AllocationMonitor() {
 
   async function loadUnassignedNodes() {
     setLoadingNodes(true);
-    const { data } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select("id,master_order_id,status,total_amount,created_at,vendor_id,pickup_lat,pickup_lng")
-      .is("driver_id", null)
-      .in("status", ["pending", "confirmed", "preparing", "ready_for_pickup", "requires_admin_routing"])
-      .order("created_at", { ascending: false })
-      .limit(50);
-    setUnassigned((data ?? []) as UnassignedNode[]);
-    setLoadingNodes(false);
+    try {
+      const data = await listUnassignedNodesFn();
+      setUnassigned(data as UnassignedNode[]);
+    } catch {
+      setUnassigned([]);
+    } finally {
+      setLoadingNodes(false);
+    }
   }
 
   async function broadcast(nodeId: string) {
     setBroadcastingId(nodeId);
-    const { data, error } = await supabase.rpc("broadcast_smart_dispatch", {
-      p_node_id: nodeId,
-    });
-    setBroadcastingId(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const { count } = await broadcastSmartDispatchFn({ data: { nodeId } });
+      if (count === 0) {
+        toast.warning("لا يوجد مندوبون متاحون — قد يتطلب توجيه يدوي");
+      } else {
+        toast.success(`تم بث العرض إلى ${count} مندوب`);
+      }
+      await loadUnassignedNodes();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setBroadcastingId(null);
     }
-    const count = Number(data ?? 0);
-    if (count === 0) {
-      toast.warning("لا يوجد مندوبون متاحون — قد يتطلب توجيه يدوي");
-    } else {
-      toast.success(`تم بث العرض إلى ${count} مندوب`);
-    }
-    await loadUnassignedNodes();
   }
 
   async function loadOrders() {
     setLoading(true);
-    // Sovereign Matrix: list master orders + count their fulfillment nodes (which is the
-    // Sovereign equivalent of "sub_orders" — a node = one vendor's slice of the master order).
-    const { data: masterRows } = await supabase
-      .from("salsabil_master_orders")
-      .select("id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(id)")
-      .order("created_at", { ascending: false })
-      .limit(50);
-
-    if (!masterRows) {
+    try {
+      const rows = await listRecentMasterOrdersWithSubCountFn();
+      setOrders(
+        rows.map((m) => ({
+          id: m.id,
+          total: Number(m.total_amount ?? 0),
+          status: m.status,
+          created_at: m.created_at,
+          user_id: m.customer_id,
+          sub_count: m.sub_count,
+        })),
+      );
+    } catch {
       setOrders([]);
+    } finally {
       setLoading(false);
-      return;
     }
-
-    setOrders(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (masterRows as any[]).map((m) => ({
-        id: m.id,
-        total: Number(m.total_amount ?? 0),
-        status: m.status,
-        created_at: m.created_at,
-        user_id: m.customer_id,
-        sub_count: (m.salsabil_fulfillment_nodes ?? []).length,
-      })),
-    );
-    setLoading(false);
   }
 
   async function loadAllocation(orderId: string) {
     setSelectedOrder(orderId);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("allocation_overview", { _order_id: orderId });
-    if (error) {
+    try {
+      const data = await getAllocationOverviewFn({ data: { orderId } });
+      setAllocation((data as SubOrderRow[]) || []);
+    } catch {
       toast.error("تعذّر تحميل تفاصيل التوزيع");
-      return;
     }
-    setAllocation((data as unknown as SubOrderRow[]) || []);
   }
 
   async function reallocate(orderId: string) {
     setReallocating(true);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("allocate_order_inventory", {
-      _order_id: orderId,
-      _zone: zoneInput || "M",
-    });
-    setReallocating(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      const result = await allocateOrderInventoryFn({
+        data: { orderId, zone: zoneInput || "M" },
+      });
+      toast.success(
+        `تم التوزيع: ${result?.allocated_items ?? 0} عنصر${result?.failed_items?.length ? ` — ${result.failed_items.length} فشل` : ""}`,
+      );
+      await loadAllocation(orderId);
+      await loadOrders();
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setReallocating(false);
     }
-    const result = data as { allocated_items?: number; failed_items?: unknown[] } | null;
-    toast.success(
-      `تم التوزيع: ${result?.allocated_items ?? 0} عنصر${result?.failed_items?.length ? ` — ${result.failed_items.length} فشل` : ""}`,
-    );
-    await loadAllocation(orderId);
-    await loadOrders();
   }
 
   useEffect(() => {

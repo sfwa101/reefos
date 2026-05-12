@@ -9,14 +9,15 @@
  * nodes (vendor-level fulfillment units) using the same priority ladder used
  * across the customer Account view.
  */
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Package, Clock, TrendingUp, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { listMasterOrdersFn, setOrderStatusFn } from "@/lib/ops.functions";
+import { useAdminOrdersRealtime } from "@/hooks/useAdminOrdersRealtime";
 
 interface MasterOrderRow {
   id: string;
@@ -76,99 +77,50 @@ export default function Orders() {
   const seenIds = useRef<Set<string>>(new Set());
   const firstLoad = useRef(true);
 
-  // Realtime — listen to Sovereign Matrix tables.
-  useEffect(() => {
-    const channel = supabase
-      .channel("admin-master-orders-list")
-      .on(
-        "postgres_changes" as never,
-        { event: "INSERT", schema: "public", table: "salsabil_master_orders" },
-        (payload: { new?: { id?: string } }) => {
-          const newId = payload?.new?.id;
-          if (newId && !seenIds.current.has(newId) && !firstLoad.current) {
-            seenIds.current.add(newId);
-            toast.success("طلب جديد وصل 🎉", {
-              description: `#${newId.slice(0, 8).toUpperCase()}`,
-            });
-          }
-          setNonce((n) => n + 1);
-        },
-      )
-      .on(
-        "postgres_changes" as never,
-        { event: "UPDATE", schema: "public", table: "salsabil_master_orders" },
-        () => setNonce((n) => n + 1),
-      )
-      .on(
-        "postgres_changes" as never,
-        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-        () => setNonce((n) => n + 1),
-      )
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
+  // Realtime — listen to Sovereign Matrix tables via dedicated hook.
+  useAdminOrdersRealtime({
+    onInsert: (newId) => {
+      if (!seenIds.current.has(newId) && !firstLoad.current) {
+        seenIds.current.add(newId);
+        toast.success("طلب جديد وصل 🎉", {
+          description: `#${newId.slice(0, 8).toUpperCase()}`,
+        });
+      }
+    },
+    onChange: () => setNonce((n) => n + 1),
+  });
 
-  // Phase 37 — atomic admin RPC; no direct table writes from the browser.
+  // Phase 37 — atomic admin server fn; no direct table writes from the browser.
   const cancelOrder = async (row: MasterOrderRow) => {
-    const { error } = await supabase.rpc("admin_set_order_status", {
-      p_order_id: row.id,
-      p_status: "cancelled",
-    });
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await setOrderStatusFn({ data: { orderId: row.id, status: "cancelled" } });
+      toast.success(`تم إلغاء #${row.id.slice(0, 8).toUpperCase()}`);
+      setNonce((n) => n + 1);
+    } catch (e) {
+      toast.error((e as Error).message);
     }
-    toast.success(`تم إلغاء #${row.id.slice(0, 8).toUpperCase()}`);
-    setNonce((n) => n + 1);
   };
 
   const fetcher = async (): Promise<MasterOrderRow[]> => {
-    // Pull master orders with their fulfillment nodes (for status aggregation).
-    const { data, error } = await supabase
-      .from("salsabil_master_orders")
-      .select(`
-        id,
-        total_amount,
-        customer_id,
-        created_at,
-        salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk ( status )
-      `)
-      .order("created_at", { ascending: false })
-      .limit(500);
-    if (error) {
-      console.error("[admin/orders] fetch failed:", error.message);
-      toast.error(`تعذر جلب الطلبات: ${error.message}`);
+    let raw;
+    try {
+      raw = await listMasterOrdersFn();
+    } catch (e) {
+      console.error("[admin/orders] fetch failed:", (e as Error).message);
+      toast.error(`تعذر جلب الطلبات: ${(e as Error).message}`);
       return [];
     }
 
-    // Hydrate customer profiles in a single batch (RLS-safe).
-    const customerIds = Array.from(new Set((data ?? []).map((d) => d.customer_id).filter(Boolean)));
-    const profileMap = new Map<string, { full_name: string | null; phone: string | null }>();
-    if (customerIds.length) {
-      const { data: profiles } = await supabase
-        .from("profiles")
-        .select("id,full_name,phone")
-        .in("id", customerIds);
-      (profiles ?? []).forEach((p) => profileMap.set(p.id, { full_name: p.full_name, phone: p.phone }));
-    }
-
-    const rows: MasterOrderRow[] = (data ?? []).map((m) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const nodes: { status: string }[] = (m as any).salsabil_fulfillment_nodes ?? [];
-      const prof = profileMap.get(m.customer_id);
-      return {
-        id: m.id,
-        status: aggregateStatus(nodes.map((n) => n.status)),
-        total: Number(m.total_amount ?? 0),
-        customer_id: m.customer_id,
-        customer_name: prof?.full_name ?? null,
-        customer_phone: prof?.phone ?? null,
-        node_count: nodes.length,
-        created_at: m.created_at,
-      };
-    });
+    const rows: MasterOrderRow[] = raw.map((m) => ({
+      id: m.id,
+      status: aggregateStatus(m.node_statuses),
+      total: Number(m.total_amount ?? 0),
+      customer_id: m.customer_id,
+      customer_name: m.customer_name,
+      customer_phone: m.customer_phone,
+      node_count: m.node_statuses.length,
+      created_at: m.created_at,
+    }));
 
     if (firstLoad.current) {
       rows.forEach((o) => seenIds.current.add(o.id));

@@ -3,6 +3,7 @@
 // All gated by `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
 // ---- Types ----------------------------------------------------------------
 export type BannerRow = {
@@ -306,3 +307,33 @@ export const endFlashSaleFn = createServerFn({ method: "POST" })
 
 // ---- Aliases (per blueprint naming) --------------------------------------
 export const listFlashSalesFn = getActiveFlashSaleFn;
+
+// ============= Wave R-1 Batch 2 — Banner Storage Upload =============
+
+export const uploadBannerImageFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { filename: string; contentType: string; base64: string }) => {
+    if (!d?.filename) throw new Error("filename_required");
+    if (!d?.base64) throw new Error("base64_required");
+    if (!d?.contentType) throw new Error("contentType_required");
+    if (!/^image\//.test(d.contentType)) throw new Error("invalid_content_type");
+    // ~6MB cap on raw bytes
+    const approxBytes = Math.floor((d.base64.length * 3) / 4);
+    if (approxBytes > 6 * 1024 * 1024) throw new Error("file_too_large");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data }): Promise<{ publicUrl: string }> => {
+    const ext = (data.filename.split(".").pop() || "bin").toLowerCase().replace(/[^a-z0-9]/g, "");
+    const path = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const buffer = Buffer.from(data.base64, "base64");
+    const { error } = await supabaseAdmin.storage
+      .from("marketing-banners")
+      .upload(path, buffer, {
+        cacheControl: "3600",
+        upsert: false,
+        contentType: data.contentType,
+      });
+    if (error) throw new Error(error.message);
+    const { data: pub } = supabaseAdmin.storage.from("marketing-banners").getPublicUrl(path);
+    return { publicUrl: pub.publicUrl };
+  });

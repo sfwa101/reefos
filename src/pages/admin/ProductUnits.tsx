@@ -1,49 +1,26 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
 import { Loader2, ShieldAlert, Plus, Trash2, Save, Package } from "lucide-react";
 import { toast } from "sonner";
+import {
+  listUnitsOfMeasureFn,
+  listProductUnitsForProductFn,
+  upsertProductUnitsFn,
+  deleteProductUnitFn,
+  type UoMRow,
+  type ProductUnitRow,
+} from "@/lib/admin-catalog.functions";
+import { getNestedStockBreakdownFn } from "@/lib/ops.functions";
 
-type UoM = { code: string; name_ar: string; is_base: boolean; sort_order: number };
+type UoM = UoMRow;
 type ProductRow = { id: string; name: string; price: number };
-type PU = {
-  id?: string;
-  product_id: string;
-  unit_code: string;
-  conversion_factor: number;
-  selling_price: number | null;
-  is_default_sell: boolean;
-  is_active: boolean;
-};
+type PU = ProductUnitRow;
 type Breakdown = { human_readable?: string; total_pieces?: number } | null;
-type ValidatePricing = { ok: boolean; message?: string } | null;
-
-// Typed bridge: these tables/RPCs aren't in the generated Supabase types yet.
-// Wrapping the client in a precise interface keeps every call site checked.
-type ProductUnitsDb = {
-  from(table: "units_of_measure"): {
-    select(s: string): {
-      order(c: string): { limit(n: number): Promise<{ data: UoM[] | null }> };
-    };
-  };
-  from(table: "product_units"): {
-    select(s: string): {
-      eq(c: string, v: string): {
-        order(c: string): { limit(n: number): Promise<{ data: PU[] | null }> };
-      };
-    };
-    delete(): { eq(c: string, v: string): Promise<{ error: { message: string } | null }> };
-    upsert(payload: PU[], opts: { onConflict: string }): Promise<{ error: { message: string } | null }>;
-  };
-  rpc(fn: "nested_stock_breakdown", args: { _product_id: string }): Promise<{ data: Breakdown }>;
-  rpc(fn: "validate_unit_pricing", args: { _product_id: string; _unit_code: string; _selling_price: number }): Promise<{ data: ValidatePricing }>;
-};
 
 export default function ProductUnits() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("store_manager") || hasRole("staff");
-  const db = supabase as unknown as ProductUnitsDb;
 
   const [units, setUnits] = useState<UoM[]>([]);
   const [products, setProducts] = useState<ProductRow[]>([]);
@@ -57,11 +34,11 @@ export default function ProductUnits() {
   useEffect(() => {
     if (!allowed) return;
     (async () => {
-      const [{ data: u }, sov] = await Promise.all([
-        db.from("units_of_measure").select("*").order("sort_order").limit(500),
+      const [u, sov] = await Promise.all([
+        listUnitsOfMeasureFn(),
         import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
       ]);
-      setUnits((u || []) as UoM[]);
+      setUnits(u);
       setProducts(sov.map((r) => ({ id: r.id, name: r.name, price: r.price })));
     })();
   }, [allowed]);
@@ -69,13 +46,16 @@ export default function ProductUnits() {
   const loadProductUnits = async (p: ProductRow) => {
     setSelected(p);
     setLoading(true);
-    const [{ data: pu }, { data: bd }] = await Promise.all([
-      db.from("product_units").select("*").eq("product_id", p.id).order("conversion_factor").limit(500),
-      db.rpc("nested_stock_breakdown", { _product_id: p.id }),
-    ]);
-    setRows((pu || []) as PU[]);
-    setBreakdown(bd);
-    setLoading(false);
+    try {
+      const [pu, bd] = await Promise.all([
+        listProductUnitsForProductFn({ data: { productId: p.id } }),
+        getNestedStockBreakdownFn({ data: { productId: p.id } }),
+      ]);
+      setRows(pu);
+      setBreakdown((bd ?? null) as Breakdown);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const addUnit = (code: string) => {
@@ -95,8 +75,11 @@ export default function ProductUnits() {
   const removeRow = async (idx: number) => {
     const row = rows[idx];
     if (row.id) {
-      const { error } = await db.from("product_units").delete().eq("id", row.id);
-      if (error) return toast.error(error.message);
+      try {
+        await deleteProductUnitFn({ data: { id: row.id } });
+      } catch (e) {
+        return toast.error((e as Error).message);
+      }
     }
     setRows((rs) => rs.filter((_, i) => i !== idx));
   };
@@ -105,36 +88,7 @@ export default function ProductUnits() {
     if (!selected) return;
     setSaving(true);
     try {
-      // Validate pricing per unit
-      for (const r of rows) {
-        if (r.selling_price && r.selling_price > 0) {
-          const { data: v } = await db.rpc("validate_unit_pricing", {
-            _product_id: r.product_id,
-            _unit_code: r.unit_code,
-            _selling_price: r.selling_price,
-          });
-          if (v && v.ok === false) {
-            toast.error(`${r.unit_code}: ${v.message ?? "تسعير غير صالح"}`);
-            setSaving(false);
-            return;
-          }
-        }
-      }
-
-      const payload = rows.map((r) => ({
-        ...(r.id ? { id: r.id } : {}),
-        product_id: r.product_id,
-        unit_code: r.unit_code,
-        conversion_factor: r.conversion_factor,
-        selling_price: r.selling_price,
-        is_default_sell: r.is_default_sell,
-        is_active: r.is_active,
-      }));
-
-      const { error } = await db.from("product_units").upsert(payload, {
-        onConflict: "product_id,unit_code",
-      });
-      if (error) throw error;
+      await upsertProductUnitsFn({ data: { rows } });
       toast.success("تم الحفظ");
       loadProductUnits(selected);
     } catch (e: unknown) {
