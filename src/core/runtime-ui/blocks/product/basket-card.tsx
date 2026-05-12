@@ -4,7 +4,7 @@ import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { useAuth } from "@/context/AuthContext";
 import { basketMarketing, sumBasketRetail, hydrateBasket } from "@/lib/baskets";
 import { toLatin } from "@/lib/format";
-import BasketSheet from "./BasketSheet";
+import BasketSheet from "@/core/runtime-ui/blocks/commerce/basket-detail-sheet";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const toneClass = (tone?: string) =>
