@@ -17,18 +17,24 @@ export default function Stores() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const { data, error } = await supabase.from("stores").select("*").order("name").limit(1000);
-    if (error) toast.error(error.message);
-    setItems((data ?? []) as Store[]);
+    try {
+      setItems(await listStoresFn());
+    } catch (err) {
+      toast.error((err as Error).message);
+      setItems([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const del = async (s: Store) => {
     if (!confirm(`حذف "${s.name}"؟`)) return;
-    const { error } = await supabase.from("stores").delete().eq("id", s.id);
-    if (error) return toast.error(error.message);
-    toast.success("تم الحذف");
-    load();
+    try {
+      await deleteStoreFn({ data: { id: s.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   };
 
   return (
