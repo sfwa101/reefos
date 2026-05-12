@@ -14,11 +14,16 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { ChevronRight, MapPin, Package, User, Truck, X, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { IOSCard, IOSList, IOSRow, IOSSection } from "@/components/ios/IOSCard";
 import { fmtMoney, fmtDate } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import {
+  getMasterOrderDetailFn,
+  setOrderStatusFn,
+  listActiveDriversFn,
+  assignDriverToOrderFn,
+} from "@/lib/ops.functions";
 
 const FLOW = [
   { value: "pending", label: "بانتظار" },
