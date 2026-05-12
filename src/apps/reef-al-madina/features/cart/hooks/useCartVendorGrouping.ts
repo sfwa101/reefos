@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CartLineMeta } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { products as allProducts, type Product } from "@/lib/products";
+/**
+ * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape. The
+ * cross-sell rail still emits `Product[]` because its consumer
+ * (CartCrossSellRail / CartContext.add) reads `l.product.*`. Will move to
+ * `ProductCardVM[]` once §2.E migrates.
+ */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { getActiveTenantId } from "@/context/TenantContext";
+
+const SNAPSHOT_KEY = () =>
+  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
 import {
   vendorForProduct,
   type VendorKey,
