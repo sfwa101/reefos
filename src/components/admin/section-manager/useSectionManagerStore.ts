@@ -19,6 +19,7 @@ interface SectionManagerState {
   selectBlock: (id: string | null) => void;
   setTab: (tab: ZoneTab) => void;
   updateBlock: (id: string, patch: Partial<LayoutBlock>) => void;
+  addBlock: (block: LayoutBlock) => void;
   reorderBlocks: (zone: ZoneTab, oldIndex: number, newIndex: number) => void;
   markClean: (newPublished?: MobileHomeLayoutV1) => void;
 }
