@@ -154,8 +154,8 @@ export class MeatPricingStrategy
     return out;
   }
 
-  private requireRules(product: Product): ButcheryRules {
-    const rules = getButcheryRules(product);
+  private requireRules(product: PricingInput): ButcheryRules {
+    const rules = getButcheryRules(toLegacyProductShape(product));
     if (!rules) {
       throw new Error(
         `MeatPricingStrategy: product "${product.id}" is not a butchery item`,
