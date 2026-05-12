@@ -217,3 +217,37 @@ export const closeSupportTicketFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============= Wave R-1 Batch 4 — Human Directory =============
+export type HumanProfile = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  governorate: string | null;
+  created_at: string;
+};
+export type HumanRelationship = { profile_id: string; kind: string };
+export type HumanDirectoryState = {
+  profiles: HumanProfile[];
+  relationships: HumanRelationship[];
+};
+
+export const listHumanDirectoryFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<HumanDirectoryState> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const [{ data: profs, error: e1 }, { data: rels, error: e2 }] = await Promise.all([
+      sb.from("profiles")
+        .select("id,full_name,phone,governorate,created_at")
+        .order("created_at", { ascending: false })
+        .limit(500),
+      sb.from("human_relationships").select("profile_id,kind").limit(5000),
+    ]);
+    if (e1) throw new Error(e1.message);
+    if (e2) throw new Error(e2.message);
+    return {
+      profiles: (profs ?? []) as HumanProfile[],
+      relationships: (rels ?? []) as HumanRelationship[],
+    };
+  });
