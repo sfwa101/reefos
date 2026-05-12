@@ -308,10 +308,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     setSubmitting(true);
     const minLoading = new Promise<void>((r) => setTimeout(r, 1000));
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      const currentUser = (user ?? session?.user) || null;
+      // Wave P-D Phase D-2 — `useAuth` is the single source of truth for the
+      // signed-in user; the orchestrator no longer reaches into
+      // `supabase.auth.getSession()` directly.
+      const currentUser = user ?? null;
       const isGuest = !currentUser;
 
       if (isGuest) {
