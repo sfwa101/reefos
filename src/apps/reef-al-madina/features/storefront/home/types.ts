@@ -1,7 +1,7 @@
 /**
  * Home Storefront — domain types.
  *
- * Wave P-A (Storefront Purity) — the legacy `HGProduct` view-model has
+ * Wave P-A (Storefront Purity) — the legacy view-model has been eradicated.
  * been eradicated. Home components now consume the canonical
  * `ProductCardVM` from `@/core/catalog/types` directly, with the
  * `homeProductCardAdapter` in `./adapter.ts` handling translation to
