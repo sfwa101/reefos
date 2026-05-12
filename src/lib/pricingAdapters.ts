@@ -26,12 +26,12 @@ import type {
   ButcheryRules,
   PrepOption,
   WeightOption,
-} from "./butcheryPrep";
+} from "./weighed-prep-rules";
 import {
   BORROW_DURATIONS,
   BORROW_DEPOSIT_RATIO,
   type BorrowDuration,
-} from "./library";
+} from "./digital-borrowing";
 
 /* =============== Butchery → modifiers =============== */
 
