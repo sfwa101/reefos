@@ -4,7 +4,7 @@
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { mintUniversalAssetFn } from "@/lib/admin-catalog.functions";
 import { tenantQueryKey } from "@/lib/tenantScope";
 
 export interface SuggestedAsset {
