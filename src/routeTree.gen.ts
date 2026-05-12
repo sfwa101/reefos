@@ -133,7 +133,6 @@ import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory
 import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
 import { Route as AppStoreSupermarketRouteImport } from './routes/_app/store.supermarket'
-import { Route as AppStoreSubscriptionRouteImport } from './routes/_app/store.subscription'
 import { Route as AppStoreProduceRouteImport } from './routes/_app/store.produce'
 import { Route as AppStoreKitchenRouteImport } from './routes/_app/store.kitchen'
 import { Route as AppStoreHomeCompareRouteImport } from './routes/_app/store.home-compare'
@@ -773,11 +772,6 @@ const AppStoreSupermarketRoute = AppStoreSupermarketRouteImport.update({
   path: '/store/supermarket',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStoreSubscriptionRoute = AppStoreSubscriptionRouteImport.update({
-  id: '/store/subscription',
-  path: '/store/subscription',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStoreProduceRoute = AppStoreProduceRouteImport.update({
   id: '/store/produce',
   path: '/store/produce',
@@ -996,7 +990,6 @@ export interface FileRoutesByFullPath {
   '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/store/kitchen': typeof AppStoreKitchenRoute
   '/store/produce': typeof AppStoreProduceRoute
-  '/store/subscription': typeof AppStoreSubscriptionRoute
   '/store/supermarket': typeof AppStoreSupermarketRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
@@ -1133,7 +1126,6 @@ export interface FileRoutesByTo {
   '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/store/kitchen': typeof AppStoreKitchenRoute
   '/store/produce': typeof AppStoreProduceRoute
-  '/store/subscription': typeof AppStoreSubscriptionRoute
   '/store/supermarket': typeof AppStoreSupermarketRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
@@ -1280,7 +1272,6 @@ export interface FileRoutesById {
   '/_app/store/home-compare': typeof AppStoreHomeCompareRoute
   '/_app/store/kitchen': typeof AppStoreKitchenRoute
   '/_app/store/produce': typeof AppStoreProduceRoute
-  '/_app/store/subscription': typeof AppStoreSubscriptionRoute
   '/_app/store/supermarket': typeof AppStoreSupermarketRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
@@ -1423,7 +1414,6 @@ export interface FileRouteTypes {
     | '/store/home-compare'
     | '/store/kitchen'
     | '/store/produce'
-    | '/store/subscription'
     | '/store/supermarket'
     | '/sub/$slug'
     | '/pos/close-shift'
@@ -1560,7 +1550,6 @@ export interface FileRouteTypes {
     | '/store/home-compare'
     | '/store/kitchen'
     | '/store/produce'
-    | '/store/subscription'
     | '/store/supermarket'
     | '/sub/$slug'
     | '/pos/close-shift'
@@ -1706,7 +1695,6 @@ export interface FileRouteTypes {
     | '/_app/store/home-compare'
     | '/_app/store/kitchen'
     | '/_app/store/produce'
-    | '/_app/store/subscription'
     | '/_app/store/supermarket'
     | '/_app/sub/$slug'
     | '/_pos/pos/close-shift'
@@ -2610,13 +2598,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppStoreSupermarketRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/store/subscription': {
-      id: '/_app/store/subscription'
-      path: '/store/subscription'
-      fullPath: '/store/subscription'
-      preLoaderRoute: typeof AppStoreSubscriptionRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/store/produce': {
       id: '/_app/store/produce'
       path: '/store/produce'
@@ -2805,7 +2786,6 @@ interface AppRouteChildren {
   AppStoreHomeCompareRoute: typeof AppStoreHomeCompareRoute
   AppStoreKitchenRoute: typeof AppStoreKitchenRoute
   AppStoreProduceRoute: typeof AppStoreProduceRoute
-  AppStoreSubscriptionRoute: typeof AppStoreSubscriptionRoute
   AppStoreSupermarketRoute: typeof AppStoreSupermarketRoute
   AppSubSlugRoute: typeof AppSubSlugRoute
 }
@@ -2832,7 +2812,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppStoreHomeCompareRoute: AppStoreHomeCompareRoute,
   AppStoreKitchenRoute: AppStoreKitchenRoute,
   AppStoreProduceRoute: AppStoreProduceRoute,
-  AppStoreSubscriptionRoute: AppStoreSubscriptionRoute,
   AppStoreSupermarketRoute: AppStoreSupermarketRoute,
   AppSubSlugRoute: AppSubSlugRoute,
 }
