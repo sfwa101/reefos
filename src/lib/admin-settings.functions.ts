@@ -2,11 +2,22 @@
 // Sanctioned `createServerFn` handlers for `app_settings` key/value store.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import {
+  LAYOUT_KEY_PREFIX,
+  MOBILE_HOME_LAYOUT_KEY,
+  MOBILE_HOME_LAYOUT_DRAFT_KEY,
+  MobileHomeLayoutSchema,
+} from "@/lib/section-manager.types";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SbAny = any;
 
-const ALLOWED_KEYS = new Set(["general", "finance"]);
+const ALLOWED_KEYS = new Set([
+  "general",
+  "finance",
+  MOBILE_HOME_LAYOUT_KEY,
+  MOBILE_HOME_LAYOUT_DRAFT_KEY,
+]);
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type AppSettingsBundle = Record<string, Record<string, any>>;
