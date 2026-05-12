@@ -53,9 +53,14 @@ export default function Expenses() {
 
   useEffect(() => { if (allowed) load(); else setLoading(false); /* eslint-disable-next-line */ }, [allowed]);
 
-  const create = async () => {
+  const resetForm = () => setForm({
+    category: "operations", subcategory: "", amount: "", expense_date: new Date().toISOString().slice(0, 10),
+    paid_to: "", payment_method: "cash", reference: "", notes: "",
+  });
+
+  const submit = async () => {
     try {
-      await createExpense({ data: {
+      const payload = {
         category: form.category,
         subcategory: form.subcategory || null,
         amount: parseFloat(form.amount),
@@ -64,14 +69,45 @@ export default function Expenses() {
         payment_method: form.payment_method,
         reference: form.reference || null,
         notes: form.notes || null,
-      }});
-      toast.success("تم تسجيل المصروف");
-      setForm({ ...form, amount: "", subcategory: "", paid_to: "", reference: "", notes: "" });
+      };
+      if (editingId) {
+        await updateExpense({ data: { id: editingId, ...payload } });
+        toast.success("تم تحديث المصروف");
+      } else {
+        await createExpense({ data: payload });
+        toast.success("تم تسجيل المصروف");
+      }
+      resetForm();
+      setEditingId(null);
       setShowForm(false);
       load();
     } catch (e) {
       toast.error((e as Error).message);
     }
+  };
+
+  const startEdit = (r: ExpenseRow) => {
+    setEditingId(r.id);
+    setForm({
+      category: r.category,
+      subcategory: r.subcategory ?? "",
+      amount: String(r.amount),
+      expense_date: r.expense_date,
+      paid_to: r.paid_to ?? "",
+      payment_method: r.payment_method ?? "cash",
+      reference: r.reference ?? "",
+      notes: r.notes ?? "",
+    });
+    setShowForm(true);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("حذف المصروف؟")) return;
+    try {
+      await deleteExpense({ data: { id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
