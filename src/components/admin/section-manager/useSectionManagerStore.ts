@@ -20,7 +20,10 @@ interface SectionManagerState {
   setTab: (tab: ZoneTab) => void;
   updateBlock: (id: string, patch: Partial<LayoutBlock>) => void;
   addBlock: (block: LayoutBlock) => void;
+  insertBlockAt: (index: number, block: LayoutBlock) => void;
+  removeBlock: (id: string) => void;
   reorderBlocks: (zone: ZoneTab, oldIndex: number, newIndex: number) => void;
+  moveBlock: (id: string, direction: "up" | "down") => void;
   markClean: (newPublished?: MobileHomeLayoutV1) => void;
 }
 
@@ -93,6 +96,63 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
         },
         dirty: true,
         selectedBlockId: block.id,
+      };
+    }),
+
+  insertBlockAt: (index, block) =>
+    set((s) => {
+      const now = new Date().toISOString();
+      if (!s.draftDoc) {
+        return {
+          draftDoc: {
+            __v: 1,
+            page_key: "mobile_home",
+            updated_at: now,
+            updated_by: "admin",
+            blocks: [{ ...block, sort_order: 0 }],
+          } as MobileHomeLayoutV1,
+          dirty: true,
+          selectedBlockId: block.id,
+        };
+      }
+      const next = s.draftDoc.blocks.slice();
+      const safeIdx = Math.max(0, Math.min(index, next.length));
+      next.splice(safeIdx, 0, block);
+      const renum = next.map((b, i) => ({ ...b, sort_order: i }));
+      return {
+        draftDoc: { ...s.draftDoc, blocks: renum, updated_at: now },
+        dirty: true,
+        selectedBlockId: block.id,
+      };
+    }),
+
+  removeBlock: (id) =>
+    set((s) => {
+      if (!s.draftDoc) return s;
+      const blocks = s.draftDoc.blocks
+        .filter((b) => b.id !== id)
+        .map((b, i) => ({ ...b, sort_order: i }));
+      return {
+        draftDoc: { ...s.draftDoc, blocks, updated_at: new Date().toISOString() },
+        dirty: true,
+        selectedBlockId: s.selectedBlockId === id ? null : s.selectedBlockId,
+      };
+    }),
+
+  moveBlock: (id, direction) =>
+    set((s) => {
+      if (!s.draftDoc) return s;
+      const blocks = s.draftDoc.blocks.slice().sort((a, b) => a.sort_order - b.sort_order);
+      const idx = blocks.findIndex((b) => b.id === id);
+      if (idx < 0) return s;
+      const target = direction === "up" ? idx - 1 : idx + 1;
+      if (target < 0 || target >= blocks.length) return s;
+      const [moved] = blocks.splice(idx, 1);
+      blocks.splice(target, 0, moved);
+      const renum = blocks.map((b, i) => ({ ...b, sort_order: i }));
+      return {
+        draftDoc: { ...s.draftDoc, blocks: renum, updated_at: new Date().toISOString() },
+        dirty: true,
       };
     }),
 
