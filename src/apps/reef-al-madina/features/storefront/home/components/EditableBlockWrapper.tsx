@@ -55,7 +55,7 @@ export function EditableBlockWrapper({ block, index, total, active, children }: 
         </button>
         <button
           type="button"
-          onClick={() => selectBlock(block.id)}
+          onClick={() => openInspector(block.id)}
           className="flex h-7 w-7 items-center justify-center rounded-full text-foreground/80 hover:bg-primary/10 hover:text-primary"
           aria-label="تعديل"
         >
