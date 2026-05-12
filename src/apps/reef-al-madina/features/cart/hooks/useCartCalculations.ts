@@ -260,19 +260,19 @@ export const useCartCalculations = ({
 
   const cashierItems = useMemo(
     () =>
-      lines
-        .filter((l) => UUID_RE.test(l.product.id))
-        .map((l) => ({ id: l.product.id, qty: l.qty })),
+      lines.length === 0
+        ? []
+        : lines
+            .filter((l) => UUID_RE.test(l.product.id))
+            .map((l) => ({ id: l.product.id, qty: l.qty })),
     [lines],
   );
   const allLinesAreUuid = cashierItems.length === lines.length;
-  const cartSignature = useMemo(
-    () =>
-      allLinesAreUuid && cashierItems.length > 0
-        ? JSON.stringify(cashierItems.map((i) => [i.id, i.qty]))
-        : "",
-    [cashierItems, allLinesAreUuid],
-  );
+  const cartSignature = useMemo(() => {
+    if (lines.length === 0) return "";
+    if (!allLinesAreUuid || cashierItems.length === 0) return "";
+    return JSON.stringify(cashierItems.map((i) => [i.id, i.qty]));
+  }, [cashierItems, allLinesAreUuid, lines.length]);
 
   useEffect(() => {
     if (!cartSignature) return;
