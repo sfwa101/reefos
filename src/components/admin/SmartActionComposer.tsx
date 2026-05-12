@@ -86,6 +86,7 @@ export function SmartActionComposer() {
   const [picked, setPicked] = useState<Action | null>(null);
   const [productOpen, setProductOpen] = useState(false);
   const { activeWorkspaceKind } = useSovereignContext();
+  const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
 
   function close() {
@@ -94,9 +95,15 @@ export function SmartActionComposer() {
   }
 
   function handlePick(a: Action) {
+    if (a.soon) return;
     if (a.intent === "new-product") {
       close();
       setProductOpen(true);
+      return;
+    }
+    if (a.to) {
+      close();
+      navigate({ to: a.to as never });
       return;
     }
     setPicked(a);
