@@ -43,6 +43,18 @@ export type SectionLayoutVariant =
   | "restaurant-list"
   | "basket-builder";
 
+/**
+ * Section capabilities — Wave P-C · Phase C-3.
+ *
+ * Drives per-vertical block gating in `resolveSectionTree` without slug
+ * switches. Strings live in this module to keep the registry self-
+ * contained; the resolver matches on string equality.
+ */
+export const SECTION_CAP = {
+  COMPARE: "commerce.compare",
+} as const;
+export type SectionCapability = (typeof SECTION_CAP)[keyof typeof SECTION_CAP];
+
 export interface SectionIdentity {
   slug: string;
   themeKey: StoreThemeKey;
@@ -54,6 +66,8 @@ export interface SectionIdentity {
   quickActions?: SectionQuickAction[];
   /** Drives how ProductsGrid / LayoutFactory render this section */
   layoutVariant: SectionLayoutVariant;
+  /** Optional capability flags (Wave P-C · C-3). */
+  capabilities?: ReadonlyArray<SectionCapability>;
 }
 
 export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
@@ -69,6 +83,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "توصيل مجاني للطلبات فوق 500 ج.م",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   produce: {
     slug: "produce",
@@ -82,6 +97,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "من المزرعة إلى بابك مباشرة",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   dairy: {
     slug: "dairy",
@@ -95,6 +111,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "يصلك خلال ساعتين من الحلب",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   meat: {
     slug: "meat",
@@ -156,6 +173,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
         "linear-gradient(135deg, hsl(20 60% 28%), hsl(15 50% 40%) 60%, hsl(35 70% 60%))",
     },
     layoutVariant: "meal-menu",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   restaurants: {
     slug: "restaurants",
@@ -262,6 +280,14 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
     },
     layoutVariant: "standard",
   },
+};
+
+// Slug aliases — preserve legacy URLs after Wave P-C route collapse so old
+// links / bookmarks (`/store/home`) keep resolving to the canonical
+// identity (`home-goods`). Aliases inherit everything except `slug`.
+SECTION_IDENTITY_REGISTRY.home = {
+  ...SECTION_IDENTITY_REGISTRY["home-goods"],
+  slug: "home",
 };
 
 /** Lookup helper. Returns undefined for unknown slugs (caller decides fallback). */

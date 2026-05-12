@@ -8,7 +8,7 @@ import type { SectionIdentity as KernelSectionIdentity } from "@/core/sections/t
 import type { ProductCardVM, ProductDetailsVM } from "@/core/catalog/types";
 import { CAP } from "@/core/capabilities";
 import type { RenderBlock, RenderDescriptor } from "./types";
-import type { SectionIdentity as RegistrySectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { type SectionIdentity as RegistrySectionIdentity, SECTION_CAP } from "@/core/catalog/registry/SectionIdentityRegistry";
 import { storeThemes } from "@/lib/storeThemes";
 import type { HomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 
@@ -30,6 +30,7 @@ const REEF_PAGE_KEY: Record<string, string> = {
   "school-library": "reef_school_library",
   wholesale: "reef_wholesale",
   "home-goods": "home",
+  home: "home",
 };
 
 export function identityToPageKey(identity: RegistrySectionIdentity): string {
@@ -120,15 +121,16 @@ export function resolveDetailsTree(
  * declarative RenderDescriptor. Consumed by the dynamic
  * `src/pages/store/SectionPage.tsx` shell behind the `store/$slug` route.
  *
- * Capability gating (CompareBar, etc.) will move onto SectionIdentity in
- * Phase C-3; for now we mount the bar unconditionally to preserve parity
- * with the Shape-β shells (HomeGoods, Dairy, Produce, Kitchen).
+ * Capability gating (e.g. `commerce.compare`) is driven by
+ * `identity.capabilities` — Phase C-3 wired the CompareBar to the
+ * Shape-β verticals (home-goods, dairy, produce, kitchen).
  */
 export function resolveSectionTree(
   identity: RegistrySectionIdentity,
   orchestrator: HomeOrchestrator,
 ): RenderDescriptor {
   const theme = storeThemes[identity.themeKey];
+  const caps = new Set(identity.capabilities ?? []);
   const blocks: RenderBlock[] = [
     block("nav.back_header", "back-header", {
       title: identity.title,
@@ -140,8 +142,11 @@ export function resolveSectionTree(
       theme,
       orchestrator,
     }),
-    block("commerce.compare_bar", "compare"),
   ];
+
+  if (caps.has(SECTION_CAP.COMPARE)) {
+    blocks.push(block("commerce.compare_bar", "compare"));
+  }
 
   if (orchestrator.opened) {
     blocks.push(
