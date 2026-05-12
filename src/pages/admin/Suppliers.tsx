@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listSuppliersFullFn,
   createSupplierFn,
+  updateSupplierFn,
+  deleteSupplierFn,
   type SupplierFullRow,
 } from "@/lib/admin-catalog.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Building2 } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Building2, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
 
 type Supplier = SupplierFullRow;
