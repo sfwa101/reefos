@@ -31,71 +31,44 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/context/AuthContext";
+import {
+  listAdminOverrideLogsFn,
+  recordAdminOverrideApprovalFn,
+  type OverrideLogRow,
+} from "@/lib/profit-observation.functions";
+import { useAdminOverrideLogsRealtime } from "@/hooks/useAdminOverrideLogsRealtime";
 import { toLatin } from "@/lib/format";
 
-interface OverrideLogRow {
-  id: string;
-  admin_user_id: string;
-  product_id: string | null;
-  cart_id: string | null;
-  order_id: string | null;
-  original_grand_total: number | null;
-  overridden_grand_total: number | null;
-  reason: string;
-  loss_prevention_reason: string | null;
-  metadata: Record<string, unknown>;
-  created_at: string;
-}
-
 const ProfitObservationRoom = () => {
-  const { user } = useAuth();
   const [rows, setRows] = useState<OverrideLogRow[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [reviewing, setReviewing] = useState<OverrideLogRow | null>(null);
   const [reviewReason, setReviewReason] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
-  // Initial load + realtime feed.
   useEffect(() => {
     let alive = true;
-    const load = async () => {
-      const { data, error: dbErr } = await supabase
-        .from("admin_override_logs")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (!alive) return;
-      if (dbErr) {
-        setError(dbErr.message);
+    (async () => {
+      try {
+        const data = await listAdminOverrideLogsFn();
+        if (!alive) return;
+        setRows(data);
+      } catch (e) {
+        if (!alive) return;
+        setError((e as Error).message);
         setRows([]);
-        return;
       }
-      setRows((data as OverrideLogRow[]) ?? []);
-    };
-    void load();
-
-    const channel = supabase
-      .channel("admin_override_logs-feed")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "admin_override_logs" },
-        (payload) => {
-          setRows((prev) => {
-            const next = (prev ?? []).slice();
-            next.unshift(payload.new as OverrideLogRow);
-            return next.slice(0, 100);
-          });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      alive = false;
-      void supabase.removeChannel(channel);
-    };
+    })();
+    return () => { alive = false; };
   }, []);
+
+  useAdminOverrideLogsRealtime((row) => {
+    setRows((prev) => {
+      const next = (prev ?? []).slice();
+      next.unshift(row);
+      return next.slice(0, 100);
+    });
+  });
 
   const stats = useMemo(() => {
     if (!rows || rows.length === 0) {
@@ -117,33 +90,33 @@ const ProfitObservationRoom = () => {
   }, [rows]);
 
   const submitReview = async () => {
-    if (!reviewing || !user) return;
+    if (!reviewing) return;
     if (reviewReason.trim().length < 10) {
       toast.error("اكتب سبباً مفصلاً (10 أحرف على الأقل)");
       return;
     }
     setSubmitting(true);
-    const { error: insertErr } = await supabase
-      .from("admin_override_logs")
-      .insert({
-        admin_user_id: user.id,
-        product_id: reviewing.product_id,
-        cart_id: reviewing.cart_id,
-        order_id: reviewing.order_id,
-        original_grand_total: reviewing.original_grand_total,
-        overridden_grand_total: reviewing.overridden_grand_total,
-        reason: `اعتماد إداري: ${reviewReason.trim()}`,
-        loss_prevention_reason: reviewing.loss_prevention_reason,
-        metadata: { reviewed_log_id: reviewing.id, action: "approve_override" },
+    try {
+      await recordAdminOverrideApprovalFn({
+        data: {
+          source_log_id: reviewing.id,
+          product_id: reviewing.product_id,
+          cart_id: reviewing.cart_id,
+          order_id: reviewing.order_id,
+          original_grand_total: reviewing.original_grand_total,
+          overridden_grand_total: reviewing.overridden_grand_total,
+          loss_prevention_reason: reviewing.loss_prevention_reason,
+          justification: reviewReason.trim(),
+        },
       });
-    setSubmitting(false);
-    if (insertErr) {
-      toast.error(insertErr.message);
-      return;
+      toast.success("تم تسجيل الاعتماد الإداري");
+      setReviewing(null);
+      setReviewReason("");
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSubmitting(false);
     }
-    toast.success("تم تسجيل الاعتماد الإداري");
-    setReviewing(null);
-    setReviewReason("");
   };
 
   return (
