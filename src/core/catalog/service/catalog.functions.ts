@@ -352,3 +352,30 @@ export const priceQuoteFn = createServerFn({ method: "POST" })
     return { lines: quotedLines, currency, quotedAt: new Date().toISOString() };
   });
 
+
+// ────────────────────────────────────────────────────────────────────────────
+// Constitution v2.0 · Phase 1 · Step 3
+// DNA Endpoint — exposes a `usa_products` row as a ProductCivilizationEntity.
+// Public read (matches the existing public RLS on usa_products). Returns the
+// clean Layer-4 Domain model — never raw DB rows.
+// ────────────────────────────────────────────────────────────────────────────
+
+const DNAInputSchema = z.object({
+  id: z.string().uuid(),
+});
+
+export const getProductDNAFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => DNAInputSchema.parse(input))
+  .handler(async ({ data }): Promise<ProductCivilizationEntity> => {
+    const { data: row, error } = await supabase
+      .from("usa_products")
+      .select("*")
+      .eq("id", data.id)
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!row) throw new Error(`Product DNA not found for id=${data.id}`);
+
+    return projectProductDNA(row as UsaProductRow);
+  });
