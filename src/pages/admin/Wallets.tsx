@@ -3,14 +3,18 @@ import {
   Wallet, Search, Loader2, ShieldCheck, Receipt, User as UserIcon, Phone, AlertCircle,
   Coins, Hourglass, CheckCircle2,
 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  searchProfilesFn, getWalletBalanceFn, adminTopupWalletFn,
+  type ProfileSearchRow,
+} from "@/lib/finance.functions";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 
-type Profile = { id: string; full_name: string | null; phone: string | null };
+type Profile = ProfileSearchRow;
 type Topup = {
   id: string; user_id: string; amount: number; method: string;
   transfer_reference: string; note: string | null; performed_by_name: string | null;
@@ -39,6 +43,9 @@ const STATUS_LABEL: Record<string, string> = {
 };
 
 function TopupForm() {
+  const searchProfiles = useServerFn(searchProfilesFn);
+  const getBalance = useServerFn(getWalletBalanceFn);
+  const adminTopup = useServerFn(adminTopupWalletFn);
   const [search, setSearch] = useState("");
   const [matches, setMatches] = useState<Profile[]>([]);
   const [searching, setSearching] = useState(false);
@@ -60,36 +67,41 @@ function TopupForm() {
     let cancel = false;
     setSearching(true);
     const t = setTimeout(async () => {
-      const term = search.trim();
-      const { data } = await supabase
-        .from("profiles").select("id, full_name, phone")
-        .or(`full_name.ilike.%${term}%,phone.ilike.%${term}%`).limit(8);
-      if (!cancel) { setMatches((data ?? []) as Profile[]); setSearching(false); }
+      try {
+        const data = await searchProfiles({ data: { term: search.trim() } });
+        if (!cancel) setMatches(data);
+      } catch {
+        if (!cancel) setMatches([]);
+      } finally {
+        if (!cancel) setSearching(false);
+      }
     }, 300);
     return () => { cancel = true; clearTimeout(t); };
-  }, [search]);
+  }, [search, searchProfiles]);
 
   useEffect(() => {
     if (!selected) { setBalance(null); return; }
     (async () => {
-      const { data } = await supabase
-        .from("wallet_balances").select("balance").eq("user_id", selected.id).maybeSingle();
-      setBalance(Number((data as { balance: number } | null)?.balance ?? 0));
+      try {
+        const { balance } = await getBalance({ data: { user_id: selected.id } });
+        setBalance(balance);
+      } catch {
+        setBalance(0);
+      }
     })();
-  }, [selected]);
+  }, [selected, getBalance]);
 
   const handleTopup = async () => {
     if (!selected || !valid) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.rpc("admin_topup_wallet" as never, {
-        _user_id: selected.id,
-        _amount: Number(amount),
-        _method: method,
-        _transfer_reference: reference.trim(),
-        _note: note.trim() || null,
-      } as never);
-      if (error) throw error;
+      await adminTopup({ data: {
+        user_id: selected.id,
+        amount: Number(amount),
+        method,
+        transfer_reference: reference.trim(),
+        note: note.trim() || null,
+      }});
       toast.success(`تم تسجيل الطلب — قيد اعتماد الأدمن (Maker-Checker)`, {
         description: `${fmtMoney(Number(amount))} • سيظهر في رصيد العميل بعد الاعتماد`,
       });

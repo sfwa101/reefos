@@ -1,17 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listPendingTopupsFn, approveTopupFn, rejectTopupFn,
+  type PendingTopupRow,
+} from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Clock, User } from "lucide-react";
-
-type Topup = {
-  id: string; user_id: string; amount: number; method: string;
-  transfer_reference: string; note: string | null; status: string;
-  performed_by: string; performed_by_name: string | null; created_at: string;
-  rejection_reason: string | null;
-};
 
 const METHOD_LABEL: Record<string, string> = {
   vodafone_cash: "فودافون كاش", instapay: "إنستاباي",
@@ -20,17 +17,21 @@ const METHOD_LABEL: Record<string, string> = {
 
 export default function TopupApprovals() {
   const { hasRole, loading } = useAdminRoles();
-  const [rows, setRows] = useState<Topup[]>([]);
+  const listPending = useServerFn(listPendingTopupsFn);
+  const approveFn = useServerFn(approveTopupFn);
+  const rejectFn = useServerFn(rejectTopupFn);
+  const [rows, setRows] = useState<PendingTopupRow[]>([]);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [reason, setReason] = useState<Record<string, string>>({});
 
   const load = useCallback(async () => {
-    const { data } = await supabase
-      .from("wallet_topup_requests" as never)
-      .select("*").eq("status", "pending")
-      .order("created_at", { ascending: true }).limit(50);
-    setRows(((data ?? []) as unknown) as Topup[]);
-  }, []);
+    try {
+      const data = await listPending();
+      setRows(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
+  }, [listPending]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -50,8 +51,7 @@ export default function TopupApprovals() {
   const approve = async (id: string) => {
     setBusyId(id);
     try {
-      const { error } = await supabase.rpc("approve_wallet_topup" as never, { _topup_id: id } as never);
-      if (error) throw error;
+      await approveFn({ data: { id } });
       toast.success("تم اعتماد الشحن وإضافة الرصيد للعميل");
       await load();
     } catch (e) {
@@ -71,8 +71,7 @@ export default function TopupApprovals() {
     if (r.length < 3) { toast.error("اكتب سبب الرفض (3 أحرف على الأقل)"); return; }
     setBusyId(id);
     try {
-      const { error } = await supabase.rpc("reject_wallet_topup" as never, { _topup_id: id, _reason: r } as never);
-      if (error) throw error;
+      await rejectFn({ data: { id, reason: r } });
       toast.success("تم رفض الطلب");
       await load();
     } catch (e) {

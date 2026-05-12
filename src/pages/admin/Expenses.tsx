@@ -1,16 +1,11 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { listExpensesFn, createExpenseFn, type ExpenseRow } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Receipt } from "lucide-react";
 import { toast } from "sonner";
-
-type Expense = {
-  id: string; category: string; subcategory: string | null; amount: number;
-  expense_date: string; paid_to: string | null; payment_method: string | null;
-  reference: string | null; notes: string | null;
-};
 
 const CATEGORIES = [
   { value: "operations", label: "تشغيل" },
@@ -28,7 +23,9 @@ const CATEGORIES = [
 export default function Expenses() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
-  const [rows, setRows] = useState<Expense[]>([]);
+  const listExpenses = useServerFn(listExpensesFn);
+  const createExpense = useServerFn(createExpenseFn);
+  const [rows, setRows] = useState<ExpenseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({
@@ -38,31 +35,37 @@ export default function Expenses() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("daily_expenses").select("*").order("expense_date", { ascending: false }).limit(100);
-    setRows((data || []) as Expense[]);
-    setLoading(false);
+    try {
+      const data = await listExpenses();
+      setRows(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed]);
+  useEffect(() => { if (allowed) load(); else setLoading(false); /* eslint-disable-next-line */ }, [allowed]);
 
   const create = async () => {
-    const amt = parseFloat(form.amount);
-    if (!(amt > 0)) return toast.error("مبلغ غير صالح");
-    const { error } = await (supabase as any).from("daily_expenses").insert({
-      category: form.category,
-      subcategory: form.subcategory || null,
-      amount: amt,
-      expense_date: form.expense_date,
-      paid_to: form.paid_to || null,
-      payment_method: form.payment_method,
-      reference: form.reference || null,
-      notes: form.notes || null,
-    });
-    if (error) return toast.error(error.message);
-    toast.success("تم تسجيل المصروف");
-    setForm({ ...form, amount: "", subcategory: "", paid_to: "", reference: "", notes: "" });
-    setShowForm(false);
-    load();
+    try {
+      await createExpense({ data: {
+        category: form.category,
+        subcategory: form.subcategory || null,
+        amount: parseFloat(form.amount),
+        expense_date: form.expense_date,
+        paid_to: form.paid_to || null,
+        payment_method: form.payment_method,
+        reference: form.reference || null,
+        notes: form.notes || null,
+      }});
+      toast.success("تم تسجيل المصروف");
+      setForm({ ...form, amount: "", subcategory: "", paid_to: "", reference: "", notes: "" });
+      setShowForm(false);
+      load();
+    } catch (e) {
+      toast.error((e as Error).message);
+    }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;

@@ -5,26 +5,17 @@
  * `PurchaseInvoiceBuilder` (RPC-driven, MAC-aware).
  */
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, ShieldAlert, FileText, PackagePlus } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import { listPurchaseInvoicesFn, type PurchaseInvoiceRow } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { PurchaseInvoiceBuilder } from "@/apps/reef-al-madina/features/admin/components/PurchaseInvoiceBuilder";
+import { toast } from "sonner";
 
-type Invoice = {
-  id: string;
-  invoice_number: string | null;
-  invoice_date: string;
-  due_date: string | null;
-  total: number;
-  paid_amount: number;
-  remaining: number;
-  status: string;
-  supplier_id: string;
-  suppliers?: { name: string } | null;
-};
+type Invoice = PurchaseInvoiceRow;
 
 type Tab = "list" | "new";
 
@@ -38,19 +29,21 @@ const STATUS_TONE: Record<string, string> = {
 export default function PurchaseInvoices() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
+  const listInvoices = useServerFn(listPurchaseInvoicesFn);
   const [tab, setTab] = useState<Tab>("list");
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase
-      .from("purchase_invoices")
-      .select("*, suppliers(name)")
-      .order("invoice_date", { ascending: false })
-      .limit(50);
-    setInvoices((data ?? []) as unknown as Invoice[]);
-    setLoading(false);
+    try {
+      const data = await listInvoices();
+      setInvoices(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {

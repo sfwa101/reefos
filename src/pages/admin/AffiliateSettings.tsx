@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,18 +7,18 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, Save, Plus, Percent } from "lucide-react";
-
-type Row = {
-  id: string;
-  category: string;
-  default_commission_pct: number;
-  notes: string | null;
-};
+import {
+  listAffiliateSettingsFn, createAffiliateSettingFn, updateAffiliateSettingFn,
+  type AffiliateSettingRow,
+} from "@/lib/finance.functions";
 
 export default function AffiliateSettings() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const isAdmin = hasRole("admin");
-  const [rows, setRows] = useState<Row[]>([]);
+  const listFn = useServerFn(listAffiliateSettingsFn);
+  const createFn = useServerFn(createAffiliateSettingFn);
+  const updateFn = useServerFn(updateAffiliateSettingFn);
+  const [rows, setRows] = useState<AffiliateSettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
   const [newCategory, setNewCategory] = useState("");
@@ -26,50 +26,55 @@ export default function AffiliateSettings() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("affiliate_settings")
-      .select("id,category,default_commission_pct,notes")
-      .order("category");
-    if (error) toast.error(error.message);
-    setRows((data ?? []) as Row[]);
-    setLoading(false);
+    try {
+      const data = await listFn();
+      setRows(data);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); /* eslint-disable-next-line */ }, []);
 
-  const updateRow = (id: string, patch: Partial<Row>) =>
+  const updateRow = (id: string, patch: Partial<AffiliateSettingRow>) =>
     setRows(rs => rs.map(r => (r.id === id ? { ...r, ...patch } : r)));
 
-  const save = async (row: Row) => {
-    if (row.default_commission_pct < 0 || row.default_commission_pct > 50) {
-      toast.error("النسبة يجب أن تكون بين 0% و 50%");
-      return;
-    }
+  const save = async (row: AffiliateSettingRow) => {
     setSavingId(row.id);
-    const { error } = await supabase
-      .from("affiliate_settings")
-      .update({
+    try {
+      await updateFn({ data: {
+        id: row.id,
         default_commission_pct: row.default_commission_pct,
         notes: row.notes,
-      })
-      .eq("id", row.id);
-    setSavingId(null);
-    if (error) toast.error(error.message);
-    else toast.success(`تم حفظ "${row.category}"`);
+      }});
+      toast.success(`تم حفظ "${row.category}"`);
+    } catch (e) {
+      const msg = (e as Error).message;
+      toast.error(msg === "invalid_pct" ? "النسبة يجب أن تكون بين 0% و 50%" : msg);
+    } finally {
+      setSavingId(null);
+    }
   };
 
   const addRow = async () => {
-    const cat = newCategory.trim();
-    const pct = parseFloat(newPct);
-    if (!cat) return toast.error("أدخل اسم الفئة");
-    if (isNaN(pct) || pct < 0 || pct > 50) return toast.error("النسبة 0-50%");
-    const { error } = await supabase
-      .from("affiliate_settings")
-      .insert({ category: cat, default_commission_pct: pct });
-    if (error) return toast.error(error.message);
-    setNewCategory(""); setNewPct("3");
-    toast.success("تمت إضافة الفئة");
-    load();
+    try {
+      await createFn({ data: {
+        category: newCategory,
+        default_commission_pct: parseFloat(newPct),
+      }});
+      setNewCategory(""); setNewPct("3");
+      toast.success("تمت إضافة الفئة");
+      load();
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = {
+        category_required: "أدخل اسم الفئة",
+        invalid_pct: "النسبة 0-50%",
+      };
+      toast.error(map[msg] ?? msg);
+    }
   };
 
   if (rolesLoading) return <div className="p-8 text-center"><Loader2 className="animate-spin mx-auto" /></div>;

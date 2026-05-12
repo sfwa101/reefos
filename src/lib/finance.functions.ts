@@ -258,3 +258,358 @@ export const settleDriverCashFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============================================================================
+// Wave R-1 · Batch 3 — Expenses, Affiliate Settings, Purchase Invoices,
+// Wallet Topups (Maker-Checker), Profile lookup, Product Partners.
+// ============================================================================
+
+// ---- Daily Expenses -------------------------------------------------------
+export type ExpenseRow = {
+  id: string; category: string; subcategory: string | null; amount: number;
+  expense_date: string; paid_to: string | null; payment_method: string | null;
+  reference: string | null; notes: string | null;
+};
+
+export const listExpensesFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<ExpenseRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("daily_expenses")
+      .select("*")
+      .order("expense_date", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ExpenseRow[];
+  });
+
+const EXPENSE_CATEGORIES = [
+  "operations","salaries","employee_advance","damages","personal_drawings",
+  "utilities","rent","marketing","transport","other",
+];
+const EXPENSE_METHODS = ["cash","bank_transfer","wallet"];
+
+export const createExpenseFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    category: string; subcategory: string | null; amount: number;
+    expense_date: string; paid_to: string | null; payment_method: string;
+    reference: string | null; notes: string | null;
+  }) => {
+    if (!EXPENSE_CATEGORIES.includes(d.category)) throw new Error("invalid_category");
+    if (!EXPENSE_METHODS.includes(d.payment_method)) throw new Error("invalid_method");
+    const amt = Number(d.amount);
+    if (!Number.isFinite(amt) || amt <= 0) throw new Error("invalid_amount");
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(d.expense_date)) throw new Error("invalid_date");
+    return { ...d, amount: amt };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("daily_expenses").insert({
+      category: data.category,
+      subcategory: data.subcategory?.trim() || null,
+      amount: data.amount,
+      expense_date: data.expense_date,
+      paid_to: data.paid_to?.trim() || null,
+      payment_method: data.payment_method,
+      reference: data.reference?.trim() || null,
+      notes: data.notes?.trim() || null,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Affiliate Settings ---------------------------------------------------
+export type AffiliateSettingRow = {
+  id: string; category: string; default_commission_pct: number; notes: string | null;
+};
+
+export const listAffiliateSettingsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<AffiliateSettingRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("affiliate_settings")
+      .select("id,category,default_commission_pct,notes")
+      .order("category");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as AffiliateSettingRow[];
+  });
+
+function validateAffiliatePct(pct: number): number {
+  const n = Number(pct);
+  if (!Number.isFinite(n) || n < 0 || n > 50) throw new Error("invalid_pct");
+  return n;
+}
+
+export const createAffiliateSettingFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { category: string; default_commission_pct: number }) => {
+    const cat = (d.category ?? "").trim();
+    if (!cat) throw new Error("category_required");
+    return { category: cat, default_commission_pct: validateAffiliatePct(d.default_commission_pct) };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("affiliate_settings").insert(data);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const updateAffiliateSettingFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; default_commission_pct: number; notes: string | null }) => {
+    if (!d?.id) throw new Error("id_required");
+    return {
+      id: d.id,
+      default_commission_pct: validateAffiliatePct(d.default_commission_pct),
+      notes: d.notes ?? null,
+    };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb
+      .from("affiliate_settings")
+      .update({ default_commission_pct: data.default_commission_pct, notes: data.notes })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Purchase Invoices ----------------------------------------------------
+export type PurchaseInvoiceRow = {
+  id: string; invoice_number: string | null; invoice_date: string;
+  due_date: string | null; total: number; paid_amount: number; remaining: number;
+  status: string; supplier_id: string;
+  suppliers?: { name: string } | null;
+};
+
+export const listPurchaseInvoicesFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<PurchaseInvoiceRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("purchase_invoices")
+      .select("*, suppliers(name)")
+      .order("invoice_date", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PurchaseInvoiceRow[];
+  });
+
+// ---- Wallet Top-ups (Maker-Checker) --------------------------------------
+export type PendingTopupRow = {
+  id: string; user_id: string; amount: number; method: string;
+  transfer_reference: string; note: string | null; status: string;
+  performed_by: string; performed_by_name: string | null;
+  created_at: string; rejection_reason: string | null;
+};
+
+export const listPendingTopupsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<PendingTopupRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("wallet_topup_requests")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at", { ascending: true })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PendingTopupRow[];
+  });
+
+export const approveTopupFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.rpc("approve_wallet_topup", { _topup_id: data.id });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const rejectTopupFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; reason: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    const r = (d.reason ?? "").trim();
+    if (r.length < 3) throw new Error("reason_too_short");
+    return { id: d.id, reason: r };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.rpc("reject_wallet_topup", { _topup_id: data.id, _reason: data.reason });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export type ProfileSearchRow = { id: string; full_name: string | null; phone: string | null };
+
+export const searchProfilesFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { term: string }) => {
+    const t = (d?.term ?? "").trim();
+    if (t.length < 2) throw new Error("term_too_short");
+    // Sanitize ILIKE wildcards to keep the OR filter safe.
+    const safe = t.replace(/[%,_]/g, "");
+    if (!safe) throw new Error("term_invalid");
+    return { term: safe };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<ProfileSearchRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data: rows, error } = await sb
+      .from("profiles")
+      .select("id, full_name, phone")
+      .or(`full_name.ilike.%${data.term}%,phone.ilike.%${data.term}%`)
+      .limit(8);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as ProfileSearchRow[];
+  });
+
+export const getWalletBalanceFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { user_id: string }) => {
+    if (!d?.user_id) throw new Error("user_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ balance: number }> => {
+    const sb = context.supabase as SbAny;
+    const { data: row, error } = await sb
+      .from("wallet_balances")
+      .select("balance")
+      .eq("user_id", data.user_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { balance: Number((row as { balance: number } | null)?.balance ?? 0) };
+  });
+
+const TOPUP_METHODS = ["vodafone_cash", "instapay", "bank_transfer", "cash"];
+
+export const adminTopupWalletFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    user_id: string; amount: number; method: string;
+    transfer_reference: string; note: string | null;
+  }) => {
+    if (!d?.user_id) throw new Error("user_not_found");
+    const amt = Number(d.amount);
+    if (!Number.isFinite(amt) || amt <= 0) throw new Error("invalid_amount");
+    if (amt > 100000) throw new Error("amount_too_large");
+    if (!TOPUP_METHODS.includes(d.method)) throw new Error("invalid_method");
+    const ref = (d.transfer_reference ?? "").trim();
+    if (ref.length < 4) throw new Error("transfer_reference_required");
+    return { ...d, amount: amt, transfer_reference: ref, note: d.note?.trim() || null };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.rpc("admin_topup_wallet", {
+      _user_id: data.user_id,
+      _amount: data.amount,
+      _method: data.method,
+      _transfer_reference: data.transfer_reference,
+      _note: data.note,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---- Product Partners -----------------------------------------------------
+export type ProductPartnerRow = {
+  id: string; product_id: string; partner_name: string; partner_phone: string | null;
+  split_type: "gross_profit" | "net_profit" | "revenue"; percentage: number; is_active: boolean;
+  products?: { name: string } | null;
+};
+
+export type PartnerLedgerRow = {
+  id: string; partner_name: string; product_name: string | null;
+  amount_due: number; status: string; created_at: string;
+  split_type: string; percentage: number;
+};
+
+export const listProductPartnersFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<ProductPartnerRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("product_partners")
+      .select("*, products(name)")
+      .order("created_at", { ascending: false });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ProductPartnerRow[];
+  });
+
+export const listPartnerLedgersFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<PartnerLedgerRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("partner_ledgers")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as PartnerLedgerRow[];
+  });
+
+const SPLIT_TYPES = ["gross_profit", "net_profit", "revenue"];
+
+export const createProductPartnerFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    product_id: string; partner_name: string; partner_phone: string | null;
+    split_type: string; percentage: number;
+  }) => {
+    if (!d?.product_id) throw new Error("product_required");
+    const name = (d.partner_name ?? "").trim();
+    if (!name) throw new Error("name_required");
+    if (!SPLIT_TYPES.includes(d.split_type)) throw new Error("invalid_split");
+    const pct = Number(d.percentage);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) throw new Error("invalid_pct");
+    return {
+      product_id: d.product_id,
+      partner_name: name,
+      partner_phone: d.partner_phone?.trim() || null,
+      split_type: d.split_type,
+      percentage: pct,
+    };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("product_partners").insert(data);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const setProductPartnerActiveFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; is_active: boolean }) => {
+    if (!d?.id) throw new Error("id_required");
+    return { id: d.id, is_active: !!d.is_active };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("product_partners").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const markPartnerLedgerPaidFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.rpc("admin_update_partner_ledger", {
+      p_ledger_id: data.id,
+      p_mark_paid: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
