@@ -12,11 +12,14 @@ interface SectionManagerState {
   publishedDoc: MobileHomeLayoutV1 | null;
   draftDoc: MobileHomeLayoutV1 | null;
   selectedBlockId: string | null;
+  inspectingBlockId: string | null;
   dirty: boolean;
   activeTab: ZoneTab;
 
   init: (published: MobileHomeLayoutV1 | null, draft: MobileHomeLayoutV1 | null) => void;
   selectBlock: (id: string | null) => void;
+  openInspector: (id: string) => void;
+  closeInspector: () => void;
   setTab: (tab: ZoneTab) => void;
   updateBlock: (id: string, patch: Partial<LayoutBlock>) => void;
   addBlock: (block: LayoutBlock) => void;
@@ -44,6 +47,7 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
   publishedDoc: null,
   draftDoc: null,
   selectedBlockId: null,
+  inspectingBlockId: null,
   dirty: false,
   activeTab: "all",
 
@@ -52,11 +56,14 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
       publishedDoc: published,
       draftDoc: draft ?? published,
       selectedBlockId: null,
+      inspectingBlockId: null,
       dirty: false,
       activeTab: "all",
     }),
 
   selectBlock: (id) => set({ selectedBlockId: id }),
+  openInspector: (id) => set({ inspectingBlockId: id, selectedBlockId: id }),
+  closeInspector: () => set({ inspectingBlockId: null }),
   setTab: (tab) => set({ activeTab: tab }),
 
   updateBlock: (id, patch) =>

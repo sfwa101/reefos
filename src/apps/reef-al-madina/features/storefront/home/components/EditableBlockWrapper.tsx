@@ -23,7 +23,7 @@ interface Props {
 export function EditableBlockWrapper({ block, index, total, active, children }: Props) {
   const moveBlock = useSectionManagerStore((s) => s.moveBlock);
   const removeBlock = useSectionManagerStore((s) => s.removeBlock);
-  const selectBlock = useSectionManagerStore((s) => s.selectBlock);
+  const openInspector = useSectionManagerStore((s) => s.openInspector);
 
   if (!active) return <>{children}</>;
 
@@ -55,7 +55,7 @@ export function EditableBlockWrapper({ block, index, total, active, children }: 
         </button>
         <button
           type="button"
-          onClick={() => selectBlock(block.id)}
+          onClick={() => openInspector(block.id)}
           className="flex h-7 w-7 items-center justify-center rounded-full text-foreground/80 hover:bg-primary/10 hover:text-primary"
           aria-label="تعديل"
         >
