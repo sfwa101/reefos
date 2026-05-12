@@ -142,7 +142,7 @@ function useDebounced<T>(value: T, ms = 250): T {
   return v;
 }
 
-const escapeIlike = (raw: string): string => raw.replace(/[%,()]/g, (m) => `\\${m}`);
+// (escapeIlike now lives in admin-grid.functions; client side has nothing to escape.)
 
 // -------- Main component --------
 
