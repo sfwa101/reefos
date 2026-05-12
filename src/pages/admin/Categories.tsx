@@ -17,21 +17,25 @@ export default function Categories() {
 
   const load = useCallback(async () => {
     setItems(null);
-    const { data, error } = await supabase.from("categories").select("*").order("sort_order").limit(500);
-    if (error) toast.error(error.message);
-    setItems((data ?? []) as Category[]);
+    try {
+      const data = await listCategoriesFn();
+      setItems(data);
+    } catch (err) {
+      toast.error((err as Error).message);
+      setItems([]);
+    }
   }, []);
   useEffect(() => { load(); }, [load]);
 
   const handleDelete = async (c: Category) => {
     if (!confirm(`حذف الفئة "${c.name}"؟`)) return;
-    const { error } = await supabase.from("categories").delete().eq("id", c.id);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await deleteCategoryFn({ data: { id: c.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
     }
-    toast.success("تم الحذف");
-    load();
   };
 
   const roots = (items ?? []).filter((c) => !c.parent_id);
