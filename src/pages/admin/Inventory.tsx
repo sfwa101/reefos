@@ -1,12 +1,12 @@
 import { useEffect, useState, useCallback } from "react";
 import { Search, Save, Loader2, AlertTriangle, Boxes } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/lib/sovereignCatalog";
+import { getNestedStockBreakdownFn } from "@/lib/ops.functions";
 
 type Row = {
   id: string;        // sku_id (Sovereign)
