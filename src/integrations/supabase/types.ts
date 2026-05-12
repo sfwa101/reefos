@@ -2172,45 +2172,62 @@ export type Database = {
       }
       entity_definitions: {
         Row: {
+          capabilities: Json
           created_at: string
           description: string | null
+          dna_kind: string | null
           icon: string | null
           id: string
           is_system: boolean
           key: string
           label_i18n: Json
+          parent_entity_id: string | null
           primary_key_col: string
           sort_order: number
           table_name: string
           updated_at: string
         }
         Insert: {
+          capabilities?: Json
           created_at?: string
           description?: string | null
+          dna_kind?: string | null
           icon?: string | null
           id?: string
           is_system?: boolean
           key: string
           label_i18n?: Json
+          parent_entity_id?: string | null
           primary_key_col?: string
           sort_order?: number
           table_name: string
           updated_at?: string
         }
         Update: {
+          capabilities?: Json
           created_at?: string
           description?: string | null
+          dna_kind?: string | null
           icon?: string | null
           id?: string
           is_system?: boolean
           key?: string
           label_i18n?: Json
+          parent_entity_id?: string | null
           primary_key_col?: string
           sort_order?: number
           table_name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "entity_definitions_parent_entity_id_fkey"
+            columns: ["parent_entity_id"]
+            isOneToOne: false
+            referencedRelation: "entity_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       escrow_disputes: {
         Row: {
