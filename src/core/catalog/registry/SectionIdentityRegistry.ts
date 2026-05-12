@@ -238,7 +238,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       { icon: "PackagePlus", label: "ابني سلتك", action: "navigate", payload: "/store/baskets-build" },
       { icon: "CalendarClock", label: "اشتراكاتي", action: "navigate", payload: "/store/baskets-subs" },
     ],
-    layoutVariant: "basket-builder",
+    layoutVariant: "standard",
   },
   subscriptions: {
     slug: "subscriptions",
