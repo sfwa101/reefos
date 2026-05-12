@@ -26,6 +26,9 @@ This Constitution establishes the **non-negotiable governance fabric** that all 
 8. **Tenant Isolation is Absolute.** Frontend never asserts tenant identity; the server is the only source of tenancy truth.
 9. **Single Source of Truth.** Pricing, identity, capability, and tenancy each have exactly one authoritative source. Duplicates are bugs.
 10. **Append-Only History.** State-changing decisions emit immutable events. Mutation without a corresponding event is forbidden.
+11. **100x Scale Doctrine.** Every module is designed to survive 100× current scope — infinite verticals, tenants, capabilities, and event throughput. "It's only for one section / one store / one country" is a banned justification. Reef Al Madina is the **Standard Model Sovereign Runtime Ecosystem**, not a grocery app, and MUST integrate sovereign financial flows (Taysir), swarm logistics (Barq), social finance (Asrab), and arbitrarily many physical-market verticals through a single descriptor- and capability-driven kernel.
+12. **Anti-Hardcoding Law (Zero Domain Knowledge in Code).** The codebase MUST NOT encode knowledge of any specific vertical, product category, store type, food item, or physical-market expansion. Domain knowledge lives **only** in declarative data: `SectionIdentityRegistry`, `CapabilityRegistry`, `RenderDescriptor` trees in `ui_layouts`, i18n catalogs, and DB seeds. See Article 3a.
+13. **Sovereign Interconnectivity.** Every node consumes peer nodes (Barq, Taysir, Asrab, Hakim, Maeen, Nabd, Afraa, Benaa, Noor, Al-Muhannad) only via published gateway contracts. In-tree re-implementation of another node's responsibilities is forbidden.
 
 ---
 
