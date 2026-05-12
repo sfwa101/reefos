@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { supabase } from "@/integrations/supabase/client";
+import { broadcastNotificationFn } from "@/lib/crm.functions";
 import { toast } from "sonner";
 
 type NotifRow = {
@@ -38,43 +38,10 @@ export default function NotificationsPage() {
   const sendMut = useMutation({
     mutationFn: async () => {
       if (!title.trim()) throw new Error("العنوان مطلوب");
-
-      // Resolve target user IDs based on segment
-      let userIds: string[] = [];
-      if (segment === "vip") {
-        // Sovereign Matrix: VIP = customers with ≥20 delivered master orders.
-        const { data, error } = await supabase
-          .from("salsabil_master_orders")
-          .select("customer_id")
-          .eq("status", "delivered")
-          .limit(2000);
-        if (error) throw error;
-        const counts: Record<string, number> = {};
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (data || []).forEach((o: any) => {
-          if (o.customer_id) counts[o.customer_id] = (counts[o.customer_id] || 0) + 1;
-        });
-        userIds = Object.entries(counts).filter(([, c]) => c >= 20).map(([uid]) => uid);
-      } else {
-        const { data, error } = await supabase.from("profiles").select("id").limit(5000);
-        if (error) throw error;
-        userIds = (data || []).map((p: any) => p.id).filter(Boolean);
-      }
-
-      if (userIds.length === 0) throw new Error("لا يوجد مستلمون لهذه الشريحة");
-
-      const rows = userIds.map((uid) => ({
-        user_id: uid,
-        title: title.trim(),
-        body: body.trim() || null,
-        icon: "bell",
-      }));
-      // Insert in chunks of 500 to avoid payload limits
-      for (let i = 0; i < rows.length; i += 500) {
-        const { error } = await supabase.from("notifications").insert(rows.slice(i, i + 500));
-        if (error) throw error;
-      }
-      return userIds.length;
+      const res = await broadcastNotificationFn({
+        data: { title: title.trim(), body: body.trim() || null, segment },
+      });
+      return res.recipients;
     },
     onSuccess: (count) => {
       toast.success(`تم إرسال الإشعار إلى ${count} مستلم`);
@@ -83,10 +50,9 @@ export default function NotificationsPage() {
       setBody("");
       setSegment("all");
       qc.invalidateQueries({ queryKey: ["notifications"] });
-      // Force grid reload via window event — UniversalAdminGrid re-fetches on mount,
-      // simplest reliable refresh is to re-render route, but invalidate is enough hint.
       window.location.reload();
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     onError: (e: any) => toast.error(e?.message || "فشل الإرسال"),
   });
 

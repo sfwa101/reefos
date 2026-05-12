@@ -29,8 +29,12 @@ export default function CouponsPanel() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await supabase.from(TABLE).select("*").order("created_at", { ascending: false });
-    setRows((data ?? []) as Coupon[]);
+    try {
+      const data = await listCouponsFn();
+      setRows((data ?? []) as unknown as Coupon[]);
+    } catch {
+      setRows([]);
+    }
     setLoading(false);
   };
   useEffect(() => { load(); }, []);
@@ -42,13 +46,17 @@ export default function CouponsPanel() {
   }), [rows]);
 
   const toggleActive = async (row: Coupon) => {
-    const { error } = await supabase.from(TABLE).update({ is_active: !row.is_active } as never).eq("id", row.id);
-    if (error) toast.error("تعذر التحديث"); else load();
+    try {
+      await setCouponActiveFn({ data: { id: row.id, is_active: !row.is_active } });
+      load();
+    } catch { toast.error("تعذر التحديث"); }
   };
   const remove = async (row: Coupon) => {
     if (!confirm("حذف الكوبون؟")) return;
-    const { error } = await supabase.from(TABLE).delete().eq("id", row.id);
-    if (error) toast.error("فشل الحذف"); else { toast.success("تم الحذف"); load(); }
+    try {
+      await deleteCouponFn({ data: { id: row.id } });
+      toast.success("تم الحذف"); load();
+    } catch { toast.error("فشل الحذف"); }
   };
 
   return (
@@ -133,7 +141,7 @@ function CouponDialog({
   const save = async () => {
     if (!form.code) { toast.error("الكود مطلوب"); return; }
     setSaving(true);
-    const payload = {
+    const values = {
       code: String(form.code).toUpperCase(),
       description: form.description || null,
       discount_pct: form.type === "pct" ? Number(form.discount_pct) : 0,
@@ -145,11 +153,13 @@ function CouponDialog({
       ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
       is_active: form.is_active,
     };
-    const res = editing
-      ? await supabase.from(TABLE).update(payload as never).eq("id", editing.id)
-      : await supabase.from(TABLE).insert(payload as never);
+    try {
+      await upsertCouponFn({ data: { id: editing?.id ?? null, values } });
+      toast.success("تم الحفظ"); setOpen(false); onSaved();
+    } catch (e) {
+      toast.error("فشل الحفظ: " + (e as Error).message);
+    }
     setSaving(false);
-    if (res.error) toast.error("فشل الحفظ: " + res.error.message); else { toast.success("تم الحفظ"); setOpen(false); onSaved(); }
   };
 
   return (

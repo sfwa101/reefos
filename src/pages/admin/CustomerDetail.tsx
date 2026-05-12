@@ -6,7 +6,7 @@ import {
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UniversalAdminGrid, type DataSource, type Column } from "@/components/admin/UniversalAdminGrid";
-import { supabase } from "@/integrations/supabase/client";
+import { getCustomer360Fn } from "@/lib/crm.functions";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
@@ -101,32 +101,27 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [wallet, setWallet] = useState<WalletRow | null>(null);
   const [stats, setStats] = useState<StatsRow>({ total_spent: 0, orders_count: 0, last_order_at: null });
+  const [orders, setOrders] = useState<OrderRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       setLoading(true);
-
-      const [prof, wal, ord] = await Promise.all([
-        supabase.from("profiles").select("id,full_name,phone,avatar_url,created_at,occupation,household_size,preferred_locale").eq("id", customerId).maybeSingle(),
-        supabase.from("wallet_balances").select("balance,points,cashback,coupons").eq("user_id", customerId).maybeSingle(),
-        // Sovereign Matrix: lifetime spend = sum of master_orders.total_amount for this customer.
-        supabase.from("salsabil_master_orders").select("total_amount,created_at").eq("customer_id", customerId).limit(1000),
-      ]);
-
-      if (cancelled) return;
-
-      setProfile((prof.data as Profile) ?? null);
-      setWallet((wal.data as WalletRow) ?? { balance: 0, points: 0, cashback: 0, coupons: 0 });
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const orders = ((ord.data ?? []) as any[]).map((o) => ({ total: Number(o.total_amount ?? 0), created_at: o.created_at as string }));
-      const total_spent = orders.reduce((a, b) => a + Number(b.total ?? 0), 0);
-      const last_order_at = orders.length
-        ? orders.map((o) => o.created_at).sort().slice(-1)[0]
-        : null;
-      setStats({ total_spent, orders_count: orders.length, last_order_at });
+      try {
+        const c360 = await getCustomer360Fn({ data: { customerId } });
+        if (cancelled) return;
+        setProfile((c360.profile as Profile | null) ?? null);
+        setWallet((c360.wallet as WalletRow) ?? { balance: 0, points: 0, cashback: 0, coupons: 0 });
+        setStats(c360.stats as StatsRow);
+        setOrders(c360.orders as OrderRow[]);
+      } catch {
+        if (cancelled) return;
+        setProfile(null);
+        setWallet({ balance: 0, points: 0, cashback: 0, coupons: 0 });
+        setStats({ total_spent: 0, orders_count: 0, last_order_at: null });
+        setOrders([]);
+      }
       setLoading(false);
     })();
     return () => { cancelled = true; };
@@ -135,32 +130,11 @@ export default function CustomerDetail({ customerId }: { customerId: string }) {
   const tier = useMemo(() => tierFromSpent(stats.total_spent), [stats.total_spent]);
   const TierIcon = tier.icon;
 
-  // DataSource for the orders mini-grid — same stem cell, just a user_id filter via custom fetcher.
+  // Orders mini-grid sourced from the gateway aggregate.
   const ordersDataSource: DataSource<OrderRow> = useMemo(() => ({
-    fetcher: async () => {
-      // Sovereign Matrix: customer's master orders, with aggregated headline status from child nodes.
-      const { data, error } = await supabase
-        .from("salsabil_master_orders")
-        .select("id,total_amount,status,created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
-        .eq("customer_id", customerId)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return ((data ?? []) as any[]).map((m) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const nodes: any[] = m.salsabil_fulfillment_nodes ?? [];
-        const statuses = nodes.map((n) => n.status);
-        const headline =
-          statuses.length === 0 ? (m.status ?? "pending") :
-          statuses.every((s) => s === "delivered") ? "delivered" :
-          statuses.every((s) => s === "cancelled") ? "cancelled" :
-          (statuses.find((s) => !["delivered","cancelled"].includes(s)) ?? m.status ?? "pending");
-        return { id: m.id, total: Number(m.total_amount ?? 0), status: headline, created_at: m.created_at } as OrderRow;
-      });
-    },
+    fetcher: async () => orders,
     searchKeys: ["id", "status"],
-  }), [customerId]);
+  }), [orders]);
 
   return (
     <>
