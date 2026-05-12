@@ -32,12 +32,8 @@ export default function HakimTerminal() {
     setReport(null);
     setBlueprint(null);
     try {
-      const { data, error } = await supabase.functions.invoke("hakim_architect", {
-        body: { prompt },
-      });
-      if (error) throw new Error(error.message ?? "ai_invoke_failed");
-      if (!data?.ok || !data?.blueprint) throw new Error(data?.error ?? "no_blueprint");
-      setBlueprint(data.blueprint as HakimBlueprint);
+      const blueprint = await summonHakimArchitectFn({ data: { prompt } });
+      setBlueprint(blueprint as HakimBlueprint);
       toast.success("تم استدعاء حكيم — المخطط جاهز للمراجعة");
     } catch (e) {
       toast.error(`حكيم لم يستجب: ${e instanceof Error ? e.message : "خطأ"}`);
