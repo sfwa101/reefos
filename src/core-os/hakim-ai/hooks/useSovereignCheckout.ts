@@ -99,8 +99,41 @@ export const callSovereignCheckout = async (
   );
   if (error) throw new Error(friendly(error.message || "Checkout failed"));
   if (!data || typeof data !== "string") throw new Error("استجابة غير متوقعة من الخادم");
+
+  // ─── Dual-Write Bridge: append `commit` events to inventory ledger (fail-safe) ───
+  // Fire-and-forget: failures are logged but never block checkout success.
+  void (async () => {
+    try {
+      const { appendLedgerEventFn } = await import(
+        "@/core/inventory/gateway/inventory.functions"
+      );
+      const LEDGER_LOCATION_ID = "00000000-0000-0000-0000-000000000000";
+      await Promise.allSettled(
+        input.cart_items.map((item) =>
+          appendLedgerEventFn({
+            data: {
+              entity_id: item.product_id,
+              location_id: LEDGER_LOCATION_ID,
+              event_type: "commit",
+              delta: -Math.abs(item.quantity),
+              idempotency_key: `sale_${data}_${item.product_id}`,
+              actor_id: input.customer_id,
+              context: {
+                source: "checkout.sovereign",
+                order_id: data,
+                quantity: item.quantity,
+              },
+            },
+          }),
+        ),
+      );
+    } catch (err) {
+      console.error("[inventory-ledger] checkout dual-write failed:", err);
+    }
+  })();
+
   return data;
-};
+}
 
 /** TanStack mutation variant for component callers. */
 export function useSovereignCheckout() {
