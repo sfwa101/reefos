@@ -1,0 +1,1 @@
+ALTER VIEW public.view_product_financial_dna SET (security_invoker = true);
