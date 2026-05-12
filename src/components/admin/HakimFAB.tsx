@@ -45,60 +45,30 @@ export function HakimFAB() {
     setInput("");
     const contextual = `[سياق المستخدم: ${contextHint} — ${pathname}]\n\n${message}`;
     setMessages((m) => [...m, { role: "user", content: message }, { role: "assistant", content: "" }]);
-    setStreaming(true);
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-chat`;
-      const resp = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+    let failed = false;
+    await streamSend(
+      { session_id: sessionId, message: contextual, period_from: null, period_to: null },
+      {
+        onChunk: (assistantSoFar) => {
+          setMessages((m) => {
+            const copy = [...m];
+            copy[copy.length - 1] = { role: "assistant", content: assistantSoFar };
+            return copy;
+          });
         },
-        body: JSON.stringify({ session_id: sessionId, message: contextual }),
-      });
+        onSession: (sid) => setSessionId(sid),
+        onError: (code) => {
+          failed = true;
+          if (code === "rate_limited") toast.error("تم تجاوز الحد، حاول لاحقاً");
+          else if (code === "payment_required") toast.error("الرصيد منتهٍ");
+          else toast.error("فشل الاتصال بحكيم");
+        },
+      },
+    );
 
-      if (resp.status === 429) { toast.error("تم تجاوز الحد، حاول لاحقاً"); throw new Error("429"); }
-      if (resp.status === 402) { toast.error("الرصيد منتهٍ"); throw new Error("402"); }
-      if (!resp.ok || !resp.body) throw new Error("stream_failed");
-
-      const reader = resp.body.getReader();
-      const dec = new TextDecoder();
-      let buf = "";
-      let assistantSoFar = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        buf += dec.decode(value, { stream: true });
-        let idx;
-        while ((idx = buf.indexOf("\n")) !== -1) {
-          let line = buf.slice(0, idx); buf = buf.slice(idx + 1);
-          if (line.endsWith("\r")) line = line.slice(0, -1);
-          if (!line.startsWith("data: ")) continue;
-          const json = line.slice(6).trim();
-          if (json === "[DONE]") continue;
-          try {
-            const p = JSON.parse(json);
-            if (p.meta?.session_id) { setSessionId(p.meta.session_id); continue; }
-            const c = p.choices?.[0]?.delta?.content;
-            if (c) {
-              assistantSoFar += c;
-              setMessages((m) => {
-                const copy = [...m];
-                copy[copy.length - 1] = { role: "assistant", content: assistantSoFar };
-                return copy;
-              });
-            }
-          } catch { buf = line + "\n" + buf; break; }
-        }
-      }
-    } catch (e: any) {
-      if (!["429", "402"].includes(e?.message)) toast.error("فشل الاتصال بحكيم");
+    if (failed) {
       setMessages((m) => m.slice(0, -2));
-    } finally {
-      setStreaming(false);
     }
   };
 
