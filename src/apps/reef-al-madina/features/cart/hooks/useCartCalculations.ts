@@ -251,46 +251,65 @@ export const useCartCalculations = ({
    * Fires the sovereign Cashier gateway in parallel with the legacy
    * calculation. Discrepancies are logged ONLY — UI continues to trust
    * `useCartCalculations` until the cutover phase. Failures swallowed.
+   *
+   * Hardened (Phase C3.1): content-hashed signature + 500ms debounce
+   * to prevent render-loop saturation. Logs gated to DEV only.
    * ------------------------------------------------------------------ */
   const cashierPreview = useCashierPreview();
   const cashierMutate = cashierPreview.mutate;
-  useEffect(() => {
-    if (lines.length === 0) return;
-    // The DNA view is keyed by uuid; skip while any legacy slug-id lines
-    // remain in the cart (e.g. demo seeds like "water").
-    const items = lines
-      .filter((l) => UUID_RE.test(l.product.id))
-      .map((l) => ({ id: l.product.id, qty: l.qty }));
-    if (items.length === 0 || items.length !== lines.length) return;
 
-    cashierMutate(
-      { items, context: { member_tier: "guest" } },
-      {
-        onSuccess: (snapshot) => {
-          const delta = Math.abs(snapshot.totals.grand_total - grand);
-          if (delta > 0.01) {
-            console.warn(
-              `[CASHIER-SHADOW-MISMATCH] Legacy: ${grand}, Brain: ${snapshot.totals.grand_total}, Hash: ${snapshot.snapshot_hash}`,
-              {
-                legacy: { subtotal, discount, delivery, grand },
-                brain: snapshot.totals,
-              },
-            );
-          } else {
-            console.info("[cashier-shadow] match", {
-              grand,
-              hash: snapshot.snapshot_hash,
-            });
-          }
+  const cashierItems = useMemo(
+    () =>
+      lines
+        .filter((l) => UUID_RE.test(l.product.id))
+        .map((l) => ({ id: l.product.id, qty: l.qty })),
+    [lines],
+  );
+  const allLinesAreUuid = cashierItems.length === lines.length;
+  const cartSignature = useMemo(
+    () =>
+      allLinesAreUuid && cashierItems.length > 0
+        ? JSON.stringify(cashierItems.map((i) => [i.id, i.qty]))
+        : "",
+    [cashierItems, allLinesAreUuid],
+  );
+
+  useEffect(() => {
+    if (!cartSignature) return;
+    const timer = setTimeout(() => {
+      cashierMutate(
+        { items: cashierItems, context: { member_tier: "guest" } },
+        {
+          onSuccess: (snapshot) => {
+            const delta = Math.abs(snapshot.totals.grand_total - grand);
+            if (delta > 0.01) {
+              if (import.meta.env.DEV) {
+                console.warn(
+                  `[CASHIER-SHADOW-MISMATCH] Legacy: ${grand}, Brain: ${snapshot.totals.grand_total}, Hash: ${snapshot.snapshot_hash}`,
+                  {
+                    legacy: { subtotal, discount, delivery, grand },
+                    brain: snapshot.totals,
+                  },
+                );
+              }
+            } else if (import.meta.env.DEV) {
+              console.info("[cashier-shadow] match", {
+                grand,
+                hash: snapshot.snapshot_hash,
+              });
+            }
+          },
+          onError: (err) => {
+            if (import.meta.env.DEV) {
+              console.warn("[cashier-shadow] preview failed:", err.message);
+            }
+          },
         },
-        onError: (err) => {
-          // Fail-safe: never disrupt the cart UI.
-          console.warn("[cashier-shadow] preview failed:", err.message);
-        },
-      },
-    );
+      );
+    }, 500);
+    return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines, grand]);
+  }, [cartSignature]);
 
   return {
     subtotal,
