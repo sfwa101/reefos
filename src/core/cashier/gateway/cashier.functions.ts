@@ -129,32 +129,36 @@ export const previewCashierFn = createServerFn({ method: "POST" })
 
     const snapshot = calculateCart(lines, context);
 
-    // ── Append-only Ledger (Article 7.1) — fail-safe ──────────────
-    try {
-      const { data: authData } = await supabase.auth.getUser();
-      const actorId = authData?.user?.id ?? null;
+    // ── Append-only Ledger (Article 7.1) — fire-and-forget ────────
+    // Non-blocking: do NOT await. The preview response returns
+    // immediately; ledger writes happen in the background.
+    void (async () => {
+      try {
+        const { data: authData } = await supabase.auth.getUser();
+        const actorId = authData?.user?.id ?? null;
 
-      const { error: ledgerError } = await supabase
-        .from("cashier_snapshots")
-        .upsert(
-          {
-            snapshot_hash: snapshot.snapshot_hash,
-            input_payload: {
-              items: data.items,
-              context: data.context,
-            } as unknown as JsonObject,
-            output_payload: snapshot as unknown as JsonObject,
-            actor_id: actorId,
-          },
-          { onConflict: "snapshot_hash", ignoreDuplicates: true },
-        );
+        const { error: ledgerError } = await supabase
+          .from("cashier_snapshots")
+          .upsert(
+            {
+              snapshot_hash: snapshot.snapshot_hash,
+              input_payload: {
+                items: data.items,
+                context: data.context,
+              } as unknown as JsonObject,
+              output_payload: snapshot as unknown as JsonObject,
+              actor_id: actorId,
+            },
+            { onConflict: "snapshot_hash", ignoreDuplicates: true },
+          );
 
-      if (ledgerError) {
-        console.error("[CASHIER-LEDGER] insert failed:", ledgerError.message);
+        if (ledgerError) {
+          console.error("[CASHIER-LEDGER] insert failed:", ledgerError.message);
+        }
+      } catch (err) {
+        console.error("[CASHIER-LEDGER] unexpected error:", err);
       }
-    } catch (err) {
-      console.error("[CASHIER-LEDGER] unexpected error:", err);
-    }
+    })();
 
     return snapshot;
   });
