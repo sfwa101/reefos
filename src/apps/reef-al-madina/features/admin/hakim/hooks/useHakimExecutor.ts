@@ -69,10 +69,8 @@ export function useHakimExecutor() {
       for (const asset of blueprint.suggested_assets) {
         try {
           const payload = toMintPayload(asset, blueprint.module_name);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const { data, error } = await (supabase.rpc as any)("mint_universal_asset", { payload });
-          if (error) throw new Error(error.message ?? "mint_failed");
-          report.minted.push(String(data));
+          const { id } = await mintUniversalAssetFn({ data: { payload } });
+          report.minted.push(id);
         } catch (e) {
           report.failed.push({ name: asset.name, error: e instanceof Error ? e.message : String(e) });
         }
