@@ -167,4 +167,4 @@ const SubscriptionManagerBlock = () => {
   );
 };
 
-export default BasketsSubs;
+export default SubscriptionManagerBlock;
