@@ -376,3 +376,100 @@ export const createSupplierFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { id: row.id as string };
   });
+
+// ============= Wave R-1 Batch 2 — Product Units =============
+export type UoMRow = { code: string; name_ar: string; is_base: boolean; sort_order: number };
+export type ProductUnitRow = {
+  id?: string;
+  product_id: string;
+  unit_code: string;
+  conversion_factor: number;
+  selling_price: number | null;
+  is_default_sell: boolean;
+  is_active: boolean;
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SbAnyPU = any;
+
+export const listUnitsOfMeasureFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<UoMRow[]> => {
+    const sb = context.supabase as SbAnyPU;
+    const { data, error } = await sb
+      .from("units_of_measure")
+      .select("*")
+      .order("sort_order")
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as UoMRow[];
+  });
+
+export const listProductUnitsForProductFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { productId: string }) => {
+    if (!d?.productId) throw new Error("productId_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<ProductUnitRow[]> => {
+    const sb = context.supabase as SbAnyPU;
+    const { data: rows, error } = await sb
+      .from("product_units")
+      .select("*")
+      .eq("product_id", data.productId)
+      .order("conversion_factor")
+      .limit(500);
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as ProductUnitRow[];
+  });
+
+export const upsertProductUnitsFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { rows: ProductUnitRow[] }) => {
+    if (!Array.isArray(d?.rows)) throw new Error("rows_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAnyPU;
+    // Validate pricing per unit server-side using existing RPC.
+    for (const r of data.rows) {
+      if (r.selling_price && r.selling_price > 0) {
+        const { data: v } = await sb.rpc("validate_unit_pricing", {
+          _product_id: r.product_id,
+          _unit_code: r.unit_code,
+          _selling_price: r.selling_price,
+        });
+        const vv = v as { ok?: boolean; message?: string } | null;
+        if (vv && vv.ok === false) {
+          throw new Error(`${r.unit_code}: ${vv.message ?? "تسعير غير صالح"}`);
+        }
+      }
+    }
+    const payload = data.rows.map((r) => ({
+      ...(r.id ? { id: r.id } : {}),
+      product_id: r.product_id,
+      unit_code: r.unit_code,
+      conversion_factor: r.conversion_factor,
+      selling_price: r.selling_price,
+      is_default_sell: r.is_default_sell,
+      is_active: r.is_active,
+    }));
+    const { error } = await sb
+      .from("product_units")
+      .upsert(payload, { onConflict: "product_id,unit_code" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+export const deleteProductUnitFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAnyPU;
+    const { error } = await sb.from("product_units").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
