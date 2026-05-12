@@ -4,9 +4,9 @@
  */
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, Boxes, Trash2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useInventoryMatrix, useUpdateInventory, type InventoryRow } from "@/core-os/hakim-ai/hooks/useInventoryMatrix";
+import { listAssetSkusFn } from "@/lib/admin-catalog.functions";
 
 interface SkuRow { id: string; sku_code: string; }
 
@@ -22,13 +22,8 @@ const useAssetSkus = (assetId: string | undefined) =>
     queryKey: ["salsabil_skus", assetId],
     enabled: !!assetId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("salsabil_skus")
-        .select("id, sku_code")
-        .eq("asset_id", assetId!)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as SkuRow[];
+      const rows = await listAssetSkusFn({ data: { asset_id: assetId! } });
+      return rows;
     },
   });
 

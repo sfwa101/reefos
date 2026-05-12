@@ -143,3 +143,31 @@ export const runHakimAdvisorFn = createServerFn({ method: "POST" })
     }
     return { ok: true };
   });
+
+// ---- Hakim Architect (Sovereign Blueprint Summoning) ---------------------
+export type HakimArchitectBlueprint = {
+  module_name: string;
+  description: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  suggested_assets: any[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sdui_layout: any;
+};
+
+export const summonHakimArchitectFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { prompt: string }) => {
+    const prompt = String(d?.prompt ?? "").trim();
+    if (!prompt) throw new Error("prompt_required");
+    if (prompt.length > 4000) throw new Error("prompt_too_long");
+    return { prompt };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<HakimArchitectBlueprint> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.functions.invoke("hakim_architect", {
+      body: { prompt: data.prompt },
+    });
+    if (error) throw new Error(error.message ?? "ai_invoke_failed");
+    if (!out?.ok || !out?.blueprint) throw new Error(out?.error ?? "no_blueprint");
+    return out.blueprint as HakimArchitectBlueprint;
+  });

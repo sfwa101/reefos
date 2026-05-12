@@ -15,7 +15,7 @@ import {
 } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
-import { supabase } from "@/integrations/supabase/client";
+import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 
 const ERROR_MESSAGES: Record<VisionGenesisError, string> = {
   rate_limited: "تم تجاوز حد الطلبات، حاول بعد قليل.",
@@ -61,6 +61,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const mutation = useVisionGenesis();
   const mintMutation = useMintUSA();
   const aestheticMutation = useAestheticProcessor();
+  const { upload: uploadProductImage } = useProductImageUpload();
 
   const handleFile = useCallback((f: File) => {
     if (!f.type.startsWith("image/")) {
@@ -114,15 +115,12 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
         });
         // Convert data URL → Blob → upload to product-images bucket.
         const blob = await (await fetch(purified.imageDataUrl)).blob();
-        const path = `usa/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.png`;
-        const { error: upErr } = await supabase.storage
-          .from("product-images")
-          .upload(path, blob, { contentType: "image/png", upsert: false });
-        if (upErr) throw new Error(upErr.message);
-        const { data: pub } = supabase.storage
-          .from("product-images")
-          .getPublicUrl(path);
-        mediaUrl = pub.publicUrl;
+        mediaUrl = await uploadProductImage({
+          file: blob,
+          prefix: "usa",
+          contentType: "image/png",
+          ext: "png",
+        });
       }
 
       const enrichedAsset = mediaUrl

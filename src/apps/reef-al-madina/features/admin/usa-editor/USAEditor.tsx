@@ -14,7 +14,7 @@ import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { supabase } from "@/integrations/supabase/client";
+import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 import { toast } from "sonner";
 
 export interface USARecord {
@@ -78,6 +78,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const update = useUpdateUSA();
   const mint = useMintUSA();
   const matchmaker = useAssetMatchmaker();
+  const { upload: uploadProductImage } = useProductImageUpload();
 
   const [tab, setTab] = useState<string>(isNew ? "basic" : "basic");
   const [name, setName] = useState("");
@@ -197,13 +198,13 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     if (!aiFile) return undefined;
     try {
       const ext = aiFile.name.split(".").pop()?.toLowerCase() || "jpg";
-      const path = `usa-genesis/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
-      const { error: upErr } = await supabase.storage
-        .from("product-images")
-        .upload(path, aiFile, { contentType: aiFile.type, upsert: false });
-      if (upErr) throw upErr;
-      const { data } = supabase.storage.from("product-images").getPublicUrl(path);
-      return data.publicUrl ? [data.publicUrl] : undefined;
+      const url = await uploadProductImage({
+        file: aiFile,
+        prefix: "usa-genesis",
+        contentType: aiFile.type,
+        ext,
+      });
+      return url ? [url] : undefined;
     } catch (e) {
       console.warn("[USAEditor] media upload failed", e);
       toast.error("تعذّر رفع الصورة — سيُسكّ الأصل بدون صورة");
