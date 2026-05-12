@@ -66,7 +66,7 @@ export function resolveListTree(
 
 /** صفحة تفاصيل منتج. القدرات تتحكم بالبلوكات الظاهرة. */
 export function resolveDetailsTree(
-  section: SectionIdentity,
+  section: KernelSectionIdentity,
   product: ProductDetailsVM,
 ): RenderDescriptor {
   const caps = new Set(product.capabilities);
