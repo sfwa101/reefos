@@ -15,7 +15,7 @@ import {
 } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
-import { supabase } from "@/integrations/supabase/client";
+import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 
 const ERROR_MESSAGES: Record<VisionGenesisError, string> = {
   rate_limited: "تم تجاوز حد الطلبات، حاول بعد قليل.",
