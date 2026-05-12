@@ -111,7 +111,8 @@ export type SharedCartItemRow = {
   product_name: string;
   unit_price: number;
   quantity: number;
-  meta: Record<string, unknown>;
+  // Stored as Json on the wire; consumers treat it as a record-like blob.
+  meta: { [x: string]: Json | undefined };
   added_by: string;
   created_at: string;
   updated_at: string;
