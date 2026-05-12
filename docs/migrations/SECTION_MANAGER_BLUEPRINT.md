@@ -56,6 +56,24 @@ export interface LayoutBlock {
     density?: "compact" | "comfortable" | "spacious";
   };
   entity_refs?: EntityRef[];     // what data the block pulls
+
+  /**
+   * Target Zones — "Manage Once, Reflect Everywhere".
+   * A single block document drives ALL three surfaces. Each flag is
+   * independent; a block may appear in any combination of zones.
+   * Defaults (when omitted): home_feed = true, stories = false, grid = true.
+   */
+  display_in_stories: boolean;   // top horizontal Story Bar (circular bubbles)
+  display_in_grid: boolean;      // dedicated Categories screen (full grid/list)
+  display_in_home_feed: boolean; // vertical scrollable block on Home
+
+  /** Optional per-zone overrides (icon/cover/sort) when one asset isn't enough. */
+  zone_overrides?: {
+    stories?:   { icon_url?: string; label?: string; sort_order?: number };
+    grid?:      { cover_url?: string; label?: string; sort_order?: number };
+    home_feed?: { sort_order?: number };
+  };
+
   visibility?: {
     min_tier?: "guest" | "registered" | "amanah" | "vip";
     platforms?: Array<"web" | "ios" | "android">;
