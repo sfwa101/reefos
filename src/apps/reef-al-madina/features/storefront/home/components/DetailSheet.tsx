@@ -25,9 +25,10 @@ import { useCartActions } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 
 import { getById } from "@/lib/products";
+import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
-import type { HGProduct } from "../types";
+import { homeProductCardAdapter } from "../adapter";
 
 const TrustBadge = ({
   icon: Icon,
@@ -79,15 +80,22 @@ export const DetailSheet = ({
   product,
   onClose,
 }: {
-  product: HGProduct;
+  product: ProductCardVM;
   onClose: () => void;
 }) => {
   const { add } = useCartActions();
-  const isPre = product.fulfillment === "preorder";
+  const view = homeProductCardAdapter(product);
+  const isPre = view.isPreorder;
+  const price = product.price.amount;
+  const oldPrice = product.price.compareAt;
+  const name = product.name.ar;
+  const imageUrl = product.hero?.url ?? "";
+  const ratingAvg = product.rating?.avg ?? 0;
+  const ratingCount = product.rating?.count ?? 0;
   const deposit = isPre
-    ? Math.round((product.price * (product.depositPct ?? 25)) / 100)
+    ? Math.round((price * (view.depositPct ?? 25)) / 100)
     : 0;
-  const remaining = product.price - deposit;
+  const remaining = price - deposit;
 
   // Lock scroll
   useEffect(() => {
