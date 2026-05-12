@@ -74,7 +74,7 @@ export const SectionFiltersSheetBlock: BlockComponent = ({ block }) => {
 // ─── product.detail_sheet ───
 export const ProductDetailSheetBlock: BlockComponent = ({ block }) => {
   const props = (block.props ?? {}) as {
-    product: Product;
+    product: ProductCardVM;
     onClose: () => void;
   };
   return <DetailSheet product={props.product} onClose={props.onClose} />;
