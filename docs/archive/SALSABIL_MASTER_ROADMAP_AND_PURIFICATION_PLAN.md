@@ -398,19 +398,66 @@ gateway calls.
 
 ## Phase 5 — Reef Al Madina Wave 2 Completion (MVP Launch)
 
-**Goal:** Return to Reef Al Madina with the now-purified Salsabil OS and
-finish the storefront + operations to launch the physical-market MVP
-(crepes, potato sandwiches, ice cream, plus the core grocery sections).
+**Doctrine reframe (100x Scale).** Reef Al Madina is **not** a grocery
+delivery app. It is the **Standard Model Sovereign Runtime Ecosystem** —
+the reference node of Salsabil OS proving that a single capability- and
+descriptor-driven kernel can host **infinite operational complexity**:
+sovereign financial flows (Taysir wallet limits, family graph, lending),
+swarm logistics (Barq real-time dispatch), cross-platform commerce
+(Asrab social finance, vendor federations), and arbitrarily many
+physical-market verticals — all without a single bespoke route, page,
+component, or `if (section === "...")` branch.
+
+**Sovereign Interconnectivity.** Reef Al Madina operates as one node in
+a federation. It MUST consume — never re-implement — the following
+sovereign spines:
+
+- **Barq** — real-time logistics, swarm dispatch, ETA, geo-fencing.
+- **Taysir** — financial ledger, wallet limits, family graph, rapid pay,
+  credit posture.
+- **Asrab** — social/communal finance (gameyas, savings circles).
+- **Hakim** — AI advisor (Propose → Dispose, never autonomous).
+- **Maeen** — last-mile delivery surface.
+- **Nabd / Afraa / Benaa / Noor / Al-Muhannad** — federated read/write
+  via published gateway contracts only.
+
+**Anti-Hardcoding Mandate (binding for this entire phase).** The
+codebase MUST NOT contain logic, types, components, routes, hooks, or
+literals tailored to specific physical-market verticals. Examples of
+**forbidden** identifiers in `.ts`/`.tsx` source: `crepes`, `potato`,
+`sandwich`, `ice_cream`, `iceCream`, `falafel`, `shawarma`, `pharmacy`,
+`butcher`, `bakery`, `meat`, `dairy`, `produce`, `sweets`, `kitchen`,
+`restaurant`, `wholesale`, `village`, `school`, `library`, etc., when
+used as **business-logic switches**. Such terms may exist **only** as:
+
+- string values inside `SectionIdentityRegistry` / capability bundles /
+  block descriptors persisted in the database or seed JSON,
+- localized labels in i18n catalogs,
+- migration / seed scripts.
+
+Any `if`, `switch`, `?:`, type union, or component name that encodes
+domain knowledge of a specific vertical is a constitutional violation.
 
 **Workstreams:**
 
-1. **Storefront completion**
-   - Finalize section descriptors for: Meat, Dairy, Produce, Pharmacy,
-     Sweets, HomeGoods, SchoolLibrary, Kitchen, Restaurants, Subscriptions,
-     Wholesale, Village, Recipes, Baskets — all via the dynamic
-     `store.$slug.tsx` route.
-   - Add new sections (Crepes, Potato Sandwiches, Ice Cream) by registry
-     descriptor only — zero new route files.
+1. **Storefront completion (Capability + Descriptor only)**
+   - Every existing section (Meat, Dairy, Produce, Pharmacy, Sweets,
+     HomeGoods, SchoolLibrary, Kitchen, Restaurants, Subscriptions,
+     Wholesale, Village, Recipes, Baskets) is served by the **single**
+     dynamic route `store.$slug.tsx` resolving against
+     `SectionIdentityRegistry`. No section owns a `.tsx` file.
+   - **New physical-market verticals (e.g. crepes, potato sandwiches,
+     ice cream, or any future vertical) are launched purely by:**
+     1. inserting a `SectionIdentity` row,
+     2. registering the required `Capability` keys,
+     3. publishing a `RenderDescriptor` (header + filters + grid + CTA)
+        via `ui_layouts`,
+     4. (optional) registering a new `CardTemplate` in
+        `CardTemplateRegistry` if the vertical needs bespoke card chrome.
+   - **Zero** new routes, **zero** new components, **zero** new hooks,
+     **zero** kernel changes are permitted to onboard a vertical. If a
+     vertical "needs code", the kernel is missing a generic capability —
+     extend the kernel generically, never the vertical specifically.
 
 2. **Commerce completion**
    - Cart, checkout, order placement, post-order tracking — all wired to
