@@ -15,7 +15,7 @@
  * each modifier so receipts, analytics, and Hakim-AI can introspect.
  */
 
-import type { Product } from "@/lib/products";
+import type { Product, ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
 import {
   getButcheryRules,
   isButcheryProduct,
@@ -26,9 +26,32 @@ import {
 import type {
   IPricingStrategy,
   PricingContext,
+  PricingInput,
   PricingModifier,
   PricingSelection,
 } from "../types";
+
+/**
+ * Construct the minimal `Product`-shaped envelope expected by the legacy
+ * `getButcheryRules(p: Product)` helper. The helper only reads `id`,
+ * `source` and `subCategory`; the remaining fields are filled with safe
+ * defaults so we never widen `PricingInput` for legacy consumption.
+ *
+ * Wave P-C/P-E will rewrite `getButcheryRules` to accept `PricingInput`
+ * directly and this adapter goes away.
+ */
+const toLegacyProductShape = (p: PricingInput): Product => ({
+  id: p.id,
+  name: "",
+  unit: p.unit ?? "",
+  price: p.price,
+  oldPrice: p.oldPrice,
+  image: "",
+  category: "",
+  subCategory: p.subCategory,
+  source: p.source as ProductSource,
+  metadata: p.metadata,
+});
 
 export interface MeatSelection extends PricingSelection {
   readonly weight: WeightOption;
