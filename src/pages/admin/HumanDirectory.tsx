@@ -11,6 +11,7 @@ import { listHumanDirectoryFn, type HumanProfile, type HumanRelationship } from 
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { HumanProfileSheet } from "@/components/admin/crm/HumanProfileSheet";
+import { CreateHumanDialog } from "@/components/admin/crm/CreateHumanDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -34,24 +35,27 @@ export default function HumanDirectory() {
   const [q, setQ] = useState("");
   const [filterKind, setFilterKind] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const refresh = async () => {
+    try {
+      const { profiles: profs, relationships: rels } = await listHumanDirectoryFn();
+      setProfiles(profs);
+      const map = new Map<string, Set<string>>();
+      rels.forEach((r: Rel) => {
+        if (!r.profile_id) return;
+        if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
+        map.get(r.profile_id)!.add(r.kind);
+      });
+      setRelMap(map);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setProfiles([]);
+    }
+  };
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const { profiles: profs, relationships: rels } = await listHumanDirectoryFn();
-        setProfiles(profs);
-        const map = new Map<string, Set<string>>();
-        rels.forEach((r: Rel) => {
-          if (!r.profile_id) return;
-          if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
-          map.get(r.profile_id)!.add(r.kind);
-        });
-        setRelMap(map);
-      } catch (e) {
-        toast.error((e as Error).message);
-        setProfiles([]);
-      }
-    })();
+    void refresh();
   }, []);
 
 
@@ -85,9 +89,8 @@ export default function HumanDirectory() {
             />
           </div>
           <button
-            disabled
-            title="قريباً"
-            className="hidden lg:inline-flex items-center gap-1.5 h-11 px-4 rounded-2xl bg-primary/10 text-primary text-[12.5px] font-semibold opacity-60"
+            onClick={() => setCreateOpen(true)}
+            className="inline-flex items-center gap-1.5 h-11 px-4 rounded-2xl bg-primary text-primary-foreground text-[12.5px] font-semibold press"
           >
             <UserPlus className="h-4 w-4" /> إضافة إنسان
           </button>
@@ -154,6 +157,14 @@ export default function HumanDirectory() {
       </div>
 
       <HumanProfileSheet profileId={openId} open={!!openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <CreateHumanDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(id) => {
+          void refresh();
+          setOpenId(id);
+        }}
+      />
     </>
   );
 }

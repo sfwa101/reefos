@@ -328,6 +328,7 @@ export type SupplierFullRow = {
   outstanding_balance: number;
   total_purchased: number;
   total_paid: number;
+  payment_terms_days: number | null;
   is_active: boolean;
 };
 

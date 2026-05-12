@@ -1,13 +1,16 @@
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listSuppliersFullFn,
   createSupplierFn,
+  updateSupplierFn,
+  deleteSupplierFn,
   type SupplierFullRow,
 } from "@/lib/admin-catalog.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Building2 } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Building2, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";
 
 type Supplier = SupplierFullRow;
@@ -19,6 +22,12 @@ export default function Suppliers() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<{ name: string; contact_phone: string; closing_day: string; collection_days: string; payment_terms_days: string }>({ name: "", contact_phone: "", closing_day: "", collection_days: "", payment_terms_days: "30" });
+  const [busyId, setBusyId] = useState<string | null>(null);
+
+  const updateSupplier = useServerFn(updateSupplierFn);
+  const deleteSupplier = useServerFn(deleteSupplierFn);
 
   const load = async () => {
     setLoading(true);
@@ -84,21 +93,113 @@ export default function Suppliers() {
         )}
 
         <div className="space-y-2">
-          {rows.map((r) => (
-            <div key={r.id} className="bg-surface rounded-xl p-3 border border-border/40 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Building2 className="h-5 w-5" /></div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-[14px] truncate">{r.name}</p>
-                <p className="text-[11px] text-foreground-tertiary">
-                  تقفيل: {r.closing_day ?? "-"} • تحصيل: {(r.collection_days || []).join("/") || "-"}
-                </p>
+          {rows.map((r) => {
+            const isEditing = editingId === r.id;
+            const busy = busyId === r.id;
+            return (
+              <div key={r.id} className="bg-surface rounded-xl p-3 border border-border/40">
+                {!isEditing ? (
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary"><Building2 className="h-5 w-5" /></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-[14px] truncate">{r.name}</p>
+                      <p className="text-[11px] text-foreground-tertiary">
+                        تقفيل: {r.closing_day ?? "-"} • تحصيل: {(r.collection_days || []).join("/") || "-"}
+                      </p>
+                    </div>
+                    <div className="text-left">
+                      <p className="font-display text-[14px] text-destructive">{fmtMoney(r.outstanding_balance)}</p>
+                      <p className="text-[10px] text-foreground-tertiary">مستحق</p>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          setEditingId(r.id);
+                          setEditForm({
+                            name: r.name,
+                            contact_phone: r.contact_phone ?? "",
+                            closing_day: r.closing_day != null ? String(r.closing_day) : "",
+                            collection_days: (r.collection_days || []).join(","),
+                            payment_terms_days: String(r.payment_terms_days ?? 30),
+                          });
+                        }}
+                        className="h-8 w-8 rounded-lg bg-muted flex items-center justify-center text-foreground-secondary press"
+                        title="تعديل"
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (!confirm(`تعطيل المورد "${r.name}"؟`)) return;
+                          setBusyId(r.id);
+                          try {
+                            await deleteSupplier({ data: { id: r.id } });
+                            toast.success("تم تعطيل المورد");
+                            await load();
+                          } catch (e) { toast.error((e as Error).message); }
+                          finally { setBusyId(null); }
+                        }}
+                        disabled={busy}
+                        className="h-8 w-8 rounded-lg bg-destructive/10 flex items-center justify-center text-destructive press disabled:opacity-50"
+                        title="تعطيل"
+                      >
+                        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="اسم المورد" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} />
+                    <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="هاتف" value={editForm.contact_phone} onChange={(e) => setEditForm({ ...editForm, contact_phone: e.target.value })} />
+                    <div className="grid grid-cols-3 gap-2">
+                      <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="يوم تقفيل" value={editForm.closing_day} onChange={(e) => setEditForm({ ...editForm, closing_day: e.target.value })} />
+                      <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="أيام تحصيل" value={editForm.collection_days} onChange={(e) => setEditForm({ ...editForm, collection_days: e.target.value })} />
+                      <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="مهلة دفع" value={editForm.payment_terms_days} onChange={(e) => setEditForm({ ...editForm, payment_terms_days: e.target.value })} />
+                    </div>
+                    <div className="flex items-center gap-2 justify-end">
+                      <button
+                        onClick={() => setEditingId(null)}
+                        disabled={busy}
+                        className="h-9 px-3 rounded-lg bg-muted text-[12.5px] flex items-center gap-1 press disabled:opacity-50"
+                      >
+                        <X className="h-4 w-4" /> إلغاء
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const name = editForm.name.trim();
+                          if (!name) return toast.error("الاسم مطلوب");
+                          const days = editForm.collection_days
+                            .split(",").map((s) => parseInt(s.trim()))
+                            .filter((n) => Number.isFinite(n));
+                          setBusyId(r.id);
+                          try {
+                            await updateSupplier({
+                              data: {
+                                id: r.id,
+                                name,
+                                contact_phone: editForm.contact_phone.trim() || null,
+                                closing_day: editForm.closing_day ? parseInt(editForm.closing_day) : null,
+                                collection_days: days,
+                                payment_terms_days: parseInt(editForm.payment_terms_days) || 30,
+                              },
+                            });
+                            toast.success("تم تحديث المورد");
+                            setEditingId(null);
+                            await load();
+                          } catch (e) { toast.error((e as Error).message); }
+                          finally { setBusyId(null); }
+                        }}
+                        disabled={busy}
+                        className="h-9 px-3 rounded-lg bg-primary text-primary-foreground text-[12.5px] font-semibold flex items-center gap-1 press disabled:opacity-50"
+                      >
+                        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />} حفظ
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="text-left">
-                <p className="font-display text-[14px] text-destructive">{fmtMoney(r.outstanding_balance)}</p>
-                <p className="text-[10px] text-foreground-tertiary">مستحق</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
           {rows.length === 0 && <p className="text-center text-foreground-tertiary py-8 text-[13px]">لا يوجد موردون بعد</p>}
         </div>
       </div>
