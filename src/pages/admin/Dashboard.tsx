@@ -226,7 +226,7 @@ export default function Dashboard() {
           <div className="grid grid-cols-4 gap-3">
             {[
               { icon: ShoppingBag, label: "الطلبات", to: "/admin/orders", tone: "from-primary to-primary-glow" },
-              { icon: Package, label: "الأصول", to: "/admin/assets", tone: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
+              { icon: Package, label: "المحركات", to: "/admin/hub", tone: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
               { icon: Users, label: "العملاء", to: "/admin/customers", tone: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
               { icon: Wallet, label: "المحافظ", to: "/admin/wallets", tone: "from-[hsl(var(--purple))] to-[hsl(var(--pink))]" },
             ].map((a) => (
