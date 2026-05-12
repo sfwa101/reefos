@@ -83,6 +83,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "توصيل مجاني للطلبات فوق 500 ج.م",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   produce: {
     slug: "produce",
