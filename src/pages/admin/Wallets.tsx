@@ -372,6 +372,8 @@ function AdjustPanel() {
     </div>
   );
 }
+
+export default function AdminWallets() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
   const allowed = hasRole("admin") || hasRole("store_manager");
 
