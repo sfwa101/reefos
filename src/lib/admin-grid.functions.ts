@@ -146,7 +146,7 @@ export const listAdminGridFn = createServerFn({ method: "POST" })
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
 
-    const items = (rows ?? []) as unknown[];
+    const items = (rows ?? []) as Record<string, unknown>[];
     return {
       items,
       hasMore: items.length >= data.limit,
