@@ -79,7 +79,7 @@ export type AdminGridQuery = {
   searchKeys?: string[];
 };
 
-export type AdminGridPage<T = unknown> = {
+export type AdminGridPage<T = Record<string, unknown>> = {
   items: T[];
   hasMore: boolean;
 };
