@@ -148,3 +148,20 @@ export interface ProductListVM {
   hasMore: boolean;
   nextOffset?: number;
 }
+
+/**
+ * Type-level lineage marker: documents which DNA layers each VM field
+ * conceptually derives from. Compile-only; no runtime cost. Keeps the
+ * `ProductIdentityDNA` / `ProductFinancialDNA` imports anchored so the
+ * relationship is enforced by tsc going forward.
+ */
+export type _ProductVMLineage = {
+  identity: Pick<
+    ProductIdentityDNA,
+    "id" | "slug" | "sku" | "section_id" | "tags" | "badges" | "is_active"
+  >;
+  financial: Pick<
+    ProductFinancialDNA,
+    "currency" | "base_price" | "compare_at_price"
+  >;
+};
