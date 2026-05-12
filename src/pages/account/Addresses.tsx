@@ -130,16 +130,25 @@ const Addresses = () => {
 
   const setDefault = async (id: string) => {
     if (!user) return;
-    await supabase.from("addresses").update({ is_default: false }).eq("user_id", user.id);
-    await supabase.from("addresses").update({ is_default: true }).eq("id", id);
-    toast.success("تم تعيين العنوان الافتراضي");
-    load();
+    try {
+      await setDefaultAddressFn({ data: { id } });
+      toast.success("تم تعيين العنوان الافتراضي");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر التحديث";
+      toast.error(m);
+    }
   };
 
   const remove = async (id: string) => {
-    await supabase.from("addresses").delete().eq("id", id);
-    toast("تم حذف العنوان");
-    load();
+    try {
+      await deleteAddressFn({ data: { id } });
+      toast("تم حذف العنوان");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر الحذف";
+      toast.error(m);
+    }
   };
 
   return (
