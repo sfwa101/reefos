@@ -8,8 +8,13 @@ import {
   listProductsBySectionFn,
   getProductDetailsFn,
   getProductRelationsFn,
+  getProductsByIdsFn,
+  getProductDetailsByIdFn,
+  priceQuoteFn,
+  type PriceQuoteVM,
 } from "./catalog.functions";
 import type {
+  ProductCardVM,
   ProductDetailsVM,
   ProductListVM,
   ProductRelationVM,
@@ -21,6 +26,12 @@ export interface ListBySectionParams {
   limit?: number;
   offset?: number;
   sort?: string; // popularity | new | price_asc | price_desc | seasonal
+}
+
+export interface PriceQuoteLineInput {
+  productId: string;
+  variantId?: string;
+  qty: number;
 }
 
 export const CatalogService = {
@@ -39,5 +50,21 @@ export const CatalogService = {
   ): Promise<ProductRelationVM[]> {
     const stored = await getProductRelationsFn({ data: { productId } });
     return resolveRelations({ productId, stored, types, limit });
+  },
+
+  async getManyById(ids: readonly string[]): Promise<ProductCardVM[]> {
+    if (ids.length === 0) return [];
+    return getProductsByIdsFn({ data: { ids: [...ids] } });
+  },
+
+  async getDetailsById(id: string): Promise<ProductDetailsVM | null> {
+    return getProductDetailsByIdFn({ data: { id } });
+  },
+
+  async priceQuote(lines: readonly PriceQuoteLineInput[]): Promise<PriceQuoteVM> {
+    if (lines.length === 0) {
+      return { lines: [], currency: "EGP", quotedAt: new Date().toISOString() };
+    }
+    return priceQuoteFn({ data: { lines: [...lines] } });
   },
 };
