@@ -15,7 +15,7 @@ export type OpsCriticalOrder = {
   customer_id: string | null;
   total_amount: number | null;
   status: string;
-  delivery_info: { [x: string]: unknown } | null;
+  delivery_info: { [x: string]: {} } | null;
   created_at: string;
 };
 
