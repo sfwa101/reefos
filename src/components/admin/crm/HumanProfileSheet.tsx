@@ -6,8 +6,9 @@
  * become "Promote to ..." actions instead of blank panes.
  */
 import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { Loader2, Phone, MapPin, ShieldCheck, Sparkles, UserPlus, Wallet, Receipt, Users, KeyRound } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { getHuman360Fn, type Human360Result } from "@/lib/crm.functions";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";

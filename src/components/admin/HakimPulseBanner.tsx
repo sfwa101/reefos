@@ -1,39 +1,15 @@
-import { useEffect, useState } from "react";
 import { Sparkles, Loader2, MessageCircle } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { useHakimPulseBanner } from "@/hooks/useHakimPulseBanner";
 
 export function HakimPulseBanner({
   metrics, page = "finance", onChat,
-}: { metrics: Record<string, any>; page?: string; onChat?: () => void }) {
-  const [pulse, setPulse] = useState<string>("");
-  const [loading, setLoading] = useState(true);
-  const [err, setErr] = useState<string | null>(null);
-
-  // Stable signature so we don't refetch on every render
-  const sig = JSON.stringify(metrics);
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true); setErr(null);
-      try {
-        const { data, error } = await supabase.functions.invoke("hakim-pulse", {
-          body: { metrics, page },
-        });
-        if (cancelled) return;
-        if (error) throw error;
-        if ((data as any)?.error === "rate_limited") setErr("الطلبات كثيرة، حاول بعد دقيقة.");
-        else if ((data as any)?.error === "credits_exhausted") setErr("نفد رصيد الذكاء الاصطناعي.");
-        else setPulse((data as any)?.pulse ?? "");
-      } catch (e: any) {
-        if (!cancelled) setErr(e?.message ?? "تعذر قراءة النبضة");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [sig, page]);
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  metrics: Record<string, any>;
+  page?: string;
+  onChat?: () => void;
+}) {
+  const { pulse, loading, error } = useHakimPulseBanner(metrics, page);
 
   return (
     <div className="relative overflow-hidden rounded-3xl border border-primary/20 bg-gradient-to-br from-primary/8 via-card to-[hsl(var(--purple))]/8 p-4 lg:p-5 shadow-soft">
@@ -52,8 +28,8 @@ export function HakimPulseBanner({
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
               يقرأ حكيم الأرقام الآن…
             </div>
-          ) : err ? (
-            <p className="text-[12.5px] text-destructive">{err}</p>
+          ) : error ? (
+            <p className="text-[12.5px] text-destructive">{error}</p>
           ) : (
             <p className="text-[13.5px] leading-relaxed text-foreground-secondary">{pulse || "—"}</p>
           )}
