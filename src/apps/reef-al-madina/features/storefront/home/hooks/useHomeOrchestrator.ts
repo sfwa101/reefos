@@ -1,11 +1,18 @@
 /**
- * useHomeOrchestrator — single source of truth for the Home Goods
- * storefront page state.
+ * useHomeOrchestrator — single source of truth for the storefront page state.
  *
- * Phase 11.2 — products are now fetched from Supabase via
- * `useProductsBySourceQuery("home")` and projected to the legacy
- * `HGProduct` view-model via `productToHGView`. There is no longer
- * any local product data.
+ * Wave P-A (Storefront Purity) — `HGProduct` has been eradicated. The
+ * orchestrator now consumes `ProductCardVM[]` directly from
+ * `catalogGateway.listSection` (the canonical sovereign catalog) and emits
+ * the same shape to all leaf components. The `homeProductCardAdapter`
+ * derives the legacy filter axes (`CatId`, `Fulfillment`) and presentation
+ * fields from the VM without polluting it.
+ *
+ * `rawProducts` / `openedRaw` are kept as a *transitional* legacy bridge
+ * exclusively for the few outside consumers (`PersonalizedDealsRail`,
+ * `QuickMealsRail`) that still expect the legacy `Product` shape. They are
+ * derived locally via `vmToProduct` and will disappear once those rails are
+ * migrated to consume `ProductCardVM[]` directly.
  *
  * Owns:
  *   - search query, active category, fulfillment filter, sort, price cap
@@ -23,15 +30,20 @@ import type { Product, ProductSource } from "@/lib/products";
 import { useSectionSubcategories, type SubcategoryItem } from "@/core/catalog/hooks/useSectionSubcategories";
 
 import { BESTSELLER_IDS } from "../dictionaries";
+import { homeProductCardAdapter } from "../adapter";
+import type { FulfillmentFilter, SortId } from "../types";
 
-// Wave 2.E — wire orchestrator to the runtime catalog gateway (usa_products
-// via CatalogService) instead of the legacy salsabil_assets path. Source
-// names map 1:1 to section slugs except for these aliases.
+// Wave 2.E — section slugs for sources that don't equal the source name.
 const SOURCE_TO_SLUG: Partial<Record<ProductSource, string>> = {
   home: "home-goods",
   library: "school-library",
 };
 
+/**
+ * Transitional legacy bridge — converts a sovereign `ProductCardVM` back
+ * into the legacy `Product` shape consumed by `PersonalizedDealsRail` and
+ * `QuickMealsRail`. Will be deleted once those rails migrate to VM.
+ */
 const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
   const attrs = (vm.attributes ?? {}) as Record<string, unknown>;
   const brand = typeof attrs.brand === "string" ? attrs.brand : undefined;
@@ -54,13 +66,6 @@ const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
     description: vm.shortDescription?.ar,
   };
 };
-import { productToHGView } from "../mapper";
-import type {
-  CatId,
-  FulfillmentFilter,
-  HGProduct,
-  SortId,
-} from "../types";
 
 export type HomeOrchestrator = {
   // ─── primitive state ───
@@ -80,14 +85,15 @@ export type HomeOrchestrator = {
   setPriceMax: (n: number) => void;
   priceMaxAvail: number;
 
-  // ─── derived ───
-  /** Full live catalog (DB-driven, view-model). */
-  catalog: HGProduct[];
-  /** Live `Product` rows — used by Add-To-Cart paths. */
+  // ─── derived (canonical sovereign view-models) ───
+  /** Full live catalog (DB-driven, canonical view-model). */
+  catalog: ProductCardVM[];
+  /** Legacy `Product` rows — transitional, only for un-migrated rails. */
   rawProducts: Product[];
-  filtered: HGProduct[];
-  bestSellers: HGProduct[];
-  opened: HGProduct | null;
+  filtered: ProductCardVM[];
+  bestSellers: ProductCardVM[];
+  opened: ProductCardVM | null;
+  /** Legacy opened — transitional, only for un-migrated callers. */
   openedRaw: Product | null;
   filtersActive: boolean;
   loading: boolean;
@@ -104,22 +110,22 @@ export type HomeOrchestrator = {
 
 export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchestrator => {
   const slug = SOURCE_TO_SLUG[source] ?? source;
-  const { data: rawProducts = [], isLoading } = useQuery({
-    queryKey: ["catalog", "section", slug, 48],
-    queryFn: async (): Promise<Product[]> => {
+  const { data: catalog = [], isLoading } = useQuery({
+    queryKey: ["catalog", "section", slug, 48, "vm"],
+    queryFn: async (): Promise<ProductCardVM[]> => {
       const r = await catalogGateway.listSection({ slug, limit: 48, sort: "popularity" });
       if (!r.items.length) {
         console.warn("[CatalogGateway] Section returned 0 products for slug:", slug);
       }
-      return r.items.map((vm) => vmToProduct(vm, source));
+      return r.items;
     },
     staleTime: 5 * 60 * 1000,
     gcTime: 24 * 60 * 60 * 1000,
   });
 
-  const catalog = useMemo(
-    () => rawProducts.map(productToHGView),
-    [rawProducts],
+  const rawProducts = useMemo(
+    () => catalog.map((vm) => vmToProduct(vm, source)),
+    [catalog, source],
   );
 
   // Home Goods keeps the curated hardcoded `CATS` list. Every other
@@ -137,49 +143,49 @@ export const useHomeOrchestrator = (source: ProductSource = "home"): HomeOrchest
   const [filtersOpen, setFiltersOpen] = useState(false);
 
   const priceMaxAvail = useMemo(
-    () => (catalog.length ? Math.max(...catalog.map((p) => p.price)) : 50000),
+    () => (catalog.length ? Math.max(...catalog.map((p) => p.price.amount)) : 50000),
     [catalog],
   );
   const [priceMax, setPriceMaxRaw] = useState<number | null>(null);
-  // Auto-track the dynamic max while the user hasn't customised it.
   const effectivePriceMax = priceMax ?? priceMaxAvail;
   const setPriceMax = (n: number) => setPriceMaxRaw(n);
 
   const filtered = useMemo(() => {
     const term = q.trim();
     let list = catalog.filter((p) => {
+      const view = homeProductCardAdapter(p);
       if (cat !== "all") {
         if (dynamicCats) {
           // DB-driven: match against the raw `tags` array.
           if (!p.tags || !p.tags.includes(cat)) return false;
-        } else if (p.category !== cat) {
+        } else if (view.catId !== cat) {
           return false;
         }
       }
-      if (fulFilter !== "all" && p.fulfillment !== fulFilter) return false;
-      if (p.price > effectivePriceMax) return false;
+      if (fulFilter !== "all" && view.fulfillment !== fulFilter) return false;
+      if (p.price.amount > effectivePriceMax) return false;
       if (!term) return true;
       return (
-        p.name.includes(term) ||
-        p.brand.includes(term) ||
-        p.tagline.includes(term)
+        p.name.ar.includes(term) ||
+        view.brand.includes(term) ||
+        view.tagline.includes(term)
       );
     });
     switch (sort) {
       case "price-asc":
-        list = [...list].sort((a, b) => a.price - b.price);
+        list = [...list].sort((a, b) => a.price.amount - b.price.amount);
         break;
       case "price-desc":
-        list = [...list].sort((a, b) => b.price - a.price);
+        list = [...list].sort((a, b) => b.price.amount - a.price.amount);
         break;
       case "rating":
-        list = [...list].sort((a, b) => b.rating - a.rating);
+        list = [...list].sort((a, b) => (b.rating?.avg ?? 0) - (a.rating?.avg ?? 0));
         break;
       case "discount":
         list = [...list].sort((a, b) => {
-          const da = a.oldPrice ? (a.oldPrice - a.price) / a.oldPrice : 0;
-          const db = b.oldPrice ? (b.oldPrice - b.price) / b.oldPrice : 0;
-          return db - da;
+          const ra = a.price.compareAt ? (a.price.compareAt - a.price.amount) / a.price.compareAt : 0;
+          const rb = b.price.compareAt ? (b.price.compareAt - b.price.amount) / b.price.compareAt : 0;
+          return rb - ra;
         });
         break;
       default:
