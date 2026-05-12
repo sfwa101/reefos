@@ -8,7 +8,7 @@ import type { SectionIdentity as KernelSectionIdentity } from "@/core/sections/t
 import type { ProductCardVM, ProductDetailsVM } from "@/core/catalog/types";
 import { CAP } from "@/core/capabilities";
 import type { RenderBlock, RenderDescriptor } from "./types";
-import type { SectionIdentity as RegistrySectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { type SectionIdentity as RegistrySectionIdentity, SECTION_CAP } from "@/core/catalog/registry/SectionIdentityRegistry";
 import { storeThemes } from "@/lib/storeThemes";
 import type { HomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 
