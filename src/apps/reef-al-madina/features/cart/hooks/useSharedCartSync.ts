@@ -1,5 +1,17 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+// EXEMPT (Wave P-D Phase D-2): `@/integrations/supabase/client` is imported
+// here ONLY for the realtime `supabase.channel(...)` subscription below. All
+// reads/writes are routed through `@/lib/cart.functions` per the blueprint.
 import { supabase } from "@/integrations/supabase/client";
+import {
+  hydrateSharedCartFn,
+  setSharedCartStatusFn,
+  resetSharedCartApprovalsFn,
+  setMyApprovalFn,
+  insertSharedCartItemFn,
+  updateSharedCartItemQtyFn,
+  deleteSharedCartItemFn,
+} from "@/lib/cart.functions";
 import { useAuth } from "@/context/AuthContext";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 
