@@ -21,7 +21,7 @@
  *   - loading flag for skeleton states
  */
 import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { catalogGateway } from "@/core/catalog/gateway";
 import type { ProductCardVM } from "@/core/catalog/types";
