@@ -1,7 +1,8 @@
 import { useParams, Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import { products, type Product } from "@/lib/products";
+import { products } from "@/core/catalog/legacy/legacyRuntime";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
 import { ChevronLeft } from "lucide-react";
 

@@ -1,6 +1,6 @@
 import { Plus, Minus, Heart } from "lucide-react";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
-import { isPerishable, type Product } from "@/lib/products";
+import { isPerishable, type Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { Link } from "@tanstack/react-router";
 import { memo, useEffect, useRef, useState } from "react";
 import { useIsFavorite, useToggleFavorite } from "@/context/FavoritesContext";
