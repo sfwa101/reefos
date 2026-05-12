@@ -144,3 +144,113 @@ export const getInventoryStateFn = createServerFn({ method: "GET" })
     const events = ((rows ?? []) as unknown as LedgerRow[]).map(toDomainEvent);
     return calculateStock(events);
   });
+
+// ─────────────────────────────────────────────────────────────
+// Function 3: reserveStockFn — validate availability + create pending hold
+// ─────────────────────────────────────────────────────────────
+
+const reserveItemSchema = z.object({
+  entity_id: z.string().min(1),
+  location_id: z.string().min(1),
+  qty: z.number().finite().positive(),
+});
+
+const reserveInputSchema = z.object({
+  order_ref: z.string().min(1),
+  items: z.array(reserveItemSchema).min(1),
+  actor_id: z.string().nullable().optional(),
+});
+
+interface ReservationRow {
+  id: string;
+  order_ref: string;
+  state: string;
+  expires_at: string;
+  items: unknown;
+  created_at: string;
+}
+
+async function readStateFor(
+  entity_id: string,
+  location_id: string,
+): Promise<InventoryStateSnapshot> {
+  const { data: rows, error } = await supabase
+    .from("inventory_ledger_events" as never)
+    .select("*")
+    .eq("entity_id", entity_id)
+    .eq("location_id", location_id)
+    .order("occurred_at", { ascending: true });
+
+  if (error) {
+    throw new Error(`Failed to read ledger for availability check: ${error.message}`);
+  }
+  const events = ((rows ?? []) as unknown as LedgerRow[]).map(toDomainEvent);
+  return calculateStock(events);
+}
+
+export const reserveStockFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => reserveInputSchema.parse(input))
+  .handler(async ({ data }): Promise<InventoryReservation> => {
+    // 1. Validate availability for every line.
+    for (const item of data.items) {
+      const state = await readStateFor(item.entity_id, item.location_id);
+      if (!canReserve(item.qty, state.available, SUPPORTS_BACKORDER)) {
+        throw new Error(
+          `Insufficient stock for SKU '${item.entity_id}' @ '${item.location_id}': ` +
+            `requested ${item.qty}, available ${state.available}.`,
+        );
+      }
+    }
+
+    // 2. Persist the reservation row.
+    const expires_at = new Date(Date.now() + RESERVATION_TTL_MS).toISOString();
+    const { data: resRow, error: resErr } = await supabase
+      .from("inventory_reservations" as never)
+      .insert({
+        order_ref: data.order_ref,
+        state: "pending",
+        expires_at,
+        items: data.items,
+      } as never)
+      .select("*")
+      .single();
+
+    if (resErr || !resRow) {
+      throw new Error(`Failed to create reservation: ${resErr?.message ?? "unknown error"}`);
+    }
+    const reservationRow = resRow as unknown as ReservationRow;
+
+    // 3. Append one `reserve` ledger event per line (idempotency-protected).
+    for (const item of data.items) {
+      const draft = createReservationEvent(
+        item.entity_id,
+        item.location_id,
+        item.qty,
+        data.order_ref,
+        `reserve_${data.order_ref}_${item.entity_id}`,
+        {
+          actor_id: data.actor_id ?? null,
+          context: { reservation_id: reservationRow.id, location_id: item.location_id },
+        },
+      );
+
+      const { error: evErr } = await supabase
+        .from("inventory_ledger_events" as never)
+        .insert(draft as never);
+
+      if (evErr && (evErr as { code?: string }).code !== "23505") {
+        throw new Error(
+          `Failed to append reserve event for '${item.entity_id}': ${evErr.message}`,
+        );
+      }
+    }
+
+    return {
+      id: reservationRow.id,
+      order_ref: reservationRow.order_ref,
+      state: reservationRow.state as InventoryReservation["state"],
+      expires_at: reservationRow.expires_at,
+      created_at: reservationRow.created_at,
+      items: data.items,
+    };
+  });
