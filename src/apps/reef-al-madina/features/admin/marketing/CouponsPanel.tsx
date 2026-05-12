@@ -141,7 +141,7 @@ function CouponDialog({
   const save = async () => {
     if (!form.code) { toast.error("الكود مطلوب"); return; }
     setSaving(true);
-    const payload = {
+    const values = {
       code: String(form.code).toUpperCase(),
       description: form.description || null,
       discount_pct: form.type === "pct" ? Number(form.discount_pct) : 0,
@@ -153,11 +153,13 @@ function CouponDialog({
       ends_at: form.ends_at ? new Date(form.ends_at).toISOString() : null,
       is_active: form.is_active,
     };
-    const res = editing
-      ? await supabase.from(TABLE).update(payload as never).eq("id", editing.id)
-      : await supabase.from(TABLE).insert(payload as never);
+    try {
+      await upsertCouponFn({ data: { id: editing?.id ?? null, values } });
+      toast.success("تم الحفظ"); setOpen(false); onSaved();
+    } catch (e) {
+      toast.error("فشل الحفظ: " + (e as Error).message);
+    }
     setSaving(false);
-    if (res.error) toast.error("فشل الحفظ: " + res.error.message); else { toast.success("تم الحفظ"); setOpen(false); onSaved(); }
   };
 
   return (
