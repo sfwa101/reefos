@@ -387,3 +387,39 @@ export const releaseReservationFn = createServerFn({ method: "POST" })
       items,
     };
   });
+
+// ─────────────────────────────────────────────────────────────
+// Function 6: cleanupExpiredReservationsFn — TTL janitor
+// ─────────────────────────────────────────────────────────────
+
+export const cleanupExpiredReservationsFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => z.object({}).optional().parse(input) ?? {})
+  .handler(async (): Promise<{ processed: number; failed: number }> => {
+    const nowIso = new Date().toISOString();
+
+    const { data: rows, error } = await supabase
+      .from("inventory_reservations" as never)
+      .select("id")
+      .eq("state", "pending")
+      .lt("expires_at", nowIso);
+
+    if (error) {
+      throw new Error(`Failed to scan expired reservations: ${error.message}`);
+    }
+
+    const expired = (rows ?? []) as unknown as Array<{ id: string }>;
+    let processed = 0;
+    let failed = 0;
+
+    for (const row of expired) {
+      try {
+        await releaseReservationFn({ data: { reservation_id: row.id, reason: "expired" } });
+        processed += 1;
+      } catch (err) {
+        failed += 1;
+        console.error(`[janitor] Failed to expire reservation '${row.id}':`, err);
+      }
+    }
+
+    return { processed, failed };
+  });
