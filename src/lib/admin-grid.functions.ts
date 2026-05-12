@@ -147,7 +147,8 @@ export const listAdminGridFn = createServerFn({ method: "POST" })
     const { data: rows, error } = await query;
     if (error) throw new Error(error.message);
 
-    const items = (rows ?? []) as Record<string, unknown>[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const items = (rows ?? []) as any[];
     return {
       items,
       hasMore: items.length >= data.limit,
