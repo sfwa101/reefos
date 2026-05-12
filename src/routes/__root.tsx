@@ -35,6 +35,7 @@ import { TenantProvider } from "@/context/TenantContext";
 import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
 // Wave P-0 — DEV-only Constitution Article 3 watchdog (no-op in prod).
 import "@/core/runtime-ui/watchdog.bootstrap";
+import "@/integrations/supabase/serverFnAuthFetch.client";
 
 function NotFoundComponent() {
   return (
