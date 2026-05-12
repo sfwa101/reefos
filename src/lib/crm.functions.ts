@@ -1,0 +1,177 @@
+// CRM Gateway — Wave P-D · Phase D-8.
+// Customer 360 aggregator + admin notification broadcaster, gated by `requireAdmin`.
+import { createServerFn } from "@tanstack/react-start";
+import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+
+// ---- Types ----------------------------------------------------------------
+export type CrmProfile = {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  avatar_url: string | null;
+  created_at: string;
+  occupation: string | null;
+  household_size: number | null;
+  preferred_locale: string | null;
+};
+
+export type CrmWallet = {
+  balance: number;
+  points: number;
+  cashback: number;
+  coupons: number;
+};
+
+export type CrmStats = {
+  total_spent: number;
+  orders_count: number;
+  last_order_at: string | null;
+};
+
+export type CrmOrder = {
+  id: string;
+  total: number;
+  status: string;
+  created_at: string;
+};
+
+export type Customer360 = {
+  profile: CrmProfile | null;
+  wallet: CrmWallet;
+  stats: CrmStats;
+  orders: CrmOrder[];
+};
+
+export type BroadcastSegment = "all" | "vip";
+
+export type BroadcastResult = { recipients: number };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SbAny = any;
+
+const ZERO_WALLET: CrmWallet = { balance: 0, points: 0, cashback: 0, coupons: 0 };
+
+// ---- Customer 360 ---------------------------------------------------------
+export const getCustomer360Fn = createServerFn({ method: "GET" })
+  .inputValidator((d: { customerId: string }) => {
+    if (!d?.customerId) throw new Error("invalid_customer_id");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<Customer360> => {
+    const sb = context.supabase as SbAny;
+    const customerId = data.customerId;
+
+    const [prof, wal, ord] = await Promise.all([
+      sb
+        .from("profiles")
+        .select("id, full_name, phone, avatar_url, created_at, occupation, household_size, preferred_locale")
+        .eq("id", customerId)
+        .maybeSingle(),
+      sb
+        .from("wallet_balances")
+        .select("balance, points, cashback, coupons")
+        .eq("user_id", customerId)
+        .maybeSingle(),
+      sb
+        .from("salsabil_master_orders")
+        .select("id, total_amount, status, created_at, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
+        .eq("customer_id", customerId)
+        .order("created_at", { ascending: false })
+        .limit(100),
+    ]);
+
+    if (prof.error) throw new Error(prof.error.message);
+    if (wal.error) throw new Error(wal.error.message);
+    if (ord.error) throw new Error(ord.error.message);
+
+    const rawOrders = (ord.data ?? []) as Array<{
+      id: string;
+      total_amount: number | null;
+      status: string | null;
+      created_at: string;
+      salsabil_fulfillment_nodes?: Array<{ status: string }> | null;
+    }>;
+
+    const orders: CrmOrder[] = rawOrders.map((m) => {
+      const nodes = m.salsabil_fulfillment_nodes ?? [];
+      const statuses = nodes.map((n) => n.status);
+      const headline =
+        statuses.length === 0
+          ? m.status ?? "pending"
+          : statuses.every((s) => s === "delivered")
+            ? "delivered"
+            : statuses.every((s) => s === "cancelled")
+              ? "cancelled"
+              : statuses.find((s) => !["delivered", "cancelled"].includes(s)) ?? m.status ?? "pending";
+      return {
+        id: m.id,
+        total: Number(m.total_amount ?? 0),
+        status: headline,
+        created_at: m.created_at,
+      };
+    });
+
+    const total_spent = orders.reduce((sum, o) => sum + o.total, 0);
+    const last_order_at = orders.length
+      ? orders.map((o) => o.created_at).sort().slice(-1)[0]
+      : null;
+
+    return {
+      profile: (prof.data as CrmProfile | null) ?? null,
+      wallet: (wal.data as CrmWallet | null) ?? ZERO_WALLET,
+      stats: { total_spent, orders_count: orders.length, last_order_at },
+      orders,
+    };
+  });
+
+// ---- Notification broadcast ----------------------------------------------
+export const broadcastNotificationFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { title: string; body: string | null; segment: BroadcastSegment }) => {
+    if (!d?.title?.trim()) throw new Error("invalid_title");
+    if (d.segment !== "all" && d.segment !== "vip") throw new Error("invalid_segment");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<BroadcastResult> => {
+    const sb = context.supabase as SbAny;
+
+    let userIds: string[] = [];
+    if (data.segment === "vip") {
+      const { data: rows, error } = await sb
+        .from("salsabil_master_orders")
+        .select("customer_id")
+        .eq("status", "delivered")
+        .limit(2000);
+      if (error) throw new Error(error.message);
+      const counts: Record<string, number> = {};
+      ((rows ?? []) as Array<{ customer_id: string | null }>).forEach((o) => {
+        if (o.customer_id) counts[o.customer_id] = (counts[o.customer_id] || 0) + 1;
+      });
+      userIds = Object.entries(counts).filter(([, c]) => c >= 20).map(([uid]) => uid);
+    } else {
+      const { data: rows, error } = await sb.from("profiles").select("id").limit(5000);
+      if (error) throw new Error(error.message);
+      userIds = ((rows ?? []) as Array<{ id: string | null }>)
+        .map((p) => p.id)
+        .filter((id): id is string => !!id);
+    }
+
+    if (userIds.length === 0) throw new Error("no_recipients");
+
+    const title = data.title.trim();
+    const body = data.body?.trim() || null;
+    const rows = userIds.map((uid) => ({
+      user_id: uid,
+      title,
+      body,
+      icon: "bell",
+    }));
+
+    for (let i = 0; i < rows.length; i += 500) {
+      const { error } = await sb.from("notifications").insert(rows.slice(i, i + 500));
+      if (error) throw new Error(error.message);
+    }
+
+    return { recipients: userIds.length };
+  });
