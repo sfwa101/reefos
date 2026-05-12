@@ -25,10 +25,14 @@ export default function Branches() {
 
   async function load() {
     setLoading(true);
-    const { data, error } = await supabase.from("branches").select("*").order("created_at").limit(1000);
-    if (error) toast.error(error.message);
-    setItems((data as Branch[]) || []);
-    setLoading(false);
+    try {
+      setItems(await listBranchesFn());
+    } catch (err) {
+      toast.error((err as Error).message);
+      setItems([]);
+    } finally {
+      setLoading(false);
+    }
   }
 
   async function create() {
@@ -37,22 +41,39 @@ export default function Branches() {
       return;
     }
     setCreating(true);
-    const { error } = await supabase.from("branches").insert({
-      ...draft,
-      country_code: draft.country_code.toUpperCase(),
-      supported_locales: [draft.default_locale],
-    });
-    setCreating(false);
-    if (error) { toast.error(error.message); return; }
-    toast.success("تم إنشاء الفرع");
-    setDraft({ code: "", name: "", country: "", country_code: "", currency: "EGP", timezone: "Africa/Cairo", default_locale: "ar" });
-    load();
+    try {
+      await upsertBranchFn({
+        data: {
+          id: null,
+          values: {
+            code: draft.code,
+            name: draft.name,
+            country: draft.country,
+            country_code: draft.country_code.toUpperCase(),
+            currency: draft.currency,
+            timezone: draft.timezone,
+            default_locale: draft.default_locale,
+            supported_locales: [draft.default_locale],
+          },
+        },
+      });
+      toast.success("تم إنشاء الفرع");
+      setDraft({ code: "", name: "", country: "", country_code: "", currency: "EGP", timezone: "Africa/Cairo", default_locale: "ar" });
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
+    } finally {
+      setCreating(false);
+    }
   }
 
   async function toggleActive(b: Branch) {
-    const { error } = await supabase.from("branches").update({ is_active: !b.is_active }).eq("id", b.id);
-    if (error) { toast.error(error.message); return; }
-    load();
+    try {
+      await setBranchActiveFn({ data: { id: b.id, is_active: !b.is_active } });
+      load();
+    } catch (err) {
+      toast.error((err as Error).message);
+    }
   }
 
   useEffect(() => { load(); }, []);
