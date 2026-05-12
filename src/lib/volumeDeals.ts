@@ -1,4 +1,4 @@
-import type { Product } from "./products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 
 export type VolumeDeal = { buy: number; save: number };
 

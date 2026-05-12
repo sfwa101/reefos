@@ -3,8 +3,8 @@
  * extra gallery images. Falls back gracefully when no enrichment exists for
  * a given product id.
  */
-import type { Product } from "./products";
-import { products } from "./products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { products } from "@/core/catalog/legacy/legacyRuntime";
 
 export type TrustBadge = {
   emoji: string;
