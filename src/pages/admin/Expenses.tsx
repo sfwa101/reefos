@@ -2,9 +2,12 @@ import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { listExpensesFn, createExpenseFn, type ExpenseRow } from "@/lib/finance.functions";
+import {
+  listExpensesFn, createExpenseFn, updateExpenseFn, deleteExpenseFn,
+  type ExpenseRow,
+} from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Receipt } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Receipt, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 const CATEGORIES = [
@@ -25,9 +28,12 @@ export default function Expenses() {
   const allowed = hasRole("admin") || hasRole("finance") || hasRole("store_manager");
   const listExpenses = useServerFn(listExpensesFn);
   const createExpense = useServerFn(createExpenseFn);
+  const updateExpense = useServerFn(updateExpenseFn);
+  const deleteExpense = useServerFn(deleteExpenseFn);
   const [rows, setRows] = useState<ExpenseRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState({
     category: "operations", subcategory: "", amount: "", expense_date: new Date().toISOString().slice(0, 10),
     paid_to: "", payment_method: "cash", reference: "", notes: "",
@@ -47,9 +53,14 @@ export default function Expenses() {
 
   useEffect(() => { if (allowed) load(); else setLoading(false); /* eslint-disable-next-line */ }, [allowed]);
 
-  const create = async () => {
+  const resetForm = () => setForm({
+    category: "operations", subcategory: "", amount: "", expense_date: new Date().toISOString().slice(0, 10),
+    paid_to: "", payment_method: "cash", reference: "", notes: "",
+  });
+
+  const submit = async () => {
     try {
-      await createExpense({ data: {
+      const payload = {
         category: form.category,
         subcategory: form.subcategory || null,
         amount: parseFloat(form.amount),
@@ -58,14 +69,45 @@ export default function Expenses() {
         payment_method: form.payment_method,
         reference: form.reference || null,
         notes: form.notes || null,
-      }});
-      toast.success("تم تسجيل المصروف");
-      setForm({ ...form, amount: "", subcategory: "", paid_to: "", reference: "", notes: "" });
+      };
+      if (editingId) {
+        await updateExpense({ data: { id: editingId, ...payload } });
+        toast.success("تم تحديث المصروف");
+      } else {
+        await createExpense({ data: payload });
+        toast.success("تم تسجيل المصروف");
+      }
+      resetForm();
+      setEditingId(null);
       setShowForm(false);
       load();
     } catch (e) {
       toast.error((e as Error).message);
     }
+  };
+
+  const startEdit = (r: ExpenseRow) => {
+    setEditingId(r.id);
+    setForm({
+      category: r.category,
+      subcategory: r.subcategory ?? "",
+      amount: String(r.amount),
+      expense_date: r.expense_date,
+      paid_to: r.paid_to ?? "",
+      payment_method: r.payment_method ?? "cash",
+      reference: r.reference ?? "",
+      notes: r.notes ?? "",
+    });
+    setShowForm(true);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("حذف المصروف؟")) return;
+    try {
+      await deleteExpense({ data: { id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (e) { toast.error((e as Error).message); }
   };
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
@@ -91,8 +133,8 @@ export default function Expenses() {
           </div>
         </div>
 
-        <button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
-          <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : "تسجيل مصروف"}
+        <button onClick={() => { if (showForm) { setEditingId(null); resetForm(); } setShowForm(!showForm); }} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
+          <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : (editingId ? "تعديل مصروف" : "تسجيل مصروف")}
         </button>
 
         {showForm && (
@@ -115,7 +157,7 @@ export default function Expenses() {
               <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="مرجع" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
             </div>
             <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="ملاحظات" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-            <button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</button>
+            <button onClick={submit} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">{editingId ? "تحديث" : "حفظ"}</button>
           </div>
         )}
 
@@ -131,6 +173,12 @@ export default function Expenses() {
                 <p className="text-[11px] text-foreground-tertiary truncate">{r.expense_date} {r.paid_to ? `• ${r.paid_to}` : ""}</p>
               </div>
               <p className="font-display text-[14px] text-destructive">{fmtMoney(r.amount)}</p>
+              <button onClick={() => startEdit(r)} className="p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
             </div>
           ))}
           {rows.length === 0 && <p className="text-center text-foreground-tertiary py-8 text-[13px]">لا توجد مصروفات</p>}

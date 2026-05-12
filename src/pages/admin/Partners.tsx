@@ -5,10 +5,11 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listProductPartnersFn, listPartnerLedgersFn, createProductPartnerFn,
   setProductPartnerActiveFn, markPartnerLedgerPaidFn,
+  updateProductPartnerFn, deleteProductPartnerFn,
   type ProductPartnerRow, type PartnerLedgerRow,
 } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
-import { Loader2, ShieldAlert, Plus, Users } from "lucide-react";
+import { Loader2, ShieldAlert, Plus, Users, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 type Product = { id: string; name: string };
@@ -20,6 +21,8 @@ export default function Partners() {
   const listLedger = useServerFn(listPartnerLedgersFn);
   const createPartner = useServerFn(createProductPartnerFn);
   const togglePartnerFn = useServerFn(setProductPartnerActiveFn);
+  const updatePartnerFn = useServerFn(updateProductPartnerFn);
+  const deletePartnerFn = useServerFn(deleteProductPartnerFn);
   const markPaidFn = useServerFn(markPartnerLedgerPaidFn);
 
   const [products, setProducts] = useState<Product[]>([]);
@@ -89,6 +92,33 @@ export default function Partners() {
     }
   };
 
+  const editPartner = async (p: ProductPartnerRow) => {
+    const pctRaw = window.prompt(`النسبة الجديدة لـ "${p.partner_name}" (0-100):`, String(p.percentage));
+    if (pctRaw === null) return;
+    const pct = parseFloat(pctRaw);
+    if (!Number.isFinite(pct) || pct <= 0 || pct > 100) return toast.error("نسبة غير صالحة");
+    const splitRaw = window.prompt('نوع التقسيم: net_profit / gross_profit / revenue', p.split_type);
+    if (splitRaw === null) return;
+    try {
+      await updatePartnerFn({ data: { id: p.id, percentage: pct, split_type: splitRaw } });
+      toast.success("تم التحديث");
+      load();
+    } catch (e) {
+      const msg = (e as Error).message;
+      const map: Record<string, string> = { invalid_pct: "نسبة غير صالحة", invalid_split: "نوع تقسيم غير صالح" };
+      toast.error(map[msg] ?? msg);
+    }
+  };
+
+  const removePartner = async (p: ProductPartnerRow) => {
+    if (!confirm(`حذف الشريك "${p.partner_name}"؟ سيتم تعطيله.`)) return;
+    try {
+      await deletePartnerFn({ data: { id: p.id } });
+      toast.success("تم الحذف");
+      load();
+    } catch (e) { toast.error((e as Error).message); }
+  };
+
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (!allowed) return (<><MobileTopbar title="الشركاء" /><div className="p-8 text-center" dir="rtl"><ShieldAlert className="h-12 w-12 mx-auto text-foreground-tertiary mb-3" /><p>غير متاح</p></div></>);
 
@@ -137,8 +167,14 @@ export default function Partners() {
                   <p className="font-medium text-[14px] truncate">{p.partner_name}</p>
                   <p className="text-[11px] text-foreground-tertiary truncate">{p.products?.name} • {p.percentage}% من {p.split_type === "net_profit" ? "صافي الربح" : p.split_type === "gross_profit" ? "إجمالي الربح" : "الإيراد"}</p>
                 </div>
+                <button onClick={() => editPartner(p)} className="text-[11px] p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
                 <button onClick={() => togglePartner(p.id, p.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${p.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
                   {p.is_active ? "نشط" : "موقوف"}
+                </button>
+                <button onClick={() => removePartner(p)} className="text-[11px] p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+                  <Trash2 className="h-3.5 w-3.5" />
                 </button>
               </div>
             ))}

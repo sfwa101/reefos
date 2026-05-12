@@ -6,9 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { Loader2, Save, Plus, Percent } from "lucide-react";
+import { Loader2, Save, Plus, Percent, Trash2 } from "lucide-react";
 import {
   listAffiliateSettingsFn, createAffiliateSettingFn, updateAffiliateSettingFn,
+  deleteAffiliateSettingFn,
   type AffiliateSettingRow,
 } from "@/lib/finance.functions";
 
@@ -18,6 +19,7 @@ export default function AffiliateSettings() {
   const listFn = useServerFn(listAffiliateSettingsFn);
   const createFn = useServerFn(createAffiliateSettingFn);
   const updateFn = useServerFn(updateAffiliateSettingFn);
+  const deleteFn = useServerFn(deleteAffiliateSettingFn);
   const [rows, setRows] = useState<AffiliateSettingRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
@@ -122,8 +124,8 @@ export default function AffiliateSettings() {
                     {(row.default_commission_pct ?? 0).toFixed(1)}%
                   </span>
                 </div>
-                <div className="grid grid-cols-3 gap-2 items-end">
-                  <div className="col-span-2">
+                <div className="grid grid-cols-[1fr_auto_auto] gap-2 items-end">
+                  <div>
                     <Label className="text-xs">النسبة %</Label>
                     <Input
                       type="number" min={0} max={50} step={0.1}
@@ -133,6 +135,19 @@ export default function AffiliateSettings() {
                   </div>
                   <Button onClick={() => save(row)} disabled={savingId === row.id} size="sm">
                     {savingId === row.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    onClick={async () => {
+                      if (!confirm(`حذف فئة "${row.category}"؟`)) return;
+                      try {
+                        await deleteFn({ data: { id: row.id } });
+                        toast.success("تم الحذف");
+                        load();
+                      } catch (e) { toast.error((e as Error).message); }
+                    }}
+                    size="sm" variant="destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>

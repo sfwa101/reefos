@@ -5,6 +5,8 @@ import { fmtNum } from "@/lib/format";
 import {
   listStaffProfilesFn,
   manageStaffRoleFn,
+  assignRoleFn,
+  revokeRoleFn,
   type StaffProfileRow,
 } from "@/lib/hr.functions";
 import { toast } from "sonner";
@@ -82,7 +84,7 @@ export default function StaffAdmin() {
   const onDelete = async (r: any) => {
     if (!confirm(`حذف دور ${ROLE_LABEL[r.role] ?? r.role}؟`)) return;
     try {
-      await manageStaffRoleFn({ data: { action: "delete", role: r.role, role_id: r.id, user_id: r.user_id } });
+      await revokeRoleFn({ data: { role_id: r.id, role: r.role } });
       toast.success("تم الحذف");
       refresh();
     } catch (e) {
@@ -104,10 +106,7 @@ export default function StaffAdmin() {
         toast.success("تم تحديث الدور");
       } else {
         if (!editing.user_id) { toast.error("اختر المستخدم"); setSaving(false); return; }
-        await manageStaffRoleFn({ data: {
-          action: "insert", role: editing.role,
-          user_id: editing.user_id, is_active: editing.is_active ?? true,
-        } });
+        await assignRoleFn({ data: { user_id: editing.user_id, role: editing.role } });
         toast.success("تم إسناد الدور");
       }
       setEditing(null);
