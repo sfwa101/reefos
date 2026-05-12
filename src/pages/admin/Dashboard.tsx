@@ -294,7 +294,7 @@ export default function Dashboard() {
             className="lg:col-span-2"
             title="أعلى الفئات مبيعاً"
             subtitle="آخر ٧ أيام"
-            action={<SectionLink to="/admin/assets" label="الأصول" />}
+            action={<SectionLink to="/admin/hub" label="المحركات" />}
           >
             {topCats.length === 0 ? (
               <EmptyState icon={ShoppingBag} title="لا توجد بيانات فئات بعد" />
