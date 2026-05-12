@@ -8,7 +8,7 @@ import { lazy, Suspense } from "react";
 import type { SectionConfig } from "../types";
 
 const WholesaleComparisonSection = lazy(
-  () => import("@/apps/reef-al-madina/features/wholesale/components/WholesaleComparisonSection"),
+  () => import("@/core/runtime-ui/blocks/product/compare-section"),
 );
 const CompareHomeGoodsSection = lazy(
   () => import("@/apps/reef-al-madina/features/compare/components/CompareHomeGoodsSection"),

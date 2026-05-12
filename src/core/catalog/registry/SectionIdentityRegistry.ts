@@ -290,6 +290,21 @@ SECTION_IDENTITY_REGISTRY.home = {
   slug: "home",
 };
 
+// Supermarket — canonical hub vertical preserved post route-collapse.
+SECTION_IDENTITY_REGISTRY.supermarket = {
+  slug: "supermarket",
+  themeKey: "supermarket",
+  title: "السوبرماركت",
+  subtitle: "كل ما تحتاجه يوميًا",
+  searchPlaceholder: "ابحث في السوبرماركت…",
+  hero: {
+    eyebrow: "السوبرماركت",
+    headline: "كل احتياجاتك في مكان واحد",
+    body: "توصيل سريع · أسعار يومية",
+  },
+  layoutVariant: "standard",
+};
+
 /** Lookup helper. Returns undefined for unknown slugs (caller decides fallback). */
 export function getSectionIdentity(slug: string): SectionIdentity | undefined {
   return SECTION_IDENTITY_REGISTRY[slug];

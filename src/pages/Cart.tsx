@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Home, Lock, ShoppingBag, Sparkles, Zap } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import BackHeader from "@/components/BackHeader";
-import CartUpgradeBanner from "@/components/baskets/CartUpgradeBanner";
+import CartUpgradeBanner from "@/core/runtime-ui/blocks/commerce/cart-upgrade-banner";
 import { toLatin } from "@/lib/format";
 import { useCartOrchestrator } from "@/apps/reef-al-madina/features/cart/hooks/useCartOrchestrator";
 import { useSharedCartContext } from "@/context/SharedCartContext";

@@ -67,7 +67,8 @@ const CompareHomeGoodsSection = () => {
             أضف منتجات إلى المقارنة من قسم الأدوات المنزلية حتى ٤ منتجات.
           </p>
           <Link
-            to="/store/home"
+            to="/store/$slug"
+            params={{ slug: "home-goods" }}
             className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-extrabold text-primary-foreground shadow-pill"
           >
             <ArrowLeft className="h-4 w-4" />

@@ -20,7 +20,7 @@ import {
 import { sweetsBookingToModifiers } from "@/lib/pricingAdapters";
 import { mod, type Modifier } from "@/lib/pricingEngine";
 import { VariantPicker } from "@/apps/reef-al-madina/features/sweets/components/VariantPicker";
-import { FulfillmentSelector } from "@/apps/reef-al-madina/features/sweets/components/FulfillmentSelector";
+import { FulfillmentSelector } from "@/core/runtime-ui/blocks/commerce/fulfillment-selector";
 import { SweetsCustomizationForm } from "@/apps/reef-al-madina/features/sweets/components/SweetsCustomizationForm";
 
 type Props = {

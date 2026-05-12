@@ -132,7 +132,6 @@ import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
 import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
-import { Route as AppStoreSupermarketRouteImport } from './routes/_app/store.supermarket'
 import { Route as AppStoreHomeCompareRouteImport } from './routes/_app/store.home-compare'
 import { Route as AppStoreBasketsSubsRouteImport } from './routes/_app/store.baskets-subs'
 import { Route as AppStoreBasketsBuildRouteImport } from './routes/_app/store.baskets-build'
@@ -763,11 +762,6 @@ const AppSubSlugRoute = AppSubSlugRouteImport.update({
   path: '/sub/$slug',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStoreSupermarketRoute = AppStoreSupermarketRouteImport.update({
-  id: '/store/supermarket',
-  path: '/store/supermarket',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStoreHomeCompareRoute = AppStoreHomeCompareRouteImport.update({
   id: '/store/home-compare',
   path: '/store/home-compare',
@@ -962,7 +956,6 @@ export interface FileRoutesByFullPath {
   '/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/store/home-compare': typeof AppStoreHomeCompareRoute
-  '/store/supermarket': typeof AppStoreSupermarketRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1094,7 +1087,6 @@ export interface FileRoutesByTo {
   '/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/store/home-compare': typeof AppStoreHomeCompareRoute
-  '/store/supermarket': typeof AppStoreSupermarketRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1236,7 +1228,6 @@ export interface FileRoutesById {
   '/_app/store/baskets-build': typeof AppStoreBasketsBuildRoute
   '/_app/store/baskets-subs': typeof AppStoreBasketsSubsRoute
   '/_app/store/home-compare': typeof AppStoreHomeCompareRoute
-  '/_app/store/supermarket': typeof AppStoreSupermarketRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
@@ -1374,7 +1365,6 @@ export interface FileRouteTypes {
     | '/store/baskets-build'
     | '/store/baskets-subs'
     | '/store/home-compare'
-    | '/store/supermarket'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1506,7 +1496,6 @@ export interface FileRouteTypes {
     | '/store/baskets-build'
     | '/store/baskets-subs'
     | '/store/home-compare'
-    | '/store/supermarket'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1647,7 +1636,6 @@ export interface FileRouteTypes {
     | '/_app/store/baskets-build'
     | '/_app/store/baskets-subs'
     | '/_app/store/home-compare'
-    | '/_app/store/supermarket'
     | '/_app/sub/$slug'
     | '/_pos/pos/close-shift'
     | '/_pos/pos/inventory'
@@ -2543,13 +2531,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSubSlugRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/store/supermarket': {
-      id: '/_app/store/supermarket'
-      path: '/store/supermarket'
-      fullPath: '/store/supermarket'
-      preLoaderRoute: typeof AppStoreSupermarketRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/store/home-compare': {
       id: '/_app/store/home-compare'
       path: '/store/home-compare'
@@ -2706,7 +2687,6 @@ interface AppRouteChildren {
   AppStoreBasketsBuildRoute: typeof AppStoreBasketsBuildRoute
   AppStoreBasketsSubsRoute: typeof AppStoreBasketsSubsRoute
   AppStoreHomeCompareRoute: typeof AppStoreHomeCompareRoute
-  AppStoreSupermarketRoute: typeof AppStoreSupermarketRoute
   AppSubSlugRoute: typeof AppSubSlugRoute
 }
 
@@ -2728,7 +2708,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppStoreBasketsBuildRoute: AppStoreBasketsBuildRoute,
   AppStoreBasketsSubsRoute: AppStoreBasketsSubsRoute,
   AppStoreHomeCompareRoute: AppStoreHomeCompareRoute,
-  AppStoreSupermarketRoute: AppStoreSupermarketRoute,
   AppSubSlugRoute: AppSubSlugRoute,
 }
 
@@ -3067,13 +3046,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

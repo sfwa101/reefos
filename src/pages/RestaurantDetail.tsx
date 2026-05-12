@@ -9,7 +9,7 @@ import { toLatin, fmtMoney } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
-import RestaurantItemSheet from "@/components/restaurants/RestaurantItemSheet";
+import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 
 const RestaurantDetail = () => {
   const { id } = useParams({ from: "/_app/restaurant/$id" });

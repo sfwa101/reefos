@@ -9,7 +9,7 @@ import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import type { Restaurant } from "@/lib/restaurants";
-import RestaurantItemSheet from "./RestaurantItemSheet";
+import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 
 const resolve = (ids: string[]): Product[] =>

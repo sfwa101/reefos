@@ -32,8 +32,16 @@ const LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE = {
       message:
         "Constitution Article 3a — `@/lib/products` is the legacy static catalog. New files MUST consume the canonical `catalogGateway` (`src/core/catalog/gateway`) instead.",
     },
+    {
+      name: "@/apps/reef-al-madina/features/storefront/components/SduiCategoryPage",
+      message:
+        "Wave P-C — `SduiCategoryPage` was decommissioned. Use `src/pages/store/SectionPage.tsx` (dynamic `/store/$slug` route) instead.",
+    },
   ],
-  patterns: ["@/lib/products/*"],
+  patterns: [
+    "@/lib/products/*",
+    "**/SduiCategoryPage*",
+  ],
 };
 
 export default tseslint.config(

@@ -3,7 +3,7 @@ import { Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import { products } from "@/core/catalog/legacy/legacyRuntime";
 import { storeThemes } from "@/lib/storeThemes";
-import BasketCard from "@/components/baskets/BasketCard";
+import BasketCard from "@/core/runtime-ui/blocks/product/basket-card";
 import { findFrequency } from "@/lib/baskets";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";

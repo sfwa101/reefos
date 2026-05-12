@@ -113,7 +113,8 @@ const SubCategory = () => {
         <div className="glass-strong rounded-2xl p-8 text-center">
           <p className="text-sm text-muted-foreground mb-3">لا توجد منتجات في هذا القسم بعد.</p>
           <Link
-            to="/store/supermarket"
+            to="/store/$slug"
+            params={{ slug: "supermarket" }}
             className="inline-flex items-center gap-1 text-sm font-bold text-primary"
           >
             تصفح السوبر ماركت <ChevronLeft className="h-4 w-4" />

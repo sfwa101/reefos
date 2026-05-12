@@ -16,8 +16,8 @@ import {
   type SubFrequencyId,
 } from "@/lib/baskets";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
-import SmartSwapSheet from "./SmartSwapSheet";
-import AnimatedNumber from "./AnimatedNumber";
+import SmartSwapSheet from "@/core/runtime-ui/blocks/commerce/smart-swap-sheet";
+import AnimatedNumber from "@/components/baskets/AnimatedNumber";
 
 type Mode = "oneoff" | "subscribe";
 type GiftMeta = {
