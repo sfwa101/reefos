@@ -21,6 +21,8 @@ export default function Partners() {
   const listLedger = useServerFn(listPartnerLedgersFn);
   const createPartner = useServerFn(createProductPartnerFn);
   const togglePartnerFn = useServerFn(setProductPartnerActiveFn);
+  const updatePartnerFn = useServerFn(updateProductPartnerFn);
+  const deletePartnerFn = useServerFn(deleteProductPartnerFn);
   const markPaidFn = useServerFn(markPartnerLedgerPaidFn);
 
   const [products, setProducts] = useState<Product[]>([]);
