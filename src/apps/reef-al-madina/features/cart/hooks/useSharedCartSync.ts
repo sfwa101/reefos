@@ -371,8 +371,7 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       lastLocalItemsSignatureRef.current = itemsSignature(nextItems);
       setItems(nextItems);
       try {
-        const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
-        if (err) throw err;
+        await deleteSharedCartItemFn({ data: { itemId } });
       } catch (err) {
         setItems(snapshot);
         lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
