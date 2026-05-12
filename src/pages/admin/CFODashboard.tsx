@@ -3,7 +3,7 @@ import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PrintReportButton } from "@/components/admin/PrintReportButton";
-import { supabase } from "@/integrations/supabase/client";
+import { getCfoDashboardStatsFn } from "@/lib/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
 
@@ -42,11 +42,15 @@ export default function CFODashboard() {
 
   useEffect(() => {
     if (!allowed) { setLoading(false); return; }
+    let cancelled = false;
     (async () => {
-      const { data, error } = await supabase.rpc("cfo_dashboard_stats" as never);
-      if (!error) setStats(data as unknown as Stats);
-      setLoading(false);
+      try {
+        const data = await getCfoDashboardStatsFn();
+        if (!cancelled) setStats(data as Stats);
+      } catch { /* admin-gated */ }
+      finally { if (!cancelled) setLoading(false); }
     })();
+    return () => { cancelled = true; };
   }, [allowed]);
 
   if (rolesLoading || loading) {
