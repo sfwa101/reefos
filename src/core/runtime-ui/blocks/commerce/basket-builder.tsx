@@ -17,7 +17,7 @@ import { PackagePlus, Plus, Minus, Sparkles, Check, ShoppingCart } from "lucide-
 
 const BUILD_SOURCES: Product["source"][] = ["produce", "dairy", "village", "supermarket"];
 
-const BasketsBuild = () => {
+const BasketBuilderBlock = () => {
   const navigate = useNavigate();
   const { add } = useCart();
   const [qty, setQty] = useState<Record<string, number>>({});
