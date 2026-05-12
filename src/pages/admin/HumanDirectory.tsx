@@ -157,6 +157,14 @@ export default function HumanDirectory() {
       </div>
 
       <HumanProfileSheet profileId={openId} open={!!openId} onOpenChange={(o) => !o && setOpenId(null)} />
+      <CreateHumanDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={(id) => {
+          void refresh();
+          setOpenId(id);
+        }}
+      />
     </>
   );
 }
