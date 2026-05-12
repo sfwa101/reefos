@@ -206,7 +206,7 @@ export const useCartCalculations = ({
       let shadowSubtotal = 0;
       let shadowDeposit = 0;
       for (const l of lines) {
-        const base = l.meta?.unitPrice ?? l.product.price;
+        const base = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
         const mods: Modifier[] = [];
         // Domain-agnostic projection: any preserved meta.appliedModifiers
         // bubbles straight through; otherwise we treat the line as flat.
