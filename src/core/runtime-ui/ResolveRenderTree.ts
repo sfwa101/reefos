@@ -121,15 +121,16 @@ export function resolveDetailsTree(
  * declarative RenderDescriptor. Consumed by the dynamic
  * `src/pages/store/SectionPage.tsx` shell behind the `store/$slug` route.
  *
- * Capability gating (CompareBar, etc.) will move onto SectionIdentity in
- * Phase C-3; for now we mount the bar unconditionally to preserve parity
- * with the Shape-β shells (HomeGoods, Dairy, Produce, Kitchen).
+ * Capability gating (e.g. `commerce.compare`) is driven by
+ * `identity.capabilities` — Phase C-3 wired the CompareBar to the
+ * Shape-β verticals (home-goods, dairy, produce, kitchen).
  */
 export function resolveSectionTree(
   identity: RegistrySectionIdentity,
   orchestrator: HomeOrchestrator,
 ): RenderDescriptor {
   const theme = storeThemes[identity.themeKey];
+  const caps = new Set(identity.capabilities ?? []);
   const blocks: RenderBlock[] = [
     block("nav.back_header", "back-header", {
       title: identity.title,
@@ -141,8 +142,11 @@ export function resolveSectionTree(
       theme,
       orchestrator,
     }),
-    block("commerce.compare_bar", "compare"),
   ];
+
+  if (caps.has(SECTION_CAP.COMPARE)) {
+    blocks.push(block("commerce.compare_bar", "compare"));
+  }
 
   if (orchestrator.opened) {
     blocks.push(
