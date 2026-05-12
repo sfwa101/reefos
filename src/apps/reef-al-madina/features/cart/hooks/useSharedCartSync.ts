@@ -348,15 +348,10 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
       setItems(nextItems);
       try {
         if (quantity <= 0) {
-          const { error: err } = await supabase.from("shared_cart_items").delete().eq("id", itemId);
-          if (err) throw err;
+          await deleteSharedCartItemFn({ data: { itemId } });
           return;
         }
-        const { error: err } = await supabase
-          .from("shared_cart_items")
-          .update({ quantity })
-          .eq("id", itemId);
-        if (err) throw err;
+        await updateSharedCartItemQtyFn({ data: { itemId, quantity } });
       } catch (err) {
         setItems(snapshot);
         lastLocalItemsSignatureRef.current = itemsSignature(snapshot);
