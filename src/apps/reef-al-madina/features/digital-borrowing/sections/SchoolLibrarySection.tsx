@@ -15,12 +15,12 @@ import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { myKycStatusQueryOptions } from "@/lib/library.queries";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { PALETTE, useLibraryProducts, type TabKey } from "@/apps/reef-al-madina/features/library/data";
-import { BorrowCard } from "@/apps/reef-al-madina/features/library/components/BorrowCard";
-import { KYCGateDialog } from "@/apps/reef-al-madina/features/library/components/KYCGateDialog";
-import { BorrowSheet } from "@/apps/reef-al-madina/features/library/components/BorrowSheet";
-import { BundlesGrid } from "@/apps/reef-al-madina/features/library/components/BundlesGrid";
-import { PrintWizard } from "@/apps/reef-al-madina/features/library/components/PrintWizard";
+import { PALETTE, useLibraryProducts, type TabKey } from "@/apps/reef-al-madina/features/digital-borrowing/data";
+import { BorrowCard } from "@/apps/reef-al-madina/features/digital-borrowing/components/BorrowCard";
+import { KYCGateDialog } from "@/apps/reef-al-madina/features/digital-borrowing/components/KYCGateDialog";
+import { BorrowSheet } from "@/apps/reef-al-madina/features/digital-borrowing/components/BorrowSheet";
+import { BundlesGrid } from "@/apps/reef-al-madina/features/digital-borrowing/components/BundlesGrid";
+import { PrintWizard } from "@/apps/reef-al-madina/features/digital-borrowing/components/PrintWizard";
 
 const SchoolLibrarySection = () => {
   const [tab, setTab] = useState<TabKey>("store");
