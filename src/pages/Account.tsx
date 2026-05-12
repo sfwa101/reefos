@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import { getMyAccountHubFn } from "@/lib/user.functions";
 import { tierProgress } from "@/lib/tiers";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { formatCustomerId } from "@/apps/reef-al-madina/features/account/lib/customerId";
@@ -39,21 +39,18 @@ const Account = () => {
     if (!user) return;
     let alive = true;
     (async () => {
-      const [{ data: w }, { count }, { data: spent }, { data: kyc }] = await Promise.all([
-        supabase.from("wallet_balances").select("balance, points").eq("user_id", user.id).maybeSingle(),
-        // Sovereign Matrix: master orders are the single source of truth for "my order count".
-        supabase.from("salsabil_master_orders").select("id", { count: "exact", head: true }).eq("customer_id", user.id),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any).rpc("user_total_spent", { _user_id: user.id }),
-        supabase.from("kyc_verifications").select("status").eq("user_id", user.id).maybeSingle<{ status: NonNullable<KycStatus> }>(),
-      ]);
-      if (!alive) return;
-      setPoints(Number(w?.points ?? 0));
-      setBalance(Number(w?.balance ?? 0));
-      setOrdersCount(count ?? 0);
-      setTotalSpent(Number(spent ?? 0));
-      setKycStatus(kyc?.status ?? null);
-    })().catch(() => {});
+      try {
+        const hub = await getMyAccountHubFn();
+        if (!alive) return;
+        setPoints(hub.points);
+        setBalance(hub.balance);
+        setOrdersCount(hub.ordersCount);
+        setTotalSpent(hub.totalSpent);
+        setKycStatus(hub.kycStatus);
+      } catch (e) {
+        console.error("account hub load error", e);
+      }
+    })();
     return () => { alive = false; };
   }, [user]);
 
