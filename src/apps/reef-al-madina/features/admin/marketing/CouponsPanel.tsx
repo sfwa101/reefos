@@ -3,14 +3,17 @@ import { Tag, Plus, Trash2, Pencil, Power, Percent, ShoppingBag } from "lucide-r
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Kpi, Field } from "./shared";
 import { TIERS, type Coupon, type CouponForm, type Tier } from "./types";
-
-const TABLE = "coupons" as never;
+import {
+  listCouponsFn,
+  upsertCouponFn,
+  setCouponActiveFn,
+  deleteCouponFn,
+} from "@/lib/marketing.functions";
 
 const blankForm: CouponForm = {
   code: "", description: "", discount_pct: 10, discount_amount: null,
