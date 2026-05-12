@@ -99,133 +99,32 @@ export default function Dashboard() {
   const [week, setWeek] = useState<{ id: string; total: number | null; created_at: string; status: string }[]>([]);
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null);
 
+  const load = async () => {
+    try {
+      const ov = await getAdminDashboardOverviewFn();
+      setBento(ov.bento);
+      setOrders(
+        ov.orders.map((o) => ({
+          id: o.id,
+          total: o.total,
+          status: o.status,
+          created_at: o.created_at,
+          user_id: o.user_id,
+          profiles: { full_name: o.full_name },
+        })),
+      );
+      setTopCats(ov.topCats);
+      setWeek(ov.week);
+    } catch {
+      setOrders([]);
+    }
+  };
+
   useEffect(() => {
-    let cancelled = false;
-    const startToday = new Date(); startToday.setHours(0, 0, 0, 0);
-    const start7 = new Date(); start7.setDate(start7.getDate() - 6); start7.setHours(0, 0, 0, 0);
-
-    const load = async () => {
-      try {
-        const [ordersRes, profilesRes, lowRes, weekRes, catsRes] = await Promise.all([
-          // Sovereign Matrix: live master orders feed (with child node statuses for headline aggregation).
-          supabase
-            .from("salsabil_master_orders")
-            .select("id,total_amount,status,created_at,customer_id, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
-            .order("created_at", { ascending: false })
-            .limit(60),
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (supabase as any).from("profiles").select("id", { count: "exact", head: true }),
-          // Phase 15.2 — products table dropped; low-stock count via Sovereign inventory matrix.
-          Promise.resolve({ count: 0 }),
-          // 7-day master orders for trend + funnel.
-          supabase
-            .from("salsabil_master_orders")
-            .select("id,total_amount,created_at,status, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(status)")
-            .gte("created_at", start7.toISOString())
-            .order("created_at", { ascending: true }),
-          // Top categories — Sovereign: aggregate fulfillment items via sku → asset.category_path.
-          supabase
-            .from("salsabil_fulfillment_items")
-            .select("quantity,price_at_time,created_at, salsabil_skus(salsabil_assets(category_path))")
-            .gte("created_at", start7.toISOString())
-            .limit(500),
-        ]);
-        if (cancelled) return;
-
-        // Hydrate customer names in one batch.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const masters: any[] = Array.isArray(ordersRes?.data) ? ordersRes.data : [];
-        const customerIds = Array.from(new Set(masters.map((m) => m.customer_id).filter(Boolean)));
-        const nameMap = new Map<string, string | null>();
-        if (customerIds.length) {
-          const { data: profs } = await supabase
-            .from("profiles")
-            .select("id,full_name")
-            .in("id", customerIds);
-          (profs ?? []).forEach((p) => nameMap.set(p.id, p.full_name));
-        }
-
-        const list: OrderRow[] = masters.map((m) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const statuses: string[] = (m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status);
-          return {
-            id: m.id,
-            total: Number(m.total_amount ?? 0),
-            status: aggregateStatus(statuses, m.status ?? "pending"),
-            created_at: m.created_at,
-            user_id: m.customer_id,
-            profiles: { full_name: nameMap.get(m.customer_id) ?? null },
-          };
-        });
-        const today = list.filter((o) => new Date(o.created_at) >= startToday);
-        const inDelivery = list.filter((o) =>
-          ["out_for_delivery", "preparing", "ready", "confirmed", "assigned", "picked_up"].includes(o.status),
-        ).length;
-        const todayRev = today.reduce((s, o) => s + Number(o.total ?? 0), 0);
-
-        setBento({
-          todayOrders: today.length,
-          todayRevenue: todayRev,
-          inDelivery,
-          totalCustomers: profilesRes?.count ?? 0,
-          lowStock: lowRes?.count ?? 0,
-          partnersDue: 0,
-        });
-        setOrders(list);
-
-        // Top categories from Sovereign fulfillment items → sku → asset.category_path.
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const items: any[] = Array.isArray(catsRes?.data) ? catsRes.data : [];
-        const catMap = new Map<string, number>();
-        for (const it of items) {
-          const cat = it?.salsabil_skus?.salsabil_assets?.category_path?.split("/")?.[0] ?? "غير مصنّف";
-          const lineTotal = Number(it?.price_at_time ?? 0) * Number(it?.quantity ?? 0);
-          catMap.set(cat, (catMap.get(cat) ?? 0) + lineTotal);
-        }
-        setTopCats(
-          [...catMap.entries()]
-            .map(([label, value]) => ({ label, value }))
-            .sort((a, b) => b.value - a.value)
-            .slice(0, 5),
-        );
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const weekMasters: any[] = Array.isArray(weekRes?.data) ? weekRes.data : [];
-        setWeek(weekMasters.map((m) => ({
-          id: m.id,
-          total: Number(m.total_amount ?? 0),
-          created_at: m.created_at,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          status: aggregateStatus((m.salsabil_fulfillment_nodes ?? []).map((n: any) => n.status), m.status ?? "pending"),
-        })));
-      } catch {
-        if (!cancelled) setOrders([]);
-      }
-    };
-
     load();
-
-    const channel = supabase
-      .channel("admin-dashboard-master-orders")
-      .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        "postgres_changes" as any,
-        { event: "*", schema: "public", table: "salsabil_master_orders" },
-        () => { if (!cancelled) load(); },
-      )
-      .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        "postgres_changes" as any,
-        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-        () => { if (!cancelled) load(); },
-      )
-      .subscribe();
-
-    return () => {
-      cancelled = true;
-      supabase.removeChannel(channel);
-    };
   }, []);
+
+  useAdminDashboardRealtime(load);
 
   /* ---- Derived ---- */
 
