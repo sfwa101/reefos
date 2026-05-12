@@ -2,7 +2,7 @@
 // All sub-pieces live in src/features/library/. This file only owns top-level
 // tab + KYC verification status state.
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import {
   ShoppingBag, Library, Printer, Lock, FileText,
