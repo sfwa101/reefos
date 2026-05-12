@@ -473,3 +473,41 @@ export const deleteProductUnitFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ---- Universal Salsabil Assets (USA) — Wave R-1 · Batch 7 ---------------
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SbAnyUSA = any;
+
+export type AssetSkuRow = { id: string; sku_code: string };
+
+export const listAssetSkusFn = createServerFn({ method: "GET" })
+  .inputValidator((d: { asset_id: string }) => {
+    const id = String(d?.asset_id ?? "").trim();
+    if (!id) throw new Error("asset_id_required");
+    return { asset_id: id };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<AssetSkuRow[]> => {
+    const sb = context.supabase as SbAnyUSA;
+    const { data: rows, error } = await sb
+      .from("salsabil_skus")
+      .select("id, sku_code")
+      .eq("asset_id", data.asset_id)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (rows ?? []) as AssetSkuRow[];
+  });
+
+export const mintUniversalAssetFn = createServerFn({ method: "POST" })
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  .inputValidator((d: { payload: any }) => {
+    if (!d?.payload || typeof d.payload !== "object") throw new Error("payload_required");
+    return { payload: d.payload };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<{ id: string }> => {
+    const sb = context.supabase as SbAnyUSA;
+    const { data: id, error } = await sb.rpc("mint_universal_asset", { payload: data.payload });
+    if (error) throw new Error(error.message ?? "mint_failed");
+    return { id: String(id) };
+  });
