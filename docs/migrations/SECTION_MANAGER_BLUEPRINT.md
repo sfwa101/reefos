@@ -127,13 +127,24 @@ Add `mobile_home_layout_v1` and `mobile_home_layout_v1_draft` to the `ALLOWED_KE
 
 **No new server functions required.** Reuse `getAppSettingsFn` / `upsertAppSettingFn`. This keeps the gateway surface minimal and the audit trail unified.
 
-### 2.3 Client Read Path
+### 2.3 Client Read Path — "Manage Once, Reflect Everywhere"
 
-The storefront's existing `useUiLayout` hook (`apps/reef-al-madina/.../useUiLayout.ts`) remains the canonical reader for legacy `ui_layouts` rows. A **new** read-only hook `useMobileHomeLayout()` will:
+A **single document** drives all three surfaces. Three thin selector hooks read the same cached payload and project it onto each zone:
 
-1. Public-read the `mobile_home_layout_v1` row through a thin `getPublicLayoutFn` (or a dedicated public RLS policy on `app_settings` filtered to that single key — chosen during implementation).
-2. Fall back to a hard-coded `DEFAULT_MOBILE_HOME_LAYOUT` so the app **never renders blank**.
-3. Cache via TanStack Query with 1h `staleTime` (matches existing SDUI cache policy).
+| Hook | Surface | Selection |
+|---|---|---|
+| `useHomeFeedLayout()` | Home vertical scroll | `blocks.filter(b => b.is_active && b.display_in_home_feed)` sorted by `sort_order` |
+| `useHomeStoryBar()` | Top circular Story Bar | `blocks.filter(b => b.is_active && b.display_in_stories)` sorted by `zone_overrides.stories.sort_order ?? sort_order` |
+| `useCategoriesGridLayout()` | Dedicated Categories screen | `blocks.filter(b => b.is_active && b.display_in_grid)` sorted by `zone_overrides.grid.sort_order ?? sort_order` |
+
+All three share a single TanStack Query key (`['mobile_home_layout_v1']`) — one network round-trip, three projections. Toggling a flag in the admin propagates to **every** surface on the next cache invalidation.
+
+Each hook falls back to `DEFAULT_MOBILE_HOME_LAYOUT` so no surface ever renders blank. Cache: 1h `staleTime` (matches existing SDUI cache policy).
+
+### 2.4 RLS Posture
+
+- **Read of `mobile_home_layout_v1`** (published): `select` allowed to `anon` for that single key only (via `policy USING (key = 'mobile_home_layout_v1')`), or fronted by an unauthenticated server fn — decided at implementation time after security review.
+- **Read of `*_draft` and write of all keys**: admin-only, already enforced by `requireAdmin` middleware.
 
 ### 2.4 RLS Posture
 
