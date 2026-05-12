@@ -47,6 +47,7 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
   publishedDoc: null,
   draftDoc: null,
   selectedBlockId: null,
+  inspectingBlockId: null,
   dirty: false,
   activeTab: "all",
 
@@ -55,11 +56,14 @@ export const useSectionManagerStore = create<SectionManagerState>((set) => ({
       publishedDoc: published,
       draftDoc: draft ?? published,
       selectedBlockId: null,
+      inspectingBlockId: null,
       dirty: false,
       activeTab: "all",
     }),
 
   selectBlock: (id) => set({ selectedBlockId: id }),
+  openInspector: (id) => set({ inspectingBlockId: id, selectedBlockId: id }),
+  closeInspector: () => set({ inspectingBlockId: null }),
   setTab: (tab) => set({ activeTab: tab }),
 
   updateBlock: (id, patch) =>
