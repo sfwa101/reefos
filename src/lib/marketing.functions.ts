@@ -337,3 +337,156 @@ export const uploadBannerImageFn = createServerFn({ method: "POST" })
     const { data: pub } = supabaseAdmin.storage.from("marketing-banners").getPublicUrl(path);
     return { publicUrl: pub.publicUrl };
   });
+
+// ============= Wave R-1 Batch 4 — Legacy Offers (Discounts + Mega Events + Simple Coupons) =============
+export type OfferCouponRow = {
+  id: string; code: string; description: string | null;
+  discount_pct: number | null; discount_amount: number | null;
+  min_order_total: number | null; min_user_level: string | null;
+  max_uses: number | null; uses_count: number; is_active: boolean;
+  ends_at: string | null;
+};
+export type OfferDiscountRow = {
+  id: string; name: string; scope: string; scope_value: string | null;
+  discount_pct: number | null; discount_amount: number | null;
+  min_user_level: string | null; is_active: boolean;
+};
+export type OfferMegaEventRow = {
+  id: string; name: string; trigger_kind: string; active_date: string | null;
+  banner_title: string | null; banner_subtitle: string | null;
+  global_discount_pct: number | null; is_active: boolean;
+};
+
+export const listOffersWorkbenchFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<{
+    coupons: OfferCouponRow[];
+    discounts: OfferDiscountRow[];
+    events: OfferMegaEventRow[];
+  }> => {
+    const sb = context.supabase as SbAny;
+    const [c, d, e] = await Promise.all([
+      sb.from("coupons").select("*").order("created_at", { ascending: false }),
+      sb.from("discounts").select("*").order("created_at", { ascending: false }),
+      sb.from("mega_events").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (c.error) throw new Error(c.error.message);
+    if (d.error) throw new Error(d.error.message);
+    if (e.error) throw new Error(e.error.message);
+    return {
+      coupons: (c.data ?? []) as OfferCouponRow[],
+      discounts: (d.data ?? []) as OfferDiscountRow[],
+      events: (e.data ?? []) as OfferMegaEventRow[],
+    };
+  });
+
+export const createOfferCouponFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    code: string; description: string | null;
+    discount_pct: number | null; discount_amount: number | null;
+    min_order_total: number | null; min_user_level: string | null;
+    max_uses: number | null; ends_at: string | null;
+  }) => {
+    if (!d?.code?.trim()) throw new Error("code_required");
+    if (d.discount_pct != null && (d.discount_pct < 0 || d.discount_pct > 100)) throw new Error("invalid_pct");
+    if (d.discount_amount != null && d.discount_amount < 0) throw new Error("invalid_amount");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("coupons").insert({
+      code: data.code.trim().toUpperCase(),
+      description: data.description,
+      discount_pct: data.discount_pct,
+      discount_amount: data.discount_amount,
+      min_order_total: data.min_order_total,
+      min_user_level: data.min_user_level,
+      max_uses: data.max_uses,
+      ends_at: data.ends_at,
+      is_active: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const toggleOfferCouponFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; is_active: boolean }) => d)
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("coupons").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const createOfferDiscountFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    name: string; scope: string; scope_value: string | null;
+    discount_pct: number | null; min_user_level: string | null;
+  }) => {
+    if (!d?.name?.trim()) throw new Error("name_required");
+    if (!["global","category","product"].includes(d.scope)) throw new Error("invalid_scope");
+    if (d.discount_pct != null && (d.discount_pct < 0 || d.discount_pct > 100)) throw new Error("invalid_pct");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("discounts").insert({
+      name: data.name,
+      scope: data.scope,
+      scope_value: data.scope_value,
+      discount_pct: data.discount_pct,
+      min_user_level: data.min_user_level,
+      is_active: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const toggleOfferDiscountFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; is_active: boolean }) => d)
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("discounts").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const createMegaEventFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    name: string; trigger_kind: string; active_date: string | null;
+    banner_title: string | null; banner_subtitle: string | null;
+    global_discount_pct: number | null;
+  }) => {
+    if (!d?.name?.trim()) throw new Error("name_required");
+    if (d.global_discount_pct != null && (d.global_discount_pct < 0 || d.global_discount_pct > 100)) throw new Error("invalid_pct");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("mega_events").insert({
+      name: data.name,
+      trigger_kind: data.trigger_kind,
+      active_date: data.active_date,
+      banner_title: data.banner_title,
+      banner_subtitle: data.banner_subtitle,
+      global_discount_pct: data.global_discount_pct,
+      is_active: true,
+    });
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const toggleMegaEventFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; is_active: boolean }) => d)
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    const sb = context.supabase as SbAny;
+    const { error } = await sb.from("mega_events").update({ is_active: data.is_active }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });

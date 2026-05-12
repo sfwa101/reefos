@@ -261,3 +261,112 @@ export const rejectAdvanceFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
+
+// ============= Wave R-1 Batch 4 — Staff Roles + KYC =============
+import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { supabaseAdmin } from "@/integrations/supabase/client.server";
+
+const APP_ROLES_LIST = [
+  "admin","staff","cashier","store_manager","collector",
+  "delivery","finance","vendor","super_admin","branch_manager",
+  "driver","inventory_clerk","user",
+] as const;
+
+export type StaffRoleAction = "insert" | "update" | "delete";
+
+export const manageStaffRoleFn = createServerFn({ method: "POST" })
+  .inputValidator((d: {
+    action: StaffRoleAction;
+    user_id?: string | null;
+    role: string;
+    role_id?: string | null;
+    is_active?: boolean;
+  }) => {
+    if (!d?.action || !["insert","update","delete"].includes(d.action)) throw new Error("invalid_action");
+    if (!APP_ROLES_LIST.includes(d.role as typeof APP_ROLES_LIST[number])) throw new Error("invalid_role");
+    if ((d.action === "update" || d.action === "delete") && !d.role_id) throw new Error("role_id_required");
+    if ((d.action === "insert" || d.action === "update") && !d.user_id) throw new Error("user_id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const args: Record<string, unknown> = {
+      p_user_id: data.user_id ?? null,
+      p_role: data.role,
+      p_action: data.action,
+    };
+    if (data.role_id) args.p_role_id = data.role_id;
+    if (typeof data.is_active === "boolean") args.p_is_active = data.is_active;
+    const { error } = await sb.rpc("admin_manage_staff_role", args);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export type StaffProfileRow = { id: string; full_name: string | null; phone: string | null };
+
+export const listStaffProfilesFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<StaffProfileRow[]> => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { data, error } = await sb
+      .from("profiles")
+      .select("id, full_name, phone")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as StaffProfileRow[];
+  });
+
+// ---- KYC -----------------------------------------------------------------
+export type KycDocPaths = { front_image_path: string | null; back_image_path: string | null };
+
+export const updateKycStatusFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string; status: "approved" | "rejected" }) => {
+    if (!d?.id) throw new Error("id_required");
+    if (!["approved","rejected"].includes(d.status)) throw new Error("invalid_status");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = context.supabase as any;
+    const { error } = await sb
+      .from("kyc_verifications")
+      .update({ status: data.status, reviewed_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const };
+  });
+
+export const getKycSignedUrlsFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { id: string }) => {
+    if (!d?.id) throw new Error("id_required");
+    return d;
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data }): Promise<{ frontUrl: string | null; backUrl: string | null }> => {
+    const { data: row, error } = await supabaseAdmin
+      .from("kyc_verifications")
+      .select("front_image_path, back_image_path")
+      .eq("id", data.id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    const fp = (row as KycDocPaths | null)?.front_image_path ?? null;
+    const bp = (row as KycDocPaths | null)?.back_image_path ?? null;
+    let frontUrl: string | null = null;
+    let backUrl: string | null = null;
+    if (fp) {
+      const { data: f, error: fe } = await supabaseAdmin.storage.from("kyc-documents").createSignedUrl(fp, 300);
+      if (fe) throw new Error(fe.message);
+      frontUrl = f?.signedUrl ?? null;
+    }
+    if (bp) {
+      const { data: b, error: be } = await supabaseAdmin.storage.from("kyc-documents").createSignedUrl(bp, 300);
+      if (be) throw new Error(be.message);
+      backUrl = b?.signedUrl ?? null;
+    }
+    return { frontUrl, backUrl };
+  });

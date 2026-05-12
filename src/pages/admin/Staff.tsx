@@ -2,8 +2,13 @@ import { useEffect, useState } from "react";
 import { Users, ShieldCheck, Truck, Store, Plus } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  listStaffProfilesFn,
+  manageStaffRoleFn,
+  type StaffProfileRow,
+} from "@/lib/hr.functions";
 import { toast } from "sonner";
+
 
 const APP_ROLES = [
   "admin",
@@ -44,10 +49,9 @@ const ROLE_TONE: Record<string, string> = {
   vendor: "bg-[hsl(var(--teal))]/15 text-[hsl(var(--teal))]",
 };
 
-type Profile = { id: string; full_name: string | null; phone: string | null };
+type Profile = StaffProfileRow;
 
 export default function StaffAdmin() {
-  // bump to force UniversalAdminGrid remount → refetch
   const [refreshKey, setRefreshKey] = useState(0);
   const refresh = () => setRefreshKey((k) => k + 1);
 
@@ -56,36 +60,34 @@ export default function StaffAdmin() {
   const [profileQuery, setProfileQuery] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Load profiles for the picker (only when dialog opens & it's a new role)
   useEffect(() => {
     if (!editing || editing.id) return;
     let alive = true;
     (async () => {
-      const { data } = await supabase
-        .from("profiles")
-        .select("id, full_name, phone")
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (alive) setProfiles((data ?? []) as Profile[]);
+      try {
+        const rows = await listStaffProfilesFn();
+        if (alive) setProfiles(rows);
+      } catch (e) {
+        if (alive) toast.error((e as Error).message);
+      }
     })();
     return () => { alive = false; };
   }, [editing]);
 
   const onAdd = () => setEditing({ role: "staff", is_active: true });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onEdit = (r: any) => setEditing({ id: r.id, user_id: r.user_id, role: r.role, is_active: r.is_active });
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onDelete = async (r: any) => {
     if (!confirm(`حذف دور ${ROLE_LABEL[r.role] ?? r.role}؟`)) return;
-    // Phase 43 — routed through SECURITY DEFINER RPC (no raw client delete).
-    const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
-      p_user_id: r.user_id,
-      p_role: r.role,
-      p_action: "delete",
-      p_role_id: r.id,
-    });
-    if (error) return toast.error("فشل الحذف: " + error.message);
-    toast.success("تم الحذف");
-    refresh();
+    try {
+      await manageStaffRoleFn({ data: { action: "delete", role: r.role, role_id: r.id, user_id: r.user_id } });
+      toast.success("تم الحذف");
+      refresh();
+    } catch (e) {
+      toast.error("فشل الحذف: " + (e as Error).message);
+    }
   };
 
   const save = async () => {
@@ -95,31 +97,23 @@ export default function StaffAdmin() {
     setSaving(true);
     try {
       if (editing.id) {
-        // Phase 43 — routed through SECURITY DEFINER RPC.
-        const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
-          p_user_id: editing.user_id,
-          p_role: editing.role,
-          p_action: "update",
-          p_role_id: editing.id,
-          p_is_active: editing.is_active ?? true,
-        });
-        if (error) throw error;
+        await manageStaffRoleFn({ data: {
+          action: "update", role: editing.role, role_id: editing.id,
+          user_id: editing.user_id, is_active: editing.is_active ?? true,
+        } });
         toast.success("تم تحديث الدور");
       } else {
         if (!editing.user_id) { toast.error("اختر المستخدم"); setSaving(false); return; }
-        const { error } = await (supabase.rpc as any)("admin_manage_staff_role", {
-          p_user_id: editing.user_id,
-          p_role: editing.role,
-          p_action: "insert",
-          p_is_active: editing.is_active ?? true,
-        });
-        if (error) throw error;
+        await manageStaffRoleFn({ data: {
+          action: "insert", role: editing.role,
+          user_id: editing.user_id, is_active: editing.is_active ?? true,
+        } });
         toast.success("تم إسناد الدور");
       }
       setEditing(null);
       refresh();
-    } catch (e: any) {
-      toast.error(e?.message ?? "فشل الحفظ");
+    } catch (e) {
+      toast.error((e as Error)?.message ?? "فشل الحفظ");
     } finally {
       setSaving(false);
     }

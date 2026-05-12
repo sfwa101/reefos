@@ -613,3 +613,47 @@ export const markPartnerLedgerPaidFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// ============= Wave R-1 Batch 4 — Zakat Assessments =============
+export type ZakatAssessmentRow = {
+  id: string;
+  period_start: string;
+  period_end: string;
+  inventory_market_value: number;
+  cash_balances: number;
+  receivables: number;
+  liabilities: number;
+  zakat_base: number;
+  nisab_value: number;
+  zakat_due: number;
+  is_above_nisab: boolean;
+  status: string;
+  created_at: string;
+};
+
+export const listZakatAssessmentsFn = createServerFn({ method: "GET" })
+  .middleware([requireAdmin])
+  .handler(async ({ context }): Promise<ZakatAssessmentRow[]> => {
+    const sb = context.supabase as SbAny;
+    const { data, error } = await sb
+      .from("zakat_assessments")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(20);
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ZakatAssessmentRow[];
+  });
+
+export const computeZakatAssessmentFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { nisab: number }) => {
+    const n = Number(d?.nisab);
+    if (!Number.isFinite(n) || n <= 0) throw new Error("invalid_nisab");
+    return { nisab: n };
+  })
+  .middleware([requireAdmin])
+  .handler(async ({ data, context }): Promise<ZakatAssessmentRow> => {
+    const sb = context.supabase as SbAny;
+    const { data: out, error } = await sb.rpc("compute_zakat_assessment", { _nisab_value: data.nisab });
+    if (error) throw new Error(error.message);
+    return out as ZakatAssessmentRow;
+  });
