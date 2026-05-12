@@ -488,9 +488,14 @@ domain knowledge of a specific vertical is a constitutional violation.
 
 **Exit criteria:**
 - Reef Al Madina passes a full E2E checkout on every section.
-- New physical-market sections (crepes, potato sandwiches, ice cream) are
-  live behind feature flags.
-- Zero constitutional violations in CI.
+- New physical-market verticals (crepes, potato sandwiches, ice cream,
+  and any future vertical) are live **purely** via registry/descriptor
+  rows and feature flags — `git diff` for their launch contains **no**
+  `.ts`/`.tsx` source changes (only DB seeds, registry data, layouts).
+- Reef Al Madina demonstrably consumes Barq, Taysir, and Asrab as
+  external sovereign nodes (no in-tree re-implementation).
+- Zero constitutional violations in CI, including the Anti-Hardcoding
+  Law lint gate (`lint:no-vertical-literals`).
 
 ---
 
