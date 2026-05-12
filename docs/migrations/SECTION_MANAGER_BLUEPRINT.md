@@ -56,6 +56,24 @@ export interface LayoutBlock {
     density?: "compact" | "comfortable" | "spacious";
   };
   entity_refs?: EntityRef[];     // what data the block pulls
+
+  /**
+   * Target Zones — "Manage Once, Reflect Everywhere".
+   * A single block document drives ALL three surfaces. Each flag is
+   * independent; a block may appear in any combination of zones.
+   * Defaults (when omitted): home_feed = true, stories = false, grid = true.
+   */
+  display_in_stories: boolean;   // top horizontal Story Bar (circular bubbles)
+  display_in_grid: boolean;      // dedicated Categories screen (full grid/list)
+  display_in_home_feed: boolean; // vertical scrollable block on Home
+
+  /** Optional per-zone overrides (icon/cover/sort) when one asset isn't enough. */
+  zone_overrides?: {
+    stories?:   { icon_url?: string; label?: string; sort_order?: number };
+    grid?:      { cover_url?: string; label?: string; sort_order?: number };
+    home_feed?: { sort_order?: number };
+  };
+
   visibility?: {
     min_tier?: "guest" | "registered" | "amanah" | "vip";
     platforms?: Array<"web" | "ios" | "android">;
@@ -83,6 +101,10 @@ export interface MobileHomeLayoutV1 {
 5. `config.columns ∈ {2,3,4}`; other enums validated against allow-lists from `sdui-engine/types`.
 6. Total blocks ≤ **40** (DoS guard).
 7. Total document size ≤ **64 KB** serialized (matches `app_settings.value` JSONB sanity bound).
+8. **At least one** `display_in_*` flag must be `true` per block — orphan blocks (invisible everywhere) are rejected with `block_orphaned:<id>`.
+9. `display_in_stories = true` requires either `zone_overrides.stories.icon_url` or a derivable icon from `entity_refs[0]` (category cover) — enforced at save.
+10. `display_in_grid = true` requires a label (block `title` or `zone_overrides.grid.label`) — enforced at save.
+11. Per-zone `sort_order` (when present in `zone_overrides`) must be unique within that zone; gateway re-normalizes.
 
 Any violation → reject with `invalid_layout:<reason>`. **Never persist a half-valid document.**
 
@@ -105,13 +127,24 @@ Add `mobile_home_layout_v1` and `mobile_home_layout_v1_draft` to the `ALLOWED_KE
 
 **No new server functions required.** Reuse `getAppSettingsFn` / `upsertAppSettingFn`. This keeps the gateway surface minimal and the audit trail unified.
 
-### 2.3 Client Read Path
+### 2.3 Client Read Path — "Manage Once, Reflect Everywhere"
 
-The storefront's existing `useUiLayout` hook (`apps/reef-al-madina/.../useUiLayout.ts`) remains the canonical reader for legacy `ui_layouts` rows. A **new** read-only hook `useMobileHomeLayout()` will:
+A **single document** drives all three surfaces. Three thin selector hooks read the same cached payload and project it onto each zone:
 
-1. Public-read the `mobile_home_layout_v1` row through a thin `getPublicLayoutFn` (or a dedicated public RLS policy on `app_settings` filtered to that single key — chosen during implementation).
-2. Fall back to a hard-coded `DEFAULT_MOBILE_HOME_LAYOUT` so the app **never renders blank**.
-3. Cache via TanStack Query with 1h `staleTime` (matches existing SDUI cache policy).
+| Hook | Surface | Selection |
+|---|---|---|
+| `useHomeFeedLayout()` | Home vertical scroll | `blocks.filter(b => b.is_active && b.display_in_home_feed)` sorted by `sort_order` |
+| `useHomeStoryBar()` | Top circular Story Bar | `blocks.filter(b => b.is_active && b.display_in_stories)` sorted by `zone_overrides.stories.sort_order ?? sort_order` |
+| `useCategoriesGridLayout()` | Dedicated Categories screen | `blocks.filter(b => b.is_active && b.display_in_grid)` sorted by `zone_overrides.grid.sort_order ?? sort_order` |
+
+All three share a single TanStack Query key (`['mobile_home_layout_v1']`) — one network round-trip, three projections. Toggling a flag in the admin propagates to **every** surface on the next cache invalidation.
+
+Each hook falls back to `DEFAULT_MOBILE_HOME_LAYOUT` so no surface ever renders blank. Cache: 1h `staleTime` (matches existing SDUI cache policy).
+
+### 2.4 RLS Posture
+
+- **Read of `mobile_home_layout_v1`** (published): `select` allowed to `anon` for that single key only (via `policy USING (key = 'mobile_home_layout_v1')`), or fronted by an unauthenticated server fn — decided at implementation time after security review.
+- **Read of `*_draft` and write of all keys**: admin-only, already enforced by `requireAdmin` middleware.
 
 ### 2.4 RLS Posture
 
@@ -125,21 +158,38 @@ The storefront's existing `useUiLayout` hook (`apps/reef-al-madina/.../useUiLayo
 ### 3.1 Layout (3-column workbench)
 
 ```text
-┌──────────────────────────────────────────────────────────────────────┐
-│ Header:  [محرر ترتيب الأقسام]  [Draft|Published]  [حفظ مسودة] [نشر] │
-├──────────────┬───────────────────────────────┬───────────────────────┤
-│ Block        │  Canvas (DnD Sortable List)   │  Inspector            │
-│ Palette      │                               │                       │
-│              │  ▦ Hero Banner       [👁][⋮]  │  Selected block:      │
-│ • Hero       │  ▦ Story Circles     [👁][⋮]  │  ─ id, kind           │
-│ • Carousel   │  ▦ Mega Offer        [👁][⋮]  │  ─ title / subtitle   │
-│ • Grid       │  ▦ Bundles Rail      [👁][⋮]  │  ─ config (variant,   │
-│ • Mega Offer │  ▦ Crepes Carousel   [👁][⋮]  │     padding, tone…)   │
-│ • Bundles    │  ▦ Ice Cream Grid    [👁][⋮]  │  ─ entity_refs picker │
-│ • Spacer     │  ▦ + Add block               │  ─ visibility window  │
-│              │                               │  ─ [حذف الكتلة]       │
-└──────────────┴───────────────────────────────┴───────────────────────┘
+┌──────────────────────────────────────────────────────────────────────────────┐
+│ Header:  [محرر ترتيب الأقسام]  [Draft|Published]  [حفظ مسودة]  [نشر]        │
+├──────────────┬─────────────────────────────────────────┬─────────────────────┤
+│ Block        │  Canvas — Tabs: [الكل] [Home] [Stories] │  Inspector          │
+│ Palette      │                  [Categories Grid]      │                     │
+│              │                                         │  Selected block:    │
+│ • Hero       │  ▦ Hero Banner          🏠 ⭕ ▦  [⋮]    │  ─ id, kind         │
+│ • Carousel   │  ▦ Story Circles        ·  ⭕ ·  [⋮]    │  ─ title / subtitle │
+│ • Grid       │  ▦ Mega Offer           🏠 ·  ▦  [⋮]    │  ─ config           │
+│ • Mega Offer │  ▦ Crepes Carousel      🏠 ⭕ ▦  [⋮]    │  ─ entity_refs      │
+│ • Bundles    │  ▦ Ice Cream Grid       🏠 ⭕ ▦  [⋮]    │  ─ visibility       │
+│ • Spacer     │  ▦ + Add block                          │                     │
+│              │                                         │  ▼ Target Zones     │
+│              │  Legend: 🏠 Home Feed  ⭕ Stories  ▦ Grid│   ⬜ display_in_…   │
+│              │                                         │     home_feed       │
+│              │                                         │   ⬜ display_in_…   │
+│              │                                         │     stories         │
+│              │                                         │   ⬜ display_in_…   │
+│              │                                         │     grid            │
+│              │                                         │                     │
+│              │                                         │  ▼ Zone Overrides   │
+│              │                                         │   stories.icon_url  │
+│              │                                         │   grid.cover_url    │
+│              │                                         │   per-zone sort     │
+│              │                                         │                     │
+│              │                                         │  [حذف الكتلة]       │
+└──────────────┴─────────────────────────────────────────┴─────────────────────┘
 ```
+
+**Canvas Zone Tabs** — the canvas can be filtered to a single zone. Reordering inside a zone tab updates that zone's `zone_overrides.<zone>.sort_order`; reordering inside the **الكل** tab updates the canonical `sort_order`. This gives the admin precise per-surface control without losing the global stack.
+
+**Inline Zone Chips on each Block Card** — the three glyphs (🏠 ⭕ ▦) are clickable toggles for `display_in_home_feed`, `display_in_stories`, `display_in_grid` respectively. One click flips the flag; the chip dims when off. This is the fastest path to "Manage Once, Reflect Everywhere".
 
 ### 3.2 Library Choice
 
@@ -157,9 +207,11 @@ If `@dnd-kit` is not yet installed it will be added via `bun add @dnd-kit/core @
 src/pages/admin/SectionManager.tsx          // page shell, draft/publish toolbar
 src/components/admin/section-manager/
   ├─ BlockPalette.tsx                       // left rail, "drag to add"
-  ├─ LayoutCanvas.tsx                       // <DndContext><SortableContext>
-  ├─ BlockCard.tsx                          // sortable item, eye toggle, menu
+  ├─ LayoutCanvas.tsx                       // <DndContext><SortableContext> + zone tabs
+  ├─ ZoneTabs.tsx                           // [All|Home|Stories|Grid] filter
+  ├─ BlockCard.tsx                          // sortable item; inline zone chips 🏠⭕▦
   ├─ BlockInspector.tsx                     // right panel, controlled form
+  ├─ ZoneTogglePanel.tsx                    // 3 switches + zone_overrides editor
   ├─ EntityRefPicker.tsx                    // category/product/bundle search
   ├─ VisibilityWindowEditor.tsx             // tier + date range
   └─ useSectionManagerStore.ts              // Zustand local draft state
