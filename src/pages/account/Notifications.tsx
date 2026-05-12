@@ -53,9 +53,14 @@ const Notifications = () => {
 
   const markAllRead = async () => {
     if (!user) return;
-    await supabase.from("notifications").update({ read: true }).eq("user_id", user.id).eq("read", false);
-    toast.success("تم تعليم الكل كمقروء");
-    load();
+    try {
+      await markAllNotificationsReadFn();
+      toast.success("تم تعليم الكل كمقروء");
+      load();
+    } catch (e) {
+      const m = e instanceof Error ? e.message : "تعذّر التحديث";
+      toast.error(m);
+    }
   };
 
   return (
