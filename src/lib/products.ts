@@ -69,23 +69,10 @@ export function rowToProduct(row: DbRow): Product {
   };
 }
 
-/* ============ Perishability ============ */
-const PERISHABLE_SOURCES: ReadonlyArray<ProductSource> = [
-  "produce", "dairy", "meat", "kitchen", "recipes", "restaurants", "baskets",
-];
+/* `isPerishable` and `productAvailableInZone` are re-exported above from
+ * `@/core/catalog/legacy/legacyProduct.types`. Wave P-B B-3.
+ */
 
-export const isPerishable = (p: Product): boolean => {
-  if (typeof p.perishable === "boolean") return p.perishable;
-  if (PERISHABLE_SOURCES.includes(p.source)) return true;
-  if (p.category === "المجمدات") return true;
-  if (p.source === "sweets" && (p.subCategory === "تورتات" || p.subCategory === "مثلجات")) return true;
-  return false;
-};
-
-export const productAvailableInZone = (
-  p: Product,
-  zoneAcceptsPerishables: boolean,
-): boolean => zoneAcceptsPerishables || !isPerishable(p);
 
 /* ============ React Query Bridge ============
  * The real catalog lives in the per-request QueryClient under the
