@@ -97,121 +97,81 @@ export default function OrderDetail() {
   const [customer, setCustomer] = useState<CustomerLite | null>(null);
   const [updating, setUpdating] = useState(false);
   const [showAssign, setShowAssign] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [drivers, setDrivers] = useState<any[]>([]);
+  type AdminDriver = { id: string; full_name: string | null; phone: string | null };
+  const [drivers, setDrivers] = useState<AdminDriver[]>([]);
 
   useEffect(() => {
     if (!orderId) return;
     (async () => {
-      // 1) Master order + nested fulfillment nodes + items + sku + asset.
-      const { data: master } = await supabase
-        .from("salsabil_master_orders")
-        .select(`
-          id, total_amount, status, created_at, customer_id, delivery_info,
-          salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk (
-            id, status, notes,
-            salsabil_fulfillment_items (
-              id, quantity, price_at_time,
-              salsabil_skus ( salsabil_assets ( name, media ) )
-            )
-          )
-        `)
-        .eq("id", orderId)
-        .maybeSingle();
+      let detail;
+      try {
+        detail = await getMasterOrderDetailFn({ data: { orderId } });
+      } catch {
+        setOrder(null);
+        return;
+      }
+      if (!detail) { setOrder(null); return; }
 
-      if (!master) { setOrder(null); return; }
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const nodes: any[] = (master as any).salsabil_fulfillment_nodes ?? [];
-      const nodeIds: string[] = nodes.map((n) => n.id);
-      const nodeStatuses: string[] = nodes.map((n) => n.status);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const di: any = (master as any).delivery_info ?? {};
-      const flatItems: ItemRow[] = [];
-      nodes.forEach((n) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (n.salsabil_fulfillment_items ?? []).forEach((it: any) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const media = (it?.salsabil_skus?.salsabil_assets?.media as any) ?? {};
-          const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
-          flatItems.push({
-            id: it.id,
-            quantity: it.quantity,
-            price: Number(it.price_at_time ?? 0),
-            product_name: it?.salsabil_skus?.salsabil_assets?.name ?? "منتج",
-            product_image: image,
-          });
-        });
-      });
-      // Aggregated notes (vendor-level, joined).
-      const notes = nodes.map((n) => n.notes).filter(Boolean).join(" • ") || (di.notes ?? null);
+      const di = (detail.delivery_info ?? {}) as Record<string, unknown> & { notes?: string; payment_method?: string };
+      const notes = detail.node_notes.join(" • ") || (di.notes ?? null);
 
       setOrder({
-        id: master.id,
-        total: Number(master.total_amount ?? 0),
-        status: aggregateStatus(nodeStatuses, master.status ?? "pending"),
-        created_at: master.created_at,
-        customer_id: master.customer_id,
+        id: detail.id,
+        total: Number(detail.total_amount ?? 0),
+        status: aggregateStatus(detail.node_statuses, detail.status ?? "pending"),
+        created_at: detail.created_at,
+        customer_id: detail.customer_id,
         payment_method: di.payment_method ?? null,
         notes,
-        delivery_info: di,
-        node_ids: nodeIds,
+        delivery_info: detail.delivery_info,
+        node_ids: detail.node_ids,
       });
-      setItems(flatItems);
-
-      // 2) Customer profile.
-      if (master.customer_id) {
-        const { data: cust } = await supabase
-          .from("profiles")
-          .select("full_name,phone")
-          .eq("id", master.customer_id)
-          .maybeSingle();
-        setCustomer(cust ?? null);
-      }
+      setItems(detail.items);
+      setCustomer(detail.customer);
     })();
   }, [orderId]);
 
   async function setStatus(next: string) {
     if (!order) return;
     setUpdating(true);
-    // Phase 37 — single atomic admin RPC replaces direct table writes.
-    const { error: rpcErr } = await supabase.rpc("admin_set_order_status", {
-      p_order_id: order.id,
-      p_status: next,
-    });
-    setUpdating(false);
-    if (rpcErr) return toast.error("تعذّر تحديث الحالة");
-    setOrder({ ...order, status: next });
-    invalidateOrderCaches(qc);
-    toast.success("تم تحديث حالة الطلب");
+    try {
+      await setOrderStatusFn({ data: { orderId: order.id, status: next } });
+      setOrder({ ...order, status: next });
+      invalidateOrderCaches(qc);
+      toast.success("تم تحديث حالة الطلب");
+    } catch {
+      toast.error("تعذّر تحديث الحالة");
+    } finally {
+      setUpdating(false);
+    }
   }
 
   async function openAssignDriver() {
     setShowAssign(true);
     if (drivers.length === 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any).from("drivers").select("*").eq("is_active", true).order("full_name").limit(500);
-      setDrivers(data ?? []);
+      try {
+        const list = await listActiveDriversFn();
+        setDrivers(list);
+      } catch {
+        setDrivers([]);
+      }
     }
   }
 
   async function confirmAndAssign(driverId: string, driverName: string) {
     if (!order) return;
     setUpdating(true);
-    const { error } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .update({
-        driver_id: driverId,
-        status: "out_for_delivery",
-        assigned_at: new Date().toISOString(),
-      })
-      .in("id", order.node_ids);
-    setUpdating(false);
-    if (error) return toast.error("تعذّر تعيين المندوب");
-    setOrder({ ...order, status: "out_for_delivery" });
-    setShowAssign(false);
-    invalidateOrderCaches(qc);
-    toast.success(`تم التعيين إلى ${driverName}`);
+    try {
+      await assignDriverToOrderFn({ data: { nodeIds: order.node_ids, driverId } });
+      setOrder({ ...order, status: "out_for_delivery" });
+      setShowAssign(false);
+      invalidateOrderCaches(qc);
+      toast.success(`تم التعيين إلى ${driverName}`);
+    } catch {
+      toast.error("تعذّر تعيين المندوب");
+    } finally {
+      setUpdating(false);
+    }
   }
 
   if (!order) {
