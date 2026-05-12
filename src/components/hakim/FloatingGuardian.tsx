@@ -13,6 +13,7 @@
  * `bg-accent` to stay token-pure.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Sparkles, Send, Loader2, AlertTriangle, X } from "lucide-react";
 import {
   Sheet,
@@ -20,9 +21,19 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignContext";
+import {
+  chatHakimFn,
+  markHakimInsightReadFn,
+  type HakimInsight,
+  type HakimSnapshot,
+} from "@/lib/user.functions";
+import {
+  hakimInsightsQueryOptions,
+  hakimSnapshotQueryOptions,
+  userKeys,
+} from "@/lib/user.queries";
 
 type Severity = "info" | "advisory" | "warning" | "critical";
 
