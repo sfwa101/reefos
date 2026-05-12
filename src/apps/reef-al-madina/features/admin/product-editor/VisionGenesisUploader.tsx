@@ -73,11 +73,13 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [hint, setHint] = useState("");
   const [payload, setPayload] = useState<USAGenesisPayload | null>(null);
+  const [pendingInferenceId, setPendingInferenceId] = useState<string | null>(null);
   const [dragOver, setDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
-  const mutation = useVisionGenesis();
-  const mintMutation = useMintUSA();
+  const mutation = useInferEntity();
+  const mintMutation = useApproveInference();
+  const rejectMutation = useRejectInference();
   const aestheticMutation = useAestheticProcessor();
   const { upload: uploadProductImage } = useProductImageUpload();
 
@@ -88,6 +90,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
     }
     setFile(f);
     setPayload(null);
+    setPendingInferenceId(null);
     const url = URL.createObjectURL(f);
     setPreview(url);
   }, []);
@@ -100,9 +103,18 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   };
 
   const reset = () => {
+    // Fire-and-forget rejection of any unapproved trace so the ledger
+    // accurately reflects the Human Veto.
+    if (pendingInferenceId) {
+      rejectMutation.mutate({
+        inference_id: pendingInferenceId,
+        reason: "user_discarded",
+      });
+    }
     setFile(null);
     setPreview(null);
     setPayload(null);
+    setPendingInferenceId(null);
     setHint("");
     mutation.reset();
   };
@@ -110,17 +122,24 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
   const analyze = async () => {
     if (!file) return;
     try {
-      const result = await mutation.mutateAsync({ file, hint: hint.trim() || undefined });
-      setPayload(result);
+      const image_base64 = await fileToBase64(file);
+      const trace = await mutation.mutateAsync({
+        image_base64,
+        context: hint.trim() ? { hint: hint.trim() } : undefined,
+      });
+      const draft = trace.draft_payload as unknown as USAGenesisPayload;
+      setPayload(draft);
+      setPendingInferenceId(trace.id);
       toast.success("تم توليد الأصل العالمي ✨");
     } catch (e) {
-      const code = (e instanceof Error ? e.message : "unknown") as VisionGenesisError;
-      toast.error(ERROR_MESSAGES[code] ?? ERROR_MESSAGES.unknown);
+      const raw = e instanceof Error ? e.message : "unknown";
+      const code = (raw.split(":")[0] || "unknown") as VisionGenesisError;
+      toast.error(ERROR_MESSAGES[code] ?? ERROR_MESSAGES.unknown ?? raw);
     }
   };
 
   const approve = async () => {
-    if (!payload) return;
+    if (!payload || !pendingInferenceId) return;
     try {
       // Phase 13 — Imperial Aesthetic Pipeline.
       // Purify the source image (background removal + soft white backdrop)
@@ -131,7 +150,6 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
           file,
           style: "white",
         });
-        // Convert data URL → Blob → upload to product-images bucket.
         const blob = await (await fetch(purified.imageDataUrl)).blob();
         mediaUrl = await uploadProductImage({
           file: blob,
@@ -150,22 +168,36 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
       };
 
       if (handoffOnly) {
+        // Co-pilot mode: parent will mint. Discard the audited draft so it
+        // doesn't dangle as `pending` forever.
+        rejectMutation.mutate({
+          inference_id: pendingInferenceId,
+          reason: "handoff_to_parent",
+        });
         onApprove?.(enrichedPayload, file);
-        reset();
+        setFile(null);
+        setPreview(null);
+        setPayload(null);
+        setPendingInferenceId(null);
+        setHint("");
+        mutation.reset();
         return;
       }
-      await mintMutation.mutateAsync({
-        asset: enrichedAsset,
-        skus: payload.skus,
-        financial_contract: payload.financial_contract,
-      });
+      await mintMutation.mutateAsync({ inference_id: pendingInferenceId });
       onApprove?.(enrichedPayload, file);
-      reset();
+      // Mint succeeded — clear local state without re-rejecting the now-approved trace.
+      setFile(null);
+      setPreview(null);
+      setPayload(null);
+      setPendingInferenceId(null);
+      setHint("");
+      mutation.reset();
     } catch (e) {
       const msg = e instanceof Error ? e.message : "unknown";
-      if (msg !== "mint_failed") toast.error(`تعذّر تحسين/رفع الصورة: ${msg}`);
+      if (!msg.startsWith("mint_failed")) toast.error(`تعذّر تحسين/رفع الصورة: ${msg}`);
     }
   };
+
 
   return (
     <div className="space-y-4">
