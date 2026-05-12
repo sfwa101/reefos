@@ -13,7 +13,8 @@ import { usePredictBasket, type PredictedBasketLine } from "@/core-os/hakim-ai/h
 import { Skeleton } from "@/components/ui/skeleton";
 import { toLatin } from "@/lib/format";
 import type { CartLine } from "@/store/useCartStore";
-import type { Product } from "@/lib/products";
+/** @deprecated Wave P-B B-3 — bridge type; predicted basket synthesizes a Product to feed the deprecated CartLine.product field. */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";

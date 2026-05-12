@@ -1,7 +1,27 @@
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCart, type CartLineMeta } from "@/context/CartContext";
 import { useSharedCartSync } from "./useSharedCartSync";
-import { products as allProducts, type Product } from "@/lib/products";
+/**
+ * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape kept only
+ * to populate the deprecated `CartLine.product` field for §2.E external
+ * consumers (CartContext / CartPanel / etc.) until they migrate to
+ * `useCartHydration`.
+ */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { getActiveTenantId } from "@/context/TenantContext";
+
+/**
+ * Wave P-B B-3 — read the catalog snapshot through the QueryClient cache
+ * (the same data formerly exposed by `@/lib/products`'s `products` proxy)
+ * so this hook no longer imports from the static catalog. Returns `[]`
+ * before the catalog hydrates; the shared-cart UI tolerates an empty
+ * lookup window because the corresponding lines are simply skipped (the
+ * existing pre-P-B code already had the same `productMap.get(...) →
+ * continue` semantics for unknown ids).
+ */
+const SNAPSHOT_KEY = () =>
+  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
 
 const sharedLineIdentity = (
   productId: string,
@@ -31,9 +51,12 @@ export const useSharedCartAdapter = (sharedCartId: string | null) => {
   const local = useCart();
   const shared = useSharedCartSync(sharedCartId);
   const isSharedMode = !!sharedCartId;
+  const queryClient = useQueryClient();
 
   const sharedLines = useMemo(() => {
     if (!isSharedMode) return [] as { product: Product; qty: number; meta?: CartLineMeta }[];
+    const allProducts =
+      queryClient.getQueryData<Product[]>(SNAPSHOT_KEY()) ?? [];
     const out: { product: Product; qty: number; meta?: CartLineMeta }[] = [];
     for (const it of shared.items) {
       const product = allProducts.find((p) => p.id === it.product_id);
@@ -41,7 +64,7 @@ export const useSharedCartAdapter = (sharedCartId: string | null) => {
       out.push({ product, qty: it.quantity, meta: it.meta as CartLineMeta | undefined });
     }
     return out;
-  }, [isSharedMode, shared.items]);
+  }, [isSharedMode, shared.items, queryClient]);
 
   const lines = isSharedMode ? sharedLines : local.lines;
   const count = isSharedMode ? sharedLines.reduce((s, l) => s + l.qty, 0) : local.count;

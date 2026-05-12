@@ -29,7 +29,8 @@ import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules, useCartHasErrors } from "@/context/CartContext";
-import { isPerishable } from "@/lib/products";
+/** @deprecated Wave P-B B-3 — capability check; will move to `vm.capabilities.includes("perishable")` in B-7+. */
+import { isPerishable } from "@/core/catalog/legacy/legacyProduct.types";
 import { computeLogisticsQuote } from "@/core-os/barq-logistics/core/quote";
 import { useDefaultDeliveryMethod } from "@/apps/reef-al-madina/features/logistics/hooks/useDefaultDeliveryMethod";
 import { legacyZoneToLogisticsZone } from "@/apps/reef-al-madina/features/logistics/adapters/legacyZoneToLogisticsZone";

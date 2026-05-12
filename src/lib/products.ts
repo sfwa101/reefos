@@ -15,49 +15,29 @@
 
 import type { QueryClient } from "@tanstack/react-query";
 
-export type ProductVariant = { id: string; label: string; priceDelta: number };
-export type ProductAddon = { id: string; label: string; price: number };
+// Wave P-B (Static Catalog Killer) — legacy types now live in
+// `@/core/catalog/legacy/legacyProduct.types`. This file re-exports them so
+// existing callers (8 §2.E external consumers) keep compiling unchanged
+// during the transition.
+export type {
+  Product,
+  ProductVariant,
+  ProductAddon,
+  ProductSource,
+  DbRow,
+} from "@/core/catalog/legacy/legacyProduct.types";
+export {
+  isPerishable,
+  productAvailableInZone,
+} from "@/core/catalog/legacy/legacyProduct.types";
 
-export type ProductSource =
-  | "supermarket" | "kitchen" | "dairy" | "produce" | "recipes"
-  | "pharmacy" | "library" | "wholesale" | "home"
-  | "village" | "baskets" | "restaurants" | "meat" | "sweets";
-
-export type Product = {
-  id: string;
-  name: string;
-  brand?: string;
-  unit: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  rating?: number;
-  category: string;
-  subCategory?: string;
-  source: ProductSource;
-  badge?: "best" | "trending" | "premium" | "new";
-  variants?: ProductVariant[];
-  addons?: ProductAddon[];
-  perishable?: boolean;
-  metadata?: Record<string, unknown>;
-  description?: string;
-  /** Phase 54 — Inventory Triage projections (from salsabil_skus.attributes + inventory_matrix). */
-  stock?: number;
-  wakalahEligible?: boolean;
-  hideOnZero?: boolean;
-  lowStockThreshold?: number;
-};
-
-export type DbRow = {
-  id: string; name: string; brand: string | null; unit: string;
-  price: number; old_price: number | null;
-  image: string | null; image_url: string | null;
-  rating: number | null; category: string; sub_category: string | null;
-  source: string; badge: string | null;
-  variants: unknown; addons: unknown;
-  perishable: boolean | null; is_active: boolean;
-  metadata: unknown; description: string | null;
-};
+import type {
+  Product,
+  ProductSource,
+  ProductVariant,
+  ProductAddon,
+  DbRow,
+} from "@/core/catalog/legacy/legacyProduct.types";
 
 export const PRODUCT_COLUMNS =
   "id,name,brand,unit,price,old_price,image,image_url,rating,category,sub_category,source,badge,variants,addons,perishable,is_active,metadata,description" as const;
@@ -89,23 +69,10 @@ export function rowToProduct(row: DbRow): Product {
   };
 }
 
-/* ============ Perishability ============ */
-const PERISHABLE_SOURCES: ReadonlyArray<ProductSource> = [
-  "produce", "dairy", "meat", "kitchen", "recipes", "restaurants", "baskets",
-];
+/* `isPerishable` and `productAvailableInZone` are re-exported above from
+ * `@/core/catalog/legacy/legacyProduct.types`. Wave P-B B-3.
+ */
 
-export const isPerishable = (p: Product): boolean => {
-  if (typeof p.perishable === "boolean") return p.perishable;
-  if (PERISHABLE_SOURCES.includes(p.source)) return true;
-  if (p.category === "المجمدات") return true;
-  if (p.source === "sweets" && (p.subCategory === "تورتات" || p.subCategory === "مثلجات")) return true;
-  return false;
-};
-
-export const productAvailableInZone = (
-  p: Product,
-  zoneAcceptsPerishables: boolean,
-): boolean => zoneAcceptsPerishables || !isPerishable(p);
 
 /* ============ React Query Bridge ============
  * The real catalog lives in the per-request QueryClient under the

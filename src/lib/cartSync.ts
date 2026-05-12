@@ -11,7 +11,8 @@
 // External reads must replace local state; never replay rows through add().
 
 import { supabase } from "@/integrations/supabase/client";
-import { type Product } from "@/lib/products";
+/** @deprecated Wave P-B B-3 — bridge type for legacy cart-row hydration. */
+import { type Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 import { fetchAssetsByLegacyIds, assetToProduct } from "@/lib/sovereignCatalog";
 

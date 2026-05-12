@@ -1,7 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import type { CartLineMeta } from "@/context/CartContext";
 import { supabase } from "@/integrations/supabase/client";
-import { products as allProducts, type Product } from "@/lib/products";
+/**
+ * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape. The
+ * cross-sell rail still emits `Product[]` because its consumer
+ * (CartCrossSellRail / CartContext.add) reads `l.product.*`. Will move to
+ * `ProductCardVM[]` once §2.E migrates.
+ */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { getActiveTenantId } from "@/context/TenantContext";
+
+const SNAPSHOT_KEY = () =>
+  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
 import {
   vendorForProduct,
   type VendorKey,
@@ -24,6 +35,7 @@ interface FrequentlyBoughtRow {
  */
 export const useCartVendorGrouping = (lines: Line[], payment: string) => {
   const [coPurchaseIds, setCoPurchaseIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   const lineIdsKey = lines.map((l) => l.product.id).join(",");
   useEffect(() => {
@@ -55,6 +67,11 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
 
   const crossSell = useMemo<Product[]>(() => {
     if (lines.length === 0) return [];
+    // Wave P-B B-3 — read the catalog snapshot from the QueryClient cache
+    // instead of importing the legacy `products` proxy. Returns [] before
+    // hydration; cross-sell rail tolerates an empty list.
+    const allProducts =
+      queryClient.getQueryData<Product[]>(SNAPSHOT_KEY()) ?? [];
     const inCart = new Set(lines.map((l) => l.product.id));
     const cartSources = new Set(lines.map((l) => l.product.source));
     const cartCategories = new Set(lines.map((l) => l.product.category));
@@ -74,7 +91,7 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
         return scoreB - scoreA;
       });
     return [...coReal, ...heur].slice(0, 6);
-  }, [lines, coPurchaseIds]);
+  }, [lines, coPurchaseIds, queryClient]);
 
   const vendorGroups = useMemo<VendorGroup[]>(() => {
     const map = new Map<string, VendorGroup>();

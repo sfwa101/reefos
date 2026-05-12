@@ -19,7 +19,14 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
-import type { Product } from "@/lib/products";
+/**
+ * @deprecated Wave P-B (Static Catalog Killer) — `Product` is the legacy
+ * denormalized shape. The store keeps it ONLY to populate the transitional
+ * `product: Product` bridge field on `CartLine` for the 8 §2.E external
+ * consumers that still read `l.product.*`. Migrated leaves consume
+ * `ProductCardVM` via `useCartHydration` instead.
+ */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { Modifier } from "@/lib/pricingEngine";
 
 // ---------------------------------------------------------------------------
