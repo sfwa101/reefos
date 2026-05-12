@@ -312,11 +312,61 @@ export const useCartStore = create<CartState & CartActions>()(
     {
       name: STORAGE_KEY,
       storage: safeStorage,
-      partialize: (s) => ({ items: s.items, productIndex: s.productIndex }),
+      // Wave P-C (Payload Diet) — persist ONLY identity + thin display snapshot.
+      // The deprecated `product` bridge is dropped from disk to keep
+      // localStorage in the kilobyte range; it is re-synthesised as a stub
+      // on rehydrate so legacy `l.product.*` consumers keep compiling until
+      // they migrate to `useCartHydration`.
+      partialize: (s) => ({
+        items: Object.fromEntries(
+          Object.entries(s.items).map(([k, l]) => [
+            k,
+            {
+              productId: l.productId ?? l.product?.id,
+              variantId: l.variantId,
+              qty: l.qty,
+              capturedPrice: l.capturedPrice ?? l.product?.price,
+              capturedName: l.capturedName ?? l.product?.name,
+              capturedImage:
+                typeof l.capturedImage === "string"
+                  ? l.capturedImage
+                  : typeof l.product?.image === "string"
+                    ? l.product.image
+                    : undefined,
+              capturedAt: l.capturedAt,
+              meta: l.meta,
+            } as unknown as CartLine,
+          ]),
+        ),
+        productIndex: {},
+      }),
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         // Wave P-B: lift persisted legacy lines into the canonical shape.
         state.items = migrateLegacyCartShape(state.items);
+        // Wave P-C: re-synthesise a thin `product` stub from the captured
+        // snapshot for any line that was persisted without the bridge.
+        for (const [k, l] of Object.entries(state.items)) {
+          if (!l.product || typeof l.product.id !== "string") {
+            const id = l.productId;
+            if (!id) {
+              delete state.items[k];
+              continue;
+            }
+            state.items[k] = {
+              ...l,
+              product: {
+                id,
+                name: l.capturedName ?? "",
+                price: l.capturedPrice ?? 0,
+                image: l.capturedImage ?? FALLBACK_CART_IMG,
+                unit: "",
+                category: "general",
+                source: "supermarket",
+              } as Product,
+            };
+          }
+        }
         // Rebuild the index defensively against stale persisted data.
         state.productIndex = buildIndex(state.items);
       },
