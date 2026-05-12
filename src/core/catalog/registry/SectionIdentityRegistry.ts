@@ -99,6 +99,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
     layoutVariant: "standard",
     capabilities: [SECTION_CAP.COMPARE],
   },
+  dairy: {
     slug: "dairy",
     themeKey: "dairy",
     title: "منتجات الألبان",
@@ -110,6 +111,7 @@ export const SECTION_IDENTITY_REGISTRY: Record<string, SectionIdentity> = {
       body: "يصلك خلال ساعتين من الحلب",
     },
     layoutVariant: "standard",
+    capabilities: [SECTION_CAP.COMPARE],
   },
   meat: {
     slug: "meat",
