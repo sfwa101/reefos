@@ -33,12 +33,12 @@
  *     explicit `strategyKey` (e.g. force "wholesale" for a B2B account).
  */
 
-import type { Product } from "@/lib/products";
 import { initPricingEngine, pricingEngine } from "./bootstrap";
 import {
   PricingEngineError,
   type PriceBreakdown,
   type PricingContext,
+  type PricingInput,
   type PricingSelection,
 } from "./types";
 
