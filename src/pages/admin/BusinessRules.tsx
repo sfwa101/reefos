@@ -109,17 +109,15 @@ const LoyaltyEditor = () => {
   useEffect(() => {
     let alive = true;
     void (async () => {
-      const { data, error } = await supabase
-        .from("loyalty_tier_rules")
-        .select("*")
-        .order("min_lifetime_spend", { ascending: true });
-      if (!alive) return;
-      if (error) {
-        toast.error(error.message);
+      try {
+        const data = await listLoyaltyTierRulesFn();
+        if (!alive) return;
+        setRows(data);
+      } catch (e) {
+        if (!alive) return;
+        toast.error((e as Error).message);
         setRows([]);
-        return;
       }
-      setRows((data as TierRule[]) ?? []);
     })();
     return () => {
       alive = false;
@@ -134,21 +132,22 @@ const LoyaltyEditor = () => {
 
   const persistRow = async (row: TierRule) => {
     setSavingId(row.id);
-    const { error } = await supabase
-      .from("loyalty_tier_rules")
-      .update({
-        discount_pct: row.discount_pct,
-        points_multiplier: row.points_multiplier,
-        min_lifetime_spend: row.min_lifetime_spend,
-        is_active: row.is_active,
-      })
-      .eq("id", row.id);
-    setSavingId(null);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await updateLoyaltyTierRuleFn({
+        data: {
+          id: row.id,
+          discount_pct: row.discount_pct,
+          points_multiplier: row.points_multiplier,
+          min_lifetime_spend: row.min_lifetime_spend,
+          is_active: row.is_active,
+        },
+      });
+      toast.success(`تم حفظ ${TIER_META[row.tier]?.label ?? row.tier}`);
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setSavingId(null);
     }
-    toast.success(`تم حفظ ${TIER_META[row.tier]?.label ?? row.tier}`);
   };
 
   if (rows === null) {
