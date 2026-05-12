@@ -111,3 +111,57 @@ export function resolveDetailsTree(
     blocks,
   };
 }
+
+/**
+ * Section page shell — Wave P-C · Phase C-1.
+ *
+ * Composes the page-level chrome (back header → hero → SDUI factory →
+ * compare bar → overlays) for a storefront vertical entirely as a
+ * declarative RenderDescriptor. Consumed by the dynamic
+ * `src/pages/store/SectionPage.tsx` shell behind the `store/$slug` route.
+ *
+ * Capability gating (CompareBar, etc.) will move onto SectionIdentity in
+ * Phase C-3; for now we mount the bar unconditionally to preserve parity
+ * with the Shape-β shells (HomeGoods, Dairy, Produce, Kitchen).
+ */
+export function resolveSectionTree(
+  identity: RegistrySectionIdentity,
+  orchestrator: HomeOrchestrator,
+): RenderDescriptor {
+  const theme = storeThemes[identity.themeKey];
+  const blocks: RenderBlock[] = [
+    block("nav.back_header", "back-header", {
+      title: identity.title,
+      subtitle: identity.subtitle,
+    }),
+    block("section.hero_banner", "hero", { identity }),
+    block("section.layout_factory", "factory", {
+      pageKey: identityToPageKey(identity),
+      theme,
+      orchestrator,
+    }),
+    block("commerce.compare_bar", "compare"),
+  ];
+
+  if (orchestrator.opened) {
+    blocks.push(
+      block("product.detail_sheet", "detail-sheet", {
+        product: orchestrator.opened,
+        onClose: () => orchestrator.setOpenId(null),
+      }),
+    );
+  }
+  if (orchestrator.filtersOpen) {
+    blocks.push(
+      block("section.filters_sheet", "filters", {
+        orchestrator,
+        hue: theme.hue,
+      }),
+    );
+  }
+
+  return {
+    context: { sectionSlug: identity.slug, view: "section" },
+    blocks,
+  };
+}
