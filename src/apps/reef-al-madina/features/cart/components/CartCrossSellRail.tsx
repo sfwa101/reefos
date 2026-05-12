@@ -3,7 +3,8 @@ import { Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
-import type { Product } from "@/lib/products";
+/** @deprecated Wave P-B B-3 — bridge type; the rail will consume `ProductCardVM[]` after §2.E migrates. */
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 
 type Props = {
