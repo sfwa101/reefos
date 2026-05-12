@@ -67,6 +67,11 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
 
   const crossSell = useMemo<Product[]>(() => {
     if (lines.length === 0) return [];
+    // Wave P-B B-3 — read the catalog snapshot from the QueryClient cache
+    // instead of importing the legacy `products` proxy. Returns [] before
+    // hydration; cross-sell rail tolerates an empty list.
+    const allProducts =
+      queryClient.getQueryData<Product[]>(SNAPSHOT_KEY()) ?? [];
     const inCart = new Set(lines.map((l) => l.product.id));
     const cartSources = new Set(lines.map((l) => l.product.source));
     const cartCategories = new Set(lines.map((l) => l.product.category));
@@ -86,7 +91,7 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
         return scoreB - scoreA;
       });
     return [...coReal, ...heur].slice(0, 6);
-  }, [lines, coPurchaseIds]);
+  }, [lines, coPurchaseIds, queryClient]);
 
   const vendorGroups = useMemo<VendorGroup[]>(() => {
     const map = new Map<string, VendorGroup>();
