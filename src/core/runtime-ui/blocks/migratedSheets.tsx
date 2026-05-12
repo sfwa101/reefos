@@ -18,6 +18,9 @@ import RestaurantCard from "@/core/runtime-ui/blocks/product/restaurant-card";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 import SweetsSheet from "@/core/runtime-ui/blocks/product/sweets-sheet";
 import CompareSection from "@/core/runtime-ui/blocks/product/compare-section";
+import BasketBuilder from "@/core/runtime-ui/blocks/commerce/basket-builder";
+import SubscriptionManager from "@/core/runtime-ui/blocks/commerce/subscription-manager";
+import CompareGrid from "@/core/runtime-ui/blocks/commerce/compare-grid";
 
 const propsOf = <T,>(block: { props?: unknown }): T =>
   (block.props ?? {}) as T;
