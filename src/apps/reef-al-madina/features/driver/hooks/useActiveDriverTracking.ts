@@ -6,7 +6,9 @@
  * Legacy `orders.driver_id` lookup is purged.
  */
 import { useEffect, useState } from "react";
+// EXEMPT: realtime channel subscription allowed (Wave P-D blueprint)
 import { supabase } from "@/integrations/supabase/client";
+import { getDriverPositionFn, resolveDriverIdFn } from "@/lib/driver.functions";
 import type { DriverStatus } from "@/apps/reef-al-madina/features/driver/store/useDriverTelemetry";
 
 export type DriverLivePosition = {
