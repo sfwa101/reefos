@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { products, type Product } from "@/lib/products";
+import { products } from "@/core/catalog/legacy/legacyRuntime";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { getRestaurant } from "@/lib/restaurants";
 import { ChefHat, Star } from "lucide-react";
 import { Link } from "@tanstack/react-router";

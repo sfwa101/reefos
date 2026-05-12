@@ -13,7 +13,7 @@
 import { useEffect } from "react";
 import BackHeader from "@/components/BackHeader";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
-import type { ProductSource } from "@/lib/products";
+import type { ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
 import { useHomeOrchestrator } from "../home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "../home/components/LayoutFactory";
 import { DetailSheet } from "../home/components/DetailSheet";

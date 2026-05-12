@@ -1,4 +1,4 @@
-import type { Product } from "@/lib/products";
+import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import ProductCard from "@/components/ProductCard";
 import { Flame } from "lucide-react";
 

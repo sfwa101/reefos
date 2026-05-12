@@ -23,7 +23,7 @@ import OptimizedImage from "@/components/ui/OptimizedImage";
 import { useCartActions, useCartLineQty } from "@/context/CartContext";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
-import { getById } from "@/lib/products";
+import { getById } from "@/core/catalog/legacy/legacyRuntime";
 import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
