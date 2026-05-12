@@ -1,15 +1,15 @@
 /**
  * Home Storefront — domain types.
  *
- * `HGProduct` is now a thin **view-model** derived from a Supabase
- * `Product` row + its `metadata` (Phase 11.2 — Single Source of Truth
- * migration). All UI fields the legacy components used (tagline, badges,
- * fulfillment, depositPct, etaDays, warranty, reviews) are read from
- * `metadata` via the mapper in `./mapper.ts`.
+ * Wave P-A (Storefront Purity) — the legacy view-model has been eradicated.
+ * been eradicated. Home components now consume the canonical
+ * `ProductCardVM` from `@/core/catalog/types` directly, with the
+ * `homeProductCardAdapter` in `./adapter.ts` handling translation to
+ * the home-specific filter axes (`CatId`, `Fulfillment`).
  *
- * `CatId` is now `string` because category labels live in the DB
- * (`sub_category`) — the FILTER mapping in `./dictionaries.ts` matches
- * each pill to the actual sub_category strings.
+ * `CatId` remains here transitionally as the legacy filter pill axis;
+ * Wave P-C will replace it with capability-driven filters sourced from
+ * the section registry.
  */
 
 export type CatId =
@@ -21,33 +21,6 @@ export type CatId =
   | "decor";
 
 export type Fulfillment = "instant" | "preorder";
-
-export type HGProduct = {
-  id: string;
-  name: string;
-  brand: string;
-  unit: string;
-  price: number;
-  oldPrice?: number;
-  image: string;
-  rating: number;
-  reviews: number;
-  category: CatId;
-  fulfillment: Fulfillment;
-  /** for preorder */
-  depositPct?: number;
-  etaDays?: number;
-  tagline: string;
-  badges: string[];
-  warranty?: string;
-  /** Phase 54 — Inventory Triage. */
-  stock?: number;
-  wakalahEligible?: boolean;
-  hideOnZero?: boolean;
-  lowStockThreshold?: number;
-  /** Raw tag list from DB — used for dynamic subcategory filtering. */
-  tags?: string[];
-};
 
 export type Bundle = {
   id: string;

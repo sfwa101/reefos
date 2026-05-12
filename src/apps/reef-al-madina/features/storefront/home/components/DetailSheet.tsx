@@ -290,7 +290,7 @@ export const DetailSheet = ({
             ) : (
               <>
                 <Plus className="h-4 w-4" strokeWidth={3} />
-                أضف إلى السلة — {fmt(product.price)}
+                أضف إلى السلة — {fmt(price)}
               </>
             )}
           </button>
