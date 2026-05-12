@@ -116,6 +116,12 @@ export type SharedCartItemRow = {
   updated_at: string;
 };
 
+type HydrateSharedCartResult = {
+  cart: SharedCartRow | null;
+  participants: SharedCartParticipantRow[];
+  items: SharedCartItemRow[];
+};
+
 export const hydrateSharedCartFn = createServerFn({ method: "GET" })
   .inputValidator((d: { cartId: string }) => d)
   .middleware([requireSupabaseAuth])
