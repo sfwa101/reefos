@@ -79,7 +79,8 @@ export type AdminGridQuery = {
   searchKeys?: string[];
 };
 
-export type AdminGridPage<T = Record<string, unknown>> = {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export type AdminGridPage<T = any> = {
   items: T[];
   hasMore: boolean;
 };
