@@ -5,6 +5,8 @@ import { fmtNum } from "@/lib/format";
 import {
   listStaffProfilesFn,
   manageStaffRoleFn,
+  assignRoleFn,
+  revokeRoleFn,
   type StaffProfileRow,
 } from "@/lib/hr.functions";
 import { toast } from "sonner";
