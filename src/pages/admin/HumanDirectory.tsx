@@ -35,24 +35,27 @@ export default function HumanDirectory() {
   const [q, setQ] = useState("");
   const [filterKind, setFilterKind] = useState<string | null>(null);
   const [openId, setOpenId] = useState<string | null>(null);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const refresh = async () => {
+    try {
+      const { profiles: profs, relationships: rels } = await listHumanDirectoryFn();
+      setProfiles(profs);
+      const map = new Map<string, Set<string>>();
+      rels.forEach((r: Rel) => {
+        if (!r.profile_id) return;
+        if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
+        map.get(r.profile_id)!.add(r.kind);
+      });
+      setRelMap(map);
+    } catch (e) {
+      toast.error((e as Error).message);
+      setProfiles([]);
+    }
+  };
 
   useEffect(() => {
-    void (async () => {
-      try {
-        const { profiles: profs, relationships: rels } = await listHumanDirectoryFn();
-        setProfiles(profs);
-        const map = new Map<string, Set<string>>();
-        rels.forEach((r: Rel) => {
-          if (!r.profile_id) return;
-          if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
-          map.get(r.profile_id)!.add(r.kind);
-        });
-        setRelMap(map);
-      } catch (e) {
-        toast.error((e as Error).message);
-        setProfiles([]);
-      }
-    })();
+    void refresh();
   }, []);
 
 
