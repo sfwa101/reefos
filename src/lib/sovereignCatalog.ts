@@ -316,6 +316,9 @@ export async function fetchAdminCatalog(): Promise<SkuAdminRow[]> {
 
 /* ── Sovereign Mutations ── */
 
+/** Global/default location placeholder for ledger entries lacking explicit warehouse routing. */
+const DEFAULT_LEDGER_LOCATION_ID = "00000000-0000-0000-0000-000000000000";
+
 /** Upsert availability_data.stock for a sku (merges with existing JSON). */
 export async function upsertSkuStock(skuId: string, stock: number): Promise<void> {
   const { data: existing } = await supabase
@@ -324,6 +327,11 @@ export async function upsertSkuStock(skuId: string, stock: number): Promise<void
     .eq("sku_id", skuId)
     .is("location_code", null)
     .maybeSingle();
+  const existingAvailability = (existing?.availability_data as { stock?: unknown } | null) ?? null;
+  const oldStockRaw = existingAvailability?.stock;
+  const oldStock = typeof oldStockRaw === "number"
+    ? oldStockRaw
+    : Number(oldStockRaw ?? 0) || 0;
   const merged = { ...(existing?.availability_data as object ?? {}), stock };
   if (existing?.id) {
     const { error } = await supabase
@@ -336,6 +344,30 @@ export async function upsertSkuStock(skuId: string, stock: number): Promise<void
       .from("salsabil_inventory_matrix")
       .insert({ sku_id: skuId, inventory_type: "count", availability_data: merged });
     if (error) throw new Error(error.message);
+  }
+
+  // ─── Dual-Write Bridge: append `adjust` event to inventory ledger (fail-safe) ───
+  const delta = stock - oldStock;
+  if (delta !== 0) {
+    try {
+      const { appendLedgerEventFn } = await import(
+        "@/core/inventory/gateway/inventory.functions"
+      );
+      const { data: auth } = await supabase.auth.getUser();
+      await appendLedgerEventFn({
+        data: {
+          entity_id: skuId,
+          location_id: DEFAULT_LEDGER_LOCATION_ID,
+          event_type: "adjust",
+          delta,
+          idempotency_key: `adjust_${skuId}_${Date.now()}`,
+          actor_id: auth?.user?.id ?? null,
+          context: { source: "admin.upsertSkuStock", old_stock: oldStock, new_stock: stock },
+        },
+      });
+    } catch (err) {
+      console.error("[inventory-ledger] dual-write failed (legacy update succeeded):", err);
+    }
   }
 }
 
