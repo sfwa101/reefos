@@ -35,28 +35,8 @@ import {
   userKeys,
 } from "@/lib/user.queries";
 
-type Severity = "info" | "advisory" | "warning" | "critical";
-
-type InsightRow = {
-  id: string;
-  user_id: string;
-  workspace_id: string;
-  severity: Severity;
-  kind: string;
-  title: string;
-  summary: string | null;
-  suggestions: unknown;
-  created_at: string;
-  read_at: string | null;
-};
-
-type Snapshot = {
-  balance?: number;
-  income?: number;
-  expense?: number;
-  savings_velocity?: number;
-  top_categories?: Array<{ category: string; amount: number; count: number }>;
-};
+type InsightRow = HakimInsight;
+type Snapshot = HakimSnapshot;
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
 
