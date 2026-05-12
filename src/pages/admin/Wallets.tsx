@@ -7,6 +7,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import {
   searchProfilesFn, getWalletBalanceFn, adminTopupWalletFn,
+  adminAdjustWalletFn, reverseWalletEntryFn,
   type ProfileSearchRow,
 } from "@/lib/finance.functions";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
