@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,19 +7,12 @@ import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Globe, Plus, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-
-type Branch = {
-  id: string;
-  code: string;
-  name: string;
-  country: string;
-  country_code: string;
-  currency: string;
-  timezone: string;
-  default_locale: string;
-  supported_locales: string[];
-  is_active: boolean;
-};
+import {
+  listBranchesFn,
+  upsertBranchFn,
+  setBranchActiveFn,
+  type BranchRow as Branch,
+} from "@/lib/admin-catalog.functions";
 
 export default function Branches() {
   const [items, setItems] = useState<Branch[]>([]);
