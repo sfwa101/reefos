@@ -18,6 +18,9 @@ import RestaurantCard from "@/core/runtime-ui/blocks/product/restaurant-card";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 import SweetsSheet from "@/core/runtime-ui/blocks/product/sweets-sheet";
 import CompareSection from "@/core/runtime-ui/blocks/product/compare-section";
+import BasketBuilder from "@/core/runtime-ui/blocks/commerce/basket-builder";
+import SubscriptionManager from "@/core/runtime-ui/blocks/commerce/subscription-manager";
+import CompareGrid from "@/core/runtime-ui/blocks/commerce/compare-grid";
 
 const propsOf = <T,>(block: { props?: unknown }): T =>
   (block.props ?? {}) as T;
@@ -70,4 +73,21 @@ export const SweetsSheetBlock: BlockComponent = ({ block }) => (
 
 export const CompareSectionBlock: BlockComponent = ({ block: _block }) => (
   <CompareSection />
+);
+
+// ─── Wave P-D · Phase D-3 — bespoke route collapse ────────────────
+// `BasketsBuild`, `BasketsSubs`, and `CompareHomeGoods` page shells
+// are now declarative blocks rendered by the dynamic `/store/$slug`
+// route via `resolveSectionTree` switching on `layoutVariant`.
+
+export const BasketBuilderBlock: BlockComponent = ({ block: _block }) => (
+  <BasketBuilder />
+);
+
+export const SubscriptionManagerBlock: BlockComponent = ({ block: _block }) => (
+  <SubscriptionManager />
+);
+
+export const CompareGridBlock: BlockComponent = ({ block: _block }) => (
+  <CompareGrid />
 );

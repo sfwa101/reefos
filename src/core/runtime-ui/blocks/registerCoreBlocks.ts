@@ -40,6 +40,9 @@ import {
   RestaurantItemSheetBlock,
   SweetsSheetBlock,
   CompareSectionBlock,
+  BasketBuilderBlock,
+  SubscriptionManagerBlock,
+  CompareGridBlock,
 } from "./migratedSheets";
 
 let registered = false;
@@ -57,6 +60,9 @@ export function registerCoreBlocks() {
     "product.restaurant_item_sheet": RestaurantItemSheetBlock,
     "product.sweets_sheet": SweetsSheetBlock,
     "product.compare_section": CompareSectionBlock,
+    "commerce.basket_builder": BasketBuilderBlock,
+    "commerce.subscription_manager": SubscriptionManagerBlock,
+    "commerce.compare_grid": CompareGridBlock,
     "section.header": SectionHeaderBlock,
     "product.grid": ProductGridBlock,
     "product.list": ProductListBlock,

@@ -132,9 +132,6 @@ import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
 import { Route as PosPosCloseShiftRouteImport } from './routes/_pos.pos.close-shift'
 import { Route as AppSubSlugRouteImport } from './routes/_app/sub.$slug'
-import { Route as AppStoreHomeCompareRouteImport } from './routes/_app/store.home-compare'
-import { Route as AppStoreBasketsSubsRouteImport } from './routes/_app/store.baskets-subs'
-import { Route as AppStoreBasketsBuildRouteImport } from './routes/_app/store.baskets-build'
 import { Route as AppStoreSlugRouteImport } from './routes/_app/store.$slug'
 import { Route as AppRestaurantIdRouteImport } from './routes/_app/restaurant.$id'
 import { Route as AppProductProductIdRouteImport } from './routes/_app/product.$productId'
@@ -762,21 +759,6 @@ const AppSubSlugRoute = AppSubSlugRouteImport.update({
   path: '/sub/$slug',
   getParentRoute: () => AppRoute,
 } as any)
-const AppStoreHomeCompareRoute = AppStoreHomeCompareRouteImport.update({
-  id: '/store/home-compare',
-  path: '/store/home-compare',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreBasketsSubsRoute = AppStoreBasketsSubsRouteImport.update({
-  id: '/store/baskets-subs',
-  path: '/store/baskets-subs',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppStoreBasketsBuildRoute = AppStoreBasketsBuildRouteImport.update({
-  id: '/store/baskets-build',
-  path: '/store/baskets-build',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppStoreSlugRoute = AppStoreSlugRouteImport.update({
   id: '/store/$slug',
   path: '/store/$slug',
@@ -953,9 +935,6 @@ export interface FileRoutesByFullPath {
   '/product/$productId': typeof AppProductProductIdRoute
   '/restaurant/$id': typeof AppRestaurantIdRoute
   '/store/$slug': typeof AppStoreSlugRoute
-  '/store/baskets-build': typeof AppStoreBasketsBuildRoute
-  '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
-  '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1084,9 +1063,6 @@ export interface FileRoutesByTo {
   '/product/$productId': typeof AppProductProductIdRoute
   '/restaurant/$id': typeof AppRestaurantIdRoute
   '/store/$slug': typeof AppStoreSlugRoute
-  '/store/baskets-build': typeof AppStoreBasketsBuildRoute
-  '/store/baskets-subs': typeof AppStoreBasketsSubsRoute
-  '/store/home-compare': typeof AppStoreHomeCompareRoute
   '/sub/$slug': typeof AppSubSlugRoute
   '/pos/close-shift': typeof PosPosCloseShiftRoute
   '/pos/inventory': typeof PosPosInventoryRoute
@@ -1225,9 +1201,6 @@ export interface FileRoutesById {
   '/_app/product/$productId': typeof AppProductProductIdRoute
   '/_app/restaurant/$id': typeof AppRestaurantIdRoute
   '/_app/store/$slug': typeof AppStoreSlugRoute
-  '/_app/store/baskets-build': typeof AppStoreBasketsBuildRoute
-  '/_app/store/baskets-subs': typeof AppStoreBasketsSubsRoute
-  '/_app/store/home-compare': typeof AppStoreHomeCompareRoute
   '/_app/sub/$slug': typeof AppSubSlugRoute
   '/_pos/pos/close-shift': typeof PosPosCloseShiftRoute
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
@@ -1362,9 +1335,6 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/restaurant/$id'
     | '/store/$slug'
-    | '/store/baskets-build'
-    | '/store/baskets-subs'
-    | '/store/home-compare'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1493,9 +1463,6 @@ export interface FileRouteTypes {
     | '/product/$productId'
     | '/restaurant/$id'
     | '/store/$slug'
-    | '/store/baskets-build'
-    | '/store/baskets-subs'
-    | '/store/home-compare'
     | '/sub/$slug'
     | '/pos/close-shift'
     | '/pos/inventory'
@@ -1633,9 +1600,6 @@ export interface FileRouteTypes {
     | '/_app/product/$productId'
     | '/_app/restaurant/$id'
     | '/_app/store/$slug'
-    | '/_app/store/baskets-build'
-    | '/_app/store/baskets-subs'
-    | '/_app/store/home-compare'
     | '/_app/sub/$slug'
     | '/_pos/pos/close-shift'
     | '/_pos/pos/inventory'
@@ -2531,27 +2495,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSubSlugRouteImport
       parentRoute: typeof AppRoute
     }
-    '/_app/store/home-compare': {
-      id: '/_app/store/home-compare'
-      path: '/store/home-compare'
-      fullPath: '/store/home-compare'
-      preLoaderRoute: typeof AppStoreHomeCompareRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/baskets-subs': {
-      id: '/_app/store/baskets-subs'
-      path: '/store/baskets-subs'
-      fullPath: '/store/baskets-subs'
-      preLoaderRoute: typeof AppStoreBasketsSubsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/_app/store/baskets-build': {
-      id: '/_app/store/baskets-build'
-      path: '/store/baskets-build'
-      fullPath: '/store/baskets-build'
-      preLoaderRoute: typeof AppStoreBasketsBuildRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/_app/store/$slug': {
       id: '/_app/store/$slug'
       path: '/store/$slug'
@@ -2684,9 +2627,6 @@ interface AppRouteChildren {
   AppProductProductIdRoute: typeof AppProductProductIdRoute
   AppRestaurantIdRoute: typeof AppRestaurantIdRoute
   AppStoreSlugRoute: typeof AppStoreSlugRoute
-  AppStoreBasketsBuildRoute: typeof AppStoreBasketsBuildRoute
-  AppStoreBasketsSubsRoute: typeof AppStoreBasketsSubsRoute
-  AppStoreHomeCompareRoute: typeof AppStoreHomeCompareRoute
   AppSubSlugRoute: typeof AppSubSlugRoute
 }
 
@@ -2705,9 +2645,6 @@ const AppRouteChildren: AppRouteChildren = {
   AppProductProductIdRoute: AppProductProductIdRoute,
   AppRestaurantIdRoute: AppRestaurantIdRoute,
   AppStoreSlugRoute: AppStoreSlugRoute,
-  AppStoreBasketsBuildRoute: AppStoreBasketsBuildRoute,
-  AppStoreBasketsSubsRoute: AppStoreBasketsSubsRoute,
-  AppStoreHomeCompareRoute: AppStoreHomeCompareRoute,
   AppSubSlugRoute: AppSubSlugRoute,
 }
 

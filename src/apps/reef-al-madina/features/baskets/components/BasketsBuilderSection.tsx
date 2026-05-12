@@ -56,7 +56,8 @@ const BasketsBuilderSection = () => {
       {/* Quick actions */}
       <section className="grid grid-cols-2 gap-3">
         <Link
-          to="/store/baskets-build"
+          to="/store/$slug"
+          params={{ slug: "baskets-build" }}
           className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 to-emerald-700 p-3.5 text-right text-white shadow-tile transition active:scale-[0.98]"
         >
           <PackagePlus className="mb-1.5 h-5 w-5" />
@@ -65,7 +66,8 @@ const BasketsBuilderSection = () => {
           <ChevronLeft className="absolute bottom-2 left-2 h-4 w-4 opacity-70 transition group-hover:translate-x-[-2px]" />
         </Link>
         <Link
-          to="/store/baskets-subs"
+          to="/store/$slug"
+          params={{ slug: "baskets-subs" }}
           className="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-violet-500 to-fuchsia-600 p-3.5 text-right text-white shadow-tile transition active:scale-[0.98]"
         >
           <CalendarClock className="mb-1.5 h-5 w-5" />
@@ -88,7 +90,8 @@ const BasketsBuilderSection = () => {
               return (
                 <Link
                   key={s.id}
-                  to="/store/baskets-subs"
+                  to="/store/$slug"
+                  params={{ slug: "baskets-subs" }}
                   className="relative flex w-44 shrink-0 items-center gap-2.5 rounded-2xl bg-card p-2 ring-1 ring-border/60 shadow-soft"
                 >
                   <img src={s.basketImage} alt="" className="h-12 w-12 shrink-0 rounded-xl object-cover" />
