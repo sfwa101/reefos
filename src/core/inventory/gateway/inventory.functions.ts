@@ -257,3 +257,133 @@ export const reserveStockFn = createServerFn({ method: "POST" })
       items: data.items,
     };
   });
+
+// ─────────────────────────────────────────────────────────────
+// Function 4 & 5: commitReservationFn / releaseReservationFn
+// ─────────────────────────────────────────────────────────────
+
+const reservationIdSchema = z.object({ reservation_id: z.string().min(1) });
+const releaseInputSchema = z.object({
+  reservation_id: z.string().min(1),
+  reason: z.enum(["cancelled", "expired"]),
+});
+
+async function fetchReservation(reservation_id: string): Promise<ReservationRow> {
+  const { data, error } = await supabase
+    .from("inventory_reservations" as never)
+    .select("*")
+    .eq("id", reservation_id)
+    .single();
+  if (error || !data) {
+    throw new Error(`Reservation '${reservation_id}' not found: ${error?.message ?? "missing"}`);
+  }
+  return data as unknown as ReservationRow;
+}
+
+function parseItems(raw: unknown): ReservationItem[] {
+  if (!Array.isArray(raw)) {
+    throw new Error("Reservation items payload is malformed.");
+  }
+  return raw as ReservationItem[];
+}
+
+export const commitReservationFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => reservationIdSchema.parse(input))
+  .handler(async ({ data }): Promise<InventoryReservation> => {
+    const row = await fetchReservation(data.reservation_id);
+    if (row.state !== "pending") {
+      throw new Error(
+        `Cannot commit reservation '${row.id}': state is '${row.state}', expected 'pending'.`,
+      );
+    }
+    const items = parseItems(row.items);
+
+    for (const item of items) {
+      const draft = commitReservationEvent(
+        item.entity_id,
+        item.location_id,
+        item.qty,
+        row.order_ref,
+        `commit_${row.id}_${item.entity_id}`,
+        { context: { reservation_id: row.id, location_id: item.location_id } },
+      );
+      const { error: evErr } = await supabase
+        .from("inventory_ledger_events" as never)
+        .insert(draft as never);
+      if (evErr && (evErr as { code?: string }).code !== "23505") {
+        throw new Error(
+          `Failed to append commit event for '${item.entity_id}': ${evErr.message}`,
+        );
+      }
+    }
+
+    const { data: updated, error: updErr } = await supabase
+      .from("inventory_reservations" as never)
+      .update({ state: "committed" } as never)
+      .eq("id", row.id)
+      .select("*")
+      .single();
+    if (updErr || !updated) {
+      throw new Error(`Failed to mark reservation committed: ${updErr?.message ?? "unknown"}`);
+    }
+    const finalRow = updated as unknown as ReservationRow;
+
+    return {
+      id: finalRow.id,
+      order_ref: finalRow.order_ref,
+      state: finalRow.state as InventoryReservation["state"],
+      expires_at: finalRow.expires_at,
+      created_at: finalRow.created_at,
+      items,
+    };
+  });
+
+export const releaseReservationFn = createServerFn({ method: "POST" })
+  .inputValidator((input: unknown) => releaseInputSchema.parse(input))
+  .handler(async ({ data }): Promise<InventoryReservation> => {
+    const row = await fetchReservation(data.reservation_id);
+    if (row.state === "committed") {
+      throw new Error(`Cannot release reservation '${row.id}': already committed.`);
+    }
+    const items = parseItems(row.items);
+    const nextState = data.reason === "expired" ? "expired" : "released";
+
+    for (const item of items) {
+      const draft = releaseReservationEvent(
+        item.entity_id,
+        item.location_id,
+        item.qty,
+        row.order_ref,
+        `release_${row.id}_${item.entity_id}`,
+        { context: { reservation_id: row.id, location_id: item.location_id, reason: data.reason } },
+      );
+      const { error: evErr } = await supabase
+        .from("inventory_ledger_events" as never)
+        .insert(draft as never);
+      if (evErr && (evErr as { code?: string }).code !== "23505") {
+        throw new Error(
+          `Failed to append release event for '${item.entity_id}': ${evErr.message}`,
+        );
+      }
+    }
+
+    const { data: updated, error: updErr } = await supabase
+      .from("inventory_reservations" as never)
+      .update({ state: nextState } as never)
+      .eq("id", row.id)
+      .select("*")
+      .single();
+    if (updErr || !updated) {
+      throw new Error(`Failed to mark reservation ${nextState}: ${updErr?.message ?? "unknown"}`);
+    }
+    const finalRow = updated as unknown as ReservationRow;
+
+    return {
+      id: finalRow.id,
+      order_ref: finalRow.order_ref,
+      state: finalRow.state as InventoryReservation["state"],
+      expires_at: finalRow.expires_at,
+      created_at: finalRow.created_at,
+      items,
+    };
+  });
