@@ -1,14 +1,13 @@
 /**
  * BundlesRail — horizontal "bundles" carousel section.
  *
- * Phase 11.2 — bundles still come from the local `dictionaries` (UI
- * config), but the products they reference are pulled from the live
- * Supabase catalog passed in as `catalog`.
+ * Wave P-A — consumes `ProductCardVM[]` directly.
  */
 import { Package } from "lucide-react";
 
+import type { ProductCardVM } from "@/core/catalog/types";
+
 import { BUNDLES } from "../dictionaries";
-import type { HGProduct } from "../types";
 import { BundleCard } from "./BundleCard";
 import { RailHeader } from "./RailHeader";
 
@@ -18,7 +17,7 @@ export const BundlesRail = ({
   title,
   sub,
 }: {
-  catalog: HGProduct[];
+  catalog: ProductCardVM[];
   hue: string;
   title?: string;
   sub?: string;
@@ -34,7 +33,7 @@ export const BundlesRail = ({
       {BUNDLES.map((b) => {
         const items = b.itemIds
           .map((id) => catalog.find((p) => p.id === id))
-          .filter((p): p is HGProduct => Boolean(p));
+          .filter((p): p is ProductCardVM => Boolean(p));
         if (items.length === 0) return null;
         return <BundleCard key={b.id} bundle={b} items={items} hue={hue} />;
       })}
