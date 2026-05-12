@@ -7,17 +7,15 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Search, Users, UserPlus } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { listHumanDirectoryFn, type HumanProfile, type HumanRelationship } from "@/lib/crm.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { HumanProfileSheet } from "@/components/admin/crm/HumanProfileSheet";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
-type Profile = {
-  id: string; full_name: string | null; phone: string | null;
-  governorate: string | null; created_at: string;
-};
-type Rel = { profile_id: string; kind: string };
+type Profile = HumanProfile;
+type Rel = HumanRelationship;
 
 const CHIP_STYLES: Record<string, string> = {
   customer: "bg-info/10 text-info",
@@ -39,25 +37,23 @@ export default function HumanDirectory() {
 
   useEffect(() => {
     void (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const [{ data: profs }, { data: rels }] = await Promise.all([
-        sb.from("profiles")
-          .select("id,full_name,phone,governorate,created_at")
-          .order("created_at", { ascending: false })
-          .limit(500),
-        sb.from("human_relationships").select("profile_id,kind").limit(5000),
-      ]);
-      setProfiles((profs ?? []) as Profile[]);
-      const map = new Map<string, Set<string>>();
-      ((rels ?? []) as Rel[]).forEach((r) => {
-        if (!r.profile_id) return;
-        if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
-        map.get(r.profile_id)!.add(r.kind);
-      });
-      setRelMap(map);
+      try {
+        const { profiles: profs, relationships: rels } = await listHumanDirectoryFn();
+        setProfiles(profs);
+        const map = new Map<string, Set<string>>();
+        rels.forEach((r: Rel) => {
+          if (!r.profile_id) return;
+          if (!map.has(r.profile_id)) map.set(r.profile_id, new Set());
+          map.get(r.profile_id)!.add(r.kind);
+        });
+        setRelMap(map);
+      } catch (e) {
+        toast.error((e as Error).message);
+        setProfiles([]);
+      }
     })();
   }, []);
+
 
   const filtered = useMemo(() => {
     if (!profiles) return null;

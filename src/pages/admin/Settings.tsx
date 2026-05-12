@@ -1,16 +1,14 @@
 import { useEffect, useState } from "react";
-import { Settings as SettingsIcon, Store, Coins, Save } from "lucide-react";
+import { Store, Coins, Save } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { getAppSettingsFn, upsertAppSettingFn } from "@/lib/admin-settings.functions";
 import { toast } from "sonner";
 
 /**
  * Settings Hub — /admin/settings
- * --------------------------------
  * Tabbed key/value editor backed by `app_settings` table.
- * Keeps the UI surface tiny while still exposing real backend config.
  */
 
 type GeneralSettings = { store_name: string; logo_url: string; default_currency: string };
@@ -44,31 +42,34 @@ export default function Settings() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from("app_settings")
-        .select("key,value")
-        .in("key", ["general", "finance"]);
-      if (cancelled) return;
-      if (!error && data) {
-        const g = data.find((r) => r.key === "general")?.value as Partial<GeneralSettings> | undefined;
-        const f = data.find((r) => r.key === "finance")?.value as Partial<FinanceSettings> | undefined;
+      try {
+        const bundle = await getAppSettingsFn({ data: { keys: ["general", "finance"] } });
+        if (cancelled) return;
+        const g = bundle.general as Partial<GeneralSettings> | undefined;
+        const f = bundle.finance as Partial<FinanceSettings> | undefined;
         if (g) setGeneral({ ...DEFAULT_GENERAL, ...g });
         if (f) setFinance({ ...DEFAULT_FINANCE, ...f });
+      } catch (err) {
+        toast.error((err as Error).message);
+      } finally {
+        if (!cancelled) setLoading(false);
       }
-      setLoading(false);
     })();
     return () => { cancelled = true; };
   }, []);
 
   async function save(key: "general" | "finance", value: object) {
     setSavingTab(key);
-    const { error } = await supabase
-      .from("app_settings")
-      .upsert([{ key, value: value as never }], { onConflict: "key" });
-    setSavingTab(null);
-    if (error) toast.error("فشل الحفظ: " + error.message);
-    else toast.success("تم الحفظ بنجاح");
+    try {
+      await upsertAppSettingFn({ data: { key, value: value as Record<string, unknown> } });
+      toast.success("تم الحفظ بنجاح");
+    } catch (err) {
+      toast.error("فشل الحفظ: " + (err as Error).message);
+    } finally {
+      setSavingTab(null);
+    }
   }
+
 
   return (
     <>

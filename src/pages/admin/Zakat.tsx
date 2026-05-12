@@ -1,20 +1,16 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  computeZakatAssessmentFn,
+  listZakatAssessmentsFn,
+  type ZakatAssessmentRow,
+} from "@/lib/finance.functions";
 import { Loader2, ShieldAlert, Calculator, Scale, Sparkles } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 
-type Z = {
-  id: string;
-  period_start: string; period_end: string;
-  inventory_market_value: number; cash_balances: number;
-  receivables: number; liabilities: number;
-  zakat_base: number; nisab_value: number; zakat_due: number;
-  is_above_nisab: boolean; status: string;
-  created_at: string;
-};
+type Z = ZakatAssessmentRow;
 
 export default function Zakat() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -26,9 +22,13 @@ export default function Zakat() {
 
   const load = async () => {
     setLoading(true);
-    const { data } = await (supabase as any).from("zakat_assessments").select("*").order("created_at", { ascending: false }).limit(20);
-    setHistory((data || []) as Z[]);
-    setLoading(false);
+    try {
+      setHistory(await listZakatAssessmentsFn());
+    } catch (e) {
+      toast.error((e as Error).message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { if (allowed) load(); else setLoading(false); }, [allowed]);
@@ -36,14 +36,13 @@ export default function Zakat() {
   const compute = async () => {
     setComputing(true);
     try {
-      const { data, error } = await (supabase as any).rpc("compute_zakat_assessment", { _nisab_value: nisab });
-      if (error) throw error;
-      const d = data as any;
+      const d = await computeZakatAssessmentFn({ data: { nisab } });
       toast.success(d.is_above_nisab ? `الزكاة المستحقة: ${fmtMoney(d.zakat_due)}` : "الوعاء أقل من النصاب");
       load();
-    } catch (e: any) { toast.error(e?.message || "فشل"); }
+    } catch (e) { toast.error((e as Error)?.message || "فشل"); }
     finally { setComputing(false); }
   };
+
 
   if (rolesLoading || loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>;
   if (!allowed) return (<><MobileTopbar title="الزكاة" /><div className="p-8 text-center" dir="rtl"><ShieldAlert className="h-12 w-12 mx-auto text-foreground-tertiary mb-3" /><p>للإدارة والمالية فقط</p></div></>);
