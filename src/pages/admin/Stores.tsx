@@ -115,20 +115,21 @@ function StoreEditor({ store, onClose, onSaved }: { store: Store | null; onClose
     }
     setSaving(true);
     try {
-      const payload = {
-        name: f.name.trim(),
-        slug: f.slug.trim(),
-        type: f.type,
-        phone: f.phone || null,
-        address: f.address || null,
-        logo_url: f.logo_url || null,
-        commission_pct: Number(f.commission_pct) || 0,
-        is_active: f.is_active,
-      };
-      const { error } = isNew
-        ? await supabase.from("stores").insert(payload)
-        : await supabase.from("stores").update(payload).eq("id", store!.id);
-      if (error) throw error;
+      await upsertStoreFn({
+        data: {
+          id: isNew ? null : store!.id,
+          values: {
+            name: f.name.trim(),
+            slug: f.slug.trim(),
+            type: f.type,
+            phone: f.phone || null,
+            address: f.address || null,
+            logo_url: f.logo_url || null,
+            commission_pct: Number(f.commission_pct) || 0,
+            is_active: f.is_active,
+          },
+        },
+      });
       toast.success(isNew ? "تم الإنشاء" : "تم الحفظ");
       onSaved();
     } catch (err) {
