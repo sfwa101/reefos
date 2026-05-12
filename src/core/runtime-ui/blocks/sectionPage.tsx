@@ -18,7 +18,7 @@ import { CompareBar } from "@/apps/reef-al-madina/features/storefront/home/compo
 import type { HomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 import type { SectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
 import type { StoreTheme } from "@/lib/storeThemes";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { ProductCardVM } from "@/core/catalog/types";
 
 // ─── nav.back_header ───
 export const BackHeaderBlock: BlockComponent = ({ block }) => {
