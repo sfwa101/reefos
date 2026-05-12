@@ -9,7 +9,7 @@
  * nodes (vendor-level fulfillment units) using the same priority ladder used
  * across the customer Account view.
  */
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Package, Clock, TrendingUp, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
