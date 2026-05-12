@@ -1,21 +1,14 @@
 import { useEffect, useState, useCallback } from "react";
 import { Plus, Pencil, Trash2, X, Loader2, Store as StoreIcon } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
-
-type Store = {
-  id: string;
-  name: string;
-  slug: string;
-  type: string;
-  phone: string | null;
-  address: string | null;
-  logo_url: string | null;
-  commission_pct: number;
-  is_active: boolean;
-};
+import {
+  listStoresFn,
+  upsertStoreFn,
+  deleteStoreFn,
+  type StoreRow as Store,
+} from "@/lib/admin-catalog.functions";
 
 export default function Stores() {
   const [items, setItems] = useState<Store[] | null>(null);
