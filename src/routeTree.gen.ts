@@ -46,6 +46,7 @@ import { Route as AdminStaffAdvancesRouteImport } from './routes/admin.staff-adv
 import { Route as AdminStaffRouteImport } from './routes/admin.staff'
 import { Route as AdminSovereignTreasuryRouteImport } from './routes/admin.sovereign-treasury'
 import { Route as AdminSettingsRouteImport } from './routes/admin.settings'
+import { Route as AdminSectionManagerRouteImport } from './routes/admin.section-manager'
 import { Route as AdminSavingsRouteImport } from './routes/admin.savings'
 import { Route as AdminRolePermissionsRouteImport } from './routes/admin.role-permissions'
 import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
@@ -324,6 +325,11 @@ const AdminSovereignTreasuryRoute = AdminSovereignTreasuryRouteImport.update({
 const AdminSettingsRoute = AdminSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminSectionManagerRoute = AdminSectionManagerRouteImport.update({
+  id: '/section-manager',
+  path: '/section-manager',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminSavingsRoute = AdminSavingsRouteImport.update({
@@ -904,6 +910,7 @@ export interface FileRoutesByFullPath {
   '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
+  '/admin/section-manager': typeof AdminSectionManagerRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -1033,6 +1040,7 @@ export interface FileRoutesByTo {
   '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
+  '/admin/section-manager': typeof AdminSectionManagerRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -1171,6 +1179,7 @@ export interface FileRoutesById {
   '/admin/riba-audit': typeof AdminRibaAuditRoute
   '/admin/role-permissions': typeof AdminRolePermissionsRoute
   '/admin/savings': typeof AdminSavingsRoute
+  '/admin/section-manager': typeof AdminSectionManagerRoute
   '/admin/settings': typeof AdminSettingsRoute
   '/admin/sovereign-treasury': typeof AdminSovereignTreasuryRoute
   '/admin/staff': typeof AdminStaffRoute
@@ -1307,6 +1316,7 @@ export interface FileRouteTypes {
     | '/admin/riba-audit'
     | '/admin/role-permissions'
     | '/admin/savings'
+    | '/admin/section-manager'
     | '/admin/settings'
     | '/admin/sovereign-treasury'
     | '/admin/staff'
@@ -1436,6 +1446,7 @@ export interface FileRouteTypes {
     | '/admin/riba-audit'
     | '/admin/role-permissions'
     | '/admin/savings'
+    | '/admin/section-manager'
     | '/admin/settings'
     | '/admin/sovereign-treasury'
     | '/admin/staff'
@@ -1573,6 +1584,7 @@ export interface FileRouteTypes {
     | '/admin/riba-audit'
     | '/admin/role-permissions'
     | '/admin/savings'
+    | '/admin/section-manager'
     | '/admin/settings'
     | '/admin/sovereign-treasury'
     | '/admin/staff'
@@ -1903,6 +1915,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AdminSettingsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/section-manager': {
+      id: '/admin/section-manager'
+      path: '/section-manager'
+      fullPath: '/admin/section-manager'
+      preLoaderRoute: typeof AdminSectionManagerRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/savings': {
@@ -2850,6 +2869,7 @@ interface AdminRouteChildren {
   AdminRibaAuditRoute: typeof AdminRibaAuditRoute
   AdminRolePermissionsRoute: typeof AdminRolePermissionsRoute
   AdminSavingsRoute: typeof AdminSavingsRoute
+  AdminSectionManagerRoute: typeof AdminSectionManagerRoute
   AdminSettingsRoute: typeof AdminSettingsRoute
   AdminSovereignTreasuryRoute: typeof AdminSovereignTreasuryRoute
   AdminStaffRoute: typeof AdminStaffRoute
@@ -2928,6 +2948,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminRibaAuditRoute: AdminRibaAuditRoute,
   AdminRolePermissionsRoute: AdminRolePermissionsRoute,
   AdminSavingsRoute: AdminSavingsRoute,
+  AdminSectionManagerRoute: AdminSectionManagerRoute,
   AdminSettingsRoute: AdminSettingsRoute,
   AdminSovereignTreasuryRoute: AdminSovereignTreasuryRoute,
   AdminStaffRoute: AdminStaffRoute,
