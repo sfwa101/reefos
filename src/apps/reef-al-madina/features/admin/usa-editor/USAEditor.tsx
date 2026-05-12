@@ -14,7 +14,7 @@ import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
 import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { supabase } from "@/integrations/supabase/client";
+import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 import { toast } from "sonner";
 
 export interface USARecord {
