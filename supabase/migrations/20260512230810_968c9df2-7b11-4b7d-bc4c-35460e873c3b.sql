@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS idx_usa_products_financial_lookup ON public.usa_products (id) WHERE is_active = true AND deleted_at IS NULL;
