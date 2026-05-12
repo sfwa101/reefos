@@ -1,11 +1,12 @@
 import { memo, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search, ChevronLeft, Inbox, Rows3, Rows2, type LucideIcon } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { listAdminGridFn } from "@/lib/admin-grid.functions";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 
