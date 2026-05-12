@@ -13,12 +13,18 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import {
   calculateStock,
+  canReserve,
+  createReservationEvent,
   type InventoryStateSnapshot,
 } from "../domain/InventoryBrain";
 import type {
+  InventoryReservation,
   StockLedgerEvent,
   StockLedgerEventType,
 } from "../domain/types";
+
+const RESERVATION_TTL_MS = 15 * 60 * 1000;
+const SUPPORTS_BACKORDER = false;
 
 // ─────────────────────────────────────────────────────────────
 // Validation
