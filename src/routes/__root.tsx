@@ -33,6 +33,8 @@ import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
 import { TenantProvider } from "@/context/TenantContext";
 import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
+// Wave P-0 — DEV-only Constitution Article 3 watchdog (no-op in prod).
+import "@/core/runtime-ui/watchdog.bootstrap";
 
 function NotFoundComponent() {
   return (
