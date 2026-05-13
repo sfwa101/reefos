@@ -111,6 +111,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPricingModel((asset.pricing_model as PricingModel) ?? "flat");
       setCurrency((asset.currency as "EGP" | "USD" | "EUR") ?? "EGP");
       setTab("basic");
+      const traits = Array.isArray(asset.traits) ? (asset.traits as unknown[]) : [];
+      setPackagingEnabled(traits.includes(CAP.PACKAGING_HIERARCHY));
+      setPackagingTiers([]);
     } else {
       setName("");
       setDescription("");
@@ -121,6 +124,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setAiDraft(null);
       setAiFile(null);
       setTab("basic");
+      setPackagingEnabled(false);
+      setPackagingTiers([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
