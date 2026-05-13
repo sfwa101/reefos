@@ -35,7 +35,25 @@ export type QueuedTableUpdateOp = {
   patch: Record<string, unknown>;
 };
 
-export type QueuedOp = QueuedRpcOp | QueuedTableUpdateOp;
+export type QueuedSovereignCheckoutOp = {
+  op: "sovereign.checkout";
+  payload: {
+    customer_id: string;
+    cart_items: Array<{ product_id: string; quantity: number }>;
+    delivery_info: Record<string, unknown>;
+    idempotency_key: string;
+    expected_snapshot_hash: string;
+    cashier_context?: {
+      member_tier?: "guest" | "bronze" | "silver" | "gold" | "vip";
+      coupon_code?: string | null;
+      delivery_zone_id?: string | null;
+      delivery_fee?: number;
+      currency?: string;
+    };
+  };
+};
+
+export type QueuedOp = QueuedRpcOp | QueuedTableUpdateOp | QueuedSovereignCheckoutOp;
 
 export type QueuedItem = {
   id: string;
