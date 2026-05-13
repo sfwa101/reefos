@@ -11,6 +11,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type {
   AssetTag,
+  AssetTagDraft,
   AssetTagLinkResolved,
 } from "@/core/commerce/types/assetTag";
 
