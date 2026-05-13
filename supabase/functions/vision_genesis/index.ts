@@ -77,69 +77,50 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
 
-    // Phase C-1 — URL-only contract. Base64 ingestion is removed entirely
-    // to drop cold-start memory and enforce the Storage Bypass invariant.
+    // Phase C-4 — Safe Base64 Restoration.
+    // The browser's Universal Compression Engine guarantees each payload is
+    // ≤ ~150 KB (1024px max edge, WebP q≈0.8). At that size, inline base64
+    // round-trips through Deno safely (no OOM), and the AI Gateway accepts
+    // the data: URL natively (no Storage URL rejection).
     const body = await req.json().catch(() => ({}));
     const {
-      image_url,
-      secondary_image_url,
-      image_urls, // forward-compat array form
+      image_base64,
+      secondary_image_base64,
+      images_base64, // forward-compat array form
       hint,
     } = body ?? {};
 
-    // Build the URL queue (primary + optional secondary, OR explicit array).
-    const urls: string[] = Array.isArray(image_urls)
-      ? image_urls.filter((u: unknown): u is string => typeof u === "string" && u.length > 0).slice(0, 4)
+    const datas: string[] = Array.isArray(images_base64)
+      ? images_base64.filter((u: unknown): u is string => typeof u === "string" && u.length > 0).slice(0, 4)
       : [
-          ...(typeof image_url === "string" && image_url.length > 0 ? [image_url] : []),
-          ...(typeof secondary_image_url === "string" && secondary_image_url.length > 0
-            ? [secondary_image_url]
+          ...(typeof image_base64 === "string" && image_base64.length > 0 ? [image_base64] : []),
+          ...(typeof secondary_image_base64 === "string" && secondary_image_base64.length > 0
+            ? [secondary_image_base64]
             : []),
         ];
 
-    if (urls.length === 0) {
-      return json({ error: "missing_image", details: "image_url is required" }, 400);
+    if (datas.length === 0) {
+      return json({ error: "missing_image", details: "image_base64 is required" }, 400);
     }
 
-    // Phase C-2 — URL Pass-Through Mode.
-    // ZERO image bytes enter the Deno isolate. We only do a HEAD pre-flight
-    // to fast-fail invalid URLs/MIMEs/oversized assets, then forward the
-    // raw public URL to the AI gateway which fetches it server-side.
-    const MAX_BYTES = 20 * 1024 * 1024; // 20 MB upstream cap
-    const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-    const validateUrl = async (u: string): Promise<void> => {
-      let parsed: URL;
-      try {
-        parsed = new URL(u);
-      } catch {
-        throw new Error("invalid_image_url");
+    // Hard ceiling — anything larger than ~600 KB per image means the client
+    // bypassed the Compression Engine. Reject fast instead of risking OOM.
+    const MAX_DATA_URL_BYTES = 600 * 1024;
+    const DATA_URL_RE = /^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/;
+    for (const d of datas) {
+      if (!DATA_URL_RE.test(d)) {
+        return json({ error: "invalid_image", details: "image must be a data:image/* base64 URL" }, 400);
       }
-      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
-        throw new Error("invalid_image_protocol");
+      if (d.length > MAX_DATA_URL_BYTES) {
+        return json({
+          error: "invalid_image",
+          details: `image_too_large:${d.length} (compress client-side, max ${MAX_DATA_URL_BYTES})`,
+        }, 400);
       }
-      let head: Response;
-      try {
-        head = await fetch(u, { method: "HEAD" });
-      } catch (e) {
-        throw new Error(`head_failed:${e instanceof Error ? e.message : String(e)}`);
-      }
-      if (!head.ok) throw new Error(`head_status:${head.status}`);
-      const ct = (head.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-      if (ct && !ct.startsWith("image/")) throw new Error(`unsupported_image_mime:${ct}`);
-      if (ct && !ALLOWED_MIME.has(ct)) throw new Error(`unsupported_image_mime:${ct}`);
-      const declared = Number(head.headers.get("content-length") || 0);
-      if (declared && declared > MAX_BYTES) throw new Error(`image_too_large:${declared}`);
-    };
-
-    try {
-      for (const u of urls) await validateUrl(u);
-    } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e);
-      return json({ error: "invalid_image", details: msg }, 400);
     }
 
-    const primaryUrl = urls[0];
-    const secondaryUrl = urls.length > 1 ? urls[1] : null;
+    const primaryUrl = datas[0];
+    const secondaryUrl = datas.length > 1 ? datas[1] : null;
 
     const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
 
