@@ -96,11 +96,6 @@ export function SmartActionComposer() {
 
   function handlePick(a: Action) {
     if (a.soon) return;
-    if (a.intent === "new-product") {
-      close();
-      setProductOpen(true);
-      return;
-    }
     if (a.to) {
       close();
       navigate({ to: a.to as never });
