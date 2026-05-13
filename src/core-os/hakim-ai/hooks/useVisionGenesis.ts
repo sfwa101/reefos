@@ -51,67 +51,9 @@ export type VisionGenesisError =
   | "missing_key"
   | "unknown";
 
-/**
- * Client-side compression: draws the file to a canvas, scales the longest
- * edge to <= 1024px, and exports as JPEG @ 0.7 quality before base64-encoding.
- * Cuts a typical 6 MB camera photo to ~150–300 KB so the dual-image payload
- * stays well under the Edge Function body limit (~6 MB).
- */
-const MAX_EDGE = 1024;
-const JPEG_QUALITY = 0.7;
+/** Lightweight base64 encoder — no canvas resize, trust native pipeline. */
 
 async function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
-  // Decode the image off the main thread when possible.
-  const bitmap = await createImageBitmap(file).catch(() => null);
-  let width: number;
-  let height: number;
-  let drawSource: CanvasImageSource;
-
-  if (bitmap) {
-    width = bitmap.width;
-    height = bitmap.height;
-    drawSource = bitmap;
-  } else {
-    // Fallback for browsers without createImageBitmap support for the file type.
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error("file_read_error"));
-      reader.onload = () => resolve(String(reader.result ?? ""));
-      reader.readAsDataURL(file);
-    });
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("image_decode_error"));
-      el.src = dataUrl;
-    });
-    width = img.naturalWidth || img.width;
-    height = img.naturalHeight || img.height;
-    drawSource = img;
-  }
-
-  const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
-  const targetW = Math.max(1, Math.round(width * scale));
-  const targetH = Math.max(1, Math.round(height * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("canvas_unavailable");
-  ctx.drawImage(drawSource, 0, 0, targetW, targetH);
-  if (bitmap && "close" in bitmap) {
-    try { (bitmap as ImageBitmap).close(); } catch { /* noop */ }
-  }
-
-  const blob: Blob = await new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error("canvas_to_blob_failed"))),
-      "image/jpeg",
-      JPEG_QUALITY,
-    );
-  });
-
   const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("file_read_error"));
@@ -120,10 +62,9 @@ async function fileToBase64(file: File): Promise<{ base64: string; mime: string 
       const [, b64 = ""] = result.split(",");
       resolve(b64);
     };
-    reader.readAsDataURL(blob);
+    reader.readAsDataURL(file);
   });
-
-  return { base64, mime: "image/jpeg" };
+  return { base64, mime: file.type || "image/jpeg" };
 }
 
 export type VisionGenesisInput = {
@@ -140,10 +81,6 @@ export function useVisionGenesis() {
       const secondary = secondaryFile
         ? await fileToBase64(secondaryFile)
         : null;
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.access_token) {
-        throw new Error("يجب تسجيل الدخول بصلاحية صحيحة لاستخدام حكيم");
-      }
       const { data, error } = await supabase.functions.invoke("vision_genesis", {
         body: {
           image_base64: base64,
@@ -151,9 +88,6 @@ export function useVisionGenesis() {
           hint,
           secondary_image_base64: secondary?.base64 ?? null,
           secondary_mime_type: secondary?.mime ?? null,
-        },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
         },
       });
       // Try to surface the structured `details` from the edge function body.

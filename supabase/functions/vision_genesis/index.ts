@@ -6,8 +6,6 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-  "Access-Control-Max-Age": "86400",
 };
 
 const json = (body: unknown, status = 200) =>
@@ -54,9 +52,8 @@ function pickPalette(category: string | null, traits: string[]): { name: string;
   return PALETTES[h % PALETTES.length];
 }
 Deno.serve(async (req) => {
-  // CORS preflight shield — MUST be first to prevent gateway-level rejections
   if (req.method === "OPTIONS") {
-    return new Response("ok", { status: 200, headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
