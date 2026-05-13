@@ -429,7 +429,7 @@ export const priceQuoteFn = createServerFn({ method: "POST" })
     const productIds = Array.from(new Set(data.lines.map((l) => l.productId)));
     const { data: rows, error } = await supabase
       .from("salsabil_assets")
-      .select(`id, is_active, ${SOVEREIGN_SELECT.split("salsabil_skus")[1] ? "" : ""}salsabil_skus ( id, sort_order, is_active, salsabil_financial_contracts ( base_price, currency, is_active ) )`)
+      .select(`id, is_active, salsabil_skus ( id, sort_order, is_active, salsabil_financial_contracts ( base_price, currency, is_active ) )`)
       .in("id", productIds);
     if (error) throw error;
 
