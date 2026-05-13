@@ -15,7 +15,7 @@ import {
   LayoutGrid,
   type LucideIcon,
 } from "lucide-react";
-import type { WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
+import type { WorkspaceKind } from "@/core/capabilities/store/useSovereignContext";
 
 export type NavItem = {
   to: string;

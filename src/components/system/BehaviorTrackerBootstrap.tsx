@@ -1,4 +1,4 @@
-import { useTrackBehavior } from "@/core-os/event-bus/useTrackBehavior";
+import { useTrackBehavior } from "@/core/events/useTrackBehavior";
 
 /**
  * Headless mount — wires the global Salsabil Event Bus to the

@@ -21,7 +21,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
 import { IdentityGateway } from "@/core/identity";
 import { pathForRole, type AppRole } from "@/hooks/useUserRole";
-import { EGY_GOVERNORATE_LIST } from "@/core-os/capabilities/identity/egyptianIdDecoder";
+import { EGY_GOVERNORATE_LIST } from "@/core/capabilities/identity/egyptianIdDecoder";
 
 // Country codes (Egypt-first; others added for diaspora resilience).
 const COUNTRIES = [

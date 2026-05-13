@@ -16,7 +16,7 @@ import { useAuthOptional } from "@/context/AuthContext";
 import {
   useSovereignContext,
   type PersonaRow,
-} from "@/core-os/capabilities/store/useSovereignContext";
+} from "@/core/capabilities/store/useSovereignContext";
 
 export type ThemeDnaPayload = {
   colors?: Record<string, string>;

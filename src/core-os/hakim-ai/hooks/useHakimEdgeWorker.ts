@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { emitSalsabilEvent } from "@/core-os/event-bus";
+import { emitSalsabilEvent } from "@/core/events";
 
 /**
  * useHakimEdgeWorker — local-first autonomous agent.

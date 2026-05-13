@@ -27,7 +27,7 @@ import { IdentityGateway } from "@/core/identity";
 import { useAuth } from "@/context/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
-import { useSovereignContext, type PersonaRow } from "@/core-os/capabilities/store/useSovereignContext";
+import { useSovereignContext, type PersonaRow } from "@/core/capabilities/store/useSovereignContext";
 import { cn } from "@/lib/utils";
 
 // Lucide icon resolver — `salsabil_persona_matrix.icon` stores the icon name.

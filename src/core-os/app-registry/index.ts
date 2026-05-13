@@ -11,7 +11,7 @@
 import type { ComponentType } from "react";
 import type { LucideIcon } from "lucide-react";
 import { ShoppingBasket, Plane, HeartPulse, Sparkles } from "lucide-react";
-import type { SalsabilAppId } from "@/core-os/event-bus";
+import type { SalsabilAppId } from "@/core/events";
 
 export type MiniAppVisibilityCtx = {
   userId: string | null;

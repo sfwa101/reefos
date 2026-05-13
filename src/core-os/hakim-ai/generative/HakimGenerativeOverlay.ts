@@ -11,7 +11,7 @@
  *   - NEVER persisted. Decay every 10 minutes.
  *   - Any output that fails Zod is rejected upstream → caller falls back.
  */
-import { eventBus, type SalsabilEvents } from "@/core-os/event-bus";
+import { eventBus, type SalsabilEvents } from "@/core/events";
 
 const DECAY_MS = 10 * 60 * 1000;
 const INTENT_HIGH = 3; // ≥3 signals in window → "high intent"

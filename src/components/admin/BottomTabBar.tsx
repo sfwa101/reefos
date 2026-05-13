@@ -7,7 +7,7 @@
  */
 import { Link, useLocation } from "@tanstack/react-router";
 import { cn } from "@/lib/utils";
-import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignContext";
+import { useSovereignContext } from "@/core/capabilities/store/useSovereignContext";
 import { useCapabilities } from "@/hooks/useCapability";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { buildBottomTabsForKind } from "./nav/workspaceNav";

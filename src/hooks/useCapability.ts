@@ -18,7 +18,7 @@ import { useUserRoles } from "@/hooks/useUserRoles";
 import {
   useSovereignContext,
   type WorkspaceKind,
-} from "@/core-os/capabilities/store/useSovereignContext";
+} from "@/core/capabilities/store/useSovereignContext";
 
 type WorkspaceRow = {
   id: string;
