@@ -54,7 +54,10 @@ function pickPalette(category: string | null, traits: string[]): { name: string;
   return PALETTES[h % PALETTES.length];
 }
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+  // CORS preflight shield — MUST be first to prevent gateway-level rejections
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { status: 200, headers: corsHeaders });
+  }
 
   try {
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
