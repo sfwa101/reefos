@@ -315,6 +315,27 @@ function GenesisPage() {
               </button>
             </div>
           )}
+
+          {/* Visual Veto — Palette swatches */}
+          {primaryFile && (
+            <PaletteVetoBar
+              palettes={PALETTES}
+              selected={selectedPalette}
+              busy={busy}
+              onSelect={(p) => setSelectedPalette(p)}
+              onRegenerate={() => runClean(selectedPalette)}
+            />
+          )}
+
+          {/* Secondary image — back of pack / nutrition label */}
+          {primaryFile && !hasDraft && (
+            <SecondaryCaptureZone
+              url={secondaryUrl}
+              busy={busy}
+              onFile={onPickSecondary}
+              onClear={() => { setSecondaryFile(null); setSecondaryUrl(null); }}
+            />
+          )}
         </section>
 
         {/* 2. Hakim Draft Board */}
