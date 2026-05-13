@@ -426,7 +426,9 @@ Deno.serve(async (req) => {
     }
 
     if (!parsed || !usedProvider) {
-      return json({ error: "AI_API_ERROR", details: "all providers failed", attempts }, 502);
+      // Soft-fail: return 200 so the frontend can read provider_attempts
+      // instead of seeing an opaque 502 from the Edge runtime.
+      return json({ ok: false, error: "AI_API_ERROR", details: "all providers failed", attempts }, 200);
     }
 
     // Sanitize
