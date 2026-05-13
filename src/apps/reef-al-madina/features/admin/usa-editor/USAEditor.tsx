@@ -13,6 +13,7 @@ import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-edito
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft } from "@/core/commerce";
+import { PackagingGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
