@@ -345,6 +345,41 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   };
 
   /**
+   * Phase F-1 — Persist the Living Inventory drafts into
+   * `salsabil_inventory_matrix`. Runs STRICTLY AFTER persistPackaging so
+   * the freshly-allocated tier UUIDs are available via `tierIdMap`.
+   *
+   * Resilience:
+   *   • Resolves the asset's base SKU via `PricingGateway.resolveBaseSku`.
+   *   • If no drafts → wipes all inventory rows for the base SKU.
+   *   • Drafts whose tier id cannot be resolved are dropped by the gateway.
+   */
+  const persistInventory = async (
+    assetId: string,
+    tierIdMap: Map<string, string>,
+  ): Promise<void> => {
+    try {
+      const baseSkuId = await PricingGateway.resolveBaseSku(assetId);
+      if (!baseSkuId) {
+        if (inventoryDrafts.length > 0) {
+          console.warn("[USAEditor] no base SKU yet — skipping inventory sync");
+        }
+        return;
+      }
+      if (inventoryDrafts.length === 0) {
+        await InventoryGateway.wipeInventoryForSku(baseSkuId);
+        return;
+      }
+      await InventoryGateway.syncInventory(baseSkuId, inventoryDrafts, tierIdMap);
+      toast.success("تمت مزامنة المخزون الحي");
+    } catch (e) {
+      console.error("[USAEditor] inventory sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ المخزون";
+      toast.error(`⚠️ ${msg}`);
+    }
+  };
+
+  /**
    * Phase D-6 — Compute the trait set for a NEW mint, layering capability
    * traits from the toggles on top of any AI-supplied traits.
    */
