@@ -13,10 +13,11 @@ import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-edito
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import DimensionalTagSelector from "@/components/commerce/assets/DimensionalTagSelector";
 import CognitivePricingBuilder from "@/components/commerce/assets/CognitivePricingBuilder";
+import LivingInventoryBuilder from "@/components/commerce/assets/LivingInventoryBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
-import type { PackagingTierDraft, FinancialContractDraft } from "@/core/commerce";
+import type { PackagingTierDraft, FinancialContractDraft, InventoryDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
-import { PackagingGateway, TagsGateway, PricingGateway } from "@/core/commerce";
+import { PackagingGateway, TagsGateway, PricingGateway, InventoryGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
