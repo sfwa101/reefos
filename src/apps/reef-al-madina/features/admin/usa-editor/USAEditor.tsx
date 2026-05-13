@@ -7,9 +7,12 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
+import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
+import { CAP } from "@/core/capabilities/CapabilityRegistry";
+import type { PackagingTierDraft } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
@@ -95,6 +98,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [pendingEmbedding, setPendingEmbedding] = useState<number[] | null>(null);
   const [hasOverriddenAI, setHasOverriddenAI] = useState(false);
 
+  // Phase D-2 — Economic Packaging Runtime (local draft, lifted on save).
+  const [packagingEnabled, setPackagingEnabled] = useState(false);
+  const [packagingTiers, setPackagingTiers] = useState<PackagingTierDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
@@ -104,6 +111,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPricingModel((asset.pricing_model as PricingModel) ?? "flat");
       setCurrency((asset.currency as "EGP" | "USD" | "EUR") ?? "EGP");
       setTab("basic");
+      const traits = Array.isArray(asset.traits) ? (asset.traits as unknown[]) : [];
+      setPackagingEnabled(traits.includes(CAP.PACKAGING_HIERARCHY));
+      setPackagingTiers([]);
     } else {
       setName("");
       setDescription("");
@@ -114,6 +124,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setAiDraft(null);
       setAiFile(null);
       setTab("basic");
+      setPackagingEnabled(false);
+      setPackagingTiers([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
@@ -325,12 +337,15 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </SheetHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-5 mt-3 grid grid-cols-4 h-10">
-            <TabsTrigger value="basic" className="text-[12px]">أساسي</TabsTrigger>
-            <TabsTrigger value="financials" className="text-[12px]">العقود المالية</TabsTrigger>
-            <TabsTrigger value="inventory" className="text-[12px]">المخزون</TabsTrigger>
-            <TabsTrigger value="genesis" className="text-[12px] gap-1 inline-flex items-center justify-center">
-              <Sparkles className="h-3 w-3" /> التكوين الذكي
+          <TabsList className="mx-5 mt-3 grid grid-cols-5 h-10">
+            <TabsTrigger value="basic" className="text-[11.5px]">أساسي</TabsTrigger>
+            <TabsTrigger value="financials" className="text-[11.5px]">المالية</TabsTrigger>
+            <TabsTrigger value="packaging" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+              <Layers className="h-3 w-3" /> العبوات
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="text-[11.5px]">المخزون</TabsTrigger>
+            <TabsTrigger value="genesis" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+              <Sparkles className="h-3 w-3" /> الذكي
             </TabsTrigger>
           </TabsList>
 
@@ -449,6 +464,52 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               </Field>
               {isNew && <DuplicateAdvisor />}
               <SaveButton />
+            </TabsContent>
+
+
+            <TabsContent value="packaging" className="m-0 space-y-3">
+              <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[12.5px] font-extrabold">تفعيل شجرة العبوات</p>
+                    <p className="text-[10.5px] text-foreground-tertiary">
+                      للأصول التي تُباع بأكثر من وحدة (جرام/كجم/كرتونة…).
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !packagingEnabled;
+                    setPackagingEnabled(next);
+                    if (!next) setPackagingTiers([]);
+                  }}
+                  className={`h-8 px-3 rounded-full text-[11px] font-extrabold press border ${
+                    packagingEnabled
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-foreground-tertiary"
+                  }`}
+                >
+                  {packagingEnabled ? "مفعّل" : "غير مفعّل"}
+                </button>
+              </div>
+
+              {packagingEnabled ? (
+                <PackagingHierarchyBuilder
+                  assetId={asset?.id ?? null}
+                  value={packagingTiers}
+                  onChange={setPackagingTiers}
+                />
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Layers className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[12.5px] font-display">شجرة العبوات معطّلة</p>
+                  <p className="text-[10.5px] text-foreground-tertiary mt-1 leading-relaxed">
+                    فعّل الميزة من الأعلى لبناء هرم وحدات البيع (Pallet → Carton → kg → g).
+                  </p>
+                </div>
+              )}
             </TabsContent>
 
             <TabsContent value="inventory" className="m-0">
