@@ -54,10 +54,13 @@ export const ProductCard = ({
   p,
   onOpen,
   variant = "standard",
+  priority = false,
 }: {
   p: ProductCardVM;
   onOpen: () => void;
   variant?: "standard" | "minimal";
+  /** Eager-load image (above-the-fold tiles). Default: false → lazy. */
+  priority?: boolean;
 }) => {
   const { add } = useCartActions();
   const qty = useCartLineQty(p.id);
@@ -146,6 +149,7 @@ export const ProductCard = ({
             alt={name}
             width={512}
             height={512}
+            priority={priority}
             className="h-full w-full object-cover object-center"
             wrapperClassName="absolute inset-0"
           />
@@ -205,6 +209,7 @@ export const ProductCard = ({
           alt={name}
           width={768}
           height={768}
+          priority={priority}
           className="h-full w-full object-cover object-center"
           wrapperClassName="absolute inset-0"
         />
