@@ -244,8 +244,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           },
           semantic_embedding: embedding,
         });
-        await persistPackaging(newAssetId);
+        const tierIdMap = await persistPackaging(newAssetId);
         await persistTags(newAssetId);
+        await persistPricing(newAssetId, tierIdMap);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
@@ -257,8 +258,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           description: description.trim() || null,
           base_price: priceNum,
         });
-        await persistPackaging(asset!.id);
+        const tierIdMap = await persistPackaging(asset!.id);
         await persistTags(asset!.id);
+        await persistPricing(asset!.id, tierIdMap);
         await syncClassificationTrait(asset!.id);
         onSaved?.();
       }
