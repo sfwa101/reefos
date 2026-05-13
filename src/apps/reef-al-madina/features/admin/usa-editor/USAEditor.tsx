@@ -113,8 +113,24 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setCurrency((asset.currency as "EGP" | "USD" | "EUR") ?? "EGP");
       setTab("basic");
       const traits = Array.isArray(asset.traits) ? (asset.traits as unknown[]) : [];
-      setPackagingEnabled(traits.includes(CAP.PACKAGING_HIERARCHY));
+      const enabled = traits.includes(CAP.PACKAGING_HIERARCHY);
+      setPackagingEnabled(enabled);
       setPackagingTiers([]);
+      // Hydrate persisted packaging tiers for edit mode.
+      let cancelled = false;
+      (async () => {
+        try {
+          const rows = await PackagingGateway.listTiers(asset.id);
+          if (cancelled) return;
+          setPackagingTiers(rows as unknown as PackagingTierDraft[]);
+          if (rows.length > 0) setPackagingEnabled(true);
+        } catch (e) {
+          console.warn("[USAEditor] failed to load packaging tiers", e);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
     } else {
       setName("");
       setDescription("");
