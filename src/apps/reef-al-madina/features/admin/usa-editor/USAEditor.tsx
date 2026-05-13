@@ -16,7 +16,7 @@ import CognitivePricingBuilder from "@/components/commerce/assets/CognitivePrici
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft, FinancialContractDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
-import { PackagingGateway, TagsGateway } from "@/core/commerce";
+import { PackagingGateway, TagsGateway, PricingGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
