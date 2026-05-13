@@ -14,7 +14,7 @@ import type {
   LogisticsWarning,
   QuoteInput,
 } from "./types";
-import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
+import { HakimGenerativeOverlay } from "@/core/hakim-ai/generative/HakimGenerativeOverlay";
 
 const round2 = (n: number): number => Math.round(n * 100) / 100;
 

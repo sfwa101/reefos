@@ -9,7 +9,7 @@
 import { useMemo } from "react";
 import { Sparkles, ShoppingBasket } from "lucide-react";
 import { useReplaceCart } from "@/hooks/useReplaceCart";
-import { usePredictBasket, type PredictedBasketLine } from "@/core-os/hakim-ai/hooks/usePredictBasket";
+import { usePredictBasket, type PredictedBasketLine } from "@/core/hakim-ai/hooks/usePredictBasket";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toLatin } from "@/lib/format";
 import type { CartLine } from "@/store/useCartStore";

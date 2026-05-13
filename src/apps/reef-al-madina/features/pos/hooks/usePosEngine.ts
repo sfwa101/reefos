@@ -6,7 +6,7 @@ import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
 import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
-import { callSovereignCheckout } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { callSovereignCheckout } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

@@ -17,7 +17,7 @@ import type {
   SectionConfig,
   SectionKey,
   UiLayout,
-} from "@/core-os/sdui-engine/types";
+} from "@/core/runtime-ui/sdui/types";
 import { CAP } from "@/core/capabilities";
 import type { SectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
 

@@ -21,11 +21,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
-import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
+import { useAestheticProcessor } from "@/core/hakim-ai/hooks/useAestheticProcessor";
 import {
   useVisionGenesis, type USAGenesisPayload,
-} from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
+} from "@/core/hakim-ai/hooks/useVisionGenesis";
+import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
 
 export const Route = createFileRoute("/admin/assets/genesis")({
   component: GenesisPage,

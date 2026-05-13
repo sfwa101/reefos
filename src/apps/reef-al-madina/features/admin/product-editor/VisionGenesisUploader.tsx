@@ -11,8 +11,8 @@ import { toast } from "sonner";
 import {
   type USAGenesisPayload,
   type VisionGenesisError,
-} from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
+} from "@/core/hakim-ai/hooks/useVisionGenesis";
+import { useAestheticProcessor } from "@/core/hakim-ai/hooks/useAestheticProcessor";
 import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 import {
   useInferEntity,

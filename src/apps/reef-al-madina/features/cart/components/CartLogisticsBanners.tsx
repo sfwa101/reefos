@@ -9,7 +9,7 @@
  */
 import { AlertTriangle, OctagonAlert } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import type { LogisticsQuote } from "@/core-os/barq-logistics/core/types";
+import type { LogisticsQuote } from "@/core/logistics/core/types";
 
 type Props = {
   quote: LogisticsQuote | null;

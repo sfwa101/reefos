@@ -10,7 +10,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type {
   BuildingType,
   DeliveryMethod,
-} from "@/core-os/barq-logistics/core/types";
+} from "@/core/logistics/core/types";
 
 export const FALLBACK_STANDARD_DELIVERY_METHOD: DeliveryMethod = {
   id: "fallback-standard",

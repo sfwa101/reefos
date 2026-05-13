@@ -18,10 +18,10 @@ import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft, FinancialContractDraft, InventoryDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
 import { PackagingGateway, TagsGateway, PricingGateway, InventoryGateway } from "@/core/commerce";
-import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
-import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
-import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
-import type { USAGenesisPayload } from "@/core-os/hakim-ai/hooks/useVisionGenesis";
+import { useUpdateUSA } from "@/core/hakim-ai/hooks/useUpdateUSA";
+import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
+import { useAssetMatchmaker, type MatchedAsset } from "@/core/hakim-ai/hooks/useAssetMatchmaker";
+import type { USAGenesisPayload } from "@/core/hakim-ai/hooks/useVisionGenesis";
 import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 import { toast } from "sonner";
 

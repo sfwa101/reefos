@@ -28,8 +28,8 @@ import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
 import type { SectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
 import { synthesizeLayoutFromIdentity } from "@/core/runtime-ui/engine/BlockRecipes";
 
-import { SectionFrame } from "@/core-os/sdui-engine/SectionFrame";
-import { SDUIErrorBoundary } from "@/core-os/sdui-engine/components/SDUIErrorBoundary";
+import { SectionFrame } from "@/core/runtime-ui/sdui/SectionFrame";
+import { SDUIErrorBoundary } from "@/core/runtime-ui/sdui/components/SDUIErrorBoundary";
 
 // Phase 26 — Main Hub stem cells (orchestrator-free, self-contained)
 import { MainSearchHeader } from "@/apps/reef-al-madina/features/main-hub/components/MainSearchHeader";
@@ -53,9 +53,9 @@ import SpatioTemporalOffersRail from "@/apps/reef-al-madina/features/offers/comp
 import MaeenLauncherGrid from "@/apps/khalil/components/MaeenLauncherGrid";
 
 // Phase 30 — Advanced Stem Cell Ascendancy primitives
-import { SduiMenuList } from "@/core-os/sdui-engine/primitives/SduiMenuList";
-import { SduiWizardChain } from "@/core-os/sdui-engine/primitives/SduiWizardChain";
-import { SduiComparisonGrid } from "@/core-os/sdui-engine/primitives/SduiComparisonGrid";
+import { SduiMenuList } from "@/core/runtime-ui/sdui/primitives/SduiMenuList";
+import { SduiWizardChain } from "@/core/runtime-ui/sdui/primitives/SduiWizardChain";
+import { SduiComparisonGrid } from "@/core/runtime-ui/sdui/primitives/SduiComparisonGrid";
 
 type FactoryContext = {
   /** Orchestrator is optional — Main Hub sections don't need it. */
