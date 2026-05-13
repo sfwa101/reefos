@@ -56,7 +56,7 @@ const SORTS: { id: SortId; label: string }[] = [
 ];
 
 const SearchPage = () => {
-  const { q } = useSearch({ from: "/_app/search" });
+  const { q, brand, trait } = useSearch({ from: "/_app/search" });
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortId>("relevance");
   const [activeCat, setActiveCat] = useState<string>("all");
@@ -71,13 +71,22 @@ const SearchPage = () => {
     if (inputVal === q) { setIsDebouncing(false); return; }
     setIsDebouncing(true);
     const t = setTimeout(() => {
-      navigate({ to: "/search", search: { q: inputVal }, replace: true });
+      navigate({
+        to: "/search",
+        search: (prev) => ({ ...prev, q: inputVal }),
+        replace: true,
+      });
       setIsDebouncing(false);
     }, 220);
     return () => clearTimeout(t);
   }, [inputVal, q, navigate]);
 
   const setQuery = (val: string) => setInputVal(val);
+
+  const clearBrand = () =>
+    navigate({ to: "/search", search: (prev) => ({ ...prev, brand: undefined }), replace: true });
+  const clearTrait = () =>
+    navigate({ to: "/search", search: (prev) => ({ ...prev, trait: undefined }), replace: true });
 
   // Search history (recent queries) + featured categories (trending grid)
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
