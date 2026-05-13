@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
 
-    const { image_base64, mime_type, style } = await req
+    const { image_base64, mime_type, style, palette_name, palette_hex } = await req
       .json()
       .catch(() => ({}));
     if (!image_base64 || typeof image_base64 !== "string") {
@@ -61,9 +61,22 @@ Deno.serve(async (req) => {
       ? image_base64
       : `data:${mt};base64,${image_base64}`;
 
-    const styleKey =
-      typeof style === "string" && style in STYLE_PROMPTS ? style : "white";
-    const instruction = STYLE_PROMPTS[styleKey];
+    let styleKey: string;
+    let instruction: string;
+    if (
+      typeof palette_hex === "string" &&
+      /^#[0-9a-fA-F]{6}$/.test(palette_hex) &&
+      typeof palette_name === "string" &&
+      palette_name.length > 0 &&
+      palette_name.length < 60
+    ) {
+      styleKey = `custom:${palette_name}`;
+      instruction = `Remove the original background entirely and place the subject on a soft pastel ${palette_name} background (${palette_hex}). Centered, e-commerce catalog style, soft natural shadow, professional studio lighting. Do not alter the product itself.`;
+    } else {
+      styleKey =
+        typeof style === "string" && style in STYLE_PROMPTS ? style : "white";
+      instruction = STYLE_PROMPTS[styleKey];
+    }
 
     const aiRes = await fetch(
       "https://ai.gateway.lovable.dev/v1/chat/completions",
