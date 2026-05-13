@@ -157,13 +157,13 @@ export default function UsaLedger() {
           hint: "افتح بوابة التكوين الذكي وارفع صورة لتوليد أول أصل عالمي.",
         }}
         topSlot={
-          <button
-            onClick={() => setCreating(true)}
+          <Link
+            to="/admin/assets/genesis"
             className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-[13px] font-extrabold press shadow-soft"
           >
             <Plus className="h-4 w-4" />
             تكوين أصل جديد بالذكاء البصري
-          </button>
+          </Link>
         }
         dataSource={{
           table: "salsabil_assets",
