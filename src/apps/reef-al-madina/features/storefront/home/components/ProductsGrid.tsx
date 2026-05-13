@@ -48,8 +48,13 @@ export const ProductsGrid = ({
         hue={hue}
       />
       <div className="mt-3 grid grid-cols-2 gap-3">
-        {filtered.map((p) => (
-          <ProductCard key={p.id} p={p} onOpen={() => onOpen(p.id)} />
+        {filtered.map((p, i) => (
+          <ProductCard
+            key={p.id}
+            p={p}
+            onOpen={() => onOpen(p.id)}
+            priority={i < 4}
+          />
         ))}
       </div>
       {sectionEmpty && (
