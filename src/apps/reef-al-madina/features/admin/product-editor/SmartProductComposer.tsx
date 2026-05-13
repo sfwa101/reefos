@@ -479,7 +479,7 @@ function PrimarySlot({
       )}
     >
       <input
-        ref={inputRef} type="file" accept="image/*" capture="environment"
+        ref={inputRef} type="file" accept="image/*"
         className="hidden" onChange={(e) => onFile(e.target.files?.[0])}
       />
       {url ? (
