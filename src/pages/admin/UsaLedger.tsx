@@ -26,6 +26,13 @@ const ASSET_TYPE_TONE: Record<string, string> = {
   milestone_project: "bg-purple-500/10 text-purple-600 dark:text-purple-300",
 };
 
+interface RawContract {
+  base_price: number;
+  currency: string;
+  pricing_model: string;
+  is_active: boolean;
+  valid_from: string;
+}
 interface RawAsset {
   id: string;
   name: string;
@@ -34,13 +41,9 @@ interface RawAsset {
   traits: unknown;
   is_active: boolean;
   created_at: string;
-  salsabil_skus?: Array<{ id: string }> | null;
-  salsabil_financial_contracts?: Array<{
-    base_price: number;
-    currency: string;
-    pricing_model: string;
-    is_active: boolean;
-    valid_from: string;
+  salsabil_skus?: Array<{
+    id: string;
+    salsabil_financial_contracts?: RawContract[] | null;
   }> | null;
 }
 
