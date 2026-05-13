@@ -105,10 +105,11 @@ function pickHero(media: unknown): MediaRefVM | undefined {
   return { url, alt: { ar: "" }, kind: "hero" };
 }
 
-function pickPrimarySku(asset: SovereignAsset): SovereignAsset["salsabil_skus"] extends Array<infer T> ? T | undefined : never {
+type SovereignSku = NonNullable<SovereignAsset["salsabil_skus"]>[number];
+
+function pickPrimarySku(asset: SovereignAsset): SovereignSku | undefined {
   const skus = asset.salsabil_skus ?? [];
   const ordered = [...skus].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  // @ts-expect-error narrow
   return ordered.find((s) => s.is_active !== false) ?? ordered[0];
 }
 
