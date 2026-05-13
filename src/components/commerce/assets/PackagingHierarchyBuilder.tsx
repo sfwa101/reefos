@@ -222,6 +222,8 @@ export default function PackagingHierarchyBuilder({
       uom_code: preset.uom,
       conversion_to_parent: 1,
       conversion_to_base: 1,
+      barcode: null,
+      price_override: null,
       is_stock_keeping: true,
       is_default_sell: true,
       is_default_buy: true,
