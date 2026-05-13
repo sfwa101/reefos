@@ -434,7 +434,10 @@ function GenesisPage() {
       </main>
 
       {/* 3. Human Veto Sticky Bar */}
-      <footer className="fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur border-t border-border/60 shadow-float">
+      <footer
+        className="fixed inset-x-0 z-50 bg-card/95 backdrop-blur border-t border-border/60 shadow-float bottom-20 lg:bottom-0"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="mx-auto max-w-2xl px-4 py-3">
           <div className="flex items-center gap-2">
             <button
