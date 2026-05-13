@@ -3,7 +3,7 @@ import BackHeader from "@/components/BackHeader";
 import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway, type SovereignOrderVM as SovereignOrder, type SovereignOrderNodeVM as SovereignNode } from "@/core/orders";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { getById } from "@/core/catalog/legacy/legacyRuntime";
