@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Outlet, useLocation } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import TopBar from "@/components/TopBar";
 import TabBar from "@/components/TabBar";
 import SectionsPanel from "@/components/desktop/SectionsPanel";
