@@ -718,3 +718,120 @@ function NumInput({
     />
   );
 }
+
+function PaletteVetoBar({
+  palettes, selected, busy, onSelect, onRegenerate,
+}: {
+  palettes: PaletteSwatch[];
+  selected: PaletteSwatch | null;
+  busy: boolean;
+  onSelect: (p: PaletteSwatch) => void;
+  onRegenerate: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-card/60 p-2.5 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary font-semibold">
+          خلفية الأصل · حق النقض البصري
+        </span>
+        <button
+          type="button" disabled={busy || !selected}
+          onClick={onRegenerate}
+          className={cn(
+            "text-[10.5px] px-2.5 py-1 rounded-full font-semibold press",
+            "bg-primary/10 text-primary border border-primary/30",
+            "disabled:opacity-40 inline-flex items-center gap-1",
+          )}
+        >
+          <Wand2 className="h-3 w-3" />
+          إعادة توليد الخلفية
+        </button>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {palettes.map((p) => {
+          const active = selected?.name === p.name;
+          return (
+            <button
+              key={p.name}
+              type="button"
+              onClick={() => onSelect(p)}
+              title={p.label}
+              aria-label={p.label}
+              aria-pressed={active}
+              className={cn(
+                "shrink-0 h-9 w-9 rounded-full border-2 transition press relative",
+                active ? "border-primary scale-110 shadow-glow" : "border-border/60",
+              )}
+              style={{ backgroundColor: p.hex }}
+            >
+              {active && (
+                <CheckCircle2 className="h-4 w-4 text-primary absolute -top-1 -right-1 bg-card rounded-full" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SecondaryCaptureZone({
+  url, busy, onFile, onClear,
+}: {
+  url: string | null; busy: boolean;
+  onFile: (file: File | null | undefined) => void; onClear: () => void;
+}) {
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="rounded-2xl border border-dashed border-border/60 bg-card/40 p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[12px] font-display leading-tight">
+            تصوير ظهر العبوة / الحقائق الغذائية
+          </p>
+          <p className="text-[10.5px] text-foreground-tertiary mt-0.5">
+            اختياري — يساعد حكيم على قراءة الملصق الغذائي والمكونات
+          </p>
+        </div>
+        {url && !busy && (
+          <button
+            onClick={onClear}
+            className="h-8 w-8 rounded-full bg-card border border-border/60 flex items-center justify-center press"
+            aria-label="حذف"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      {url ? (
+        <div className="relative h-28 rounded-xl overflow-hidden border border-border/40 bg-background">
+          <img src={url} alt="ظهر العبوة" className="absolute inset-0 w-full h-full object-contain" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            ref={galleryRef} type="file" accept="image/*" className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+          <input
+            ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+          <button
+            type="button" disabled={busy} onClick={() => galleryRef.current?.click()}
+            className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
+          >
+            <ImagePlus className="h-3.5 w-3.5" /> من المعرض
+          </button>
+          <button
+            type="button" disabled={busy} onClick={() => cameraRef.current?.click()}
+            className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
+          >
+            <Camera className="h-3.5 w-3.5" /> الكاميرا
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
