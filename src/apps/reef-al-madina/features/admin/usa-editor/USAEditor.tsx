@@ -129,6 +129,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPackagingTiers([]);
       setClassificationEnabled(traits.includes(CAP.MULTI_CLASSIFICATION));
       setTagDrafts([]);
+      setFinancialContractsDraft([]);
       // Hydrate persisted packaging tiers + tag links for edit mode.
       let cancelled = false;
       (async () => {
