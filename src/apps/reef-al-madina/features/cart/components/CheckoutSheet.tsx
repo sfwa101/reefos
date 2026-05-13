@@ -18,6 +18,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { toLatin } from "@/lib/format";
+import { computeCheckoutRails, computeChargeableAmount } from "@/core/orders";
 import type { useCartOrchestrator } from "../hooks/useCartOrchestrator";
 import { CartPaymentMethods } from "./CartPaymentMethods";
 import { CartSummary } from "./CartSummary";
@@ -47,10 +48,13 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
   // useHardwareBackModal(open, () => onOpenChange(false));
   const [giftMsgOpen, setGiftMsgOpen] = useState(false);
 
-  // Interlocked running totals — each rail builds on the previous one.
-  const baseTotal = Math.round(o.effectiveGrand - o.tip - o.charity);
-  const tipRailTotal = baseTotal; // tip computed on the pre-tip total
-  const charityRailTotal = baseTotal + o.tip; // charity options shift after tip is picked
+  // Interlocked running totals — delegated to the Sovereign Checkout Runtime.
+  // The UI captures intent; the Runtime computes truth (Constitution · Article 4).
+  const { tipRailTotal, charityRailTotal } = computeCheckoutRails({
+    effectiveGrand: o.effectiveGrand,
+    tip: o.tip,
+    charity: o.charity,
+  });
 
   const blockedMessage = (() => {
     if (isLocked) return "السلة مقفلة بانتظار موافقات المشاركين";
@@ -349,7 +353,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                 </span>
               </span>
               <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
-                {toLatin(Math.round(o.effectiveGrand))} ج
+                {toLatin(computeChargeableAmount(o.effectiveGrand))} ج
               </span>
             </button>
 
