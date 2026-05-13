@@ -6,6 +6,7 @@ import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
 import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
+import { callSovereignCheckout } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -258,29 +259,27 @@ export function usePosEngine() {
     return data as PosShift;
   }, [shift]);
 
-  // Checkout — Sovereign POS pipeline (Phase 53):
-  //  1. process_checkout_sovereign  → create master order
-  //  2. process_pos_cash_payment    → atomic cash settlement (ledger + paid)
-  //  3. pos_shifts counters         → operator accountability
-  // Offline: enqueue both RPCs via Ground-Sync (Phase 49) and surface "Saved Offline".
+  // Checkout — Sovereign POS pipeline (Phase POS-2 Step 2):
+  //  1. validatedSovereignCheckoutFn → server re-runs CashierBrain & vetoes on hash mismatch
+  //  2. process_pos_cash_payment     → atomic cash settlement against the SERVER total
+  //  3. pos_shifts counters          → operator accountability (against server total)
+  // Offline: enqueue the validated server-fn payload so the price judge runs at drain.
   const checkout = useCallback(async (tendered: number) => {
     if (!user) { toast.error("غير مسجل دخول"); return null; }
     if (!shift) { toast.error("افتح ورديّة أولاً"); return null; }
     if (cart.length === 0) { toast.error("السلة فارغة"); return null; }
-    if (!sovereignHash || !sovereignFresh) {
-      toast.error("جاري التحقق من السعر السيادي… أعِد المحاولة");
-      return null;
+    if (!sovereignFresh || !sovereignHash || sovereignTotal === null) {
+      throw new Error("السعر السيادي قيد المراجعة، يرجى الانتظار للحظة...");
     }
-    if (tendered < displayTotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
+    const authoritativeTotal = sovereignTotal;
+    if (tendered < authoritativeTotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
 
     const idem = (typeof crypto !== "undefined" && crypto.randomUUID)
       ? crypto.randomUUID()
       : `pos_${Date.now()}_${Math.random().toString(36).slice(2)}`;
-    const cartItems = cart.map(l => ({
+    const sovereignCartItems = cart.map(l => ({
       product_id: l.product_id,
-      name: l.name,
-      price: l.price,
-      qty: l.qty,
+      quantity: l.qty,
     }));
     const deliveryInfo = {
       channel: "pos",
@@ -291,67 +290,52 @@ export function usePosEngine() {
       payment_method: "cash",
     };
 
-    // OFFLINE FAST-PATH — queue and clear instantly
+    const sovereignPayload = {
+      customer_id: user.id,
+      cart_items: sovereignCartItems,
+      delivery_info: deliveryInfo,
+      idempotency_key: idem,
+      expected_snapshot_hash: sovereignHash,
+      cashier_context: { member_tier: "guest" as const },
+    };
+
+    // OFFLINE FAST-PATH — queue the validated server-fn payload (hash travels with it)
     if (typeof navigator !== "undefined" && navigator.onLine === false) {
-      await enqueueOfflineMutation({
-        op: "rpc",
-        rpcName: "process_checkout_sovereign",
-        payload: {
-          p_customer_id: user.id,
-          p_cart_items: cartItems,
-          p_delivery_info: deliveryInfo,
-          p_idempotency_key: idem,
-        },
-      });
-      const change = tendered - subtotal;
+      await enqueueOfflineMutation({ op: "sovereign.checkout", payload: sovereignPayload });
+      const change = tendered - authoritativeTotal;
       clearCart();
       toast.success(`حُفظ بدون اتصال — الباقي ${change.toFixed(2)}`);
-      return { change, total: subtotal, offline: true };
+      return { change, total: authoritativeTotal, offline: true };
     }
 
-    // ONLINE — sovereign order + cash settlement
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const orderRes = await (supabase as any).rpc("process_checkout_sovereign", {
-      p_customer_id: user.id,
-      p_cart_items: cartItems,
-      p_delivery_info: deliveryInfo,
-      p_idempotency_key: idem,
-    });
-
-    if (orderRes.error) {
-      if (isLikelyNetworkError(orderRes.error)) {
-        await enqueueOfflineMutation({
-          op: "rpc",
-          rpcName: "process_checkout_sovereign",
-          payload: {
-            p_customer_id: user.id,
-            p_cart_items: cartItems,
-            p_delivery_info: deliveryInfo,
-            p_idempotency_key: idem,
-          },
-        });
-        const change = tendered - subtotal;
+    // ONLINE — sovereign price judge + cash settlement
+    let orderId: string;
+    try {
+      orderId = await callSovereignCheckout(sovereignPayload);
+    } catch (e) {
+      if (isLikelyNetworkError(e)) {
+        await enqueueOfflineMutation({ op: "sovereign.checkout", payload: sovereignPayload });
+        const change = tendered - authoritativeTotal;
         clearCart();
         toast.success(`حُفظ بدون اتصال — الباقي ${change.toFixed(2)}`);
-        return { change, total: subtotal, offline: true };
+        return { change, total: authoritativeTotal, offline: true };
       }
-      toast.error("تعذّر إنشاء الطلب", { description: orderRes.error.message });
+      const msg = e instanceof Error ? e.message : "تعذّر إنشاء الطلب";
+      toast.error("تعذّر إنشاء الطلب", { description: msg });
       return null;
     }
-
-    const orderId = orderRes.data as string;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const payRes = await (supabase as any).rpc("process_pos_cash_payment", {
       p_order_id: orderId,
-      p_amount: subtotal,
+      p_amount: authoritativeTotal,
     });
     if (payRes.error) {
       if (isLikelyNetworkError(payRes.error)) {
         await enqueueOfflineMutation({
           op: "rpc",
           rpcName: "process_pos_cash_payment",
-          payload: { p_order_id: orderId, p_amount: subtotal },
+          payload: { p_order_id: orderId, p_amount: authoritativeTotal },
         });
         toast.warning("الطلب أُنشئ — الدفع سيُسوّى بعد الاتصال");
       } else {
@@ -360,22 +344,22 @@ export function usePosEngine() {
       }
     }
 
-    // Shift counters (best-effort — non-fatal)
+    // Shift counters (best-effort — non-fatal) — server total
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await (supabase as any)
       .from("pos_shifts")
       .update({
-        total_sales: shift.total_sales + subtotal,
+        total_sales: shift.total_sales + authoritativeTotal,
         total_orders: shift.total_orders + 1,
       })
       .eq("id", shift.id);
-    setShift(s => s ? { ...s, total_sales: s.total_sales + subtotal, total_orders: s.total_orders + 1 } : s);
+    setShift(s => s ? { ...s, total_sales: s.total_sales + authoritativeTotal, total_orders: s.total_orders + 1 } : s);
 
-    const change = tendered - subtotal;
+    const change = tendered - authoritativeTotal;
     clearCart();
     toast.success(`تم البيع — الباقي ${change.toFixed(2)}`);
-    return { change, total: subtotal, order_id: orderId };
-  }, [user, cart, shift, subtotal, clearCart]);
+    return { change, total: authoritativeTotal, order_id: orderId };
+  }, [user, cart, shift, clearCart, sovereignFresh, sovereignHash, sovereignTotal]);
 
   return {
     // products
