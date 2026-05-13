@@ -71,8 +71,11 @@ function GenesisPage() {
   const [stage, setStage] = useState<Stage>("idle");
   const [primaryFile, setPrimaryFile] = useState<File | null>(null);
   const [primaryUrl, setPrimaryUrl] = useState<string | null>(null);
+  const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
+  const [secondaryUrl, setSecondaryUrl] = useState<string | null>(null);
   const [genesis, setGenesis] = useState<USAGenesisPayload | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState<PaletteSwatch | null>(null);
 
   // Granular DNA form
   const [name, setName] = useState("");
@@ -80,8 +83,8 @@ function GenesisPage() {
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
   const [origin, setOrigin] = useState("");
-  const [price, setPrice] = useState<number>(0);
-  const [cost, setCost] = useState<number>(0);
+  const [price, setPrice] = useState<number | "">("");
+  const [cost, setCost] = useState<number | "">("");
   const [currency, setCurrency] = useState<string>("EGP");
   const [marketingShort, setMarketingShort] = useState("");
   const [marketingLong, setMarketingLong] = useState("");
@@ -97,6 +100,9 @@ function GenesisPage() {
   const [aiFields, setAiFields] = useState<Set<string>>(new Set());
   const clearAi = (k: string) =>
     setAiFields((s) => { if (!s.has(k)) return s; const n = new Set(s); n.delete(k); return n; });
+
+  const priceNum = typeof price === "number" ? price : 0;
+  const canApprove = name.trim().length > 0 && priceNum > 0;
 
   const onPickFile = useCallback((file: File | null | undefined) => {
     if (!file) return;
