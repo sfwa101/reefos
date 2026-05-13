@@ -153,151 +153,170 @@ Deno.serve(async (req) => {
 7. حدد النوع: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات.
 8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).`;
 
+    const visionPayload = {
+      model: "google/gemini-2.5-pro",
+      messages: [
+        { role: "system", content: systemPrompt },
+        {
+          role: "user",
+          content: [
+            {
+              type: "text",
+              text: `حلّل ${secondaryUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
+            },
+            { type: "image_url", image_url: { url: primaryUrl } },
+            ...(secondaryUrl
+              ? [{ type: "image_url", image_url: { url: secondaryUrl } }]
+              : []),
+          ],
+        },
+      ],
+      tools: [
+        {
+          type: "function",
+          function: {
+            name: "generate_usa_payload",
+            description: "Return the full Universal Salsabil Asset Product DNA payload extracted from the image.",
+            parameters: {
+              type: "object",
+              properties: {
+                asset: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string" },
+                    description: { type: "string" },
+                    asset_type: { type: "string", enum: [...ASSET_TYPES] },
+                    traits: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "سمات مستنتجة مثل cold_chain, fragile, halal_certified",
+                    },
+                    category_path: {
+                      type: ["string", "null"],
+                      description: "مسار الفئة الهرمي مثل 'بقالة/ألبان/جبن'",
+                    },
+                    brand: { type: ["string", "null"], description: "العلامة التجارية إن ظهرت" },
+                    origin_country: { type: ["string", "null"], description: "بلد المنشأ" },
+                    marketing: {
+                      type: ["object", "null"],
+                      properties: {
+                        short: { type: ["string", "null"], description: "وصف تسويقي قصير (≤140 حرف) بالعربية" },
+                        long: { type: ["string", "null"], description: "وصف تسويقي مطوّل بالعربية" },
+                      },
+                    },
+                    nutrition: {
+                      type: ["object", "null"],
+                      description: "حقائق غذائية لكل 100 جم/مل إن ظهرت على العبوة",
+                      properties: {
+                        kcal: { type: ["number", "null"] },
+                        protein_g: { type: ["number", "null"] },
+                        fat_g: { type: ["number", "null"] },
+                        carbs_g: { type: ["number", "null"] },
+                        sugar_g: { type: ["number", "null"] },
+                      },
+                    },
+                    physical: {
+                      type: ["object", "null"],
+                      properties: {
+                        net_weight: { type: ["number", "null"], description: "الوزن/الحجم الصافي" },
+                        weight_unit: {
+                          type: ["string", "null"],
+                          enum: ["g", "kg", "ml", "L", "piece", null],
+                          description: "وحدة الوزن/الحجم",
+                        },
+                      },
+                    },
+                    allergens: {
+                      type: ["array", "null"],
+                      items: { type: "string" },
+                      description: "مسببات الحساسية مثل gluten, milk, nuts, soy",
+                    },
+                  },
+                  required: ["name", "description", "asset_type", "traits"],
+                },
+                skus: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      sku_code: { type: "string" },
+                      attributes: {
+                        type: "object",
+                        additionalProperties: true,
+                        description: "size, weight, color, variant, etc.",
+                      },
+                      barcode: {
+                        type: ["string", "null"],
+                        description: "EAN/UPC barcode إن قُرئ من الصورة",
+                      },
+                      variant_axes: {
+                        type: ["object", "null"],
+                        properties: {
+                          size: { type: ["string", "null"] },
+                          flavor: { type: ["string", "null"] },
+                        },
+                      },
+                    },
+                    required: ["sku_code", "attributes"],
+                  },
+                },
+                financial_contract: {
+                  type: "object",
+                  properties: {
+                    pricing_model: { type: "string", enum: [...PRICING_MODELS] },
+                    base_price: { type: "number" },
+                    currency: { type: "string", enum: ["EGP", "USD", "EUR"] },
+                    contract_rules: {
+                      type: "object",
+                      additionalProperties: true,
+                      description: "tier table, milestone splits, deposit rules",
+                    },
+                  },
+                  required: ["pricing_model", "base_price"],
+                },
+              },
+              required: ["asset", "skus", "financial_contract"],
+            },
+          },
+        },
+      ],
+      tool_choice: { type: "function", function: { name: "generate_usa_payload" } },
+    };
+
+    console.error("[C3][vision_genesis] AI Gateway request", JSON.stringify({
+      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
+      model: visionPayload.model,
+      imageTransport: "raw_https_url",
+      imageCount: urls.length,
+      primaryUrl,
+      secondaryUrl,
+      payload: visionPayload,
+    }));
+
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
-        messages: [
-          { role: "system", content: systemPrompt },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: `حلّل ${secondaryUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
-              },
-              { type: "image_url", image_url: { url: primaryUrl } },
-              ...(secondaryUrl
-                ? [{ type: "image_url", image_url: { url: secondaryUrl } }]
-                : []),
-            ],
-          },
-        ],
-        tools: [
-          {
-            type: "function",
-            function: {
-              name: "generate_usa_payload",
-              description: "Return the full Universal Salsabil Asset Product DNA payload extracted from the image.",
-              parameters: {
-                type: "object",
-                properties: {
-                  asset: {
-                    type: "object",
-                    properties: {
-                      name: { type: "string" },
-                      description: { type: "string" },
-                      asset_type: { type: "string", enum: [...ASSET_TYPES] },
-                      traits: {
-                        type: "array",
-                        items: { type: "string" },
-                        description: "سمات مستنتجة مثل cold_chain, fragile, halal_certified",
-                      },
-                      category_path: {
-                        type: ["string", "null"],
-                        description: "مسار الفئة الهرمي مثل 'بقالة/ألبان/جبن'",
-                      },
-                      brand: { type: ["string", "null"], description: "العلامة التجارية إن ظهرت" },
-                      origin_country: { type: ["string", "null"], description: "بلد المنشأ" },
-                      marketing: {
-                        type: ["object", "null"],
-                        properties: {
-                          short: { type: ["string", "null"], description: "وصف تسويقي قصير (≤140 حرف) بالعربية" },
-                          long: { type: ["string", "null"], description: "وصف تسويقي مطوّل بالعربية" },
-                        },
-                      },
-                      nutrition: {
-                        type: ["object", "null"],
-                        description: "حقائق غذائية لكل 100 جم/مل إن ظهرت على العبوة",
-                        properties: {
-                          kcal: { type: ["number", "null"] },
-                          protein_g: { type: ["number", "null"] },
-                          fat_g: { type: ["number", "null"] },
-                          carbs_g: { type: ["number", "null"] },
-                          sugar_g: { type: ["number", "null"] },
-                        },
-                      },
-                      physical: {
-                        type: ["object", "null"],
-                        properties: {
-                          net_weight: { type: ["number", "null"], description: "الوزن/الحجم الصافي" },
-                          weight_unit: {
-                            type: ["string", "null"],
-                            enum: ["g", "kg", "ml", "L", "piece", null],
-                            description: "وحدة الوزن/الحجم",
-                          },
-                        },
-                      },
-                      allergens: {
-                        type: ["array", "null"],
-                        items: { type: "string" },
-                        description: "مسببات الحساسية مثل gluten, milk, nuts, soy",
-                      },
-                    },
-                    required: ["name", "description", "asset_type", "traits"],
-                  },
-                  skus: {
-                    type: "array",
-                    items: {
-                      type: "object",
-                      properties: {
-                        sku_code: { type: "string" },
-                        attributes: {
-                          type: "object",
-                          additionalProperties: true,
-                          description: "size, weight, color, variant, etc.",
-                        },
-                        barcode: {
-                          type: ["string", "null"],
-                          description: "EAN/UPC barcode إن قُرئ من الصورة",
-                        },
-                        variant_axes: {
-                          type: ["object", "null"],
-                          properties: {
-                            size: { type: ["string", "null"] },
-                            flavor: { type: ["string", "null"] },
-                          },
-                        },
-                      },
-                      required: ["sku_code", "attributes"],
-                    },
-                  },
-                  financial_contract: {
-                    type: "object",
-                    properties: {
-                      pricing_model: { type: "string", enum: [...PRICING_MODELS] },
-                      base_price: { type: "number" },
-                      currency: { type: "string", enum: ["EGP", "USD", "EUR"] },
-                      contract_rules: {
-                        type: "object",
-                        additionalProperties: true,
-                        description: "tier table, milestone splits, deposit rules",
-                      },
-                    },
-                    required: ["pricing_model", "base_price"],
-                  },
-                },
-                required: ["asset", "skus", "financial_contract"],
-              },
-            },
-          },
-        ],
-        tool_choice: { type: "function", function: { name: "generate_usa_payload" } },
-      }),
+      body: JSON.stringify(visionPayload),
     });
+
+    const aiText = await aiRes.text();
+    console.error("[C3][vision_genesis] AI Gateway response", JSON.stringify({
+      status: aiRes.status,
+      ok: aiRes.ok,
+      contentType: aiRes.headers.get("content-type"),
+      body: aiText,
+    }));
 
     if (aiRes.status === 429) return json({ error: "rate_limited", details: "AI gateway rate limit hit (429)." }, 429);
     if (aiRes.status === 402) return json({ error: "credits_exhausted", details: "AI gateway credits exhausted (402)." }, 402);
     if (!aiRes.ok) {
       // Phase C-2 — bubble the upstream body verbatim. No truncation, no wrapping.
-      const t = await aiRes.text();
-      console.error("Vision AI error:", aiRes.status, t);
-      let upstream: unknown = t;
-      try { upstream = JSON.parse(t); } catch { /* keep as text */ }
+      console.error("Vision AI error:", aiRes.status, aiText);
+      let upstream: unknown = aiText;
+      try { upstream = JSON.parse(aiText); } catch { /* keep as text */ }
       return json({
         error: "AI_API_ERROR",
         status: aiRes.status,
@@ -305,7 +324,17 @@ Deno.serve(async (req) => {
       }, aiRes.status);
     }
 
-    const aiData = await aiRes.json();
+    let aiData: any;
+    try {
+      aiData = JSON.parse(aiText);
+    } catch (e) {
+      console.error("[C3][vision_genesis] AI Gateway non-JSON success body", aiText);
+      return json({
+        error: "AI_NON_JSON_RESPONSE",
+        details: e instanceof Error ? e.message : String(e),
+        upstream: aiText,
+      }, 500);
+    }
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     if (!toolCall) {
       const fallbackMsg = aiData.choices?.[0]?.message?.content ?? JSON.stringify(aiData).slice(0, 500);
