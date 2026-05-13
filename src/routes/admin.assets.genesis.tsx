@@ -48,6 +48,19 @@ function dataUrlToFile(dataUrl: string, name = "clean.png"): File {
   return new File([arr], name, { type: mime });
 }
 
+// ── Visual Veto: pastel palette swatches (mirror server `vision_genesis`) ──
+type PaletteSwatch = { name: string; hex: string; label: string };
+const PALETTES: PaletteSwatch[] = [
+  { name: "pure white", hex: "#FFFFFF", label: "أبيض نقي" },
+  { name: "mint green", hex: "#D1FAE5", label: "نعناعي" },
+  { name: "warm cream", hex: "#FEF3C7", label: "كريمي" },
+  { name: "blush pink", hex: "#FCE7F3", label: "وردي" },
+  { name: "powder blue", hex: "#DBEAFE", label: "أزرق هادئ" },
+  { name: "soft lavender", hex: "#EDE9FE", label: "لافندر" },
+  { name: "sand beige", hex: "#F5F1E8", label: "بيج رملي" },
+  { name: "sage", hex: "#E2E8DD", label: "ميرمية" },
+];
+
 // Optional rich-DNA fields the upgraded Vision Cortex may emit on `asset`.
 type RichDNA = {
   category_path?: string;
