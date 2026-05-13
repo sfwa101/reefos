@@ -125,9 +125,12 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `حلّل هذه الصورة واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
+                text: `حلّل ${secondaryDataUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
               },
               { type: "image_url", image_url: { url: dataUrl } },
+              ...(secondaryDataUrl
+                ? [{ type: "image_url", image_url: { url: secondaryDataUrl } }]
+                : []),
             ],
           },
         ],
