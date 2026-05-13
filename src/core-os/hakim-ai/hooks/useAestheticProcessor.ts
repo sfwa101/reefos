@@ -55,7 +55,7 @@ async function fileToBase64(file: File): Promise<{ base64: string; mime: string 
 
 export function useAestheticProcessor() {
   return useMutation<AestheticResult, Error, AestheticInput>({
-    mutationFn: async ({ file, base64, mime, style = "white" }) => {
+    mutationFn: async ({ file, base64, mime, style = "white", palette }) => {
       let payloadB64 = base64 ?? "";
       let payloadMime = mime ?? "image/jpeg";
       if (file) {
@@ -72,6 +72,8 @@ export function useAestheticProcessor() {
             image_base64: payloadB64,
             mime_type: payloadMime,
             style,
+            palette_name: palette?.name ?? null,
+            palette_hex: palette?.hex ?? null,
           },
         },
       );
