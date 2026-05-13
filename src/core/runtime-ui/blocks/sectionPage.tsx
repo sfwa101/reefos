@@ -38,12 +38,14 @@ export const SectionLayoutFactoryBlock: BlockComponent = ({ block }) => {
     pageKey: string;
     theme: StoreTheme;
     orchestrator?: HomeOrchestrator;
+    identity?: SectionIdentity;
   };
   return (
     <LayoutFactory
       pageKey={props.pageKey}
       theme={props.theme}
       orchestrator={props.orchestrator}
+      identity={props.identity}
     />
   );
 };
