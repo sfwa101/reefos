@@ -23,7 +23,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { useAuth } from "@/context/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
@@ -79,13 +79,8 @@ const SovereignPersonaSwitcher = ({ variant = "pill", className }: Props) => {
     queryKey: ["salsabil_persona_matrix"],
     staleTime: 5 * 60_000,
     queryFn: async (): Promise<PersonaRow[]> => {
-      const { data, error } = await supabase
-        .from("salsabil_persona_matrix")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as unknown as PersonaRow[];
+      const rows = await IdentityGateway.listActivePersonas();
+      return rows as unknown as PersonaRow[];
     },
   });
 

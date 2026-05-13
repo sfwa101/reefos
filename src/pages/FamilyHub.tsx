@@ -2,7 +2,6 @@ import { useEffect, useState, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Loader2, Users, ShieldCheck, Wallet2, Target, Plus, Settings2, Crown } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -10,40 +9,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toLatin } from "@/lib/format";
+import {
+  FamilyGateway,
+  type FamilyContextVM,
+  type FamilyGroupVM,
+  type FamilyMemberVM,
+  type FamilyLimitVM,
+  type FamilyVaultVM,
+  type FamilyRole,
+} from "@/core/family";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-const sb = supabase as any;
-
-type Member = {
-  group_id: string;
-  user_id: string;
-  role: "head" | "admin" | "spouse" | "child" | "dependent";
-  joined_at: string;
-  full_name?: string | null;
-  short_id?: string | null;
-  wallet_id?: string | null;
-};
-
-type Group = { id: string; name: string; created_by: string };
-
-type LimitRow = {
-  id: string;
-  wallet_id: string;
-  period: "daily" | "weekly" | "monthly";
-  max_amount: number;
-  active: boolean;
-};
-
-type SharedVault = {
-  id: string;
-  name: string;
-  current_balance: number;
-  target_amount: number | null;
-  status: string;
-  group_id: string | null;
-};
-
-const ROLE_LABEL: Record<Member["role"], string> = {
+const ROLE_LABEL: Record<FamilyRole, string> = {
   head: "وليّ الأمر",
   admin: "مشرف",
   spouse: "شريك حياة",
@@ -56,97 +32,25 @@ export default function FamilyHub() {
   const uid = user?.id ?? null;
 
   const [loading, setLoading] = useState(true);
-  const [group, setGroup] = useState<Group | null>(null);
-  const [myRole, setMyRole] = useState<Member["role"] | null>(null);
-  const [members, setMembers] = useState<Member[]>([]);
-  const [limits, setLimits] = useState<LimitRow[]>([]);
-  const [vaults, setVaults] = useState<SharedVault[]>([]);
+  const [group, setGroup] = useState<FamilyGroupVM | null>(null);
+  const [myRole, setMyRole] = useState<FamilyRole | null>(null);
+  const [members, setMembers] = useState<FamilyMemberVM[]>([]);
+  const [limits, setLimits] = useState<FamilyLimitVM[]>([]);
+  const [vaults, setVaults] = useState<FamilyVaultVM[]>([]);
   const [showCreate, setShowCreate] = useState(false);
   const [creating, setCreating] = useState(false);
   const [newGroupName, setNewGroupName] = useState("");
-  const [editLimitFor, setEditLimitFor] = useState<Member | null>(null);
+  const [editLimitFor, setEditLimitFor] = useState<FamilyMemberVM | null>(null);
 
   const refresh = async () => {
     if (!uid) return;
     setLoading(true);
-
-    // 1. Find membership (first family group user belongs to)
-    const { data: myMemb } = await sb
-      .from("tayseer_family_members")
-      .select("group_id, role")
-      .eq("user_id", uid)
-      .limit(1)
-      .maybeSingle();
-
-    if (!myMemb) {
-      setGroup(null);
-      setMembers([]);
-      setLimits([]);
-      setVaults([]);
-      setLoading(false);
-      return;
-    }
-    setMyRole(myMemb.role);
-
-    const { data: g } = await sb
-      .from("tayseer_family_groups")
-      .select("id, name, created_by")
-      .eq("id", myMemb.group_id)
-      .maybeSingle();
-    setGroup(g);
-
-    // 2. Roster
-    const { data: rawMembers } = await sb
-      .from("tayseer_family_members")
-      .select("group_id, user_id, role, joined_at")
-      .eq("group_id", myMemb.group_id);
-
-    const userIds: string[] = (rawMembers ?? []).map((m: any) => m.user_id);
-    const { data: profiles } = await sb
-      .from("profiles")
-      .select("user_id, full_name, short_id")
-      .in("user_id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
-
-    const { data: walletsRows } = await sb
-      .from("wallets")
-      .select("id, user_id")
-      .eq("currency", "EGP")
-      .in("user_id", userIds.length ? userIds : ["00000000-0000-0000-0000-000000000000"]);
-
-    const profileMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
-    const walletMap = new Map((walletsRows ?? []).map((w: any) => [w.user_id, w.id]));
-
-    const enriched: Member[] = (rawMembers ?? []).map((m: any) => {
-      const p = profileMap.get(m.user_id) as any;
-      return {
-        ...m,
-        full_name: p?.full_name ?? null,
-        short_id: p?.short_id ?? null,
-        wallet_id: walletMap.get(m.user_id) ?? null,
-      };
-    });
-    setMembers(enriched);
-
-    // 3. Limits across all family wallets
-    const walletIds = enriched.map((m) => m.wallet_id).filter(Boolean) as string[];
-    if (walletIds.length) {
-      const { data: lim } = await sb
-        .from("tayseer_wallet_limits")
-        .select("id, wallet_id, period, max_amount, active")
-        .in("wallet_id", walletIds);
-      setLimits(lim ?? []);
-    } else {
-      setLimits([]);
-    }
-
-    // 4. Shared vaults
-    const { data: v } = await sb
-      .from("tayseer_shared_vaults")
-      .select("id, name, current_balance, target_amount, status, group_id")
-      .eq("group_id", myMemb.group_id)
-      .order("created_at", { ascending: false });
-    setVaults(v ?? []);
-
+    const ctx: FamilyContextVM = await FamilyGateway.getFamilyContext(uid);
+    setGroup(ctx.group);
+    setMyRole(ctx.myRole);
+    setMembers(ctx.members);
+    setLimits(ctx.limits);
+    setVaults(ctx.vaults);
     setLoading(false);
   };
 
@@ -158,7 +62,7 @@ export default function FamilyHub() {
   const isHead = myRole === "head" || myRole === "admin";
 
   const limitsByWallet = useMemo(() => {
-    const map = new Map<string, LimitRow[]>();
+    const map = new Map<string, FamilyLimitVM[]>();
     for (const l of limits) {
       const arr = map.get(l.wallet_id) ?? [];
       arr.push(l);
@@ -170,18 +74,18 @@ export default function FamilyHub() {
   const handleCreateGroup = async () => {
     if (!newGroupName.trim() || !uid) return;
     setCreating(true);
-    const { error } = await sb
-      .from("tayseer_family_groups")
-      .insert({ name: newGroupName.trim(), created_by: uid });
-    setCreating(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await FamilyGateway.createFamilyGroup(newGroupName, uid);
+      toast.success("تم إنشاء المجموعة العائلية");
+      setShowCreate(false);
+      setNewGroupName("");
+      refresh();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر الإنشاء";
+      toast.error(msg);
+    } finally {
+      setCreating(false);
     }
-    toast.success("تم إنشاء المجموعة العائلية");
-    setShowCreate(false);
-    setNewGroupName("");
-    refresh();
   };
 
   if (loading) {
@@ -192,7 +96,6 @@ export default function FamilyHub() {
     );
   }
 
-  // No group → onboarding
   if (!group) {
     return (
       <div className="mx-auto max-w-2xl px-4 lg:px-8 pt-6 pb-24" dir="rtl">
@@ -241,7 +144,6 @@ export default function FamilyHub() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 lg:px-8 pt-4 pb-24 space-y-5" dir="rtl">
-      {/* HEADER */}
       <motion.section
         initial={{ opacity: 0, y: -8 }}
         animate={{ opacity: 1, y: 0 }}
@@ -259,7 +161,6 @@ export default function FamilyHub() {
         </span>
       </motion.section>
 
-      {/* ROSTER */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -320,7 +221,6 @@ export default function FamilyHub() {
         </ul>
       </motion.section>
 
-      {/* SHARED VAULTS */}
       <motion.section
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -395,16 +295,14 @@ export default function FamilyHub() {
   );
 }
 
-/* --------- Edit Limit Dialog --------- */
-
 function EditLimitDialog({
   member,
   existing,
   onClose,
   onSaved,
 }: {
-  member: Member;
-  existing: LimitRow[];
+  member: FamilyMemberVM;
+  existing: FamilyLimitVM[];
   onClose: () => void;
   onSaved: () => void;
 }) {
@@ -426,25 +324,21 @@ function EditLimitDialog({
       return;
     }
     setSaving(true);
-    const { error } = await sb
-      .from("tayseer_wallet_limits")
-      .upsert(
-        {
-          wallet_id: member.wallet_id,
-          set_by: user.id,
-          period,
-          max_amount: amt,
-          active: true,
-        },
-        { onConflict: "wallet_id,period" },
-      );
-    setSaving(false);
-    if (error) {
-      toast.error(error.message);
-      return;
+    try {
+      await FamilyGateway.upsertWalletLimit({
+        walletId: member.wallet_id,
+        setBy: user.id,
+        period,
+        maxAmount: amt,
+      });
+      toast.success("تم حفظ الحد");
+      onSaved();
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر الحفظ";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
     }
-    toast.success("تم حفظ الحد");
-    onSaved();
   };
 
   return (
@@ -456,7 +350,7 @@ function EditLimitDialog({
         <div className="space-y-3">
           <div className="space-y-2">
             <Label>الفترة</Label>
-            <Select value={period} onValueChange={(v) => setPeriod(v as any)}>
+            <Select value={period} onValueChange={(v) => setPeriod(v as "daily" | "weekly" | "monthly")}>
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
