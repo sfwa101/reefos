@@ -124,14 +124,26 @@ function GenesisPage() {
     setPrimaryUrl(URL.createObjectURL(file));
   }, []);
 
-  async function runClean() {
+  const onPickSecondary = useCallback((file: File | null | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
+    setSecondaryFile(file);
+    setSecondaryUrl(URL.createObjectURL(file));
+  }, []);
+
+  async function runClean(palette?: PaletteSwatch | null) {
     if (!primaryFile) return;
     try {
       setStage("cleaning");
-      const cleaned = await aesthetic.mutateAsync({ file: primaryFile, style: "white" });
+      const target = palette ?? selectedPalette;
+      const cleaned = await aesthetic.mutateAsync(
+        target
+          ? { file: primaryFile, palette: { name: target.name, hex: target.hex } }
+          : { file: primaryFile, style: "white" },
+      );
       setPrimaryUrl(cleaned.imageDataUrl);
       setPrimaryFile(dataUrlToFile(cleaned.imageDataUrl));
-      toast.success("تم تحسين الصورة");
+      toast.success("تم تحديث الخلفية");
     } catch { toast.error("فشل تحسين الصورة"); }
     finally { setStage("idle"); }
   }
@@ -140,7 +152,7 @@ function GenesisPage() {
     if (!primaryFile) { toast.error("أضف صورة أولًا"); return; }
     try {
       setStage("describing");
-      const usa = await vision.mutateAsync({ file: primaryFile });
+      const usa = await vision.mutateAsync({ file: primaryFile, secondaryFile });
       setGenesis(usa);
       // Phase V-2: server returned a generative pastel composition — adopt it.
       const aestheticUrl = (usa as unknown as { aesthetic_image_data_url?: string | null })
