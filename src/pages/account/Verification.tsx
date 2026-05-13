@@ -99,15 +99,6 @@ const Verification = () => {
       if (frontFile) frontPath = await uploadOne(frontFile, "front");
       if (backFile) backPath = await uploadOne(backFile, "back");
 
-      const payload = {
-        user_id: user.id,
-        national_id: cleanId,
-        front_image_path: frontPath,
-        back_image_path: backPath,
-        status: "pending" as KycStatus,
-        rejection_reason: null,
-        submitted_at: new Date().toISOString(),
-      };
       const data = await IdentityGateway.submitKycVerification({
         userId: user.id,
         nationalId: cleanId,
