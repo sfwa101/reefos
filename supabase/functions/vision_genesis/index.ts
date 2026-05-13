@@ -264,14 +264,13 @@ Deno.serve(async (req) => {
       tool_choice: { type: "function", function: { name: "generate_usa_payload" } },
     };
 
-    console.error("[C3][vision_genesis] AI Gateway request", JSON.stringify({
+    console.error("[C4][vision_genesis] AI Gateway request", JSON.stringify({
       endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
       model: visionPayload.model,
-      imageTransport: "raw_https_url",
-      imageCount: urls.length,
-      primaryUrl,
-      secondaryUrl,
-      payload: visionPayload,
+      imageTransport: "inline_base64_data_url",
+      imageCount: datas.length,
+      primaryBytes: primaryUrl.length,
+      secondaryBytes: secondaryUrl?.length ?? 0,
     }));
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
