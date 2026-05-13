@@ -1,9 +1,9 @@
 /** @deprecated Replaced by Vision Cortex (`@/core/vision/gateway/hooks#useInferEntity`). */
 /**
- * useVisionGenesis — Phase 7 Part 2 client adapter.
- * Wraps the `vision_genesis` edge function in a TanStack mutation:
- * accepts a File (or raw base64), converts to base64, invokes the
- * function, and returns a sanitized USA payload.
+ * useVisionGenesis — Storage Bypass edition (Phase N-6).
+ * Uploads images to the public `product-images` bucket under
+ * `vision-staging/` and passes ONLY URLs to the edge function.
+ * No more base64 in the HTTP body.
  */
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -51,20 +51,22 @@ export type VisionGenesisError =
   | "missing_key"
   | "unknown";
 
-/** Lightweight base64 encoder — no canvas resize, trust native pipeline. */
+const STAGING_BUCKET = "product-images";
+const STAGING_PREFIX = "vision-staging";
 
-async function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
-  const base64 = await new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error("file_read_error"));
-    reader.onload = () => {
-      const result = String(reader.result ?? "");
-      const [, b64 = ""] = result.split(",");
-      resolve(b64);
-    };
-    reader.readAsDataURL(file);
-  });
-  return { base64, mime: file.type || "image/jpeg" };
+async function uploadToStaging(file: File): Promise<string> {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60);
+  const path = `${STAGING_PREFIX}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
+  const { error: upErr } = await supabase.storage
+    .from(STAGING_BUCKET)
+    .upload(path, file, {
+      contentType: file.type || "image/jpeg",
+      upsert: false,
+    });
+  if (upErr) throw new Error(`storage_upload_failed: ${upErr.message}`);
+  const { data } = supabase.storage.from(STAGING_BUCKET).getPublicUrl(path);
+  if (!data?.publicUrl) throw new Error("storage_public_url_missing");
+  return data.publicUrl;
 }
 
 export type VisionGenesisInput = {
@@ -77,22 +79,15 @@ export type VisionGenesisInput = {
 export function useVisionGenesis() {
   return useMutation<USAGenesisPayload, Error, VisionGenesisInput>({
     mutationFn: async ({ file, hint, secondaryFile }) => {
-      const { base64, mime } = await fileToBase64(file);
-      const secondary = secondaryFile
-        ? await fileToBase64(secondaryFile)
+      const image_url = await uploadToStaging(file);
+      const secondary_image_url = secondaryFile
+        ? await uploadToStaging(secondaryFile)
         : null;
+
       const { data, error } = await supabase.functions.invoke("vision_genesis", {
-        body: {
-          image_base64: base64,
-          mime_type: mime,
-          hint,
-          secondary_image_base64: secondary?.base64 ?? null,
-          secondary_mime_type: secondary?.mime ?? null,
-        },
+        body: { image_url, secondary_image_url, hint },
       });
-      // Try to surface the structured `details` from the edge function body.
-      // supabase.functions.invoke wraps non-2xx in `FunctionsHttpError` whose
-      // `context.response` is a Response we can re-parse.
+
       const readErrorBody = async (): Promise<{ error?: string; details?: string } | null> => {
         try {
           const ctx = (error as unknown as { context?: { response?: Response } } | null)?.context;
