@@ -11,6 +11,7 @@
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -44,8 +45,7 @@ export function useDispatchRadar(): UseDispatchRadarResult {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const auth = await supabase.auth.getUser();
-      const uid = auth.data.user?.id;
+      const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) return;
       const { data } = await supabase
         .from("drivers")

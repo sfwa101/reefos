@@ -1,12 +1,9 @@
-// @constitutional-exemption: Article 5 — auth boot.
-// RoleGuard is the bootstrap primitive that resolves the current admin's
-// roles before the rest of the Admin shell mounts. It is permitted to import
-// the raw Supabase client only for `auth.getUser()` + `user_roles` lookup.
-// See docs/constitution/CAPABILITY_SYSTEM.md.
+// Wave B-1 (Purification): RoleGuard now consumes IdentityGateway —
+// no direct Supabase access remains in this UI primitive.
 import { useEffect, useState, type ReactNode } from "react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { ShieldAlert, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -18,15 +15,11 @@ export function useAdminRoles() {
 
   useEffect(() => {
     if (!user) { setRoles([]); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from("user_roles")
-      .select("role, is_active")
-      .eq("user_id", user.id)
-      .eq("is_active", true)
-      .then(({ data }: { data: { role: AppRole }[] | null }) => {
-        setRoles(data?.map(r => r.role) ?? []);
-      });
+    let cancelled = false;
+    IdentityGateway.getActiveRoles(user.id).then((rs) => {
+      if (!cancelled) setRoles(rs as AppRole[]);
+    });
+    return () => { cancelled = true; };
   }, [user]);
 
   return {

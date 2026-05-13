@@ -6,6 +6,7 @@ import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Loader2, Send, Camera, ImagePlus, CheckCircle2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import type { ProductRequestPayload } from "../types";
 
 const schema = z.object({
@@ -52,7 +53,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
       setError(parsed.error.issues[0]?.message ?? "بيانات غير صالحة");
       return;
     }
-    const { data: userData } = await supabase.auth.getUser();
+    const uid = await IdentityGateway.getCurrentUserId();
     const payload: ProductRequestPayload = {
       product_name: parsed.data.product_name,
       description: parsed.data.description?.trim() ? parsed.data.description.trim() : null,
@@ -63,7 +64,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
     setLoading(true);
     const { error: dbErr } = await supabase
       .from("product_requests")
-      .insert({ ...payload, user_id: userData.user?.id ?? null });
+      .insert({ ...payload, user_id: uid });
     setLoading(false);
     if (dbErr) {
       setError("تعذر إرسال الطلب، حاول لاحقاً");
