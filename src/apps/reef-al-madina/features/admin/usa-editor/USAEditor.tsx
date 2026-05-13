@@ -98,6 +98,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [pendingEmbedding, setPendingEmbedding] = useState<number[] | null>(null);
   const [hasOverriddenAI, setHasOverriddenAI] = useState(false);
 
+  // Phase D-2 — Economic Packaging Runtime (local draft, lifted on save).
+  const [packagingEnabled, setPackagingEnabled] = useState(false);
+  const [packagingTiers, setPackagingTiers] = useState<PackagingTierDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
