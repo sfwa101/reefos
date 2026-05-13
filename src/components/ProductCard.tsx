@@ -322,18 +322,23 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
               {product.name}
             </h3>
-            {product.brand && (
-              <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{product.brand}</p>
-            )}
           </button>
         ) : (
           <Link to="/product/$productId" params={{ productId: product.id }} className="block">
             <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
               {product.name}
             </h3>
-            {product.brand && (
-              <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{product.brand}</p>
-            )}
+          </Link>
+        )}
+        {product.brand && (
+          <Link
+            to="/search"
+            search={{ q: product.brand, brand: product.brand }}
+            onClick={(e) => e.stopPropagation()}
+            className="mt-0.5 inline-block w-fit rounded-full bg-primary/8 px-2 py-0.5 text-[10px] font-extrabold text-primary ring-1 ring-primary/15 transition active:scale-95"
+            aria-label={`تصفية حسب ${product.brand}`}
+          >
+            {product.brand}
           </Link>
         )}
         <p className="text-[10px] text-muted-foreground">{product.unit}</p>

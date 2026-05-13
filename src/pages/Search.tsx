@@ -19,6 +19,7 @@ import { toLatin } from "@/lib/format";
 import { useUniversalSearch, useSearchHistory } from "@/modules/search";
 import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
 import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
+import { extractHandlingTraits, traitLabel } from "@/lib/productTraits";
 
 // Live Sovereign search — merges with in-memory `products`.
 // Returns DB-only matches (cached products are skipped to avoid dupes).
@@ -55,7 +56,7 @@ const SORTS: { id: SortId; label: string }[] = [
 ];
 
 const SearchPage = () => {
-  const { q } = useSearch({ from: "/_app/search" });
+  const { q, brand, trait } = useSearch({ from: "/_app/search" });
   const navigate = useNavigate();
   const [sort, setSort] = useState<SortId>("relevance");
   const [activeCat, setActiveCat] = useState<string>("all");
@@ -70,13 +71,22 @@ const SearchPage = () => {
     if (inputVal === q) { setIsDebouncing(false); return; }
     setIsDebouncing(true);
     const t = setTimeout(() => {
-      navigate({ to: "/search", search: { q: inputVal }, replace: true });
+      navigate({
+        to: "/search",
+        search: (prev) => ({ ...prev, q: inputVal }),
+        replace: true,
+      });
       setIsDebouncing(false);
     }, 220);
     return () => clearTimeout(t);
   }, [inputVal, q, navigate]);
 
   const setQuery = (val: string) => setInputVal(val);
+
+  const clearBrand = () =>
+    navigate({ to: "/search", search: (prev) => ({ ...prev, q: prev.q ?? "", brand: undefined }), replace: true });
+  const clearTrait = () =>
+    navigate({ to: "/search", search: (prev) => ({ ...prev, q: prev.q ?? "", trait: undefined }), replace: true });
 
   // Search history (recent queries) + featured categories (trending grid)
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
@@ -138,6 +148,16 @@ const SearchPage = () => {
 
   const filtered = useMemo(() => {
     let list = matches;
+    if (brand) {
+      const b = brand.toLowerCase();
+      list = list.filter((p) => (p.brand ?? "").toLowerCase() === b);
+    }
+    if (trait) {
+      const t = trait.toLowerCase();
+      list = list.filter((p) =>
+        extractHandlingTraits(p.metadata).some((x) => x.toLowerCase() === t),
+      );
+    }
     if (activeCat !== "all") list = list.filter((p) => p.category === activeCat);
     if (maxPrice && maxPrice < priceCeiling)
       list = list.filter((p) => p.price <= maxPrice);
@@ -153,7 +173,7 @@ const SearchPage = () => {
         break;
     }
     return list;
-  }, [matches, activeCat, sort, maxPrice, priceCeiling]);
+  }, [matches, brand, trait, activeCat, sort, maxPrice, priceCeiling]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Product[]>();
@@ -221,6 +241,26 @@ const SearchPage = () => {
           <p className="mt-2 px-1 text-[11px] font-bold text-muted-foreground">
             {toLatin(total)} نتيجة لـ <span className="text-foreground">"{q}"</span>
           </p>
+        )}
+        {(brand || trait) && (
+          <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+            {brand && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-extrabold text-primary ring-1 ring-primary/20">
+                علامة: {brand}
+                <button onClick={clearBrand} aria-label="إزالة فلتر العلامة" className="opacity-70 hover:opacity-100">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {trait && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-extrabold text-accent-foreground ring-1 ring-accent/30">
+                نمط: {traitLabel(trait)}
+                <button onClick={clearTrait} aria-label="إزالة فلتر النمط" className="opacity-70 hover:opacity-100">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+          </div>
         )}
       </div>
 

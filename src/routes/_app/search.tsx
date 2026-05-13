@@ -5,5 +5,13 @@ const Search = lazyPage(() => import("@/pages/Search"));
 
 export const Route = createFileRoute("/_app/search")({
   component: Search,
-  validateSearch: (s: Record<string, unknown>) => ({ q: typeof s.q === "string" ? s.q : "" }),
+  validateSearch: (s: Record<string, unknown>): {
+    q: string;
+    brand?: string;
+    trait?: string;
+  } => ({
+    q: typeof s.q === "string" ? s.q : "",
+    brand: typeof s.brand === "string" && s.brand ? s.brand : undefined,
+    trait: typeof s.trait === "string" && s.trait ? s.trait : undefined,
+  }),
 });

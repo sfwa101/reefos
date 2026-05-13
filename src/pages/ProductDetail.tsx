@@ -11,6 +11,7 @@ import { listProductReviewsFn, listProductUnitsFn } from "@/lib/catalog.function
 import { logBehavior } from "@/lib/behavior";
 import { motion } from "framer-motion";
 import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/lib/productEnrichment";
+import { extractHandlingTraits, traitLabel } from "@/lib/productTraits";
 import { villageMetaFor } from "@/lib/sourcing-meta";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
@@ -175,7 +176,16 @@ const ProductDetail = () => {
           <section className="space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                {product.brand && <p className="text-[11px] font-bold text-primary">{product.brand}</p>}
+                {product.brand && (
+                  <Link
+                    to="/search"
+                    search={{ q: product.brand, brand: product.brand }}
+                    className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-extrabold text-primary ring-1 ring-primary/20 transition active:scale-95"
+                    aria-label={`عرض كل منتجات ${product.brand}`}
+                  >
+                    {product.brand}
+                  </Link>
+                )}
                 <h1 className="font-display text-2xl font-extrabold leading-tight">{product.name}</h1>
                 <p className="text-xs text-muted-foreground">{product.unit}</p>
               </div>
@@ -203,6 +213,27 @@ const ProductDetail = () => {
                 ))}
               </div>
             )}
+
+            {(() => {
+              const traits = extractHandlingTraits(product.metadata);
+              if (traits.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1.5">
+                  {traits.map((t) => (
+                    <Link
+                      key={t}
+                      to="/search"
+                      search={{ q: t, trait: t }}
+                      className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-1 text-[10.5px] font-extrabold text-accent-foreground ring-1 ring-accent/30 transition active:scale-95"
+                      aria-label={`عرض كل المنتجات ${traitLabel(t)}`}
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      {traitLabel(t)}
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
 
             {product.rating && (
               <div className="flex items-center gap-2 text-xs">
