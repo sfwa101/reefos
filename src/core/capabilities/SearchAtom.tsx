@@ -12,7 +12,7 @@
 import { memo, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Loader2 } from "lucide-react";
-import { eventBus, type SalsabilAppId } from "@/core-os/event-bus";
+import { eventBus, type SalsabilAppId } from "@/core/events";
 
 export type OmniScope = {
   appId: SalsabilAppId | string;
