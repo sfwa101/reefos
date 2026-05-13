@@ -122,7 +122,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const enabled = traits.includes(CAP.PACKAGING_HIERARCHY);
       setPackagingEnabled(enabled);
       setPackagingTiers([]);
-      // Hydrate persisted packaging tiers for edit mode.
+      setClassificationEnabled(traits.includes(CAP.MULTI_CLASSIFICATION));
+      setTagDrafts([]);
+      // Hydrate persisted packaging tiers + tag links for edit mode.
       let cancelled = false;
       (async () => {
         try {
@@ -132,6 +134,27 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           if (rows.length > 0) setPackagingEnabled(true);
         } catch (e) {
           console.warn("[USAEditor] failed to load packaging tiers", e);
+        }
+        try {
+          const links = await TagsGateway.listLinksFor(asset.id);
+          if (cancelled) return;
+          if (links.length > 0) {
+            setClassificationEnabled(true);
+            setTagDrafts(
+              links.map((l) => ({
+                id: l.tag.id,
+                tag_key: l.tag.tag_key,
+                tag_value: l.tag.tag_value,
+                label_i18n: l.tag.label_i18n,
+                parent_tag_id: l.tag.parent_tag_id,
+                metadata: l.tag.metadata,
+                is_active: l.tag.is_active,
+                sort_order: l.tag.sort_order,
+              })),
+            );
+          }
+        } catch (e) {
+          console.warn("[USAEditor] failed to load tag links", e);
         }
       })();
       return () => {
@@ -149,6 +172,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setTab("basic");
       setPackagingEnabled(false);
       setPackagingTiers([]);
+      setClassificationEnabled(false);
+      setTagDrafts([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
