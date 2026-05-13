@@ -209,6 +209,7 @@ export const ProductCard = ({
           alt={name}
           width={768}
           height={768}
+          priority={priority}
           className="h-full w-full object-cover object-center"
           wrapperClassName="absolute inset-0"
         />
