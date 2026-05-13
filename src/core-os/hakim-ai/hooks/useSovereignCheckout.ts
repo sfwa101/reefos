@@ -48,6 +48,21 @@ export type SovereignCheckoutInput = {
    * network failures without creating duplicate orders or charges.
    */
   idempotency_key: string;
+  /**
+   * Phase C5 — Sovereign Price Validation (Article 12.1). Deterministic
+   * `snapshot_hash` produced by the latest Cashier Brain preview. The
+   * server re-runs the brain against authoritative DNA and rejects the
+   * checkout if the hash does not match.
+   */
+  expected_snapshot_hash: string;
+  /** Optional context override for the price re-computation (defaults to guest tier). */
+  cashier_context?: {
+    member_tier?: "guest" | "bronze" | "silver" | "gold" | "vip";
+    coupon_code?: string | null;
+    delivery_zone_id?: string | null;
+    delivery_fee?: number;
+    currency?: string;
+  };
 };
 
 /** Browser-safe UUID v4 generator (crypto.randomUUID with a polyfill fallback). */
