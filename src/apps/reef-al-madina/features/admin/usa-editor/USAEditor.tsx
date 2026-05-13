@@ -812,25 +812,27 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               )}
             </TabsContent>
 
-            <TabsContent value="inventory" className="m-0">
-              {!asset ? (
-                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
-                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
-                  <p className="text-[13px] font-display">احفظ الأصل أولاً</p>
-                  <p className="text-[11px] text-foreground-tertiary mt-1">
-                    إدارة المخزون متاحة بعد سكّ الأصل وتوليد SKUs.
+            <TabsContent value="inventory" className="m-0 space-y-4">
+              <LivingInventoryBuilder
+                packagingTiers={packagingTiers}
+                packagingEnabled={packagingEnabled}
+                value={inventoryDrafts}
+                onChange={setInventoryDrafts}
+              />
+
+              {asset && assetType === "physical" && (
+                <div className="pt-2 border-t border-border/40">
+                  <p className="text-[10.5px] font-bold text-foreground-tertiary mb-2">
+                    📊 لقطة المخزون الحالي عبر الفروع
                   </p>
+                  <InventoryMatrixPanel assetId={asset.id} />
                 </div>
-              ) : assetType !== "physical" ? (
-                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
-                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
-                  <p className="text-[13px] font-display">نوع غير مادي</p>
-                  <p className="text-[11px] text-foreground-tertiary mt-1 leading-relaxed">
-                    إدارة طاقة الاستيعاب أو الفترات الزمنية ستتوفر في التحديث القادم.
-                  </p>
-                </div>
-              ) : (
-                <InventoryMatrixPanel assetId={asset.id} />
+              )}
+
+              {!asset && (
+                <p className="text-[10.5px] text-foreground-tertiary leading-relaxed text-center px-2">
+                  💡 يتم تثبيت قيم المخزون بعد سكّ الأصل وتوليد SKU الأساسي.
+                </p>
               )}
             </TabsContent>
 
