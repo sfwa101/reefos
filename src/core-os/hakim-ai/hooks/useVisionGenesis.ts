@@ -151,8 +151,8 @@ export function useVisionGenesis() {
       });
       if (error) {
         const code =
-          (data as { error?: VisionGenesisError } | null)?.error ?? "unknown";
-        throw new Error(code);
+          (data as { error?: VisionGenesisError } | null)?.error ?? null;
+        throw new Error(code ?? error.message ?? "unknown");
       }
       const payload = data as { error?: VisionGenesisError } & USAGenesisPayload;
       if (!payload || payload.error) {
