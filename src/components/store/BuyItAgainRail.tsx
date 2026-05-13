@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { IdentityGateway } from "@/core/identity";
+import { CommerceGateway } from "@/core/commerce";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { products as allProducts } from "@/core/catalog/legacy/legacyRuntime";
 import ProductCard from "@/components/ProductCard";
@@ -26,45 +25,11 @@ const BuyItAgainRail = ({ pool }: Props) => {
     let cancelled = false;
     (async () => {
       try {
-        const uid = await IdentityGateway.getCurrentUserId();
-        if (!uid) return;
-
-        const { data: masters } = await supabase
-          .from("salsabil_master_orders")
-          .select("id")
-          .eq("customer_id", uid)
-          .order("created_at", { ascending: false })
-          .limit(20);
-        const masterIds = (masters ?? []).map((m) => m.id);
-        if (masterIds.length === 0 || cancelled) return;
-
-        const { data: nodes } = await supabase
-          .from("salsabil_fulfillment_nodes")
-          .select("id")
-          .in("master_order_id", masterIds);
-        const nodeIds = (nodes ?? []).map((n) => n.id);
-        if (nodeIds.length === 0 || cancelled) return;
-
-        const { data, error } = await supabase
-          .from("salsabil_fulfillment_items")
-          .select("created_at, salsabil_skus!inner(asset_id)")
-          .in("node_id", nodeIds)
-          .order("created_at", { ascending: false })
-          .limit(60);
-        if (error || !data || cancelled) return;
-
-        const ids = Array.from(
-          new Set(
-            ((data ?? []) as unknown as Array<{
-              salsabil_skus: { asset_id: string | null } | null;
-            }>)
-              .map((r) => r.salsabil_skus?.asset_id)
-              .filter((aid): aid is string => Boolean(aid))
-              .map(assetIdToLegacyProductId),
-          ),
-        );
+        const assetIds = await CommerceGateway.getRecentlyPurchasedAssetIds(60);
+        if (cancelled || assetIds.length === 0) return;
+        const legacyIds = assetIds.map(assetIdToLegacyProductId);
         const poolIds = new Set(pool.map((p) => p.id));
-        const fromOrders = ids
+        const fromOrders = legacyIds
           .filter((id) => poolIds.has(id))
           .map((id) => allProducts.find((p) => p.id === id))
           .filter((p): p is Product => Boolean(p))
