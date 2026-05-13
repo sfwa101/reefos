@@ -52,9 +52,8 @@ function pickPalette(category: string | null, traits: string[]): { name: string;
   return PALETTES[h % PALETTES.length];
 }
 Deno.serve(async (req) => {
-  // CORS preflight shield — MUST be first to prevent gateway-level rejections
   if (req.method === "OPTIONS") {
-    return new Response("ok", { status: 200, headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
