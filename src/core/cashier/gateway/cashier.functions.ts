@@ -144,53 +144,7 @@ export const cashierPreviewSchema = previewSchema;
 export const previewCashierFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => previewSchema.parse(input))
   .handler(async ({ data }): Promise<CartSnapshot> => {
-    const ids = Array.from(new Set(data.items.map((i) => i.id)));
-
-    const { data: rows, error } = await supabase
-      .from("view_product_financial_dna")
-      .select("id, base_price, currency, tax_class, pricing_rules")
-      .in("id", ids);
-
-    if (error) {
-      throw new Error(`Failed to load product financial DNA: ${error.message}`);
-    }
-
-    const dnaById = new Map<string, ProductFinancialDNA>();
-    for (const r of (rows ?? []) as DnaRow[]) {
-      dnaById.set(r.id, rowToDna(r));
-    }
-
-    const lines: CartLineInput[] = [];
-    const missing: string[] = [];
-    for (const item of data.items) {
-      const dna = dnaById.get(item.id);
-      if (!dna) {
-        missing.push(item.id);
-        continue;
-      }
-      lines.push({
-        id: item.id,
-        dna,
-        qty: item.qty,
-        modifiers: item.modifiers,
-      });
-    }
-
-    if (missing.length > 0) {
-      throw new Error(
-        `Cashier preview: ${missing.length} product(s) missing financial DNA: ${missing.join(",")}`,
-      );
-    }
-
-    const context: CashierContext = {
-      member_tier: data.context.member_tier,
-      coupon_code: data.context.coupon_code ?? null,
-      delivery_zone_id: data.context.delivery_zone_id ?? null,
-      delivery_fee: data.context.delivery_fee,
-      currency: data.context.currency,
-    };
-
-    const snapshot = calculateCart(lines, context);
+    const snapshot = await computeAuthoritativeSnapshot(data);
 
     // ── Append-only Ledger (Article 7.1) — fire-and-forget ────────
     // Non-blocking: do NOT await. The preview response returns
