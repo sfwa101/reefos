@@ -7,10 +7,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase as supabaseBrowser } from "@/integrations/supabase/client";
-import {
-  buildCardsBatch,
-  buildDetails,
-} from "../runtime/ProductRuntimeEngine";
 import { normalizeRelation } from "../runtime/ProductTransformers";
 import type {
   ProductCardVM,
@@ -292,58 +288,64 @@ export const getProductRelationsFn = createServerFn({ method: "POST" })
   });
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Wave P-B (Static Catalog Killer) — Cart hydration & integrity surface.
-// These three handlers are the canonical replacement for `getById` / `bySource`
-// / direct `products` reads previously served by `src/lib/products.ts`. They
-// underpin `catalogGateway.getManyById`, `catalogGateway.getDetailsById`, and
-// `catalogGateway.priceQuote`.
+// Phase U-1 (Unification Strike) — Cart hydration & integrity surface.
+// These four handlers were previously bound to the legacy `usa_products`
+// table. They now read directly from the Sovereign Asset Ledger
+// (`salsabil_assets` ⨝ `salsabil_skus` ⨝ `salsabil_financial_contracts`)
+// and reuse the in-file `assetToCardVM` adapter so every consumer of
+// `catalogGateway` keeps receiving canonical `ProductCardVM`/`ProductDetailsVM`.
 // ─────────────────────────────────────────────────────────────────────────────
 
 const ManyByIdSchema = z.object({
   ids: z.array(z.string().uuid()).min(1).max(100),
 });
 
+async function resolveSectionForCategoryPath(
+  path: string | null,
+): Promise<{ id: string; slug: string }> {
+  const head = path?.split("/")[0] ?? "";
+  if (!head) return { id: "00000000-0000-0000-0000-000000000000", slug: "general" };
+  const { data } = await supabase
+    .from("sections")
+    .select("id, slug")
+    .eq("slug", head)
+    .maybeSingle();
+  return data ?? { id: "00000000-0000-0000-0000-000000000000", slug: head };
+}
+
 export const getProductsByIdsFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ManyByIdSchema.parse(input))
   .handler(async ({ data }): Promise<ProductCardVM[]> => {
     const { data: rows, error } = await supabase
-      .from("usa_products")
-      .select("*")
+      .from("salsabil_assets")
+      .select(SOVEREIGN_SELECT)
       .in("id", data.ids)
-      .eq("is_active", true)
-      .is("deleted_at", null);
+      .eq("is_active", true);
     if (error) throw error;
     if (!rows || rows.length === 0) return [];
 
-    const sectionIds = Array.from(new Set(rows.map((r) => r.section_id)));
-    const [{ data: sections }, { data: caps }, { data: media }] = await Promise.all([
-      supabase.from("sections").select("id, slug").in("id", sectionIds),
-      supabase
-        .from("section_capabilities")
-        .select("section_id, capability_key")
-        .in("section_id", sectionIds),
-      supabase
-        .from("product_media")
-        .select("*")
-        .in("product_id", rows.map((r) => r.id))
-        .eq("kind", "hero"),
-    ]);
-
-    const capsBySection = new Map<string, string[]>();
-    for (const c of caps ?? []) {
-      const arr = capsBySection.get(c.section_id) ?? [];
-      arr.push(c.capability_key);
-      capsBySection.set(c.section_id, arr);
-    }
-    const sectionInfo = new Map(
-      (sections ?? []).map((s) => [
-        s.id,
-        { slug: s.slug, capabilities: capsBySection.get(s.id) ?? [] },
-      ]),
+    const assets = rows as unknown as SovereignAsset[];
+    const slugHeads = Array.from(
+      new Set(assets.map((a) => a.category_path?.split("/")[0] ?? "").filter(Boolean)),
     );
-    const heroMedia = new Map((media ?? []).map((m) => [m.product_id, m]));
+    const sectionMap = new Map<string, { id: string; slug: string }>();
+    if (slugHeads.length > 0) {
+      const { data: secs } = await supabase
+        .from("sections")
+        .select("id, slug")
+        .in("slug", slugHeads);
+      for (const s of secs ?? []) sectionMap.set(s.slug, { id: s.id, slug: s.slug });
+    }
 
-    return buildCardsBatch({ products: rows, sectionInfo, heroMedia });
+    const out: ProductCardVM[] = [];
+    for (const a of assets) {
+      const head = a.category_path?.split("/")[0] ?? "";
+      const section = sectionMap.get(head)
+        ?? { id: "00000000-0000-0000-0000-000000000000", slug: head || "general" };
+      const card = assetToCardVM(a, section);
+      if (card) out.push(card);
+    }
+    return out;
   });
 
 const DetailsByIdSchema = z.object({ id: z.string().uuid() });
@@ -352,57 +354,44 @@ export const getProductDetailsByIdFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => DetailsByIdSchema.parse(input))
   .handler(async ({ data }): Promise<ProductDetailsVM | null> => {
     const { data: row, error } = await supabase
-      .from("usa_products")
-      .select("*")
+      .from("salsabil_assets")
+      .select(SOVEREIGN_SELECT)
       .eq("id", data.id)
       .eq("is_active", true)
-      .is("deleted_at", null)
       .maybeSingle();
     if (error) throw error;
     if (!row) return null;
 
-    const [
-      { data: section },
-      { data: media },
-      { data: variants },
-      { data: addons },
-      { data: nutrition },
-      { data: relations },
-    ] = await Promise.all([
-      supabase.from("sections").select("id, slug").eq("id", row.section_id).maybeSingle(),
-      supabase.from("product_media").select("*").eq("product_id", row.id).order("sort_order"),
-      supabase
-        .from("product_variants_v2")
-        .select("*")
-        .eq("product_id", row.id)
-        .eq("is_active", true)
-        .order("sort_order"),
-      supabase
-        .from("product_addons")
-        .select("*")
-        .eq("product_id", row.id)
-        .eq("is_active", true)
-        .order("sort_order"),
-      supabase.from("product_nutrition").select("*").eq("product_id", row.id).maybeSingle(),
-      supabase.from("product_relations").select("*").eq("product_id", row.id),
-    ]);
-    if (!section) return null;
+    const asset = row as unknown as SovereignAsset;
+    const section = await resolveSectionForCategoryPath(asset.category_path);
+    const card = assetToCardVM(asset, section);
+    if (!card) return null;
 
-    const { data: caps } = await supabase
-      .from("section_capabilities")
-      .select("capability_key")
-      .eq("section_id", section.id);
-    const capabilityKeys = (caps ?? []).map((c) => c.capability_key);
+    const traits = (asset.traits ?? {}) as Record<string, unknown>;
+    const galleryRaw = Array.isArray(asset.media) ? asset.media : [];
+    const gallery: MediaRefVM[] = galleryRaw
+      .map((m): MediaRefVM | null => {
+        if (typeof m === "string") return { url: m, alt: card.name, kind: "gallery" };
+        if (m && typeof m === "object") {
+          const r = m as Record<string, unknown>;
+          const url = (r.url ?? r.src) as string | undefined;
+          if (!url) return null;
+          return { url, alt: card.name, kind: (r.kind as string) ?? "gallery" };
+        }
+        return null;
+      })
+      .filter((x): x is MediaRefVM => x != null)
+      .filter((m) => m.url !== card.hero?.url);
 
-    return buildDetails({
-      product: row,
-      section: { slug: section.slug, capabilities: capabilityKeys },
-      media: media ?? [],
-      variants: variants ?? [],
-      addons: addons ?? [],
-      nutrition: nutrition ?? null,
-      relations: relations ?? [],
-    });
+    return {
+      ...card,
+      description: asset.description ? { ar: asset.description } : undefined,
+      isPerishable: traits.perishable === true,
+      gallery,
+      variants: [],
+      addons: [],
+      relations: [],
+    };
   });
 
 const PriceQuoteSchema = z.object({
@@ -439,39 +428,50 @@ export const priceQuoteFn = createServerFn({ method: "POST" })
   .handler(async ({ data }): Promise<PriceQuoteVM> => {
     const productIds = Array.from(new Set(data.lines.map((l) => l.productId)));
     const { data: rows, error } = await supabase
-      .from("usa_products")
-      .select("id, base_price, currency, is_active, deleted_at")
+      .from("salsabil_assets")
+      .select(`id, is_active, salsabil_skus ( id, sort_order, is_active, salsabil_financial_contracts ( base_price, currency, is_active ) )`)
       .in("id", productIds);
     if (error) throw error;
 
-    const variantIds = data.lines
-      .map((l) => l.variantId)
-      .filter((v): v is string => typeof v === "string");
-    const variantDeltas = new Map<string, number>();
-    if (variantIds.length > 0) {
-      const { data: vrows } = await supabase
-        .from("product_variants_v2")
-        .select("id, price_delta")
-        .in("id", variantIds);
-      for (const v of vrows ?? []) {
-        variantDeltas.set(v.id, Number(v.price_delta ?? 0));
-      }
-    }
+    type AssetPriceRow = {
+      id: string;
+      is_active: boolean;
+      salsabil_skus: Array<{
+        id: string;
+        sort_order: number | null;
+        is_active: boolean | null;
+        salsabil_financial_contracts: Array<{
+          base_price: number | string | null;
+          currency: string | null;
+          is_active: boolean | null;
+        }> | null;
+      }> | null;
+    };
+    const assetById = new Map(
+      ((rows ?? []) as unknown as AssetPriceRow[]).map((r) => [r.id, r]),
+    );
 
-    const byId = new Map((rows ?? []).map((r) => [r.id, r]));
-    const currency = (rows?.[0]?.currency as string | undefined) ?? "EGP";
+    let currency = "EGP";
     const quotedLines: PriceQuoteLineVM[] = data.lines.map((l) => {
-      const row = byId.get(l.productId);
-      const available = !!row && row.is_active === true && row.deleted_at === null;
-      const base = Number(row?.base_price ?? 0);
-      const delta = l.variantId ? (variantDeltas.get(l.variantId) ?? 0) : 0;
-      const unitPrice = base + delta;
+      const asset = assetById.get(l.productId);
+      const skus = asset?.salsabil_skus ?? [];
+      const ordered = [...skus].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+      const sku = l.variantId
+        ? ordered.find((s) => s.id === l.variantId)
+        : (ordered.find((s) => s.is_active !== false) ?? ordered[0]);
+      const contract =
+        sku?.salsabil_financial_contracts?.find((c) => c.is_active !== false)
+        ?? sku?.salsabil_financial_contracts?.[0];
+      const unitPrice = contract?.base_price != null ? Number(contract.base_price) : 0;
+      const lineCurrency = (contract?.currency ?? "EGP") as string;
+      currency = lineCurrency;
+      const available = !!asset && asset.is_active === true && !!sku;
       return {
         productId: l.productId,
         variantId: l.variantId,
         unitPrice,
         lineTotal: unitPrice * l.qty,
-        currency: (row?.currency as string | undefined) ?? currency,
+        currency: lineCurrency,
         available,
       };
     });
@@ -481,9 +481,10 @@ export const priceQuoteFn = createServerFn({ method: "POST" })
 
 // ────────────────────────────────────────────────────────────────────────────
 // Constitution v2.0 · Phase 1 · Step 3
-// DNA Endpoint — exposes a `usa_products` row as a ProductCivilizationEntity.
-// Public read (matches the existing public RLS on usa_products). Returns the
-// clean Layer-4 Domain model — never raw DB rows.
+// DNA Endpoint — exposes a Sovereign Asset row as a ProductCivilizationEntity.
+// Public read (matches `salsabil_assets` public RLS). Returns the clean Layer-4
+// Domain model — never raw DB rows. The tolerant `projectProductDNA` projector
+// accepts our synthesized partial-row shape and fills any gaps with defaults.
 // ────────────────────────────────────────────────────────────────────────────
 
 const DNAInputSchema = z.object({
@@ -494,14 +495,40 @@ export const getProductDNAFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => DNAInputSchema.parse(input))
   .handler(async ({ data }): Promise<ProductCivilizationEntity> => {
     const { data: row, error } = await supabase
-      .from("usa_products")
-      .select("*")
+      .from("salsabil_assets")
+      .select(SOVEREIGN_SELECT)
       .eq("id", data.id)
-      .is("deleted_at", null)
+      .eq("is_active", true)
       .maybeSingle();
 
     if (error) throw error;
     if (!row) throw new Error(`Product DNA not found for id=${data.id}`);
 
-    return projectProductDNA(row as UsaProductRow);
+    const asset = row as unknown as SovereignAsset;
+    const primary = pickPrimarySku(asset);
+    const contract = primary?.salsabil_financial_contracts?.find((c) => c.is_active !== false)
+      ?? primary?.salsabil_financial_contracts?.[0];
+    const traits = (asset.traits ?? {}) as Record<string, unknown>;
+
+    const synthesized: UsaProductRow = {
+      id: asset.id,
+      slug: (traits.slug as string | undefined) ?? asset.id,
+      sku: primary?.sku_code ?? null,
+      section_id: null,
+      name_i18n: { ar: asset.name } as unknown as JsonValue,
+      description_i18n: asset.description
+        ? ({ ar: asset.description } as unknown as JsonValue)
+        : null,
+      base_price: contract?.base_price ?? 0,
+      currency: contract?.currency ?? "EGP",
+      sale_unit: ((primary?.attributes as Record<string, unknown> | null)?.unit
+        ?? traits.unit ?? null) as string | null,
+      is_perishable: traits.perishable === true,
+      tags: Array.isArray(traits.tags)
+        ? (traits.tags as unknown[]).filter((t): t is string => typeof t === "string")
+        : null,
+      attributes: traits as unknown as JsonValue,
+    } as UsaProductRow;
+
+    return projectProductDNA(synthesized);
   });

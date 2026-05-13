@@ -41,10 +41,8 @@ const CLUSTERS: HubCluster[] = [
     title: "العمليات",
     items: [
       { to: "/admin/orders/", label: "الطلبات", icon: ShoppingBag },
-      { to: "/admin/product-units", label: "المنتجات", icon: Package },
-      { to: "/admin/assets", label: "الأصول", icon: Layers },
+      { to: "/admin/assets", label: "المنتجات والأصول", icon: Layers },
       { to: "/admin/products/new", label: "منتج جديد بحكيم", icon: Sparkles },
-      { to: "/admin/inventory", label: "المخزون", icon: Boxes },
       { to: "/admin/inventory-locations", label: "مواقع المخزون", icon: MapPin },
       { to: "/admin/low-stock", label: "نقص المخزون", icon: AlertTriangle },
       { to: "/admin/cross-branch-transfers", label: "تحويلات بين الفروع", icon: Repeat },
