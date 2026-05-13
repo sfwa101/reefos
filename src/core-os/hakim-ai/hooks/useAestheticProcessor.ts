@@ -18,6 +18,8 @@ export type AestheticInput = {
   base64?: string;
   mime?: string;
   style?: AestheticStyle;
+  /** Optional custom palette — overrides `style`. */
+  palette?: { name: string; hex: string } | null;
 };
 
 export type AestheticResult = {
