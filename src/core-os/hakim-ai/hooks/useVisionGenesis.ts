@@ -1,16 +1,17 @@
 /**
- * useVisionGenesis — Sovereign Vision Hook (Phase C-1).
+ * useVisionGenesis — Sovereign Vision Hook (Phase C-4).
  *
  * Constitutional flow:
- *   UI → MediaGateway (Storage Bypass upload)
- *      → HakimGateway (Inference invocation)
+ *   UI → ImageCompressor (max 1024px, WebP q≈0.8, < 150 KB)
+ *      → blobToDataUrl (inline base64)
+ *      → HakimGateway (Edge inference)
  *
- * The hook is a pure orchestration layer: it owns NO direct Supabase
- * imports, NO Base64 payloads, and NO `functions.invoke` calls. All
- * infrastructure access is delegated to Sovereign Gateways.
+ * The hook owns NO direct Supabase imports, NO functions.invoke calls,
+ * and NO Storage uploads for vision inference (Storage is no longer in
+ * the critical path — the AI Gateway gets the inline data directly).
  */
 import { useMutation } from "@tanstack/react-query";
-import { MediaGateway } from "@/core/media";
+import { compressImage, blobToDataUrl } from "@/core/media";
 import { HakimGateway, type ProductDNAPayload } from "@/core/hakim-ai";
 
 // Backwards-compatible type aliases — downstream consumers (USAEditor,
@@ -32,23 +33,9 @@ export type VisionGenesisError =
   | "missing_key"
   | "unknown";
 
-const STAGING_BUCKET = "product-images";
-const STAGING_PREFIX = "vision-staging";
-
-async function uploadToStaging(file: File): Promise<string> {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60);
-  const path = `${STAGING_PREFIX}/${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 8)}-${safeName}`;
-  const { publicUrl } = await MediaGateway.uploadFile({
-    bucket: STAGING_BUCKET,
-    path,
-    file,
-    contentType: file.type || "image/jpeg",
-    upsert: false,
-  });
-  if (!publicUrl) throw new Error("storage_public_url_missing");
-  return publicUrl;
+async function fileToCompressedDataUrl(file: File): Promise<string> {
+  const compressed = await compressImage(file);
+  return blobToDataUrl(compressed);
 }
 
 export type VisionGenesisInput = {
@@ -61,16 +48,16 @@ export type VisionGenesisInput = {
 export function useVisionGenesis() {
   return useMutation<USAGenesisPayload, Error, VisionGenesisInput>({
     mutationFn: async ({ file, hint, secondaryFile }) => {
-      // 1) Storage Bypass — upload first, ship URLs only.
-      const image_url = await uploadToStaging(file);
-      const secondary_image_url = secondaryFile
-        ? await uploadToStaging(secondaryFile)
+      // 1) Universal Compression — shrink in the browser to a few KB.
+      const image_base64 = await fileToCompressedDataUrl(file);
+      const secondary_image_base64 = secondaryFile
+        ? await fileToCompressedDataUrl(secondaryFile)
         : null;
 
       // 2) Sovereign inference through the HakimGateway.
       return HakimGateway.inferProductDNA({
-        image_url,
-        secondary_image_url,
+        image_base64,
+        secondary_image_base64,
         hint,
       });
     },

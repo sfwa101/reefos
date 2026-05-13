@@ -11,6 +11,7 @@
  * `supabase.storage.from(...)` invocation is constrained to this file.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { compressImage } from "../utils/ImageCompressor";
 
 export interface UploadFileInput {
   /** Storage bucket id (e.g. "product-images", "kyc-documents", "avatars"). */
@@ -23,6 +24,11 @@ export interface UploadFileInput {
   readonly contentType?: string;
   /** Overwrite existing object at the same path. Defaults to `false`. */
   readonly upsert?: boolean;
+  /**
+   * Skip the Universal Compression Engine. Default: false.
+   * Compression is enforced for every `image/*` payload that is a real `File`.
+   */
+  readonly skipCompression?: boolean;
 }
 
 export interface UploadFileResult {
@@ -32,11 +38,39 @@ export interface UploadFileResult {
 }
 
 export const MediaGateway = {
-  /** Upload a file to a Lovable Cloud storage bucket. */
+  /**
+   * Upload a file to a Lovable Cloud storage bucket.
+   *
+   * Phase C-4: every `image/*` File is shrunk through the Universal
+   * Compression Engine (max 1024px / WebP q≈0.8) before it ever touches
+   * Supabase Storage. This guarantees Empire-wide bandwidth + bucket
+   * optimization without each call site reimplementing the dance.
+   */
   async uploadFile(input: UploadFileInput): Promise<UploadFileResult> {
-    const { bucket, path, file, contentType, upsert } = input;
-    const { error } = await supabase.storage.from(bucket).upload(path, file, {
-      contentType: contentType ?? (file instanceof File ? file.type : undefined) ?? "application/octet-stream",
+    const { bucket, path, file, contentType, upsert, skipCompression } = input;
+
+    let payload: Blob = file;
+    if (
+      !skipCompression &&
+      file instanceof File &&
+      typeof file.type === "string" &&
+      file.type.startsWith("image/")
+    ) {
+      try {
+        payload = await compressImage(file);
+      } catch {
+        payload = file; // fail-open: never block an upload on compression hiccups.
+      }
+    }
+
+    const resolvedType =
+      contentType ??
+      (payload instanceof File ? payload.type : undefined) ??
+      (file instanceof File ? file.type : undefined) ??
+      "application/octet-stream";
+
+    const { error } = await supabase.storage.from(bucket).upload(path, payload, {
+      contentType: resolvedType,
       upsert: upsert ?? false,
     });
     if (error) throw new Error(`media_upload_failed: ${error.message}`);

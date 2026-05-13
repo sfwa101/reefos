@@ -14,10 +14,14 @@ import { supabase } from "@/integrations/supabase/client";
 // ─── Vision Genesis (Product DNA) ────────────────────────────────────────
 
 export interface InferProductDNAInput {
-  /** Public URL produced by `MediaGateway.uploadFile` (vision-staging/*). */
-  readonly image_url: string;
-  /** Optional secondary photo URL (e.g. nutrition label). */
-  readonly secondary_image_url?: string | null;
+  /**
+   * Phase C-4 — inline `data:image/<mime>;base64,...` URL produced by the
+   * Universal Compression Engine. Must be < 150 KB after compression to
+   * keep the Deno isolate safe and the AI Gateway happy.
+   */
+  readonly image_base64: string;
+  /** Optional secondary photo data URL (e.g. nutrition label). */
+  readonly secondary_image_base64?: string | null;
   /** Free-text steering hint forwarded to the model. */
   readonly hint?: string;
 }
@@ -109,25 +113,28 @@ async function readErrorEnvelope(
 
 export const HakimGateway = {
   /**
-   * Inference Step — sends pre-uploaded image URLs to the
-   * `vision_genesis` edge function and returns the sanitized
-   * Universal Salsabil Asset Product DNA payload.
+   * Inference Step — Phase C-4. Sends compressed inline base64 images
+   * (≤ ~150 KB each) to the `vision_genesis` edge function and returns
+   * the sanitized Universal Salsabil Asset Product DNA payload.
    *
-   * Pre-condition: callers MUST first upload images through
-   * `MediaGateway.uploadFile` and pass the resulting public URLs.
-   * Raw Base64 / Blob payloads are rejected by contract.
+   * Pre-condition: callers MUST run images through the Universal
+   * Compression Engine (`compressImage` + `blobToDataUrl`) BEFORE invoking
+   * this gateway. Raw multi-MB blobs would re-introduce the Deno OOM crash.
    */
   async inferProductDNA(
     input: InferProductDNAInput,
   ): Promise<ProductDNAPayload> {
-    if (!input.image_url || typeof input.image_url !== "string") {
-      throw new Error("image_url is required");
+    if (!input.image_base64 || typeof input.image_base64 !== "string") {
+      throw new Error("image_base64 is required");
+    }
+    if (!input.image_base64.startsWith("data:image/")) {
+      throw new Error("image_base64 must be a data: URL (image/*)");
     }
 
     const { data, error } = await supabase.functions.invoke("vision_genesis", {
       body: {
-        image_url: input.image_url,
-        secondary_image_url: input.secondary_image_url ?? null,
+        image_base64: input.image_base64,
+        secondary_image_base64: input.secondary_image_base64 ?? null,
         hint: input.hint,
       },
     });
