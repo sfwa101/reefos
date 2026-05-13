@@ -267,7 +267,11 @@ export function usePosEngine() {
     if (!user) { toast.error("غير مسجل دخول"); return null; }
     if (!shift) { toast.error("افتح ورديّة أولاً"); return null; }
     if (cart.length === 0) { toast.error("السلة فارغة"); return null; }
-    if (tendered < subtotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
+    if (!sovereignHash || !sovereignFresh) {
+      toast.error("جاري التحقق من السعر السيادي… أعِد المحاولة");
+      return null;
+    }
+    if (tendered < displayTotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
 
     const idem = (typeof crypto !== "undefined" && crypto.randomUUID)
       ? crypto.randomUUID()
