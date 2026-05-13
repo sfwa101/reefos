@@ -6,5 +6,5 @@ export const Route = createFileRoute("/_app/store/$slug")({
   beforeLoad: ({ params }) => {
     if (!getSectionIdentity(params.slug)) throw notFound();
   },
-  component: lazyStorePage(() => import("@/pages/store/SectionPage"), "grid"),
+  component: lazyStorePage(() => import("@/components/store/views/SectionPage"), "grid"),
 });

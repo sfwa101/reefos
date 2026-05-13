@@ -1,3 +1,3 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Expenses from "@/pages/admin/Expenses";
+import Expenses from "@/components/admin/views/Expenses";
 export const Route = createFileRoute("/admin/expenses")({ component: Expenses });

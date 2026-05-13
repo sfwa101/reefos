@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import AllocationMonitor from "@/pages/admin/AllocationMonitor";
+import AllocationMonitor from "@/components/admin/views/AllocationMonitor";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 
 export const Route = createFileRoute("/admin/allocation")({
