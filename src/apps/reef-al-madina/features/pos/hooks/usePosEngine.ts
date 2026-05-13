@@ -388,6 +388,10 @@ export function usePosEngine() {
     // cart
     cart,
     subtotal,
+    sovereignTotal,
+    sovereignHash,
+    sovereignFresh,
+    displayTotal,
     itemCount,
     addProduct,
     incLine,
