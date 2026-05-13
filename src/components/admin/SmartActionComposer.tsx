@@ -37,7 +37,7 @@ const NEW_PRODUCT: Action = {
   label: "منتج جديد",
   hint: "أسقِط صورة — وحكيم ينتظر أمرك",
   icon: Sparkles,
-  intent: "new-product",
+  to: "/admin/assets/genesis",
 };
 
 const NEW_HUMAN: Action = {
