@@ -42,10 +42,138 @@ const ListSchema = z.object({
   sort: z.enum(["popularity", "new", "price_asc", "price_desc", "seasonal"]).default("popularity"),
 });
 
+/* ────────────────────────────────────────────────────────────────────
+ * Phase N-1 — Sovereign Asset Adapter.
+ * Storefront grids and PDP now read from `salsabil_assets` joined with
+ * `salsabil_skus` and `salsabil_financial_contracts`. Section scoping
+ * is done via `category_path` prefix matching since assets carry no
+ * `section_id` column. The legacy `usa_products` table is preserved
+ * for forensic rollback but is no longer queried by the storefront.
+ * ──────────────────────────────────────────────────────────────────── */
+
+type SovereignAsset = {
+  id: string;
+  name: string;
+  description: string | null;
+  category_path: string | null;
+  traits: Record<string, unknown> | null;
+  media: unknown;
+  is_active: boolean;
+  asset_type: string;
+  created_at: string;
+  salsabil_skus: Array<{
+    id: string;
+    sku_code: string;
+    barcode: string | null;
+    attributes: Record<string, unknown> | null;
+    is_active: boolean | null;
+    sort_order: number | null;
+    salsabil_financial_contracts: Array<{
+      base_price: number | string | null;
+      currency: string | null;
+      contract_rules: Record<string, unknown> | null;
+      is_active: boolean | null;
+    }> | null;
+  }> | null;
+};
+
+const SOVEREIGN_SELECT = `
+  id, name, description, category_path, traits, media, is_active, asset_type, created_at,
+  salsabil_skus (
+    id, sku_code, barcode, attributes, is_active, sort_order,
+    salsabil_financial_contracts ( base_price, currency, contract_rules, is_active )
+  )
+` as const;
+
+const FALLBACK_IMG =
+  "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
+
+function pickHero(media: unknown): MediaRefVM | undefined {
+  let url: string | null = null;
+  if (Array.isArray(media) && media.length > 0) {
+    const first = media[0];
+    if (typeof first === "string") url = first;
+    else if (first && typeof first === "object") {
+      const r = first as Record<string, unknown>;
+      url = (r.url ?? r.src ?? r.path) as string | undefined ?? null;
+    }
+  } else if (media && typeof media === "object") {
+    const r = media as Record<string, unknown>;
+    url = (r.url ?? r.src) as string | undefined ?? null;
+  }
+  if (!url) return undefined;
+  return { url, alt: { ar: "" }, kind: "hero" };
+}
+
+function pickPrimarySku(asset: SovereignAsset): SovereignAsset["salsabil_skus"] extends Array<infer T> ? T | undefined : never {
+  const skus = asset.salsabil_skus ?? [];
+  const ordered = [...skus].sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  // @ts-expect-error narrow
+  return ordered.find((s) => s.is_active !== false) ?? ordered[0];
+}
+
+function assetToCardVM(
+  asset: SovereignAsset,
+  section: { id: string; slug: string },
+): ProductCardVM | null {
+  const primary = pickPrimarySku(asset);
+  if (!primary) return null;
+  const contract = primary.salsabil_financial_contracts?.find((c) => c.is_active !== false)
+    ?? primary.salsabil_financial_contracts?.[0];
+  const baseAmount = contract?.base_price != null ? Number(contract.base_price) : 0;
+  const traits = (asset.traits ?? {}) as Record<string, unknown>;
+  const compareAtRaw = traits.old_price ?? traits.compare_at_price;
+  const compareAt = typeof compareAtRaw === "number" ? compareAtRaw : Number(compareAtRaw ?? NaN);
+  const currency = ((contract?.currency ?? "EGP") as PriceVM["currency"]);
+  const price: PriceVM = {
+    amount: baseAmount,
+    currency,
+    compareAt: Number.isFinite(compareAt) && compareAt > baseAmount ? compareAt : undefined,
+    discountRatio: Number.isFinite(compareAt) && compareAt > baseAmount && baseAmount > 0
+      ? Math.max(0, Math.min(1, 1 - baseAmount / compareAt))
+      : undefined,
+    tier: "base",
+  };
+  const name: I18nText = { ar: asset.name };
+  const tagsRaw = traits.tags;
+  const tags: string[] = Array.isArray(tagsRaw)
+    ? tagsRaw.filter((t): t is string => typeof t === "string")
+    : [];
+  const hero = pickHero(asset.media) ?? { url: FALLBACK_IMG, alt: name, kind: "hero" };
+  const attrs: Record<string, JsonValue> = {
+    asset_id: asset.id,
+    sku_id: primary.id,
+    category_path: asset.category_path ?? null,
+    ...(traits as Record<string, JsonValue>),
+  };
+  return {
+    id: asset.id,
+    slug: asset.id, // Sovereign assets are addressed by UUID until slug column lands.
+    sku: primary.sku_code,
+    sectionId: section.id,
+    sectionSlug: section.slug,
+    name,
+    shortDescription: typeof traits.short_description === "string"
+      ? { ar: traits.short_description as string }
+      : undefined,
+    hero,
+    price,
+    saleUnit: ((primary.attributes as Record<string, unknown> | null)?.unit
+      ?? traits.unit ?? "وحدة") as string,
+    inStock: true, // inventory join can refine later
+    isLowStock: false,
+    badges: [],
+    tags,
+    rating: { avg: typeof traits.rating === "number" ? (traits.rating as number) : 0, count: 0 },
+    capabilities: [],
+    attributes: Object.freeze(attrs),
+  };
+}
+
 export const listProductsBySectionFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => ListSchema.parse(input))
   .handler(async ({ data }): Promise<ProductListVM> => {
-    // 1) section + capabilities
+    // 1) section row (we still need the id for ProductCardVM.sectionId).
     const { data: section, error: sErr } = await supabase
       .from("sections")
       .select("id, slug")
@@ -54,55 +182,37 @@ export const listProductsBySectionFn = createServerFn({ method: "POST" })
     if (sErr) throw sErr;
     if (!section) return { items: [], total: 0, hasMore: false };
 
-    const { data: caps } = await supabase
-      .from("section_capabilities")
-      .select("capability_key")
-      .eq("section_id", section.id);
-    const capabilityKeys = (caps ?? []).map((c) => c.capability_key);
-
-    // 2) products
+    // 2) Sovereign assets scoped by category_path prefix.
+    const slugLike = `${data.sectionSlug}%`;
     let query = supabase
-      .from("usa_products")
-      .select("*", { count: "exact" })
-      .eq("section_id", section.id)
+      .from("salsabil_assets")
+      .select(SOVEREIGN_SELECT, { count: "exact" })
       .eq("is_active", true)
-      .is("deleted_at", null);
+      .eq("asset_type", "physical")
+      .ilike("category_path", slugLike);
 
     switch (data.sort) {
       case "new":
         query = query.order("created_at", { ascending: false });
         break;
       case "price_asc":
-        query = query.order("base_price", { ascending: true });
-        break;
       case "price_desc":
-        query = query.order("base_price", { ascending: false });
-        break;
       case "seasonal":
-        query = query.order("is_featured", { ascending: false }).order("popularity_score", { ascending: false });
-        break;
+      case "popularity":
       default:
-        query = query.order("popularity_score", { ascending: false });
+        query = query.order("created_at", { ascending: false });
     }
-
     query = query.range(data.offset, data.offset + data.limit - 1);
 
     const { data: rows, count, error: pErr } = await query;
     if (pErr) throw pErr;
 
-    const productIds = (rows ?? []).map((r) => r.id);
-    let heroMedia = new Map();
-    if (productIds.length) {
-      const { data: media } = await supabase
-        .from("product_media")
-        .select("*")
-        .in("product_id", productIds)
-        .eq("kind", "hero");
-      heroMedia = new Map((media ?? []).map((m) => [m.product_id, m]));
-    }
+    let items = ((rows ?? []) as unknown as SovereignAsset[])
+      .map((a) => assetToCardVM(a, section))
+      .filter((v): v is ProductCardVM => v != null);
 
-    const sectionInfo = new Map([[section.id, { slug: section.slug, capabilities: capabilityKeys }]]);
-    const items = buildCardsBatch({ products: rows ?? [], sectionInfo, heroMedia });
+    if (data.sort === "price_asc") items = items.sort((a, b) => a.price.amount - b.price.amount);
+    if (data.sort === "price_desc") items = items.sort((a, b) => b.price.amount - a.price.amount);
 
     const total = count ?? items.length;
     const nextOffset = data.offset + items.length;
@@ -119,41 +229,52 @@ const DetailsSchema = z.object({ slug: z.string().min(1).max(128) });
 export const getProductDetailsFn = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) => DetailsSchema.parse(input))
   .handler(async ({ data }): Promise<ProductDetailsVM | null> => {
-    const { data: row, error } = await supabase
-      .from("usa_products")
-      .select("*")
-      .eq("slug", data.slug)
+    // Phase N-1: assets are addressed by UUID through the slug field.
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(data.slug);
+    if (!isUuid) return null;
+    const { data: asset, error } = await supabase
+      .from("salsabil_assets")
+      .select(SOVEREIGN_SELECT)
+      .eq("id", data.slug)
       .eq("is_active", true)
-      .is("deleted_at", null)
       .maybeSingle();
     if (error) throw error;
-    if (!row) return null;
+    if (!asset) return null;
 
-    const [{ data: section }, { data: media }, { data: variants }, { data: addons }, { data: nutrition }, { data: relations }] = await Promise.all([
-      supabase.from("sections").select("id, slug").eq("id", row.section_id).maybeSingle(),
-      supabase.from("product_media").select("*").eq("product_id", row.id).order("sort_order"),
-      supabase.from("product_variants_v2").select("*").eq("product_id", row.id).eq("is_active", true).order("sort_order"),
-      supabase.from("product_addons").select("*").eq("product_id", row.id).eq("is_active", true).order("sort_order"),
-      supabase.from("product_nutrition").select("*").eq("product_id", row.id).maybeSingle(),
-      supabase.from("product_relations").select("*").eq("product_id", row.id),
-    ]);
-    if (!section) return null;
+    const a = asset as unknown as SovereignAsset;
+    const slugHead = a.category_path?.split("/")[0] ?? "";
+    const { data: section } = slugHead
+      ? await supabase.from("sections").select("id, slug").eq("slug", slugHead).maybeSingle()
+      : { data: null as { id: string; slug: string } | null };
+    const fallbackSection = section ?? { id: "00000000-0000-0000-0000-000000000000", slug: slugHead || "general" };
+    const card = assetToCardVM(a, fallbackSection);
+    if (!card) return null;
 
-    const { data: caps } = await supabase
-      .from("section_capabilities")
-      .select("capability_key")
-      .eq("section_id", section.id);
-    const capabilityKeys = (caps ?? []).map((c) => c.capability_key);
+    const traits = (a.traits ?? {}) as Record<string, unknown>;
+    const galleryRaw = Array.isArray(a.media) ? a.media : [];
+    const gallery: MediaRefVM[] = galleryRaw
+      .map((m): MediaRefVM | null => {
+        if (typeof m === "string") return { url: m, alt: card.name, kind: "gallery" };
+        if (m && typeof m === "object") {
+          const r = m as Record<string, unknown>;
+          const url = (r.url ?? r.src) as string | undefined;
+          if (!url) return null;
+          return { url, alt: card.name, kind: (r.kind as string) ?? "gallery" };
+        }
+        return null;
+      })
+      .filter((x): x is MediaRefVM => x != null)
+      .filter((m) => m.url !== card.hero?.url);
 
-    return buildDetails({
-      product: row,
-      section: { slug: section.slug, capabilities: capabilityKeys },
-      media: media ?? [],
-      variants: variants ?? [],
-      addons: addons ?? [],
-      nutrition: nutrition ?? null,
-      relations: relations ?? [],
-    });
+    return {
+      ...card,
+      description: a.description ? { ar: a.description } : undefined,
+      isPerishable: traits.perishable === true,
+      gallery,
+      variants: [],
+      addons: [],
+      relations: [],
+    };
   });
 
 const RelationsSchema = z.object({ productId: z.string().uuid() });
