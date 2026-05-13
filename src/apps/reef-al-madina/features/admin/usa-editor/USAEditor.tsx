@@ -273,22 +273,65 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
    * Persist the lifted PackagingHierarchyBuilder state to
    * `salsabil_packaging_tiers` via the topological-safe gateway.
    * Off-toggle wipes any existing tiers for the asset.
+   *
+   * Returns a Map<localTierId, realDbId> so downstream gateways
+   * (PricingGateway) can resolve foreign keys to freshly persisted rows.
+   * Returns an empty map on the wipe / error paths.
    */
-  const persistPackaging = async (assetId: string) => {
+  const persistPackaging = async (assetId: string): Promise<Map<string, string>> => {
     try {
-      if (!packagingEnabled) {
+      if (!packagingEnabled || packagingTiers.length === 0) {
         await PackagingGateway.wipeTiers(assetId);
-        return;
+        return new Map();
       }
-      if (packagingTiers.length === 0) {
-        await PackagingGateway.wipeTiers(assetId);
-        return;
-      }
-      await PackagingGateway.syncTiers(assetId, packagingTiers);
+      const idMap = await PackagingGateway.syncTiers(assetId, packagingTiers);
       toast.success("تمت مزامنة شجرة العبوات بنجاح");
+      return idMap;
     } catch (e) {
       console.error("[USAEditor] packaging sync failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ شجرة العبوات";
+      toast.error(`⚠️ ${msg}`);
+      return new Map();
+    }
+  };
+
+  /**
+   * Phase E-2 — Persist the Cognitive Pricing drafts into
+   * `salsabil_financial_contracts`. Runs STRICTLY AFTER persistPackaging
+   * so the freshly-allocated tier UUIDs are available via `tierIdMap`.
+   *
+   * Resilience:
+   *   • Resolves the asset's base SKU via `PricingGateway.resolveBaseSku`.
+   *   • If no contracts in draft → wipes all contracts for the base SKU.
+   *   • If packaging is disabled, the UI only emits a single base-asset
+   *     contract (packaging_tier_local_id === null) — gateway persists
+   *     it with `packaging_tier_id = NULL`.
+   */
+  const persistPricing = async (
+    assetId: string,
+    tierIdMap: Map<string, string>,
+  ): Promise<void> => {
+    try {
+      const baseSkuId = await PricingGateway.resolveBaseSku(assetId);
+      if (!baseSkuId) {
+        if (financialContractsDraft.length > 0) {
+          console.warn("[USAEditor] no base SKU yet — skipping pricing sync");
+        }
+        return;
+      }
+      if (financialContractsDraft.length === 0) {
+        await PricingGateway.wipeForSku(baseSkuId);
+        return;
+      }
+      await PricingGateway.syncContracts(
+        baseSkuId,
+        financialContractsDraft,
+        tierIdMap,
+      );
+      toast.success("تمت مزامنة سياسات التسعير الذكي");
+    } catch (e) {
+      console.error("[USAEditor] pricing sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ سياسات التسعير";
       toast.error(`⚠️ ${msg}`);
     }
   };
