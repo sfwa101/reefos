@@ -84,7 +84,7 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
 export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
-  const [productOpen, setProductOpen] = useState(false);
+  // productOpen state removed in Phase V-1.C — Genesis is a full route now.
   const { activeWorkspaceKind } = useSovereignContext();
   const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
