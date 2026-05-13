@@ -206,8 +206,6 @@ export function SmartActionComposer() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <SmartProductComposer open={productOpen} onOpenChange={setProductOpen} />
     </>
   );
 }
