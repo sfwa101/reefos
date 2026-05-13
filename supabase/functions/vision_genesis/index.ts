@@ -300,7 +300,55 @@ Deno.serve(async (req) => {
       generated_at: new Date().toISOString(),
     };
 
-    return json({ ok: true, ...sanitized });
+    // ── Generative Aesthetics Layer ─────────────────────────────────────
+    // Re-render the cropped subject onto a category-aware pastel backdrop
+    // so storefront cards never expose a raw cutout. Server-side only,
+    // returns a single optimized 2D image (Article 1.2 — Ghostly Payload).
+    let aestheticImage: string | null = null;
+    let aestheticPalette: { name: string; hex: string } | null = null;
+    try {
+      aestheticPalette = pickPalette(sanitized.asset.category_path, sanitized.asset.traits);
+      const prompt = `Professional, photorealistic commercial product shot of "${sanitized.asset.name}" placed in a clean, minimalist environment with a soft, matte ${aestheticPalette.name} pastel background (${aestheticPalette.hex}). Soft diffused studio lighting from the upper-left. Realistic soft drop shadow beneath the product for depth. Centered composition, square framing, e-commerce catalog style, extremely high quality, professional photography. Do not alter the product itself — preserve labels, colors, and proportions exactly.`;
+      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: dataUrl } },
+              ],
+            },
+          ],
+          modalities: ["image", "text"],
+        }),
+      });
+      if (imgRes.ok) {
+        const d = await imgRes.json();
+        const url: string | undefined =
+          d?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (typeof url === "string" && url.startsWith("data:image/")) {
+          aestheticImage = url;
+        }
+      } else {
+        console.warn("aesthetics skipped", imgRes.status);
+      }
+    } catch (e) {
+      console.warn("aesthetics error", e);
+    }
+
+    return json({
+      ok: true,
+      ...sanitized,
+      aesthetic_image_data_url: aestheticImage,
+      aesthetic_palette: aestheticPalette,
+    });
   } catch (e) {
     console.error("vision_genesis error:", e);
     return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
