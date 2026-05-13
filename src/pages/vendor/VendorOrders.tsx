@@ -89,25 +89,16 @@ export default function VendorOrders() {
 
   const queryClient = useQueryClient();
 
-  // Realtime radar — vendor-scoped subscription on fulfillment_nodes
+  // Realtime radar — vendor-scoped subscription via OrderGateway
   useEffect(() => {
     if (!vendorId) return;
-    const channel = supabase
-      .channel(`vendor-fulfillment-${vendorId}`)
-      .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        "postgres_changes" as any,
-        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `vendor_id=eq.${vendorId}` },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (payload: any) => {
-          if (payload.eventType === "INSERT") toast.success("طلب جديد بحاجة للتجهيز!");
-          else if (payload.eventType === "UPDATE") toast("تم تحديث حالة الطلب");
-          queryClient.invalidateQueries({ queryKey: ["admin-grid", "salsabil_fulfillment_nodes"] });
-          queryClient.invalidateQueries({ queryKey: ["vendor-fulfillment-nodes"] });
-        },
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const unsubscribe = OrderGateway.subscribeVendorNodes(vendorId, (e) => {
+      if (e.eventType === "INSERT") toast.success("طلب جديد بحاجة للتجهيز!");
+      else if (e.eventType === "UPDATE") toast("تم تحديث حالة الطلب");
+      queryClient.invalidateQueries({ queryKey: ["admin-grid", "salsabil_fulfillment_nodes"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-fulfillment-nodes"] });
+    });
+    return unsubscribe;
   }, [vendorId, queryClient]);
 
   const metrics = useMemo<BentoMetric[]>(() => [
