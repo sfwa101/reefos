@@ -170,11 +170,13 @@ export default function UsaLedger() {
         }
         dataSource={{
           table: "salsabil_assets",
-          select: "id,name,description,asset_type,traits,is_active,created_at,salsabil_skus(id),salsabil_financial_contracts(base_price,currency,pricing_model,is_active,valid_from)",
+          select: "id,name,description,asset_type,traits,is_active,created_at,salsabil_skus(id,salsabil_financial_contracts(base_price,currency,pricing_model,is_active,valid_from))",
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["name", "description"],
           map: (raw: RawAsset): USARecord => {
-            const activeContract = (raw.salsabil_financial_contracts ?? [])
+            const allContracts: RawContract[] = (raw.salsabil_skus ?? [])
+              .flatMap((s) => s.salsabil_financial_contracts ?? []);
+            const activeContract = allContracts
               .filter((c) => c.is_active)
               .sort((a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime())[0];
             return {
