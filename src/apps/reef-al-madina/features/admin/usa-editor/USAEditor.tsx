@@ -7,13 +7,15 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
+import DimensionalTagSelector from "@/components/commerce/assets/DimensionalTagSelector";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft } from "@/core/commerce";
-import { PackagingGateway } from "@/core/commerce";
+import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
+import { PackagingGateway, TagsGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
@@ -103,6 +105,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [packagingEnabled, setPackagingEnabled] = useState(false);
   const [packagingTiers, setPackagingTiers] = useState<PackagingTierDraft[]>([]);
 
+  // Phase D-5 — Multi-Dimensional Classification (local draft, lifted on save).
+  const [classificationEnabled, setClassificationEnabled] = useState(false);
+  const [tagDrafts, setTagDrafts] = useState<AssetTagDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
@@ -116,7 +122,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const enabled = traits.includes(CAP.PACKAGING_HIERARCHY);
       setPackagingEnabled(enabled);
       setPackagingTiers([]);
-      // Hydrate persisted packaging tiers for edit mode.
+      setClassificationEnabled(traits.includes(CAP.MULTI_CLASSIFICATION));
+      setTagDrafts([]);
+      // Hydrate persisted packaging tiers + tag links for edit mode.
       let cancelled = false;
       (async () => {
         try {
@@ -126,6 +134,27 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           if (rows.length > 0) setPackagingEnabled(true);
         } catch (e) {
           console.warn("[USAEditor] failed to load packaging tiers", e);
+        }
+        try {
+          const links = await TagsGateway.listLinksFor(asset.id);
+          if (cancelled) return;
+          if (links.length > 0) {
+            setClassificationEnabled(true);
+            setTagDrafts(
+              links.map((l) => ({
+                id: l.tag.id,
+                tag_key: l.tag.tag_key,
+                tag_value: l.tag.tag_value,
+                label_i18n: l.tag.label_i18n,
+                parent_tag_id: l.tag.parent_tag_id,
+                metadata: l.tag.metadata,
+                is_active: l.tag.is_active,
+                sort_order: l.tag.sort_order,
+              })),
+            );
+          }
+        } catch (e) {
+          console.warn("[USAEditor] failed to load tag links", e);
         }
       })();
       return () => {
@@ -143,6 +172,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setTab("basic");
       setPackagingEnabled(false);
       setPackagingTiers([]);
+      setClassificationEnabled(false);
+      setTagDrafts([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
@@ -380,11 +411,14 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </SheetHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-5 mt-3 grid grid-cols-5 h-10">
+          <TabsList className="mx-5 mt-3 grid grid-cols-6 h-10">
             <TabsTrigger value="basic" className="text-[11.5px]">أساسي</TabsTrigger>
             <TabsTrigger value="financials" className="text-[11.5px]">المالية</TabsTrigger>
             <TabsTrigger value="packaging" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
               <Layers className="h-3 w-3" /> العبوات
+            </TabsTrigger>
+            <TabsTrigger value="dimensions" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+              <Network className="h-3 w-3" /> الأبعاد
             </TabsTrigger>
             <TabsTrigger value="inventory" className="text-[11.5px]">المخزون</TabsTrigger>
             <TabsTrigger value="genesis" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
@@ -550,6 +584,51 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   <p className="text-[12.5px] font-display">شجرة العبوات معطّلة</p>
                   <p className="text-[10.5px] text-foreground-tertiary mt-1 leading-relaxed">
                     فعّل الميزة من الأعلى لبناء هرم وحدات البيع (Pallet → Carton → kg → g).
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="dimensions" className="m-0 space-y-3">
+              <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Network className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[12.5px] font-extrabold">تفعيل التصنيف متعدد الأبعاد</p>
+                    <p className="text-[10.5px] text-foreground-tertiary">
+                      اربط الأصل بأكثر من محور (قسم · حملة · نظام غذائي · سرعة…).
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !classificationEnabled;
+                    setClassificationEnabled(next);
+                    if (!next) setTagDrafts([]);
+                  }}
+                  className={`h-8 px-3 rounded-full text-[11px] font-extrabold press border ${
+                    classificationEnabled
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-foreground-tertiary"
+                  }`}
+                >
+                  {classificationEnabled ? "مفعّل" : "غير مفعّل"}
+                </button>
+              </div>
+
+              {classificationEnabled ? (
+                <DimensionalTagSelector
+                  assetId={asset?.id ?? null}
+                  value={tagDrafts}
+                  onChange={setTagDrafts}
+                />
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Network className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[12.5px] font-display">التصنيف متعدد الأبعاد معطّل</p>
+                  <p className="text-[10.5px] text-foreground-tertiary mt-1 leading-relaxed">
+                    فعّل الميزة لربط الأصل بمحاور متعددة في وقت واحد.
                   </p>
                 </div>
               )}
