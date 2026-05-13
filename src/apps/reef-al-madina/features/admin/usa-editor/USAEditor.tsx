@@ -337,12 +337,15 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </SheetHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-5 mt-3 grid grid-cols-4 h-10">
-            <TabsTrigger value="basic" className="text-[12px]">أساسي</TabsTrigger>
-            <TabsTrigger value="financials" className="text-[12px]">العقود المالية</TabsTrigger>
-            <TabsTrigger value="inventory" className="text-[12px]">المخزون</TabsTrigger>
-            <TabsTrigger value="genesis" className="text-[12px] gap-1 inline-flex items-center justify-center">
-              <Sparkles className="h-3 w-3" /> التكوين الذكي
+          <TabsList className="mx-5 mt-3 grid grid-cols-5 h-10">
+            <TabsTrigger value="basic" className="text-[11.5px]">أساسي</TabsTrigger>
+            <TabsTrigger value="financials" className="text-[11.5px]">المالية</TabsTrigger>
+            <TabsTrigger value="packaging" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+              <Layers className="h-3 w-3" /> العبوات
+            </TabsTrigger>
+            <TabsTrigger value="inventory" className="text-[11.5px]">المخزون</TabsTrigger>
+            <TabsTrigger value="genesis" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+              <Sparkles className="h-3 w-3" /> الذكي
             </TabsTrigger>
           </TabsList>
 
