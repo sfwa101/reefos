@@ -170,7 +170,7 @@ function GenesisPage() {
   }
 
   async function approve() {
-    if (!name.trim() || price <= 0) { toast.error("الاسم والسعر مطلوبان"); return; }
+    if (!canApprove) { toast.error("الاسم والسعر مطلوبان"); return; }
     setStage("publishing");
     try {
       const base: USAGenesisPayload = genesis ?? {
