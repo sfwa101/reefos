@@ -268,6 +268,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         const tierIdMap = await persistPackaging(asset!.id);
         await persistTags(asset!.id);
         await persistPricing(asset!.id, tierIdMap);
+        await persistInventory(asset!.id, tierIdMap);
         await syncClassificationTrait(asset!.id);
         onSaved?.();
       }
