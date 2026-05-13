@@ -242,6 +242,26 @@ const SearchPage = () => {
             {toLatin(total)} نتيجة لـ <span className="text-foreground">"{q}"</span>
           </p>
         )}
+        {(brand || trait) && (
+          <div className="mt-2 flex flex-wrap gap-1.5 px-1">
+            {brand && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-extrabold text-primary ring-1 ring-primary/20">
+                علامة: {brand}
+                <button onClick={clearBrand} aria-label="إزالة فلتر العلامة" className="opacity-70 hover:opacity-100">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+            {trait && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2.5 py-1 text-[11px] font-extrabold text-accent-foreground ring-1 ring-accent/30">
+                نمط: {traitLabel(trait)}
+                <button onClick={clearTrait} aria-label="إزالة فلتر النمط" className="opacity-70 hover:opacity-100">
+                  <X className="h-3 w-3" />
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
 
       <div className="space-y-6 pt-5">
