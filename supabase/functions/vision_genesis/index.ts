@@ -78,31 +78,44 @@ Deno.serve(async (req) => {
     if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
 
     const {
+      image_url,
+      secondary_image_url,
+      hint,
+      // Legacy back-compat (will be removed): accept image_base64 if a stale
+      // client still sends it, but the new path is URL-only.
       image_base64,
       mime_type,
-      hint,
-      secondary_image_base64,
-      secondary_mime_type,
     } = await req.json().catch(() => ({}));
-    if (!image_base64 || typeof image_base64 !== "string") {
-      return json({ error: "missing_image" }, 400);
+
+    // Resolve a remote URL to a data URL the AI gateway can ingest.
+    const urlToDataUrl = async (u: string): Promise<string> => {
+      const r = await fetch(u);
+      if (!r.ok) throw new Error(`fetch_image_failed:${r.status}`);
+      const ct = r.headers.get("content-type") || "image/jpeg";
+      const buf = new Uint8Array(await r.arrayBuffer());
+      // base64 encode
+      let bin = "";
+      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
+      return `data:${ct};base64,${btoa(bin)}`;
+    };
+
+    let dataUrl: string;
+    if (typeof image_url === "string" && image_url.length > 0) {
+      dataUrl = await urlToDataUrl(image_url);
+    } else if (typeof image_base64 === "string" && image_base64.length > 0) {
+      const mt = typeof mime_type === "string" && mime_type.startsWith("image/")
+        ? mime_type
+        : "image/jpeg";
+      dataUrl = image_base64.startsWith("data:")
+        ? image_base64
+        : `data:${mt};base64,${image_base64}`;
+    } else {
+      return json({ error: "missing_image", details: "image_url is required" }, 400);
     }
-    const mt = typeof mime_type === "string" && mime_type.startsWith("image/")
-      ? mime_type
-      : "image/jpeg";
-    const dataUrl = image_base64.startsWith("data:")
-      ? image_base64
-      : `data:${mt};base64,${image_base64}`;
 
     let secondaryDataUrl: string | null = null;
-    if (typeof secondary_image_base64 === "string" && secondary_image_base64.length > 0) {
-      const smt =
-        typeof secondary_mime_type === "string" && secondary_mime_type.startsWith("image/")
-          ? secondary_mime_type
-          : "image/jpeg";
-      secondaryDataUrl = secondary_image_base64.startsWith("data:")
-        ? secondary_image_base64
-        : `data:${smt};base64,${secondary_image_base64}`;
+    if (typeof secondary_image_url === "string" && secondary_image_url.length > 0) {
+      secondaryDataUrl = await urlToDataUrl(secondary_image_url);
     }
 
     const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
