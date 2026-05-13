@@ -5443,6 +5443,7 @@ export type Database = {
           category_path: string | null
           created_at: string
           created_by: string | null
+          deleted_at: string | null
           description: string | null
           id: string
           is_active: boolean
@@ -5457,6 +5458,7 @@ export type Database = {
           category_path?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
@@ -5471,6 +5473,7 @@ export type Database = {
           category_path?: string | null
           created_at?: string
           created_by?: string | null
+          deleted_at?: string | null
           description?: string | null
           id?: string
           is_active?: boolean
@@ -6023,6 +6026,7 @@ export type Database = {
           attributes: Json
           barcode: string | null
           created_at: string
+          deleted_at: string | null
           id: string
           is_active: boolean
           sku_code: string
@@ -6034,6 +6038,7 @@ export type Database = {
           attributes?: Json
           barcode?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           sku_code: string
@@ -6045,6 +6050,7 @@ export type Database = {
           attributes?: Json
           barcode?: string | null
           created_at?: string
+          deleted_at?: string | null
           id?: string
           is_active?: boolean
           sku_code?: string
