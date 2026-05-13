@@ -4,6 +4,7 @@
  * Reads salsabil_assets joined with salsabil_skus + salsabil_financial_contracts.
  */
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Sparkles, Layers, Wrench, Pencil, Boxes, Plus } from "lucide-react";
 import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import USAEditor, { type USARecord } from "@/apps/reef-al-madina/features/admin/usa-editor/USAEditor";
