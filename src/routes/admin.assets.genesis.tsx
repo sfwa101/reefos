@@ -92,6 +92,7 @@ function GenesisPage() {
   const [sugar, setSugar] = useState<number | "">("");
   const [netWeight, setNetWeight] = useState<number | "">("");
   const [weightUnit, setWeightUnit] = useState("g");
+  const [approxWeight, setApproxWeight] = useState(false);
   const [allergens, setAllergens] = useState("");
   const [aiFields, setAiFields] = useState<Set<string>>(new Set());
   const clearAi = (k: string) =>
@@ -239,7 +240,8 @@ function GenesisPage() {
       </header>
 
       {/* Body — generous padding bottom for sticky veto bar */}
-      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-5 pb-40 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-5 pb-[260px] space-y-6">
+      {/* ↑ pb-[260px] keeps the last DNA field clear of the sticky veto bar AND the AppShell BottomTabBar */}
         {/* 1. Capture Zone */}
         <section className="space-y-3">
           <SectionTitle index="١" label="التقاط الصورة" />
@@ -370,7 +372,7 @@ function GenesisPage() {
                 <DnaField label="سكر (جم)" ai={aiFields.has("sugar")}>
                   <NumInput value={sugar} onChange={(v) => { setSugar(v); clearAi("sugar"); }} />
                 </DnaField>
-                <DnaField label="الوزن الصافي" ai={aiFields.has("netWeight")}>
+                <DnaField label={approxWeight ? "الوزن الصافي · وزن تقريبي" : "الوزن الصافي"} ai={aiFields.has("netWeight")}>
                   <div className="flex items-center gap-1">
                     <NumInput value={netWeight} onChange={(v) => { setNetWeight(v); clearAi("netWeight"); }} />
                     <select
@@ -383,6 +385,19 @@ function GenesisPage() {
                       <option value="l">لتر</option>
                     </select>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => setApproxWeight((v) => !v)}
+                    className={cn(
+                      "mt-1.5 inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full border transition",
+                      approxWeight
+                        ? "bg-primary/10 border-primary/40 text-primary"
+                        : "bg-transparent border-border/50 text-foreground-tertiary",
+                    )}
+                    aria-pressed={approxWeight}
+                  >
+                    {approxWeight ? "≈ وزن تقريبي" : "وزن تقريبي؟"}
+                  </button>
                 </DnaField>
               </div>
               <DnaField label="مسببات الحساسية" ai={aiFields.has("allergens")}>
@@ -432,7 +447,10 @@ function GenesisPage() {
       </main>
 
       {/* 3. Human Veto Sticky Bar */}
-      <footer className="fixed bottom-0 inset-x-0 z-30 bg-card/95 backdrop-blur border-t border-border/60 shadow-float">
+      <footer
+        className="fixed inset-x-0 z-50 bg-card/95 backdrop-blur border-t border-border/60 shadow-float bottom-20 lg:bottom-0"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
         <div className="mx-auto max-w-2xl px-4 py-3">
           <div className="flex items-center gap-2">
             <button
