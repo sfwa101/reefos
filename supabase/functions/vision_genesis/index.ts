@@ -101,10 +101,13 @@ Deno.serve(async (req) => {
       return json({ error: "missing_image", details: "image_url is required" }, 400);
     }
 
-    // Hardened fetcher — size cap (8 MB) + MIME allow-list.
-    const MAX_BYTES = 8 * 1024 * 1024;
+    // Phase C-2 — URL Pass-Through Mode.
+    // ZERO image bytes enter the Deno isolate. We only do a HEAD pre-flight
+    // to fast-fail invalid URLs/MIMEs/oversized assets, then forward the
+    // raw public URL to the AI gateway which fetches it server-side.
+    const MAX_BYTES = 20 * 1024 * 1024; // 20 MB upstream cap
     const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
-    const urlToDataUrl = async (u: string): Promise<string> => {
+    const validateUrl = async (u: string): Promise<void> => {
       let parsed: URL;
       try {
         parsed = new URL(u);
@@ -114,26 +117,29 @@ Deno.serve(async (req) => {
       if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
         throw new Error("invalid_image_protocol");
       }
-      const r = await fetch(u);
-      if (!r.ok) throw new Error(`fetch_image_failed:${r.status}`);
-      const ct = (r.headers.get("content-type") || "image/jpeg").split(";")[0].trim().toLowerCase();
-      if (!ALLOWED_MIME.has(ct)) throw new Error(`unsupported_image_mime:${ct}`);
-      const declared = Number(r.headers.get("content-length") || 0);
-      if (declared && declared > MAX_BYTES) throw new Error(`image_too_large:${declared}`);
-      const ab = await r.arrayBuffer();
-      if (ab.byteLength > MAX_BYTES) throw new Error(`image_too_large:${ab.byteLength}`);
-      const buf = new Uint8Array(ab);
-      // chunked base64 to avoid stack overflow on larger payloads
-      let bin = "";
-      const CHUNK = 0x8000;
-      for (let i = 0; i < buf.length; i += CHUNK) {
-        bin += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + CHUNK)));
+      let head: Response;
+      try {
+        head = await fetch(u, { method: "HEAD" });
+      } catch (e) {
+        throw new Error(`head_failed:${e instanceof Error ? e.message : String(e)}`);
       }
-      return `data:${ct};base64,${btoa(bin)}`;
+      if (!head.ok) throw new Error(`head_status:${head.status}`);
+      const ct = (head.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+      if (ct && !ct.startsWith("image/")) throw new Error(`unsupported_image_mime:${ct}`);
+      if (ct && !ALLOWED_MIME.has(ct)) throw new Error(`unsupported_image_mime:${ct}`);
+      const declared = Number(head.headers.get("content-length") || 0);
+      if (declared && declared > MAX_BYTES) throw new Error(`image_too_large:${declared}`);
     };
 
-    const dataUrl = await urlToDataUrl(urls[0]);
-    const secondaryDataUrl = urls.length > 1 ? await urlToDataUrl(urls[1]) : null;
+    try {
+      for (const u of urls) await validateUrl(u);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      return json({ error: "invalid_image", details: msg }, 400);
+    }
+
+    const primaryUrl = urls[0];
+    const secondaryUrl = urls.length > 1 ? urls[1] : null;
 
     const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
 
@@ -162,11 +168,11 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `حلّل ${secondaryDataUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
+                text: `حلّل ${secondaryUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
               },
-              { type: "image_url", image_url: { url: dataUrl } },
-              ...(secondaryDataUrl
-                ? [{ type: "image_url", image_url: { url: secondaryDataUrl } }]
+              { type: "image_url", image_url: { url: primaryUrl } },
+              ...(secondaryUrl
+                ? [{ type: "image_url", image_url: { url: secondaryUrl } }]
                 : []),
             ],
           },
@@ -287,9 +293,16 @@ Deno.serve(async (req) => {
     if (aiRes.status === 429) return json({ error: "rate_limited", details: "AI gateway rate limit hit (429)." }, 429);
     if (aiRes.status === 402) return json({ error: "credits_exhausted", details: "AI gateway credits exhausted (402)." }, 402);
     if (!aiRes.ok) {
+      // Phase C-2 — bubble the upstream body verbatim. No truncation, no wrapping.
       const t = await aiRes.text();
       console.error("Vision AI error:", aiRes.status, t);
-      return json({ error: "AI_API_ERROR", status: aiRes.status, details: t.slice(0, 800) }, 500);
+      let upstream: unknown = t;
+      try { upstream = JSON.parse(t); } catch { /* keep as text */ }
+      return json({
+        error: "AI_API_ERROR",
+        status: aiRes.status,
+        upstream,
+      }, aiRes.status);
     }
 
     const aiData = await aiRes.json();
@@ -417,7 +430,7 @@ Deno.serve(async (req) => {
               role: "user",
               content: [
                 { type: "text", text: prompt },
-                { type: "image_url", image_url: { url: dataUrl } },
+                { type: "image_url", image_url: { url: primaryUrl } },
               ],
             },
           ],
