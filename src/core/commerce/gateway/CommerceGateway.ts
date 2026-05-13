@@ -14,7 +14,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import { IdentityGateway } from "@/core/identity";
 
-export type SharedCartSplitType = "even" | "by_items" | "fixed" | "percent";
+export type SharedCartSplitType = "percentage" | "fixed" | "itemized";
 
 export const CommerceGateway = {
   /**
