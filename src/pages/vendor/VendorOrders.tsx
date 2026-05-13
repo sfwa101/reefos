@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Package, CheckCircle2, Clock, Eye, PackageCheck, MapPin, Phone, User, Truck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway } from "@/core/orders";
 import { useCurrentVendor } from "@/core-os/hakim-ai/hooks/useCurrentVendor";
 import { useUpdateFulfillmentStatus, type FulfillmentStatus } from "@/core-os/hakim-ai/hooks/useFulfillmentNodes";
 import { UniversalAdminGrid, type Column, type RowAction, type BentoMetric } from "@/components/admin/UniversalAdminGrid";
@@ -84,50 +84,21 @@ export default function VendorOrders() {
   const { data: items, isLoading: itemsLoading } = useQuery<NodeItem[]>({
     queryKey: ["fulfillment-items", detailsNode?.id],
     enabled: !!detailsNode?.id,
-    queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data, error } = await sb
-        .from("salsabil_fulfillment_items")
-        .select(`
-          id, sku_id, quantity, price_at_time,
-          sku:salsabil_skus(sku_code, asset:salsabil_assets(name))
-        `)
-        .eq("node_id", detailsNode!.id);
-      if (error) throw error;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data ?? []).map((r: any): NodeItem => ({
-        id: r.id,
-        sku_id: r.sku_id,
-        quantity: r.quantity,
-        price_at_time: Number(r.price_at_time),
-        sku_code: r.sku?.sku_code ?? null,
-        asset_name: r.sku?.asset?.name ?? null,
-      }));
-    },
+    queryFn: () => OrderGateway.getNodeItems(detailsNode!.id),
   });
 
   const queryClient = useQueryClient();
 
-  // Realtime radar — vendor-scoped subscription on fulfillment_nodes
+  // Realtime radar — vendor-scoped subscription via OrderGateway
   useEffect(() => {
     if (!vendorId) return;
-    const channel = supabase
-      .channel(`vendor-fulfillment-${vendorId}`)
-      .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        "postgres_changes" as any,
-        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `vendor_id=eq.${vendorId}` },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (payload: any) => {
-          if (payload.eventType === "INSERT") toast.success("طلب جديد بحاجة للتجهيز!");
-          else if (payload.eventType === "UPDATE") toast("تم تحديث حالة الطلب");
-          queryClient.invalidateQueries({ queryKey: ["admin-grid", "salsabil_fulfillment_nodes"] });
-          queryClient.invalidateQueries({ queryKey: ["vendor-fulfillment-nodes"] });
-        },
-      )
-      .subscribe();
-    return () => { supabase.removeChannel(channel); };
+    const unsubscribe = OrderGateway.subscribeVendorNodes(vendorId, (e) => {
+      if (e.eventType === "INSERT") toast.success("طلب جديد بحاجة للتجهيز!");
+      else if (e.eventType === "UPDATE") toast("تم تحديث حالة الطلب");
+      queryClient.invalidateQueries({ queryKey: ["admin-grid", "salsabil_fulfillment_nodes"] });
+      queryClient.invalidateQueries({ queryKey: ["vendor-fulfillment-nodes"] });
+    });
+    return unsubscribe;
   }, [vendorId, queryClient]);
 
   const metrics = useMemo<BentoMetric[]>(() => [

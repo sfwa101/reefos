@@ -11,7 +11,7 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "@/components/ui/drawer";
 import { Loader2, MapPin, Check, Building2, Home, Briefcase, Star } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsGateway } from "@/core/logistics";
 import { useAuth } from "@/context/AuthContext";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 import { ClientOnly } from "@tanstack/react-router";
@@ -79,32 +79,26 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
     if (!recipientPhone.trim()) { toast.error("رقم هاتف المستلم مطلوب"); return; }
 
     setSaving(true);
-    const { data, error } = await supabase
-      .from("addresses")
-      .insert({
-        user_id: user.id,
-        label,
-        city,
-        district: district || null,
-        street,
-        building: null,
-        building_type: buildingType,
-        floor: floor || null,
-        apartment_no: apartmentNo || null,
-        recipient_name: recipientName || null,
-        recipient_phone: recipientPhone,
-        delivery_instructions: instructions || null,
-        lat,
-        lng,
-        is_default: false,
-      })
-      .select("id")
-      .single();
+    const newId = await LogisticsGateway.createAddress({
+      userId: user.id,
+      label,
+      city,
+      district: district || null,
+      street,
+      buildingType,
+      floor: floor || null,
+      apartmentNo: apartmentNo || null,
+      recipientName: recipientName || null,
+      recipientPhone,
+      instructions: instructions || null,
+      lat,
+      lng,
+    });
     setSaving(false);
 
-    if (error || !data) { toast.error("تعذّر حفظ العنوان"); return; }
+    if (!newId) { toast.error("تعذّر حفظ العنوان"); return; }
     toast.success("تم حفظ العنوان");
-    onSaved?.(data.id);
+    onSaved?.(newId);
     onOpenChange(false);
     reset();
   };

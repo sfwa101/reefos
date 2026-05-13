@@ -3,7 +3,7 @@ import BackHeader from "@/components/BackHeader";
 import { Package, Truck, Check, RotateCcw, Clock, Loader2, ShoppingBag, X, type LucideIcon } from "lucide-react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway, type SovereignOrderVM as SovereignOrder, type SovereignOrderNodeVM as SovereignNode } from "@/core/orders";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { useCart } from "@/context/CartContext";
 import { getById } from "@/core/catalog/legacy/legacyRuntime";
@@ -18,35 +18,7 @@ import { toast } from "sonner";
  * Zero reads of legacy `orders` / `order_items`.
  */
 
-type SovereignItem = {
-  id: string;
-  quantity: number;
-  price_at_time: number;
-  sku_id: string | null;
-  salsabil_skus: {
-    asset_id: string | null;
-    salsabil_assets: {
-      name: string | null;
-      media: unknown;
-    } | null;
-  } | null;
-};
-
-type SovereignNode = {
-  id: string;
-  status: string;
-  total_amount: number;
-  vendor_id: string | null;
-  salsabil_fulfillment_items: SovereignItem[];
-};
-
-type SovereignOrder = {
-  id: string;
-  status: string;
-  total_amount: number;
-  created_at: string;
-  salsabil_fulfillment_nodes: SovereignNode[];
-};
+// Sovereign order types are imported from @/core/orders.
 
 const statusInfo: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   delivered:                { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
@@ -102,21 +74,8 @@ const Orders = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data, error } = await supabase
-        .from("salsabil_master_orders")
-        .select(`
-          id, status, total_amount, created_at,
-          salsabil_fulfillment_nodes (
-            id, status, total_amount, vendor_id,
-            salsabil_fulfillment_items (
-              id, quantity, price_at_time, sku_id,
-              salsabil_skus ( asset_id, salsabil_assets ( name, media ) )
-            )
-          )
-        `)
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-      if (!error) setOrders((data as unknown as SovereignOrder[]) ?? []);
+      const data = await OrderGateway.getCustomerOrders(user.id);
+      setOrders(data);
       setLoading(false);
     })();
   }, [user]);

@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway } from "@/core/orders";
 
 type StoredWaFallback = {
   phone: string;
@@ -40,23 +40,8 @@ const OrderSuccess = () => {
     if (!id) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .select("id, delivery_snapshot")
-        .eq("master_order_id", id)
-        .limit(1)
-        .maybeSingle();
-      if (cancelled || !data) return;
-      const snap = (data.delivery_snapshot ?? {}) as { handover?: { otp?: string } };
-      if (snap.handover?.otp) {
-        setPickupOtp(snap.handover.otp);
-        return;
-      }
-      // Fallback to RPC if RLS hides snapshot
-      const { data: otp } = await supabase.rpc("get_handover_otp", {
-        p_node_id: data.id as string,
-      });
-      if (!cancelled && typeof otp === "string") setPickupOtp(otp);
+      const otp = await OrderGateway.getPickupOtp(id);
+      if (!cancelled && otp) setPickupOtp(otp);
     })();
     return () => { cancelled = true; };
   }, [id]);
