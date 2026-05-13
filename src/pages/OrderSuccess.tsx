@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway } from "@/core/orders";
 
 type StoredWaFallback = {
   phone: string;
