@@ -150,6 +150,42 @@ function dataUrlParts(dataUrl: string): { mime: string; b64: string } {
   return { mime: m[1], b64: m[2] };
 }
 
+// Convert JSON-Schema (with `type: ["X","null"]`) to Gemini OpenAPI 3 schema
+// (single `type` + `nullable: true`). Also strips `null` from enums and drops
+// unsupported keywords like `additionalProperties`.
+function toGeminiSchema(node: any): any {
+  if (Array.isArray(node)) return node.map(toGeminiSchema);
+  if (!node || typeof node !== "object") return node;
+  const out: any = {};
+  for (const [k, v] of Object.entries(node)) {
+    if (k === "additionalProperties") continue; // unsupported by Gemini
+    if (k === "type" && Array.isArray(v)) {
+      const nonNull = v.filter((t) => t !== "null");
+      out.type = (nonNull[0] ?? "string");
+      if (v.includes("null")) out.nullable = true;
+    } else if (k === "enum" && Array.isArray(v)) {
+      const cleaned = v.filter((x) => x !== null);
+      if (cleaned.length) out.enum = cleaned;
+      if (v.includes(null)) out.nullable = true;
+    } else if (k === "properties" && v && typeof v === "object") {
+      const props: Record<string, any> = {};
+      for (const [pk, pv] of Object.entries(v as Record<string, any>)) {
+        props[pk] = toGeminiSchema(pv);
+      }
+      out.properties = props;
+    } else if (k === "items") {
+      out.items = toGeminiSchema(v);
+    } else {
+      out[k] = toGeminiSchema(v);
+    }
+  }
+  // Gemini requires `type` on every schema node; default to "string".
+  if (!("type" in out) && !("properties" in out) && !("enum" in out)) {
+    // leave as-is
+  }
+  return out;
+}
+
 async function callGemini(opts: {
   apiKey: string;
   primary: string;
@@ -176,7 +212,7 @@ async function callGemini(opts: {
           {
             name: "generate_usa_payload",
             description: "Return the full Universal Salsabil Asset Product DNA payload.",
-            parameters: TOOL_PARAMETERS,
+            parameters: toGeminiSchema(TOOL_PARAMETERS),
           },
         ],
       },
