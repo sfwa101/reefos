@@ -185,7 +185,7 @@ function GenesisPage() {
         skus: [],
         financial_contract: {
           pricing_model: "flat",
-          base_price: price,
+          base_price: priceNum,
           currency: currency as "EGP" | "USD" | "EUR",
           contract_rules: {},
         },
@@ -199,7 +199,7 @@ function GenesisPage() {
         skus: base.skus,
         financial_contract: {
           ...base.financial_contract,
-          base_price: price,
+          base_price: priceNum,
           currency: currency as "EGP" | "USD" | "EUR",
         },
       });
