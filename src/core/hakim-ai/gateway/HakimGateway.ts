@@ -24,6 +24,11 @@ export interface InferProductDNAInput {
   readonly secondary_image_base64?: string | null;
   /** Free-text steering hint forwarded to the model. */
   readonly hint?: string;
+  /**
+   * Sovereign provider override. Defaults to "gemini" with automatic
+   * failover to "openrouter" inside the Edge Function.
+   */
+  readonly provider?: "gemini" | "openrouter" | "deepseek";
 }
 
 export interface ProductDNAAsset {
@@ -136,6 +141,7 @@ export const HakimGateway = {
         image_base64: input.image_base64,
         secondary_image_base64: input.secondary_image_base64 ?? null,
         hint: input.hint,
+        provider: input.provider ?? "gemini",
       },
     });
 
