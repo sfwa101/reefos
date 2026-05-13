@@ -13,7 +13,7 @@
  */
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { validatedSovereignCheckoutFn } from "@/core/cashier/gateway/checkout.functions";
 
 export type SovereignCartItem = {
   product_id: string;
