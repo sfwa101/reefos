@@ -589,6 +589,51 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               )}
             </TabsContent>
 
+            <TabsContent value="dimensions" className="m-0 space-y-3">
+              <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Network className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[12.5px] font-extrabold">تفعيل التصنيف متعدد الأبعاد</p>
+                    <p className="text-[10.5px] text-foreground-tertiary">
+                      اربط الأصل بأكثر من محور (قسم · حملة · نظام غذائي · سرعة…).
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !classificationEnabled;
+                    setClassificationEnabled(next);
+                    if (!next) setTagDrafts([]);
+                  }}
+                  className={`h-8 px-3 rounded-full text-[11px] font-extrabold press border ${
+                    classificationEnabled
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-foreground-tertiary"
+                  }`}
+                >
+                  {classificationEnabled ? "مفعّل" : "غير مفعّل"}
+                </button>
+              </div>
+
+              {classificationEnabled ? (
+                <DimensionalTagSelector
+                  assetId={asset?.id ?? null}
+                  value={tagDrafts}
+                  onChange={setTagDrafts}
+                />
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Network className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[12.5px] font-display">التصنيف متعدد الأبعاد معطّل</p>
+                  <p className="text-[10.5px] text-foreground-tertiary mt-1 leading-relaxed">
+                    فعّل الميزة لربط الأصل بمحاور متعددة في وقت واحد.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="inventory" className="m-0">
               {!asset ? (
                 <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
