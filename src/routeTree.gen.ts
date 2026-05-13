@@ -53,7 +53,6 @@ import { Route as AdminRibaAuditRouteImport } from './routes/admin.riba-audit'
 import { Route as AdminReviewsRouteImport } from './routes/admin.reviews'
 import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
 import { Route as AdminProfitObservationRouteImport } from './routes/admin.profit-observation'
-import { Route as AdminProductUnitsRouteImport } from './routes/admin.product-units'
 import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
 import { Route as AdminPersonalizedPicksRouteImport } from './routes/admin.personalized-picks'
@@ -361,11 +360,6 @@ const AdminPurchasesRoute = AdminPurchasesRouteImport.update({
 const AdminProfitObservationRoute = AdminProfitObservationRouteImport.update({
   id: '/profit-observation',
   path: '/profit-observation',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProductUnitsRoute = AdminProductUnitsRouteImport.update({
-  id: '/product-units',
-  path: '/product-units',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminProductBatchesRoute = AdminProductBatchesRouteImport.update({
@@ -908,7 +902,6 @@ export interface FileRoutesByFullPath {
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
-  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -1039,7 +1032,6 @@ export interface FileRoutesByTo {
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
-  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -1179,7 +1171,6 @@ export interface FileRoutesById {
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
-  '/admin/product-units': typeof AdminProductUnitsRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
   '/admin/purchases': typeof AdminPurchasesRoute
   '/admin/reviews': typeof AdminReviewsRoute
@@ -1317,7 +1308,6 @@ export interface FileRouteTypes {
     | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
-    | '/admin/product-units'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1448,7 +1438,6 @@ export interface FileRouteTypes {
     | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
-    | '/admin/product-units'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1587,7 +1576,6 @@ export interface FileRouteTypes {
     | '/admin/personalized-picks'
     | '/admin/print-jobs'
     | '/admin/product-batches'
-    | '/admin/product-units'
     | '/admin/profit-observation'
     | '/admin/purchases'
     | '/admin/reviews'
@@ -1976,13 +1964,6 @@ declare module '@tanstack/react-router' {
       path: '/profit-observation'
       fullPath: '/admin/profit-observation'
       preLoaderRoute: typeof AdminProfitObservationRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/product-units': {
-      id: '/admin/product-units'
-      path: '/product-units'
-      fullPath: '/admin/product-units'
-      preLoaderRoute: typeof AdminProductUnitsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/product-batches': {
@@ -2880,7 +2861,6 @@ interface AdminRouteChildren {
   AdminPersonalizedPicksRoute: typeof AdminPersonalizedPicksRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
   AdminProductBatchesRoute: typeof AdminProductBatchesRoute
-  AdminProductUnitsRoute: typeof AdminProductUnitsRoute
   AdminProfitObservationRoute: typeof AdminProfitObservationRoute
   AdminPurchasesRoute: typeof AdminPurchasesRoute
   AdminReviewsRoute: typeof AdminReviewsRoute
@@ -2960,7 +2940,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPersonalizedPicksRoute: AdminPersonalizedPicksRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
   AdminProductBatchesRoute: AdminProductBatchesRoute,
-  AdminProductUnitsRoute: AdminProductUnitsRoute,
   AdminProfitObservationRoute: AdminProfitObservationRoute,
   AdminPurchasesRoute: AdminPurchasesRoute,
   AdminReviewsRoute: AdminReviewsRoute,
@@ -3046,3 +3025,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
