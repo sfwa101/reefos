@@ -6,6 +6,8 @@ export { CommerceGateway, type SharedCartSplitType } from "./gateway/CommerceGat
 export { PackagingGateway } from "./gateway/PackagingGateway";
 export { TagsGateway } from "./gateway/TagsGateway";
 export { PricingGateway } from "./gateway/PricingGateway";
+export { InventoryGateway } from "./gateway/InventoryGateway";
+export type { InventoryDraft, InventoryKind } from "./gateway/InventoryGateway";
 export type {
   PackagingTier,
   PackagingTierDraft,

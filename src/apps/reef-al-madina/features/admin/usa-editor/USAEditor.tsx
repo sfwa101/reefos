@@ -7,16 +7,17 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
+import { Sparkles, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import DimensionalTagSelector from "@/components/commerce/assets/DimensionalTagSelector";
 import CognitivePricingBuilder from "@/components/commerce/assets/CognitivePricingBuilder";
+import LivingInventoryBuilder from "@/components/commerce/assets/LivingInventoryBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
-import type { PackagingTierDraft, FinancialContractDraft } from "@/core/commerce";
+import type { PackagingTierDraft, FinancialContractDraft, InventoryDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
-import { PackagingGateway, TagsGateway, PricingGateway } from "@/core/commerce";
+import { PackagingGateway, TagsGateway, PricingGateway, InventoryGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
@@ -114,6 +115,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   // Persistence (DB writes for financial contracts) is deferred to Phase E-2.
   const [financialContractsDraft, setFinancialContractsDraft] = useState<FinancialContractDraft[]>([]);
 
+  // Phase F-1 — Living Inventory Runtime (local draft, lifted on save).
+  const [inventoryDrafts, setInventoryDrafts] = useState<InventoryDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
@@ -130,6 +134,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setClassificationEnabled(traits.includes(CAP.MULTI_CLASSIFICATION));
       setTagDrafts([]);
       setFinancialContractsDraft([]);
+      setInventoryDrafts([]);
       // Hydrate persisted packaging tiers + tag links for edit mode.
       let cancelled = false;
       (async () => {
@@ -181,6 +186,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setClassificationEnabled(false);
       setTagDrafts([]);
       setFinancialContractsDraft([]);
+      setInventoryDrafts([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
@@ -247,6 +253,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         const tierIdMap = await persistPackaging(newAssetId);
         await persistTags(newAssetId);
         await persistPricing(newAssetId, tierIdMap);
+        await persistInventory(newAssetId, tierIdMap);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
@@ -261,6 +268,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         const tierIdMap = await persistPackaging(asset!.id);
         await persistTags(asset!.id);
         await persistPricing(asset!.id, tierIdMap);
+        await persistInventory(asset!.id, tierIdMap);
         await syncClassificationTrait(asset!.id);
         onSaved?.();
       }
@@ -332,6 +340,41 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     } catch (e) {
       console.error("[USAEditor] pricing sync failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ سياسات التسعير";
+      toast.error(`⚠️ ${msg}`);
+    }
+  };
+
+  /**
+   * Phase F-1 — Persist the Living Inventory drafts into
+   * `salsabil_inventory_matrix`. Runs STRICTLY AFTER persistPackaging so
+   * the freshly-allocated tier UUIDs are available via `tierIdMap`.
+   *
+   * Resilience:
+   *   • Resolves the asset's base SKU via `PricingGateway.resolveBaseSku`.
+   *   • If no drafts → wipes all inventory rows for the base SKU.
+   *   • Drafts whose tier id cannot be resolved are dropped by the gateway.
+   */
+  const persistInventory = async (
+    assetId: string,
+    tierIdMap: Map<string, string>,
+  ): Promise<void> => {
+    try {
+      const baseSkuId = await PricingGateway.resolveBaseSku(assetId);
+      if (!baseSkuId) {
+        if (inventoryDrafts.length > 0) {
+          console.warn("[USAEditor] no base SKU yet — skipping inventory sync");
+        }
+        return;
+      }
+      if (inventoryDrafts.length === 0) {
+        await InventoryGateway.wipeInventoryForSku(baseSkuId);
+        return;
+      }
+      await InventoryGateway.syncInventory(baseSkuId, inventoryDrafts, tierIdMap);
+      toast.success("تمت مزامنة المخزون الحي");
+    } catch (e) {
+      console.error("[USAEditor] inventory sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ المخزون";
       toast.error(`⚠️ ${msg}`);
     }
   };
@@ -769,25 +812,27 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               )}
             </TabsContent>
 
-            <TabsContent value="inventory" className="m-0">
-              {!asset ? (
-                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
-                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
-                  <p className="text-[13px] font-display">احفظ الأصل أولاً</p>
-                  <p className="text-[11px] text-foreground-tertiary mt-1">
-                    إدارة المخزون متاحة بعد سكّ الأصل وتوليد SKUs.
+            <TabsContent value="inventory" className="m-0 space-y-4">
+              <LivingInventoryBuilder
+                packagingTiers={packagingTiers}
+                packagingEnabled={packagingEnabled}
+                value={inventoryDrafts}
+                onChange={setInventoryDrafts}
+              />
+
+              {asset && assetType === "physical" && (
+                <div className="pt-2 border-t border-border/40">
+                  <p className="text-[10.5px] font-bold text-foreground-tertiary mb-2">
+                    📊 لقطة المخزون الحالي عبر الفروع
                   </p>
+                  <InventoryMatrixPanel assetId={asset.id} />
                 </div>
-              ) : assetType !== "physical" ? (
-                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
-                  <Boxes className="h-7 w-7 text-primary mx-auto mb-2" />
-                  <p className="text-[13px] font-display">نوع غير مادي</p>
-                  <p className="text-[11px] text-foreground-tertiary mt-1 leading-relaxed">
-                    إدارة طاقة الاستيعاب أو الفترات الزمنية ستتوفر في التحديث القادم.
-                  </p>
-                </div>
-              ) : (
-                <InventoryMatrixPanel assetId={asset.id} />
+              )}
+
+              {!asset && (
+                <p className="text-[10.5px] text-foreground-tertiary leading-relaxed text-center px-2">
+                  💡 يتم تثبيت قيم المخزون بعد سكّ الأصل وتوليد SKU الأساسي.
+                </p>
               )}
             </TabsContent>
 
