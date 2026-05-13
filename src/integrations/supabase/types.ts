@@ -5648,6 +5648,7 @@ export type Database = {
           currency: string
           id: string
           is_active: boolean
+          packaging_tier_id: string | null
           pricing_model: Database["public"]["Enums"]["salsabil_pricing_model"]
           sku_id: string
           updated_at: string
@@ -5661,6 +5662,7 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          packaging_tier_id?: string | null
           pricing_model?: Database["public"]["Enums"]["salsabil_pricing_model"]
           sku_id: string
           updated_at?: string
@@ -5674,6 +5676,7 @@ export type Database = {
           currency?: string
           id?: string
           is_active?: boolean
+          packaging_tier_id?: string | null
           pricing_model?: Database["public"]["Enums"]["salsabil_pricing_model"]
           sku_id?: string
           updated_at?: string
@@ -5681,6 +5684,13 @@ export type Database = {
           valid_to?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "salsabil_financial_contracts_packaging_tier_id_fkey"
+            columns: ["packaging_tier_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_packaging_tiers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salsabil_financial_contracts_sku_id_fkey"
             columns: ["sku_id"]
@@ -5827,6 +5837,7 @@ export type Database = {
           id: string
           inventory_type: Database["public"]["Enums"]["salsabil_inventory_type"]
           location_code: string | null
+          packaging_tier_id: string | null
           sku_id: string
           updated_at: string
         }
@@ -5835,6 +5846,7 @@ export type Database = {
           id?: string
           inventory_type?: Database["public"]["Enums"]["salsabil_inventory_type"]
           location_code?: string | null
+          packaging_tier_id?: string | null
           sku_id: string
           updated_at?: string
         }
@@ -5843,10 +5855,18 @@ export type Database = {
           id?: string
           inventory_type?: Database["public"]["Enums"]["salsabil_inventory_type"]
           location_code?: string | null
+          packaging_tier_id?: string | null
           sku_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "salsabil_inventory_matrix_packaging_tier_id_fkey"
+            columns: ["packaging_tier_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_packaging_tiers"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "salsabil_inventory_matrix_sku_id_fkey"
             columns: ["sku_id"]
@@ -5927,6 +5947,88 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      salsabil_packaging_tiers: {
+        Row: {
+          asset_id: string
+          attributes: Json
+          barcode: string | null
+          conversion_to_base: number
+          conversion_to_parent: number
+          created_at: string
+          id: string
+          is_active: boolean
+          is_default_buy: boolean
+          is_default_sell: boolean
+          is_stock_keeping: boolean
+          parent_tier_id: string | null
+          price_override: number | null
+          sort_order: number
+          tier_label: string
+          uom_code: string | null
+          updated_at: string
+        }
+        Insert: {
+          asset_id: string
+          attributes?: Json
+          barcode?: string | null
+          conversion_to_base?: number
+          conversion_to_parent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_buy?: boolean
+          is_default_sell?: boolean
+          is_stock_keeping?: boolean
+          parent_tier_id?: string | null
+          price_override?: number | null
+          sort_order?: number
+          tier_label: string
+          uom_code?: string | null
+          updated_at?: string
+        }
+        Update: {
+          asset_id?: string
+          attributes?: Json
+          barcode?: string | null
+          conversion_to_base?: number
+          conversion_to_parent?: number
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          is_default_buy?: boolean
+          is_default_sell?: boolean
+          is_stock_keeping?: boolean
+          parent_tier_id?: string | null
+          price_override?: number | null
+          sort_order?: number
+          tier_label?: string
+          uom_code?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "salsabil_packaging_tiers_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_packaging_tiers_parent_tier_id_fkey"
+            columns: ["parent_tier_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_packaging_tiers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "salsabil_packaging_tiers_uom_code_fkey"
+            columns: ["uom_code"]
+            isOneToOne: false
+            referencedRelation: "units_of_measure"
+            referencedColumns: ["code"]
+          },
+        ]
       }
       salsabil_persona_matrix: {
         Row: {

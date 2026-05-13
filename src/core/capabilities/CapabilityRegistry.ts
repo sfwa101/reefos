@@ -20,6 +20,10 @@ export const CAP = Object.freeze({
   HEALTH_FILTERS: "supports_health_filters",
   SEASONAL: "supports_seasonal",
   B2B_PRICING: "supports_b2b_pricing",
+  /** Phase D-1 — Economic Packaging Runtime (recursive unit hierarchy). */
+  PACKAGING_HIERARCHY: "packaging_hierarchy",
+  /** Phase D-1/D-2 — Multi-axis tag/graph classification. */
+  MULTI_CLASSIFICATION: "multi_classification",
 } as const);
 
 export type CapabilityKey = (typeof CAP)[keyof typeof CAP] | string;
