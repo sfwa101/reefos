@@ -24,13 +24,27 @@ function extractAliases(metadata: unknown): readonly string[] {
   return [];
 }
 
+function extractTraitStrings(metadata: unknown): readonly string[] {
+  if (!metadata || typeof metadata !== "object") return [];
+  const m = metadata as Record<string, unknown>;
+  const out: string[] = [];
+  for (const key of ["handling_traits", "traits", "tags"] as const) {
+    const v = m[key];
+    if (Array.isArray(v)) {
+      for (const x of v) if (typeof x === "string") out.push(x);
+    }
+  }
+  return out;
+}
+
 function toProductEntity(p: Product): SearchableEntity {
   const barcode =
     p.metadata && typeof p.metadata === "object"
       ? (p.metadata as Record<string, unknown>).barcode
       : undefined;
   const aliases = extractAliases(p.metadata);
-  const baseExtras = [p.subCategory, p.brand, p.source, ...aliases].filter(
+  const traits = extractTraitStrings(p.metadata);
+  const baseExtras = [p.subCategory, p.source, ...aliases, ...traits].filter(
     (x): x is string => typeof x === "string" && x.length > 0,
   );
   return {
@@ -38,6 +52,8 @@ function toProductEntity(p: Product): SearchableEntity {
     kind: "product",
     rawId: p.id,
     title: normalizeArabic(p.name),
+    // Subtitle is heavily boosted — promote brand here so brand matches rank
+    // alongside name matches (Phase V-3: Semantic Commerce Graph).
     subtitle: normalizeArabic(p.brand ?? p.unit ?? ""),
     category: normalizeArabic(p.category),
     keywords: expandKeywords(p.name, baseExtras),
@@ -67,7 +83,9 @@ const MINI_OPTIONS = {
     "image", "barcode", "href",
   ] as const,
   searchOptions: {
-    boost: { title: 3, subtitle: 1.5, category: 1.2 },
+    // brand lives in `subtitle`; bump its weight so brand matches surface
+    // alongside title matches. keywords carry traits/aliases.
+    boost: { title: 3, subtitle: 2.8, category: 1.2, keywords: 1.4 },
     prefix: true,
     fuzzy: 0.25,
   },
