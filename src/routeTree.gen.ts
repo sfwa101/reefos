@@ -98,7 +98,6 @@ import { Route as AdminCashierSessionsRouteImport } from './routes/admin.cashier
 import { Route as AdminBusinessRulesRouteImport } from './routes/admin.business-rules'
 import { Route as AdminBranchesRouteImport } from './routes/admin.branches'
 import { Route as AdminAuditLogRouteImport } from './routes/admin.audit-log'
-import { Route as AdminAssetsRouteImport } from './routes/admin.assets'
 import { Route as AdminAnalyticsRouteImport } from './routes/admin.analytics'
 import { Route as AdminAllocationRouteImport } from './routes/admin.allocation'
 import { Route as AdminAffiliateSettingsRouteImport } from './routes/admin.affiliate-settings'
@@ -119,6 +118,7 @@ import { Route as AppCartRouteImport } from './routes/_app/cart'
 import { Route as AppAffiliateRouteImport } from './routes/_app/affiliate'
 import { Route as AppAccountRouteImport } from './routes/_app/account'
 import { Route as AdminOrdersIndexRouteImport } from './routes/admin.orders.index'
+import { Route as AdminAssetsIndexRouteImport } from './routes/admin.assets.index'
 import { Route as AppAccountIndexRouteImport } from './routes/_app/account.index'
 import { Route as AdminProductsNewRouteImport } from './routes/admin.products.new'
 import { Route as AdminOrdersOrderIdRouteImport } from './routes/admin.orders.$orderId'
@@ -590,11 +590,6 @@ const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
   path: '/audit-log',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAssetsRoute = AdminAssetsRouteImport.update({
-  id: '/assets',
-  path: '/assets',
-  getParentRoute: () => AdminRoute,
-} as any)
 const AdminAnalyticsRoute = AdminAnalyticsRouteImport.update({
   id: '/analytics',
   path: '/analytics',
@@ -695,6 +690,11 @@ const AdminOrdersIndexRoute = AdminOrdersIndexRouteImport.update({
   path: '/orders/',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminAssetsIndexRoute = AdminAssetsIndexRouteImport.update({
+  id: '/assets/',
+  path: '/assets/',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AppAccountIndexRoute = AppAccountIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -748,9 +748,9 @@ const AdminCustomersCustomerIdRoute =
     getParentRoute: () => AdminCustomersRoute,
   } as any)
 const AdminAssetsGenesisRoute = AdminAssetsGenesisRouteImport.update({
-  id: '/genesis',
-  path: '/genesis',
-  getParentRoute: () => AdminAssetsRoute,
+  id: '/assets/genesis',
+  path: '/assets/genesis',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
   id: '/$id',
@@ -864,7 +864,6 @@ export interface FileRoutesByFullPath {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -971,6 +970,7 @@ export interface FileRoutesByFullPath {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/account/': typeof AppAccountIndexRoute
+  '/admin/assets/': typeof AdminAssetsIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesByTo {
@@ -995,7 +995,6 @@ export interface FileRoutesByTo {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1102,6 +1101,7 @@ export interface FileRoutesByTo {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/account': typeof AppAccountIndexRoute
+  '/admin/assets': typeof AdminAssetsIndexRoute
   '/admin/orders': typeof AdminOrdersIndexRoute
 }
 export interface FileRoutesById {
@@ -1135,7 +1135,6 @@ export interface FileRoutesById {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1243,6 +1242,7 @@ export interface FileRoutesById {
   '/admin/orders/$orderId': typeof AdminOrdersOrderIdRoute
   '/admin/products/new': typeof AdminProductsNewRoute
   '/_app/account/': typeof AppAccountIndexRoute
+  '/admin/assets/': typeof AdminAssetsIndexRoute
   '/admin/orders/': typeof AdminOrdersIndexRoute
 }
 export interface FileRouteTypes {
@@ -1273,7 +1273,6 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
-    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1380,6 +1379,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/admin/products/new'
     | '/account/'
+    | '/admin/assets/'
     | '/admin/orders/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -1404,7 +1404,6 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
-    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1511,6 +1510,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/admin/products/new'
     | '/account'
+    | '/admin/assets'
     | '/admin/orders'
   id:
     | '__root__'
@@ -1543,7 +1543,6 @@ export interface FileRouteTypes {
     | '/admin/affiliate-settings'
     | '/admin/allocation'
     | '/admin/analytics'
-    | '/admin/assets'
     | '/admin/audit-log'
     | '/admin/branches'
     | '/admin/business-rules'
@@ -1651,6 +1650,7 @@ export interface FileRouteTypes {
     | '/admin/orders/$orderId'
     | '/admin/products/new'
     | '/_app/account/'
+    | '/admin/assets/'
     | '/admin/orders/'
   fileRoutesById: FileRoutesById
 }
@@ -2293,13 +2293,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuditLogRouteImport
       parentRoute: typeof AdminRoute
     }
-    '/admin/assets': {
-      id: '/admin/assets'
-      path: '/assets'
-      fullPath: '/admin/assets'
-      preLoaderRoute: typeof AdminAssetsRouteImport
-      parentRoute: typeof AdminRoute
-    }
     '/admin/analytics': {
       id: '/admin/analytics'
       path: '/analytics'
@@ -2440,6 +2433,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminOrdersIndexRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/assets/': {
+      id: '/admin/assets/'
+      path: '/assets'
+      fullPath: '/admin/assets/'
+      preLoaderRoute: typeof AdminAssetsIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/_app/account/': {
       id: '/_app/account/'
       path: '/'
@@ -2512,10 +2512,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/assets/genesis': {
       id: '/admin/assets/genesis'
-      path: '/genesis'
+      path: '/assets/genesis'
       fullPath: '/admin/assets/genesis'
       preLoaderRoute: typeof AdminAssetsGenesisRouteImport
-      parentRoute: typeof AdminAssetsRoute
+      parentRoute: typeof AdminRoute
     }
     '/admin/$entity/$id': {
       id: '/admin/$entity/$id'
@@ -2776,18 +2776,6 @@ const AdminEntityRouteWithChildren = AdminEntityRoute._addFileChildren(
   AdminEntityRouteChildren,
 )
 
-interface AdminAssetsRouteChildren {
-  AdminAssetsGenesisRoute: typeof AdminAssetsGenesisRoute
-}
-
-const AdminAssetsRouteChildren: AdminAssetsRouteChildren = {
-  AdminAssetsGenesisRoute: AdminAssetsGenesisRoute,
-}
-
-const AdminAssetsRouteWithChildren = AdminAssetsRoute._addFileChildren(
-  AdminAssetsRouteChildren,
-)
-
 interface AdminCustomersRouteChildren {
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
 }
@@ -2848,7 +2836,6 @@ interface AdminRouteChildren {
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
-  AdminAssetsRoute: typeof AdminAssetsRouteWithChildren
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
@@ -2916,8 +2903,10 @@ interface AdminRouteChildren {
   AdminWalletsRoute: typeof AdminWalletsRoute
   AdminZakatRoute: typeof AdminZakatRoute
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminAssetsGenesisRoute: typeof AdminAssetsGenesisRoute
   AdminOrdersOrderIdRoute: typeof AdminOrdersOrderIdRoute
   AdminProductsNewRoute: typeof AdminProductsNewRoute
+  AdminAssetsIndexRoute: typeof AdminAssetsIndexRoute
   AdminOrdersIndexRoute: typeof AdminOrdersIndexRoute
 }
 
@@ -2927,7 +2916,6 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
-  AdminAssetsRoute: AdminAssetsRouteWithChildren,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
   AdminBusinessRulesRoute: AdminBusinessRulesRoute,
@@ -2995,8 +2983,10 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminWalletsRoute: AdminWalletsRoute,
   AdminZakatRoute: AdminZakatRoute,
   AdminIndexRoute: AdminIndexRoute,
+  AdminAssetsGenesisRoute: AdminAssetsGenesisRoute,
   AdminOrdersOrderIdRoute: AdminOrdersOrderIdRoute,
   AdminProductsNewRoute: AdminProductsNewRoute,
+  AdminAssetsIndexRoute: AdminAssetsIndexRoute,
   AdminOrdersIndexRoute: AdminOrdersIndexRoute,
 }
 
@@ -3056,3 +3046,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
