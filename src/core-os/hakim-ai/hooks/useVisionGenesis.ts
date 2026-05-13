@@ -51,14 +51,7 @@ export type VisionGenesisError =
   | "missing_key"
   | "unknown";
 
-/**
- * Client-side compression: draws the file to a canvas, scales the longest
- * edge to <= 1024px, and exports as JPEG @ 0.7 quality before base64-encoding.
- * Cuts a typical 6 MB camera photo to ~150–300 KB so the dual-image payload
- * stays well under the Edge Function body limit (~6 MB).
- */
-const MAX_EDGE = 1024;
-const JPEG_QUALITY = 0.7;
+/** Lightweight base64 encoder — no canvas resize, trust native pipeline. */
 
 async function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
   const base64 = await new Promise<string>((resolve, reject) => {
