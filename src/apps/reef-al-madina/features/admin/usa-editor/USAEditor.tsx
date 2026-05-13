@@ -485,18 +485,21 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </SheetHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-5 mt-3 grid grid-cols-6 h-10">
-            <TabsTrigger value="basic" className="text-[11.5px]">أساسي</TabsTrigger>
-            <TabsTrigger value="financials" className="text-[11.5px]">المالية</TabsTrigger>
-            <TabsTrigger value="packaging" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+          <TabsList className="mx-5 mt-3 grid grid-cols-7 h-10">
+            <TabsTrigger value="basic" className="text-[11px]">أساسي</TabsTrigger>
+            <TabsTrigger value="financials" className="text-[11px]">المالية</TabsTrigger>
+            <TabsTrigger value="cognitive" className="text-[11px] gap-1 inline-flex items-center justify-center">
+              <Coins className="h-3 w-3" /> الذكي
+            </TabsTrigger>
+            <TabsTrigger value="packaging" className="text-[11px] gap-1 inline-flex items-center justify-center">
               <Layers className="h-3 w-3" /> العبوات
             </TabsTrigger>
-            <TabsTrigger value="dimensions" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+            <TabsTrigger value="dimensions" className="text-[11px] gap-1 inline-flex items-center justify-center">
               <Network className="h-3 w-3" /> الأبعاد
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="text-[11.5px]">المخزون</TabsTrigger>
-            <TabsTrigger value="genesis" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
-              <Sparkles className="h-3 w-3" /> الذكي
+            <TabsTrigger value="inventory" className="text-[11px]">المخزون</TabsTrigger>
+            <TabsTrigger value="genesis" className="text-[11px] gap-1 inline-flex items-center justify-center">
+              <Sparkles className="h-3 w-3" /> Vision
             </TabsTrigger>
           </TabsList>
 
