@@ -492,7 +492,7 @@ function GenesisPage() {
             </button>
             <button
               onClick={approve}
-              disabled={busy || done || !name.trim() || price <= 0}
+              disabled={busy || done || !canApprove}
               className={cn(
                 "flex-1 h-12 rounded-2xl font-display text-[14px]",
                 "bg-gradient-primary text-primary-foreground shadow-glow press transition-base",
