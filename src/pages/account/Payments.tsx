@@ -3,6 +3,7 @@ import BackHeader from "@/components/BackHeader";
 import { CreditCard, Wallet, Plus, Trash2, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 
 /**
  * PaymentMethod — shape served by the future `payment_methods` table.
@@ -31,8 +32,7 @@ const Payments = () => {
   useEffect(() => {
     let mounted = true;
     (async () => {
-      const { data: auth } = await supabase.auth.getUser();
-      const uid = auth.user?.id;
+      const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) {
         if (mounted) setLoading(false);
         return;

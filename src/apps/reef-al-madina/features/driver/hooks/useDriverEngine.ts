@@ -15,6 +15,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
@@ -151,8 +152,7 @@ export const useDriverEngine = (): DriverEngine => {
       setLoading(false);
       return;
     }
-    const auth = await supabase.auth.getUser();
-    const uid = auth.data.user?.id;
+    const uid = await IdentityGateway.getCurrentUserId();
     if (!uid) {
       setDriverId(null);
       setLoading(false);

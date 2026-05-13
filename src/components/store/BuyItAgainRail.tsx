@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { products as allProducts } from "@/core/catalog/legacy/legacyRuntime";
 import ProductCard from "@/components/ProductCard";
@@ -25,13 +26,13 @@ const BuyItAgainRail = ({ pool }: Props) => {
     let cancelled = false;
     (async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+        const uid = await IdentityGateway.getCurrentUserId();
+        if (!uid) return;
 
         const { data: masters } = await supabase
           .from("salsabil_master_orders")
           .select("id")
-          .eq("customer_id", user.id)
+          .eq("customer_id", uid)
           .order("created_at", { ascending: false })
           .limit(20);
         const masterIds = (masters ?? []).map((m) => m.id);

@@ -19,7 +19,7 @@ import { toast } from "sonner";
 import reefLogo from "@/assets/reef-logo.webp";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { pathForRole, type AppRole } from "@/hooks/useUserRole";
 import { EGY_GOVERNORATE_LIST } from "@/core-os/capabilities/identity/egyptianIdDecoder";
 
@@ -33,24 +33,9 @@ const COUNTRIES = [
   { code: "+1",   flag: "🇺🇸", label: "أمريكا" },
 ];
 
-const ROLE_PRIORITY: Record<string, number> = {
-  admin: 1, finance: 2, branch_manager: 3, store_manager: 4,
-  inventory_clerk: 5, cashier: 6, delivery: 7, staff: 8, collector: 9, vendor: 10,
-};
-
 async function resolveRedirectPath(userId: string): Promise<string> {
-  try {
-    const { data } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId)
-      .eq("is_active", true);
-    if (!data || data.length === 0) return "/";
-    const sorted = [...data].sort(
-      (a, b) => (ROLE_PRIORITY[a.role] ?? 99) - (ROLE_PRIORITY[b.role] ?? 99),
-    );
-    return pathForRole(sorted[0].role as AppRole);
-  } catch { return "/"; }
+  const primary = await IdentityGateway.getPrimaryRole(userId);
+  return primary ? pathForRole(primary as AppRole) : "/";
 }
 
 type Step = "phone" | "pin" | "register";
@@ -105,8 +90,8 @@ const Auth = () => {
         toast.error(res.error);
         return;
       }
-      const { data: { user: u } } = await supabase.auth.getUser();
-      const to = u ? await resolveRedirectPath(u.id) : "/";
+      const uid = await IdentityGateway.getCurrentUserId();
+      const to = uid ? await resolveRedirectPath(uid) : "/";
       toast.success("أهلاً بعودتك");
       navigate({ to, replace: true });
     } finally { setBusy(false); }
