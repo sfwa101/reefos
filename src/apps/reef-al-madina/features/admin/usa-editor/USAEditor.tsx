@@ -7,13 +7,14 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import DimensionalTagSelector from "@/components/commerce/assets/DimensionalTagSelector";
+import CognitivePricingBuilder from "@/components/commerce/assets/CognitivePricingBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
-import type { PackagingTierDraft } from "@/core/commerce";
+import type { PackagingTierDraft, FinancialContractDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
 import { PackagingGateway, TagsGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
@@ -108,6 +109,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   // Phase D-5 — Multi-Dimensional Classification (local draft, lifted on save).
   const [classificationEnabled, setClassificationEnabled] = useState(false);
   const [tagDrafts, setTagDrafts] = useState<AssetTagDraft[]>([]);
+
+  // Phase E-1 — Cognitive Pricing Runtime (local draft, lifted on save).
+  // Persistence (DB writes for financial contracts) is deferred to Phase E-2.
+  const [financialContractsDraft, setFinancialContractsDraft] = useState<FinancialContractDraft[]>([]);
 
   useEffect(() => {
     if (asset) {
