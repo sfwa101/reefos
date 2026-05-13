@@ -284,6 +284,69 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
     }
   };
 
+  /**
+   * Phase D-6 — Compute the trait set for a NEW mint, layering capability
+   * traits from the toggles on top of any AI-supplied traits.
+   */
+  const computeMintTraits = (base: unknown): string[] => {
+    const traits = new Set<string>(
+      Array.isArray(base) ? (base as unknown[]).filter((t): t is string => typeof t === "string") : [],
+    );
+    if (classificationEnabled && tagDrafts.length > 0) {
+      traits.add(CAP.MULTI_CLASSIFICATION);
+    } else {
+      traits.delete(CAP.MULTI_CLASSIFICATION);
+    }
+    return Array.from(traits);
+  };
+
+  /**
+   * Phase D-6 — Persist the multi-dimensional tag graph for an asset.
+   * Off-toggle wipes all links. Otherwise upserts vocab + links and
+   * deletes any links the Emperor removed in the UI.
+   */
+  const persistTags = async (assetId: string) => {
+    try {
+      if (!classificationEnabled || tagDrafts.length === 0) {
+        await TagsGateway.wipeLinks(assetId);
+        return;
+      }
+      await TagsGateway.syncLinks(assetId, tagDrafts);
+      toast.success("تمت مزامنة الأبعاد التصنيفية");
+    } catch (e) {
+      console.error("[USAEditor] tag sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ الأبعاد";
+      toast.error(`⚠️ ${msg}`);
+    }
+  };
+
+  /**
+   * Phase D-6 — On UPDATE, the RPC doesn't touch traits. Reconcile the
+   * `traits` JSONB array on `salsabil_assets` so CAP.MULTI_CLASSIFICATION
+   * mirrors the toggle state.
+   */
+  const syncClassificationTrait = async (assetId: string) => {
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const current = Array.isArray(asset?.traits)
+        ? (asset!.traits as unknown[]).filter((t): t is string => typeof t === "string")
+        : [];
+      const want = classificationEnabled && tagDrafts.length > 0;
+      const has = current.includes(CAP.MULTI_CLASSIFICATION);
+      if (want === has) return;
+      const next = want
+        ? Array.from(new Set([...current, CAP.MULTI_CLASSIFICATION]))
+        : current.filter((t) => t !== CAP.MULTI_CLASSIFICATION);
+      const { error } = await supabase
+        .from("salsabil_assets")
+        .update({ traits: next as never })
+        .eq("id", assetId);
+      if (error) throw error;
+    } catch (e) {
+      console.warn("[USAEditor] trait sync failed", e);
+    }
+  };
+
   const uploadAiImageIfAny = async (): Promise<string[] | undefined> => {
     if (!aiFile) return undefined;
     try {
