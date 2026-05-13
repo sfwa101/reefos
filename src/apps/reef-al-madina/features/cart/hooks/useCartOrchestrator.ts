@@ -400,6 +400,16 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         };
 
         try {
+          // Phase C5 — Sovereign Price Validation. Refuse to submit until
+          // the Cashier Brain has confirmed the cart's authoritative hash.
+          if (!calc.cashierSnapshotFresh || !calc.cashierSnapshotHash) {
+            toast.error(
+              "عفواً، لم يكتمل احتساب السعر السيادي بعد. يرجى الانتظار لحظة وإعادة المحاولة.",
+            );
+            setSubmitting(false);
+            submittingRef.current = false;
+            return;
+          }
           // Phase 36 Titanium Shield — idempotent checkout. Phase 38 reuses
           // the same key the trace event captured so success can be correlated.
           savedOrderId = await callSovereignCheckout({
@@ -407,6 +417,8 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
             cart_items: sovereignItems,
             delivery_info: deliveryInfo,
             idempotency_key: checkoutIdempotencyKey,
+            expected_snapshot_hash: calc.cashierSnapshotHash,
+            cashier_context: { member_tier: "guest" },
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
