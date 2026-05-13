@@ -6,7 +6,7 @@ import { toLatin } from "@/lib/format";
 import { Progress } from "@/components/ui/progress";
 import type { ReferralRow } from "@/core/finance/types/wallet.types";
 import { useAffiliateEngine } from "@/core/finance/hooks/useAffiliateEngine";
-import { WithdrawDialog } from "@/core/finance/components/WithdrawDialog";
+import { WithdrawDialog } from "@/components/finance/WithdrawDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { openWhatsApp } from "@/lib/whatsapp";
 
