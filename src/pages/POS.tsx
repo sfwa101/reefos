@@ -65,7 +65,7 @@ export default function POSPage() {
           />
           <div className="lg:sticky lg:top-16 self-start">
             <PosQuickPay
-              total={e.subtotal}
+              total={e.displayTotal}
               itemCount={e.itemCount}
               disabled={!e.canSell}
               onPay={e.checkout}
