@@ -15,7 +15,7 @@ import { SduiRenderer } from "@/core/runtime-ui/sdui/components/SduiRenderer";
 import { parseBlocks, type SduiBlock } from "@/core/runtime-ui/sdui/engine/schemas";
 import { useDailyCountdown } from "../hooks/useDailyCountdown";
 import { useSpatioTemporalOffers } from "../hooks/useSpatioTemporalOffers";
-import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
+import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
 import type { OfferMatrixRow } from "../types/offerMatrix";
 
 export const SpatioTemporalOffersRail = () => {

@@ -5,7 +5,7 @@
  */
 import { memo } from "react";
 import { Link } from "@tanstack/react-router";
-import { appRegistry } from "@/core-os/app-registry";
+import { appRegistry } from "@/core/capabilities/app-registry";
 import type { SduiAppGridBlock as Props } from "../engine/schemas";
 import { useAuth } from "@/context/AuthContext";
 

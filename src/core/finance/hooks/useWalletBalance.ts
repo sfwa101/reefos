@@ -4,7 +4,7 @@ import { tierProgress, type TierDef } from "@/lib/tiers";
 import type {
   Profile,
   WalletBalance,
-} from "@/core-os/finance/types/wallet.types";
+} from "@/core/finance/types/wallet.types";
 
 /**
  * useWalletBalance — focused slice of the wallet data graph.

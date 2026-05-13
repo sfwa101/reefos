@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { PiggyBank, Settings2, Target, Sparkles, TrendingUp } from "lucide-react";
-import { useWalletSavings } from "@/core-os/finance/hooks/useWalletSavings";
+import { useWalletSavings } from "@/core/finance/hooks/useWalletSavings";
 import { toLatin } from "@/lib/format";
 
 /**

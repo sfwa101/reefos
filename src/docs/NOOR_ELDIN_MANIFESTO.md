@@ -180,7 +180,7 @@ Noor El-Din is a **Sovereign Stem Cell** under Law 2.
 1. **Lives at** `src/apps/noor-eldin/` — sibling of `reef-al-madina`,
    `khalil`, `asrab`, `nabd`. Registered in `src/core-os/app-registry/`.
 2. **Consumes the kernel only** via `@/core-os/*`:
-   - `@/core-os/finance` (Tayseer) — wallet, apprenticeship payouts, MRS unlocks
+   - `@/core/finance` (Tayseer) — wallet, apprenticeship payouts, MRS unlocks
    - `@/core/hakim-ai` — the Coach runtime
    - `@/core/runtime-ui/sdui` — every learning surface is a composed intent (Law 1)
    - `@/core/logistics` — physical apprenticeship routing

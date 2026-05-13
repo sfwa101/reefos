@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { toLatin } from "@/lib/format";
-import { formatDate, iconFor, isPositive } from "@/core-os/finance/lib/walletAdvisor";
-import type { Tx } from "@/core-os/finance/types/wallet.types";
+import { formatDate, iconFor, isPositive } from "@/core/finance/lib/walletAdvisor";
+import type { Tx } from "@/core/finance/types/wallet.types";
 
 /**
  * WalletTransactionList — "The Vault" sheet.

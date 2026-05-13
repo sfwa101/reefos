@@ -25,7 +25,7 @@ import {
   Wand2,
   Crown,
 } from "lucide-react";
-import { appRegistry } from "@/core-os/app-registry";
+import { appRegistry } from "@/core/capabilities/app-registry";
 
 const STORAGE_KEY = "salsabil.dev.maeenAsDefault";
 const LEGACY_STORAGE_KEYS = [

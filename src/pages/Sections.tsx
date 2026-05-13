@@ -7,7 +7,7 @@
  */
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
 import { storeThemes } from "@/lib/storeThemes";
-import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
+import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
 
 const HUB_THEME = storeThemes.supermarket;
 const HUB_PAGE_KEY = "departments_hub";

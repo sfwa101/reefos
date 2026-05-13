@@ -24,7 +24,7 @@ import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/co
 import { SduiHomeFeed } from "@/apps/reef-al-madina/features/storefront/home/components/SduiHomeFeed";
 import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
-import { useSovereignPrayerStore } from "@/core-os/spirit/useSovereignPrayer";
+import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
 
 const HOME_THEME = storeThemes.supermarket;
 const HOME_PAGE_KEY = "reef_home";
