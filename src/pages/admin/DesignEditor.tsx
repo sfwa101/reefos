@@ -1,5 +1,5 @@
 import { Layout } from "lucide-react";
-import { LayoutEditorGrid } from "@/core-os/system-editor/LayoutEditorGrid";
+import { LayoutEditorGrid } from "@/core/runtime-ui/system-editor/LayoutEditorGrid";
 
 export default function DesignEditor() {
   return (

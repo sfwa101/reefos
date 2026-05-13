@@ -11,7 +11,7 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
-import { SovereignThemeProvider } from "@/core-os/theme/SovereignThemeProvider";
+import { SovereignThemeProvider } from "@/core/theme/SovereignThemeProvider";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/context/CartContext";
@@ -28,9 +28,9 @@ import { SubdomainGuard } from "@/components/SubdomainGuard";
 import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBootstrap";
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 import { DevOSNavigator } from "@/components/system/DevOSNavigator";
-import { SovereignSpiritBootstrap } from "@/core-os/spirit/SovereignSpiritBootstrap";
+import { SovereignSpiritBootstrap } from "@/core/spirit/SovereignSpiritBootstrap";
 import { MaintenanceGate } from "@/components/system/MaintenanceGate";
-import { SovereignDormancyOverlay } from "@/core-os/spirit/SovereignDormancyOverlay";
+import { SovereignDormancyOverlay } from "@/core/spirit/SovereignDormancyOverlay";
 import { TenantProvider } from "@/context/TenantContext";
 import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
 // Wave P-0 — DEV-only Constitution Article 3 watchdog (no-op in prod).

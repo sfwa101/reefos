@@ -7,8 +7,8 @@ import { fireConfetti } from "@/lib/confetti";
 import {
   TOPUP_PRESETS,
   type PaymentMethod,
-} from "@/core-os/finance/types/wallet.types";
-import { bonusFor } from "@/core-os/finance/lib/walletAdvisor";
+} from "@/core/finance/types/wallet.types";
+import { bonusFor } from "@/core/finance/lib/walletAdvisor";
 import { isMobileWaContext, openWhatsApp } from "@/lib/whatsapp";
 
 const paymentMethods: PaymentMethod[] = [

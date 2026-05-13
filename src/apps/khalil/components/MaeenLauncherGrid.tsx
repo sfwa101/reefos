@@ -11,9 +11,9 @@ import { useEffect } from "react";
 import { useSduiLayout } from "@/core/runtime-ui/sdui/hooks/useSduiLayout";
 import { SduiRenderer } from "@/core/runtime-ui/sdui/components/SduiRenderer";
 import { HakimGenerativeOverlay } from "@/core/hakim-ai/generative/HakimGenerativeOverlay";
-import { SalsabilStatusBar } from "@/core-os/ui/SalsabilStatusBar";
+import { SalsabilStatusBar } from "@/core/runtime-ui/components/SalsabilStatusBar";
 import { useAuth } from "@/context/AuthContext";
-import { useActiveDelivery } from "@/core-os/maeen/useActiveDelivery";
+import { useActiveDelivery } from "@/core/maeen/useActiveDelivery";
 
 const SLUG = "khalil_hub";
 const TRACKING_BLOCK_ID = "hakim_barq_live";

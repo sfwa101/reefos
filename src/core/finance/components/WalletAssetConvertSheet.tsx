@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowDownUp, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
-import type { WalletAsset } from "@/core-os/finance/hooks/useWalletAssets";
+import type { WalletAsset } from "@/core/finance/hooks/useWalletAssets";
 
 type Pair = {
   fromKey: WalletAsset["type"];

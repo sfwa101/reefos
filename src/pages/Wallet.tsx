@@ -17,19 +17,19 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { useWalletDashboard } from "@/core-os/finance/hooks/useWalletDashboard";
-import { useWalletAssets } from "@/core-os/finance/hooks/useWalletAssets";
-import { useHideBalance } from "@/core-os/finance/hooks/useHideBalance";
-import { useWalletTransactions } from "@/core-os/finance/hooks/useWalletTransactions";
-import { WalletTopupDialog } from "@/core-os/finance/components/WalletTopupDialog";
-import { WalletTransferDialog } from "@/core-os/finance/components/WalletTransferDialog";
-import { WalletPosBarcode } from "@/core-os/finance/components/WalletPosBarcode";
-import { WalletCharityHub } from "@/core-os/finance/components/WalletCharityHub";
-import { GameyasDockContent } from "@/core-os/finance/components/GameyasDockContent";
-import { OperationsDockContent } from "@/core-os/finance/components/OperationsDockContent";
-import { VaultsDockContent } from "@/core-os/finance/components/VaultsDockContent";
-import { InsightsDockContent } from "@/core-os/finance/components/InsightsDockContent";
-import { SavingsJarDialog } from "@/core-os/finance/components/WalletSavingsJars";
+import { useWalletDashboard } from "@/core/finance/hooks/useWalletDashboard";
+import { useWalletAssets } from "@/core/finance/hooks/useWalletAssets";
+import { useHideBalance } from "@/core/finance/hooks/useHideBalance";
+import { useWalletTransactions } from "@/core/finance/hooks/useWalletTransactions";
+import { WalletTopupDialog } from "@/core/finance/components/WalletTopupDialog";
+import { WalletTransferDialog } from "@/core/finance/components/WalletTransferDialog";
+import { WalletPosBarcode } from "@/core/finance/components/WalletPosBarcode";
+import { WalletCharityHub } from "@/core/finance/components/WalletCharityHub";
+import { GameyasDockContent } from "@/core/finance/components/GameyasDockContent";
+import { OperationsDockContent } from "@/core/finance/components/OperationsDockContent";
+import { VaultsDockContent } from "@/core/finance/components/VaultsDockContent";
+import { InsightsDockContent } from "@/core/finance/components/InsightsDockContent";
+import { SavingsJarDialog } from "@/core/finance/components/WalletSavingsJars";
 import { toLatin } from "@/lib/format";
 import { FloatingGuardian } from "@/components/hakim/FloatingGuardian";
 

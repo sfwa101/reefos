@@ -2,9 +2,9 @@ import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Sparkles, TrendingDown, Wallet as WalletIcon } from "lucide-react";
-import { useWalletTransactions } from "@/core-os/finance/hooks/useWalletTransactions";
+import { useWalletTransactions } from "@/core/finance/hooks/useWalletTransactions";
 import { toLatin } from "@/lib/format";
-import type { AppSpend } from "@/core-os/finance/hooks/useWalletDashboard";
+import type { AppSpend } from "@/core/finance/hooks/useWalletDashboard";
 
 type Slice = { key: string; name: string; value: number; tone: string };
 

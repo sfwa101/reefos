@@ -7,7 +7,7 @@ import { useMemo } from "react";
 import {
   ModifierOrchestrator,
   type ModifierGroupSchema,
-} from "@/core-os/modifier-engine";
+} from "@/core/commerce/modifier-engine";
 
 type Props = {
   note: string;

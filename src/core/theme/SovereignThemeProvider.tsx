@@ -12,7 +12,7 @@ import { createContext, useContext, type ReactNode } from "react";
 import {
   useSovereignTheme,
   type SovereignTheme,
-} from "@/core-os/theme/hooks/useSovereignTheme";
+} from "@/core/theme/hooks/useSovereignTheme";
 
 type SovereignThemeContextValue = {
   tenantId: string;

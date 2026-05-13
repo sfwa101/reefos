@@ -178,9 +178,9 @@ Noor El-Din is a **Sovereign Stem Cell** under Law 2.
 
 ### Required compliance
 1. **Lives at** `src/apps/noor-eldin/` — sibling of `reef-al-madina`,
-   `khalil`, `asrab`, `nabd`. Registered in `src/core-os/app-registry/`.
-2. **Consumes the kernel only** via `@/core-os/*`:
-   - `@/core-os/finance` (Tayseer) — wallet, apprenticeship payouts, MRS unlocks
+   `khalil`, `asrab`, `nabd`. Registered in `src/core/app-registry/`.
+2. **Consumes the kernel only** via `@/core/*`:
+   - `@/core/finance` (Tayseer) — wallet, apprenticeship payouts, MRS unlocks
    - `@/core/hakim-ai` — the Coach runtime
    - `@/core/runtime-ui/sdui` — every learning surface is a composed intent (Law 1)
    - `@/core/logistics` — physical apprenticeship routing
@@ -195,7 +195,7 @@ Noor El-Din is a **Sovereign Stem Cell** under Law 2.
    queue. The learner never loses work to a flaky network.
 6. **No cross-stem-cell imports** — Noor El-Din never imports from
    `reef-al-madina/`, `khalil/`, etc. All sharing happens through
-   `@/core-os/*`, `@/context/*`, `@/lib/*`.
+   `@/core/*`, `@/context/*`, `@/lib/*`.
 
 ### Forbidden patterns (instant rejection)
 - Hand-rolled "course player" pages outside the SDUI Composer

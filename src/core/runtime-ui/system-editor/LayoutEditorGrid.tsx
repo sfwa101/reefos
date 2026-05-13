@@ -19,7 +19,7 @@ import {
   SECTION_LABELS,
   PAGE_LABELS,
   useLayoutEditor,
-} from "@/core-os/system-editor/hooks/useLayoutEditor";
+} from "@/core/runtime-ui/system-editor/hooks/useLayoutEditor";
 import { SECTION_REGISTRY, type PageKey } from "@/core/runtime-ui/sdui/registry";
 import type {
   SectionConfig, SectionKey,

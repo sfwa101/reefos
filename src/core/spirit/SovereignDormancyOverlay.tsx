@@ -12,7 +12,7 @@ import { useAuth } from "@/context/AuthContext";
 import {
   useSovereignPrayerStore,
   PRAYER_LABEL_AR,
-} from "@/core-os/spirit/useSovereignPrayer";
+} from "@/core/spirit/useSovereignPrayer";
 
 export const SovereignDormancyOverlay = () => {
   const { profile } = useAuth();

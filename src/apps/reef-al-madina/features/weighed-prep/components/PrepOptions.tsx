@@ -9,7 +9,7 @@ import { Panel } from "./Panel";
 import {
   SelectionAtom,
   type SelectionGroupSchema,
-} from "@/core-os/modifier-engine";
+} from "@/core/commerce/modifier-engine";
 import {
   slaForPrep, slaMeta,
   type PrepOption, type PrepAddon, type PackagingOption,

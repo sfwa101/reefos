@@ -7,7 +7,7 @@
  * and bundles them with the cart line.
  */
 import { useState } from "react";
-import { ModifierOrchestrator, type ModifierGroupSchema, type ModifierState } from "@/core-os/modifier-engine";
+import { ModifierOrchestrator, type ModifierGroupSchema, type ModifierState } from "@/core/commerce/modifier-engine";
 import type { SduiModifierGroupBlock } from "../engine/schemas";
 
 type Props = { block: SduiModifierGroupBlock };

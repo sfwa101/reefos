@@ -1,8 +1,8 @@
 import { motion } from "framer-motion";
 import { Eye, EyeOff } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { maskAmount } from "@/core-os/finance/hooks/useHideBalance";
-import type { WalletAsset } from "@/core-os/finance/hooks/useWalletAssets";
+import { maskAmount } from "@/core/finance/hooks/useHideBalance";
+import type { WalletAsset } from "@/core/finance/hooks/useWalletAssets";
 
 type Props = {
   asset: WalletAsset;
