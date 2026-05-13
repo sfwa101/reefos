@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { CartLineMeta } from "@/context/CartContext";
 /** @deprecated Wave P-B B-3 — calculations already prefer `capturedPrice` over `product.price`. */
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
@@ -257,6 +257,12 @@ export const useCartCalculations = ({
    * ------------------------------------------------------------------ */
   const cashierPreview = useCashierPreview();
   const cashierMutate = cashierPreview.mutate;
+  const [cashierSnapshotHash, setCashierSnapshotHash] = useState<string | null>(
+    null,
+  );
+  const [cashierSnapshotSignature, setCashierSnapshotSignature] = useState<
+    string | null
+  >(null);
 
   const cashierItems = useMemo(
     () =>
@@ -281,6 +287,11 @@ export const useCartCalculations = ({
         { items: cashierItems, context: { member_tier: "guest" } },
         {
           onSuccess: (snapshot) => {
+            // Phase C5 — capture the latest authoritative snapshot hash so
+            // the checkout submit can hand it to the Sovereign Price Judge.
+            setCashierSnapshotHash(snapshot.snapshot_hash);
+            setCashierSnapshotSignature(cartSignature);
+
             const delta = Math.abs(snapshot.totals.grand_total - grand);
             if (delta > 0.01) {
               if (import.meta.env.DEV) {
@@ -340,5 +351,19 @@ export const useCartCalculations = ({
     showChangeJar,
     progress,
     FREE_DELIVERY_THRESHOLD,
+    /**
+     * Phase C5 — latest authoritative `snapshot_hash` from CashierBrain.
+     * `null` until the first preview lands or whenever the cart mutates
+     * faster than the 500ms debounce can confirm. Only valid when
+     * `cashierSnapshotFresh` is true.
+     */
+    cashierSnapshotHash,
+    /** True when the captured hash matches the current cart signature. */
+    cashierSnapshotFresh:
+      cashierSnapshotHash !== null &&
+      cashierSnapshotSignature === cartSignature &&
+      cartSignature !== "",
+    /** Items the server validated (UUID-only product ids). */
+    cashierSnapshotItems: cashierItems,
   };
 };

@@ -13,7 +13,7 @@
  */
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { validatedSovereignCheckoutFn } from "@/core/cashier/gateway/checkout.functions";
 
 export type SovereignCartItem = {
   product_id: string;
@@ -48,6 +48,21 @@ export type SovereignCheckoutInput = {
    * network failures without creating duplicate orders or charges.
    */
   idempotency_key: string;
+  /**
+   * Phase C5 — Sovereign Price Validation (Article 12.1). Deterministic
+   * `snapshot_hash` produced by the latest Cashier Brain preview. The
+   * server re-runs the brain against authoritative DNA and rejects the
+   * checkout if the hash does not match.
+   */
+  expected_snapshot_hash: string;
+  /** Optional context override for the price re-computation (defaults to guest tier). */
+  cashier_context?: {
+    member_tier?: "guest" | "bronze" | "silver" | "gold" | "vip";
+    coupon_code?: string | null;
+    delivery_zone_id?: string | null;
+    delivery_fee?: number;
+    currency?: string;
+  };
 };
 
 /** Browser-safe UUID v4 generator (crypto.randomUUID with a polyfill fallback). */
@@ -82,23 +97,32 @@ export const callSovereignCheckout = async (
   if (!input.idempotency_key) {
     throw new Error("idempotency_key is required for checkout");
   }
-  const args = {
-    p_customer_id: input.customer_id,
-    p_cart_items: input.cart_items,
-    p_delivery_info: input.delivery_info ?? {},
-    p_idempotency_key: input.idempotency_key,
-  } as unknown as Parameters<
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (typeof supabase.rpc<any>)
-  >[1];
+  if (!input.expected_snapshot_hash) {
+    throw new Error(
+      "عفواً، لم يكتمل احتساب السعر السيادي بعد. يرجى الانتظار لحظة وإعادة المحاولة.",
+    );
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc(
-    "process_checkout_sovereign",
-    args,
-  );
-  if (error) throw new Error(friendly(error.message || "Checkout failed"));
-  if (!data || typeof data !== "string") throw new Error("استجابة غير متوقعة من الخادم");
+  let data: string;
+  try {
+    data = await validatedSovereignCheckoutFn({
+      data: {
+        customer_id: input.customer_id,
+        cart_items: input.cart_items,
+        delivery_info: (input.delivery_info ?? {}) as Record<string, unknown>,
+        idempotency_key: input.idempotency_key,
+        expected_snapshot_hash: input.expected_snapshot_hash,
+        cashier_context: input.cashier_context ?? { member_tier: "guest" },
+      },
+    });
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "Checkout failed";
+    throw new Error(friendly(msg));
+  }
+
+  if (!data || typeof data !== "string") {
+    throw new Error("استجابة غير متوقعة من الخادم");
+  }
 
   // ─── Dual-Write Bridge: append `commit` events to inventory ledger (fail-safe) ───
   // Fire-and-forget: failures are logged but never block checkout success.
