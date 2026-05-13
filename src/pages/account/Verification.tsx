@@ -4,6 +4,7 @@ import { BadgeCheck, Camera, CheckCircle2, CircleAlert, IdCard, Loader2, Save, S
 import BackHeader from "@/components/BackHeader";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaGateway } from "@/core/media";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -58,12 +59,12 @@ const Verification = () => {
         setRow(data);
         setNationalId(data.national_id ?? "");
         if (data.front_image_path) {
-          const { data: f } = await supabase.storage.from(BUCKET).createSignedUrl(data.front_image_path, 600);
-          if (alive) setSignedFront(f?.signedUrl ?? null);
+          const f = await MediaGateway.getSignedUrl(BUCKET, data.front_image_path, 600);
+          if (alive) setSignedFront(f);
         }
         if (data.back_image_path) {
-          const { data: b } = await supabase.storage.from(BUCKET).createSignedUrl(data.back_image_path, 600);
-          if (alive) setSignedBack(b?.signedUrl ?? null);
+          const b = await MediaGateway.getSignedUrl(BUCKET, data.back_image_path, 600);
+          if (alive) setSignedBack(b);
         }
       }
       setLoading(false);
@@ -83,8 +84,7 @@ const Verification = () => {
   const uploadOne = async (file: File, side: "front" | "back"): Promise<string> => {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `${user!.id}/${side}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from(BUCKET).upload(path, file, { upsert: true, contentType: file.type });
-    if (error) throw error;
+    await MediaGateway.uploadFile({ bucket: BUCKET, path, file, contentType: file.type, upsert: true });
     return path;
   };
 

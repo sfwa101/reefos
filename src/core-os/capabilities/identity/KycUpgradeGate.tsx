@@ -28,6 +28,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaGateway } from "@/core/media";
 import { decodeEgyptianId, normalizeIdInput, type DecodedEgyptianId } from "./egyptianIdDecoder";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { cn } from "@/lib/utils";
@@ -93,10 +94,15 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
       if (decoded.gender === "male" && photoFile) {
         try {
           const path = `${user.id}/kyc_${Date.now()}.jpg`;
-          await supabase.storage.from("avatars").upload(path, photoFile, { upsert: true, contentType: photoFile.type });
-          const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-          if (pub?.publicUrl) {
-            await supabase.from("profiles").update({ avatar_url: pub.publicUrl }).eq("id", user.id);
+          const { publicUrl } = await MediaGateway.uploadFile({
+            bucket: "avatars",
+            path,
+            file: photoFile,
+            contentType: photoFile.type,
+            upsert: true,
+          });
+          if (publicUrl) {
+            await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
           }
         } catch { /* non-fatal: photo can be re-uploaded from settings */ }
       }
