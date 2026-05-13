@@ -257,6 +257,12 @@ export const useCartCalculations = ({
    * ------------------------------------------------------------------ */
   const cashierPreview = useCashierPreview();
   const cashierMutate = cashierPreview.mutate;
+  const [cashierSnapshotHash, setCashierSnapshotHash] = useState<string | null>(
+    null,
+  );
+  const [cashierSnapshotSignature, setCashierSnapshotSignature] = useState<
+    string | null
+  >(null);
 
   const cashierItems = useMemo(
     () =>
