@@ -4,7 +4,7 @@ import { ChevronLeft, Loader2, Lock, Sparkles, ShieldCheck, Users } from "lucide
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { toLatin } from "@/lib/format";
-import type { OpenCircle, TrustScore } from "../hooks/useGameyas";
+import type { OpenCircle, TrustScore } from "@/core/finance/hooks/useGameyas";
 
 /**
  * JoinGameyaSheet — Halal turn-picker.

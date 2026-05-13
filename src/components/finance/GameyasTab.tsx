@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Plus, ShieldCheck, Crown, ChevronRight, Loader2 } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { useGameyas, type GameyaCircle } from "../hooks/useGameyas";
+import { useGameyas, type GameyaCircle } from "@/core/finance/hooks/useGameyas";
 import { GameyaCreationSheet } from "./GameyaCreationSheet";
 import { GameyaDetailsSheet } from "./GameyaDetailsSheet";
 

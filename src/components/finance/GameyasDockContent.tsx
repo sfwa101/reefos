@@ -16,7 +16,7 @@ import {
   useTrustScore,
   type GameyaCircle,
   type OpenCircle,
-} from "../hooks/useGameyas";
+} from "@/core/finance/hooks/useGameyas";
 import { GameyaCreationSheet } from "./GameyaCreationSheet";
 import { GameyaDetailsSheet } from "./GameyaDetailsSheet";
 import { JoinGameyaSheet } from "./JoinGameyaSheet";

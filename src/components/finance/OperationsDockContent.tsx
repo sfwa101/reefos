@@ -10,7 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { useWalletTransactions, type WalletTxn } from "../hooks/useWalletTransactions";
+import { useWalletTransactions, type WalletTxn } from "@/core/finance/hooks/useWalletTransactions";
 
 /**
  * OperationsDockContent — Apple-Wallet-style unified ledger.
