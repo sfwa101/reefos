@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
 import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
+import { useCashierPreview } from "@/core/cashier/gateway/hooks";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CART_KEY = "pos.cart.v1";
 const CACHE_KEY = "pos.products.cache.v1";
