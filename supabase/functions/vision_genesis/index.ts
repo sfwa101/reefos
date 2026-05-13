@@ -293,9 +293,16 @@ Deno.serve(async (req) => {
     if (aiRes.status === 429) return json({ error: "rate_limited", details: "AI gateway rate limit hit (429)." }, 429);
     if (aiRes.status === 402) return json({ error: "credits_exhausted", details: "AI gateway credits exhausted (402)." }, 402);
     if (!aiRes.ok) {
+      // Phase C-2 — bubble the upstream body verbatim. No truncation, no wrapping.
       const t = await aiRes.text();
       console.error("Vision AI error:", aiRes.status, t);
-      return json({ error: "AI_API_ERROR", status: aiRes.status, details: t.slice(0, 800) }, 500);
+      let upstream: unknown = t;
+      try { upstream = JSON.parse(t); } catch { /* keep as text */ }
+      return json({
+        error: "AI_API_ERROR",
+        status: aiRes.status,
+        upstream,
+      }, aiRes.status);
     }
 
     const aiData = await aiRes.json();
