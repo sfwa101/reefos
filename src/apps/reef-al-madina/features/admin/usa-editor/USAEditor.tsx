@@ -13,6 +13,7 @@ import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-edito
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft } from "@/core/commerce";
+import { PackagingGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core-os/hakim-ai/hooks/useAssetMatchmaker";
@@ -112,8 +113,24 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setCurrency((asset.currency as "EGP" | "USD" | "EUR") ?? "EGP");
       setTab("basic");
       const traits = Array.isArray(asset.traits) ? (asset.traits as unknown[]) : [];
-      setPackagingEnabled(traits.includes(CAP.PACKAGING_HIERARCHY));
+      const enabled = traits.includes(CAP.PACKAGING_HIERARCHY);
+      setPackagingEnabled(enabled);
       setPackagingTiers([]);
+      // Hydrate persisted packaging tiers for edit mode.
+      let cancelled = false;
+      (async () => {
+        try {
+          const rows = await PackagingGateway.listTiers(asset.id);
+          if (cancelled) return;
+          setPackagingTiers(rows as unknown as PackagingTierDraft[]);
+          if (rows.length > 0) setPackagingEnabled(true);
+        } catch (e) {
+          console.warn("[USAEditor] failed to load packaging tiers", e);
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
     } else {
       setName("");
       setDescription("");
@@ -171,7 +188,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           }
         }
 
-        await mint.mutateAsync({
+        const newAssetId = await mint.mutateAsync({
           asset: {
             name: trimmed,
             description: description.trim(),
@@ -188,6 +205,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           },
           semantic_embedding: embedding,
         });
+        await persistPackaging(newAssetId);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
@@ -199,10 +217,35 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           description: description.trim() || null,
           base_price: priceNum,
         });
+        await persistPackaging(asset!.id);
         onSaved?.();
       }
     } catch {
       /* toast handled in hook */
+    }
+  };
+
+  /**
+   * Persist the lifted PackagingHierarchyBuilder state to
+   * `salsabil_packaging_tiers` via the topological-safe gateway.
+   * Off-toggle wipes any existing tiers for the asset.
+   */
+  const persistPackaging = async (assetId: string) => {
+    try {
+      if (!packagingEnabled) {
+        await PackagingGateway.wipeTiers(assetId);
+        return;
+      }
+      if (packagingTiers.length === 0) {
+        await PackagingGateway.wipeTiers(assetId);
+        return;
+      }
+      await PackagingGateway.syncTiers(assetId, packagingTiers);
+      toast.success("تمت مزامنة شجرة العبوات بنجاح");
+    } catch (e) {
+      console.error("[USAEditor] packaging sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ شجرة العبوات";
+      toast.error(`⚠️ ${msg}`);
     }
   };
 
