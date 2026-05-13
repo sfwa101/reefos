@@ -466,6 +466,52 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               <SaveButton />
             </TabsContent>
 
+
+            <TabsContent value="packaging" className="m-0 space-y-3">
+              <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-primary" />
+                  <div>
+                    <p className="text-[12.5px] font-extrabold">تفعيل شجرة العبوات</p>
+                    <p className="text-[10.5px] text-foreground-tertiary">
+                      للأصول التي تُباع بأكثر من وحدة (جرام/كجم/كرتونة…).
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const next = !packagingEnabled;
+                    setPackagingEnabled(next);
+                    if (!next) setPackagingTiers([]);
+                  }}
+                  className={`h-8 px-3 rounded-full text-[11px] font-extrabold press border ${
+                    packagingEnabled
+                      ? "bg-primary text-primary-foreground border-primary"
+                      : "bg-background border-border text-foreground-tertiary"
+                  }`}
+                >
+                  {packagingEnabled ? "مفعّل" : "غير مفعّل"}
+                </button>
+              </div>
+
+              {packagingEnabled ? (
+                <PackagingHierarchyBuilder
+                  assetId={asset?.id ?? null}
+                  value={packagingTiers}
+                  onChange={setPackagingTiers}
+                />
+              ) : (
+                <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
+                  <Layers className="h-7 w-7 text-primary mx-auto mb-2" />
+                  <p className="text-[12.5px] font-display">شجرة العبوات معطّلة</p>
+                  <p className="text-[10.5px] text-foreground-tertiary mt-1 leading-relaxed">
+                    فعّل الميزة من الأعلى لبناء هرم وحدات البيع (Pallet → Carton → kg → g).
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+
             <TabsContent value="inventory" className="m-0">
               {!asset ? (
                 <div className="rounded-2xl border border-dashed border-border/60 bg-background-secondary/40 p-6 text-center">
