@@ -105,6 +105,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [packagingEnabled, setPackagingEnabled] = useState(false);
   const [packagingTiers, setPackagingTiers] = useState<PackagingTierDraft[]>([]);
 
+  // Phase D-5 — Multi-Dimensional Classification (local draft, lifted on save).
+  const [classificationEnabled, setClassificationEnabled] = useState(false);
+  const [tagDrafts, setTagDrafts] = useState<AssetTagDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
