@@ -287,6 +287,11 @@ export const useCartCalculations = ({
         { items: cashierItems, context: { member_tier: "guest" } },
         {
           onSuccess: (snapshot) => {
+            // Phase C5 — capture the latest authoritative snapshot hash so
+            // the checkout submit can hand it to the Sovereign Price Judge.
+            setCashierSnapshotHash(snapshot.snapshot_hash);
+            setCashierSnapshotSignature(cartSignature);
+
             const delta = Math.abs(snapshot.totals.grand_total - grand);
             if (delta > 0.01) {
               if (import.meta.env.DEV) {
