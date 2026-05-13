@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { useCartTotal } from "@/context/CartContext";
 import { useLocationStatic as useDeliveryLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsGateway, type SavedAddressVM } from "@/core/logistics";
 import { toLatin } from "@/lib/format";
 import {
   Sheet,
@@ -31,14 +31,7 @@ const compactFmt = new Intl.NumberFormat("en-US", {
 
 const fmtCompact = (n: number) => toLatin(compactFmt.format(Math.round(n)));
 
-type SavedAddress = {
-  id: string;
-  label: string;
-  city: string;
-  district: string | null;
-  street: string | null;
-  is_default: boolean;
-};
+type SavedAddress = SavedAddressVM;
 
 const TopBar = () => {
   const total = useCartTotal();
@@ -53,13 +46,7 @@ const TopBar = () => {
 
   const loadAddresses = async () => {
     if (!user) { setAddresses([]); return; }
-    const { data } = await supabase
-      .from("addresses")
-      .select("id,label,city,district,street,is_default")
-      .eq("user_id", user.id)
-      .order("is_default", { ascending: false })
-      .order("created_at", { ascending: false });
-    const list = (data ?? []) as SavedAddress[];
+    const list = await LogisticsGateway.listAddresses(user.id);
     setAddresses(list);
     const def = list.find((a) => a.is_default) ?? list[0];
     if (def) {

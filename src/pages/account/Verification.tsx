@@ -3,8 +3,8 @@ import { Link } from "@tanstack/react-router";
 import { BadgeCheck, Camera, CheckCircle2, CircleAlert, IdCard, Loader2, Save, ShieldCheck, Upload, X } from "lucide-react";
 import BackHeader from "@/components/BackHeader";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
 import { MediaGateway } from "@/core/media";
+import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
@@ -49,11 +49,7 @@ const Verification = () => {
     if (!user) { setLoading(false); return; }
     let alive = true;
     (async () => {
-      const { data } = await supabase
-        .from("kyc_verifications")
-        .select("*")
-        .eq("user_id", user.id)
-        .maybeSingle<KycRow>();
+      const data = await IdentityGateway.getKycVerification(user.id);
       if (!alive) return;
       if (data) {
         setRow(data);
@@ -103,21 +99,12 @@ const Verification = () => {
       if (frontFile) frontPath = await uploadOne(frontFile, "front");
       if (backFile) backPath = await uploadOne(backFile, "back");
 
-      const payload = {
-        user_id: user.id,
-        national_id: cleanId,
-        front_image_path: frontPath,
-        back_image_path: backPath,
-        status: "pending" as KycStatus,
-        rejection_reason: null,
-        submitted_at: new Date().toISOString(),
-      };
-      const { data, error } = await supabase
-        .from("kyc_verifications")
-        .upsert(payload, { onConflict: "user_id" })
-        .select()
-        .single<KycRow>();
-      if (error) throw error;
+      const data = await IdentityGateway.submitKycVerification({
+        userId: user.id,
+        nationalId: cleanId,
+        frontImagePath: frontPath,
+        backImagePath: backPath,
+      });
       setRow(data);
       setFrontFile(null); setBackFile(null);
       toast.success("تم إرسال الطلب — ستصلك نتيجة التوثيق قريبًا");

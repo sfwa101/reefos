@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
 import { CreditCard, Wallet, Plus, Trash2, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 import { IdentityGateway } from "@/core/identity";
 
 /**
@@ -37,23 +36,9 @@ const Payments = () => {
         if (mounted) setLoading(false);
         return;
       }
-      // Stem-cell read — table may not exist yet; fall back gracefully.
-      try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const sb = supabase as any;
-        const { data, error } = await sb
-          .from("payment_methods")
-          .select("id,kind,brand,last4,expires_label,is_default")
-          .eq("user_id", uid)
-          .order("is_default", { ascending: false });
-        if (!mounted) return;
-        if (!error && Array.isArray(data)) {
-          setList(data as PaymentMethod[]);
-        }
-      } catch {
-        /* table not yet provisioned — empty state is fine */
-      }
-      setLoading(false);
+      const data = await IdentityGateway.listPaymentMethods(uid);
+      if (mounted) setList(data);
+      if (mounted) setLoading(false);
     })();
     return () => {
       mounted = false;

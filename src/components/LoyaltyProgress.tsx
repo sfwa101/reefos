@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Award } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity";
 import { useAuth } from "@/context/AuthContext";
 
 type Progress = {
@@ -35,7 +35,7 @@ export default function LoyaltyProgress() {
   useEffect(() => {
     if (!user?.id) return;
     (async () => {
-      const { data } = await (supabase as any).rpc("progress_to_next_level", { _user_id: user.id });
+      const data = await IdentityGateway.getLoyaltyProgress(user.id);
       if (data) setP(data as Progress);
     })();
   }, [user?.id]);

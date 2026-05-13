@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing";
 
 const STORAGE_KEY = "reef.lastActiveAt";
 const NUDGE_AFTER_MS = 2 * 60 * 60 * 1000; // 2h
@@ -37,29 +37,7 @@ export default function InactivityNudger() {
 
     (async () => {
       try {
-        let category: string | null = null;
-        if (user?.id) {
-          const { data } = await (supabase as any).rpc("category_affinity", { _user_id: user.id });
-          const top = (data ?? [])[0];
-          category = top?.category ?? null;
-        }
-        const { data: sale } = await (supabase as any)
-          .from("flash_sales")
-          .select("id")
-          .eq("is_active", true)
-          .order("starts_at", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (!sale) return;
-        let q = (supabase as any)
-          .from("flash_sale_products")
-          .select("product_id,product_name,discount_pct,category")
-          .eq("flash_sale_id", sale.id)
-          .order("rank")
-          .limit(5);
-        const { data: items } = await q;
-        const list = (items ?? []) as Array<{ product_id: string; product_name: string; discount_pct: number; category: string | null }>;
-        const pick = list.find((it) => category && it.category === category) ?? list[0];
+        const pick = await MarketingGateway.getInactivityPick(user?.id ?? null);
         if (!pick) return;
 
         const name = profile?.full_name?.split(" ")[0] ?? "";
@@ -69,10 +47,9 @@ export default function InactivityNudger() {
         });
         localStorage.setItem(NUDGE_DEDUPE_KEY, String(Date.now()));
 
-        // Persist as in-app notification if logged in
         if (user?.id) {
-          await (supabase as any).from("notifications").insert({
-            user_id: user.id,
+          await MarketingGateway.createNotification({
+            userId: user.id,
             title: "عرض فلاش يناسبك",
             body: `${pick.product_name} — خصم ${Math.round(Number(pick.discount_pct))}٪`,
             icon: "flame",

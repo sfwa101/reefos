@@ -8,7 +8,7 @@ import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Boxes, Loader2, Package, Pencil, AlertTriangle, Info } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor";
 import { useCurrentVendor } from "@/core-os/hakim-ai/hooks/useCurrentVendor";
 import { useUpdateInventory } from "@/core-os/hakim-ai/hooks/useInventoryMatrix";
 import { UniversalAdminGrid, type Column, type RowAction, type BentoMetric } from "@/components/admin/UniversalAdminGrid";
@@ -47,48 +47,7 @@ export default function VendorInventory() {
   const { data: rows, isLoading } = useQuery<VendorInvRow[]>({
     queryKey: ["vendor-inventory", vendorId],
     enabled: !!vendorId,
-    queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data, error } = await sb
-        .from("salsabil_inventory_matrix")
-        .select(`
-          id, sku_id, location_code, availability_data, updated_at,
-          sku:salsabil_skus!inner(
-            id, sku_code,
-            asset:salsabil_assets!inner(
-              id, name, description,
-              salsabil_financial_contracts(base_price, currency, is_active, valid_from)
-            )
-          )
-        `)
-        .eq("location_code", vendorId!)
-        .order("updated_at", { ascending: false });
-      if (error) throw error;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data ?? []).map((r: any): VendorInvRow => {
-        const av = (r.availability_data ?? {}) as Record<string, unknown>;
-        const contracts = (r.sku?.asset?.salsabil_financial_contracts ?? [])
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .filter((c: any) => c.is_active)
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          .sort((a: any, b: any) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime());
-        const active = contracts[0];
-        return {
-          id: r.id,
-          sku_id: r.sku_id,
-          sku_code: r.sku?.sku_code ?? "—",
-          asset_id: r.sku?.asset?.id ?? "",
-          asset_name: r.sku?.asset?.name ?? "—",
-          asset_description: r.sku?.asset?.description ?? null,
-          count: Number(av.count ?? 0),
-          override_price: av.override_price != null ? Number(av.override_price) : null,
-          base_price: active ? Number(active.base_price) : null,
-          currency: active?.currency ?? null,
-          updated_at: r.updated_at,
-        };
-      });
-    },
+    queryFn: async () => VendorGateway.listVendorInventory(vendorId!),
   });
 
   // ---- Edit dialog state ----
