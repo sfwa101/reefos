@@ -84,9 +84,9 @@ const SearchPage = () => {
   const setQuery = (val: string) => setInputVal(val);
 
   const clearBrand = () =>
-    navigate({ to: "/search", search: (prev) => ({ ...prev, brand: undefined }), replace: true });
+    navigate({ to: "/search", search: (prev) => ({ ...prev, q: prev.q ?? "", brand: undefined }), replace: true });
   const clearTrait = () =>
-    navigate({ to: "/search", search: (prev) => ({ ...prev, trait: undefined }), replace: true });
+    navigate({ to: "/search", search: (prev) => ({ ...prev, q: prev.q ?? "", trait: undefined }), replace: true });
 
   // Search history (recent queries) + featured categories (trending grid)
   const { history, push: pushHistory, remove: removeHistory, clear: clearHistory } = useSearchHistory();
