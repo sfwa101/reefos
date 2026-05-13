@@ -140,6 +140,10 @@ export function useVisionGenesis() {
       const secondary = secondaryFile
         ? await fileToBase64(secondaryFile)
         : null;
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("يجب تسجيل الدخول بصلاحية صحيحة لاستخدام حكيم");
+      }
       const { data, error } = await supabase.functions.invoke("vision_genesis", {
         body: {
           image_base64: base64,
@@ -147,6 +151,9 @@ export function useVisionGenesis() {
           hint,
           secondary_image_base64: secondary?.base64 ?? null,
           secondary_mime_type: secondary?.mime ?? null,
+        },
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
         },
       });
       // Try to surface the structured `details` from the edge function body.
