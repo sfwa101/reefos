@@ -224,19 +224,64 @@ Deno.serve(async (req) => {
       ? parsed.financial_contract.pricing_model
       : "flat";
 
+    const optStr = (v: unknown, max = 500): string | null =>
+      typeof v === "string" && v.trim() ? v.trim().slice(0, max) : null;
+    const optNum = (v: unknown): number | null =>
+      typeof v === "number" && Number.isFinite(v) ? v : null;
+    const optStrArr = (v: unknown, max = 20): string[] | null =>
+      Array.isArray(v)
+        ? v.filter((x) => typeof x === "string").slice(0, max)
+        : null;
+
+    const a = parsed?.asset ?? {};
+    const marketing = a?.marketing && typeof a.marketing === "object"
+      ? { short: optStr(a.marketing.short, 200), long: optStr(a.marketing.long, 2000) }
+      : null;
+    const nutrition = a?.nutrition && typeof a.nutrition === "object"
+      ? {
+          kcal: optNum(a.nutrition.kcal),
+          protein_g: optNum(a.nutrition.protein_g),
+          fat_g: optNum(a.nutrition.fat_g),
+          carbs_g: optNum(a.nutrition.carbs_g),
+          sugar_g: optNum(a.nutrition.sugar_g),
+        }
+      : null;
+    const physical = a?.physical && typeof a.physical === "object"
+      ? {
+          net_weight: optNum(a.physical.net_weight),
+          weight_unit: ["g", "kg", "ml", "L", "piece"].includes(a.physical.weight_unit)
+            ? a.physical.weight_unit
+            : null,
+        }
+      : null;
+
     const sanitized = {
       asset: {
-        name: String(parsed?.asset?.name ?? "أصل بدون اسم").slice(0, 200),
-        description: String(parsed?.asset?.description ?? "").slice(0, 2000),
+        name: String(a?.name ?? "أصل بدون اسم").slice(0, 200),
+        description: String(a?.description ?? "").slice(0, 2000),
         asset_type: assetType,
-        traits: Array.isArray(parsed?.asset?.traits)
-          ? parsed.asset.traits.filter((t: unknown) => typeof t === "string").slice(0, 20)
+        traits: Array.isArray(a?.traits)
+          ? a.traits.filter((t: unknown) => typeof t === "string").slice(0, 20)
           : [],
+        category_path: optStr(a?.category_path, 200),
+        brand: optStr(a?.brand, 120),
+        origin_country: optStr(a?.origin_country, 80),
+        marketing,
+        nutrition,
+        physical,
+        allergens: optStrArr(a?.allergens, 20),
       },
       skus: Array.isArray(parsed?.skus)
         ? parsed.skus.slice(0, 20).map((s: any, i: number) => ({
             sku_code: String(s?.sku_code ?? `SKU-${Date.now()}-${i}`).slice(0, 64),
             attributes: s?.attributes && typeof s.attributes === "object" ? s.attributes : {},
+            barcode: optStr(s?.barcode, 64),
+            variant_axes: s?.variant_axes && typeof s.variant_axes === "object"
+              ? {
+                  size: optStr(s.variant_axes.size, 64),
+                  flavor: optStr(s.variant_axes.flavor, 64),
+                }
+              : null,
           }))
         : [],
       financial_contract: {
@@ -251,6 +296,7 @@ Deno.serve(async (req) => {
             ? parsed.financial_contract.contract_rules
             : {},
       },
+      prompt_version: "v1-rich-dna",
       generated_at: new Date().toISOString(),
     };
 
