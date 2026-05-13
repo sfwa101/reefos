@@ -186,6 +186,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setClassificationEnabled(false);
       setTagDrafts([]);
       setFinancialContractsDraft([]);
+      setInventoryDrafts([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
