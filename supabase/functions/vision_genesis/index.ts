@@ -23,6 +23,34 @@ const PRICING_MODELS = [
   "milestone_installments",
 ] as const;
 
+// ── Generative Aesthetics: category → soft pastel palette ─────────────
+const PALETTES: Array<{ name: string; hex: string }> = [
+  { name: "mint green", hex: "#D1FAE5" },
+  { name: "warm cream", hex: "#FEF3C7" },
+  { name: "blush pink", hex: "#FCE7F3" },
+  { name: "powder blue", hex: "#DBEAFE" },
+  { name: "soft lavender", hex: "#EDE9FE" },
+  { name: "sand beige", hex: "#F5F1E8" },
+  { name: "sage", hex: "#E2E8DD" },
+];
+function pickPalette(category: string | null, traits: string[]): { name: string; hex: string } {
+  const c = (category ?? "").toLowerCase();
+  const t = traits.map((x) => x.toLowerCase()).join(" ");
+  const blob = `${c} ${t}`;
+  if (/خضار|vegetable|herb|عشب|salad/.test(blob)) return PALETTES[0];
+  if (/فاكهة|fruit|berry|توت/.test(blob)) return PALETTES[2];
+  if (/لحوم|meat|دواجن|poultry|سمك|fish|seafood/.test(blob)) return PALETTES[5];
+  if (/ألبان|dairy|cheese|جبن|milk|حليب|yogurt|زبادي/.test(blob)) return PALETTES[3];
+  if (/مخبوزات|bakery|خبز|bread|pastry|حلوى|sweet|dessert/.test(blob)) return PALETTES[1];
+  if (/مشروب|beverage|drink|juice|عصير|water|مياه|tea|شاي|coffee|قهوة/.test(blob)) return PALETTES[3];
+  if (/تجميل|beauty|cosmetic|عناية|skincare|بشرة/.test(blob)) return PALETTES[4];
+  if (/تنظيف|clean|detergent|منظف|household/.test(blob)) return PALETTES[6];
+  if (/زيت|oil|سمن|ghee|تتبيلة|condiment|sauce|صلصة/.test(blob)) return PALETTES[5];
+  // hash fallback for stable variety
+  let h = 0;
+  for (const ch of blob) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+  return PALETTES[h % PALETTES.length];
+}
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
@@ -300,7 +328,55 @@ Deno.serve(async (req) => {
       generated_at: new Date().toISOString(),
     };
 
-    return json({ ok: true, ...sanitized });
+    // ── Generative Aesthetics Layer ─────────────────────────────────────
+    // Re-render the cropped subject onto a category-aware pastel backdrop
+    // so storefront cards never expose a raw cutout. Server-side only,
+    // returns a single optimized 2D image (Article 1.2 — Ghostly Payload).
+    let aestheticImage: string | null = null;
+    let aestheticPalette: { name: string; hex: string } | null = null;
+    try {
+      aestheticPalette = pickPalette(sanitized.asset.category_path, sanitized.asset.traits);
+      const prompt = `Professional, photorealistic commercial product shot of "${sanitized.asset.name}" placed in a clean, minimalist environment with a soft, matte ${aestheticPalette.name} pastel background (${aestheticPalette.hex}). Soft diffused studio lighting from the upper-left. Realistic soft drop shadow beneath the product for depth. Centered composition, square framing, e-commerce catalog style, extremely high quality, professional photography. Do not alter the product itself — preserve labels, colors, and proportions exactly.`;
+      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash-image",
+          messages: [
+            {
+              role: "user",
+              content: [
+                { type: "text", text: prompt },
+                { type: "image_url", image_url: { url: dataUrl } },
+              ],
+            },
+          ],
+          modalities: ["image", "text"],
+        }),
+      });
+      if (imgRes.ok) {
+        const d = await imgRes.json();
+        const url: string | undefined =
+          d?.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+        if (typeof url === "string" && url.startsWith("data:image/")) {
+          aestheticImage = url;
+        }
+      } else {
+        console.warn("aesthetics skipped", imgRes.status);
+      }
+    } catch (e) {
+      console.warn("aesthetics error", e);
+    }
+
+    return json({
+      ok: true,
+      ...sanitized,
+      aesthetic_image_data_url: aestheticImage,
+      aesthetic_palette: aestheticPalette,
+    });
   } catch (e) {
     console.error("vision_genesis error:", e);
     return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
