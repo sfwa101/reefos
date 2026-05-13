@@ -18,35 +18,7 @@ import { toast } from "sonner";
  * Zero reads of legacy `orders` / `order_items`.
  */
 
-type SovereignItem = {
-  id: string;
-  quantity: number;
-  price_at_time: number;
-  sku_id: string | null;
-  salsabil_skus: {
-    asset_id: string | null;
-    salsabil_assets: {
-      name: string | null;
-      media: unknown;
-    } | null;
-  } | null;
-};
-
-type SovereignNode = {
-  id: string;
-  status: string;
-  total_amount: number;
-  vendor_id: string | null;
-  salsabil_fulfillment_items: SovereignItem[];
-};
-
-type SovereignOrder = {
-  id: string;
-  status: string;
-  total_amount: number;
-  created_at: string;
-  salsabil_fulfillment_nodes: SovereignNode[];
-};
+// Sovereign order types are imported from @/core/orders.
 
 const statusInfo: Record<string, { label: string; color: string; icon: LucideIcon }> = {
   delivered:                { label: "تم التسليم",  color: "bg-success/15 text-success",                icon: Check },
