@@ -18,3 +18,13 @@ export type {
   AssetTagAxis,
   AssetTagLabelI18n,
 } from "./types/assetTag";
+export type {
+  FinancialContractDraft,
+  PricingModelKey,
+  CurrencyCode,
+  PricingPolicyRule,
+  PolicyConditionKey,
+  PolicyOperator,
+  PolicyActionKey,
+  ContractRules,
+} from "./types/financialContract";
