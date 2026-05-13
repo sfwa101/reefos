@@ -409,6 +409,7 @@ Deno.serve(async (req) => {
     });
   } catch (e) {
     console.error("vision_genesis error:", e);
-    return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
+    const msg = e instanceof Error ? e.message : String(e);
+    return json({ error: "UNHANDLED", details: msg, stack: e instanceof Error ? e.stack?.slice(0, 600) : undefined }, 500);
   }
 });
