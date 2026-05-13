@@ -64,14 +64,28 @@ async function fileToBase64(file: File): Promise<{ base64: string; mime: string 
   });
 }
 
-export type VisionGenesisInput = { file: File; hint?: string };
+export type VisionGenesisInput = {
+  file: File;
+  hint?: string;
+  /** Optional secondary photo (e.g. back of pack / nutrition label). */
+  secondaryFile?: File | null;
+};
 
 export function useVisionGenesis() {
   return useMutation<USAGenesisPayload, Error, VisionGenesisInput>({
-    mutationFn: async ({ file, hint }) => {
+    mutationFn: async ({ file, hint, secondaryFile }) => {
       const { base64, mime } = await fileToBase64(file);
+      const secondary = secondaryFile
+        ? await fileToBase64(secondaryFile)
+        : null;
       const { data, error } = await supabase.functions.invoke("vision_genesis", {
-        body: { image_base64: base64, mime_type: mime, hint },
+        body: {
+          image_base64: base64,
+          mime_type: mime,
+          hint,
+          secondary_image_base64: secondary?.base64 ?? null,
+          secondary_mime_type: secondary?.mime ?? null,
+        },
       });
       if (error) {
         const code =
