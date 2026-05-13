@@ -24,6 +24,11 @@ export interface InferProductDNAInput {
   readonly secondary_image_base64?: string | null;
   /** Free-text steering hint forwarded to the model. */
   readonly hint?: string;
+  /**
+   * Sovereign provider override. Defaults to "gemini" with automatic
+   * failover to "openrouter" inside the Edge Function.
+   */
+  readonly provider?: "gemini" | "openrouter" | "deepseek";
 }
 
 export interface ProductDNAAsset {
