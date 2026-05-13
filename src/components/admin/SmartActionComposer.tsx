@@ -16,7 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useSovereignContext, type WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
-import { SmartProductComposer } from "@/apps/reef-al-madina/features/admin/product-editor/SmartProductComposer";
+// SmartProductComposer dialog removed in V-1.C — replaced by /admin/assets/genesis route.
 
 type Action = {
   key: string;
