@@ -7,13 +7,14 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network } from "lucide-react";
+import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
 import DimensionalTagSelector from "@/components/commerce/assets/DimensionalTagSelector";
+import CognitivePricingBuilder from "@/components/commerce/assets/CognitivePricingBuilder";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
-import type { PackagingTierDraft } from "@/core/commerce";
+import type { PackagingTierDraft, FinancialContractDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
 import { PackagingGateway, TagsGateway } from "@/core/commerce";
 import { useUpdateUSA } from "@/core-os/hakim-ai/hooks/useUpdateUSA";
@@ -109,6 +110,10 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   const [classificationEnabled, setClassificationEnabled] = useState(false);
   const [tagDrafts, setTagDrafts] = useState<AssetTagDraft[]>([]);
 
+  // Phase E-1 — Cognitive Pricing Runtime (local draft, lifted on save).
+  // Persistence (DB writes for financial contracts) is deferred to Phase E-2.
+  const [financialContractsDraft, setFinancialContractsDraft] = useState<FinancialContractDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
@@ -124,6 +129,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPackagingTiers([]);
       setClassificationEnabled(traits.includes(CAP.MULTI_CLASSIFICATION));
       setTagDrafts([]);
+      setFinancialContractsDraft([]);
       // Hydrate persisted packaging tiers + tag links for edit mode.
       let cancelled = false;
       (async () => {
@@ -174,6 +180,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPackagingTiers([]);
       setClassificationEnabled(false);
       setTagDrafts([]);
+      setFinancialContractsDraft([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
@@ -478,18 +485,21 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </SheetHeader>
 
         <Tabs value={tab} onValueChange={setTab} className="flex-1 flex flex-col overflow-hidden">
-          <TabsList className="mx-5 mt-3 grid grid-cols-6 h-10">
-            <TabsTrigger value="basic" className="text-[11.5px]">أساسي</TabsTrigger>
-            <TabsTrigger value="financials" className="text-[11.5px]">المالية</TabsTrigger>
-            <TabsTrigger value="packaging" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+          <TabsList className="mx-5 mt-3 grid grid-cols-7 h-10">
+            <TabsTrigger value="basic" className="text-[11px]">أساسي</TabsTrigger>
+            <TabsTrigger value="financials" className="text-[11px]">المالية</TabsTrigger>
+            <TabsTrigger value="cognitive" className="text-[11px] gap-1 inline-flex items-center justify-center">
+              <Coins className="h-3 w-3" /> الذكي
+            </TabsTrigger>
+            <TabsTrigger value="packaging" className="text-[11px] gap-1 inline-flex items-center justify-center">
               <Layers className="h-3 w-3" /> العبوات
             </TabsTrigger>
-            <TabsTrigger value="dimensions" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
+            <TabsTrigger value="dimensions" className="text-[11px] gap-1 inline-flex items-center justify-center">
               <Network className="h-3 w-3" /> الأبعاد
             </TabsTrigger>
-            <TabsTrigger value="inventory" className="text-[11.5px]">المخزون</TabsTrigger>
-            <TabsTrigger value="genesis" className="text-[11.5px] gap-1 inline-flex items-center justify-center">
-              <Sparkles className="h-3 w-3" /> الذكي
+            <TabsTrigger value="inventory" className="text-[11px]">المخزون</TabsTrigger>
+            <TabsTrigger value="genesis" className="text-[11px] gap-1 inline-flex items-center justify-center">
+              <Sparkles className="h-3 w-3" /> Vision
             </TabsTrigger>
           </TabsList>
 
@@ -610,6 +620,19 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               <SaveButton />
             </TabsContent>
 
+            <TabsContent value="cognitive" className="m-0 space-y-3">
+              <CognitivePricingBuilder
+                packagingTiers={packagingTiers}
+                packagingEnabled={packagingEnabled}
+                value={financialContractsDraft}
+                onChange={setFinancialContractsDraft}
+                defaultCurrency={currency}
+                defaultPricingModel={pricingModel}
+              />
+              <p className="text-[10.5px] text-foreground-tertiary leading-relaxed text-center px-2">
+                ⚙️ المسودات تُحفظ محلياً — الحفظ الدائم في قاعدة العقود المالية يأتي في المرحلة E-2.
+              </p>
+            </TabsContent>
 
             <TabsContent value="packaging" className="m-0 space-y-3">
               <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
