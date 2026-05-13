@@ -188,7 +188,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           }
         }
 
-        await mint.mutateAsync({
+        const newAssetId = await mint.mutateAsync({
           asset: {
             name: trimmed,
             description: description.trim(),
@@ -205,6 +205,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           },
           semantic_embedding: embedding,
         });
+        await persistPackaging(newAssetId);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
@@ -216,10 +217,35 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           description: description.trim() || null,
           base_price: priceNum,
         });
+        await persistPackaging(asset!.id);
         onSaved?.();
       }
     } catch {
       /* toast handled in hook */
+    }
+  };
+
+  /**
+   * Persist the lifted PackagingHierarchyBuilder state to
+   * `salsabil_packaging_tiers` via the topological-safe gateway.
+   * Off-toggle wipes any existing tiers for the asset.
+   */
+  const persistPackaging = async (assetId: string) => {
+    try {
+      if (!packagingEnabled) {
+        await PackagingGateway.wipeTiers(assetId);
+        return;
+      }
+      if (packagingTiers.length === 0) {
+        await PackagingGateway.wipeTiers(assetId);
+        return;
+      }
+      await PackagingGateway.syncTiers(assetId, packagingTiers);
+      toast.success("تمت مزامنة شجرة العبوات بنجاح");
+    } catch (e) {
+      console.error("[USAEditor] packaging sync failed", e);
+      const msg = e instanceof Error ? e.message : "تعذّر حفظ شجرة العبوات";
+      toast.error(`⚠️ ${msg}`);
     }
   };
 
