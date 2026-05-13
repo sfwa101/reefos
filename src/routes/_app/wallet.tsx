@@ -6,7 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { supabase } from "@/integrations/supabase/client";
 
-const Wallet = lazyPage(() => import("@/pages/Wallet"));
+const Wallet = lazyPage(() => import("@/components/finance/WalletView"));
 
 const DISMISS_KEY = "tayseer:kyc-advisory:dismissed";
 

@@ -7,7 +7,7 @@ import {
   HOME_HERO_LIMIT,
 } from "@/core/catalog/gateway/home.functions";
 
-const HomePage = lazyPage(() => import("@/pages/Home"));
+const HomePage = lazyPage(() => import("@/components/home/HomeDashboard"));
 
 // Wave P-E (The Great Unification) — ONE round-trip for first paint.
 // The loader awaits a single unified server function that fetches BOTH the

@@ -10,7 +10,7 @@ import {
   useTransferLogic,
   RESTRICTED_CATEGORIES,
   type RestrictedCategory,
-} from "../hooks/useTransferLogic";
+} from "@/core/finance/hooks/useTransferLogic";
 
 /**
  * WalletTransferDialog — KYC-gated peer-to-peer transfer.

@@ -9,7 +9,7 @@ import {
   Calendar,
 } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { useGameyaDetails, type GameyaCircle } from "../hooks/useGameyas";
+import { useGameyaDetails, type GameyaCircle } from "@/core/finance/hooks/useGameyas";
 
 /**
  * GameyaDetailsSheet — full transparency view for a single circle.
