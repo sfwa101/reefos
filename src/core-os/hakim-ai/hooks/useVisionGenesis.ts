@@ -61,57 +61,6 @@ const MAX_EDGE = 1024;
 const JPEG_QUALITY = 0.7;
 
 async function fileToBase64(file: File): Promise<{ base64: string; mime: string }> {
-  // Decode the image off the main thread when possible.
-  const bitmap = await createImageBitmap(file).catch(() => null);
-  let width: number;
-  let height: number;
-  let drawSource: CanvasImageSource;
-
-  if (bitmap) {
-    width = bitmap.width;
-    height = bitmap.height;
-    drawSource = bitmap;
-  } else {
-    // Fallback for browsers without createImageBitmap support for the file type.
-    const dataUrl = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onerror = () => reject(new Error("file_read_error"));
-      reader.onload = () => resolve(String(reader.result ?? ""));
-      reader.readAsDataURL(file);
-    });
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error("image_decode_error"));
-      el.src = dataUrl;
-    });
-    width = img.naturalWidth || img.width;
-    height = img.naturalHeight || img.height;
-    drawSource = img;
-  }
-
-  const scale = Math.min(1, MAX_EDGE / Math.max(width, height));
-  const targetW = Math.max(1, Math.round(width * scale));
-  const targetH = Math.max(1, Math.round(height * scale));
-
-  const canvas = document.createElement("canvas");
-  canvas.width = targetW;
-  canvas.height = targetH;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) throw new Error("canvas_unavailable");
-  ctx.drawImage(drawSource, 0, 0, targetW, targetH);
-  if (bitmap && "close" in bitmap) {
-    try { (bitmap as ImageBitmap).close(); } catch { /* noop */ }
-  }
-
-  const blob: Blob = await new Promise((resolve, reject) => {
-    canvas.toBlob(
-      (b) => (b ? resolve(b) : reject(new Error("canvas_to_blob_failed"))),
-      "image/jpeg",
-      JPEG_QUALITY,
-    );
-  });
-
   const base64 = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("file_read_error"));
@@ -120,10 +69,9 @@ async function fileToBase64(file: File): Promise<{ base64: string; mime: string 
       const [, b64 = ""] = result.split(",");
       resolve(b64);
     };
-    reader.readAsDataURL(blob);
+    reader.readAsDataURL(file);
   });
-
-  return { base64, mime: "image/jpeg" };
+  return { base64, mime: file.type || "image/jpeg" };
 }
 
 export type VisionGenesisInput = {
