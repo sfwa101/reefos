@@ -77,46 +77,63 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
 
+    // Phase C-1 — URL-only contract. Base64 ingestion is removed entirely
+    // to drop cold-start memory and enforce the Storage Bypass invariant.
+    const body = await req.json().catch(() => ({}));
     const {
       image_url,
       secondary_image_url,
+      image_urls, // forward-compat array form
       hint,
-      // Legacy back-compat (will be removed): accept image_base64 if a stale
-      // client still sends it, but the new path is URL-only.
-      image_base64,
-      mime_type,
-    } = await req.json().catch(() => ({}));
+    } = body ?? {};
 
-    // Resolve a remote URL to a data URL the AI gateway can ingest.
-    const urlToDataUrl = async (u: string): Promise<string> => {
-      const r = await fetch(u);
-      if (!r.ok) throw new Error(`fetch_image_failed:${r.status}`);
-      const ct = r.headers.get("content-type") || "image/jpeg";
-      const buf = new Uint8Array(await r.arrayBuffer());
-      // base64 encode
-      let bin = "";
-      for (let i = 0; i < buf.length; i++) bin += String.fromCharCode(buf[i]);
-      return `data:${ct};base64,${btoa(bin)}`;
-    };
+    // Build the URL queue (primary + optional secondary, OR explicit array).
+    const urls: string[] = Array.isArray(image_urls)
+      ? image_urls.filter((u: unknown): u is string => typeof u === "string" && u.length > 0).slice(0, 4)
+      : [
+          ...(typeof image_url === "string" && image_url.length > 0 ? [image_url] : []),
+          ...(typeof secondary_image_url === "string" && secondary_image_url.length > 0
+            ? [secondary_image_url]
+            : []),
+        ];
 
-    let dataUrl: string;
-    if (typeof image_url === "string" && image_url.length > 0) {
-      dataUrl = await urlToDataUrl(image_url);
-    } else if (typeof image_base64 === "string" && image_base64.length > 0) {
-      const mt = typeof mime_type === "string" && mime_type.startsWith("image/")
-        ? mime_type
-        : "image/jpeg";
-      dataUrl = image_base64.startsWith("data:")
-        ? image_base64
-        : `data:${mt};base64,${image_base64}`;
-    } else {
+    if (urls.length === 0) {
       return json({ error: "missing_image", details: "image_url is required" }, 400);
     }
 
-    let secondaryDataUrl: string | null = null;
-    if (typeof secondary_image_url === "string" && secondary_image_url.length > 0) {
-      secondaryDataUrl = await urlToDataUrl(secondary_image_url);
-    }
+    // Hardened fetcher — size cap (8 MB) + MIME allow-list.
+    const MAX_BYTES = 8 * 1024 * 1024;
+    const ALLOWED_MIME = new Set(["image/jpeg", "image/png", "image/webp", "image/gif"]);
+    const urlToDataUrl = async (u: string): Promise<string> => {
+      let parsed: URL;
+      try {
+        parsed = new URL(u);
+      } catch {
+        throw new Error("invalid_image_url");
+      }
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") {
+        throw new Error("invalid_image_protocol");
+      }
+      const r = await fetch(u);
+      if (!r.ok) throw new Error(`fetch_image_failed:${r.status}`);
+      const ct = (r.headers.get("content-type") || "image/jpeg").split(";")[0].trim().toLowerCase();
+      if (!ALLOWED_MIME.has(ct)) throw new Error(`unsupported_image_mime:${ct}`);
+      const declared = Number(r.headers.get("content-length") || 0);
+      if (declared && declared > MAX_BYTES) throw new Error(`image_too_large:${declared}`);
+      const ab = await r.arrayBuffer();
+      if (ab.byteLength > MAX_BYTES) throw new Error(`image_too_large:${ab.byteLength}`);
+      const buf = new Uint8Array(ab);
+      // chunked base64 to avoid stack overflow on larger payloads
+      let bin = "";
+      const CHUNK = 0x8000;
+      for (let i = 0; i < buf.length; i += CHUNK) {
+        bin += String.fromCharCode.apply(null, Array.from(buf.subarray(i, i + CHUNK)));
+      }
+      return `data:${ct};base64,${btoa(bin)}`;
+    };
+
+    const dataUrl = await urlToDataUrl(urls[0]);
+    const secondaryDataUrl = urls.length > 1 ? await urlToDataUrl(urls[1]) : null;
 
     const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
 

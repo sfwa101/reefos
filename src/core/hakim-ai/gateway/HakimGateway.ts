@@ -1,0 +1,154 @@
+/**
+ * HakimGateway — Sovereign façade for Hakim AI edge invocations.
+ *
+ * Constitution v2.0 · Article 4 (Sovereign Isolation) · Article 8 (Runtime First).
+ * SUPABASE_SOVEREIGNTY · §3 (Gateway Pattern).
+ *
+ * The UI layer is FORBIDDEN from importing the Supabase client to call
+ * `supabase.functions.invoke(...)`. Every Hakim/Vision edge function
+ * invocation MUST transit through this gateway. Concrete function names
+ * stay internal to this file — UI consumers see only typed VMs.
+ */
+import { supabase } from "@/integrations/supabase/client";
+
+// ─── Vision Genesis (Product DNA) ────────────────────────────────────────
+
+export interface InferProductDNAInput {
+  /** Public URL produced by `MediaGateway.uploadFile` (vision-staging/*). */
+  readonly image_url: string;
+  /** Optional secondary photo URL (e.g. nutrition label). */
+  readonly secondary_image_url?: string | null;
+  /** Free-text steering hint forwarded to the model. */
+  readonly hint?: string;
+}
+
+export interface ProductDNAAsset {
+  readonly name: string;
+  readonly description: string;
+  readonly asset_type:
+    | "physical"
+    | "digital"
+    | "service"
+    | "rental"
+    | "milestone_project";
+  readonly traits: string[];
+  readonly category_path?: string | null;
+  readonly brand?: string | null;
+  readonly origin_country?: string | null;
+  readonly marketing?: { short: string | null; long: string | null } | null;
+  readonly nutrition?: Record<string, number | null> | null;
+  readonly physical?: { net_weight: number | null; weight_unit: string | null } | null;
+  readonly allergens?: string[] | null;
+  readonly media?: string[];
+}
+
+export interface ProductDNASku {
+  readonly sku_code: string;
+  readonly attributes: Record<string, unknown>;
+  readonly barcode?: string | null;
+  readonly variant_axes?: Record<string, string | null> | null;
+}
+
+export interface ProductDNAContract {
+  readonly pricing_model:
+    | "flat"
+    | "tiered_wholesale"
+    | "subscription"
+    | "deposit_and_rental"
+    | "milestone_installments";
+  readonly base_price: number;
+  readonly currency: "EGP" | "USD" | "EUR";
+  readonly contract_rules: Record<string, unknown>;
+}
+
+export interface ProductDNAPayload {
+  readonly ok: true;
+  readonly asset: ProductDNAAsset;
+  readonly skus: ProductDNASku[];
+  readonly financial_contract: ProductDNAContract;
+  readonly generated_at: string;
+}
+
+export type HakimErrorCode =
+  | "rate_limited"
+  | "credits_exhausted"
+  | "unauthorized"
+  | "ai_error"
+  | "ai_parse_error"
+  | "missing_image"
+  | "missing_key"
+  | "unknown";
+
+/**
+ * Try to extract a structured `{ error, details }` envelope from a
+ * `FunctionsHttpError`. Edge functions returning non-2xx responses
+ * surface as `error.context.response` — which we clone and parse here.
+ */
+async function readErrorEnvelope(
+  err: unknown,
+  fallbackData: unknown,
+): Promise<{ error?: string; details?: string } | null> {
+  try {
+    const ctx = (err as { context?: { response?: Response } } | null)?.context;
+    if (ctx?.response) {
+      const text = await ctx.response.clone().text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { details: text };
+      }
+    }
+  } catch {
+    /* noop */
+  }
+  if (fallbackData && typeof fallbackData === "object") {
+    return fallbackData as { error?: string; details?: string };
+  }
+  return null;
+}
+
+export const HakimGateway = {
+  /**
+   * Inference Step — sends pre-uploaded image URLs to the
+   * `vision_genesis` edge function and returns the sanitized
+   * Universal Salsabil Asset Product DNA payload.
+   *
+   * Pre-condition: callers MUST first upload images through
+   * `MediaGateway.uploadFile` and pass the resulting public URLs.
+   * Raw Base64 / Blob payloads are rejected by contract.
+   */
+  async inferProductDNA(
+    input: InferProductDNAInput,
+  ): Promise<ProductDNAPayload> {
+    if (!input.image_url || typeof input.image_url !== "string") {
+      throw new Error("image_url is required");
+    }
+
+    const { data, error } = await supabase.functions.invoke("vision_genesis", {
+      body: {
+        image_url: input.image_url,
+        secondary_image_url: input.secondary_image_url ?? null,
+        hint: input.hint,
+      },
+    });
+
+    if (error) {
+      const env = await readErrorEnvelope(error, data);
+      const message =
+        env?.details || env?.error || (error as Error).message || "unknown";
+      throw new Error(message);
+    }
+
+    const payload = data as
+      | (ProductDNAPayload & { error?: HakimErrorCode; details?: string })
+      | null;
+    if (!payload || (payload as { error?: string }).error) {
+      throw new Error(
+        payload?.details || (payload as { error?: string })?.error || "unknown",
+      );
+    }
+    return payload;
+  },
+} as const;
+
+export type HakimGatewayType = typeof HakimGateway;
