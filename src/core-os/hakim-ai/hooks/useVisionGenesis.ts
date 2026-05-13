@@ -149,14 +149,29 @@ export function useVisionGenesis() {
           secondary_mime_type: secondary?.mime ?? null,
         },
       });
+      // Try to surface the structured `details` from the edge function body.
+      // supabase.functions.invoke wraps non-2xx in `FunctionsHttpError` whose
+      // `context.response` is a Response we can re-parse.
+      const readErrorBody = async (): Promise<{ error?: string; details?: string } | null> => {
+        try {
+          const ctx = (error as unknown as { context?: { response?: Response } } | null)?.context;
+          if (ctx?.response) {
+            const cloned = ctx.response.clone();
+            const text = await cloned.text();
+            try { return JSON.parse(text); } catch { return { details: text }; }
+          }
+        } catch { /* noop */ }
+        if (data && typeof data === "object") return data as { error?: string; details?: string };
+        return null;
+      };
       if (error) {
-        const code =
-          (data as { error?: VisionGenesisError } | null)?.error ?? null;
-        throw new Error(code ?? error.message ?? "unknown");
+        const body = await readErrorBody();
+        const message = body?.details || body?.error || error.message || "unknown";
+        throw new Error(message);
       }
-      const payload = data as { error?: VisionGenesisError } & USAGenesisPayload;
+      const payload = data as { error?: VisionGenesisError; details?: string } & USAGenesisPayload;
       if (!payload || payload.error) {
-        throw new Error(payload?.error ?? "unknown");
+        throw new Error(payload?.details || payload?.error || "unknown");
       }
       return payload;
     },

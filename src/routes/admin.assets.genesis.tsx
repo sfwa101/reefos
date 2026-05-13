@@ -196,7 +196,8 @@ function GenesisPage() {
       toast.success("استخرج حكيم البيانات — راجع واعتمد");
     } catch (err) {
       console.error("[Genesis] analyze error", err);
-      toast.error("فشل تحليل الصورة");
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(msg || "فشل تحليل الصورة", { duration: 8000 });
     } finally { setStage("idle"); }
   }
 
