@@ -219,12 +219,13 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           }
         }
 
+        const mintedTraits = computeMintTraits(aiDraft?.asset.traits);
         const newAssetId = await mint.mutateAsync({
           asset: {
             name: trimmed,
             description: description.trim(),
             asset_type: assetType,
-            traits: aiDraft?.asset.traits ?? [],
+            traits: mintedTraits,
             media: await uploadAiImageIfAny(),
           },
           skus: aiDraft?.skus ?? [],
@@ -237,6 +238,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           semantic_embedding: embedding,
         });
         await persistPackaging(newAssetId);
+        await persistTags(newAssetId);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
@@ -249,6 +251,8 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           base_price: priceNum,
         });
         await persistPackaging(asset!.id);
+        await persistTags(asset!.id);
+        await syncClassificationTrait(asset!.id);
         onSaved?.();
       }
     } catch {
