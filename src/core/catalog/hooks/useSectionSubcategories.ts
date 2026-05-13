@@ -1,12 +1,12 @@
 /**
  * useSectionSubcategories — fetch the distinct subcategory labels used
- * by live products in a given section, straight from the DB.
+ * by live Sovereign Assets in a given section.
  *
- * NOTE: `usa_products` has no `sub_category` column. The closest real
- * signal is the `tags` text[] array, so we aggregate unique tag values
- * per section and surface them as subcategory pills. The pill `id` is
- * the raw tag string — used for the label AND for direct membership
- * filtering against `Product.metadata.tags`.
+ * Phase U-1 (Unification Strike): repointed off the legacy `usa_products`
+ * table to `salsabil_assets`. Subcategories are derived from the second
+ * segment of `category_path` (e.g. "supermarket/dairy/yoghurt" →
+ * subcategory pill = "dairy"). Pill `id` doubles as the membership filter
+ * value against `Product.metadata.category_path` / `subCategory`.
  */
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,31 +22,24 @@ export function useSectionSubcategories(sectionSlug: string | undefined) {
     queryFn: async (): Promise<SubcategoryItem[]> => {
       if (!sectionSlug) return [];
 
-      const { data: section } = await supabase
-        .from("sections")
-        .select("id")
-        .eq("slug", sectionSlug)
-        .maybeSingle();
-
-      if (!section) return [];
-
       const { data } = await supabase
-        .from("usa_products")
-        .select("tags")
-        .eq("section_id", section.id)
+        .from("salsabil_assets")
+        .select("category_path")
         .eq("is_active", true)
-        .is("deleted_at", null);
+        .eq("asset_type", "physical")
+        .ilike("category_path", `${sectionSlug}/%`);
 
       if (!data) return [];
 
       const counts = new Map<string, number>();
-      for (const row of data as Array<{ tags: string[] | null }>) {
-        for (const t of row.tags ?? []) {
-          if (typeof t !== "string") continue;
-          const v = t.trim();
-          if (!v) continue;
-          counts.set(v, (counts.get(v) ?? 0) + 1);
-        }
+      for (const row of data as Array<{ category_path: string | null }>) {
+        const path = row.category_path;
+        if (!path) continue;
+        const segments = path.split("/").filter(Boolean);
+        // Second segment = subcategory label (e.g. supermarket/dairy/...).
+        const sub = segments[1]?.trim();
+        if (!sub) continue;
+        counts.set(sub, (counts.get(sub) ?? 0) + 1);
       }
 
       return Array.from(counts.entries())
