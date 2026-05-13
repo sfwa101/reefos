@@ -212,7 +212,7 @@ async function callGemini(opts: {
           {
             name: "generate_usa_payload",
             description: "Return the full Universal Salsabil Asset Product DNA payload.",
-            parameters: TOOL_PARAMETERS,
+            parameters: toGeminiSchema(TOOL_PARAMETERS),
           },
         ],
       },
