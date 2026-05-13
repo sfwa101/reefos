@@ -214,6 +214,27 @@ const ProductDetail = () => {
               </div>
             )}
 
+            {(() => {
+              const traits = extractHandlingTraits(product.metadata);
+              if (traits.length === 0) return null;
+              return (
+                <div className="flex flex-wrap gap-1.5">
+                  {traits.map((t) => (
+                    <Link
+                      key={t}
+                      to="/search"
+                      search={{ q: t, trait: t }}
+                      className="inline-flex items-center gap-1 rounded-full bg-accent/15 px-2.5 py-1 text-[10.5px] font-extrabold text-accent-foreground ring-1 ring-accent/30 transition active:scale-95"
+                      aria-label={`عرض كل المنتجات ${traitLabel(t)}`}
+                    >
+                      <Sparkles className="h-3 w-3" />
+                      {traitLabel(t)}
+                    </Link>
+                  ))}
+                </div>
+              );
+            })()}
+
             {product.rating && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 font-bold text-accent-foreground">
