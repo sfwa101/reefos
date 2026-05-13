@@ -141,6 +141,7 @@ export const HakimGateway = {
         image_base64: input.image_base64,
         secondary_image_base64: input.secondary_image_base64 ?? null,
         hint: input.hint,
+        provider: input.provider ?? "gemini",
       },
     });
 
