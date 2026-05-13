@@ -15,7 +15,7 @@
  * push the key into the seed migration's `section_order`, and a future
  * Admin UI can re-order without code changes.
  */
-import { memo, type ReactElement } from "react";
+import { memo, useMemo, type ReactElement } from "react";
 import { BestSellersRail } from "./BestSellersRail";
 import { BundlesRail } from "./BundlesRail";
 import { CategoriesGrid } from "./CategoriesGrid";
@@ -23,8 +23,10 @@ import { HeroBanner } from "./HeroBanner";
 import { ProductsGrid } from "./ProductsGrid";
 import { SearchAndFilters } from "./SearchAndFilters";
 import { useUiLayout } from "../hooks/useUiLayout";
-import type { SectionConfig, SectionKey } from "../types/sdui.types";
+import type { SectionConfig, SectionKey, UiLayout } from "../types/sdui.types";
 import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
+import type { SectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
+import { synthesizeLayoutFromIdentity } from "@/core/runtime-ui/engine/BlockRecipes";
 
 import { SectionFrame } from "@/core-os/sdui-engine/SectionFrame";
 import { SDUIErrorBoundary } from "@/core-os/sdui-engine/components/SDUIErrorBoundary";
@@ -166,14 +168,26 @@ export const LayoutFactory = ({
   pageKey,
   orchestrator = null,
   theme,
+  identity,
 }: {
   pageKey: string;
   orchestrator?: HomeOrchestrator | null;
   theme: { hue: string; ink: string; soft: string; gradient: string };
+  identity?: SectionIdentity;
 }) => {
-  const { layout, loading } = useUiLayout(pageKey);
+  const { layout: dbLayout, loading } = useUiLayout(pageKey);
 
-  if (loading) {
+  // Phase SC-1.2 — Capability-Driven Morphing.
+  // When an identity is provided (storefront verticals via SectionPage),
+  // synthesize the layout from `BlockRecipes` instead of trusting the
+  // cancerous DB clones. Hub pages (reef_home, *_hub) pass no identity
+  // and continue to honour their DB rows.
+  const layout: UiLayout | null = useMemo(() => {
+    if (!identity) return dbLayout;
+    return synthesizeLayoutFromIdentity(identity, pageKey);
+  }, [identity, dbLayout, pageKey]);
+
+  if (loading && !identity) {
     return (
       <div className="space-y-3 px-4 pt-4">
         <div className="h-12 w-3/4 animate-pulse rounded-2xl bg-foreground/10" />
