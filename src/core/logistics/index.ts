@@ -7,7 +7,7 @@ export type {
   SavedAddressVM,
 } from "./gateway/LogisticsGateway";
 
-// Smart logistics runtime (migrated from src/core-os/barq-logistics — Wave P-1).
+// Smart logistics runtime (migrated from src/core/barq-logistics — Wave P-1).
 export * from "./useSmartLogistics";
 export { computeLogisticsQuote } from "./core/quote";
 export type * from "./core/types";
