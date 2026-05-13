@@ -15,7 +15,7 @@ import type {
   SectionConfig,
   SectionKey,
   UiLayout,
-} from "@/core-os/sdui-engine/types";
+} from "@/core/runtime-ui/sdui/types";
 import {
   DEFAULT_PAGE_ORDER,
   PAGE_LABELS,
@@ -23,7 +23,7 @@ import {
   sanitizeSectionConfig,
   sectionsForPage,
   type PageKey,
-} from "@/core-os/sdui-engine/registry";
+} from "@/core/runtime-ui/sdui/registry";
 
 /** Localized section labels — sourced from the registry. */
 export const SECTION_LABELS: Record<SectionKey, string> = Object.fromEntries(

@@ -22,12 +22,12 @@ import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { useAestheticProcessor } from "@/core-os/hakim-ai/hooks/useAestheticProcessor";
+import { useAestheticProcessor } from "@/core/hakim-ai/hooks/useAestheticProcessor";
 import {
   useVisionGenesis,
   type USAGenesisPayload,
-} from "@/core-os/hakim-ai/hooks/useVisionGenesis";
-import { useMintUSA } from "@/core-os/hakim-ai/hooks/useMintUSA";
+} from "@/core/hakim-ai/hooks/useVisionGenesis";
+import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
 
 type Stage = "idle" | "cleaning" | "describing" | "publishing" | "done";
 

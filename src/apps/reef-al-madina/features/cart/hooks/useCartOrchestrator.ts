@@ -20,7 +20,7 @@ import {
   validateMinOrder,
 } from "./useCartValidation";
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
-import { callSovereignCheckout, newIdempotencyKey } from "@/core-os/hakim-ai/hooks/useSovereignCheckout";
+import { callSovereignCheckout, newIdempotencyKey } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
@@ -31,7 +31,7 @@ import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules, useCartHasErrors } from "@/context/CartContext";
 /** @deprecated Wave P-B B-3 — capability check; will move to `vm.capabilities.includes("perishable")` in B-7+. */
 import { isPerishable } from "@/core/catalog/legacy/legacyProduct.types";
-import { computeLogisticsQuote } from "@/core-os/barq-logistics/core/quote";
+import { computeLogisticsQuote } from "@/core/logistics/core/quote";
 import { useDefaultDeliveryMethod } from "@/apps/reef-al-madina/features/logistics/hooks/useDefaultDeliveryMethod";
 import { legacyZoneToLogisticsZone } from "@/apps/reef-al-madina/features/logistics/adapters/legacyZoneToLogisticsZone";
 import { PAYMENT_METHODS, findPaymentMethod } from "../data/paymentMethods";

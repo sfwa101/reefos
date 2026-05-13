@@ -8,9 +8,9 @@
  * shell on the Sovereign Matrix.
  */
 import { useEffect } from "react";
-import { useSduiLayout } from "@/core-os/sdui-engine/hooks/useSduiLayout";
-import { SduiRenderer } from "@/core-os/sdui-engine/components/SduiRenderer";
-import { HakimGenerativeOverlay } from "@/core-os/hakim-ai/generative/HakimGenerativeOverlay";
+import { useSduiLayout } from "@/core/runtime-ui/sdui/hooks/useSduiLayout";
+import { SduiRenderer } from "@/core/runtime-ui/sdui/components/SduiRenderer";
+import { HakimGenerativeOverlay } from "@/core/hakim-ai/generative/HakimGenerativeOverlay";
 import { SalsabilStatusBar } from "@/core-os/ui/SalsabilStatusBar";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveDelivery } from "@/core-os/maeen/useActiveDelivery";

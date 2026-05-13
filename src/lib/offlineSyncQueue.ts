@@ -127,7 +127,7 @@ const executeOne = async (item: QueuedItem): Promise<void> => {
   if (item.op === "sovereign.checkout") {
     // Server re-runs CashierBrain & vetoes on hash mismatch (Article 12.1).
     const { callSovereignCheckout } = await import(
-      "@/core-os/hakim-ai/hooks/useSovereignCheckout"
+      "@/core/hakim-ai/hooks/useSovereignCheckout"
     );
     await callSovereignCheckout(item.payload);
     return;

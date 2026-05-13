@@ -7,3 +7,6 @@ export {
   type ProductDNAContract,
   type HakimErrorCode,
 } from "./gateway/HakimGateway";
+
+export { HakimPulseMonitor } from "./components/HakimPulseMonitor";
+export { HakimGenerativeOverlay } from "./generative/HakimGenerativeOverlay";

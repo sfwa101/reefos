@@ -20,10 +20,10 @@ import {
   PAGE_LABELS,
   useLayoutEditor,
 } from "@/core-os/system-editor/hooks/useLayoutEditor";
-import { SECTION_REGISTRY, type PageKey } from "@/core-os/sdui-engine/registry";
+import { SECTION_REGISTRY, type PageKey } from "@/core/runtime-ui/sdui/registry";
 import type {
   SectionConfig, SectionKey,
-} from "@/core-os/sdui-engine/types";
+} from "@/core/runtime-ui/sdui/types";
 
 const PAGE_TABS: { key: PageKey; label: string; previewPath: string }[] = [
   { key: "main_hub", label: "الرئيسية (Hero)", previewPath: "/" },

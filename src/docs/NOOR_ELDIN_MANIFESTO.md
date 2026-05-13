@@ -181,9 +181,9 @@ Noor El-Din is a **Sovereign Stem Cell** under Law 2.
    `khalil`, `asrab`, `nabd`. Registered in `src/core-os/app-registry/`.
 2. **Consumes the kernel only** via `@/core-os/*`:
    - `@/core-os/finance` (Tayseer) — wallet, apprenticeship payouts, MRS unlocks
-   - `@/core-os/hakim-ai` — the Coach runtime
-   - `@/core-os/sdui-engine` — every learning surface is a composed intent (Law 1)
-   - `@/core-os/barq-logistics` — physical apprenticeship routing
+   - `@/core/hakim-ai` — the Coach runtime
+   - `@/core/runtime-ui/sdui` — every learning surface is a composed intent (Law 1)
+   - `@/core/logistics` — physical apprenticeship routing
    - `@/core/events` — emits `journey.*`, `skill.*`, `apprenticeship.*` events
 3. **Uses the same Professional DNA** runtime as the rest of Salsabil OS —
    no custom theming, no hard-coded archetype branching (Law 4).

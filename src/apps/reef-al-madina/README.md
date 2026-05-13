@@ -4,7 +4,7 @@ Primary retail super-app of Salsabil OS. Houses storefront, supermarket, meat, p
 
 All features here consume the OS kernel under `@/core-os/*`:
 - **Tayseer** (`@/core-os/finance`) — wallet, balance, savings, charity
-- **Hakim AI** (`@/core-os/hakim-ai`) — central intelligence brain
-- **SDUI Engine** (`@/core-os/sdui-engine`) — server-driven layouts
-- **Barq Logistics** (`@/core-os/barq-logistics`) — geo + delivery (formerly Mrsool/Rawafid)
+- **Hakim AI** (`@/core/hakim-ai`) — central intelligence brain
+- **SDUI Engine** (`@/core/runtime-ui/sdui`) — server-driven layouts
+- **Barq Logistics** (`@/core/logistics`) — geo + delivery (formerly Mrsool/Rawafid)
 - **System Editor** (`@/core-os/system-editor`) — visual layout editor

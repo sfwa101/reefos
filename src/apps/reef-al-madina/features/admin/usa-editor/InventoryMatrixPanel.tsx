@@ -5,7 +5,7 @@
 import { useEffect, useState } from "react";
 import { Loader2, Plus, Save, Boxes, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
-import { useInventoryMatrix, useUpdateInventory, type InventoryRow } from "@/core-os/hakim-ai/hooks/useInventoryMatrix";
+import { useInventoryMatrix, useUpdateInventory, type InventoryRow } from "@/core/hakim-ai/hooks/useInventoryMatrix";
 import { listAssetSkusFn } from "@/lib/admin-catalog.functions";
 
 interface SkuRow { id: string; sku_code: string; }

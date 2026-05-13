@@ -6,7 +6,7 @@ import { listHakimSessionsFn, listHakimMessagesFn, type HakimSessionRow, type Ha
 import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 import { Loader2, ShieldAlert, Sparkles, Send, Calendar, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
-import { HakimPulseMonitor } from "@/core-os/hakim-ai/components/HakimPulseMonitor";
+import { HakimPulseMonitor } from "@/core/hakim-ai/components/HakimPulseMonitor";
 
 type Msg = { role: "user" | "assistant"; content: string; id?: string };
 type Session = HakimSessionRow;

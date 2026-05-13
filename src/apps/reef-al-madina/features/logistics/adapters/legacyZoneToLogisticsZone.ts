@@ -3,13 +3,13 @@
  * ----------------------------------------------------------------
  * The cart historically uses the lightweight `DeliveryZone` shape from
  * `@/lib/geoZones` (also returned by `useGeoZones`). The new logistics
- * engine expects the richer `DeliveryZone` shape from `@/core-os/barq-logistics/core/types`.
+ * engine expects the richer `DeliveryZone` shape from `@/core/logistics/core/types`.
  *
  * This pure adapter bridges the two without changing either side.
  * No I/O, no React.
  */
 import type { DeliveryZone as LegacyZone } from "@/lib/geoZones";
-import type { DeliveryZone as LogisticsZone } from "@/core-os/barq-logistics/core/types";
+import type { DeliveryZone as LogisticsZone } from "@/core/logistics/core/types";
 
 export function legacyZoneToLogisticsZone(z: LegacyZone): LogisticsZone {
   return {
