@@ -351,5 +351,19 @@ export const useCartCalculations = ({
     showChangeJar,
     progress,
     FREE_DELIVERY_THRESHOLD,
+    /**
+     * Phase C5 — latest authoritative `snapshot_hash` from CashierBrain.
+     * `null` until the first preview lands or whenever the cart mutates
+     * faster than the 500ms debounce can confirm. Only valid when
+     * `cashierSnapshotFresh` is true.
+     */
+    cashierSnapshotHash,
+    /** True when the captured hash matches the current cart signature. */
+    cashierSnapshotFresh:
+      cashierSnapshotHash !== null &&
+      cashierSnapshotSignature === cartSignature &&
+      cartSignature !== "",
+    /** Items the server validated (UUID-only product ids). */
+    cashierSnapshotItems: cashierItems,
   };
 };
