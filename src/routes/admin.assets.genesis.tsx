@@ -92,6 +92,7 @@ function GenesisPage() {
   const [sugar, setSugar] = useState<number | "">("");
   const [netWeight, setNetWeight] = useState<number | "">("");
   const [weightUnit, setWeightUnit] = useState("g");
+  const [approxWeight, setApproxWeight] = useState(false);
   const [allergens, setAllergens] = useState("");
   const [aiFields, setAiFields] = useState<Set<string>>(new Set());
   const clearAi = (k: string) =>
