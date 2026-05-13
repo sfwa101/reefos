@@ -155,11 +155,17 @@ function GenesisPage() {
       const usa = await vision.mutateAsync({ file: primaryFile, secondaryFile });
       setGenesis(usa);
       // Phase V-2: server returned a generative pastel composition — adopt it.
-      const aestheticUrl = (usa as unknown as { aesthetic_image_data_url?: string | null })
-        .aesthetic_image_data_url;
-      if (aestheticUrl && aestheticUrl.startsWith("data:image/")) {
-        setPrimaryUrl(aestheticUrl);
-        setPrimaryFile(dataUrlToFile(aestheticUrl));
+      const extras = usa as unknown as {
+        aesthetic_image_data_url?: string | null;
+        aesthetic_palette?: { name: string; hex: string } | null;
+      };
+      if (extras.aesthetic_image_data_url && extras.aesthetic_image_data_url.startsWith("data:image/")) {
+        setPrimaryUrl(extras.aesthetic_image_data_url);
+        setPrimaryFile(dataUrlToFile(extras.aesthetic_image_data_url));
+      }
+      if (extras.aesthetic_palette) {
+        const matched = PALETTES.find((p) => p.name === extras.aesthetic_palette?.name);
+        if (matched) setSelectedPalette(matched);
       }
       const a = usa.asset as USAGenesisPayload["asset"] & RichDNA;
       setName(a.name ?? "");
