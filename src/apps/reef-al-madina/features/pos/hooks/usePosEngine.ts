@@ -5,6 +5,10 @@ import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
 import { fetchPosCatalog } from "@/lib/sovereignCatalog";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
+import { useCashierPreview } from "@/core/cashier/gateway/hooks";
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const CART_KEY = "pos.cart.v1";
 const CACHE_KEY = "pos.products.cache.v1";
@@ -142,6 +146,61 @@ export function usePosEngine() {
   const subtotal = useMemo(() => cart.reduce((s, l) => s + l.price * l.qty, 0), [cart]);
   const itemCount = useMemo(() => cart.reduce((s, l) => s + l.qty, 0), [cart]);
 
+  // ---------- Cashier Brain — Sovereign price observer (Phase POS-2 Step 1) ----------
+  const cashierPreview = useCashierPreview();
+  const cashierMutate = cashierPreview.mutate;
+  const [sovereignHash, setSovereignHash] = useState<string | null>(null);
+  const [sovereignTotal, setSovereignTotal] = useState<number | null>(null);
+  const [sovereignSignature, setSovereignSignature] = useState<string | null>(null);
+
+  const cashierItems = useMemo(
+    () =>
+      cart
+        .filter((l) => UUID_RE.test(l.product_id))
+        .map((l) => ({ id: l.product_id, qty: l.qty })),
+    [cart],
+  );
+  const allLinesAreUuid = cashierItems.length === cart.length;
+  const cartSignature = useMemo(() => {
+    if (cart.length === 0) return "";
+    if (!allLinesAreUuid || cashierItems.length === 0) return "";
+    return JSON.stringify(cashierItems.map((i) => [i.id, i.qty]));
+  }, [cashierItems, allLinesAreUuid, cart.length]);
+
+  useEffect(() => {
+    if (!cartSignature) {
+      setSovereignHash(null);
+      setSovereignTotal(null);
+      setSovereignSignature(null);
+      return;
+    }
+    const timer = setTimeout(() => {
+      cashierMutate(
+        { items: cashierItems, context: { member_tier: "guest" } },
+        {
+          onSuccess: (snapshot) => {
+            setSovereignHash(snapshot.snapshot_hash);
+            setSovereignTotal(snapshot.totals.grand_total);
+            setSovereignSignature(cartSignature);
+          },
+          onError: (err) => {
+            if (import.meta.env.DEV) {
+              console.warn("[pos-cashier] preview failed:", err.message);
+            }
+          },
+        },
+      );
+    }, 500);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cartSignature]);
+
+  const sovereignFresh =
+    sovereignHash !== null &&
+    sovereignSignature === cartSignature &&
+    cartSignature !== "";
+  const displayTotal = sovereignFresh && sovereignTotal !== null ? sovereignTotal : subtotal;
+
   // Hardware barcode scanner: detect rapid keystroke bursts ending in Enter
   const bufRef = useRef<{ chars: string[]; t: number }>({ chars: [], t: 0 });
   useEffect(() => {
@@ -208,7 +267,11 @@ export function usePosEngine() {
     if (!user) { toast.error("غير مسجل دخول"); return null; }
     if (!shift) { toast.error("افتح ورديّة أولاً"); return null; }
     if (cart.length === 0) { toast.error("السلة فارغة"); return null; }
-    if (tendered < subtotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
+    if (!sovereignHash || !sovereignFresh) {
+      toast.error("جاري التحقق من السعر السيادي… أعِد المحاولة");
+      return null;
+    }
+    if (tendered < displayTotal) { toast.error("المبلغ المدفوع أقل من المطلوب"); return null; }
 
     const idem = (typeof crypto !== "undefined" && crypto.randomUUID)
       ? crypto.randomUUID()
@@ -325,6 +388,10 @@ export function usePosEngine() {
     // cart
     cart,
     subtotal,
+    sovereignTotal,
+    sovereignHash,
+    sovereignFresh,
+    displayTotal,
     itemCount,
     addProduct,
     incLine,
