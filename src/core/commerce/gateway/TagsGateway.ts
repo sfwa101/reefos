@@ -91,4 +91,108 @@ export const TagsGateway = {
         tag: mapTag(r.tag as RawTag),
       }));
   },
+
+  /**
+   * Phase D-6 — Vocabulary upsert.
+   * Upserts every draft into `asset_tags` keyed on (tag_key, tag_value)
+   * and returns a map from the draft's local key (`tag_key::tag_value`)
+   * to the resolved DB UUID. Existing drafts that already carry a real
+   * UUID are passed through untouched.
+   */
+  async upsertVocabulary(
+    drafts: AssetTagDraft[],
+  ): Promise<Map<string, string>> {
+    const resolved = new Map<string, string>();
+    if (drafts.length === 0) return resolved;
+
+    // Pass-through: already-persisted tags keep their id.
+    const toUpsert: AssetTagDraft[] = [];
+    for (const d of drafts) {
+      const localKey = `${d.tag_key}::${d.tag_value}`;
+      if (d.id) {
+        resolved.set(localKey, d.id);
+      } else {
+        toUpsert.push(d);
+      }
+    }
+    if (toUpsert.length === 0) return resolved;
+
+    const payload = toUpsert.map((d) => ({
+      tag_key: d.tag_key,
+      tag_value: d.tag_value,
+      label_i18n: d.label_i18n ?? {},
+      parent_tag_id: d.parent_tag_id ?? null,
+      metadata: d.metadata ?? {},
+      is_active: d.is_active ?? true,
+      sort_order: d.sort_order ?? 0,
+    }));
+
+    const { data, error } = await supabase
+      .from(TAGS_TABLE)
+      .upsert(payload, { onConflict: "tag_key,tag_value" })
+      .select("id,tag_key,tag_value");
+    if (error) throw error;
+
+    for (const row of (data as { id: string; tag_key: string; tag_value: string }[] | null) ?? []) {
+      resolved.set(`${row.tag_key}::${row.tag_value}`, row.id);
+    }
+    return resolved;
+  },
+
+  /**
+   * Phase D-6 — Sync the tag-link graph for an asset.
+   * 1) Upserts vocabulary to guarantee FK integrity.
+   * 2) Upserts every (asset_id, tag_id) link.
+   * 3) Diffs against existing links and DELETEs ones the Emperor removed.
+   */
+  async syncLinks(assetId: string, drafts: AssetTagDraft[]): Promise<void> {
+    const vocab = await this.upsertVocabulary(drafts);
+
+    const desiredTagIds = new Set<string>();
+    for (const d of drafts) {
+      const id = vocab.get(`${d.tag_key}::${d.tag_value}`);
+      if (id) desiredTagIds.add(id);
+    }
+
+    if (desiredTagIds.size > 0) {
+      const linkPayload = Array.from(desiredTagIds).map((tag_id) => ({
+        asset_id: assetId,
+        tag_id,
+        weight: 1,
+      }));
+      const { error: upErr } = await supabase
+        .from(LINKS_TABLE)
+        .upsert(linkPayload, { onConflict: "asset_id,tag_id" });
+      if (upErr) throw upErr;
+    }
+
+    // Diff & delete removed links.
+    const { data: existing, error: exErr } = await supabase
+      .from(LINKS_TABLE)
+      .select("tag_id")
+      .eq("asset_id", assetId);
+    if (exErr) throw exErr;
+
+    const toDelete = ((existing as { tag_id: string }[] | null) ?? [])
+      .map((r) => r.tag_id)
+      .filter((id) => !desiredTagIds.has(id));
+
+    if (toDelete.length > 0) {
+      const { error: delErr } = await supabase
+        .from(LINKS_TABLE)
+        .delete()
+        .eq("asset_id", assetId)
+        .in("tag_id", toDelete);
+      if (delErr) throw delErr;
+    }
+  },
+
+  /** Phase D-6 — Wipe ALL tag links for an asset (used when toggle is off). */
+  async wipeLinks(assetId: string): Promise<void> {
+    const { error } = await supabase
+      .from(LINKS_TABLE)
+      .delete()
+      .eq("asset_id", assetId);
+    if (error) throw error;
+  },
 };
