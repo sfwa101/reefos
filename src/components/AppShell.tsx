@@ -18,6 +18,24 @@ const HIDE_TABBAR_ROUTES = [
 ];
 
 const AppShell = () => {
+  const queryClient = useQueryClient();
+
+  // Scorched Earth ghost purge — runs once per browser to flush cached
+  // pre-purge catalog payloads from localStorage + TanStack Query.
+  useEffect(() => {
+    try {
+      if (typeof window === "undefined") return;
+      const KEY = "ghost_purge_v1";
+      if (localStorage.getItem(KEY)) return;
+      localStorage.clear();
+      queryClient.clear();
+      localStorage.setItem(KEY, "done");
+      window.location.reload();
+    } catch {
+      /* sandboxed iframe — ignore */
+    }
+  }, [queryClient]);
+
   // Wave P-C (Payload Diet) — one-shot rescue: nuke any pre-diet cart
   // payload that ballooned past 1MB (typically inlined base64 product
   // images persisted into the bridge `product` field). Runs once on mount.
