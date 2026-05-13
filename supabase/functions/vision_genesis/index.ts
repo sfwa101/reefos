@@ -247,22 +247,31 @@ Deno.serve(async (req) => {
       }),
     });
 
-    if (aiRes.status === 429) return json({ error: "rate_limited" }, 429);
-    if (aiRes.status === 402) return json({ error: "credits_exhausted" }, 402);
+    if (aiRes.status === 429) return json({ error: "rate_limited", details: "AI gateway rate limit hit (429)." }, 429);
+    if (aiRes.status === 402) return json({ error: "credits_exhausted", details: "AI gateway credits exhausted (402)." }, 402);
     if (!aiRes.ok) {
       const t = await aiRes.text();
       console.error("Vision AI error:", aiRes.status, t);
-      return json({ error: "ai_error" }, 500);
+      return json({ error: "AI_API_ERROR", status: aiRes.status, details: t.slice(0, 800) }, 500);
     }
 
     const aiData = await aiRes.json();
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
+    if (!toolCall) {
+      const fallbackMsg = aiData.choices?.[0]?.message?.content ?? JSON.stringify(aiData).slice(0, 500);
+      console.error("no tool_call returned", fallbackMsg);
+      return json({ error: "AI_NO_TOOL_CALL", details: String(fallbackMsg).slice(0, 800) }, 500);
+    }
     let parsed: any = {};
     try {
       parsed = JSON.parse(toolCall?.function?.arguments ?? "{}");
     } catch (e) {
       console.error("tool args parse error", e);
-      return json({ error: "ai_parse_error" }, 500);
+      return json({
+        error: "PARSE_ERROR",
+        details: e instanceof Error ? e.message : String(e),
+        raw: String(toolCall?.function?.arguments ?? "").slice(0, 500),
+      }, 500);
     }
 
     // Sanitize
