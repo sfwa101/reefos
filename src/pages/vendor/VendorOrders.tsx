@@ -84,27 +84,7 @@ export default function VendorOrders() {
   const { data: items, isLoading: itemsLoading } = useQuery<NodeItem[]>({
     queryKey: ["fulfillment-items", detailsNode?.id],
     enabled: !!detailsNode?.id,
-    queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data, error } = await sb
-        .from("salsabil_fulfillment_items")
-        .select(`
-          id, sku_id, quantity, price_at_time,
-          sku:salsabil_skus(sku_code, asset:salsabil_assets(name))
-        `)
-        .eq("node_id", detailsNode!.id);
-      if (error) throw error;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (data ?? []).map((r: any): NodeItem => ({
-        id: r.id,
-        sku_id: r.sku_id,
-        quantity: r.quantity,
-        price_at_time: Number(r.price_at_time),
-        sku_code: r.sku?.sku_code ?? null,
-        asset_name: r.sku?.asset?.name ?? null,
-      }));
-    },
+    queryFn: () => OrderGateway.getNodeItems(detailsNode!.id),
   });
 
   const queryClient = useQueryClient();
