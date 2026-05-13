@@ -41,7 +41,7 @@ export default function More() {
       { to: "/admin/inventory-locations", icon: Boxes, label: "مواقع المخزون", color: "from-[hsl(var(--info))] to-[hsl(var(--indigo))]" },
       { to: "/admin/product-batches", icon: Layers, label: "دفعات المنتجات (FEFO)", color: "from-[hsl(var(--accent))] to-[hsl(20_100%_55%)]" },
       { to: "/admin/cross-branch-transfers", icon: ArrowRightLeft, label: "التحويلات بين الفروع", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
-      { to: "/admin/product-units", icon: Boxes, label: "وحدات المنتجات", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
+      
       { to: "/admin/$entity", params: { entity: "warehouses" }, icon: Warehouse, label: "المخازن المتعددة", color: "from-[hsl(var(--teal))] to-[hsl(var(--info))]" },
       { to: "/admin/allocation", icon: MapPin, label: "التوزيع الذكي", color: "from-[hsl(var(--info))] to-[hsl(var(--purple))]" },
       { to: "/admin/branches", icon: Sparkles, label: "الفروع الدولية", color: "from-[hsl(var(--purple))] to-[hsl(var(--info))]" },
