@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { useSovereignContext, type WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
+import { useSovereignContext, type WorkspaceKind } from "@/core/capabilities/store/useSovereignContext";
 // SmartProductComposer dialog removed in V-1.C — replaced by /admin/assets/genesis route.
 
 type Action = {

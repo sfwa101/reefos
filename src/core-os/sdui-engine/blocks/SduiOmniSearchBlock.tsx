@@ -2,8 +2,8 @@
  * SduiOmniSearchBlock — Phase VIII multi-tenant omni-search SDUI wrapper.
  */
 import { memo, useMemo } from "react";
-import { SearchAtom, type OmniScope } from "@/core-os/capabilities/SearchAtom";
-import { reefScope } from "@/core-os/capabilities/scopes/reefScope";
+import { SearchAtom, type OmniScope } from "@/core/capabilities/SearchAtom";
+import { reefScope } from "@/core/capabilities/scopes/reefScope";
 import type { SduiOmniSearchBlock as Props } from "../engine/schemas";
 
 const SCOPE_MAP: Record<string, OmniScope> = {

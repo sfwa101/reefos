@@ -184,7 +184,7 @@ Noor El-Din is a **Sovereign Stem Cell** under Law 2.
    - `@/core-os/hakim-ai` — the Coach runtime
    - `@/core-os/sdui-engine` — every learning surface is a composed intent (Law 1)
    - `@/core-os/barq-logistics` — physical apprenticeship routing
-   - `@/core-os/event-bus` — emits `journey.*`, `skill.*`, `apprenticeship.*` events
+   - `@/core/events` — emits `journey.*`, `skill.*`, `apprenticeship.*` events
 3. **Uses the same Professional DNA** runtime as the rest of Salsabil OS —
    no custom theming, no hard-coded archetype branching (Law 4).
 4. **All sensitive writes** (skill verification, MRS mutation, apprenticeship

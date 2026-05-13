@@ -18,7 +18,7 @@ import { useCapabilities } from "@/hooks/useCapability";
 import {
   useSovereignContext,
   type WorkspaceKind,
-} from "@/core-os/capabilities/store/useSovereignContext";
+} from "@/core/capabilities/store/useSovereignContext";
 
 const KIND_LABEL: Record<WorkspaceKind, string> = {
   reef:       "ريف المدينة",

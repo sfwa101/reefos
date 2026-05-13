@@ -22,7 +22,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useAuth } from "@/context/AuthContext";
-import { useSovereignContext } from "@/core-os/capabilities/store/useSovereignContext";
+import { useSovereignContext } from "@/core/capabilities/store/useSovereignContext";
 import {
   chatHakimFn,
   markHakimInsightReadFn,
