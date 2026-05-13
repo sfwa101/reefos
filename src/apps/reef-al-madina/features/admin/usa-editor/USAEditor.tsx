@@ -253,6 +253,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         const tierIdMap = await persistPackaging(newAssetId);
         await persistTags(newAssetId);
         await persistPricing(newAssetId, tierIdMap);
+        await persistInventory(newAssetId, tierIdMap);
         setHasOverriddenAI(false);
         setPendingEmbedding(null);
         onSaved?.();
