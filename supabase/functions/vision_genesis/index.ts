@@ -70,7 +70,13 @@ Deno.serve(async (req) => {
     const { data: userData, error: userErr } = await userClient.auth.getUser();
     if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
 
-    const { image_base64, mime_type, hint } = await req.json().catch(() => ({}));
+    const {
+      image_base64,
+      mime_type,
+      hint,
+      secondary_image_base64,
+      secondary_mime_type,
+    } = await req.json().catch(() => ({}));
     if (!image_base64 || typeof image_base64 !== "string") {
       return json({ error: "missing_image" }, 400);
     }
@@ -80,6 +86,17 @@ Deno.serve(async (req) => {
     const dataUrl = image_base64.startsWith("data:")
       ? image_base64
       : `data:${mt};base64,${image_base64}`;
+
+    let secondaryDataUrl: string | null = null;
+    if (typeof secondary_image_base64 === "string" && secondary_image_base64.length > 0) {
+      const smt =
+        typeof secondary_mime_type === "string" && secondary_mime_type.startsWith("image/")
+          ? secondary_mime_type
+          : "image/jpeg";
+      secondaryDataUrl = secondary_image_base64.startsWith("data:")
+        ? secondary_image_base64
+        : `data:${smt};base64,${secondary_image_base64}`;
+    }
 
     const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
 
@@ -108,9 +125,12 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `حلّل هذه الصورة واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
+                text: `حلّل ${secondaryDataUrl ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
               },
               { type: "image_url", image_url: { url: dataUrl } },
+              ...(secondaryDataUrl
+                ? [{ type: "image_url", image_url: { url: secondaryDataUrl } }]
+                : []),
             ],
           },
         ],

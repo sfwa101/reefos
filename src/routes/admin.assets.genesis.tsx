@@ -48,6 +48,19 @@ function dataUrlToFile(dataUrl: string, name = "clean.png"): File {
   return new File([arr], name, { type: mime });
 }
 
+// ── Visual Veto: pastel palette swatches (mirror server `vision_genesis`) ──
+type PaletteSwatch = { name: string; hex: string; label: string };
+const PALETTES: PaletteSwatch[] = [
+  { name: "pure white", hex: "#FFFFFF", label: "أبيض نقي" },
+  { name: "mint green", hex: "#D1FAE5", label: "نعناعي" },
+  { name: "warm cream", hex: "#FEF3C7", label: "كريمي" },
+  { name: "blush pink", hex: "#FCE7F3", label: "وردي" },
+  { name: "powder blue", hex: "#DBEAFE", label: "أزرق هادئ" },
+  { name: "soft lavender", hex: "#EDE9FE", label: "لافندر" },
+  { name: "sand beige", hex: "#F5F1E8", label: "بيج رملي" },
+  { name: "sage", hex: "#E2E8DD", label: "ميرمية" },
+];
+
 // Optional rich-DNA fields the upgraded Vision Cortex may emit on `asset`.
 type RichDNA = {
   category_path?: string;
@@ -71,8 +84,11 @@ function GenesisPage() {
   const [stage, setStage] = useState<Stage>("idle");
   const [primaryFile, setPrimaryFile] = useState<File | null>(null);
   const [primaryUrl, setPrimaryUrl] = useState<string | null>(null);
+  const [secondaryFile, setSecondaryFile] = useState<File | null>(null);
+  const [secondaryUrl, setSecondaryUrl] = useState<string | null>(null);
   const [genesis, setGenesis] = useState<USAGenesisPayload | null>(null);
   const [editMode, setEditMode] = useState(false);
+  const [selectedPalette, setSelectedPalette] = useState<PaletteSwatch | null>(null);
 
   // Granular DNA form
   const [name, setName] = useState("");
@@ -80,8 +96,8 @@ function GenesisPage() {
   const [category, setCategory] = useState("");
   const [brand, setBrand] = useState("");
   const [origin, setOrigin] = useState("");
-  const [price, setPrice] = useState<number>(0);
-  const [cost, setCost] = useState<number>(0);
+  const [price, setPrice] = useState<number | "">("");
+  const [cost, setCost] = useState<number | "">("");
   const [currency, setCurrency] = useState<string>("EGP");
   const [marketingShort, setMarketingShort] = useState("");
   const [marketingLong, setMarketingLong] = useState("");
@@ -98,6 +114,9 @@ function GenesisPage() {
   const clearAi = (k: string) =>
     setAiFields((s) => { if (!s.has(k)) return s; const n = new Set(s); n.delete(k); return n; });
 
+  const priceNum = typeof price === "number" ? price : 0;
+  const canApprove = name.trim().length > 0 && priceNum > 0;
+
   const onPickFile = useCallback((file: File | null | undefined) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
@@ -105,14 +124,26 @@ function GenesisPage() {
     setPrimaryUrl(URL.createObjectURL(file));
   }, []);
 
-  async function runClean() {
+  const onPickSecondary = useCallback((file: File | null | undefined) => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) { toast.error("اختر صورة فقط"); return; }
+    setSecondaryFile(file);
+    setSecondaryUrl(URL.createObjectURL(file));
+  }, []);
+
+  async function runClean(palette?: PaletteSwatch | null) {
     if (!primaryFile) return;
     try {
       setStage("cleaning");
-      const cleaned = await aesthetic.mutateAsync({ file: primaryFile, style: "white" });
+      const target = palette ?? selectedPalette;
+      const cleaned = await aesthetic.mutateAsync(
+        target
+          ? { file: primaryFile, palette: { name: target.name, hex: target.hex } }
+          : { file: primaryFile, style: "white" },
+      );
       setPrimaryUrl(cleaned.imageDataUrl);
       setPrimaryFile(dataUrlToFile(cleaned.imageDataUrl));
-      toast.success("تم تحسين الصورة");
+      toast.success("تم تحديث الخلفية");
     } catch { toast.error("فشل تحسين الصورة"); }
     finally { setStage("idle"); }
   }
@@ -121,14 +152,20 @@ function GenesisPage() {
     if (!primaryFile) { toast.error("أضف صورة أولًا"); return; }
     try {
       setStage("describing");
-      const usa = await vision.mutateAsync({ file: primaryFile });
+      const usa = await vision.mutateAsync({ file: primaryFile, secondaryFile });
       setGenesis(usa);
       // Phase V-2: server returned a generative pastel composition — adopt it.
-      const aestheticUrl = (usa as unknown as { aesthetic_image_data_url?: string | null })
-        .aesthetic_image_data_url;
-      if (aestheticUrl && aestheticUrl.startsWith("data:image/")) {
-        setPrimaryUrl(aestheticUrl);
-        setPrimaryFile(dataUrlToFile(aestheticUrl));
+      const extras = usa as unknown as {
+        aesthetic_image_data_url?: string | null;
+        aesthetic_palette?: { name: string; hex: string } | null;
+      };
+      if (extras.aesthetic_image_data_url && extras.aesthetic_image_data_url.startsWith("data:image/")) {
+        setPrimaryUrl(extras.aesthetic_image_data_url);
+        setPrimaryFile(dataUrlToFile(extras.aesthetic_image_data_url));
+      }
+      if (extras.aesthetic_palette) {
+        const matched = PALETTES.find((p) => p.name === extras.aesthetic_palette?.name);
+        if (matched) setSelectedPalette(matched);
       }
       const a = usa.asset as USAGenesisPayload["asset"] & RichDNA;
       setName(a.name ?? "");
@@ -164,7 +201,7 @@ function GenesisPage() {
   }
 
   async function approve() {
-    if (!name.trim() || price <= 0) { toast.error("الاسم والسعر مطلوبان"); return; }
+    if (!canApprove) { toast.error("الاسم والسعر مطلوبان"); return; }
     setStage("publishing");
     try {
       const base: USAGenesisPayload = genesis ?? {
@@ -179,7 +216,7 @@ function GenesisPage() {
         skus: [],
         financial_contract: {
           pricing_model: "flat",
-          base_price: price,
+          base_price: priceNum,
           currency: currency as "EGP" | "USD" | "EUR",
           contract_rules: {},
         },
@@ -193,7 +230,7 @@ function GenesisPage() {
         skus: base.skus,
         financial_contract: {
           ...base.financial_contract,
-          base_price: price,
+          base_price: priceNum,
           currency: currency as "EGP" | "USD" | "EUR",
         },
       });
@@ -255,7 +292,7 @@ function GenesisPage() {
           {primaryFile && !hasDraft && (
             <div className="grid grid-cols-2 gap-2">
               <button
-                type="button" disabled={busy} onClick={runClean}
+                type="button" disabled={busy} onClick={() => runClean()}
                 className={cn(
                   "h-12 rounded-2xl text-[12.5px] font-semibold press transition-base",
                   "bg-foreground/5 hover:bg-foreground/10 border border-border/50",
@@ -277,6 +314,27 @@ function GenesisPage() {
                 🤖 استخراج DNA
               </button>
             </div>
+          )}
+
+          {/* Visual Veto — Palette swatches */}
+          {primaryFile && (
+            <PaletteVetoBar
+              palettes={PALETTES}
+              selected={selectedPalette}
+              busy={busy}
+              onSelect={(p) => setSelectedPalette(p)}
+              onRegenerate={() => runClean(selectedPalette)}
+            />
+          )}
+
+          {/* Secondary image — back of pack / nutrition label */}
+          {primaryFile && !hasDraft && (
+            <SecondaryCaptureZone
+              url={secondaryUrl}
+              busy={busy}
+              onFile={onPickSecondary}
+              onClear={() => { setSecondaryFile(null); setSecondaryUrl(null); }}
+            />
           )}
         </section>
 
@@ -329,17 +387,17 @@ function GenesisPage() {
             <DnaGroup title="المالية">
               <div className="grid grid-cols-2 gap-2">
                 <DnaField label="السعر" ai={aiFields.has("price")}>
-                  <input
-                    type="number" step="0.01" value={price}
-                    onChange={(e) => { setPrice(Number(e.target.value)); clearAi("price"); }}
-                    className="w-full bg-transparent outline-none text-[14px] font-display"
+                  <NumInput
+                    value={price}
+                    step="0.01"
+                    onChange={(v) => { setPrice(v); clearAi("price"); }}
                   />
                 </DnaField>
                 <DnaField label="التكلفة" ai={aiFields.has("cost")}>
-                  <input
-                    type="number" step="0.01" value={cost}
-                    onChange={(e) => { setCost(Number(e.target.value)); clearAi("cost"); }}
-                    className="w-full bg-transparent outline-none text-[14px]"
+                  <NumInput
+                    value={cost}
+                    step="0.01"
+                    onChange={(v) => { setCost(v); clearAi("cost"); }}
                   />
                 </DnaField>
               </div>
@@ -473,7 +531,7 @@ function GenesisPage() {
             </button>
             <button
               onClick={approve}
-              disabled={busy || done || !name.trim() || price <= 0}
+              disabled={busy || done || !canApprove}
               className={cn(
                 "flex-1 h-12 rounded-2xl font-display text-[14px]",
                 "bg-gradient-primary text-primary-foreground shadow-glow press transition-base",
@@ -616,13 +674,164 @@ function DnaField({
   );
 }
 
-function NumInput({ value, onChange }: { value: number | ""; onChange: (v: number | "") => void }) {
+function NumInput({
+  value,
+  onChange,
+  step = "0.1",
+}: {
+  value: number | "";
+  onChange: (v: number | "") => void;
+  step?: string;
+}) {
+  // Local string buffer keeps intermediate states like "" or "1." typeable
+  // without React snapping the value back to 0 (which would freeze typing).
+  const [text, setText] = useState<string>(value === "" ? "" : String(value));
+  // Re-sync if the upstream value changes from outside (e.g. AI fill / reset).
+  const lastSeen = useRef<number | "">(value);
+  if (lastSeen.current !== value) {
+    const nextText = value === "" ? "" : String(value);
+    if (nextText !== text && Number(text) !== value) setText(nextText);
+    lastSeen.current = value;
+  }
   return (
     <input
-      type="number" step="0.1"
-      value={value}
-      onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
+      type="number"
+      step={step}
+      inputMode="decimal"
+      value={text}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        if (raw === "") onChange("");
+        else {
+          const n = Number(raw);
+          if (Number.isFinite(n)) onChange(n);
+        }
+      }}
+      onBlur={() => {
+        if (text === "" || text === "-" || text === ".") {
+          setText("");
+          onChange("");
+        }
+      }}
       className="w-full bg-transparent outline-none text-[13px] font-display"
     />
+  );
+}
+
+function PaletteVetoBar({
+  palettes, selected, busy, onSelect, onRegenerate,
+}: {
+  palettes: PaletteSwatch[];
+  selected: PaletteSwatch | null;
+  busy: boolean;
+  onSelect: (p: PaletteSwatch) => void;
+  onRegenerate: () => void;
+}) {
+  return (
+    <div className="rounded-2xl border border-border/40 bg-card/60 p-2.5 space-y-2">
+      <div className="flex items-center justify-between">
+        <span className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary font-semibold">
+          خلفية الأصل · حق النقض البصري
+        </span>
+        <button
+          type="button" disabled={busy || !selected}
+          onClick={onRegenerate}
+          className={cn(
+            "text-[10.5px] px-2.5 py-1 rounded-full font-semibold press",
+            "bg-primary/10 text-primary border border-primary/30",
+            "disabled:opacity-40 inline-flex items-center gap-1",
+          )}
+        >
+          <Wand2 className="h-3 w-3" />
+          إعادة توليد الخلفية
+        </button>
+      </div>
+      <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+        {palettes.map((p) => {
+          const active = selected?.name === p.name;
+          return (
+            <button
+              key={p.name}
+              type="button"
+              onClick={() => onSelect(p)}
+              title={p.label}
+              aria-label={p.label}
+              aria-pressed={active}
+              className={cn(
+                "shrink-0 h-9 w-9 rounded-full border-2 transition press relative",
+                active ? "border-primary scale-110 shadow-glow" : "border-border/60",
+              )}
+              style={{ backgroundColor: p.hex }}
+            >
+              {active && (
+                <CheckCircle2 className="h-4 w-4 text-primary absolute -top-1 -right-1 bg-card rounded-full" />
+              )}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function SecondaryCaptureZone({
+  url, busy, onFile, onClear,
+}: {
+  url: string | null; busy: boolean;
+  onFile: (file: File | null | undefined) => void; onClear: () => void;
+}) {
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  return (
+    <div className="rounded-2xl border border-dashed border-border/60 bg-card/40 p-3 space-y-2">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-[12px] font-display leading-tight">
+            تصوير ظهر العبوة / الحقائق الغذائية
+          </p>
+          <p className="text-[10.5px] text-foreground-tertiary mt-0.5">
+            اختياري — يساعد حكيم على قراءة الملصق الغذائي والمكونات
+          </p>
+        </div>
+        {url && !busy && (
+          <button
+            onClick={onClear}
+            className="h-8 w-8 rounded-full bg-card border border-border/60 flex items-center justify-center press"
+            aria-label="حذف"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+      {url ? (
+        <div className="relative h-28 rounded-xl overflow-hidden border border-border/40 bg-background">
+          <img src={url} alt="ظهر العبوة" className="absolute inset-0 w-full h-full object-contain" />
+        </div>
+      ) : (
+        <div className="grid grid-cols-2 gap-2">
+          <input
+            ref={galleryRef} type="file" accept="image/*" className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+          <input
+            ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
+            onChange={(e) => onFile(e.target.files?.[0])}
+          />
+          <button
+            type="button" disabled={busy} onClick={() => galleryRef.current?.click()}
+            className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
+          >
+            <ImagePlus className="h-3.5 w-3.5" /> من المعرض
+          </button>
+          <button
+            type="button" disabled={busy} onClick={() => cameraRef.current?.click()}
+            className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
+          >
+            <Camera className="h-3.5 w-3.5" /> الكاميرا
+          </button>
+        </div>
+      )}
+    </div>
   );
 }
