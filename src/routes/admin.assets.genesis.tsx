@@ -122,6 +122,13 @@ function GenesisPage() {
       setStage("describing");
       const usa = await vision.mutateAsync({ file: primaryFile });
       setGenesis(usa);
+      // Phase V-2: server returned a generative pastel composition — adopt it.
+      const aestheticUrl = (usa as unknown as { aesthetic_image_data_url?: string | null })
+        .aesthetic_image_data_url;
+      if (aestheticUrl && aestheticUrl.startsWith("data:image/")) {
+        setPrimaryUrl(aestheticUrl);
+        setPrimaryFile(dataUrlToFile(aestheticUrl));
+      }
       const a = usa.asset as USAGenesisPayload["asset"] & RichDNA;
       setName(a.name ?? "");
       setDescription(a.description ?? "");
