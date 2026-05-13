@@ -413,6 +413,92 @@ export type Database = {
         }
         Relationships: []
       }
+      asset_tag_links: {
+        Row: {
+          asset_id: string
+          assigned_at: string
+          assigned_by: string | null
+          tag_id: string
+          weight: number
+        }
+        Insert: {
+          asset_id: string
+          assigned_at?: string
+          assigned_by?: string | null
+          tag_id: string
+          weight?: number
+        }
+        Update: {
+          asset_id?: string
+          assigned_at?: string
+          assigned_by?: string | null
+          tag_id?: string
+          weight?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_tag_links_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "salsabil_assets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "asset_tag_links_tag_id_fkey"
+            columns: ["tag_id"]
+            isOneToOne: false
+            referencedRelation: "asset_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      asset_tags: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label_i18n: Json
+          metadata: Json
+          parent_tag_id: string | null
+          sort_order: number
+          tag_key: string
+          tag_value: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_i18n?: Json
+          metadata?: Json
+          parent_tag_id?: string | null
+          sort_order?: number
+          tag_key: string
+          tag_value: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label_i18n?: Json
+          metadata?: Json
+          parent_tag_id?: string | null
+          sort_order?: number
+          tag_key?: string
+          tag_value?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "asset_tags_parent_tag_id_fkey"
+            columns: ["parent_tag_id"]
+            isOneToOne: false
+            referencedRelation: "asset_tags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       asset_transfers: {
         Row: {
           created_at: string

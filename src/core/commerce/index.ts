@@ -9,3 +9,11 @@ export type {
   PackagingTierDraft,
   PackagingTierNode,
 } from "./types/packagingTier";
+export type {
+  AssetTag,
+  AssetTagDraft,
+  AssetTagLink,
+  AssetTagLinkResolved,
+  AssetTagAxis,
+  AssetTagLabelI18n,
+} from "./types/assetTag";
