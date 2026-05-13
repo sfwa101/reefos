@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Sparkles, Boxes, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
+import { Sparkles, Loader2, Save, Wand2, AlertTriangle, ShieldCheck, Layers, Network, Coins } from "lucide-react";
 import VisionGenesisUploader from "@/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader";
 import InventoryMatrixPanel from "@/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel";
 import PackagingHierarchyBuilder from "@/components/commerce/assets/PackagingHierarchyBuilder";
