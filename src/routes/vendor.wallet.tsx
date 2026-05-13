@@ -1,3 +1,3 @@
 import { createFileRoute } from "@tanstack/react-router";
-import VendorWallet from "@/pages/vendor/VendorWallet";
+import VendorWallet from "@/components/vendor/views/VendorWallet";
 export const Route = createFileRoute("/vendor/wallet")({ component: VendorWallet });

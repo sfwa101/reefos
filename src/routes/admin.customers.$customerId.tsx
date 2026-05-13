@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import CustomerDetail from "@/pages/admin/CustomerDetail";
+import CustomerDetail from "@/components/admin/views/CustomerDetail";
 
 function CustomerDetailRoute() {
   const { customerId } = Route.useParams();

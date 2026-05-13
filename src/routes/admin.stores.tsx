@@ -1,4 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import Stores from "@/pages/admin/Stores";
+import Stores from "@/components/admin/views/Stores";
 
 export const Route = createFileRoute("/admin/stores")({ component: Stores });

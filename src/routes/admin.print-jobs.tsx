@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import PrintJobsAdmin from "@/pages/admin/PrintJobs";
+import PrintJobsAdmin from "@/components/admin/views/PrintJobs";
 export const Route = createFileRoute("/admin/print-jobs")({
   component: PrintJobsAdmin,
 });

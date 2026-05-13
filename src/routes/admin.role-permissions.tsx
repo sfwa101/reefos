@@ -1,3 +1,3 @@
 import { createFileRoute } from "@tanstack/react-router";
-import RolePermissions from "@/pages/admin/RolePermissions";
+import RolePermissions from "@/components/admin/views/RolePermissions";
 export const Route = createFileRoute("/admin/role-permissions")({ component: RolePermissions });

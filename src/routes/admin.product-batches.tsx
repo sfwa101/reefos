@@ -1,3 +1,3 @@
 import { createFileRoute } from "@tanstack/react-router";
-import ProductBatches from "@/pages/admin/ProductBatches";
+import ProductBatches from "@/components/admin/views/ProductBatches";
 export const Route = createFileRoute("/admin/product-batches")({ component: ProductBatches });
