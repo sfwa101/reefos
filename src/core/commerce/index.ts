@@ -3,6 +3,7 @@
  * traversals (orders, shared-cart participants, buy-it-again).
  */
 export { CommerceGateway, type SharedCartSplitType } from "./gateway/CommerceGateway";
+export { PackagingGateway } from "./gateway/PackagingGateway";
 export type {
   PackagingTier,
   PackagingTierDraft,
