@@ -6,7 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Loader2, Package, CheckCircle2, Clock, Eye, PackageCheck, MapPin, Phone, User, Truck } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { OrderGateway } from "@/core/orders";
 import { useCurrentVendor } from "@/core-os/hakim-ai/hooks/useCurrentVendor";
 import { useUpdateFulfillmentStatus, type FulfillmentStatus } from "@/core-os/hakim-ai/hooks/useFulfillmentNodes";
 import { UniversalAdminGrid, type Column, type RowAction, type BentoMetric } from "@/components/admin/UniversalAdminGrid";
