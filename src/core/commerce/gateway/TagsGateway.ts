@@ -120,9 +120,9 @@ export const TagsGateway = {
     const payload = toUpsert.map((d) => ({
       tag_key: d.tag_key,
       tag_value: d.tag_value,
-      label_i18n: d.label_i18n ?? {},
+      label_i18n: (d.label_i18n ?? {}) as never,
       parent_tag_id: d.parent_tag_id ?? null,
-      metadata: d.metadata ?? {},
+      metadata: (d.metadata ?? {}) as never,
       is_active: d.is_active ?? true,
       sort_order: d.sort_order ?? 0,
     }));
