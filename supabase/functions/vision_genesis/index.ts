@@ -60,7 +60,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_PUBLISHABLE_KEY") ||
       Deno.env.get("SUPABASE_ANON_KEY")!;
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) return json({ error: "missing_key" }, 500);
+    if (!LOVABLE_API_KEY) {
+      return json({
+        error: "MISSING_API_KEY",
+        details: "LOVABLE_API_KEY is not configured in Edge Function secrets.",
+      }, 500);
+    }
 
     // Auth gate
     const authHeader = req.headers.get("Authorization") ?? "";
