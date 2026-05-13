@@ -1,27 +1,19 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ArrowDownCircle, Banknote } from "lucide-react";
 import { VendorSettlementDashboard } from "@/apps/reef-al-madina/features/vendor/components/VendorSettlementDashboard";
 import { SovereignSettlementsPanel } from "@/apps/reef-al-madina/features/vendor/components/SovereignSettlementsPanel";
-
-type W = { vendor_id: string; available_balance: number; pending_balance: number; lifetime_earned: number; lifetime_paid_out: number };
-type Payout = { id: string; amount: number; method: string; reference: string | null; status: string; created_at: string };
+import { VendorGateway, type VendorWalletVM, type VendorPayoutVM } from "@/core/vendor";
 
 export default function VendorWallet() {
-  const [wallets, setWallets] = useState<W[] | null>(null);
-  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [wallets, setWallets] = useState<VendorWalletVM[] | null>(null);
+  const [payouts, setPayouts] = useState<VendorPayoutVM[]>([]);
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
-    Promise.all([
-      sb.from("vendor_wallets").select("*"),
-      sb.from("vendor_payouts").select("*").order("created_at", { ascending: false }).limit(50),
-    ]).then(([w, p]) => {
-      setWallets(w.data ?? []);
-      setPayouts(p.data ?? []);
+    VendorGateway.listVendorWalletsAndPayouts().then(({ wallets, payouts }) => {
+      setWallets(wallets);
+      setPayouts(payouts);
     });
   }, []);
 
@@ -76,12 +68,10 @@ export default function VendorWallet() {
         )}
       </div>
 
-      {/* Phase 10.4 — sovereign auto-settlement (per-delivered-node) */}
       <div className="pt-2">
         <SovereignSettlementsPanel />
       </div>
 
-      {/* Phase 12 — event-sourced settlement engine */}
       <div className="pt-2">
         <VendorSettlementDashboard />
       </div>
