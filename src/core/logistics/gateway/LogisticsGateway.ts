@@ -75,6 +75,15 @@ export type CreateAddressInput = {
   lng: number | null;
 };
 
+export type SavedAddressVM = {
+  id: string;
+  label: string;
+  city: string;
+  district: string | null;
+  street: string | null;
+  is_default: boolean;
+};
+
 export const LogisticsGateway = {
   /**
    * Active default "standard" delivery method, or a sane fallback when the
@@ -91,6 +100,20 @@ export const LogisticsGateway = {
       .maybeSingle();
     if (error || !data) return FALLBACK_STANDARD_DELIVERY_METHOD;
     return rowToMethod(data as DeliveryMethodRow);
+  },
+
+  /**
+   * List the current user's saved delivery addresses, default-first.
+   */
+  async listAddresses(userId: string): Promise<SavedAddressVM[]> {
+    if (!userId) return [];
+    const { data } = await supabase
+      .from("addresses")
+      .select("id,label,city,district,street,is_default")
+      .eq("user_id", userId)
+      .order("is_default", { ascending: false })
+      .order("created_at", { ascending: false });
+    return ((data ?? []) as SavedAddressVM[]);
   },
 
   /**
