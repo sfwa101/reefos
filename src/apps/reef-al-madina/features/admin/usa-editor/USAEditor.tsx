@@ -620,6 +620,19 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               <SaveButton />
             </TabsContent>
 
+            <TabsContent value="cognitive" className="m-0 space-y-3">
+              <CognitivePricingBuilder
+                packagingTiers={packagingTiers}
+                packagingEnabled={packagingEnabled}
+                value={financialContractsDraft}
+                onChange={setFinancialContractsDraft}
+                defaultCurrency={currency}
+                defaultPricingModel={pricingModel}
+              />
+              <p className="text-[10.5px] text-foreground-tertiary leading-relaxed text-center px-2">
+                ⚙️ المسودات تُحفظ محلياً — الحفظ الدائم في قاعدة العقود المالية يأتي في المرحلة E-2.
+              </p>
+            </TabsContent>
 
             <TabsContent value="packaging" className="m-0 space-y-3">
               <div className="rounded-2xl border border-border bg-background-secondary/40 p-3 flex items-center justify-between gap-3">
