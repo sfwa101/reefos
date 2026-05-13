@@ -286,7 +286,7 @@ function GenesisPage() {
           {primaryFile && !hasDraft && (
             <div className="grid grid-cols-2 gap-2">
               <button
-                type="button" disabled={busy} onClick={runClean}
+                type="button" disabled={busy} onClick={() => runClean()}
                 className={cn(
                   "h-12 rounded-2xl text-[12.5px] font-semibold press transition-base",
                   "bg-foreground/5 hover:bg-foreground/10 border border-border/50",
