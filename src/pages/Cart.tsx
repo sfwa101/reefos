@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { CalendarDays, Home, Lock, ShoppingBag, Sparkles, Zap } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { CommerceGateway } from "@/core/commerce";
 import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/core/runtime-ui/blocks/commerce/cart-upgrade-banner";
 import { toLatin } from "@/lib/format";
@@ -31,18 +31,11 @@ const Cart = () => {
   const [checkoutOpen, setCheckoutOpen] = useState(false);
   const navigate = useNavigate();
 
-  const updateSplit = async (
+  const updateSplit = (
     participantId: string,
     splitType: SharedCartSplitType,
     splitValue: number,
-  ) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from("shared_cart_participants")
-      .update({ split_type: splitType, split_value: splitValue })
-      .eq("id", participantId);
-    if (error) throw error;
-  };
+  ) => CommerceGateway.updateSharedCartParticipantSplit(participantId, splitType, splitValue);
 
   const isLocked = o.isSharedMode && o.sharedCart?.status === "pending_approvals";
   const paymentsHalted = !o.paymentsEnabled;
