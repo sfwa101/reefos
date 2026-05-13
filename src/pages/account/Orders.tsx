@@ -74,21 +74,8 @@ const Orders = () => {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data, error } = await supabase
-        .from("salsabil_master_orders")
-        .select(`
-          id, status, total_amount, created_at,
-          salsabil_fulfillment_nodes (
-            id, status, total_amount, vendor_id,
-            salsabil_fulfillment_items (
-              id, quantity, price_at_time, sku_id,
-              salsabil_skus ( asset_id, salsabil_assets ( name, media ) )
-            )
-          )
-        `)
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false });
-      if (!error) setOrders((data as unknown as SovereignOrder[]) ?? []);
+      const data = await OrderGateway.getCustomerOrders(user.id);
+      setOrders(data);
       setLoading(false);
     })();
   }, [user]);
