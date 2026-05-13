@@ -7,6 +7,7 @@
  */
 import { useMutation } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { MediaGateway } from "@/core/media";
 
 export type USAGenesisAsset = {
   name: string;
@@ -57,16 +58,15 @@ const STAGING_PREFIX = "vision-staging";
 async function uploadToStaging(file: File): Promise<string> {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_").slice(-60);
   const path = `${STAGING_PREFIX}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${safeName}`;
-  const { error: upErr } = await supabase.storage
-    .from(STAGING_BUCKET)
-    .upload(path, file, {
-      contentType: file.type || "image/jpeg",
-      upsert: false,
-    });
-  if (upErr) throw new Error(`storage_upload_failed: ${upErr.message}`);
-  const { data } = supabase.storage.from(STAGING_BUCKET).getPublicUrl(path);
-  if (!data?.publicUrl) throw new Error("storage_public_url_missing");
-  return data.publicUrl;
+  const { publicUrl } = await MediaGateway.uploadFile({
+    bucket: STAGING_BUCKET,
+    path,
+    file,
+    contentType: file.type || "image/jpeg",
+    upsert: false,
+  });
+  if (!publicUrl) throw new Error("storage_public_url_missing");
+  return publicUrl;
 }
 
 export type VisionGenesisInput = {
