@@ -5,6 +5,7 @@
 export { CommerceGateway, type SharedCartSplitType } from "./gateway/CommerceGateway";
 export { PackagingGateway } from "./gateway/PackagingGateway";
 export { TagsGateway } from "./gateway/TagsGateway";
+export { PricingGateway } from "./gateway/PricingGateway";
 export type {
   PackagingTier,
   PackagingTierDraft,
