@@ -148,6 +148,16 @@ const SearchPage = () => {
 
   const filtered = useMemo(() => {
     let list = matches;
+    if (brand) {
+      const b = brand.toLowerCase();
+      list = list.filter((p) => (p.brand ?? "").toLowerCase() === b);
+    }
+    if (trait) {
+      const t = trait.toLowerCase();
+      list = list.filter((p) =>
+        extractHandlingTraits(p.metadata).some((x) => x.toLowerCase() === t),
+      );
+    }
     if (activeCat !== "all") list = list.filter((p) => p.category === activeCat);
     if (maxPrice && maxPrice < priceCeiling)
       list = list.filter((p) => p.price <= maxPrice);
@@ -163,7 +173,7 @@ const SearchPage = () => {
         break;
     }
     return list;
-  }, [matches, activeCat, sort, maxPrice, priceCeiling]);
+  }, [matches, brand, trait, activeCat, sort, maxPrice, priceCeiling]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, Product[]>();
