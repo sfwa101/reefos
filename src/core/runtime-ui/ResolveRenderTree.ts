@@ -163,6 +163,7 @@ export function resolveSectionTree(
       pageKey: identityToPageKey(identity),
       theme,
       orchestrator,
+      identity,
     }),
   ];
 
