@@ -176,7 +176,16 @@ const ProductDetail = () => {
           <section className="space-y-3">
             <div className="flex items-start justify-between gap-3">
               <div className="flex-1">
-                {product.brand && <p className="text-[11px] font-bold text-primary">{product.brand}</p>}
+                {product.brand && (
+                  <Link
+                    to="/search"
+                    search={{ q: product.brand, brand: product.brand }}
+                    className="inline-block rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-extrabold text-primary ring-1 ring-primary/20 transition active:scale-95"
+                    aria-label={`عرض كل منتجات ${product.brand}`}
+                  >
+                    {product.brand}
+                  </Link>
+                )}
                 <h1 className="font-display text-2xl font-extrabold leading-tight">{product.name}</h1>
                 <p className="text-xs text-muted-foreground">{product.unit}</p>
               </div>
