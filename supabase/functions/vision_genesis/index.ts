@@ -529,11 +529,12 @@ Deno.serve(async (req) => {
       aesthetic_palette: aestheticPalette,
     });
   } catch (e) {
-    console.error("vision_genesis error:", e);
+    // GLOBAL SAFETY NET — convert any Deno-isolate crash into a readable
+    // 200 JSON payload so the UI can surface the real error instead of a
+    // opaque 502 Bad Gateway.
+    console.error("vision_genesis CRITICAL CRASH:", e);
     const msg = e instanceof Error ? e.message : String(e);
-    return json(
-      { error: "UNHANDLED", details: msg, stack: e instanceof Error ? e.stack?.slice(0, 600) : undefined },
-      500,
-    );
+    const stack = e instanceof Error ? e.stack?.slice(0, 1200) : undefined;
+    return json({ ok: false, critical_crash: msg, stack }, 200);
   }
 });
