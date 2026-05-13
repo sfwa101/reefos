@@ -335,17 +335,17 @@ function GenesisPage() {
             <DnaGroup title="المالية">
               <div className="grid grid-cols-2 gap-2">
                 <DnaField label="السعر" ai={aiFields.has("price")}>
-                  <input
-                    type="number" step="0.01" value={price}
-                    onChange={(e) => { setPrice(Number(e.target.value)); clearAi("price"); }}
-                    className="w-full bg-transparent outline-none text-[14px] font-display"
+                  <NumInput
+                    value={price}
+                    step="0.01"
+                    onChange={(v) => { setPrice(v); clearAi("price"); }}
                   />
                 </DnaField>
                 <DnaField label="التكلفة" ai={aiFields.has("cost")}>
-                  <input
-                    type="number" step="0.01" value={cost}
-                    onChange={(e) => { setCost(Number(e.target.value)); clearAi("cost"); }}
-                    className="w-full bg-transparent outline-none text-[14px]"
+                  <NumInput
+                    value={cost}
+                    step="0.01"
+                    onChange={(v) => { setCost(v); clearAi("cost"); }}
                   />
                 </DnaField>
               </div>
