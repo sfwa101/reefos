@@ -53,7 +53,16 @@ Deno.serve(async (req) => {
       ? image_base64
       : `data:${mt};base64,${image_base64}`;
 
-    const systemPrompt = `أنت "حكيم Vision" — محلل مرئي خبير لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) كاملاً: الأصل + SKUs + العقد المالي. استخدم العربية في الأسماء والأوصاف. استنتج النوع المناسب: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات/المشاريع. اقترح traits مفيدة (مثل cold_chain, requires_calendar, fragile). إن لم يوجد سعر اقترح سعراً منطقياً للسوق المصري بالجنيه.`;
+    const systemPrompt = `أنت "حكيم Vision" — قشرة استخراج الـ Product DNA لـ "ريف المدينة". مهمتك تحليل الصورة (منتج، فاتورة مورد، عقد، أو منشور خدمة) واستخراج "الأصل العالمي" (Universal Salsabil Asset) الكامل: الأصل + SKUs + العقد المالي.
+
+قواعد صارمة:
+1. استخرج كل تفصيلة ممكنة بصرياً (اسم، علامة تجارية، باركود، وزن صافي، حقائق غذائية، مكونات، مسببات حساسية، بلد المنشأ).
+2. إذا لم يكن الحقل مرئياً أو لا يمكن استنتاجه بثقة عالية — اتركه null. لا تخمّن أرقاماً غذائية أو وزناً.
+3. اكتب جميع الأوصاف والمحتوى التسويقي بالعربية الفصحى الاحترافية.
+4. استنتج أدق category_path هرمي بصيغة "قسم/فئة/فئة فرعية" (مثال: "بقالة/منتجات الألبان/جبن").
+5. اقترح traits مفيدة مثل cold_chain, fragile, requires_calendar, halal_certified.
+6. حدد النوع: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات.
+7. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).`;
 
     const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -70,7 +79,7 @@ Deno.serve(async (req) => {
             content: [
               {
                 type: "text",
-                text: `حلّل هذه الصورة وأنشئ USA payload. ${hint ? `سياق إضافي: ${hint}` : ""}`,
+                text: `حلّل هذه الصورة واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
               },
               { type: "image_url", image_url: { url: dataUrl } },
             ],
@@ -81,7 +90,7 @@ Deno.serve(async (req) => {
             type: "function",
             function: {
               name: "generate_usa_payload",
-              description: "Return the Universal Salsabil Asset payload extracted from the image.",
+              description: "Return the full Universal Salsabil Asset Product DNA payload extracted from the image.",
               parameters: {
                 type: "object",
                 properties: {
@@ -94,7 +103,47 @@ Deno.serve(async (req) => {
                       traits: {
                         type: "array",
                         items: { type: "string" },
-                        description: "سمات مستنتجة مثل cold_chain, fragile, requires_calendar",
+                        description: "سمات مستنتجة مثل cold_chain, fragile, halal_certified",
+                      },
+                      category_path: {
+                        type: ["string", "null"],
+                        description: "مسار الفئة الهرمي مثل 'بقالة/ألبان/جبن'",
+                      },
+                      brand: { type: ["string", "null"], description: "العلامة التجارية إن ظهرت" },
+                      origin_country: { type: ["string", "null"], description: "بلد المنشأ" },
+                      marketing: {
+                        type: ["object", "null"],
+                        properties: {
+                          short: { type: ["string", "null"], description: "وصف تسويقي قصير (≤140 حرف) بالعربية" },
+                          long: { type: ["string", "null"], description: "وصف تسويقي مطوّل بالعربية" },
+                        },
+                      },
+                      nutrition: {
+                        type: ["object", "null"],
+                        description: "حقائق غذائية لكل 100 جم/مل إن ظهرت على العبوة",
+                        properties: {
+                          kcal: { type: ["number", "null"] },
+                          protein_g: { type: ["number", "null"] },
+                          fat_g: { type: ["number", "null"] },
+                          carbs_g: { type: ["number", "null"] },
+                          sugar_g: { type: ["number", "null"] },
+                        },
+                      },
+                      physical: {
+                        type: ["object", "null"],
+                        properties: {
+                          net_weight: { type: ["number", "null"], description: "الوزن/الحجم الصافي" },
+                          weight_unit: {
+                            type: ["string", "null"],
+                            enum: ["g", "kg", "ml", "L", "piece", null],
+                            description: "وحدة الوزن/الحجم",
+                          },
+                        },
+                      },
+                      allergens: {
+                        type: ["array", "null"],
+                        items: { type: "string" },
+                        description: "مسببات الحساسية مثل gluten, milk, nuts, soy",
                       },
                     },
                     required: ["name", "description", "asset_type", "traits"],
@@ -109,6 +158,17 @@ Deno.serve(async (req) => {
                           type: "object",
                           additionalProperties: true,
                           description: "size, weight, color, variant, etc.",
+                        },
+                        barcode: {
+                          type: ["string", "null"],
+                          description: "EAN/UPC barcode إن قُرئ من الصورة",
+                        },
+                        variant_axes: {
+                          type: ["object", "null"],
+                          properties: {
+                            size: { type: ["string", "null"] },
+                            flavor: { type: ["string", "null"] },
+                          },
                         },
                       },
                       required: ["sku_code", "attributes"],
