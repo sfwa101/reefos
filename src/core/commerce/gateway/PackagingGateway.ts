@@ -97,11 +97,16 @@ export const PackagingGateway = {
    * Synchronize the canonical tier list for `assetId` to match `drafts`.
    * Performs topological upserts (parent before child) and deletes tiers
    * removed from the UI.
+   *
+   * Returns the `idMap` used during the sync — keys are the local draft
+   * ids (including `tmp-…` placeholders), values are the real DB UUIDs.
+   * Downstream gateways (e.g. PricingGateway) need this mapping to link
+   * other tables (financial contracts) to the freshly persisted tier rows.
    */
   async syncTiers(
     assetId: string,
     drafts: PackagingTierDraft[],
-  ): Promise<void> {
+  ): Promise<Map<string, string>> {
     if (!assetId) throw new Error("PackagingGateway.syncTiers: assetId required");
 
     // 1. Snapshot current DB rows.
@@ -174,6 +179,8 @@ export const PackagingGateway = {
         .in("id", toDelete);
       if (delErr) throw new Error(delErr.message);
     }
+
+    return idMap;
   },
 };
 
