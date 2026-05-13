@@ -240,7 +240,8 @@ function GenesisPage() {
       </header>
 
       {/* Body — generous padding bottom for sticky veto bar */}
-      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-5 pb-40 space-y-6">
+      <main className="flex-1 mx-auto w-full max-w-2xl px-4 py-5 pb-[260px] space-y-6">
+      {/* ↑ pb-[260px] keeps the last DNA field clear of the sticky veto bar AND the AppShell BottomTabBar */}
         {/* 1. Capture Zone */}
         <section className="space-y-3">
           <SectionTitle index="١" label="التقاط الصورة" />
