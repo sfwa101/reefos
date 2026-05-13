@@ -7,10 +7,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase as supabaseBrowser } from "@/integrations/supabase/client";
-import {
-  buildCardsBatch,
-  buildDetails,
-} from "../runtime/ProductRuntimeEngine";
 import { normalizeRelation } from "../runtime/ProductTransformers";
 import type {
   ProductCardVM,
