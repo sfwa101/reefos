@@ -65,6 +65,10 @@ export function useAestheticProcessor() {
       }
       if (!payloadB64) throw new Error("missing_image");
 
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error("يجب تسجيل الدخول بصلاحية صحيحة لاستخدام حكيم");
+      }
       const { data, error } = await supabase.functions.invoke(
         "process_image_aesthetic",
         {
@@ -74,6 +78,9 @@ export function useAestheticProcessor() {
             style,
             palette_name: palette?.name ?? null,
             palette_hex: palette?.hex ?? null,
+          },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
           },
         },
       );
