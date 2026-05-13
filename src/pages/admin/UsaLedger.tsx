@@ -194,12 +194,9 @@ export default function UsaLedger() {
       />
 
       <USAEditor
-        open={creating || !!editing}
+        open={!!editing}
         asset={editing}
-        onClose={() => {
-          setCreating(false);
-          setEditing(null);
-        }}
+        onClose={() => setEditing(null)}
       />
     </>
   );
