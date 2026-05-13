@@ -180,6 +180,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       setPackagingTiers([]);
       setClassificationEnabled(false);
       setTagDrafts([]);
+      setFinancialContractsDraft([]);
     }
     setDuplicateMatches([]);
     setPendingEmbedding(null);
