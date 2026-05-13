@@ -129,6 +129,7 @@ import { Route as AdminMarketingBannersRouteImport } from './routes/admin.market
 import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.ledger'
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
+import { Route as AdminAssetsGenesisRouteImport } from './routes/admin.assets.genesis'
 import { Route as AdminEntityIdRouteImport } from './routes/admin.$entity.$id'
 import { Route as PosPosReturnsRouteImport } from './routes/_pos.pos.returns'
 import { Route as PosPosInventoryRouteImport } from './routes/_pos.pos.inventory'
@@ -746,6 +747,11 @@ const AdminCustomersCustomerIdRoute =
     path: '/$customerId',
     getParentRoute: () => AdminCustomersRoute,
   } as any)
+const AdminAssetsGenesisRoute = AdminAssetsGenesisRouteImport.update({
+  id: '/genesis',
+  path: '/genesis',
+  getParentRoute: () => AdminAssetsRoute,
+} as any)
 const AdminEntityIdRoute = AdminEntityIdRouteImport.update({
   id: '/$id',
   path: '/$id',
@@ -858,7 +864,7 @@ export interface FileRoutesByFullPath {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -954,6 +960,7 @@ export interface FileRoutesByFullPath {
   '/pos/inventory': typeof PosPosInventoryRoute
   '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
+  '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -988,7 +995,7 @@ export interface FileRoutesByTo {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1084,6 +1091,7 @@ export interface FileRoutesByTo {
   '/pos/inventory': typeof PosPosInventoryRoute
   '/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
+  '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -1127,7 +1135,7 @@ export interface FileRoutesById {
   '/admin/affiliate-settings': typeof AdminAffiliateSettingsRoute
   '/admin/allocation': typeof AdminAllocationRoute
   '/admin/analytics': typeof AdminAnalyticsRoute
-  '/admin/assets': typeof AdminAssetsRoute
+  '/admin/assets': typeof AdminAssetsRouteWithChildren
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/branches': typeof AdminBranchesRoute
   '/admin/business-rules': typeof AdminBusinessRulesRoute
@@ -1224,6 +1232,7 @@ export interface FileRoutesById {
   '/_pos/pos/inventory': typeof PosPosInventoryRoute
   '/_pos/pos/returns': typeof PosPosReturnsRoute
   '/admin/$entity/$id': typeof AdminEntityIdRoute
+  '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
@@ -1360,6 +1369,7 @@ export interface FileRouteTypes {
     | '/pos/inventory'
     | '/pos/returns'
     | '/admin/$entity/$id'
+    | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -1490,6 +1500,7 @@ export interface FileRouteTypes {
     | '/pos/inventory'
     | '/pos/returns'
     | '/admin/$entity/$id'
+    | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -1629,6 +1640,7 @@ export interface FileRouteTypes {
     | '/_pos/pos/inventory'
     | '/_pos/pos/returns'
     | '/admin/$entity/$id'
+    | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
     | '/admin/finance/ledger'
@@ -2498,6 +2510,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminCustomersCustomerIdRouteImport
       parentRoute: typeof AdminCustomersRoute
     }
+    '/admin/assets/genesis': {
+      id: '/admin/assets/genesis'
+      path: '/genesis'
+      fullPath: '/admin/assets/genesis'
+      preLoaderRoute: typeof AdminAssetsGenesisRouteImport
+      parentRoute: typeof AdminAssetsRoute
+    }
     '/admin/$entity/$id': {
       id: '/admin/$entity/$id'
       path: '/$id'
@@ -2757,6 +2776,18 @@ const AdminEntityRouteWithChildren = AdminEntityRoute._addFileChildren(
   AdminEntityRouteChildren,
 )
 
+interface AdminAssetsRouteChildren {
+  AdminAssetsGenesisRoute: typeof AdminAssetsGenesisRoute
+}
+
+const AdminAssetsRouteChildren: AdminAssetsRouteChildren = {
+  AdminAssetsGenesisRoute: AdminAssetsGenesisRoute,
+}
+
+const AdminAssetsRouteWithChildren = AdminAssetsRoute._addFileChildren(
+  AdminAssetsRouteChildren,
+)
+
 interface AdminCustomersRouteChildren {
   AdminCustomersCustomerIdRoute: typeof AdminCustomersCustomerIdRoute
 }
@@ -2817,7 +2848,7 @@ interface AdminRouteChildren {
   AdminAffiliateSettingsRoute: typeof AdminAffiliateSettingsRoute
   AdminAllocationRoute: typeof AdminAllocationRoute
   AdminAnalyticsRoute: typeof AdminAnalyticsRoute
-  AdminAssetsRoute: typeof AdminAssetsRoute
+  AdminAssetsRoute: typeof AdminAssetsRouteWithChildren
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminBranchesRoute: typeof AdminBranchesRoute
   AdminBusinessRulesRoute: typeof AdminBusinessRulesRoute
@@ -2896,7 +2927,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminAffiliateSettingsRoute: AdminAffiliateSettingsRoute,
   AdminAllocationRoute: AdminAllocationRoute,
   AdminAnalyticsRoute: AdminAnalyticsRoute,
-  AdminAssetsRoute: AdminAssetsRoute,
+  AdminAssetsRoute: AdminAssetsRouteWithChildren,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminBranchesRoute: AdminBranchesRoute,
   AdminBusinessRulesRoute: AdminBusinessRulesRoute,

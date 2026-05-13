@@ -16,7 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useSovereignContext, type WorkspaceKind } from "@/core-os/capabilities/store/useSovereignContext";
-import { SmartProductComposer } from "@/apps/reef-al-madina/features/admin/product-editor/SmartProductComposer";
+// SmartProductComposer dialog removed in V-1.C — replaced by /admin/assets/genesis route.
 
 type Action = {
   key: string;
@@ -37,7 +37,7 @@ const NEW_PRODUCT: Action = {
   label: "منتج جديد",
   hint: "أسقِط صورة — وحكيم ينتظر أمرك",
   icon: Sparkles,
-  intent: "new-product",
+  to: "/admin/assets/genesis",
 };
 
 const NEW_HUMAN: Action = {
@@ -84,7 +84,7 @@ const ACTIONS_BY_KIND: Record<WorkspaceKind, Action[]> = {
 export function SmartActionComposer() {
   const [open, setOpen] = useState(false);
   const [picked, setPicked] = useState<Action | null>(null);
-  const [productOpen, setProductOpen] = useState(false);
+  // productOpen state removed in Phase V-1.C — Genesis is a full route now.
   const { activeWorkspaceKind } = useSovereignContext();
   const navigate = useNavigate();
   const actions = ACTIONS_BY_KIND[activeWorkspaceKind] ?? ACTIONS_BY_KIND.global;
@@ -96,11 +96,6 @@ export function SmartActionComposer() {
 
   function handlePick(a: Action) {
     if (a.soon) return;
-    if (a.intent === "new-product") {
-      close();
-      setProductOpen(true);
-      return;
-    }
     if (a.to) {
       close();
       navigate({ to: a.to as never });
@@ -211,8 +206,6 @@ export function SmartActionComposer() {
           </div>
         </DialogContent>
       </Dialog>
-
-      <SmartProductComposer open={productOpen} onOpenChange={setProductOpen} />
     </>
   );
 }

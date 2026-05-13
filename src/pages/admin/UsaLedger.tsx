@@ -4,6 +4,7 @@
  * Reads salsabil_assets joined with salsabil_skus + salsabil_financial_contracts.
  */
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Sparkles, Layers, Wrench, Pencil, Boxes, Plus } from "lucide-react";
 import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import USAEditor, { type USARecord } from "@/apps/reef-al-madina/features/admin/usa-editor/USAEditor";
@@ -45,7 +46,6 @@ interface RawAsset {
 
 export default function UsaLedger() {
   const [editing, setEditing] = useState<USARecord | null>(null);
-  const [creating, setCreating] = useState(false);
 
   const metrics = useMemo<BentoMetric[]>(
     () => [
@@ -157,13 +157,13 @@ export default function UsaLedger() {
           hint: "افتح بوابة التكوين الذكي وارفع صورة لتوليد أول أصل عالمي.",
         }}
         topSlot={
-          <button
-            onClick={() => setCreating(true)}
+          <Link
+            to="/admin/assets/genesis"
             className="inline-flex items-center gap-2 h-11 px-5 rounded-2xl bg-gradient-to-r from-primary to-primary/80 text-primary-foreground text-[13px] font-extrabold press shadow-soft"
           >
             <Plus className="h-4 w-4" />
             تكوين أصل جديد بالذكاء البصري
-          </button>
+          </Link>
         }
         dataSource={{
           table: "salsabil_assets",
@@ -194,12 +194,9 @@ export default function UsaLedger() {
       />
 
       <USAEditor
-        open={creating || !!editing}
+        open={!!editing}
         asset={editing}
-        onClose={() => {
-          setCreating(false);
-          setEditing(null);
-        }}
+        onClose={() => setEditing(null)}
       />
     </>
   );

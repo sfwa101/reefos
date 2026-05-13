@@ -1,29 +1,10 @@
 /**
- * Standalone fallback route for the Product Composer.
- * Phase 66.2: the canonical entry point is the dialog opened by
- * SmartActionComposer, but this route stays for deep-links/bookmarks.
+ * Legacy redirect — Phase V-1.C.
+ * The Modal-based product composer was replaced by the full-screen
+ * Vision Genesis route (`/admin/assets/genesis`).
  */
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { SmartProductComposer } from "@/apps/reef-al-madina/features/admin/product-editor/SmartProductComposer";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/admin/products/new")({
-  component: NewProductRoute,
+  component: () => <Navigate to="/admin/assets/genesis" replace />,
 });
-
-function NewProductRoute() {
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(true);
-  return (
-    <div className="min-h-[60vh]">
-      <SmartProductComposer
-        open={open}
-        onOpenChange={(o) => {
-          setOpen(o);
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (!o) navigate({ to: "/admin" as any });
-        }}
-      />
-    </div>
-  );
-}
