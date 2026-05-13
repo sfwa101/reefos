@@ -17,6 +17,10 @@ import type {
   ProductDetailsVM,
   ProductListVM,
   ProductRelationVM,
+  PriceVM,
+  MediaRefVM,
+  I18nText,
+  JsonValue,
 } from "../types";
 import {
   projectProductDNA,
