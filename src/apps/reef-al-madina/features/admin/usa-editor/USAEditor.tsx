@@ -115,6 +115,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
   // Persistence (DB writes for financial contracts) is deferred to Phase E-2.
   const [financialContractsDraft, setFinancialContractsDraft] = useState<FinancialContractDraft[]>([]);
 
+  // Phase F-1 — Living Inventory Runtime (local draft, lifted on save).
+  const [inventoryDrafts, setInventoryDrafts] = useState<InventoryDraft[]>([]);
+
   useEffect(() => {
     if (asset) {
       setName(asset.name);
