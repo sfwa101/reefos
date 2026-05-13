@@ -635,12 +635,46 @@ function DnaField({
   );
 }
 
-function NumInput({ value, onChange }: { value: number | ""; onChange: (v: number | "") => void }) {
+function NumInput({
+  value,
+  onChange,
+  step = "0.1",
+}: {
+  value: number | "";
+  onChange: (v: number | "") => void;
+  step?: string;
+}) {
+  // Local string buffer keeps intermediate states like "" or "1." typeable
+  // without React snapping the value back to 0 (which would freeze typing).
+  const [text, setText] = useState<string>(value === "" ? "" : String(value));
+  // Re-sync if the upstream value changes from outside (e.g. AI fill / reset).
+  const lastSeen = useRef<number | "">(value);
+  if (lastSeen.current !== value) {
+    const nextText = value === "" ? "" : String(value);
+    if (nextText !== text && Number(text) !== value) setText(nextText);
+    lastSeen.current = value;
+  }
   return (
     <input
-      type="number" step="0.1"
-      value={value}
-      onChange={(e) => onChange(e.target.value === "" ? "" : Number(e.target.value))}
+      type="number"
+      step={step}
+      inputMode="decimal"
+      value={text}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setText(raw);
+        if (raw === "") onChange("");
+        else {
+          const n = Number(raw);
+          if (Number.isFinite(n)) onChange(n);
+        }
+      }}
+      onBlur={() => {
+        if (text === "" || text === "-" || text === ".") {
+          setText("");
+          onChange("");
+        }
+      }}
       className="w-full bg-transparent outline-none text-[13px] font-display"
     />
   );
