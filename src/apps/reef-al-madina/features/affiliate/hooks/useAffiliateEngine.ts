@@ -16,7 +16,7 @@
 
 import { useMemo } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 
 export interface AffiliateTier {
@@ -77,18 +77,7 @@ function useReferralCodeQuery(userId: string | undefined) {
     staleTime: 5 * 60_000,
     queryFn: async () => {
       // Phase 57 — read from referral_codes (mirror), fall back to profiles.
-      const { data: rc } = await supabase
-        .from("referral_codes")
-        .select("code")
-        .eq("user_id", userId!)
-        .maybeSingle();
-      if (rc?.code) return rc.code;
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("referral_code")
-        .eq("id", userId!)
-        .maybeSingle();
-      return (prof?.referral_code as string | null) ?? null;
+      return await MarketingGateway.getReferralCode(userId!);
     },
   });
 
@@ -96,12 +85,7 @@ function useReferralCodeQuery(userId: string | undefined) {
     mutationFn: async () => {
       if (!userId) throw new Error("not authenticated");
       // Phase 57 — server-authoritative 6-digit code (National ID derived).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("ensure_referral_code", {
-        _user_id: userId,
-      });
-      if (error) throw error;
-      return data as string;
+      return await MarketingGateway.ensureReferralCode(userId);
     },
     onSuccess: (code) => {
       if (userId) qc.setQueryData(QK.code(userId), code);
@@ -116,12 +100,8 @@ function useAffiliateTiersQuery() {
     queryKey: QK.tiers(),
     staleTime: 60 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("affiliate_tiers")
-        .select("*")
-        .order("rank", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as AffiliateTier[];
+      const data = await MarketingGateway.listAffiliateTiers();
+      return (data ?? []) as unknown as AffiliateTier[];
     },
   });
 }
@@ -132,13 +112,8 @@ function useAffiliateStateQuery(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_affiliate_state")
-        .select("*")
-        .eq("user_id", userId!)
-        .maybeSingle();
-      if (error) throw error;
-      return (data ?? null) as AffiliateState | null;
+      const data = await MarketingGateway.getUserAffiliateState(userId!);
+      return (data ?? null) as unknown as AffiliateState | null;
     },
   });
 }
@@ -149,16 +124,8 @@ function useCommissionLedgerQuery(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("commission_ledger")
-        .select(
-          "id, order_id, product_name, category, commission_amount, status, created_at, paid_at, vest_release_at",
-        )
-        .eq("affiliate_user_id", userId!)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return (data ?? []) as CommissionEntry[];
+      const data = await MarketingGateway.listCommissionLedger(userId!, 100);
+      return (data ?? []) as unknown as CommissionEntry[];
     },
   });
 }
