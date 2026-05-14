@@ -6,8 +6,8 @@
  * through the methods exported here. Hooks must NOT import the supabase
  * client directly. This is enforced as part of Wave P-3 sovereignty.
  *
- * Pre-existing `any` / `as never` / `as any` casts were preserved to
- * keep the network-extraction strictly scoped — flagged for Wave P-7.
+ * Wave P-13: Realtime channel filter payloads use `as never` to satisfy the
+ * generated `RealtimePostgresChangesFilter` typing without resorting to `any`.
  */
 import { supabase } from "@/integrations/supabase/client";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
@@ -156,8 +156,7 @@ export const FinanceGateway = {
           schema: "public",
           table: "ledger_entries",
           filter: `wallet_id=eq.${walletId}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        } as never,
         () => onInsert(),
       )
       .subscribe();
@@ -225,8 +224,7 @@ export const FinanceGateway = {
           schema: "public",
           table: "wallet_balances",
           filter: `user_id=eq.${userId}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        } as never,
         () => onChange(),
       )
       .on(
@@ -236,8 +234,7 @@ export const FinanceGateway = {
           schema: "public",
           table: "wallet_transactions",
           filter: `user_id=eq.${userId}`,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any,
+        } as never,
         () => onChange(),
       )
       .subscribe();

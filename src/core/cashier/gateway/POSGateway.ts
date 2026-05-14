@@ -8,9 +8,8 @@
  *   • Returns typed DTOs / status objects; callers never touch the
  *     Supabase client directly.
  *
- * Anomaly flag: The DB tables are accessed via `as any` casts to bypass
- * the generated Supabase typings (which omit several POS columns).
- * Tracked for hardening in Wave P-7.
+ * Wave P-13: POS tables flow through the typed `dynamicSb` surface; payloads
+ * land as `unknown` and callers narrow before use (no `any`).
  */
 import { supabase } from "@/integrations/supabase/client";
 import { dynamicSb } from "@/integrations/supabase/dynamic";

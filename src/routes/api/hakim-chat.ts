@@ -8,6 +8,7 @@ import {
   prepareHakimChatStream,
   type HakimChatStreamRequest,
 } from "@/core/hakim-ai/hakim.server";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -100,16 +101,13 @@ export const Route = createFileRoute("/api/hakim-chat")({
                 }
               } finally {
                 if (fullText) {
-                  await admin
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .from("hakim_chat_messages" as any)
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .insert({ session_id: sid, role: "assistant", content: fullText } as any);
-                  await admin
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .from("hakim_chat_sessions" as any)
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    .update({ updated_at: new Date().toISOString() } as any)
+                  const adminDyn = asDynamic(admin);
+                  await adminDyn
+                    .from("hakim_chat_messages")
+                    .insert({ session_id: sid, role: "assistant", content: fullText });
+                  await adminDyn
+                    .from("hakim_chat_sessions")
+                    .update({ updated_at: new Date().toISOString() })
                     .eq("id", sid);
                 }
                 controller.close();

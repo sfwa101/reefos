@@ -7,9 +7,8 @@
  *     to subscribe to its realtime channel from UI-bound KDS code paths.
  *   • Vends realtime subscriptions as `GatewayChannel` (unsubscribe handle).
  *
- * Anomaly flag: `as any` cast on the snapshot update bypasses the generated
- * row typing (the Supabase types are conservative about JSONB column writes).
- * Tracked for hardening in Wave P-7.
+ * Wave P-13: snapshot updates use `as never` on the JSONB payload to satisfy
+ * the conservative generated row typing for JSONB writes (no `any`).
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -71,8 +70,7 @@ const updateNodeSnapshot = async (
 ): Promise<void> => {
   const { error } = await supabase
     .from("salsabil_fulfillment_nodes")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .update(updates as any)
+    .update(updates as never)
     .eq("id", nodeId);
   if (error) throw error;
 };

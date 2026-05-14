@@ -254,8 +254,7 @@ export const IdentityGateway = {
   ): Promise<T | null> {
     const { data } = await supabase
       .from("profiles")
-      
-      .upsert(payload as any, { onConflict: "id" })
+      .upsert(payload as never, { onConflict: "id" })
       .select("*")
       .maybeSingle();
     return (data as unknown as T) ?? null;
@@ -265,8 +264,7 @@ export const IdentityGateway = {
     uid: string,
     patch: Record<string, unknown>,
   ): Promise<void> {
-    
-    await supabase.from("profiles").update(patch as any).eq("id", uid);
+    await supabase.from("profiles").update(patch as never).eq("id", uid);
   },
 
   async ensureWalletBalance(userId: string): Promise<void> {

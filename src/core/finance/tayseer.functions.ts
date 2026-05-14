@@ -11,6 +11,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 const SYMBOL_MAP: Record<string, string> = {
   BTC: "bitcoin",
@@ -39,8 +40,7 @@ async function fetchUpstream(): Promise<OracleQuote[]> {
   return out;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabaseAdmin as any;
+const sb = asDynamic(supabaseAdmin);
 
 export const tayseerOracleFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

@@ -7,14 +7,13 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyJson = any;
+type AnyJson = Record<string, unknown>;
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabaseAdmin as any;
+const sb = asDynamic(supabaseAdmin);
 
 export const predictBasketFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

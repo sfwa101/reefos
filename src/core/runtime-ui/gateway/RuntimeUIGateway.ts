@@ -20,8 +20,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { installSupabaseUiWatchdog } from "@/core/runtime-ui/watchdog";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 export type GatewayChannel = { unsubscribe: () => void };
 
 export interface UiLayoutRow {
@@ -153,10 +151,10 @@ export const RuntimeUIGateway = {
     primaryKeyCol: string,
     id: string,
   ) {
-    const { data, error } = await supabase
-      .from(tableName as never)
+    const { data, error } = await dynamicSb
+      .from(tableName)
       .select("*")
-      .eq(primaryKeyCol as any, id as any)
+      .eq(primaryKeyCol, id)
       .maybeSingle();
     return { data: (data ?? null) as Record<string, unknown> | null, error };
   },
@@ -172,8 +170,8 @@ export const RuntimeUIGateway = {
     },
   ) {
     const selectOpts = opts.withCount ? { count: "exact" as const } : undefined;
-    let q: any = supabase
-      .from(tableName as never)
+    let q = dynamicSb
+      .from(tableName)
       .select("*", selectOpts)
       .range(opts.from, opts.to);
     if (opts.eq) {
@@ -184,11 +182,11 @@ export const RuntimeUIGateway = {
         ascending: opts.orderBy.ascending ?? true,
       });
     }
-    const { data, error, count } = await q;
+    const result = (await q) as { data: unknown; error: unknown; count?: number | null };
     return {
-      data: (data ?? []) as Record<string, unknown>[],
-      count: (count as number | null) ?? null,
-      error,
+      data: (result.data ?? []) as Record<string, unknown>[],
+      count: (result.count as number | null | undefined) ?? null,
+      error: result.error,
     };
   },
 
