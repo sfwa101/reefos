@@ -142,10 +142,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   /* ---- Listen to true SIGNED_IN events (manual login transitions only) ---- */
   useEffect(() => {
-    const sub = CartGateway.onAuthChange((event, payload) => {
-      if (event === "SIGNED_IN" && payload?.userId) {
+    const sub = IdentityGateway.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.id) {
         // A real login (not INITIAL_SESSION rehydrate). Opt this uid into merge.
-        pendingMergeForUidRef.current = payload.userId;
+        pendingMergeForUidRef.current = session.user.id;
       }
       if (event === "SIGNED_OUT") {
         pendingMergeForUidRef.current = null;
