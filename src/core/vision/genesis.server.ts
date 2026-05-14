@@ -162,23 +162,24 @@ function dataUrlParts(dataUrl: string): { mime: string; b64: string } {
   return { mime: m[1], b64: m[2] };
 }
 
-function toGeminiSchema(node: any): any {
+function toGeminiSchema(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(toGeminiSchema);
   if (!node || typeof node !== "object") return node;
-  const out: any = {};
-  for (const [k, v] of Object.entries(node)) {
+  const src = node as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(src)) {
     if (k === "additionalProperties") continue;
     if (k === "type" && Array.isArray(v)) {
-      const nonNull = v.filter((t) => t !== "null");
+      const nonNull = (v as unknown[]).filter((t) => t !== "null");
       out.type = nonNull[0] ?? "string";
-      if (v.includes("null")) out.nullable = true;
+      if ((v as unknown[]).includes("null")) out.nullable = true;
     } else if (k === "enum" && Array.isArray(v)) {
-      const cleaned = v.filter((x) => x !== null);
+      const cleaned = (v as unknown[]).filter((x) => x !== null);
       if (cleaned.length) out.enum = cleaned;
-      if (v.includes(null)) out.nullable = true;
+      if ((v as unknown[]).includes(null)) out.nullable = true;
     } else if (k === "properties" && v && typeof v === "object") {
-      const props: Record<string, any> = {};
-      for (const [pk, pv] of Object.entries(v as Record<string, any>)) {
+      const props: Record<string, unknown> = {};
+      for (const [pk, pv] of Object.entries(v as Record<string, unknown>)) {
         props[pk] = toGeminiSchema(pv);
       }
       out.properties = props;
@@ -243,7 +244,7 @@ async function callGemini(opts: {
   }
   const data = JSON.parse(text);
   const fnCall =
-    data?.candidates?.[0]?.content?.parts?.find((p: any) => p?.functionCall)?.functionCall;
+    data?.candidates?.[0]?.content?.parts?.find((p: GeminiPart) => "functionCall" in p && p.functionCall)?.functionCall;
   if (!fnCall?.args) {
     throw new Error("gemini_no_function_call: " + JSON.stringify(data).slice(0, 500));
   }

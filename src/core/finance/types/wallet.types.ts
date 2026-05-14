@@ -65,10 +65,12 @@ export type Profile = {
 
 export type PaymentMethodId = "instapay" | "vodafone-cash" | "bank" | "cash";
 
+import type { LucideIcon } from "lucide-react";
+
 export type PaymentMethod = {
   id: string;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   sub: string;
 };
 

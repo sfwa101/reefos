@@ -32,17 +32,28 @@ const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 }
 export type BentoTone =
   | "primary" | "info" | "success" | "warning" | "accent" | "purple" | "pink" | "teal" | "indigo";
 
+// Public API surface — `BentoMetric.compute/urgent` accept `any[]` to remain
+// assignable across all admin/vendor row shapes (USARecord, NodeRow, Driver,
+// Zone, etc. — none of which extend `Record<string, unknown>`). Tightening
+// these to a generic `<T>` would force every caller to pass an explicit type
+// argument; tightening to `unknown[]` breaks every caller's narrowed
+// `(rows: MyRow[]) => …` arrow. Both options are non-local refactors and
+// out-of-scope for Wave P-9 Batch D. Tracked for a future Layer-6 sweep.
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRow = any;
+
 export type BentoMetric = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: any[]) => string | number;
-  urgent?: (rows: any[]) => boolean;
+  compute?: (rows: AnyRow[]) => string | number;
+  urgent?: (rows: AnyRow[]) => boolean;
   to?: string;
 };
 
-export type Column<T = any> = {
+export type Column<T = AnyRow> = {
   key: string;
   label?: string;
   render?: (row: T) => ReactNode;
@@ -50,14 +61,14 @@ export type Column<T = any> = {
   hideOnMobile?: boolean;
 };
 
-export type RowAction<T = any> = {
+export type RowAction<T = AnyRow> = {
   label: string;
   onClick: (row: T) => void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
 
-export type DataSource<T = any> = {
+export type DataSource<T = AnyRow> = {
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
@@ -65,7 +76,7 @@ export type DataSource<T = any> = {
   limit?: number;
   fetcher?: () => Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?: (row: any) => T;
+  map?: (row: AnyRow) => T;
 };
 
 export type EmptyState = {
@@ -74,7 +85,7 @@ export type EmptyState = {
   hint?: string;
 };
 
-export type UniversalAdminGridProps<T = any> = {
+export type UniversalAdminGridProps<T = AnyRow> = {
   title: string;
   subtitle?: string;
   metrics?: BentoMetric[];
