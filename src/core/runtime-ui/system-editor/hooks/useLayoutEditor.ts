@@ -167,11 +167,7 @@ export const useLayoutEditor = (pageKey: string) => {
         version: layout.version ?? 1,
         title: layout.title ?? null,
       };
-      const { data, error } = await supabase
-        .from("ui_layouts")
-        .upsert(payload, { onConflict: "page_key,status" })
-        .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-        .maybeSingle();
+      const { data, error } = await RuntimeUIGateway.upsertUiLayout(payload);
       if (error) throw error;
       return { ok: true, data };
     },
