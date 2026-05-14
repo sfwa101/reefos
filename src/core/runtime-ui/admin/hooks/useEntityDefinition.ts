@@ -3,7 +3,7 @@
  * + active form schemas. The single contract every Admin engine reads.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 
 export interface EntityAttributeRow {
   id: string;
