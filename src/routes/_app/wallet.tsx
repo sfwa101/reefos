@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { lazyPage } from "@/routes/-lazyRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 
 const Wallet = lazyPage(() => import("@/components/finance/WalletView"));
 
