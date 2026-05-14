@@ -20,11 +20,11 @@ export default function InventoryLocations() {
       metrics={[
         { key: "rows", label: "سجلات", icon: Boxes, tone: "primary", compute: (r) => r.length },
         { key: "stock", label: "إجمالي المخزون", icon: Package, tone: "info",
-          compute: (r) => r.reduce((s, x: any) => s + (x.stock ?? 0), 0) },
+          compute: (r) => r.reduce((s, x) => s + (x.stock ?? 0), 0) },
         { key: "reserved", label: "المحجوز", icon: Warehouse, tone: "purple",
-          compute: (r) => r.reduce((s, x: any) => s + (x.reserved ?? 0), 0) },
+          compute: (r) => r.reduce((s, x) => s + (x.reserved ?? 0), 0) },
         { key: "low", label: "تحت نقطة الطلب", icon: AlertTriangle, tone: "warning",
-          compute: (r) => r.filter((x: any) => (x.stock ?? 0) <= (x.reorder_point ?? 0)).length },
+          compute: (r) => r.filter((x) => (x.stock ?? 0) <= (x.reorder_point ?? 0)).length },
       ]}
       dataSource={{
         table: "inventory_locations",

@@ -75,7 +75,7 @@ export function WithdrawDialog({
       });
       if (error) throw error;
       toast.success("تم إرسال طلب السحب — قيد المراجعة", {
-        description: `المتبقي: ${(data as any)?.available_after ?? "—"} ج`,
+        description: `المتبقي: ${(data as { available_after?: number | string } | null)?.available_after ?? "—"} ج`,
       });
       onOpenChange(false);
       setAmount(""); setAccount(""); setHolder("");

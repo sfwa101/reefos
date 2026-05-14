@@ -108,7 +108,7 @@ export default function LockedOfferCard({
   );
 
   if (locked) return inner;
-  if (href) return <Link to={href as any}>{inner}</Link>;
+  if (href) return <Link to={href as never}>{inner}</Link>;
   if (onClick) return <button onClick={onClick} className="w-full text-right">{inner}</button>;
   return inner;
 }

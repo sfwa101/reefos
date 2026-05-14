@@ -16,7 +16,7 @@ import {
   User,
 } from "lucide-react";
 
-const stores: { to: string; label: string; icon: any; exact?: boolean }[] = [
+const stores: { to: string; label: string; icon: React.ElementType; exact?: boolean }[] = [
   { to: "/", label: "الرئيسية", icon: Home, exact: true },
   { to: "/sections", label: "كل الأقسام", icon: LayoutGrid },
   { to: "/store/supermarket", label: "السوبرماركت", icon: ShoppingBasket },
@@ -30,7 +30,7 @@ const stores: { to: string; label: string; icon: any; exact?: boolean }[] = [
   { to: "/store/home", label: "الأدوات المنزلية", icon: Wrench },
 ];
 
-const utility: { to: string; label: string; icon: any }[] = [
+const utility: { to: string; label: string; icon: React.ElementType }[] = [
   { to: "/offers", label: "العروض", icon: Tag },
   { to: "/wallet", label: "المحفظة", icon: WalletIcon },
   { to: "/account", label: "حسابي", icon: User },
@@ -51,7 +51,7 @@ const SectionsPanel = () => {
         return (
           <Link
             key={to}
-            to={to as any}
+            to={to as never}
             className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition ${
               active
                 ? "bg-primary text-primary-foreground shadow-pill"
@@ -71,7 +71,7 @@ const SectionsPanel = () => {
         return (
           <Link
             key={to}
-            to={to as any}
+            to={to as never}
             className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-bold transition ${
               active
                 ? "bg-primary text-primary-foreground shadow-pill"

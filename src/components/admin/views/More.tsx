@@ -17,7 +17,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
-type Item = { to?: string; params?: Record<string, string>; icon: any; label: string; color: string; onClick?: () => void };
+type Item = { to?: string; params?: Record<string, string>; icon: React.ElementType; label: string; color: string; onClick?: () => void };
 type Group = { title: string; items: Item[] };
 
 export default function More() {

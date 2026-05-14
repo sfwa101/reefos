@@ -31,16 +31,16 @@ export default function ProductBatches() {
       metrics={[
         { key: "batches", label: "الدفعات", icon: Layers, tone: "primary", compute: (r) => r.length },
         { key: "qty", label: "إجمالي الكميات", icon: Package, tone: "info",
-          compute: (r) => r.reduce((s, x: any) => s + (x.quantity ?? 0), 0) },
+          compute: (r) => r.reduce((s, x) => s + (x.quantity ?? 0), 0) },
         { key: "soon", label: "تنتهي خلال 30 يوم", icon: CalendarClock, tone: "warning",
-          compute: (r) => r.filter((x: any) => {
+          compute: (r) => r.filter((x) => {
             const d = daysUntil(x.expires_at); return d !== null && d >= 0 && d <= 30;
           }).length },
         { key: "expired", label: "منتهية", icon: AlertTriangle, tone: "pink",
-          compute: (r) => r.filter((x: any) => {
+          compute: (r) => r.filter((x) => {
             const d = daysUntil(x.expires_at); return d !== null && d < 0;
           }).length,
-          urgent: (r) => r.some((x: any) => { const d = daysUntil(x.expires_at); return d !== null && d < 0; }) },
+          urgent: (r) => r.some((x) => { const d = daysUntil(x.expires_at); return d !== null && d < 0; }) },
       ]}
       dataSource={{
         table: "product_batches",

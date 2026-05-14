@@ -53,7 +53,7 @@ export const SpendingDonut = ({ stats }: { stats: CategoryStat[] }) => (
                 ))}
               </Pie>
               <Tooltip
-                formatter={(v: any) => [`${toLatin(v)} ج.م`, ""]}
+                formatter={(v: number | string) => [`${toLatin(Number(v))} ج.م`, ""]}
                 contentStyle={{
                   borderRadius: 10,
                   border: "none",

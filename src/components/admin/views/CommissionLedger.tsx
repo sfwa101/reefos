@@ -42,11 +42,11 @@ export default function CommissionLedger() {
       metrics={[
         { key: "total", label: "السجلات", icon: Coins, tone: "primary", compute: (r) => r.length },
         { key: "payable", label: "قابلة للدفع", icon: Wallet, tone: "info",
-          compute: (r) => fmtNum(r.filter((x: any) => x.status === "payable").reduce((s, x: any) => s + Number(x.commission_amount ?? 0), 0)) },
+          compute: (r) => fmtNum(r.filter((x) => x.status === "payable").reduce((s, x) => s + Number(x.commission_amount ?? 0), 0)) },
         { key: "pending", label: "معلّقة", icon: Clock, tone: "warning",
-          compute: (r) => fmtNum(r.filter((x: any) => x.status === "pending").reduce((s, x: any) => s + Number(x.commission_amount ?? 0), 0)) },
+          compute: (r) => fmtNum(r.filter((x) => x.status === "pending").reduce((s, x) => s + Number(x.commission_amount ?? 0), 0)) },
         { key: "paid", label: "مدفوعة", icon: CheckCircle2, tone: "success",
-          compute: (r) => fmtNum(r.filter((x: any) => x.status === "paid").reduce((s, x: any) => s + Number(x.commission_amount ?? 0), 0)) },
+          compute: (r) => fmtNum(r.filter((x) => x.status === "paid").reduce((s, x) => s + Number(x.commission_amount ?? 0), 0)) },
       ]}
       dataSource={{
         table: "commission_ledger",
