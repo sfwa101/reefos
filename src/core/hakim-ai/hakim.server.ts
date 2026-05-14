@@ -161,7 +161,7 @@ export async function runHakimAdvisor(
     .select()
     .single();
 
-  return { ok: true, insight: (saved as typeof insight) || insight };
+  return { ok: true, insight: (saved as unknown as typeof insight) || insight };
 }
 
 // ─── Hakim Architect ───────────────────────────────────────────────────
