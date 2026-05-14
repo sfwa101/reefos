@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// EXEMPT (Wave P-D Phase D-2): `@/integrations/supabase/client` is imported
-// here ONLY for the realtime `supabase.channel(...)` subscription below. All
-// reads/writes are routed through `@/lib/cart.functions` per the blueprint.
-import { supabase } from "@/integrations/supabase/client";
+// Wave P-3 — All Supabase access (including realtime) routed through the
+// Sovereign CartGateway. This file no longer imports `@/integrations/supabase/client`.
+import { CartGateway } from "@/core/orders/gateway/CartGateway";
 import {
   hydrateSharedCartFn,
   setSharedCartStatusFn,
