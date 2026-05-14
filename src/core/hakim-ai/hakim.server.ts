@@ -12,9 +12,59 @@
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import type { Json } from "@/integrations/supabase/types";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyJson = any;
+type DynamicRpc = <T = unknown>(
+  name: string,
+  args?: Record<string, unknown>,
+) => Promise<{ data: T | null; error: { message: string } | null }>;
+
+// ─── Hakim Tool-Call Discriminated Union (Constitution Ch. 8) ──────────
+export interface HakimSubmitInsightArgs {
+  severity: "info" | "warning" | "critical" | "success";
+  title: string;
+  summary: string;
+  recommendations: Array<{ action: string; priority: "low" | "medium" | "high" }>;
+}
+
+export interface HakimSubmitBlueprintAsset {
+  name: string;
+  asset_type: "physical" | "service" | "digital" | "rental" | "milestone_project";
+  pricing_model:
+    | "flat"
+    | "tiered_wholesale"
+    | "subscription"
+    | "deposit_and_rental"
+    | "milestone_installments";
+  base_price: number;
+  traits: Record<string, Json>;
+}
+
+export interface HakimSubmitBlueprintArgs {
+  module_name: string;
+  description: string;
+  suggested_assets: HakimSubmitBlueprintAsset[];
+  sdui_layout: { hero?: Record<string, Json>; sections?: Array<Record<string, Json>> };
+}
+
+export type HakimToolCall =
+  | { name: "submit_insight"; arguments: HakimSubmitInsightArgs }
+  | { name: "submit_blueprint"; arguments: HakimSubmitBlueprintArgs };
+
+interface OpenAIToolCallResponse {
+  id?: string;
+  type?: "function";
+  function?: { name?: string; arguments?: string };
+}
+
+interface OpenAIChatResponse {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+      tool_calls?: OpenAIToolCallResponse[];
+    };
+  }>;
+}
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -63,8 +113,7 @@ export interface HakimAdvisorOutput {
     title: string;
     summary: string;
     recommendations: Array<{ action: string; priority: string }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    raw_snapshot: any;
+    raw_snapshot: Json | null;
     generated_for_date: string;
   };
 }
@@ -80,10 +129,10 @@ export async function runHakimAdvisor(
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!LOVABLE_API_KEY) return { error: "ai_error" };
 
-  const { data: snapshot, error: snapErr } = await userClient.rpc("financial_snapshot", {
+  const userRpc = userClient.rpc.bind(userClient) as unknown as DynamicRpc;
+  const { data: snapshot, error: snapErr } = await userRpc<Json>("financial_snapshot", {
     _days: days,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as AnyJson);
+  });
   if (snapErr) return { error: snapErr.message };
 
   const systemPrompt = `أنت "حكيم" — المستشار المالي الذكي لشركة "ريف المدينة". تحلل البيانات المالية وتقدم رؤى استباقية وتحذيرات مبكرة وتوصيات عملية. كن مختصراً، عربياً، وعملياً. ركز على: السيولة، الديون المستحقة، هوامش الربح المتآكلة، المنتجات الراكدة، فرص التحسين.`;
@@ -137,11 +186,13 @@ export async function runHakimAdvisor(
   if (aiRes.status === 402) return { error: "credits_exhausted" };
   if (!aiRes.ok) return { error: "ai_error" };
 
-  const aiData = (await aiRes.json()) as AnyJson;
+  const aiData = (await aiRes.json()) as OpenAIChatResponse;
   const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-  let parsed: AnyJson = {};
+  let parsed: Partial<HakimSubmitInsightArgs> = {};
   if (toolCall?.function?.arguments) {
-    try { parsed = JSON.parse(toolCall.function.arguments); } catch { /* noop */ }
+    try {
+      parsed = JSON.parse(toolCall.function.arguments) as Partial<HakimSubmitInsightArgs>;
+    } catch { /* noop */ }
   }
 
   const insight = {
@@ -155,10 +206,16 @@ export async function runHakimAdvisor(
   };
 
   const { data: saved } = await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_insights" as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert(insight as any)
+    .from("hakim_insights")
+    .insert({
+      kind: insight.kind,
+      severity: insight.severity,
+      title: insight.title,
+      summary: insight.summary,
+      recommendations: insight.recommendations as unknown as Json,
+      raw_snapshot: insight.raw_snapshot,
+      generated_for_date: insight.generated_for_date,
+    })
     .select()
     .single();
 
@@ -212,8 +269,7 @@ const ARCHITECT_TOOL_SCHEMA = {
 
 export interface HakimArchitectOutput {
   ok: true;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blueprint: any;
+  blueprint: HakimSubmitBlueprintArgs;
   generated_at: string;
 }
 
@@ -246,13 +302,16 @@ export async function runHakimArchitect(
     return { error: "ai_error", detail };
   }
 
-  const json = (await aiRes.json()) as AnyJson;
+  const json = (await aiRes.json()) as OpenAIChatResponse;
   const argsRaw = json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!argsRaw) return { error: "ai_no_tool_call" };
 
-  let blueprint: unknown;
+  let blueprint: HakimSubmitBlueprintArgs;
   try {
-    blueprint = typeof argsRaw === "string" ? JSON.parse(argsRaw) : argsRaw;
+    blueprint =
+      typeof argsRaw === "string"
+        ? (JSON.parse(argsRaw) as HakimSubmitBlueprintArgs)
+        : (argsRaw as HakimSubmitBlueprintArgs);
   } catch (e) {
     return { error: "ai_parse_error", detail: String(e) };
   }
@@ -287,11 +346,11 @@ export async function prepareHakimChatStream(
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!LOVABLE_API_KEY) return { ok: false, status: 500, error: "missing_key" };
 
-  const { data: report, error: repErr } = await userClient.rpc("hakim_deep_report", {
+  const userRpc = userClient.rpc.bind(userClient) as unknown as DynamicRpc;
+  const { data: report, error: repErr } = await userRpc<Json>("hakim_deep_report", {
     _from: body.period_from ?? null,
     _to: body.period_to ?? null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as AnyJson);
+  });
   if (repErr) return { ok: false, status: 403, error: repErr.message };
 
   const { data: userRes } = await userClient.auth.getUser();
@@ -301,10 +360,8 @@ export async function prepareHakimChatStream(
   let sid = body.session_id ?? undefined;
   if (!sid) {
     const { data: ses } = await supabaseAdmin
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("hakim_chat_sessions" as any)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .insert({ user_id: userId, title: body.message.slice(0, 60) } as any)
+      .from("hakim_chat_sessions")
+      .insert({ user_id: userId, title: body.message.slice(0, 60) })
       .select()
       .single();
     sid = (ses as { id?: string } | null)?.id ?? undefined;
@@ -312,14 +369,11 @@ export async function prepareHakimChatStream(
   if (!sid) return { ok: false, status: 500, error: "session_create_failed" };
 
   await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_chat_messages" as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert({ session_id: sid, role: "user", content: body.message } as any);
+    .from("hakim_chat_messages")
+    .insert({ session_id: sid, role: "user", content: body.message });
 
   const { data: hist } = await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_chat_messages" as any)
+    .from("hakim_chat_messages")
     .select("role, content")
     .eq("session_id", sid)
     .order("created_at", { ascending: true })

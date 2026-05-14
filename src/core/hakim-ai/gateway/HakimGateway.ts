@@ -17,10 +17,11 @@ import { predictBasketFn } from "@/core/orders/predict.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabase as any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rpc = (supabase.rpc as any).bind(supabase);
+type DynamicRpc = <T = unknown>(
+  name: string,
+  args?: Record<string, unknown>,
+) => Promise<{ data: T | null; error: { message: string } | null }>;
+const rpcDynamic = supabase.rpc.bind(supabase) as unknown as DynamicRpc;
 
 // ─── Vision Genesis (Product DNA) ────────────────────────────────────────
 
@@ -197,7 +198,7 @@ export const HakimGateway = {
   // ============= Anomalies (table + realtime) =============
 
   async listAnomalies(limit: number) {
-    const { data } = await sb
+    const { data } = await supabase
       .from("hakim_anomalies")
       .select("*")
       .order("created_at", { ascending: false })
@@ -206,7 +207,7 @@ export const HakimGateway = {
   },
 
   subscribeAnomalies(onChange: () => void): GatewayChannel {
-    const channel = sb
+    const channel = supabase
       .channel("hakim_anomalies_feed")
       .on(
         "postgres_changes",
@@ -214,16 +215,16 @@ export const HakimGateway = {
         () => onChange(),
       )
       .subscribe();
-    return { unsubscribe: () => sb.removeChannel(channel) };
+    return { unsubscribe: () => { supabase.removeChannel(channel); } };
   },
 
   async getPulseStats(minutes: number) {
-    const { data } = await rpc("hakim_pulse_stats", { _minutes: minutes });
+    const { data } = await supabase.rpc("hakim_pulse_stats", { _minutes: minutes });
     return data;
   },
 
   async resolveAnomaly(id: string) {
-    const { error } = await rpc("resolve_anomaly", { _id: id });
+    const { error } = await supabase.rpc("resolve_anomaly", { _id: id });
     return { error };
   },
 
@@ -236,13 +237,13 @@ export const HakimGateway = {
     fingerprint: string | null;
   }) {
     try {
-      await rpc("report_anomaly", {
+      await supabase.rpc("report_anomaly", {
         _type: input.type,
         _severity: input.severity,
         _description: input.description.slice(0, 500),
-        _payload: input.payload,
+        _payload: input.payload as never,
         _source: input.source,
-        _fingerprint: input.fingerprint,
+        _fingerprint: input.fingerprint ?? undefined,
       });
     } catch {
       /* swallow — telemetry must never break host */
@@ -257,7 +258,8 @@ export const HakimGateway = {
     description: string | null;
     base_price: number | null;
   }) {
-    const { data, error } = await rpc("update_universal_asset", {
+    // `update_universal_asset` is not present in generated Database types.
+    const { data, error } = await rpcDynamic("update_universal_asset", {
       p_asset_id: input.asset_id,
       p_name: input.name,
       p_description: input.description,
@@ -267,7 +269,9 @@ export const HakimGateway = {
   },
 
   async mintUniversalAsset(payload: unknown) {
-    const { data, error } = await rpc("mint_universal_asset", { payload });
+    const { data, error } = await supabase.rpc("mint_universal_asset", {
+      payload: payload as never,
+    });
     return { data, error };
   },
 
@@ -280,8 +284,8 @@ export const HakimGateway = {
   },
 
   async matchUniversalAsset(embedding: number[], threshold: number) {
-    const { data, error } = await rpc("match_universal_asset", {
-      p_embedding: embedding,
+    const { data, error } = await supabase.rpc("match_universal_asset", {
+      p_embedding: embedding as never,
       p_threshold: threshold,
     });
     return { data, error };
@@ -304,11 +308,11 @@ export const HakimGateway = {
     inventory_type: string;
     availability: Record<string, unknown>;
   }) {
-    const { data, error } = await rpc("upsert_inventory_matrix", {
+    const { data, error } = await supabase.rpc("upsert_inventory_matrix", {
       p_sku_id: input.sku_id,
       p_location_id: input.location_id,
       p_inventory_type: input.inventory_type,
-      p_availability: input.availability,
+      p_availability: input.availability as never,
     });
     return { data, error };
   },
@@ -316,7 +320,7 @@ export const HakimGateway = {
   // ============= Fulfillment nodes =============
 
   async updateFulfillmentNodeStatus(nodeId: string, status: string) {
-    const { data, error } = await sb
+    const { data, error } = await supabase
       .from("salsabil_fulfillment_nodes")
       .update({ status })
       .eq("id", nodeId)

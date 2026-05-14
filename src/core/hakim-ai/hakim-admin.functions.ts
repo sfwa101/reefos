@@ -6,10 +6,9 @@ import {
   runHakimPulse,
   runHakimAdvisor,
   runHakimArchitect,
+  type HakimSubmitBlueprintAsset,
 } from "@/core/hakim-ai/hakim.server";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SbAny = any;
+import type { Json } from "@/integrations/supabase/types";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -21,7 +20,7 @@ export const markHakimInsightReadFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { error } = await sb
       .from("hakim_insights")
       .update({ is_read: true })
@@ -38,7 +37,7 @@ export const resolveHakimAnomalyFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { error } = await sb
       .from("hakim_anomalies")
       .update({ resolved: true, resolved_at: new Date().toISOString() })
@@ -60,7 +59,7 @@ export type CategoryAffinityRow = {
 export const getCategoryAffinityFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<CategoryAffinityRow[]> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const sinceIso = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await sb
       .from("user_behavior_logs")
@@ -120,14 +119,14 @@ export type HakimInsightRow = {
 export const listHakimInsightsFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<HakimInsightRow[]> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { data, error } = await sb
       .from("hakim_insights")
       .select("*")
       .order("created_at", { ascending: false })
       .limit(20);
     if (error) throw new Error(error.message);
-    return (data ?? []) as HakimInsightRow[];
+    return (data ?? []) as unknown as HakimInsightRow[];
   });
 
 export const runHakimAdvisorFn = createServerFn({ method: "POST" })
@@ -149,10 +148,10 @@ export const runHakimAdvisorFn = createServerFn({ method: "POST" })
 export type HakimArchitectBlueprint = {
   module_name: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  suggested_assets: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sdui_layout: any;
+  
+  suggested_assets: HakimSubmitBlueprintAsset[];
+  
+  sdui_layout: { hero?: Record<string, Json>; sections?: Array<Record<string, Json>> };
 };
 
 export const summonHakimArchitectFn = createServerFn({ method: "POST" })

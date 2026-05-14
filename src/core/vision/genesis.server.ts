@@ -6,7 +6,28 @@
  * DeepSeek). Imported only by `.functions.ts` server-fn handlers; never
  * by client code.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Wave P-9 C: typed boundaries; remaining `any` confined to recursive JSON-Schema walker
+// and the LLM-payload normalizer (Strategy A — Batch D will tighten SDUI/runtime polymorphism).
+
+class ProviderHTTPError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ProviderHTTPError";
+    this.status = status;
+  }
+}
+
+type GeminiPart =
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } }
+  | { functionCall?: { name: string; args: unknown } };
+
+type OpenAIContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
+type SchemaNode = Record<string, unknown> | unknown[] | string | number | boolean | null;
 
 const ASSET_TYPES = ["physical", "digital", "service", "rental", "milestone_project"] as const;
 const PRICING_MODELS = [
@@ -177,7 +198,7 @@ async function callGemini(opts: {
   hint?: string;
 }): Promise<ProviderResult> {
   const { apiKey, primary, secondary, hint } = opts;
-  const parts: any[] = [
+  const parts: GeminiPart[] = [
     {
       text: `حلّل ${secondary ? "الصورتين معاً (الأولى = واجهة المنتج، الثانية = ظهر العبوة/ملصق الحقائق الغذائية)" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
     },
@@ -217,7 +238,7 @@ async function callGemini(opts: {
   const text = await res.text();
   if (!res.ok) {
     const err = new Error(`gemini_${res.status}: ${text.slice(0, 500)}`);
-    (err as any).status = res.status;
+    throw new ProviderHTTPError(err.message, res.status);
     throw err;
   }
   const data = JSON.parse(text);
@@ -239,13 +260,13 @@ async function callOpenAICompatible(opts: {
   providerLabel: string;
 }): Promise<ProviderResult> {
   const { endpoint, apiKey, model, primary, secondary, hint, providerLabel } = opts;
-  const userContent: any[] = [
+  const userContent: OpenAIContentPart[] = [
     {
       type: "text",
       text: `حلّل ${secondary ? "الصورتين معاً" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
     },
     { type: "image_url", image_url: { url: primary } },
-    ...(secondary ? [{ type: "image_url", image_url: { url: secondary } }] : []),
+    ...(secondary ? [{ type: "image_url" as const, image_url: { url: secondary } }] : []),
   ];
   const payload = {
     model,
@@ -276,7 +297,7 @@ async function callOpenAICompatible(opts: {
   const text = await res.text();
   if (!res.ok) {
     const err = new Error(`${providerLabel}_${res.status}: ${text.slice(0, 500)}`);
-    (err as any).status = res.status;
+    throw new ProviderHTTPError(err.message, res.status);
     throw err;
   }
   const data = JSON.parse(text);
