@@ -184,17 +184,12 @@ export const getHakimPulseBannerFn = createServerFn({ method: "POST" })
     return { metrics, page };
   })
   .middleware([requireAdmin])
-  .handler(async ({ data, context }): Promise<HakimPulseBannerResult> => {
-    const sb = context.supabase as SbAny;
+  .handler(async ({ data }): Promise<HakimPulseBannerResult> => {
     try {
-      const { data: out, error } = await sb.functions.invoke("hakim-pulse", { body: data });
-      if (error) return { error: "failed" };
-      const o = (out ?? {}) as Record<string, unknown>;
-      if (o.error === "rate_limited") return { error: "rate_limited" };
-      if (o.error === "credits_exhausted") return { error: "credits_exhausted" };
+      const out = await runHakimPulse({ page: data.page });
       return {
-        pulse: typeof o.pulse === "string" ? (o.pulse as string) : undefined,
-        insights: o.insights as HakimPulseBannerResult["insights"],
+        pulse: typeof out.pulse === "string" ? out.pulse : undefined,
+        insights: out.insights as HakimPulseBannerResult["insights"],
       };
     } catch {
       return { error: "failed" };
