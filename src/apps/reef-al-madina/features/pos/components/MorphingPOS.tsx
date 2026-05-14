@@ -1,25 +1,42 @@
 /**
- * Salsabil OS — Phase 1 · Wave 1
+ * Salsabil OS — Phase 1 · Wave 3
  * Layer 6 (Runtime UI) · Morphing POS shell.
  *
- * Pure capability-driven renderer. Vertical-name-free: branches strictly on
- * CAP keys exposed via the {@link CashierBrain} runtime hook.
+ * Capability-driven shell + Product DNA grid. The grid is hydrated via
+ * the {@link CatalogGateway} (CommerceEntity stream) and gated by the
+ * {@link LivingInventoryRuntime}. The UI never performs inventory math
+ * itself — it asks `canFulfill` before dispatching cart intents.
  */
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import { useCashierBrainRuntime } from "@/core/cashier/hooks/useCashierBrainRuntime";
 import { useCartRuntime } from "@/core/orders/runtime/useCartRuntime";
 import { useAuth } from "@/context/AuthContext";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
-import { ChefHat, ScanBarcode, Zap, Layers, Trash2 } from "lucide-react";
+import {
+  ChefHat,
+  ScanBarcode,
+  Zap,
+  Layers,
+  Trash2,
+  PackageX,
+} from "lucide-react";
 import type { POSMode } from "@/core/cashier/domain/POSMode";
+import { CatalogGateway } from "@/core/commerce/gateway/CatalogGateway";
+import type { CommerceEntity } from "@/core/commerce/entity/CommerceEntity";
+import { useLivingInventory } from "@/core/inventory/runtime/useLivingInventory";
 
 export interface MorphingPOSProps {
   /** Capability keys assigned to the active workspace section/terminal. */
   readonly sectionCapabilities: ReadonlyArray<string>;
   /** Render slots per mode. Any omitted slot falls back to a neutral panel. */
   readonly slots?: Partial<Record<POSMode, React.ReactNode>>;
+  /** Catalog section to populate the product grid. */
+  readonly catalogSectionSlug?: string;
+  /** Cap on entities loaded into the grid. */
+  readonly catalogLimit?: number;
 }
 
 const MODE_META: Record<POSMode, { label: string; Icon: typeof ChefHat }> = {
@@ -29,8 +46,22 @@ const MODE_META: Record<POSMode, { label: string; Icon: typeof ChefHat }> = {
   hybrid: { label: "Hybrid floor", Icon: Layers },
 };
 
+const localized = (
+  t: Record<string, string> | undefined,
+  locale: "ar" | "en",
+): string => {
+  if (!t) return "";
+  if (locale === "en") return t.en ?? t.ar ?? "";
+  return t.ar ?? t.en ?? "";
+};
+
 export function MorphingPOS(props: MorphingPOSProps) {
-  const { sectionCapabilities, slots } = props;
+  const {
+    sectionCapabilities,
+    slots,
+    catalogSectionSlug,
+    catalogLimit = 24,
+  } = props;
   const { user } = useAuth();
   const runtime = useCashierBrainRuntime({
     cashierId: user?.id ?? null,
@@ -42,6 +73,35 @@ export function MorphingPOS(props: MorphingPOSProps) {
   const currency = cart.state.snapshot.currency;
 
   const meta = MODE_META[mode];
+
+  const catalogQuery = useQuery({
+    queryKey: ["pos.morphing.catalog", catalogSectionSlug, catalogLimit],
+    queryFn: () =>
+      catalogSectionSlug
+        ? CatalogGateway.listSectionEntities({
+            sectionSlug: catalogSectionSlug,
+            limit: catalogLimit,
+          })
+        : Promise.resolve<CommerceEntity[]>([]),
+    enabled: Boolean(catalogSectionSlug),
+    staleTime: 30_000,
+  });
+
+  const entities = catalogQuery.data ?? [];
+  const inventory = useLivingInventory(entities);
+
+  const handleAdd = useCallback(
+    (entity: CommerceEntity) => {
+      if (!inventory.canFulfill(entity.entity_id, 1)) return;
+      cart.add({
+        lineId: entity.entity_id,
+        productId: entity.entity_id,
+        dna: entity.context.financial,
+        qty: 1,
+      });
+    },
+    [cart, inventory],
+  );
 
   const body = useMemo(() => {
     const slot = slots?.[mode];
@@ -78,6 +138,71 @@ export function MorphingPOS(props: MorphingPOSProps) {
     );
   }, [slots, mode, capabilities]);
 
+  const grid = (
+    <IOSCard className="p-3">
+      <div className="text-[13px] font-medium mb-2">Catalog</div>
+      {!catalogSectionSlug ? (
+        <div className="text-[12px] text-foreground-tertiary">
+          No section bound to this terminal.
+        </div>
+      ) : catalogQuery.isLoading ? (
+        <div className="text-[12px] text-foreground-tertiary">Loading…</div>
+      ) : catalogQuery.isError ? (
+        <div className="text-[12px] text-destructive">
+          Failed to load catalog.
+        </div>
+      ) : entities.length === 0 ? (
+        <div className="text-[12px] text-foreground-tertiary">
+          No products in this section.
+        </div>
+      ) : (
+        <ul className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+          {entities.map((entity) => {
+            const view = inventory.viewFor(entity.entity_id);
+            const status = view?.status ?? "out_of_stock";
+            const out = status === "out_of_stock";
+            const fin = entity.context.financial;
+            return (
+              <li key={entity.entity_id}>
+                <button
+                  type="button"
+                  disabled={out}
+                  onClick={() => handleAdd(entity)}
+                  data-stock-status={status}
+                  className="w-full text-start rounded-2xl border border-border/40 bg-surface px-3 py-2 hover:bg-surface-secondary transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <div className="text-[12px] font-medium truncate">
+                    {localized(entity.context.identity.name, "ar")}
+                  </div>
+                  <div className="mt-1 flex items-center justify-between text-[11px] text-foreground-secondary">
+                    <span className="tabular-nums">
+                      {fmtMoney(fin.base_price)} {fin.currency}
+                    </span>
+                    {out ? (
+                      <span className="inline-flex items-center gap-1 text-destructive">
+                        <PackageX className="h-3 w-3" /> Out
+                      </span>
+                    ) : (
+                      <span
+                        className={
+                          status === "low_stock"
+                            ? "text-amber-600"
+                            : "text-foreground-tertiary"
+                        }
+                      >
+                        {view?.available ?? 0} left
+                      </span>
+                    )}
+                  </div>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </IOSCard>
+  );
+
   return (
     <div className="space-y-3" data-pos-mode={mode}>
       <IOSCard className="p-3 flex items-center justify-between">
@@ -96,6 +221,7 @@ export function MorphingPOS(props: MorphingPOSProps) {
         </div>
       </IOSCard>
       {body}
+      {grid}
       <IOSCard className="p-3">
         <div className="flex items-center justify-between mb-2">
           <div className="text-[13px] font-medium">Cart</div>
