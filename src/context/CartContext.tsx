@@ -196,48 +196,36 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       const ch = realtimeChannelRef.current;
       if (ch) {
-        void supabase.removeChannel(ch);
+        ch.unsubscribe();
         realtimeChannelRef.current = null;
       }
     };
 
     const subscribeRealtime = (id: string) => {
       teardownRealtime();
-      const channel = supabase
-        .channel(`cart:${id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "cart_items",
-            filter: `user_id=eq.${id}`,
-          },
-          () => {
-            if (realtimeFetchTimerRef.current) {
-              clearTimeout(realtimeFetchTimerRef.current);
-            }
-            realtimeFetchTimerRef.current = setTimeout(async () => {
-              realtimeFetchTimerRef.current = null;
-              const currentUid = userIdRef.current;
-              if (!currentUid || currentUid !== id) return;
-              try {
-                const remote = await fetchRemoteCart(currentUid);
-                const nextSignature = cartSignature(remote);
-                // Ignore self-echoes via signature match.
-                if (nextSignature === lastPushedSignatureRef.current) return;
-                if (nextSignature === cartSignature(linesFromStore())) return;
-                skipNextPushRef.current = true;
-                useCartStore.getState().replaceAll(remote);
-                lastPushedSignatureRef.current = nextSignature;
-                skipNextPushRef.current = false;
-              } catch (err) {
-                console.warn("[cart] realtime refetch failed:", err);
-              }
-            }, 250);
-          },
-        )
-        .subscribe();
+      const channel = CartGateway.subscribeUserCart(id, () => {
+        if (realtimeFetchTimerRef.current) {
+          clearTimeout(realtimeFetchTimerRef.current);
+        }
+        realtimeFetchTimerRef.current = setTimeout(async () => {
+          realtimeFetchTimerRef.current = null;
+          const currentUid = userIdRef.current;
+          if (!currentUid || currentUid !== id) return;
+          try {
+            const remote = await fetchRemoteCart(currentUid);
+            const nextSignature = cartSignature(remote);
+            // Ignore self-echoes via signature match.
+            if (nextSignature === lastPushedSignatureRef.current) return;
+            if (nextSignature === cartSignature(linesFromStore())) return;
+            skipNextPushRef.current = true;
+            useCartStore.getState().replaceAll(remote);
+            lastPushedSignatureRef.current = nextSignature;
+            skipNextPushRef.current = false;
+          } catch (err) {
+            console.warn("[cart] realtime refetch failed:", err);
+          }
+        }, 250);
+      });
       realtimeChannelRef.current = channel;
     };
 
