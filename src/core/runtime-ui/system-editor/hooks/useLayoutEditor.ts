@@ -205,16 +205,11 @@ export const useLayoutEditor = (pageKey: string) => {
         version: newVersion,
         title: layout.title ?? null,
       };
-      const { error } = await supabase
-        .from("ui_layouts")
-        .upsert(payload, { onConflict: "page_key,status" });
+      const { error } = await RuntimeUIGateway.upsertUiLayout(payload);
       if (error) throw error;
 
       // 2) Drop the draft so editor reloads from the freshly published row.
-      await supabase.from("ui_layouts")
-        .delete()
-        .eq("page_key", layout.page_key)
-        .eq("status", "draft");
+      await RuntimeUIGateway.deleteUiLayoutDraft(layout.page_key);
 
       await reload();
       return { ok: true };
