@@ -34,7 +34,7 @@ export const logSovereignEvent = async (e: SovereignEventInput): Promise<void> =
       p_trace_id: e.trace_id,
       p_event_domain: e.event_domain,
       p_event_type: e.event_type,
-      p_payload: e.payload ?? {},
+      p_payload: (e.payload ?? {}) as never,
     });
     if (error) console.warn("[sovereign-tracing] append failed", error.message);
   } catch (err) {

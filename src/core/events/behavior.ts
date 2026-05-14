@@ -31,10 +31,10 @@ export async function logBehavior(opts: {
   try {
     await supabase.rpc("log_behavior", {
       _event: opts.event,
-      _product_id: opts.productId ?? null,
-      _category: opts.category ?? null,
-      _query: opts.query ?? null,
-      _dwell_ms: opts.dwellMs ?? null,
+      _product_id: opts.productId ?? undefined,
+      _category: opts.category ?? undefined,
+      _query: opts.query ?? undefined,
+      _dwell_ms: opts.dwellMs ?? undefined,
     });
   } catch {
     /* silent — non-critical */
