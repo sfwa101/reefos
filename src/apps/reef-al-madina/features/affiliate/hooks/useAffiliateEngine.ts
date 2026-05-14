@@ -89,22 +89,6 @@ function useReferralCodeQuery(userId: string | undefined) {
     },
   });
 
-  const provision = useMutation({
-    mutationFn: async () => {
-      if (!userId) throw new Error("not authenticated");
-      // Phase 57 — server-authoritative 6-digit code (National ID derived).
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("ensure_referral_code", {
-        _user_id: userId,
-      });
-      if (error) throw error;
-      return data as string;
-    },
-    onSuccess: (code) => {
-      if (userId) qc.setQueryData(QK.code(userId), code);
-    },
-  });
-
   return { query, provision };
 }
 
