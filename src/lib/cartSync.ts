@@ -76,12 +76,8 @@ async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> 
 
 /** Fetch the current user's persisted cart. Returns [] if not logged in. */
 export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
-  const { data, error } = await supabase
-    .from("cart_items")
-    .select("product_id, qty, meta, line_key")
-    .eq("user_id", userId);
-
-  if (error || !Array.isArray(data)) return [];
+  const data = await CartGateway.fetchUserCart(userId);
+  if (data.length === 0) return [];
 
   const ids = Array.from(new Set(data.map((r) => r.product_id).filter(Boolean)));
   const productMap = await fetchProductsByIds(ids);
