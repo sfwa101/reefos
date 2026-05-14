@@ -26,7 +26,7 @@ import type {
   ButcheryRules,
   PrepOption,
   WeightOption,
-} from "./weighed-prep-rules";
+} from "@/core/commerce/variants/weighed-prep-rules";
 import {
   BORROW_DURATIONS,
   BORROW_DEPOSIT_RATIO,
