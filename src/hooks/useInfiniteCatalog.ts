@@ -23,7 +23,7 @@ import {
   type ProductSource,
 } from "@/core/catalog/legacyProduct.types";
 import { searchSovereignAssets, assetToProduct } from "@/core/commerce/knowledge/sovereignCatalog";
-import { getActiveTenantId } from "@/context/TenantContext";
+import { getWorkspaceIdSync } from "@/core/identity/workspace";
 
 export interface UseInfiniteCatalogParams {
   readonly sources: ReadonlyArray<ProductSource>;
