@@ -77,18 +77,15 @@ function useReferralCodeQuery(userId: string | undefined) {
     staleTime: 5 * 60_000,
     queryFn: async () => {
       // Phase 57 — read from referral_codes (mirror), fall back to profiles.
-      const { data: rc } = await supabase
-        .from("referral_codes")
-        .select("code")
-        .eq("user_id", userId!)
-        .maybeSingle();
-      if (rc?.code) return rc.code;
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("referral_code")
-        .eq("id", userId!)
-        .maybeSingle();
-      return (prof?.referral_code as string | null) ?? null;
+      return await MarketingGateway.getReferralCode(userId!);
+    },
+  });
+
+  const provision = useMutation({
+    mutationFn: async () => {
+      if (!userId) throw new Error("not authenticated");
+      // Phase 57 — server-authoritative 6-digit code (National ID derived).
+      return await MarketingGateway.ensureReferralCode(userId);
     },
   });
 
