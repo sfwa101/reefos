@@ -238,7 +238,7 @@ async function callGemini(opts: {
   const text = await res.text();
   if (!res.ok) {
     const err = new Error(`gemini_${res.status}: ${text.slice(0, 500)}`);
-    (err as any).status = res.status;
+    throw new ProviderHTTPError(err.message, res.status);
     throw err;
   }
   const data = JSON.parse(text);
@@ -260,7 +260,7 @@ async function callOpenAICompatible(opts: {
   providerLabel: string;
 }): Promise<ProviderResult> {
   const { endpoint, apiKey, model, primary, secondary, hint, providerLabel } = opts;
-  const userContent: any[] = [
+  const userContent: OpenAIContentPart[] = [
     {
       type: "text",
       text: `حلّل ${secondary ? "الصورتين معاً" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
@@ -297,7 +297,7 @@ async function callOpenAICompatible(opts: {
   const text = await res.text();
   if (!res.ok) {
     const err = new Error(`${providerLabel}_${res.status}: ${text.slice(0, 500)}`);
-    (err as any).status = res.status;
+    throw new ProviderHTTPError(err.message, res.status);
     throw err;
   }
   const data = JSON.parse(text);
