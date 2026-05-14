@@ -105,9 +105,9 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
       currentTier,
       nextTier,
       successfulInvites: invites,
-      totalCommission: stateRow?.total_commission_earned ?? 0,
+      totalCommission: (sr?.total_commission_earned as number | undefined) ?? 0,
       unlocksWholesale:
-        stateRow?.unlocks_wholesale ?? currentTier?.unlocks_wholesale ?? false,
+        (sr?.unlocks_wholesale as boolean | undefined) ?? currentTier?.unlocks_wholesale ?? false,
       invitesToNext,
       progressPct,
       loading: false,
