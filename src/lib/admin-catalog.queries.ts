@@ -5,7 +5,7 @@ import {
   listCategoriesFn,
   listStoresFn,
   listSuppliersFn,
-} from "./admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 
 export const adminCatalogKeys = {
   all: ["admin-catalog"] as const,
