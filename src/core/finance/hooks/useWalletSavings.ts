@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import type { SavingsJar, SavingsTx } from "@/core/finance/types/wallet.types";
 
 const DEFAULT_JAR: SavingsJar = {
@@ -29,21 +29,12 @@ export const useWalletSavings = (userId: string | null) => {
     }
     let mounted = true;
     (async () => {
-      const [{ data: jarRow }, { data: jarTx }] = await Promise.all([
-        supabase
-          .from("savings_jar")
-          .select("balance,auto_save_enabled,round_to,goal,goal_label")
-          .eq("user_id", userId)
-          .maybeSingle(),
-        supabase
-          .from("savings_transactions")
-          .select("id,amount,kind,label,created_at")
-          .eq("user_id", userId)
-          .order("created_at", { ascending: false })
-          .limit(10),
+      const [jarRow, jarTx] = await Promise.all([
+        FinanceGateway.getSavingsJar(userId),
+        FinanceGateway.listSavingsTransactions(userId, 10),
       ]);
       if (!mounted) return;
-      setJar(jarRow ?? DEFAULT_JAR);
+      setJar((jarRow as SavingsJar | null) ?? DEFAULT_JAR);
       setJarTxs((jarTx ?? []) as SavingsTx[]);
       setLoading(false);
     })();
