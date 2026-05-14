@@ -9,7 +9,31 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { asDynamic } from "@/integrations/supabase/dynamic";
 
-type AnyJson = Record<string, unknown>;
+type FreqRow = {
+  product_id: string;
+  qty_total?: number | null;
+  order_count?: number | null;
+  last_ordered_at?: string | null;
+  avg_interval_days?: number | null;
+};
+
+type ProductRow = {
+  id: string;
+  name: string;
+  unit: string;
+  category: string;
+  price: number | string;
+  image?: string | null;
+  image_url?: string | null;
+};
+
+type AiToolCall = {
+  function?: { arguments?: string };
+};
+
+type AiResponse = {
+  choices?: Array<{ message?: { tool_calls?: AiToolCall[] } }>;
+};
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
@@ -58,8 +82,10 @@ export const predictBasketFn = createServerFn({ method: "POST" })
       return { error: "products_query_failed" as const };
     }
 
-    const productById = new Map(((products ?? []) as AnyJson[]).map((p) => [p.id, p] as const));
-    const candidates = (freqRows as AnyJson[])
+    const productsTyped = ((products ?? []) as unknown) as ProductRow[];
+    const freqTyped = (freqRows as unknown) as FreqRow[];
+    const productById = new Map(productsTyped.map((p) => [p.id, p] as const));
+    const candidates = freqTyped
       .filter((r) => productById.has(r.product_id))
       .map((r) => {
         const p = productById.get(r.product_id)!;
@@ -129,7 +155,7 @@ export const predictBasketFn = createServerFn({ method: "POST" })
     if (aiRes.status === 402) return { error: "credits_exhausted" as const };
     if (!aiRes.ok) return { error: "ai_error" as const };
 
-    const aiData = (await aiRes.json()) as AnyJson;
+    const aiData = (await aiRes.json()) as AiResponse;
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     let parsed: {
       headline?: string;
