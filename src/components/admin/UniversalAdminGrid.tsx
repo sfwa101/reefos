@@ -38,15 +38,16 @@ export type BentoTone =
  * still typecheck. Callers that pass `<UniversalAdminGrid<MyRow>` get
  * fully-typed `compute`/`urgent` callbacks via contextual inference.
  */
-export type BentoMetric<TRow = unknown> = {
+export interface BentoMetric<TRow = unknown> {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: TRow[]) => string | number;
-  urgent?: (rows: TRow[]) => boolean;
+  /** Method shorthand for bivariant params — accepts narrower row arrays. */
+  compute?(rows: TRow[]): string | number;
+  urgent?(rows: TRow[]): boolean;
   to?: string;
-};
+}
 
 export type Column<T = unknown> = {
   key: string;
