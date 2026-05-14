@@ -52,9 +52,9 @@ export const JoinGameyaSheet = ({
   const submit = async () => {
     if (!picked) return;
     setBusy(true);
-    const { error } = await supabase.rpc("join_gam_eya", {
-      _circle_id: circle.id,
-      _turn_number: picked,
+    const { error } = await FinanceGateway.joinGameya({
+      circleId: circle.id,
+      turnNumber: picked,
     });
     setBusy(false);
     if (error) {
