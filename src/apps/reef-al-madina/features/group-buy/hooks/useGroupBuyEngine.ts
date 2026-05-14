@@ -95,26 +95,17 @@ export const useGroupBuyEngine = (campaignId: string | null | undefined): UseGro
   useVisibilitySocket(
     () => {
       if (!campaignId) return;
-      const channel = supabase
-        .channel(`gb-campaign-${campaignId}`)
-        .on(
-          "postgres_changes",
-          { event: "UPDATE", schema: "public", table: "group_buy_campaigns", filter: `id=eq.${campaignId}` },
-          (payload) => {
-            const next = payload.new as GroupBuyCampaign;
-            setCampaign((prev) => (prev ? { ...prev, ...next } : next));
-          },
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "group_buy_pledges", filter: `campaign_id=eq.${campaignId}` },
-          () => {
-            fetchAll();
-          },
-        )
-        .subscribe();
+      const channel = MarketingGateway.subscribeGroupBuyCampaign(campaignId, {
+        onCampaignUpdate: (next) => {
+          const n = next as unknown as GroupBuyCampaign;
+          setCampaign((prev) => (prev ? { ...prev, ...n } : n));
+        },
+        onPledgeChange: () => {
+          fetchAll();
+        },
+      });
       return () => {
-        supabase.removeChannel(channel);
+        channel.unsubscribe();
       };
     },
     () => {
