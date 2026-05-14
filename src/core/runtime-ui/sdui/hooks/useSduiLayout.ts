@@ -49,6 +49,7 @@ export function useSduiLayout(slug: string): State {
   const query = useQuery({
     queryKey: workspaceQueryKey("sdui_layouts", slug),
     queryFn: () => fetchSduiBlocks(slug),
+    enabled: getWorkspaceIdSync() !== null,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
