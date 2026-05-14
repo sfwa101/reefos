@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { BarChart3, Wand2, Pencil, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import {
