@@ -357,14 +357,74 @@ export interface VisionGenesisInput {
   provider?: VisionProvider;
 }
 
+export type AssetType = (typeof ASSET_TYPES)[number];
+export type PricingModel = (typeof PRICING_MODELS)[number];
+export type WeightUnit = "g" | "kg" | "ml" | "L" | "piece";
+export type Currency = "EGP" | "USD" | "EUR";
+
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+export type JsonObject = { [key: string]: JsonValue };
+
+
+export interface VisionAssetMarketing {
+  short: string | null;
+  long: string | null;
+}
+export interface VisionAssetNutrition {
+  kcal: number | null;
+  protein_g: number | null;
+  fat_g: number | null;
+  carbs_g: number | null;
+  sugar_g: number | null;
+}
+export interface VisionAssetPhysical {
+  net_weight: number | null;
+  weight_unit: WeightUnit | null;
+}
+export interface VisionAssetDTO {
+  name: string;
+  description: string;
+  asset_type: AssetType;
+  traits: string[];
+  category_path: string | null;
+  brand: string | null;
+  origin_country: string | null;
+  marketing: VisionAssetMarketing | null;
+  nutrition: VisionAssetNutrition | null;
+  physical: VisionAssetPhysical | null;
+  allergens: string[] | null;
+}
+export interface VisionSkuVariantAxes {
+  size: string | null;
+  flavor: string | null;
+}
+export interface VisionSkuDTO {
+  sku_code: string;
+  attributes: JsonObject;
+  barcode: string | null;
+  variant_axes: VisionSkuVariantAxes | null;
+}
+export interface VisionFinancialContractDTO {
+  pricing_model: PricingModel;
+  base_price: number;
+  currency: Currency;
+  contract_rules: JsonObject;
+}
+
 export interface VisionGenesisOutput {
   ok: boolean;
   error?: string;
   details?: string;
   attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
-  asset?: any;
-  skus?: any[];
-  financial_contract?: any;
+  asset?: VisionAssetDTO;
+  skus?: VisionSkuDTO[];
+  financial_contract?: VisionFinancialContractDTO;
   prompt_version?: string;
   provider?: VisionProvider | null;
   provider_attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
@@ -421,14 +481,17 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
     const failoverChain: VisionProvider[] =
       primary === "gemini" ? ["gemini", "openrouter"] : [primary];
 
-    let parsed: any = null;
+    let parsed: Record<string, unknown> | null = null;
     let usedProvider: VisionProvider | null = null;
     const attempts: Array<{ provider: VisionProvider; ok: boolean; error?: string }> = [];
+
+    const isObj = (v: unknown): v is Record<string, unknown> =>
+      typeof v === "object" && v !== null && !Array.isArray(v);
 
     for (const p of failoverChain) {
       try {
         const result = await invokeProvider(p, primaryUrl, secondaryUrl, hint);
-        parsed = result.parsed;
+        parsed = isObj(result.parsed) ? result.parsed : {};
         usedProvider = p;
         attempts.push({ provider: p, ok: true });
         break;
@@ -443,13 +506,23 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
       return { ok: false, error: "AI_API_ERROR", details: "all providers failed", attempts };
     }
 
-    const assetType = (ASSET_TYPES as readonly string[]).includes(parsed?.asset?.asset_type)
-      ? parsed.asset.asset_type
-      : "physical";
-    const pricingModel = (PRICING_MODELS as readonly string[]).includes(
-      parsed?.financial_contract?.pricing_model,
+    const a: Record<string, unknown> = isObj(parsed.asset) ? parsed.asset : {};
+    const fc: Record<string, unknown> = isObj(parsed.financial_contract)
+      ? parsed.financial_contract
+      : {};
+    const skusRaw: unknown[] = Array.isArray(parsed.skus) ? parsed.skus : [];
+
+    const assetTypeRaw = isObj(a) ? a.asset_type : undefined;
+    const assetType: AssetType = (ASSET_TYPES as readonly string[]).includes(
+      typeof assetTypeRaw === "string" ? assetTypeRaw : "",
     )
-      ? parsed.financial_contract.pricing_model
+      ? (assetTypeRaw as AssetType)
+      : "physical";
+    const pricingRaw = fc.pricing_model;
+    const pricingModel: PricingModel = (PRICING_MODELS as readonly string[]).includes(
+      typeof pricingRaw === "string" ? pricingRaw : "",
+    )
+      ? (pricingRaw as PricingModel)
       : "flat";
 
     const optStr = (v: unknown, max = 500): string | null =>
@@ -457,75 +530,83 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
     const optNum = (v: unknown): number | null =>
       typeof v === "number" && Number.isFinite(v) ? v : null;
     const optStrArr = (v: unknown, max = 20): string[] | null =>
-      Array.isArray(v) ? v.filter((x) => typeof x === "string").slice(0, max) : null;
+      Array.isArray(v)
+        ? v.filter((x): x is string => typeof x === "string").slice(0, max)
+        : null;
+    const toJsonObject = (v: unknown): JsonObject =>
+      isObj(v) ? (JSON.parse(JSON.stringify(v)) as JsonObject) : {};
 
-    const a = parsed?.asset ?? {};
-    const marketing =
-      a?.marketing && typeof a.marketing === "object"
-        ? { short: optStr(a.marketing.short, 200), long: optStr(a.marketing.long, 2000) }
-        : null;
-    const nutrition =
-      a?.nutrition && typeof a.nutrition === "object"
-        ? {
-            kcal: optNum(a.nutrition.kcal),
-            protein_g: optNum(a.nutrition.protein_g),
-            fat_g: optNum(a.nutrition.fat_g),
-            carbs_g: optNum(a.nutrition.carbs_g),
-            sugar_g: optNum(a.nutrition.sugar_g),
-          }
-        : null;
-    const physical =
-      a?.physical && typeof a.physical === "object"
-        ? {
-            net_weight: optNum(a.physical.net_weight),
-            weight_unit: ["g", "kg", "ml", "L", "piece"].includes(a.physical.weight_unit)
-              ? a.physical.weight_unit
+    const marketingRaw = isObj(a.marketing) ? a.marketing : null;
+    const marketing: VisionAssetMarketing | null = marketingRaw
+      ? { short: optStr(marketingRaw.short, 200), long: optStr(marketingRaw.long, 2000) }
+      : null;
+    const nutritionRaw = isObj(a.nutrition) ? a.nutrition : null;
+    const nutrition: VisionAssetNutrition | null = nutritionRaw
+      ? {
+          kcal: optNum(nutritionRaw.kcal),
+          protein_g: optNum(nutritionRaw.protein_g),
+          fat_g: optNum(nutritionRaw.fat_g),
+          carbs_g: optNum(nutritionRaw.carbs_g),
+          sugar_g: optNum(nutritionRaw.sugar_g),
+        }
+      : null;
+    const physicalRaw = isObj(a.physical) ? a.physical : null;
+    const WEIGHT_UNITS: WeightUnit[] = ["g", "kg", "ml", "L", "piece"];
+    const physical: VisionAssetPhysical | null = physicalRaw
+      ? {
+          net_weight: optNum(physicalRaw.net_weight),
+          weight_unit:
+            typeof physicalRaw.weight_unit === "string" &&
+            (WEIGHT_UNITS as string[]).includes(physicalRaw.weight_unit)
+              ? (physicalRaw.weight_unit as WeightUnit)
               : null,
-          }
-        : null;
+        }
+      : null;
+
+    const sanitizedAsset: VisionAssetDTO = {
+      name: String(a.name ?? "أصل بدون اسم").slice(0, 200),
+      description: String(a.description ?? "").slice(0, 2000),
+      asset_type: assetType,
+      traits: Array.isArray(a.traits)
+        ? (a.traits as unknown[]).filter((t): t is string => typeof t === "string").slice(0, 20)
+        : [],
+      category_path: optStr(a.category_path, 200),
+      brand: optStr(a.brand, 120),
+      origin_country: optStr(a.origin_country, 80),
+      marketing,
+      nutrition,
+      physical,
+      allergens: optStrArr(a.allergens, 20),
+    };
+
+    const sanitizedSkus: VisionSkuDTO[] = skusRaw.slice(0, 20).map((sRaw, i) => {
+      const s: Record<string, unknown> = isObj(sRaw) ? sRaw : {};
+      const va = isObj(s.variant_axes) ? s.variant_axes : null;
+      return {
+        sku_code: String(s.sku_code ?? `SKU-${Date.now()}-${i}`).slice(0, 64),
+        attributes: toJsonObject(s.attributes),
+        barcode: optStr(s.barcode, 64),
+        variant_axes: va
+          ? { size: optStr(va.size, 64), flavor: optStr(va.flavor, 64) }
+          : null,
+      };
+    });
+
+    const CURRENCIES: Currency[] = ["EGP", "USD", "EUR"];
+    const sanitizedContract: VisionFinancialContractDTO = {
+      pricing_model: pricingModel,
+      base_price: Math.max(0, Number(fc.base_price) || 0),
+      currency:
+        typeof fc.currency === "string" && (CURRENCIES as string[]).includes(fc.currency)
+          ? (fc.currency as Currency)
+          : "EGP",
+      contract_rules: toJsonObject(fc.contract_rules),
+    };
 
     const sanitized = {
-      asset: {
-        name: String(a?.name ?? "أصل بدون اسم").slice(0, 200),
-        description: String(a?.description ?? "").slice(0, 2000),
-        asset_type: assetType,
-        traits: Array.isArray(a?.traits)
-          ? a.traits.filter((t: unknown) => typeof t === "string").slice(0, 20)
-          : [],
-        category_path: optStr(a?.category_path, 200),
-        brand: optStr(a?.brand, 120),
-        origin_country: optStr(a?.origin_country, 80),
-        marketing,
-        nutrition,
-        physical,
-        allergens: optStrArr(a?.allergens, 20),
-      },
-      skus: Array.isArray(parsed?.skus)
-        ? parsed.skus.slice(0, 20).map((s: any, i: number) => ({
-            sku_code: String(s?.sku_code ?? `SKU-${Date.now()}-${i}`).slice(0, 64),
-            attributes: s?.attributes && typeof s.attributes === "object" ? s.attributes : {},
-            barcode: optStr(s?.barcode, 64),
-            variant_axes:
-              s?.variant_axes && typeof s.variant_axes === "object"
-                ? {
-                    size: optStr(s.variant_axes.size, 64),
-                    flavor: optStr(s.variant_axes.flavor, 64),
-                  }
-                : null,
-          }))
-        : [],
-      financial_contract: {
-        pricing_model: pricingModel,
-        base_price: Math.max(0, Number(parsed?.financial_contract?.base_price) || 0),
-        currency: ["EGP", "USD", "EUR"].includes(parsed?.financial_contract?.currency)
-          ? parsed.financial_contract.currency
-          : "EGP",
-        contract_rules:
-          parsed?.financial_contract?.contract_rules &&
-          typeof parsed.financial_contract.contract_rules === "object"
-            ? parsed.financial_contract.contract_rules
-            : {},
-      },
+      asset: sanitizedAsset,
+      skus: sanitizedSkus,
+      financial_contract: sanitizedContract,
       prompt_version: "v2-multi-provider",
       provider: usedProvider,
       provider_attempts: attempts,
