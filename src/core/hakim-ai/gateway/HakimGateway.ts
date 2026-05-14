@@ -17,33 +17,11 @@ import { predictBasketFn } from "@/core/orders/predict.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
-type GatewayError = { message: string } | null;
-type DynamicTable = {
-  select: (cols?: string) => DynamicTable;
-  insert: (row: Record<string, unknown>) => DynamicTable;
-  update: (row: Record<string, unknown>) => DynamicTable;
-  delete: () => DynamicTable;
-  eq: (col: string, v: unknown) => DynamicTable;
-  order: (col: string, opts?: { ascending?: boolean }) => DynamicTable;
-  limit: (n: number) => DynamicTable;
-  single: () => Promise<{ data: unknown; error: GatewayError }>;
-  then: <T>(cb: (r: { data: unknown; error: GatewayError }) => T) => Promise<T>;
-};
 type DynamicRpc = <T = unknown>(
   name: string,
   args?: Record<string, unknown>,
-) => Promise<{ data: T | null; error: GatewayError }>;
-type DynamicChannel = {
-  on: (...a: unknown[]) => DynamicChannel;
-  subscribe: () => DynamicChannel;
-};
-type DynamicSb = {
-  from: (table: string) => DynamicTable;
-  channel: (name: string) => DynamicChannel;
-  removeChannel: (ch: DynamicChannel) => void;
-};
-const sb = supabase as unknown as DynamicSb;
-const rpc = supabase.rpc.bind(supabase) as unknown as DynamicRpc;
+) => Promise<{ data: T | null; error: { message: string } | null }>;
+const rpcDynamic = supabase.rpc.bind(supabase) as unknown as DynamicRpc;
 
 // ─── Vision Genesis (Product DNA) ────────────────────────────────────────
 
