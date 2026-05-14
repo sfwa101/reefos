@@ -50,7 +50,7 @@ interface RawAsset {
 export default function UsaLedger() {
   const [editing, setEditing] = useState<USARecord | null>(null);
 
-  const metrics = useMemo<BentoMetric[]>(
+  const metrics = useMemo<BentoMetric<USARecord>[]>(
     () => [
       {
         key: "total",
@@ -173,7 +173,8 @@ export default function UsaLedger() {
           select: "id,name,description,asset_type,traits,is_active,created_at,salsabil_skus(id,salsabil_financial_contracts(base_price,currency,pricing_model,is_active,valid_from))",
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["name", "description"],
-          map: (raw: RawAsset): USARecord => {
+          map: (rawRow: unknown): USARecord => {
+            const raw = rawRow as RawAsset;
             const allContracts: RawContract[] = (raw.salsabil_skus ?? [])
               .flatMap((s) => s.salsabil_financial_contracts ?? []);
             const activeContract = allContracts

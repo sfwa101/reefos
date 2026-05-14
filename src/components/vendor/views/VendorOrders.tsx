@@ -101,7 +101,7 @@ export default function VendorOrders() {
     return unsubscribe;
   }, [vendorId, queryClient]);
 
-  const metrics = useMemo<BentoMetric[]>(() => [
+  const metrics = useMemo<BentoMetric<NodeRow>[]>(() => [
     { key: "total", label: "إجمالي الطلبات", icon: Package, tone: "primary", compute: (r) => fmtNum(r.length) },
     { key: "pending", label: "قيد الانتظار", icon: Clock, tone: "warning", compute: (r) => fmtNum(r.filter((x) => x.status === "pending" || x.status === "preparing").length), urgent: (r) => r.some((x) => x.status === "pending") },
     { key: "ready", label: "جاهزة/مشحونة", icon: CheckCircle2, tone: "success", compute: (r) => fmtNum(r.filter((x) => x.status === "prepared" || x.status === "shipped" || x.status === "delivered").length) },
@@ -190,8 +190,9 @@ export default function VendorOrders() {
           select: "id, master_order_id, status, total_amount, created_at, delivery_snapshot, salsabil_fulfillment_items(id)",
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["master_order_id"],
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          map: (raw: any): NodeRow => ({
+          map: (rawRow: unknown): NodeRow => {
+            const raw = rawRow as Record<string, unknown> & { salsabil_fulfillment_items?: unknown[] };
+            return ({
             id: raw.id,
             master_order_id: raw.master_order_id,
             status: raw.status as FulfillmentStatus,

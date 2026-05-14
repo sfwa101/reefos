@@ -32,28 +32,24 @@ const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 }
 export type BentoTone =
   | "primary" | "info" | "success" | "warning" | "accent" | "purple" | "pink" | "teal" | "indigo";
 
-// Public API surface — `BentoMetric.compute/urgent` accept `any[]` to remain
-// assignable across all admin/vendor row shapes (USARecord, NodeRow, Driver,
-// Zone, etc. — none of which extend `Record<string, unknown>`). Tightening
-// these to a generic `<T>` would force every caller to pass an explicit type
-// argument; tightening to `unknown[]` breaks every caller's narrowed
-// `(rows: MyRow[]) => …` arrow. Both options are non-local refactors and
-// out-of-scope for Wave P-9 Batch D. Tracked for a future Layer-6 sweep.
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyRow = any;
-
-export type BentoMetric = {
+/**
+ * BentoMetric — Wave P-10 generic migration.
+ * `TRow` defaults to `unknown`, so callers that don't care about row shape
+ * still typecheck. Callers that pass `<UniversalAdminGrid<MyRow>` get
+ * fully-typed `compute`/`urgent` callbacks via contextual inference.
+ */
+export interface BentoMetric<TRow = unknown> {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: AnyRow[]) => string | number;
-  urgent?: (rows: AnyRow[]) => boolean;
+  /** Method shorthand for bivariant params — accepts narrower row arrays. */
+  compute?(rows: TRow[]): string | number;
+  urgent?(rows: TRow[]): boolean;
   to?: string;
-};
+}
 
-export type Column<T = AnyRow> = {
+export type Column<T = unknown> = {
   key: string;
   label?: string;
   render?: (row: T) => ReactNode;
@@ -61,14 +57,14 @@ export type Column<T = AnyRow> = {
   hideOnMobile?: boolean;
 };
 
-export type RowAction<T = AnyRow> = {
+export type RowAction<T = unknown> = {
   label: string;
   onClick: (row: T) => void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
 
-export type DataSource<T = AnyRow> = {
+export type DataSource<T = unknown> = {
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
@@ -76,7 +72,7 @@ export type DataSource<T = AnyRow> = {
   limit?: number;
   fetcher?: () => Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?: (row: AnyRow) => T;
+  map?: (row: unknown) => T;
 };
 
 export type EmptyState = {
@@ -85,10 +81,10 @@ export type EmptyState = {
   hint?: string;
 };
 
-export type UniversalAdminGridProps<T = AnyRow> = {
+export type UniversalAdminGridProps<T = unknown> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric[];
+  metrics?: BentoMetric<T>[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
   rowKey?: (row: T) => string;
@@ -118,28 +114,34 @@ const TONE: Record<BentoTone, string> = {
 
 function BentoTile({
   metric, value, urgent,
-}: { metric: BentoMetric; value: string | number; urgent?: boolean }) {
+}: { metric: BentoMetric<unknown>; value: string | number; urgent?: boolean }) {
   const Icon = metric.icon;
   const tone = TONE[metric.tone ?? "primary"];
-  const Wrapper: any = metric.to ? Link : "div";
-  const wrapperProps = metric.to ? { to: metric.to } : {};
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className={cn(
-        "group relative overflow-hidden rounded-3xl p-4 bg-card border shadow-soft transition-all press",
-        urgent ? "border-[hsl(var(--accent))]/40" : "border-border/50",
-        metric.to ? "hover:shadow-tile hover:-translate-y-0.5" : "",
-      )}
-    >
+  const className = cn(
+    "group relative overflow-hidden rounded-3xl p-4 bg-card border shadow-soft transition-all press",
+    urgent ? "border-[hsl(var(--accent))]/40" : "border-border/50",
+    metric.to ? "hover:shadow-tile hover:-translate-y-0.5" : "",
+  );
+  const inner = (
+    <>
       <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br text-white flex items-center justify-center mb-3 shadow-sm", tone)}>
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.5} />
       </div>
       <p className="text-[11px] text-foreground-tertiary leading-tight">{metric.label}</p>
       <p className="font-display text-[20px] num leading-tight mt-0.5">{value}</p>
       {urgent && <span className="absolute top-3 left-3 h-2 w-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />}
-    </Wrapper>
+    </>
   );
+  if (metric.to) {
+    // Admin metric `to` strings are runtime route paths; bypass Link's
+    // compile-time route-union constraint here only.
+    return (
+      <Link to={metric.to as never} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={className}>{inner}</div>;
 }
 
 // -------- Debounce hook --------

@@ -51,7 +51,7 @@ export default function VendorCatalog() {
   const [selectedAsset, setSelectedAsset] = useState<CatalogRow | null>(null);
   const [quantity, setQuantity] = useState<string>("");
 
-  const metrics = useMemo<BentoMetric[]>(() => [
+  const metrics = useMemo<BentoMetric<CatalogRow>[]>(() => [
     { key: "total", label: "إجمالي الأصول", icon: Library, tone: "primary", compute: (rows) => fmtNum(rows.length) },
     { key: "physical", label: "أصول مادية", icon: Sparkles, tone: "info", compute: (rows) => fmtNum(rows.filter((r) => r.asset_type === "physical").length) },
   ], []);
@@ -151,7 +151,8 @@ export default function VendorCatalog() {
           select: "id,name,description,asset_type,is_active,created_at,salsabil_skus(id),salsabil_financial_contracts(base_price,currency,is_active,valid_from)",
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["name", "description"],
-          map: (raw: RawAsset): CatalogRow => {
+          map: (rawRow: unknown): CatalogRow => {
+            const raw = rawRow as RawAsset;
             const activeContract = (raw.salsabil_financial_contracts ?? [])
               .filter((c) => c.is_active)
               .sort((a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime())[0];
