@@ -32,7 +32,7 @@ import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 import { SovereignSpiritBootstrap } from "@/core/spirit/SovereignSpiritBootstrap";
 import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core/spirit/SovereignDormancyOverlay";
-import { TenantProvider } from "@/context/TenantContext";
+
 import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
 // Wave P-0 — DEV-only Constitution Article 3 watchdog (no-op in prod).
 import "@/core/runtime-ui/watchdog.bootstrap";
@@ -174,7 +174,7 @@ function RootComponent() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        <TenantProvider>
+        
         <ThemeProvider>
           <LocaleProvider>
           <UIProvider>
@@ -209,7 +209,7 @@ function RootComponent() {
           </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
-        </TenantProvider>
+        
         {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
         {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
