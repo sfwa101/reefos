@@ -1,9 +1,8 @@
-// @constitutional-exemption: Article 5 — realtime subscription requires the
-// browser Supabase client. Encapsulated here so admin UI components stay
-// pure presentation. Initial fetch flows through the sovereign gateway.
+// Live admin event-timeline stream. Realtime channel is vended by
+// RealtimeGateway; initial fetch flows through the sovereign server fn.
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { supabase } from "@/integrations/supabase/client";
+import { RealtimeGateway } from "@/core/events/gateway/RealtimeGateway";
 import { listEventTimelineFn, type SovereignEventRow } from "@/lib/sovereign.functions";
 
 export type LiveTimelineEvent = SovereignEventRow;
@@ -24,21 +23,14 @@ export function useLiveEventStream(limit: number = 20) {
       }
     })();
 
-    const channel = supabase
-      .channel("admin-event-stream")
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "salsabil_event_timeline" },
-        (payload) => {
-          const row = payload.new as LiveTimelineEvent;
-          setEvents((prev) => [row, ...prev].slice(0, limit));
-        },
-      )
-      .subscribe((status) => setConnected(status === "SUBSCRIBED"));
+    const sub = RealtimeGateway.subscribeLiveEventStream<LiveTimelineEvent>({
+      onInsert: (row) => setEvents((prev) => [row, ...prev].slice(0, limit)),
+      onStatus: (subscribed) => setConnected(subscribed),
+    });
 
     return () => {
       cancelled = true;
-      supabase.removeChannel(channel);
+      sub.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [limit]);
