@@ -55,31 +55,17 @@ export const useVendorSettlement = () => {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const sb = supabase as any;
-    const [w, l, r] = await Promise.all([
-      sb
-        .from("vendor_wallets")
-        .select("*, vendors(name)"),
-      sb
-        .from("vendor_wallet_transactions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(80),
-      sb
-        .from("vendor_payout_requests")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
+    const { wallets: w, ledger: l, requests: r } =
+      await VendorGateway.loadSettlementSnapshot();
 
     setWallets(
-      (w.data ?? []).map((row: any) => ({
+      (w ?? []).map((row: any) => ({
         ...row,
         vendor_name: row.vendors?.name ?? null,
-      })),
+      })) as VendorWalletRow[],
     );
-    setLedger(l.data ?? []);
-    setRequests(r.data ?? []);
+    setLedger((l ?? []) as unknown as VendorLedgerRow[]);
+    setRequests((r ?? []) as unknown as VendorPayoutRequestRow[]);
     setLoading(false);
   }, []);
 
