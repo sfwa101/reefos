@@ -352,8 +352,9 @@ export function UniversalAdminGrid<T = any>({
             >
               <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
                 {items.map((vi) => {
-                  const row: any = filtered[vi.index];
-                  const key = rowKey ? rowKey(row) : (row?.id ?? vi.index);
+                  const row = filtered[vi.index] as T;
+                  const rowRecord = row as Record<string, unknown>;
+                  const key = rowKey ? rowKey(row) : ((rowRecord?.id as string | number | undefined) ?? vi.index);
                   return (
                     <div
                       key={key}
@@ -383,7 +384,7 @@ export function UniversalAdminGrid<T = any>({
                             col.className ?? "flex-1",
                           )}
                         >
-                          {col.render ? col.render(row) : <span className="text-[13.5px]">{String(row?.[col.key] ?? "—")}</span>}
+                          {col.render ? col.render(row) : <span className="text-[13.5px]">{String(rowRecord?.[col.key] ?? "—")}</span>}
                         </div>
                       ))}
                       {rowActions?.length ? (
@@ -430,12 +431,12 @@ export function UniversalAdminGrid<T = any>({
  * Computes m.compute(filtered) ONCE per [metrics, filtered] tuple instead of
  * on every virtualizer scroll re-render of the parent grid.
  */
-const BentoMetricsRow = memo(function BentoMetricsRow({
+function BentoMetricsRowImpl<T>({
   metrics,
   filtered,
 }: {
-  metrics: BentoMetric[];
-  filtered: any[];
+  metrics: BentoMetric<T>[];
+  filtered: T[];
 }) {
   const computed = useMemo(
     () =>
@@ -453,6 +454,12 @@ const BentoMetricsRow = memo(function BentoMetricsRow({
       ))}
     </div>
   );
-});
+}
+/**
+ * Phase U — Memoized Bento metrics row.
+ * `memo` strips generics — re-cast to the generic impl so callers get
+ * fully-typed `BentoMetric<T>[]` props.
+ */
+const BentoMetricsRow = memo(BentoMetricsRowImpl) as typeof BentoMetricsRowImpl;
 
 export default UniversalAdminGrid;

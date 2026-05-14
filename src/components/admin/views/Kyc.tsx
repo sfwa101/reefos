@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, Clock, Eye } from "lucide-react";
-import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
+import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { getKycSignedUrlsFn, updateKycStatusFn } from "@/core/hr/hr.functions";
 import { fmtNum } from "@/lib/format";
 import { toast } from "sonner";
@@ -58,9 +58,40 @@ export default function KycAdmin() {
     }
   };
 
+  const metrics: BentoMetric<KycRow>[] = [
+    { key: "pending", label: "قيد المراجعة", icon: Clock, tone: "warning",
+      compute: (rows) => fmtNum(rows.filter((r) => r.status === "pending").length),
+      urgent: (rows) => rows.some((r) => r.status === "pending") },
+    { key: "approved", label: "موثّقون", icon: ShieldCheck, tone: "success",
+      compute: (rows) => fmtNum(rows.filter((r) => r.status === "approved" || r.status === "verified").length) },
+    { key: "rejected", label: "مرفوضون", icon: ShieldX, tone: "accent",
+      compute: (rows) => fmtNum(rows.filter((r) => r.status === "rejected").length) },
+    { key: "total", label: "إجمالي الطلبات", icon: ShieldAlert, tone: "info",
+      compute: (rows) => fmtNum(rows.length) },
+  ];
+
+  const columns: Column<KycRow>[] = [
+    { key: "national_id", className: "flex-1", render: (r) => (
+      <>
+        <p className="text-[13.5px] font-medium font-mono">{r.national_id ?? "—"}</p>
+        <p className="text-[11px] text-foreground-tertiary">{new Date(r.submitted_at).toLocaleDateString("ar-EG")}</p>
+      </>
+    ) },
+    { key: "status", className: "shrink-0", render: (r) => {
+      const s = STATUS[r.status] ?? STATUS.pending;
+      return <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${s.cls}`}>{s.label}</span>;
+    } },
+  ];
+
+  const rowActions: RowAction<KycRow>[] = [
+    { label: "عرض", icon: Eye, onClick: (r) => openDocs(r) },
+    { label: "توثيق", tone: "success", onClick: (r) => update(r.id, "approved") },
+    { label: "رفض", tone: "destructive", onClick: (r) => update(r.id, "rejected") },
+  ];
+
   return (
     <>
-      <UniversalAdminGrid
+      <UniversalAdminGrid<KycRow>
         key={refreshKey}
         title="التحقق KYC"
         subtitle="مراجعة طلبات توثيق الهوية الوطنية"
@@ -70,34 +101,9 @@ export default function KycAdmin() {
           orderBy: { column: "submitted_at", ascending: false },
           searchKeys: ["national_id", "status"],
         }}
-        metrics={[
-          { key: "pending", label: "قيد المراجعة", icon: Clock, tone: "warning",
-            compute: (rows) => fmtNum(rows.filter((r: any) => r.status === "pending").length),
-            urgent: (rows) => rows.some((r: any) => r.status === "pending") },
-          { key: "approved", label: "موثّقون", icon: ShieldCheck, tone: "success",
-            compute: (rows) => fmtNum(rows.filter((r: any) => r.status === "approved" || r.status === "verified").length) },
-          { key: "rejected", label: "مرفوضون", icon: ShieldX, tone: "accent",
-            compute: (rows) => fmtNum(rows.filter((r: any) => r.status === "rejected").length) },
-          { key: "total", label: "إجمالي الطلبات", icon: ShieldAlert, tone: "info",
-            compute: (rows) => fmtNum(rows.length) },
-        ]}
-        columns={[
-          { key: "national_id", className: "flex-1", render: (r: any) => (
-            <>
-              <p className="text-[13.5px] font-medium font-mono">{r.national_id ?? "—"}</p>
-              <p className="text-[11px] text-foreground-tertiary">{new Date(r.submitted_at).toLocaleDateString("ar-EG")}</p>
-            </>
-          ) },
-          { key: "status", className: "shrink-0", render: (r: any) => {
-            const s = STATUS[r.status] ?? STATUS.pending;
-            return <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${s.cls}`}>{s.label}</span>;
-          } },
-        ]}
-        rowActions={[
-          { label: "عرض", icon: Eye, onClick: (r: any) => openDocs(r) },
-          { label: "توثيق", tone: "success", onClick: (r: any) => update(r.id, "approved") },
-          { label: "رفض", tone: "destructive", onClick: (r: any) => update(r.id, "rejected") },
-        ]}
+        metrics={metrics}
+        columns={columns}
+        rowActions={rowActions}
         searchPlaceholder="ابحث برقم الهوية..."
         empty={{ title: "لا توجد طلبات توثيق", hint: "ستظهر هنا فور تقديمها." }}
       />

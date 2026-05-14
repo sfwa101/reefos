@@ -192,15 +192,16 @@ export default function VendorOrders() {
           searchKeys: ["master_order_id"],
           map: (rawRow: unknown): NodeRow => {
             const raw = rawRow as Record<string, unknown> & { salsabil_fulfillment_items?: unknown[] };
-            return ({
-            id: raw.id,
-            master_order_id: raw.master_order_id,
-            status: raw.status as FulfillmentStatus,
-            total_amount: Number(raw.total_amount ?? 0),
-            items_count: (raw.salsabil_fulfillment_items ?? []).length,
-            created_at: raw.created_at,
-            delivery_snapshot: (raw.delivery_snapshot ?? null) as DeliverySnapshot | null,
-          }),
+            return {
+              id: raw.id as string,
+              master_order_id: raw.master_order_id as string,
+              status: raw.status as FulfillmentStatus,
+              total_amount: Number(raw.total_amount ?? 0),
+              items_count: (raw.salsabil_fulfillment_items ?? []).length,
+              created_at: raw.created_at as string,
+              delivery_snapshot: (raw.delivery_snapshot ?? null) as DeliverySnapshot | null,
+            };
+          },
         }}
         rowKey={(r) => r.id}
       />

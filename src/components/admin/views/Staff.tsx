@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users, ShieldCheck, Truck, Store, Plus } from "lucide-react";
-import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
+import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
 import {
   listStaffProfilesFn,
@@ -76,12 +76,19 @@ export default function StaffAdmin() {
     return () => { alive = false; };
   }, [editing]);
 
-  const onAdd = () => setEditing({ role: "staff", is_active: true });
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onEdit = (r: any) => setEditing({ id: r.id, user_id: r.user_id, role: r.role, is_active: r.is_active });
+  type RoleRow = {
+    id: string;
+    user_id: string;
+    role: string;
+    is_active: boolean;
+    created_at: string;
+    branch_id: string | null;
+  };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const onDelete = async (r: any) => {
+  const onAdd = () => setEditing({ role: "staff", is_active: true });
+  const onEdit = (r: RoleRow) => setEditing({ id: r.id, user_id: r.user_id, role: r.role as AppRole, is_active: r.is_active });
+
+  const onDelete = async (r: RoleRow) => {
     if (!confirm(`حذف دور ${ROLE_LABEL[r.role] ?? r.role}؟`)) return;
     try {
       await revokeRoleFn({ data: { role_id: r.id, role: r.role } });
@@ -126,9 +133,44 @@ export default function StaffAdmin() {
       )
     : profiles;
 
+  const metrics: BentoMetric<RoleRow>[] = [
+    { key: "total", label: "إجمالي الموظفين", icon: Users, tone: "primary",
+      compute: (rows) => fmtNum(rows.filter((r) => r.is_active).length) },
+    { key: "delivery", label: "التوصيل", icon: Truck, tone: "purple",
+      compute: (rows) => fmtNum(rows.filter((r) => ["delivery","driver","collector"].includes(r.role)).length) },
+    { key: "cashiers", label: "الكاشيرز", icon: Store, tone: "warning",
+      compute: (rows) => fmtNum(rows.filter((r) => r.role === "cashier").length) },
+    { key: "managers", label: "المدراء", icon: ShieldCheck, tone: "info",
+      compute: (rows) => fmtNum(rows.filter((r) => ["admin","store_manager","branch_manager","super_admin","finance"].includes(r.role)).length) },
+  ];
+
+  const columns: Column<RoleRow>[] = [
+    { key: "user_id", className: "flex-1", render: (r) => (
+      <>
+        <p className="text-[13px] font-mono">{String(r.user_id).slice(0, 8)}…</p>
+        <p className="text-[11px] text-foreground-tertiary">منذ {new Date(r.created_at).toLocaleDateString("ar-EG")}</p>
+      </>
+    ) },
+    { key: "role", className: "shrink-0", render: (r) => (
+      <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${ROLE_TONE[r.role] ?? "bg-muted text-foreground-secondary"}`}>
+        {ROLE_LABEL[r.role] ?? r.role}
+      </span>
+    ) },
+    { key: "is_active", className: "shrink-0", hideOnMobile: true, render: (r) => (
+      <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${r.is_active ? "bg-success/15 text-success" : "bg-muted text-foreground-tertiary"}`}>
+        {r.is_active ? "نشط" : "موقوف"}
+      </span>
+    ) },
+  ];
+
+  const rowActions: RowAction<RoleRow>[] = [
+    { label: "تعديل", onClick: onEdit },
+    { label: "حذف", tone: "destructive", onClick: onDelete },
+  ];
+
   return (
     <>
-      <UniversalAdminGrid
+      <UniversalAdminGrid<RoleRow>
         key={refreshKey}
         title="الموظفون"
         subtitle="إدارة أدوار وصلاحيات النظام"
@@ -138,16 +180,7 @@ export default function StaffAdmin() {
           orderBy: { column: "created_at", ascending: false },
           searchKeys: ["role", "user_id"],
         }}
-        metrics={[
-          { key: "total", label: "إجمالي الموظفين", icon: Users, tone: "primary",
-            compute: (rows) => fmtNum(rows.filter((r: any) => r.is_active).length) },
-          { key: "delivery", label: "التوصيل", icon: Truck, tone: "purple",
-            compute: (rows) => fmtNum(rows.filter((r: any) => ["delivery","driver","collector"].includes(r.role)).length) },
-          { key: "cashiers", label: "الكاشيرز", icon: Store, tone: "warning",
-            compute: (rows) => fmtNum(rows.filter((r: any) => r.role === "cashier").length) },
-          { key: "managers", label: "المدراء", icon: ShieldCheck, tone: "info",
-            compute: (rows) => fmtNum(rows.filter((r: any) => ["admin","store_manager","branch_manager","super_admin","finance"].includes(r.role)).length) },
-        ]}
+        metrics={metrics}
         topSlot={
           <div className="flex justify-end">
             <button
@@ -159,28 +192,8 @@ export default function StaffAdmin() {
             </button>
           </div>
         }
-        columns={[
-          { key: "user_id", className: "flex-1", render: (r: any) => (
-            <>
-              <p className="text-[13px] font-mono">{String(r.user_id).slice(0, 8)}…</p>
-              <p className="text-[11px] text-foreground-tertiary">منذ {new Date(r.created_at).toLocaleDateString("ar-EG")}</p>
-            </>
-          ) },
-          { key: "role", className: "shrink-0", render: (r: any) => (
-            <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${ROLE_TONE[r.role] ?? "bg-muted text-foreground-secondary"}`}>
-              {ROLE_LABEL[r.role] ?? r.role}
-            </span>
-          ) },
-          { key: "is_active", className: "shrink-0", hideOnMobile: true, render: (r: any) => (
-            <span className={`text-[10.5px] px-2 py-1 rounded-full font-semibold ${r.is_active ? "bg-success/15 text-success" : "bg-muted text-foreground-tertiary"}`}>
-              {r.is_active ? "نشط" : "موقوف"}
-            </span>
-          ) },
-        ]}
-        rowActions={[
-          { label: "تعديل", onClick: onEdit },
-          { label: "حذف", tone: "destructive", onClick: onDelete },
-        ]}
+        columns={columns}
+        rowActions={rowActions}
         searchPlaceholder="ابحث بالدور أو user_id..."
         empty={{ title: "لا يوجد موظفون", hint: "اضغط 'إسناد دور' لإضافة موظف." }}
       />
