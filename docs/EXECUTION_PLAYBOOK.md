@@ -102,7 +102,69 @@
 4. أضف RLS policies تستخدم `has_role(auth.uid(), '<new_role>')`.
 5. أنشئ `RoleGuard` UI متخصص لو احتاجت الواجهة.
 
----
+### 🟠 W7 — إنشاء Server Function جديدة (Sovereign Workspace Pattern)
+
+> **القانون الأعلى (Constitution Ch. 17 — Zero Trust Identity):** كل server function تلمس بيانات مرتبطة بمساحة عمل **يجب** أن تُركَّب فوق `requireWorkspace`. لا تقبل `workspaceId` كمدخل من العميل أبداً — اقرأه من `context.workspaceId` فقط.
+
+1. أنشئ الملف بصيغة `*.functions.ts` (مثلاً: `src/core/<domain>/<feature>.functions.ts`). **لا تضعه تحت `src/server/`** — تلك الحماية تمنع استيراده من العميل.
+2. اكتب الـ chain بالترتيب الإلزامي: `createServerFn → middleware → inputValidator → handler`.
+3. اقرأ `workspaceId` و`userId` من `context` فقط. ارفض أي field اسمه `workspaceId` في الـ Zod schema للمدخلات.
+4. أعد DTO نظيف (objects/strings/numbers/null) — لا Response، لا streams، لا instances.
+5. للقراءة العامة (لا تحتاج هوية): استخدم `requireSupabaseAuth` فقط بدلاً من `requireWorkspace`.
+
+```typescript
+// src/core/orders/orders.functions.ts
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireWorkspace } from "@/core/identity/workspace-middleware";
+
+const ListOrdersInput = z.object({
+  status: z.enum(["pending", "fulfilled"]).optional(),
+  // ❌ NEVER add workspaceId here — it comes from the JWT, not the client.
+});
+
+export const listMyOrders = createServerFn({ method: "GET" })
+  .middleware([requireWorkspace])
+  .inputValidator((d) => ListOrdersInput.parse(d))
+  .handler(async ({ data, context }) => {
+    const { supabase, userId, workspaceId } = context;
+    const q = supabase.from("orders")
+      .select("id, total_cents, status, created_at")
+      .eq("workspace_id", workspaceId)   // ✅ trusted source
+      .eq("user_id", userId);
+    if (data.status) q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return { orders: rows ?? [] };
+  });
+```
+
+**Wiring check (one-time per project):** تأكد أن `attachSupabaseAuth` مسجَّل ضمن `functionMiddleware` في `src/start.ts` — بدونه، يفشل كل استدعاء بـ `Unauthorized: No authorization header provided`.
+
+### 🟤 W8 — Frontend Data Fetching (Workspace-Bound Queries)
+
+> كل `useQuery` يلامس بيانات مساحة العمل **يجب** أن يستخدم `workspaceQueryKey()` كـ prefix و`enabled: getWorkspaceIdSync() !== null` كحارس hydration. هذا يضمن: (1) الكاش مُقسَّم بمساحة العمل في IndexedDB، (2) لا queries تنطلق قبل اكتمال `whoAmI`.
+
+```typescript
+import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
+import { listMyOrders } from "@/core/orders/orders.functions";
+
+export function useMyOrders(status?: "pending" | "fulfilled") {
+  const fetchOrders = useServerFn(listMyOrders);
+  return useQuery({
+    queryKey: workspaceQueryKey("orders", "list", { status }),
+    enabled: getWorkspaceIdSync() !== null,           // ✅ hydration guard
+    queryFn: () => fetchOrders({ data: { status } }),
+  });
+}
+```
+
+**Invalidation:** استخدم نفس الشكل — `qc.invalidateQueries({ queryKey: workspaceQueryKey("orders") })` يُبطِل كل ما تحت `["workspace", <id>, "orders", ...]` لمساحة العمل الحالية فقط.
+
+**ممنوع منعاً باتاً:** أي بناء يدوي للمفتاح بشكل `["tenant", ...]` أو `["workspace", "hard-coded-id", ...]`. أي استيراد من `@/context/TenantContext` أو `@/lib/tenantScope` (الملفان محذوفان منذ Wave P-7 Batch E).
+
 
 ## 3. Pre-Commit Checklist
 
@@ -201,6 +263,9 @@ if (!adminHost && location.pathname.startsWith("/admin")) {
 | تعديل `src/routeTree.gen.ts` | أنشئ ملف route، الـ plugin يولّده |
 | `CHECK (expire_at > now())` في DB | استبدله بـ trigger BEFORE INSERT/UPDATE |
 | RLS: `USING (true)` لـ UPDATE | `USING (auth.uid() = user_id)` أو `has_role(...)` |
+| استنتاج `workspaceId` من `window.location` / `localStorage` / `import.meta.env` / args من العميل (Ch. 17 violation) | `context.workspaceId` داخل handler عبر `requireWorkspace`، و`getWorkspaceIdSync()` على العميل |
+| `useQuery({ queryKey: ["tenant", id, ...] })` أو استيراد من `@/context/TenantContext` | `workspaceQueryKey(...)` + `enabled: getWorkspaceIdSync() !== null` (راجع W8) |
+| `createServerFn(...).handler(...).inputValidator(...)` (chain مكسور) | الترتيب الإلزامي: `middleware → inputValidator → handler` |
 
 ---
 

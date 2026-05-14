@@ -3,6 +3,8 @@
 > Subordinate to `SYSTEM_CONSTITUTION.md`.
 > Governs every payload that is composed, transmitted, validated, or rendered at runtime: SDUI descriptors, ViewModels, AI outputs, event payloads, gateway responses.
 
+> **Cross-reference — Chapter 17 (Zero Trust Identity, [`ZERO_TRUST_IDENTITY.md`](./ZERO_TRUST_IDENTITY.md)):** every schema validator that touches workspace-scoped data **MUST** treat `workspaceId` as a server-attested value sourced exclusively from the JWT claim via `requireWorkspace` middleware. Validators **MUST NOT** accept `workspaceId` (or any equivalent tenant identifier) as a client-supplied input field — if such a field appears in an incoming payload, the validator must reject it. Schemas describing persisted rows MAY include a `workspace_id` column for storage shape, but the runtime value is always overwritten by `context.workspaceId` at the gateway boundary.
+
 ---
 
 ## 1. Core Doctrine

@@ -18,7 +18,7 @@
 | **runtime-ui** | SDUI descriptors, blocks, renderer, resolvers | `src/core/runtime-ui/`, `src/core-os/sdui-engine/` |
 | **ai** | Hakim advisors, generation gateways, governance | `src/core-os/hakim-ai/`, `supabase/functions/hakim-*` |
 | **observability** | Tracing, audit, behavior events | `src/core-os/event-bus/`, `src/lib/sovereignTracing.ts` |
-| **tenancy** | Workspaces, multi-tenant scoping | `src/context/TenantContext.tsx`, server membership |
+| **identity** | Server-attested workspace identity, JWT claims, hydration | `src/core/identity/workspace.ts`, `workspace-middleware.ts`, `whoami.functions.ts` (see Constitution Ch. 17 — Zero Trust Identity) |
 
 Each domain is a **cell**. Cells have membranes; communication crosses only through approved channels.
 

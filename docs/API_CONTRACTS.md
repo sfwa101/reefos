@@ -35,8 +35,33 @@
 
 ## 2. Server Functions
 
-> الموقع: `src/server/*.functions.ts`
-> الاستدعاء: من components مباشرة، type-safe، يمر عبر `requireSupabaseAuth` middleware عند الحاجة.
+> الموقع: `src/**/*.functions.ts` (لا تضع ملفات تستدعيها الواجهة تحت `src/server/`).
+> الاستدعاء: من components مباشرة، type-safe، يمر عبر `requireSupabaseAuth` أو `requireWorkspace` middleware عند الحاجة.
+
+### 2.0 Canonical Identity Oracle — `whoAmI`
+
+> **المصدر الوحيد للحقيقة لهوية مساحة العمل على العميل.** (See Constitution Ch. 17 — Zero Trust Identity, ADR-0002.)
+
+```typescript
+// src/core/identity/whoami.functions.ts
+export const whoAmI = createServerFn({ method: "GET" })
+  .middleware([requireWorkspace])
+  .handler(async ({ context }): Promise<{ userId: string; workspaceId: string }> => ({
+    userId: context.userId,
+    workspaceId: context.workspaceId,
+  }));
+```
+
+| الخاصية | القيمة |
+|---|---|
+| **Inputs** | لا شيء — العميل لا يُمرر `workspaceId` أبداً |
+| **Output DTO** | `{ userId: string; workspaceId: string }` (سلسلتان فقط — لا objects، لا تواريخ) |
+| **Auth** | إلزامي. JWT بدون `workspace_id` claim → 401 |
+| **Trust root** | `app_metadata.workspace_id` المُحقَن بواسطة `custom_access_token_hook` |
+| **استخدامه** | يُستدعى مرة واحدة من `<WorkspaceHydrationBootstrap />` في `__root.tsx` ليُغذِّي `hydrateWorkspaceId(...)` في الـ in-memory store |
+| **Forbidden callers** | لا يجوز استدعاؤه من loaders تابعة لروترات عامة (سيفشل SSR/prerender بـ 401). الاستدعاء من component فقط، أو من تحت `_authenticated/`. |
+
+`whoAmI` هو **الجهة الوحيدة** المخوّلة لتعبئة `getWorkspaceIdSync()`. أي محاولة لاستنتاج هوية مساحة العمل من `window.location`، `localStorage`، `import.meta.env`، أو وسائط مُمرَّرة من العميل — تُعتبر خرقاً دستورياً (Ch. 17).
 
 ### 2.1 نمط القراءة المحمية (Authenticated Read)
 
