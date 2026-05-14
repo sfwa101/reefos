@@ -128,7 +128,7 @@ export function MorphingPOS(props: MorphingPOSProps) {
         <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2 text-[13px]">
           <span className="text-foreground-secondary">Total</span>
           <span className="font-semibold tabular-nums">
-            {fmtMoney(totals.grand_total, currency)}
+            {fmtMoney(totals.grand_total)} {currency}
           </span>
         </div>
       </IOSCard>
