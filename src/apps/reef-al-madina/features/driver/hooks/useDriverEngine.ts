@@ -251,10 +251,7 @@ export const useDriverEngine = (): DriverEngine => {
         }
       }
 
-      const { error } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .update(patch)
-        .eq("id", nodeId);
+      const { error } = await DriverGateway.updateFulfillmentNode(nodeId, patch);
       setBusyTaskId(null);
 
       if (error) {
