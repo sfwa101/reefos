@@ -36,7 +36,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import type {
   Product,
   ProductSource,
-} from "./legacyProduct.types";
+} from "../legacyProduct.types";
 
 // PRODUCTS_QUERY_KEY now lives in `@/hooks/useProductsQuery` (Step B-5).
 // Re-exported here so existing callers keep compiling.

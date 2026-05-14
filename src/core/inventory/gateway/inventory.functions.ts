@@ -18,13 +18,13 @@ import {
   commitReservationEvent,
   releaseReservationEvent,
   type InventoryStateSnapshot,
-} from "../domain/InventoryBrain";
+} from "@/core/commerce/inventory/InventoryBrain";
 import type {
   InventoryReservation,
   ReservationItem,
   StockLedgerEvent,
   StockLedgerEventType,
-} from "../domain/types";
+} from "@/core/commerce/inventory/types";
 
 const RESERVATION_TTL_MS = 15 * 60 * 1000;
 const SUPPORTS_BACKORDER = false;
