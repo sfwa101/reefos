@@ -10,7 +10,7 @@ import {
   useQueryClient,
   type UseQueryOptions,
 } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 // -------------------- Types --------------------
 
@@ -66,12 +66,7 @@ export function useWalletQuery(
     queryKey: tayseerKeys.wallet(walletId ?? "none"),
     enabled: !!walletId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("wallets")
-        .select("id,user_id,balance,currency,status,created_at,updated_at")
-        .eq("id", walletId!)
-        .maybeSingle();
-      if (error) throw error;
+      const data = await FinanceGateway.getWalletById(walletId!);
       return (data as Wallet | null) ?? null;
     },
     staleTime: 15_000,
@@ -95,25 +90,17 @@ export function useLedgerQuery(filters: LedgerFilters = {}) {
     initialPageParam: 0,
     queryFn: async ({ pageParam }) => {
       const offset = (pageParam as number) * pageSize;
-      let q = supabase
-        .from("ledger_entries")
-        .select(
-          "id,wallet_id,transaction_group_id,amount,currency,description,idempotency_key,counterparty_wallet_id,created_at",
-          { count: "exact" },
-        )
-        .order("created_at", { ascending: false })
-        .range(offset, offset + pageSize - 1);
-
-      if (filters.walletId) q = q.eq("wallet_id", filters.walletId);
-      if (filters.from) q = q.gte("created_at", filters.from);
-      if (filters.to) q = q.lte("created_at", filters.to);
-
-      const { data, error, count } = await q;
-      if (error) throw error;
+      const { data, count } = await FinanceGateway.listLedgerEntriesPaginated({
+        walletId: filters.walletId,
+        from: filters.from,
+        to: filters.to,
+        offset,
+        pageSize,
+      });
       return {
-        rows: (data ?? []) as LedgerEntry[],
-        nextPage: (data?.length ?? 0) === pageSize ? (pageParam as number) + 1 : null,
-        total: count ?? 0,
+        rows: data as LedgerEntry[],
+        nextPage: data.length === pageSize ? (pageParam as number) + 1 : null,
+        total: count,
       };
     },
     getNextPageParam: (last) => last.nextPage,
@@ -127,16 +114,7 @@ export function useTransferMutation() {
   const qc = useQueryClient();
   return useMutation<string, Error, TransferInput>({
     mutationFn: async (input) => {
-      const { data, error } = await supabase.rpc("tayseer_transfer_funds", {
-        sender_wallet_id: input.sender_wallet_id,
-        receiver_wallet_id: input.receiver_wallet_id,
-        transfer_amount: input.transfer_amount,
-        transfer_currency: input.transfer_currency,
-        idempotency_key: input.idempotency_key,
-        transfer_description: input.transfer_description ?? undefined,
-      });
-      if (error) throw error;
-      return data as string; // transaction_group_id
+      return await FinanceGateway.tayseerTransferFunds(input);
     },
     onSuccess: (_groupId, vars) => {
       qc.invalidateQueries({ queryKey: tayseerKeys.wallet(vars.sender_wallet_id) });
