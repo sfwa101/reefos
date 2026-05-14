@@ -113,28 +113,34 @@ const TONE: Record<BentoTone, string> = {
 
 function BentoTile({
   metric, value, urgent,
-}: { metric: BentoMetric; value: string | number; urgent?: boolean }) {
+}: { metric: BentoMetric<unknown>; value: string | number; urgent?: boolean }) {
   const Icon = metric.icon;
   const tone = TONE[metric.tone ?? "primary"];
-  const Wrapper: any = metric.to ? Link : "div";
-  const wrapperProps = metric.to ? { to: metric.to } : {};
-  return (
-    <Wrapper
-      {...wrapperProps}
-      className={cn(
-        "group relative overflow-hidden rounded-3xl p-4 bg-card border shadow-soft transition-all press",
-        urgent ? "border-[hsl(var(--accent))]/40" : "border-border/50",
-        metric.to ? "hover:shadow-tile hover:-translate-y-0.5" : "",
-      )}
-    >
+  const className = cn(
+    "group relative overflow-hidden rounded-3xl p-4 bg-card border shadow-soft transition-all press",
+    urgent ? "border-[hsl(var(--accent))]/40" : "border-border/50",
+    metric.to ? "hover:shadow-tile hover:-translate-y-0.5" : "",
+  );
+  const inner = (
+    <>
       <div className={cn("h-9 w-9 rounded-xl bg-gradient-to-br text-white flex items-center justify-center mb-3 shadow-sm", tone)}>
         <Icon className="h-[18px] w-[18px]" strokeWidth={2.5} />
       </div>
       <p className="text-[11px] text-foreground-tertiary leading-tight">{metric.label}</p>
       <p className="font-display text-[20px] num leading-tight mt-0.5">{value}</p>
       {urgent && <span className="absolute top-3 left-3 h-2 w-2 rounded-full bg-[hsl(var(--accent))] animate-pulse" />}
-    </Wrapper>
+    </>
   );
+  if (metric.to) {
+    // Admin metric `to` strings are runtime route paths; bypass Link's
+    // compile-time route-union constraint here only.
+    return (
+      <Link to={metric.to as never} className={className}>
+        {inner}
+      </Link>
+    );
+  }
+  return <div className={className}>{inner}</div>;
 }
 
 // -------- Debounce hook --------
