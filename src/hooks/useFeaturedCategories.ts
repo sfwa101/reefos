@@ -18,7 +18,7 @@
  *       remain unchanged.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 
 export type FeaturedCategory = {
   id: string;
