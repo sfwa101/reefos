@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 
 export type ColorTheme =
   | "sage"
@@ -25,8 +25,6 @@ type ThemeCtx = {
 
 const Ctx = createContext<ThemeCtx | null>(null);
 
-// Read what the pre-hydration ScriptOnce already applied to <html>, so React
-// state matches the DOM on first render and we never re-flash to defaults.
 const readInitialMode = (): Mode => {
   if (typeof window === "undefined") return "light";
   try {
@@ -45,13 +43,11 @@ const readInitialColor = (): ColorTheme => {
 };
 
 export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-  // STRICT: First app launch is ALWAYS light + sage — never auto-pick system dark.
   const [mode, setModeState] = useState<Mode>(readInitialMode);
   const [colorTheme, setColorThemeState] = useState<ColorTheme>(readInitialColor);
   const [systemMode, setSystemMode] = useState<"light" | "dark">("light");
 
   useEffect(() => {
-    // Persist defaults explicitly the first time so we never re-evaluate system pref.
     if (!localStorage.getItem("reef-mode")) localStorage.setItem("reef-mode", "light");
     if (!localStorage.getItem("reef-color")) localStorage.setItem("reef-color", "sage");
 
@@ -62,23 +58,14 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  // Hydrate from profile.theme_preference on first auth — only if the user
-  // has never explicitly set a local choice on this device.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const { data: u } = await supabase.auth.getUser();
-        const uid = u.user?.id;
+        const uid = await IdentityGateway.getCurrentUserId();
         if (!uid || cancelled) return;
-        const { data } = await supabase
-          .from("profiles")
-          .select("theme_preference")
-          .eq("id", uid)
-          .maybeSingle();
-        const remote = (data as { theme_preference?: string | null } | null)?.theme_preference;
+        const remote = await IdentityGateway.getThemePreference(uid);
         if (cancelled || !remote) return;
-        // Only hydrate if local store wasn't explicitly changed by user.
         if (remote !== colorTheme) {
           setColorThemeState(remote as ColorTheme);
           localStorage.setItem("reef-color", remote);
@@ -110,13 +97,11 @@ export const ThemeProvider = ({ children }: { children: ReactNode }) => {
   const setColorTheme = (c: ColorTheme) => {
     setColorThemeState(c);
     localStorage.setItem("reef-color", c);
-    // Persist to profile so the Emperor's choice survives across sessions/devices.
     void (async () => {
       try {
-        const { data } = await supabase.auth.getUser();
-        const uid = data.user?.id;
+        const uid = await IdentityGateway.getCurrentUserId();
         if (!uid) return;
-        await supabase.from("profiles").update({ theme_preference: c }).eq("id", uid);
+        await IdentityGateway.setThemePreference(uid, c);
       } catch {
         /* non-blocking */
       }
