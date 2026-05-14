@@ -34,20 +34,16 @@ function DriverOpsPage() {
     if (!engine.driverId) return;
     let cancelled = false;
     const refresh = async () => {
-      const { data } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .select("id, master_order_id, status, total_amount, delivery_snapshot")
-        .eq("driver_id", engine.driverId as string)
-        .in("status", ["assigned", "ready_for_pickup"]);
+      const data = await LogisticsExtras.listDriverPickupNodes(engine.driverId as string);
       if (cancelled) return;
-      const list: PickupNode[] = (data ?? []).map((n) => {
+      const list: PickupNode[] = data.map((n) => {
         const snap = (n.delivery_snapshot ?? {}) as {
           handover?: { otp?: string };
         };
         return {
-          id: n.id as string,
-          master_order_id: (n.master_order_id as string | null) ?? null,
-          status: n.status as string,
+          id: n.id,
+          master_order_id: n.master_order_id,
+          status: n.status,
           total_amount: Number(n.total_amount ?? 0),
           otp: snap.handover?.otp ?? null,
         };
@@ -56,24 +52,13 @@ function DriverOpsPage() {
       setLoadingPickups(false);
     };
     refresh();
-    const ch = supabase
-      .channel(`driver-ops-pickups-${engine.driverId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "salsabil_fulfillment_nodes",
-          filter: `driver_id=eq.${engine.driverId}`,
-        },
-        () => {
-          refresh();
-        },
-      )
-      .subscribe();
+    const ch = LogisticsExtras.subscribeDriverPickupNodes(
+      engine.driverId as string,
+      () => { refresh(); },
+    );
     return () => {
       cancelled = true;
-      supabase.removeChannel(ch);
+      ch.unsubscribe();
     };
   }, [engine.driverId]);
 
