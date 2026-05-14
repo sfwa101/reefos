@@ -171,8 +171,13 @@ const fetchFrequentlyBoughtProductIds = async (
   productIds: string[],
   limit = 6,
 ): Promise<string[]> => {
-  
-  const { data } = await supabase.rpc("frequently_bought_together", {
+  // `frequently_bought_together` RPC is not in the generated Functions
+  // map; cast to a typed callable to avoid `as any`.
+  const rpc = supabase.rpc as unknown as (
+    name: string,
+    args: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const { data } = await rpc("frequently_bought_together", {
     _product_ids: productIds,
     _limit: limit,
   });

@@ -160,10 +160,9 @@ export const PackagingGateway = {
         attributes: d.attributes ?? {},
       };
 
-      
       const { error } = await supabase
         .from(TABLE)
-        .upsert(row, { onConflict: "id" });
+        .upsert(row as never, { onConflict: "id" });
       if (error) throw new Error(error.message);
     }
 

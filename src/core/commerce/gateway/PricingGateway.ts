@@ -219,11 +219,10 @@ export const PricingGateway = {
     // 3. Upsert (single batch — no FK ordering needed since SKU + tiers
     //    are already persisted by the time we arrive here).
     if (resolved.length > 0) {
-      
       const { error: upErr } = await supabase
         .from(TABLE)
         .upsert(
-          resolved.map((r) => r.row),
+          resolved.map((r) => r.row) as never,
           { onConflict: "id" },
         );
       if (upErr) throw new Error(upErr.message);
