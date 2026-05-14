@@ -151,7 +151,7 @@ export type HakimArchitectBlueprint = {
   
   suggested_assets: HakimSubmitBlueprintAsset[];
   
-  sdui_layout: { hero?: Record<string, unknown>; sections?: Array<Record<string, unknown>> };
+  sdui_layout: { hero?: Record<string, Json>; sections?: Array<Record<string, Json>> };
 };
 
 export const summonHakimArchitectFn = createServerFn({ method: "POST" })
