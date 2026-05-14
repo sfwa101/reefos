@@ -40,23 +40,7 @@ type State = {
 };
 
 async function fetchSduiBlocks(slug: string): Promise<unknown> {
-  const { data: layout, error: e1 } = await supabase
-    .from("sdui_layouts")
-    .select("id, active_version_id")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (e1) throw e1;
-  if (!layout?.active_version_id) return null;
-
-  const { data: version, error: e2 } = await supabase
-    .from("sdui_layout_versions")
-    .select("blocks")
-    .eq("id", layout.active_version_id)
-    .maybeSingle();
-
-  if (e2) throw e2;
-  return version?.blocks ?? null;
+  return RuntimeUIGateway.getSduiActiveLayout(slug);
 }
 
 export function useSduiLayout(slug: string): State {
