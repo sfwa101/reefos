@@ -303,25 +303,43 @@ export const getHakimSnapshotFn = createServerFn({ method: "GET" })
     return ((rows as unknown) as HakimSnapshot | null) ?? null;
   });
 
-// ─── Hakim Chat (proxy to hakim-chat edge function) ───────────────
+// ─── Hakim Chat (non-streaming Q&A — Wave P-4.2 sovereign) ─────────
 export type HakimChatReply = { reply: string };
 
 export const chatHakimFn = createServerFn({ method: "POST" })
   .inputValidator((d: { message: string; scope?: string; snapshot?: HakimSnapshot | null }) => d)
   .middleware([requireSupabaseAuth])
-  .handler(async ({ data, context }): Promise<HakimChatReply> => {
-    const { supabase } = context;
-    const { data: res, error } = await supabase.functions.invoke("hakim-chat", {
-      body: {
-        message: data.message,
-        scope: data.scope ?? "wallet",
-        snapshot: data.snapshot ?? null,
-      },
-    });
-    if (error) {
-      console.error("hakim-chat error", error);
+  .handler(async ({ data }): Promise<HakimChatReply> => {
+    const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
+    if (!LOVABLE_API_KEY) {
       return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
     }
-    const r = (res as { reply?: string; message?: string } | null) ?? null;
-    return { reply: r?.reply ?? r?.message ?? "…" };
+    const scope = data.scope ?? "wallet";
+    const systemPrompt = `أنت "حكيم" — المستشار المالي الذكي. أجب بإيجاز بالعربية بناءً على البيانات المتاحة (نطاق: ${scope}). لا تخترع أرقاماً.`;
+    const userPrompt = `سؤال المستخدم: ${data.message}\n\nاللقطة المالية:\n${JSON.stringify(data.snapshot ?? null, null, 2)}`;
+    try {
+      const aiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "google/gemini-2.5-flash",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userPrompt },
+          ],
+        }),
+      });
+      if (!aiRes.ok) {
+        console.error("hakim-chat ai error", aiRes.status);
+        return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
+      }
+      const json = (await aiRes.json()) as {
+        choices?: Array<{ message?: { content?: string } }>;
+      };
+      const reply = json?.choices?.[0]?.message?.content ?? "…";
+      return { reply };
+    } catch (e) {
+      console.error("hakim-chat error", e);
+      return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
+    }
   });
