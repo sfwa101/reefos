@@ -200,7 +200,8 @@ export const IdentityGateway = {
       return data as PaymentMethodVM[];
     } catch {
       return [];
-    }
+  },
+
   // ─── Auth session ───────────────────────────────────────────────────────
   async getSession(): Promise<Session | null> {
     const { data } = await supabase.auth.getSession();
