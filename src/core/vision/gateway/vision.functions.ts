@@ -93,7 +93,7 @@ export const inferEntityFn = createServerFn({ method: "POST" })
       throw new Error(`vision_genesis_failed: ${aiRaw?.details ?? aiRaw?.error ?? "unknown"}`);
     }
 
-    const rawOutput = (aiRaw ?? {}) as JsonObject;
+    const rawOutput = (aiRaw ?? {}) as unknown as JsonObject;
     // Strip transport noise; whatever the edge fn returns IS the draft.
     const { error: _err, ...draftPayload } = rawOutput as Record<string, unknown>;
     void _err;
