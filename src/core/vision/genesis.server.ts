@@ -357,14 +357,64 @@ export interface VisionGenesisInput {
   provider?: VisionProvider;
 }
 
+export type AssetType = (typeof ASSET_TYPES)[number];
+export type PricingModel = (typeof PRICING_MODELS)[number];
+export type WeightUnit = "g" | "kg" | "ml" | "L" | "piece";
+export type Currency = "EGP" | "USD" | "EUR";
+
+export interface VisionAssetMarketing {
+  short: string | null;
+  long: string | null;
+}
+export interface VisionAssetNutrition {
+  kcal: number | null;
+  protein_g: number | null;
+  fat_g: number | null;
+  carbs_g: number | null;
+  sugar_g: number | null;
+}
+export interface VisionAssetPhysical {
+  net_weight: number | null;
+  weight_unit: WeightUnit | null;
+}
+export interface VisionAssetDTO {
+  name: string;
+  description: string;
+  asset_type: AssetType;
+  traits: string[];
+  category_path: string | null;
+  brand: string | null;
+  origin_country: string | null;
+  marketing: VisionAssetMarketing | null;
+  nutrition: VisionAssetNutrition | null;
+  physical: VisionAssetPhysical | null;
+  allergens: string[] | null;
+}
+export interface VisionSkuVariantAxes {
+  size: string | null;
+  flavor: string | null;
+}
+export interface VisionSkuDTO {
+  sku_code: string;
+  attributes: Record<string, unknown>;
+  barcode: string | null;
+  variant_axes: VisionSkuVariantAxes | null;
+}
+export interface VisionFinancialContractDTO {
+  pricing_model: PricingModel;
+  base_price: number;
+  currency: Currency;
+  contract_rules: Record<string, unknown>;
+}
+
 export interface VisionGenesisOutput {
   ok: boolean;
   error?: string;
   details?: string;
   attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
-  asset?: any;
-  skus?: any[];
-  financial_contract?: any;
+  asset?: VisionAssetDTO;
+  skus?: VisionSkuDTO[];
+  financial_contract?: VisionFinancialContractDTO;
   prompt_version?: string;
   provider?: VisionProvider | null;
   provider_attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
