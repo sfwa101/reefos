@@ -48,6 +48,9 @@ export const useBuyAgainProducts = (
 
       // 3) Items in those nodes — join SKU → asset_id.
       const rows = await MarketingGateway.listFulfillmentItemsForNodes(nodeIds, 120);
+
+      const seen = new Set<string>();
+      const out: string[] = [];
       for (const it of rows) {
         const aid = it.salsabil_skus?.asset_id;
         if (!aid) continue;
