@@ -185,7 +185,7 @@ export function useVendorOperations() {
           product_image: image,
           quantity: it.quantity,
           price: Number(it.price_at_time ?? 0),
-          created_at: it.created_at ?? node.created_at,
+          created_at: it.created_at ?? node.created_at ?? new Date().toISOString(),
           order_status: node.status,
           service_type: serviceType,
           payment_method: paymentMethod,
