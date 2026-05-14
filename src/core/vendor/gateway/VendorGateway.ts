@@ -8,6 +8,10 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
+export type GatewayChannel = { unsubscribe: () => void };
+
+type AnyRow = Record<string, unknown>;
+
 export interface VendorWalletVM {
   vendor_id: string;
   available_balance: number;
