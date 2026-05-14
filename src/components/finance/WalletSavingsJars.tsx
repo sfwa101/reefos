@@ -97,28 +97,19 @@ export const SavingsJarDialog = ({
   const [busy, setBusy] = useState(false);
 
   const refresh = async () => {
-    const [{ data: j }, { data: t }] = await Promise.all([
-      supabase
-        .from("savings_jar")
-        .select("balance,auto_save_enabled,round_to,goal,goal_label")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("savings_transactions")
-        .select("id,amount,kind,label,created_at")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(10),
+    const [j, t] = await Promise.all([
+      FinanceGateway.getSavingsJar(userId),
+      FinanceGateway.listSavingsTransactions(userId, 10),
     ]);
     onUpdate(
-      (j ?? {
+      ((j as unknown) ?? {
         balance: 0,
         auto_save_enabled: false,
         round_to: 5,
         goal: null,
         goal_label: null,
       }) as SavingsJar,
-      (t ?? []) as SavingsTx[],
+      ((t as unknown) ?? []) as SavingsTx[],
     );
   };
 
