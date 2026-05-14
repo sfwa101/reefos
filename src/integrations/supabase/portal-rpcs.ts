@@ -46,8 +46,12 @@ export async function fetchVendorPortalStats(): Promise<{
   data: VendorPortalStats | null;
   error: { message: string } | null;
 }> {
-  
-  const { data, error } = await supabase.rpc("vendor_portal_stats");
+  // `vendor_portal_stats` is not present in the generated Functions map;
+  // call through a typed callable rather than `as any`.
+  const rpc = supabase.rpc as unknown as (
+    name: string,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
+  const { data, error } = await rpc("vendor_portal_stats");
   return {
     data: (data as unknown as VendorPortalStats) ?? null,
     error: error ? { message: error.message } : null,
