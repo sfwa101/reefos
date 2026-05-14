@@ -362,9 +362,9 @@ export interface VisionGenesisOutput {
   error?: string;
   details?: string;
   attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
-  asset?: Record<string, unknown>;
-  skus?: Array<Record<string, unknown>>;
-  financial_contract?: Record<string, unknown>;
+  asset?: any;
+  skus?: any[];
+  financial_contract?: any;
   prompt_version?: string;
   provider?: VisionProvider | null;
   provider_attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
@@ -421,7 +421,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
     const failoverChain: VisionProvider[] =
       primary === "gemini" ? ["gemini", "openrouter"] : [primary];
 
-    let parsed: Record<string, unknown> | null = null;
+    let parsed: any = null;
     let usedProvider: VisionProvider | null = null;
     const attempts: Array<{ provider: VisionProvider; ok: boolean; error?: string }> = [];
 
@@ -501,7 +501,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
         allergens: optStrArr(a?.allergens, 20),
       },
       skus: Array.isArray(parsed?.skus)
-        ? (parsed.skus as unknown[]).slice(0, 20).map((raw: unknown, i: number) => { const s = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>; return ({
+        ? parsed.skus.slice(0, 20).map((s: any, i: number) => ({
             sku_code: String(s?.sku_code ?? `SKU-${Date.now()}-${i}`).slice(0, 64),
             attributes: s?.attributes && typeof s.attributes === "object" ? s.attributes : {},
             barcode: optStr(s?.barcode, 64),
@@ -512,7 +512,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
                     flavor: optStr(s.variant_axes.flavor, 64),
                   }
                 : null,
-          }); })
+          }))
         : [],
       financial_contract: {
         pricing_model: pricingModel,
