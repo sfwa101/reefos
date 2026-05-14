@@ -21,26 +21,17 @@ type NeighborState = { city: string | null; count: number };
 
 async function fetchNeighborPulse(userId: string | null): Promise<NeighborState> {
   if (!userId) return { city: null, count: 0 };
-  const { data: addr } = await supabase
-    .from("addresses")
-    .select("city")
-    .eq("user_id", userId)
-    .order("is_default", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-  const city = (addr?.city as string | undefined)?.trim() || null;
+  const city = await RuntimeUIGateway.getDefaultAddressCity(userId);
   if (!city) return { city: null, count: 0 };
 
   const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-  // Match by delivery_info JSONB → city, exclude self.
-  const { count } = await supabase
-    .from("salsabil_master_orders")
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", since)
-    .neq("customer_id", userId)
-    .filter("delivery_info->>city", "eq", city);
+  const count = await RuntimeUIGateway.countNeighborMasterOrders({
+    excludeUserId: userId,
+    sinceIso: since,
+    city,
+  });
 
-  return { city, count: count ?? 0 };
+  return { city, count };
 }
 
 export const SduiOfferNeighborhoodPool = ({
