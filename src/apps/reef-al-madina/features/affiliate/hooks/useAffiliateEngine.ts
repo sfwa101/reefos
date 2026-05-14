@@ -16,7 +16,7 @@
 
 import { useMemo } from "react";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 
 export interface AffiliateTier {
