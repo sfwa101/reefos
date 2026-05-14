@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 export type AssetType = "egp" | "points" | "cashback" | "gold" | "coupons";
 
@@ -62,29 +62,27 @@ export function useWalletAssets(userId: string | null) {
     }
     let mounted = true;
     (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
       const [legacy, multi] = await Promise.all([
-        supabase
-          .from("wallet_balances")
-          .select("balance,points,coupons,cashback")
-          .eq("user_id", userId)
-          .maybeSingle(),
-        sb
-          .from("wallet_assets")
-          .select("asset_type,balance")
-          .eq("user_id", userId),
+        FinanceGateway.getWalletBalanceLegacy(userId),
+        FinanceGateway.listMultiAssetBalances(userId),
       ]);
 
+      const legacyData = legacy as {
+        balance?: number | null;
+        points?: number | null;
+        cashback?: number | null;
+        coupons?: number | null;
+      } | null;
+
       const map: Record<AssetType, number> = {
-        egp: Number(legacy.data?.balance ?? 0),
-        points: Number(legacy.data?.points ?? 0),
-        cashback: Number(legacy.data?.cashback ?? 0),
+        egp: Number(legacyData?.balance ?? 0),
+        points: Number(legacyData?.points ?? 0),
+        cashback: Number(legacyData?.cashback ?? 0),
         gold: 0,
-        coupons: Number(legacy.data?.coupons ?? 0),
+        coupons: Number(legacyData?.coupons ?? 0),
       };
 
-      for (const row of multi.data ?? []) {
+      for (const row of multi as Array<{ asset_type: string; balance: number }>) {
         const t = row.asset_type as AssetType;
         if (t in map) map[t] = Number(row.balance ?? 0);
       }
