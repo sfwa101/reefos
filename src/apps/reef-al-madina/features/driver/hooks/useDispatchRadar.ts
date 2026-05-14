@@ -96,10 +96,7 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     async (offerId: string): Promise<boolean> => {
       if (!driverId) return false;
       setAccepting(true);
-      const { data, error } = await supabase.rpc("accept_dispatch_offer", {
-        p_offer_id: offerId,
-        p_driver_id: driverId,
-      });
+      const { data, error } = await DriverGateway.acceptDispatchOffer(offerId, driverId);
       setAccepting(false);
       if (error) {
         toast.error(error.message);
