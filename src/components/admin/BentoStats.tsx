@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { ShoppingBag, Package, Wallet, AlertTriangle, TrendingUp, Users } from "lucide-react";
+import { ShoppingBag, Wallet, AlertTriangle, TrendingUp, Users, type LucideIcon } from "lucide-react";
 import { fmtMoney, fmtNum } from "@/lib/format";
 
 type Bento = {
@@ -73,7 +73,7 @@ export function BentoStats({ stats }: { stats: Bento }) {
 }
 
 function BentoTile({ to, icon: Icon, label, value, tone, urgent }: {
-  to: string; icon: any; label: string; value: string; tone: string; urgent?: boolean;
+  to: string; icon: LucideIcon; label: string; value: string; tone: string; urgent?: boolean;
 }) {
   return (
     <Link
