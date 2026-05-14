@@ -180,6 +180,13 @@ export class CheckoutRuntime {
       itemCount: state.lines.length,
       paymentMethod: intent.paymentMethod,
       snapshotHash: validation.snapshot_hash,
+      lines: state.lines.map((l) => ({
+        lineId: l.lineId,
+        productId: l.productId,
+        name: l.name,
+        qty: l.qty,
+        capabilities: l.capabilities ?? [],
+      })),
       appId: this.appId,
     });
 
