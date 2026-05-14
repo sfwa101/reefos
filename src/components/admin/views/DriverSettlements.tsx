@@ -3,7 +3,7 @@ import {
   listDriverWalletsFn,
   settleDriverCashFn,
   type DriverWalletRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Card, CardContent } from "@/components/ui/card";

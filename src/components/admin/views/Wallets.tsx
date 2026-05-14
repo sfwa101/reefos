@@ -9,7 +9,7 @@ import {
   searchProfilesFn, getWalletBalanceFn, adminTopupWalletFn,
   adminAdjustWalletFn, reverseWalletEntryFn,
   type ProfileSearchRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";

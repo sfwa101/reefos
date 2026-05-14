@@ -8,7 +8,7 @@ import {
   updateSupplierFn,
   deleteSupplierFn,
   type SupplierFullRow,
-} from "@/lib/admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Building2, Pencil, Trash2, X, Check } from "lucide-react";
 import { toast } from "sonner";

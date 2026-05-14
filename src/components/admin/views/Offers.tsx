@@ -10,7 +10,7 @@ import {
   type OfferCouponRow as Coupon,
   type OfferDiscountRow as Discount,
   type OfferMegaEventRow as MegaEvent,
-} from "@/lib/marketing.functions";
+} from "@/core/marketing/marketing.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

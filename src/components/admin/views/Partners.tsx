@@ -7,7 +7,7 @@ import {
   setProductPartnerActiveFn, markPartnerLedgerPaidFn,
   updateProductPartnerFn, deleteProductPartnerFn,
   type ProductPartnerRow, type PartnerLedgerRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Users, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";

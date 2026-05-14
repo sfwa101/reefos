@@ -9,7 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, ShieldAlert, FileText, PackagePlus } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { listPurchaseInvoicesFn, type PurchaseInvoiceRow } from "@/lib/finance.functions";
+import { listPurchaseInvoicesFn, type PurchaseInvoiceRow } from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { PurchaseInvoiceBuilder } from "@/apps/reef-al-madina/features/admin/components/PurchaseInvoiceBuilder";

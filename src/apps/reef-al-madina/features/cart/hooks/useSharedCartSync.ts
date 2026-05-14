@@ -10,7 +10,7 @@ import {
   insertSharedCartItemFn,
   updateSharedCartItemQtyFn,
   deleteSharedCartItemFn,
-} from "@/lib/cart.functions";
+} from "@/core/orders/cart.functions";
 import { useAuth } from "@/context/AuthContext";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 

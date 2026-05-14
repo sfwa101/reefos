@@ -5,7 +5,7 @@ import {
   computeZakatAssessmentFn,
   listZakatAssessmentsFn,
   type ZakatAssessmentRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { Loader2, ShieldAlert, Calculator, Scale, Sparkles } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";

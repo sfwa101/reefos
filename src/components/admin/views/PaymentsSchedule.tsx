@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { getPaymentsScheduleFn, type PaymentsScheduleRow } from "@/lib/finance.functions";
+import { getPaymentsScheduleFn, type PaymentsScheduleRow } from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CalendarClock, AlertTriangle } from "lucide-react";
 

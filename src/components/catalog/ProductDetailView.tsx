@@ -7,7 +7,7 @@ import { useFavorites } from "@/lib/favorites";
 import { Star, Truck, ShieldCheck, Heart, Sparkles } from "lucide-react";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { listProductReviewsFn, listProductUnitsFn } from "@/lib/catalog.functions";
+import { listProductReviewsFn, listProductUnitsFn } from "@/core/catalog/catalog.functions";
 import { logBehavior } from "@/lib/behavior";
 import { motion } from "framer-motion";
 import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/lib/productEnrichment";

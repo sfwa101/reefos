@@ -3,7 +3,7 @@ import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PrintReportButton } from "@/components/admin/PrintReportButton";
-import { getCfoDashboardStatsFn } from "@/lib/finance.functions";
+import { getCfoDashboardStatsFn } from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, TrendingDown, Wallet, Gift, Percent, AlertTriangle, BarChart3 } from "lucide-react";
 

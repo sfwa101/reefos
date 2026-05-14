@@ -13,7 +13,7 @@ import {
   upsertCouponFn,
   setCouponActiveFn,
   deleteCouponFn,
-} from "@/lib/marketing.functions";
+} from "@/core/marketing/marketing.functions";
 
 const blankForm: CouponForm = {
   code: "", description: "", discount_pct: 10, discount_amount: null,

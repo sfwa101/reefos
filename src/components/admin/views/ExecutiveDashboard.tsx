@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getExecutiveDashboardStatsFn } from "@/lib/finance.functions";
+import { getExecutiveDashboardStatsFn } from "@/core/finance/finance.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, TrendingUp, ShoppingCart, DollarSign, AlertTriangle, Package } from "lucide-react";

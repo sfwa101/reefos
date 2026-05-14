@@ -8,7 +8,7 @@ import {
   upsertCategoryFn,
   deleteCategoryFn,
   type CategoryRow as Category,
-} from "@/lib/admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 
 export default function Categories() {
   const [items, setItems] = useState<Category[] | null>(null);

@@ -8,7 +8,7 @@ import {
   upsertStoreFn,
   deleteStoreFn,
   type StoreRow as Store,
-} from "@/lib/admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 
 export default function Stores() {
   const [items, setItems] = useState<Store[] | null>(null);

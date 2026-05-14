@@ -13,7 +13,7 @@ import {
   upsertFlashSaleFn,
   deleteFlashSaleFn,
   endFlashSaleFn,
-} from "@/lib/marketing.functions";
+} from "@/core/marketing/marketing.functions";
 
 const blankForm: FlashProductForm = {
   product_id: "", product_name: "", category: "",

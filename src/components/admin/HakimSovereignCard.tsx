@@ -5,7 +5,7 @@ import { fmtMoney } from "@/lib/format";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts";
 import ReactMarkdown from "react-markdown";
-import { getExecutiveDashboardStatsFn } from "@/lib/finance.functions";
+import { getExecutiveDashboardStatsFn } from "@/core/finance/finance.functions";
 import { getHakimAdvisorReportFn } from "@/lib/hakim.functions";
 
 type Stats = {
