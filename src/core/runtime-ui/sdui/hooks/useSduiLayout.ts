@@ -12,7 +12,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
-import { tenantQueryKey } from "@/lib/tenantScope";
+import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
 import { HakimGenerativeOverlay } from "@/core/hakim-ai/generative/HakimGenerativeOverlay";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 
@@ -47,8 +47,9 @@ export function useSduiLayout(slug: string): State {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: tenantQueryKey("sdui_layouts", slug),
+    queryKey: workspaceQueryKey("sdui_layouts", slug),
     queryFn: () => fetchSduiBlocks(slug),
+    enabled: getWorkspaceIdSync() !== null,
     staleTime: 5 * 60 * 1000,
     gcTime: 30 * 60 * 1000,
   });
@@ -56,7 +57,7 @@ export function useSduiLayout(slug: string): State {
   // Realtime cache invalidation — admin edits to the active layout flow live.
   useEffect(() => {
     const sub = RuntimeUIGateway.subscribeSduiLayoutUpdates(slug, () => {
-      void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
+      void queryClient.invalidateQueries({ queryKey: workspaceQueryKey("sdui_layouts", slug) });
     });
     return () => sub.unsubscribe();
   }, [slug, queryClient]);

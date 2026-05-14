@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { tenantQueryKey } from "@/lib/tenantScope";
+import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
 
 /**
  * SovereignTracing — Phase 45 forensic event viewer.
@@ -89,7 +89,7 @@ export default function SovereignTracingPage() {
   const validTrace = traceFilter === "" || UUID_RE.test(traceFilter);
   const validActor = actorFilter === "" || UUID_RE.test(actorFilter);
 
-  const queryKey = tenantQueryKey(
+  const queryKey = workspaceQueryKey(
     "admin",
     "sovereign-tracing",
     { trace: validTrace ? traceFilter : "", actor: validActor ? actorFilter : "", domain, page },
@@ -98,7 +98,7 @@ export default function SovereignTracingPage() {
   const { data, isFetching, isError, error, refetch } = useQuery({
     queryKey,
     placeholderData: keepPreviousData,
-    enabled: !rolesLoading && hasRole("admin"),
+    enabled: !rolesLoading && hasRole("admin") && getWorkspaceIdSync() !== null,
     queryFn: async (): Promise<EventRow[]> => {
       const rows = await listEventTimelineFn({
         data: {

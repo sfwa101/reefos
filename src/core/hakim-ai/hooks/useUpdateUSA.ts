@@ -7,7 +7,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
-import { tenantQueryKey } from "@/lib/tenantScope";
+import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
 
 export interface UpdateUSAInput {
   asset_id: string;
@@ -32,10 +32,10 @@ export function useUpdateUSA() {
     onSuccess: () => {
       toast.success("تم تحديث الأصل وتزامنه بنجاح");
       // Phase 43 — tenant-scoped invalidations (match fetch keys exactly).
-      qc.invalidateQueries({ queryKey: tenantQueryKey("salsabil_assets") });
-      qc.invalidateQueries({ queryKey: tenantQueryKey("catalog") });
-      qc.invalidateQueries({ queryKey: tenantQueryKey("admin-grid") });
-      qc.invalidateQueries({ queryKey: tenantQueryKey("admin", "list", "products") });
+      qc.invalidateQueries({ queryKey: workspaceQueryKey("salsabil_assets") });
+      qc.invalidateQueries({ queryKey: workspaceQueryKey("catalog") });
+      qc.invalidateQueries({ queryKey: workspaceQueryKey("admin-grid") });
+      qc.invalidateQueries({ queryKey: workspaceQueryKey("admin", "list", "products") });
     },
     onError: (err) => {
       toast.error(

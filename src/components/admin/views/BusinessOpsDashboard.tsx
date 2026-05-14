@@ -13,7 +13,7 @@ import {
   Loader2, ShieldAlert, Radio,
 } from "lucide-react";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { tenantQueryKey } from "@/lib/tenantScope";
+import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { fmtMoney } from "@/lib/format";
 import { getOpsKpisFn } from "@/core/ops/ops.functions";
@@ -35,8 +35,8 @@ export default function BusinessOpsDashboard() {
 
   // ── Single aggregated KPI/critical/low-stock query, polled every 15s ──
   const opsQuery = useQuery({
-    queryKey: tenantQueryKey("admin", "ops", "snapshot"),
-    enabled: allowed,
+    queryKey: workspaceQueryKey("admin", "ops", "snapshot"),
+    enabled: allowed && getWorkspaceIdSync() !== null,
     staleTime: 10_000,
     refetchInterval: 15_000,
     queryFn: () => getOpsKpisFn(),
