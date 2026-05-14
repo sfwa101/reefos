@@ -38,10 +38,6 @@ export function useHideBalance(userId: string | null) {
       return next;
     });
   }, [userId]);
-      }
-      return next;
-    });
-  }, [userId]);
 
   return { hidden, toggle };
 }
