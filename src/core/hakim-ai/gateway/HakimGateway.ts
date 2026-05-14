@@ -1,11 +1,10 @@
 /**
- * HakimGateway — sovereign boundary for the Hakim AI domain.
+ * HakimGateway — Sovereign façade for the Hakim AI domain.
  *
- * Wraps direct Supabase access (RPCs, edge function invocations, realtime,
- * and table reads/writes) used by Hakim hooks and surfaces. All Hakim hooks
- * must call this gateway instead of importing the Supabase client.
- *
- * Pre-existing `any` casts preserved (Wave P-7 will harden types).
+ * Wraps direct Supabase access (RPCs, edge function invocations, realtime
+ * subscriptions, table reads/writes) used by Hakim hooks and surfaces. UI
+ * code is FORBIDDEN from importing the Supabase client to call any of these
+ * methods. Pre-existing `any` casts preserved (Wave P-7 will harden types).
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -16,7 +15,133 @@ const sb = supabase as any;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const rpc = (supabase.rpc as any).bind(supabase);
 
+// ─── Vision Genesis (Product DNA) ────────────────────────────────────────
+
+export interface InferProductDNAInput {
+  readonly image_base64: string;
+  readonly secondary_image_base64?: string | null;
+  readonly hint?: string;
+  readonly provider?: "gemini" | "openrouter" | "deepseek";
+}
+
+export interface ProductDNAAsset {
+  readonly name: string;
+  readonly description: string;
+  readonly asset_type:
+    | "physical"
+    | "digital"
+    | "service"
+    | "rental"
+    | "milestone_project";
+  readonly traits: string[];
+  readonly category_path?: string | null;
+  readonly brand?: string | null;
+  readonly origin_country?: string | null;
+  readonly marketing?: { short: string | null; long: string | null } | null;
+  readonly nutrition?: Record<string, number | null> | null;
+  readonly physical?: { net_weight: number | null; weight_unit: string | null } | null;
+  readonly allergens?: string[] | null;
+  readonly media?: string[];
+}
+
+export interface ProductDNASku {
+  readonly sku_code: string;
+  readonly attributes: Record<string, unknown>;
+  readonly barcode?: string | null;
+  readonly variant_axes?: Record<string, string | null> | null;
+}
+
+export interface ProductDNAContract {
+  readonly pricing_model:
+    | "flat"
+    | "tiered_wholesale"
+    | "subscription"
+    | "deposit_and_rental"
+    | "milestone_installments";
+  readonly base_price: number;
+  readonly currency: "EGP" | "USD" | "EUR";
+  readonly contract_rules: Record<string, unknown>;
+}
+
+export interface ProductDNAPayload {
+  readonly ok: true;
+  readonly asset: ProductDNAAsset;
+  readonly skus: ProductDNASku[];
+  readonly financial_contract: ProductDNAContract;
+  readonly generated_at: string;
+}
+
+export type HakimErrorCode =
+  | "rate_limited"
+  | "credits_exhausted"
+  | "unauthorized"
+  | "ai_error"
+  | "ai_parse_error"
+  | "missing_image"
+  | "missing_key"
+  | "unknown";
+
+async function readErrorEnvelope(
+  err: unknown,
+  fallbackData: unknown,
+): Promise<{ error?: string; details?: string } | null> {
+  try {
+    const ctx = (err as { context?: { response?: Response } } | null)?.context;
+    if (ctx?.response) {
+      const text = await ctx.response.clone().text();
+      try {
+        return JSON.parse(text);
+      } catch {
+        return { details: text };
+      }
+    }
+  } catch {
+    /* noop */
+  }
+  if (fallbackData && typeof fallbackData === "object") {
+    return fallbackData as { error?: string; details?: string };
+  }
+  return null;
+}
+
 export const HakimGateway = {
+  // ============= Vision Genesis =============
+
+  async inferProductDNA(input: InferProductDNAInput): Promise<ProductDNAPayload> {
+    if (!input.image_base64 || typeof input.image_base64 !== "string") {
+      throw new Error("image_base64 is required");
+    }
+    if (!input.image_base64.startsWith("data:image/")) {
+      throw new Error("image_base64 must be a data: URL (image/*)");
+    }
+
+    const { data, error } = await supabase.functions.invoke("vision_genesis", {
+      body: {
+        image_base64: input.image_base64,
+        secondary_image_base64: input.secondary_image_base64 ?? null,
+        hint: input.hint,
+        provider: input.provider ?? "gemini",
+      },
+    });
+
+    if (error) {
+      const env = await readErrorEnvelope(error, data);
+      const message =
+        env?.details || env?.error || (error as Error).message || "unknown";
+      throw new Error(message);
+    }
+
+    const payload = data as
+      | (ProductDNAPayload & { error?: HakimErrorCode; details?: string })
+      | null;
+    if (!payload || (payload as { error?: string }).error) {
+      throw new Error(
+        payload?.details || (payload as { error?: string })?.error || "unknown",
+      );
+    }
+    return payload;
+  },
+
   // ============= Edge function invocations =============
 
   async invokeHakimPulse(body: { page: string; tiles: unknown[] }) {
@@ -168,4 +293,6 @@ export const HakimGateway = {
       .single();
     return { data, error };
   },
-};
+} as const;
+
+export type HakimGatewayType = typeof HakimGateway;
