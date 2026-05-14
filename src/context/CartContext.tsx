@@ -170,7 +170,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchProfileTier = async (id: string) => {
       try {
-        const raw = await CartGateway.fetchLoyaltyTier(id);
+        const raw = await IdentityGateway.fetchLoyaltyTier(id);
         if (cancelled) return;
         setTier(isCustomerTier(raw) ? raw : "bronze");
       } catch {
