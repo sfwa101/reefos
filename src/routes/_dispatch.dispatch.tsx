@@ -145,13 +145,12 @@ function OtpDialog({
     }
     setSubmitting(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).rpc("confirm_handover", {
-        p_node_id: ticket.id,
-        p_otp: otp.trim(),
-        p_channel: channel,
+      const { error } = await LogisticsExtras.confirmHandover({
+        nodeId: ticket.id,
+        otp: otp.trim(),
+        channel,
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       toast.success("تم تسليم الطلب بنجاح");
       onConfirmed(ticket.id);
     } catch (e) {
