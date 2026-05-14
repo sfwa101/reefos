@@ -22,7 +22,7 @@ import {
 import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
-import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
+import { createTraceId, logSovereignEvent } from "@/core/system/observability/SovereignTracingGateway";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";

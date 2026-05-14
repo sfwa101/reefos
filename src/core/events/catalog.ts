@@ -37,3 +37,34 @@ export const EVENT_NAMES: ReadonlyArray<SalsabilEventName> = Object.freeze(
 
 /** Typed payload accessor — useful for handler factories. */
 export type EventPayload<E extends SalsabilEventName> = SalsabilEvents[E];
+
+/**
+ * Civilization Event — the canonical envelope for every semantic event
+ * propagated through the Sovereign Event Cortex (Constitution Ch. 14.1).
+ *
+ * Append-only. Immutable. Trace-correlated. Schema-versioned.
+ * Producers: gateways and server functions only.
+ */
+export interface CivilizationEvent<
+  TName extends SalsabilEventName = SalsabilEventName,
+  TPayload = EventPayload<TName>,
+> {
+  /** ULID — globally unique, time-sortable. */
+  id: string;
+  /** Dot-namespaced canonical name from EVENT_CATALOG. */
+  name: TName;
+  /** Monotonic schema version for the payload contract. */
+  version: number;
+  /** ISO 8601 UTC timestamp of occurrence. */
+  occurred_at: string;
+  /** Originating actor — user, system, or AI agent. */
+  actor: { kind: "user" | "system" | "ai"; id: string };
+  /** Workspace / tenant scope. */
+  workspace_id: string;
+  /** Correlates to the observability span (sovereign tracing). */
+  trace_id: string;
+  /** Optional causal pointer to the upstream event that triggered this one. */
+  cause?: { kind: string; id: string };
+  /** Schema-validated payload, typed by the event name. */
+  payload: TPayload;
+}

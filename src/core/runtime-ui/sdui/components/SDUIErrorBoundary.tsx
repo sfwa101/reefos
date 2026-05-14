@@ -37,7 +37,7 @@ export class SDUIErrorBoundary extends Component<Props, State> {
     }
     // Best-effort sovereign tracing — never throw from a boundary.
     try {
-      void import("@/lib/sovereignTracing").then(
+      void import("@/core/system/observability/SovereignTracingGateway").then(
         ({ createTraceId, logSovereignEvent }) =>
           logSovereignEvent({
             trace_id: createTraceId(),
