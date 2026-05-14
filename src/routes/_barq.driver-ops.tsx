@@ -7,7 +7,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, KeyRound } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
 import { useDriverEngine } from "@/apps/reef-al-madina/features/driver/hooks/useDriverEngine";
 import { ActiveTasksFeed } from "@/apps/reef-al-madina/features/driver/components/ActiveTasksFeed";
 import { DriverEarningsBar } from "@/apps/reef-al-madina/features/driver/components/DriverEarningsBar";
