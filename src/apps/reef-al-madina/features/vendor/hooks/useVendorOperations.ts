@@ -174,9 +174,8 @@ export function useVendorOperations() {
   // Realtime subscriptions — bound to Sovereign tables.
   useEffect(() => {
     if (vendorIds.length === 0) return;
-    const ch = supabase
-      .channel(`vendor-ops-${vendorIds.join("-")}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" }, (payload) => {
+    const ch = VendorGateway.subscribeVendorOps(vendorIds, {
+      onFulfillmentNode: (payload) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const row = (payload.new ?? payload.old) as any;
         if (!row?.vendor_id || !vendorIds.includes(row.vendor_id)) return;
@@ -184,20 +183,12 @@ export function useVendorOperations() {
         if (payload.eventType === "INSERT") {
           toast.success("طلب سيادي جديد لمتجرك");
         }
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_items" }, () => {
-        refreshLiveItems();
-      })
-      // Phase 15.3 — Sovereign realtime: stock and price updates flow through
-      // the Decentralized Matrix and Financial Contracts, not the dead `products` shim.
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_inventory_matrix" }, () => {
-        refreshProducts();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_financial_contracts" }, () => {
-        refreshProducts();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+      },
+      onFulfillmentItem: () => { refreshLiveItems(); },
+      onInventory: () => { refreshProducts(); },
+      onFinancialContract: () => { refreshProducts(); },
+    });
+    return () => { ch.unsubscribe(); };
   }, [vendorIds, refreshLiveItems, refreshProducts]);
 
   /** Phase 15.1 — Sovereign stock writes. `productId` here is a SKU id;
