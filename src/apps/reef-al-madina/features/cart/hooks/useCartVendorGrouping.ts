@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import type { CartLineMeta } from "@/context/CartContext";
-import { supabase } from "@/integrations/supabase/client";
+import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /**
  * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape. The
  * cross-sell rail still emits `Product[]` because its consumer
@@ -25,10 +25,6 @@ import type { VendorGroup } from "../types/cart.types";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };
 
-interface FrequentlyBoughtRow {
-  product_id: string;
-}
-
 /**
  * Vendor segmentation, AI-driven cross-sell, and cashback aggregation.
  * Extracted from useCartOrchestrator with identical behavior.
@@ -48,14 +44,8 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
     // 800ms debounce — protects DB from per-keystroke qty bursts.
     const timer = setTimeout(() => {
       (async () => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data } = await (supabase as any).rpc("frequently_bought_together", {
-          _product_ids: ids,
-          _limit: 6,
-        });
-        if (!cancelled && Array.isArray(data)) {
-          setCoPurchaseIds((data as FrequentlyBoughtRow[]).map((r) => r.product_id));
-        }
+        const productIds = await CartGateway.fetchFrequentlyBoughtProductIds(ids, 6);
+        if (!cancelled) setCoPurchaseIds(productIds);
       })();
     }, 800);
     return () => {

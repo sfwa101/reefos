@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { CartGateway } from "@/core/orders/gateway/CartGateway";
 import { toLatin } from "@/lib/format";
 import { fireConfetti, fireMiniConfetti } from "@/lib/confetti";
 import type { AppliedPromo } from "../types/cart.types";
@@ -46,16 +46,8 @@ export const useCartValidation = (subtotal: number) => {
   // Finance settings (min order total)
   useEffect(() => {
     (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
-        .from("app_settings")
-        .select("value")
-        .eq("key", "finance")
-        .maybeSingle();
-      const raw = (data?.value as { min_order_total?: number | string } | null)
-        ?.min_order_total;
-      const n = Number(raw);
-      if (Number.isFinite(n) && n > 0) setMinOrderTotal(n);
+      const n = await CartGateway.fetchFinanceMinOrderTotal();
+      if (n > 0) setMinOrderTotal(n);
     })();
   }, []);
 
@@ -75,13 +67,9 @@ export const useCartValidation = (subtotal: number) => {
       return;
     }
     try {
-      const { data, error } = await supabase.rpc("validate_coupon", {
-        _code: code,
-        _order_total: subtotal,
-      });
-      if (error) throw error;
-      const payload = (data ?? {}) as { discount?: number };
-      const disc = Number(payload.discount ?? 0);
+      const { discount, error } = await CartGateway.validateCoupon(code, subtotal);
+      if (error) throw new Error(error);
+      const disc = discount;
       if (disc <= 0) throw new Error("invalid");
       const pct = subtotal > 0 ? disc / subtotal : 0;
       setAppliedPromo({ code, pct });
