@@ -140,12 +140,8 @@ export const runHakimAdvisorFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
-    if (error) throw new Error(error.message ?? "advisor_failed");
-    if (out && typeof out === "object" && "error" in out && out.error) {
-      throw new Error(String((out as { error: unknown }).error));
-    }
+    const out = await runHakimAdvisor(data, context.supabase);
+    if ("error" in out) throw new Error(String(out.error));
     return { ok: true };
   });
 
