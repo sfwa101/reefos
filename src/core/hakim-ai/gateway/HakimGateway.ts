@@ -150,7 +150,12 @@ export const HakimGateway = {
   },
 
   async invokeGenerateEmbedding(text: string) {
-    return await supabase.functions.invoke("generate_embedding", { body: { text } });
+    try {
+      const data = await generateEmbeddingFn({ data: { text } });
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "embedding_failed" } };
+    }
   },
 
   async invokePredictBasket() {
@@ -164,7 +169,12 @@ export const HakimGateway = {
     palette_name: string | null;
     palette_hex: string | null;
   }) {
-    return await supabase.functions.invoke("process_image_aesthetic", { body });
+    try {
+      const data = await processImageAestheticFn({ data: body });
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "aesthetic_failed" } };
+    }
   },
 
   async getAccessTokenForChat(): Promise<string | null> {
