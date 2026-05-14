@@ -13,8 +13,57 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyJson = any;
+type DynamicRpc = <T = unknown>(
+  name: string,
+  args?: Record<string, unknown>,
+) => Promise<{ data: T | null; error: { message: string } | null }>;
+
+// ─── Hakim Tool-Call Discriminated Union (Constitution Ch. 8) ──────────
+export interface HakimSubmitInsightArgs {
+  severity: "info" | "warning" | "critical" | "success";
+  title: string;
+  summary: string;
+  recommendations: Array<{ action: string; priority: "low" | "medium" | "high" }>;
+}
+
+export interface HakimSubmitBlueprintAsset {
+  name: string;
+  asset_type: "physical" | "service" | "digital" | "rental" | "milestone_project";
+  pricing_model:
+    | "flat"
+    | "tiered_wholesale"
+    | "subscription"
+    | "deposit_and_rental"
+    | "milestone_installments";
+  base_price: number;
+  traits: Record<string, unknown>;
+}
+
+export interface HakimSubmitBlueprintArgs {
+  module_name: string;
+  description: string;
+  suggested_assets: HakimSubmitBlueprintAsset[];
+  sdui_layout: { hero?: Record<string, unknown>; sections?: Array<Record<string, unknown>> };
+}
+
+export type HakimToolCall =
+  | { name: "submit_insight"; arguments: HakimSubmitInsightArgs }
+  | { name: "submit_blueprint"; arguments: HakimSubmitBlueprintArgs };
+
+interface OpenAIToolCallResponse {
+  id?: string;
+  type?: "function";
+  function?: { name?: string; arguments?: string };
+}
+
+interface OpenAIChatResponse {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+      tool_calls?: OpenAIToolCallResponse[];
+    };
+  }>;
+}
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
