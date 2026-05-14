@@ -269,8 +269,7 @@ const ARCHITECT_TOOL_SCHEMA = {
 
 export interface HakimArchitectOutput {
   ok: true;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  blueprint: any;
+  blueprint: HakimSubmitBlueprintArgs;
   generated_at: string;
 }
 
@@ -303,13 +302,16 @@ export async function runHakimArchitect(
     return { error: "ai_error", detail };
   }
 
-  const json = (await aiRes.json()) as AnyJson;
+  const json = (await aiRes.json()) as OpenAIChatResponse;
   const argsRaw = json?.choices?.[0]?.message?.tool_calls?.[0]?.function?.arguments;
   if (!argsRaw) return { error: "ai_no_tool_call" };
 
-  let blueprint: unknown;
+  let blueprint: HakimSubmitBlueprintArgs;
   try {
-    blueprint = typeof argsRaw === "string" ? JSON.parse(argsRaw) : argsRaw;
+    blueprint =
+      typeof argsRaw === "string"
+        ? (JSON.parse(argsRaw) as HakimSubmitBlueprintArgs)
+        : (argsRaw as HakimSubmitBlueprintArgs);
   } catch (e) {
     return { error: "ai_parse_error", detail: String(e) };
   }
