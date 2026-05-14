@@ -8,7 +8,7 @@
  *  - status filter tabs: All / Pending / Cleared
  */
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney, fmtDate } from "@/lib/format";
 import { Loader2, TrendingUp, Receipt, PiggyBank } from "lucide-react";
