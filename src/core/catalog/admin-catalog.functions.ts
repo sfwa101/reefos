@@ -376,7 +376,7 @@ export const createSupplierFn = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    return { id: row.id as string };
+    return { id: (row as { id: string }).id };
   });
 
 // ============= Wave R-1 Batch 2 — Product Units =============
