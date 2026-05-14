@@ -113,8 +113,8 @@ export async function pushRemoteCart(
   const cleanLines = dedupeForPush(lines).filter((l) => l.qty > 0);
 
   if (cleanLines.length === 0) {
-    const del = await supabase.from("cart_items").delete().eq("user_id", userId);
-    if (del.error) console.warn("[cart] failed to clear remote cart:", del.error.message);
+    const { error } = await CartGateway.clearUserCart(userId);
+    if (error) console.warn("[cart] failed to clear remote cart:", error);
     return;
   }
 
@@ -138,27 +138,21 @@ export async function pushRemoteCart(
   });
 
   // Upsert all rows in one round-trip.
-  const up = await supabase
-    .from("cart_items")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .upsert(rows as any, { onConflict: "user_id,product_id,line_key" });
-  if (up.error) {
-    console.warn("[cart] upsert failed:", up.error.message);
+  const { error: upErr } = await CartGateway.upsertCartRows(rows);
+  if (upErr) {
+    console.warn("[cart] upsert failed:", upErr);
     return;
   }
 
   // Delete any rows that are no longer in the local cart.
   const keepKeys = rows.map((r) => `${r.product_id}::${r.line_key}`);
-  const { data: existing } = await supabase
-    .from("cart_items")
-    .select("id, product_id, line_key")
-    .eq("user_id", userId);
-  if (Array.isArray(existing) && existing.length > 0) {
+  const existing = await CartGateway.listCartKeys(userId);
+  if (existing.length > 0) {
     const stale = existing
-      .filter((r) => !keepKeys.includes(`${r.product_id}::${(r as { line_key?: string }).line_key ?? ""}`))
+      .filter((r) => !keepKeys.includes(`${r.product_id}::${r.line_key ?? ""}`))
       .map((r) => r.id);
     if (stale.length > 0) {
-      await supabase.from("cart_items").delete().in("id", stale);
+      await CartGateway.deleteCartRowsByIds(stale);
     }
   }
 }
