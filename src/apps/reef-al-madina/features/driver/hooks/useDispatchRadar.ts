@@ -68,23 +68,11 @@ export function useDispatchRadar(): UseDispatchRadarResult {
   // Realtime subscription on offers for this driver
   useEffect(() => {
     if (!driverId) return;
-    const ch = supabase
-      .channel(`dispatch-radar-${driverId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "salsabil_dispatch_offers",
-          filter: `driver_id=eq.${driverId}`,
-        },
-        () => {
-          qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
-        },
-      )
-      .subscribe();
+    const ch = DriverGateway.subscribeDispatchOffers(driverId, () => {
+      qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
+    });
     return () => {
-      supabase.removeChannel(ch);
+      ch.unsubscribe();
     };
   }, [driverId, qc]);
 
