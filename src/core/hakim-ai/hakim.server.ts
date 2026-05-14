@@ -113,7 +113,7 @@ export interface HakimAdvisorOutput {
     title: string;
     summary: string;
     recommendations: Array<{ action: string; priority: string }>;
-    raw_snapshot: unknown;
+    raw_snapshot: Json | null;
     generated_for_date: string;
   };
 }
