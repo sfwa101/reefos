@@ -14,9 +14,9 @@ import { supabase } from "@/integrations/supabase/client";
 export type GatewayChannel = { unsubscribe: () => void };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabase as any;
+const sb = dynamicSb;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rpc = (supabase.rpc as any).bind(supabase);
+const rpc = dynamicSb.rpc.bind(supabase);
 
 export const FinanceGateway = {
   // ============= Tayseer ledger / wallet =============

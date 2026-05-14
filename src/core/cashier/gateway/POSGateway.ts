@@ -29,7 +29,7 @@ const fetchOpenShiftForCashier = async (
   cashierId: string,
 ): Promise<{ shift: PosShiftRow | null; error: string | null }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await dynamicSb
     .from("pos_shifts")
     .select("*")
     .eq("cashier_id", cashierId)
@@ -49,7 +49,7 @@ const openShift = async (
   openingBalance: number,
 ): Promise<{ shift: PosShiftRow | null; error: string | null }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any)
+  const { data, error } = await dynamicSb
     .from("pos_shifts")
     .insert({ cashier_id: cashierId, branch_id: branchId, opening_balance: openingBalance })
     .select("*")
@@ -65,7 +65,7 @@ const closeShift = async (
   actualBalance: number,
 ): Promise<{ shift: PosShiftRow | null; error: string | null }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc("close_pos_shift", {
+  const { data, error } = await dynamicSb.rpc("close_pos_shift", {
     _shift_id: shiftId,
     _actual_balance: actualBalance,
   });
@@ -80,7 +80,7 @@ const processCashPayment = async (
   amount: number,
 ): Promise<{ error: string | null }> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any).rpc("process_pos_cash_payment", {
+  const { error } = await dynamicSb.rpc("process_pos_cash_payment", {
     p_order_id: orderId,
     p_amount: amount,
   });
@@ -93,7 +93,7 @@ const incrementShiftCounters = async (
   totalOrders: number,
 ): Promise<void> => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any)
+  await dynamicSb
     .from("pos_shifts")
     .update({ total_sales: totalSales, total_orders: totalOrders })
     .eq("id", shiftId);

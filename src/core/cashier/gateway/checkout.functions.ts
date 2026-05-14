@@ -84,7 +84,7 @@ export const validatedSovereignCheckoutFn = createServerFn({ method: "POST" })
 
     // 3) Hash matched → call the Sovereign Router atomically.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: orderId, error } = await (supabase as any).rpc(
+    const { data: orderId, error } = await dynamicSb.rpc(
       "process_checkout_sovereign",
       {
         p_customer_id: data.customer_id,

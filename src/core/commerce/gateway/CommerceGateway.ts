@@ -27,7 +27,7 @@ export const CommerceGateway = {
     splitValue: number,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await dynamicSb
       .from("shared_cart_participants")
       .update({ split_type: splitType, split_value: splitValue })
       .eq("id", participantId);

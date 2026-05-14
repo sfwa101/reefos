@@ -26,7 +26,7 @@ export const MarketingGateway = {
    */
   async getInactivityPick(userId: string | null): Promise<InactivityPickVM | null> {
     
-    const sb = supabase as any;
+    const sb = dynamicSb;
 
     let category: string | null = null;
     if (userId) {
@@ -168,7 +168,7 @@ export const MarketingGateway = {
     error: { message: string } | null;
   }> {
     
-    const sb = supabase as any;
+    const sb = dynamicSb;
     const { data, error } = await sb
       .from("offers_matrix")
       .select("*")

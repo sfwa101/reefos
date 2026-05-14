@@ -151,7 +151,7 @@ export const approveInferenceFn = createServerFn({ method: "POST" })
 
     // Mint via the existing legacy RPC. Persistence rules unchanged.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: mintError } = await (supabase.rpc as any)(
+    const { error: mintError } = await dynamicSb.rpc(
       "mint_universal_asset",
       { payload: trace.draft_payload },
     );

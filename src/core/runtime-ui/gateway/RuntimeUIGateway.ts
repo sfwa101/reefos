@@ -197,7 +197,7 @@ export const RuntimeUIGateway = {
     payload: Record<string, unknown>;
     idempotency_key?: string;
   }) {
-    const { data, error } = await (supabase.rpc as any)("admin_entity_upsert", {
+    const { data, error } = await dynamicSb.rpc("admin_entity_upsert", {
       p_entity_key: input.entity_key,
       p_record_id: input.record_id,
       p_payload: input.payload,
@@ -215,7 +215,7 @@ export const RuntimeUIGateway = {
   },
 
   async invokeAdminAction(rpcName: string, args: Record<string, unknown>) {
-    const { data, error } = await (supabase.rpc as any)(rpcName, args);
+    const { data, error } = await dynamicSb.rpc(rpcName, args);
     return { data, error };
   },
 
@@ -230,7 +230,7 @@ export const RuntimeUIGateway = {
   // ============= Watchdog (circuit breaker) =============
 
   async tripCircuitBreaker(settingKey: string, reason: string) {
-    const { error } = await (supabase.rpc as any)("admin_trigger_circuit_breaker", {
+    const { error } = await dynamicSb.rpc("admin_trigger_circuit_breaker", {
       p_setting_key: settingKey,
       p_reason: reason,
     });

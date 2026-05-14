@@ -593,7 +593,7 @@ export async function insertProductRequest(
   payload: Record<string, unknown>,
 ): Promise<{ error: string | null }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await dynamicSb
     .from("product_requests")
     .insert(payload);
   return { error: error?.message ?? null };
