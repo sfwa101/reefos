@@ -31,12 +31,8 @@ function DispatchBoard() {
   const [target, setTarget] = useState<{ ticket: DispatchTicket; channel: Channel } | null>(null);
 
   const refresh = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select("id, master_order_id, total_amount, notes, created_at")
-      .eq("status", "ready_for_pickup")
-      .order("created_at", { ascending: true });
-    if (!error) setTickets((data ?? []) as DispatchTicket[]);
+    const data = await LogisticsExtras.listReadyForPickupNodes();
+    setTickets(data as DispatchTicket[]);
     setLoading(false);
   }, []);
 
@@ -44,15 +40,8 @@ function DispatchBoard() {
 
   useVisibilitySocket(
     () => {
-      const ch = supabase
-        .channel("dispatch-nodes")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-          () => { refresh(); },
-        )
-        .subscribe();
-      return () => { supabase.removeChannel(ch); };
+      const ch = LogisticsExtras.subscribeFulfillmentNodes(() => { refresh(); });
+      return () => { ch.unsubscribe(); };
     },
     () => { refresh(); },
     [refresh],
