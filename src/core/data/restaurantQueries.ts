@@ -20,7 +20,7 @@ export interface RestoProduct {
   readonly description: string | null;
   readonly metadata: Record<string, unknown> | null;
 }
-import { fetchRestaurantAssets } from "@/lib/sovereignCatalog";
+import { fetchRestaurantAssets } from "@/core/commerce/knowledge/sovereignCatalog";
 
 const RESTAURANTS_QUERY_KEY = ["restaurants"] as const;
 const FIVE_MINUTES = 5 * 60 * 1000;

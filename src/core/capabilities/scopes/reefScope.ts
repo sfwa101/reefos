@@ -2,8 +2,8 @@
  * Reef Al Madina scope adapter for the Universal Omni-Search.
  * Phase 15.2 — reads directly from the Sovereign Catalog (salsabil_assets).
  */
-import { searchSovereignAssets } from "@/lib/sovereignCatalog";
-import { toLegacyAssetId } from "@/lib/sovereignCatalog";
+import { searchSovereignAssets } from "@/core/commerce/knowledge/sovereignCatalog";
+import { toLegacyAssetId } from "@/core/commerce/knowledge/sovereignCatalog";
 import type { OmniScope, OmniHit } from "../SearchAtom";
 
 export const reefScope: OmniScope = {

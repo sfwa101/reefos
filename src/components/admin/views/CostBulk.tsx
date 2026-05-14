@@ -9,7 +9,7 @@ import {
   upsertSkuCost,
   upsertAssetAffiliatePct,
   type SkuAdminRow,
-} from "@/lib/sovereignCatalog";
+} from "@/core/commerce/knowledge/sovereignCatalog";
 
 
 type Row = SkuAdminRow;

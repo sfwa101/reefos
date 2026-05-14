@@ -67,7 +67,7 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
       try {
         const [s, sov] = await Promise.all([
           listSuppliersFn(),
-          import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
+          import("@/core/commerce/knowledge/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
         ]);
         if (cancel) return;
         setSuppliers(s as Supplier[]);

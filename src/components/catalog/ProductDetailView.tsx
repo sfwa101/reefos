@@ -10,9 +10,9 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { listProductReviewsFn, listProductUnitsFn } from "@/core/catalog/catalog.functions";
 import { logBehavior } from "@/lib/behavior";
 import { motion } from "framer-motion";
-import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/lib/productEnrichment";
-import { extractHandlingTraits, traitLabel } from "@/lib/productTraits";
-import { villageMetaFor } from "@/lib/sourcing-meta";
+import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/core/commerce/knowledge/productEnrichment";
+import { extractHandlingTraits, traitLabel } from "@/core/commerce/knowledge/productTraits";
+import { villageMetaFor } from "@/core/commerce/knowledge/sourcing-meta";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
 import {

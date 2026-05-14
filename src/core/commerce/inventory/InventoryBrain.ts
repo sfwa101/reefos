@@ -9,7 +9,7 @@
 import type {
   ISODateString,
   JsonObject,
-} from "@/core/dna/types";
+} from "@/core/commerce/knowledge/dna.types";
 import type {
   StockLedgerEvent,
   StockLedgerEventType,

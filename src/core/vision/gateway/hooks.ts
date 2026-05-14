@@ -14,7 +14,7 @@ import {
   rejectInferenceFn,
 } from "./vision.functions";
 import type { VisionInferenceTrace } from "../domain/types";
-import type { JsonObject } from "@/core/dna/types";
+import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
 
 export interface InferEntityInput {
   readonly image_base64: string;

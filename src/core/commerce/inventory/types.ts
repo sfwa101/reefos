@@ -5,7 +5,7 @@
  * Pure domain models. No DB, no I/O. The ledger is the source of truth;
  * `inventory_locations` and `usa_products.stock_qty` become cached projections.
  */
-import type { ISODateString, JsonObject } from "@/core/dna/types";
+import type { ISODateString, JsonObject } from "@/core/commerce/knowledge/dna.types";
 
 /** Every legal mutation that can ever change on-hand or reserved stock. */
 export type StockLedgerEventType =

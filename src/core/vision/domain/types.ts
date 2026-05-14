@@ -7,7 +7,7 @@
  * row, satisfying Constitution v2.0 Article 12.2 (Vision Cortex) and
  * Article 8.1 (Human Veto).
  */
-import type { JsonObject } from "@/core/dna/types";
+import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
 
 /** Lifecycle of an inference row. Append-only — state is mutated in place
  * on the tracker only; the inference itself is never deleted. */

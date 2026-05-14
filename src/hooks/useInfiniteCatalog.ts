@@ -22,7 +22,7 @@ import {
   type Product,
   type ProductSource,
 } from "@/core/catalog/legacyProduct.types";
-import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
+import { searchSovereignAssets, assetToProduct } from "@/core/commerce/knowledge/sovereignCatalog";
 import { getActiveTenantId } from "@/context/TenantContext";
 
 export interface UseInfiniteCatalogParams {

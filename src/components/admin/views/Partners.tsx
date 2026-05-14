@@ -36,7 +36,7 @@ export default function Partners() {
     setLoading(true);
     try {
       const [sov, pp, pl] = await Promise.all([
-        import("@/lib/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
+        import("@/core/commerce/knowledge/sovereignCatalog").then((m) => m.fetchAdminCatalog()),
         listPartners(),
         listLedger(),
       ]);

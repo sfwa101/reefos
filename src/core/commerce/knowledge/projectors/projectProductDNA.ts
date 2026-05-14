@@ -22,7 +22,7 @@ import type {
   ProductIdentityDNA,
   ProductIntelligenceDNA,
   ProductSupplyDNA,
-} from "../types";
+} from "../dna.types";
 
 /**
  * Loose shape of a row coming from `public.usa_products`. Every field is

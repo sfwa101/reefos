@@ -17,7 +17,7 @@ import type {
   CashierContext,
   ProductFinancialDNA,
 } from "@/core/cashier/domain/types";
-import type { JsonObject } from "@/core/dna/types";
+import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
 
 // ─────────────────────────── Schemas ───────────────────────────
 

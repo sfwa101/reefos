@@ -21,8 +21,8 @@ import type {
 import {
   projectProductDNA,
   type UsaProductRow,
-} from "@/core/dna/projectors/projectProductDNA";
-import type { ProductCivilizationEntity } from "@/core/dna/types";
+} from "@/core/commerce/knowledge/projectors/projectProductDNA";
+import type { ProductCivilizationEntity } from "@/core/commerce/knowledge/dna.types";
 
 /**
  * ملاحظة: نستخدم supabase publishable client (anon) لأن قراءة المنتجات عامة
