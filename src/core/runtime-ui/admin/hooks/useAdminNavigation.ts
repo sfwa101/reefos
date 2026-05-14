@@ -1,6 +1,6 @@
 /** useAdminNavigation — hierarchical sidebar tree (cached 5min). */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 
 export interface AdminNavItem {
   id: string;
@@ -33,11 +33,7 @@ export function useAdminNavigation() {
     queryKey: ["admin", "navigation"],
     staleTime: 5 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("admin_navigation")
-        .select("*")
-        .eq("is_visible", true)
-        .order("sort_order");
+      const { data, error } = await RuntimeUIGateway.listAdminNavigation();
       if (error) throw error;
       return buildTree((data ?? []) as AdminNavItem[]);
     },
