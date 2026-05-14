@@ -12,6 +12,8 @@ import {
   generateEmbeddingFn,
   processImageAestheticFn,
 } from "@/core/vision/vision.functions";
+import { hakimPulseFn } from "@/core/hakim-ai/hakim.functions";
+import { predictBasketFn } from "@/core/orders/predict.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
