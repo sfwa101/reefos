@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { MapPin, Users, Sparkles } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { useAuth } from "@/context/AuthContext";
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
