@@ -190,6 +190,7 @@ function RootComponent() {
                           <BackgroundSyncManager />
                           
                           <BehaviorTrackerBootstrap />
+                          <WorkspaceHydrationBootstrap />
                           <SovereignSpiritBootstrap />
                           <SubdomainGuard />
                           <Toaster />
