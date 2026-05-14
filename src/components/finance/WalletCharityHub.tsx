@@ -22,15 +22,8 @@ import {
 const DONATE_PRESETS = [10, 25, 50, 100];
 
 async function fetchCampaigns(): Promise<CharityCampaign[]> {
-  const { data, error } = await supabase
-    .from("charity_campaigns")
-    .select(
-      "id,auditor_id,title,description,cover_url,target_amount,current_amount,restricted_categories,is_active,ends_at,created_at",
-    )
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as CharityCampaign[];
+  const data = await FinanceGateway.listActiveCharityCampaigns();
+  return data as unknown as CharityCampaign[];
 }
 
 export const WalletCharityHub = ({
