@@ -342,7 +342,7 @@ ${JSON.stringify(report, null, 2)}`;
 
   const messages = [
     { role: "system", content: systemPrompt },
-    ...((hist ?? []) as Array<{ role: string; content: string }>).map((m) => ({
+    ...((hist ?? []) as unknown as Array<{ role: string; content: string }>).map((m) => ({
       role: m.role,
       content: m.content,
     })),
