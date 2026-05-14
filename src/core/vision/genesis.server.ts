@@ -162,23 +162,24 @@ function dataUrlParts(dataUrl: string): { mime: string; b64: string } {
   return { mime: m[1], b64: m[2] };
 }
 
-function toGeminiSchema(node: any): any {
+function toGeminiSchema(node: unknown): unknown {
   if (Array.isArray(node)) return node.map(toGeminiSchema);
   if (!node || typeof node !== "object") return node;
-  const out: any = {};
-  for (const [k, v] of Object.entries(node)) {
+  const src = node as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(src)) {
     if (k === "additionalProperties") continue;
     if (k === "type" && Array.isArray(v)) {
-      const nonNull = v.filter((t) => t !== "null");
+      const nonNull = (v as unknown[]).filter((t) => t !== "null");
       out.type = nonNull[0] ?? "string";
-      if (v.includes("null")) out.nullable = true;
+      if ((v as unknown[]).includes("null")) out.nullable = true;
     } else if (k === "enum" && Array.isArray(v)) {
-      const cleaned = v.filter((x) => x !== null);
+      const cleaned = (v as unknown[]).filter((x) => x !== null);
       if (cleaned.length) out.enum = cleaned;
-      if (v.includes(null)) out.nullable = true;
+      if ((v as unknown[]).includes(null)) out.nullable = true;
     } else if (k === "properties" && v && typeof v === "object") {
-      const props: Record<string, any> = {};
-      for (const [pk, pv] of Object.entries(v as Record<string, any>)) {
+      const props: Record<string, unknown> = {};
+      for (const [pk, pv] of Object.entries(v as Record<string, unknown>)) {
         props[pk] = toGeminiSchema(pv);
       }
       out.properties = props;
@@ -243,7 +244,7 @@ async function callGemini(opts: {
   }
   const data = JSON.parse(text);
   const fnCall =
-    data?.candidates?.[0]?.content?.parts?.find((p: any) => p?.functionCall)?.functionCall;
+    data?.candidates?.[0]?.content?.parts?.find((p: GeminiPart) => "functionCall" in p && p.functionCall)?.functionCall;
   if (!fnCall?.args) {
     throw new Error("gemini_no_function_call: " + JSON.stringify(data).slice(0, 500));
   }
@@ -361,9 +362,9 @@ export interface VisionGenesisOutput {
   error?: string;
   details?: string;
   attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
-  asset?: any;
-  skus?: any[];
-  financial_contract?: any;
+  asset?: Record<string, unknown>;
+  skus?: Array<Record<string, unknown>>;
+  financial_contract?: Record<string, unknown>;
   prompt_version?: string;
   provider?: VisionProvider | null;
   provider_attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
@@ -420,7 +421,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
     const failoverChain: VisionProvider[] =
       primary === "gemini" ? ["gemini", "openrouter"] : [primary];
 
-    let parsed: any = null;
+    let parsed: Record<string, unknown> | null = null;
     let usedProvider: VisionProvider | null = null;
     const attempts: Array<{ provider: VisionProvider; ok: boolean; error?: string }> = [];
 
@@ -500,7 +501,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
         allergens: optStrArr(a?.allergens, 20),
       },
       skus: Array.isArray(parsed?.skus)
-        ? parsed.skus.slice(0, 20).map((s: any, i: number) => ({
+        ? (parsed.skus as unknown[]).slice(0, 20).map((raw: unknown, i: number) => { const s = (raw && typeof raw === "object" ? raw : {}) as Record<string, unknown>; return ({
             sku_code: String(s?.sku_code ?? `SKU-${Date.now()}-${i}`).slice(0, 64),
             attributes: s?.attributes && typeof s.attributes === "object" ? s.attributes : {},
             barcode: optStr(s?.barcode, 64),
