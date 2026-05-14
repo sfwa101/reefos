@@ -125,7 +125,7 @@ export const listHakimInsightsFn = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(20);
     if (error) throw new Error(error.message);
-    return (data ?? []) as HakimInsightRow[];
+    return (data ?? []) as unknown as HakimInsightRow[];
   });
 
 export const runHakimAdvisorFn = createServerFn({ method: "POST" })
