@@ -30,13 +30,9 @@ export const VaultsGrid = ({ userId }: { userId: string | null }) => {
     }
     let mounted = true;
     (async () => {
-      const { data } = await supabase
-        .from("wallet_vaults")
-        .select("id,name,icon,target_amount,current_balance,locked_until")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false });
+      const data = await FinanceGateway.listUserVaults(userId);
       if (!mounted) return;
-      setVaults((data ?? []) as Vault[]);
+      setVaults(data as unknown as Vault[]);
       setLoading(false);
     })();
     return () => {
