@@ -74,11 +74,14 @@ export function useAestheticProcessor() {
       });
       if (error) throw new Error(error.message ?? "unknown");
       if (!data?.ok || !data?.image_data_url) {
-        throw new Error(data?.error ?? "ai_error");
+        const reason = (data as { reason?: string; error?: string } | null)?.reason
+          ?? (data as { reason?: string; error?: string } | null)?.error
+          ?? "ai_error";
+        throw new Error(reason);
       }
       return {
         imageDataUrl: data.image_data_url as string,
-        style: data.style as AestheticStyle,
+        style,
         processedAt: data.processed_at as string,
       };
     },
