@@ -34,27 +34,35 @@ export type BentoTone =
 
 export type GridRow = Record<string, unknown>;
 
-export type BentoMetric<T = GridRow> = {
+// NOTE: callbacks below use METHOD SHORTHAND syntax (`compute?(rows): ...`)
+// rather than property+arrow (`compute?: (rows) => ...`). Method shorthand is
+// bivariant in parameter position even under `strictFunctionTypes`, which
+// preserves the public-API ergonomics that allow callers to pass
+// `(rows: MyRow[]) => …` against the kernel-default `unknown[]`. This is the
+// minimum-friction way to remove `any` from the SDUI grid surface while
+// keeping the existing typed-row consumers (Delivery / UsaLedger / Vendor*) green.
+
+export type BentoMetric = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: T[]) => string | number;
-  urgent?: (rows: T[]) => boolean;
+  compute?(rows: unknown[]): string | number;
+  urgent?(rows: unknown[]): boolean;
   to?: string;
 };
 
 export type Column<T = GridRow> = {
   key: string;
   label?: string;
-  render?: (row: T) => ReactNode;
+  render?(row: T): ReactNode;
   className?: string;
   hideOnMobile?: boolean;
 };
 
 export type RowAction<T = GridRow> = {
   label: string;
-  onClick: (row: T) => void;
+  onClick(row: T): void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
@@ -65,9 +73,9 @@ export type DataSource<T = GridRow> = {
   orderBy?: { column: string; ascending?: boolean };
   /** Page size for server pagination. Default 50. */
   limit?: number;
-  fetcher?: () => Promise<T[]>;
+  fetcher?(): Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?: (row: GridRow) => T;
+  map?(row: unknown): T;
 };
 
 export type EmptyState = {
@@ -79,16 +87,16 @@ export type EmptyState = {
 export type UniversalAdminGridProps<T = GridRow> = {
   title: string;
   subtitle?: string;
-  metrics?: ReadonlyArray<BentoMetric<T>>;
+  metrics?: BentoMetric[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
-  rowKey?: (row: T) => string;
-  onRowClick?: (row: T) => void;
+  rowKey?(row: T): string;
+  onRowClick?(row: T): void;
   rowActions?: RowAction<T>[];
   searchPlaceholder?: string;
   empty?: EmptyState;
   topSlot?: ReactNode;
-  renderList?: (rows: T[]) => ReactNode;
+  renderList?(rows: T[]): ReactNode;
 };
 
 // -------- Tone palette --------
