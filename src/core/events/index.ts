@@ -34,6 +34,35 @@ export type SalsabilEvents = {
     idleMinutes: number;
     appId?: SalsabilAppId;
   };
+  "cart.item.added": {
+    lineId: string;
+    productId: string;
+    qty: number;
+    appId?: SalsabilAppId;
+  };
+  "cart.item.removed": {
+    lineId: string;
+    productId: string;
+    appId?: SalsabilAppId;
+  };
+  "cart.item.qty_changed": {
+    lineId: string;
+    productId: string;
+    qty: number;
+    previousQty: number;
+    appId?: SalsabilAppId;
+  };
+  "cart.cleared": {
+    itemCount: number;
+    appId?: SalsabilAppId;
+  };
+  "cart.updated": {
+    itemCount: number;
+    grandTotal: number;
+    currency: string;
+    snapshotHash: string;
+    appId?: SalsabilAppId;
+  };
 };
 
 export type SalsabilEventName = keyof SalsabilEvents;
