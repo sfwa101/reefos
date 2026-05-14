@@ -6,10 +6,9 @@
  * a no-op (the installer guards on `import.meta.env.DEV`).
  *
  * Wired from `src/routes/__root.tsx` via a single side-effect import.
- * `client.ts` is auto-generated and MUST NOT be edited; this is the
- * sanctioned injection point.
+ * Wave P-3 Sub-Wave 9: routed through `RuntimeUIGateway` so this module no
+ * longer touches the Supabase client directly.
  */
-import { supabase } from "@/integrations/supabase/client";
-import { installSupabaseUiWatchdog } from "@/core/runtime-ui/watchdog";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 
-installSupabaseUiWatchdog(supabase);
+RuntimeUIGateway.installDevWatchdog();

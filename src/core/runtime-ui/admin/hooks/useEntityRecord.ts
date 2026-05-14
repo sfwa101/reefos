@@ -1,6 +1,6 @@
 /** useEntityRecord — fetch single row by primary key. */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 
 export function useEntityRecord(
   entityKey: string,
@@ -12,14 +12,13 @@ export function useEntityRecord(
     queryKey: ["admin", "record", entityKey, id],
     enabled: !!tableName && !!id && !!primaryKeyCol,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from(tableName as never)
-        .select("*")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .eq(primaryKeyCol as any, id as any)
-        .maybeSingle();
+      const { data, error } = await RuntimeUIGateway.getEntityRecord(
+        tableName as string,
+        primaryKeyCol as string,
+        id as string,
+      );
       if (error) throw error;
-      return (data ?? null) as Record<string, unknown> | null;
+      return data;
     },
   });
 }

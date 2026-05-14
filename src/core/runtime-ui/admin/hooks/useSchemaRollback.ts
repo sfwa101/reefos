@@ -1,6 +1,6 @@
 /** useSchemaRollback — invokes admin_schema_rollback RPC. */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { toast } from "sonner";
 
 export function useSchemaRollback(entityId: string | undefined, mode: string) {
@@ -8,10 +8,7 @@ export function useSchemaRollback(entityId: string | undefined, mode: string) {
   return useMutation({
     mutationFn: async () => {
       if (!entityId) throw new Error("entity_id_required");
-      const { data, error } = await supabase.rpc("admin_schema_rollback", {
-        p_entity_id: entityId,
-        p_mode: mode,
-      });
+      const { data, error } = await RuntimeUIGateway.schemaRollback(entityId, mode);
       if (error) throw error;
       return data as { rolled_back_to: string; version: number };
     },

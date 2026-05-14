@@ -4,15 +4,14 @@
  * to validate/authorize.
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { toast } from "sonner";
 
 export function useAdminAction(rpcName: string, entityKey?: string) {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: async (args: Record<string, unknown>) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)(rpcName, args);
+      const { data, error } = await RuntimeUIGateway.invokeAdminAction(rpcName, args);
       if (error) throw error;
       return data;
     },

@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
 import { tenantQueryKey } from "@/lib/tenantScope";
@@ -40,23 +40,7 @@ type State = {
 };
 
 async function fetchSduiBlocks(slug: string): Promise<unknown> {
-  const { data: layout, error: e1 } = await supabase
-    .from("sdui_layouts")
-    .select("id, active_version_id")
-    .eq("slug", slug)
-    .maybeSingle();
-
-  if (e1) throw e1;
-  if (!layout?.active_version_id) return null;
-
-  const { data: version, error: e2 } = await supabase
-    .from("sdui_layout_versions")
-    .select("blocks")
-    .eq("id", layout.active_version_id)
-    .maybeSingle();
-
-  if (e2) throw e2;
-  return version?.blocks ?? null;
+  return RuntimeUIGateway.getSduiActiveLayout(slug);
 }
 
 export function useSduiLayout(slug: string): State {
@@ -71,25 +55,10 @@ export function useSduiLayout(slug: string): State {
 
   // Realtime cache invalidation — admin edits to the active layout flow live.
   useEffect(() => {
-    const channel = supabase
-      .channel(`sdui-updates-${slug}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "sdui_layouts",
-          filter: `slug=eq.${slug}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    const sub = RuntimeUIGateway.subscribeSduiLayoutUpdates(slug, () => {
+      void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
+    });
+    return () => sub.unsubscribe();
   }, [slug, queryClient]);
 
   // Subscribe to Hakim's transient overlay so re-orderings cause a re-render

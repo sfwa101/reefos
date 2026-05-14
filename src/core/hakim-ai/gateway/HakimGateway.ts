@@ -248,6 +248,14 @@ export const HakimGateway = {
     return { data, error };
   },
 
+  async updateAssetTraits(assetId: string, traits: string[]) {
+    const { error } = await supabase
+      .from("salsabil_assets")
+      .update({ traits: traits as never })
+      .eq("id", assetId);
+    return { error };
+  },
+
   async matchUniversalAsset(embedding: number[], threshold: number) {
     const { data, error } = await rpc("match_universal_asset", {
       p_embedding: embedding,

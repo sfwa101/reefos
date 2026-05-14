@@ -3,7 +3,7 @@
  * Cache invalidation is strict and ONLY runs on success.
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { toast } from "sonner";
 
 export interface EntityUpsertInput {
@@ -19,15 +19,14 @@ export function useEntityMutation() {
     mutationFn: async (input: EntityUpsertInput) => {
       const idem = input.idempotency_key
         ?? (typeof crypto !== "undefined" ? crypto.randomUUID() : undefined);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("admin_entity_upsert", {
-        p_entity_key: input.entity_key,
-        p_record_id: input.record_id ?? null,
-        p_payload: input.payload,
-        p_idempotency_key: idem,
+      const { data, error } = await RuntimeUIGateway.entityUpsert({
+        entity_key: input.entity_key,
+        record_id: input.record_id ?? null,
+        payload: input.payload,
+        idempotency_key: idem,
       });
       if (error) throw error;
-      return data as Record<string, unknown>;
+      return (data ?? {}) as Record<string, unknown>;
     },
     onSuccess: (data, vars) => {
       qc.invalidateQueries({ queryKey: ["admin", "list", vars.entity_key] });

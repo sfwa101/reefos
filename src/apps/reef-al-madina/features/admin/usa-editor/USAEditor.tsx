@@ -422,7 +422,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
    */
   const syncClassificationTrait = async (assetId: string) => {
     try {
-      const { supabase } = await import("@/integrations/supabase/client");
+      const { HakimGateway } = await import("@/core/hakim-ai/gateway/HakimGateway");
       const current = Array.isArray(asset?.traits)
         ? (asset!.traits as unknown[]).filter((t): t is string => typeof t === "string")
         : [];
@@ -432,10 +432,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const next = want
         ? Array.from(new Set([...current, CAP.MULTI_CLASSIFICATION]))
         : current.filter((t) => t !== CAP.MULTI_CLASSIFICATION);
-      const { error } = await supabase
-        .from("salsabil_assets")
-        .update({ traits: next as never })
-        .eq("id", assetId);
+      const { error } = await HakimGateway.updateAssetTraits(assetId, next);
       if (error) throw error;
     } catch (e) {
       console.warn("[USAEditor] trait sync failed", e);

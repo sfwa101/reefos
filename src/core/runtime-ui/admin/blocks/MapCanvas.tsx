@@ -7,7 +7,7 @@
  * polygons via Realtime + RPC data.
  */
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import type { DriverPinLayer, GeofencePolygonLayer } from "../schemas";
 
 type Props = {
@@ -30,12 +30,15 @@ export default function MapCanvas({ centerLat, centerLng, zoom, children }: Prop
     if (!pinLayer) return;
     let active = true;
     const tick = async () => {
-      const { data } = await supabase.rpc("find_nearest_drivers", {
-        p_lat: centerLat, p_lng: centerLng, p_radius_m: 50_000, p_limit: 50,
+      const data = await RuntimeUIGateway.findNearestDrivers({
+        lat: centerLat,
+        lng: centerLng,
+        radiusM: 50_000,
+        limit: 50,
       });
-      if (!active || !data) return;
+      if (!active) return;
       setPins(
-        (data as Array<{ driver_id: string }>).map((d) => ({
+        data.map((d) => ({
           driver_id: d.driver_id, lat: centerLat, lng: centerLng,
         })),
       );
@@ -47,8 +50,7 @@ export default function MapCanvas({ centerLat, centerLng, zoom, children }: Prop
 
   useEffect(() => {
     if (!polyLayer) return;
-    supabase.from("delivery_polygons").select("id", { count: "exact", head: true })
-      .then(({ count }) => setPolyCount(count ?? 0));
+    void RuntimeUIGateway.countDeliveryPolygons().then((c) => setPolyCount(c));
   }, [polyLayer]);
 
   return (

@@ -10,7 +10,7 @@
  * the DB trigger).
  */
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import type {
   SectionConfig,
   SectionKey,
@@ -47,12 +47,7 @@ export const useLayoutEditor = (pageKey: string) => {
   const reload = useCallback(async () => {
     setLoading(true);
     // 1) Try draft
-    const draft = await supabase
-      .from("ui_layouts")
-      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-      .eq("page_key", pageKey)
-      .eq("status", "draft")
-      .maybeSingle();
+    const draft = await RuntimeUIGateway.getUiLayoutByStatus(pageKey, "draft");
 
     if (draft.data) {
       setLayout(draft.data as unknown as UiLayout);
@@ -62,12 +57,7 @@ export const useLayoutEditor = (pageKey: string) => {
     }
 
     // 2) Fall back to published as a starting point
-    const pub = await supabase
-      .from("ui_layouts")
-      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-      .eq("page_key", pageKey)
-      .eq("status", "published")
-      .maybeSingle();
+    const pub = await RuntimeUIGateway.getUiLayoutByStatus(pageKey, "published");
 
     if (pub.data) {
       setLayout({ ...(pub.data as unknown as UiLayout), status: "draft", id: "new-draft" });
@@ -177,11 +167,7 @@ export const useLayoutEditor = (pageKey: string) => {
         version: layout.version ?? 1,
         title: layout.title ?? null,
       };
-      const { data, error } = await supabase
-        .from("ui_layouts")
-        .upsert(payload, { onConflict: "page_key,status" })
-        .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-        .maybeSingle();
+      const { data, error } = await RuntimeUIGateway.upsertUiLayout(payload);
       if (error) throw error;
       return { ok: true, data };
     },
@@ -219,16 +205,11 @@ export const useLayoutEditor = (pageKey: string) => {
         version: newVersion,
         title: layout.title ?? null,
       };
-      const { error } = await supabase
-        .from("ui_layouts")
-        .upsert(payload, { onConflict: "page_key,status" });
+      const { error } = await RuntimeUIGateway.upsertUiLayout(payload);
       if (error) throw error;
 
       // 2) Drop the draft so editor reloads from the freshly published row.
-      await supabase.from("ui_layouts")
-        .delete()
-        .eq("page_key", layout.page_key)
-        .eq("status", "draft");
+      await RuntimeUIGateway.deleteUiLayoutDraft(layout.page_key);
 
       await reload();
       return { ok: true };

@@ -8,7 +8,7 @@
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { tenantQueryKey } from "@/lib/tenantScope";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
@@ -96,23 +96,10 @@ function readPreviewMode(): LayoutStatus {
 }
 
 async function fetchUiLayout(pageKey: string, status: LayoutStatus): Promise<UiLayout | null> {
-  let { data } = await supabase
-    .from("ui_layouts")
-    .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-    .eq("page_key", pageKey)
-    .eq("status", status)
-    .eq("is_active", true)
-    .maybeSingle();
+  let data = await RuntimeUIGateway.getActiveUiLayout(pageKey, status);
 
   if (!data && status === "draft") {
-    const r = await supabase
-      .from("ui_layouts")
-      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-      .eq("page_key", pageKey)
-      .eq("status", "published")
-      .eq("is_active", true)
-      .maybeSingle();
-    data = r.data;
+    data = await RuntimeUIGateway.getActiveUiLayout(pageKey, "published");
   }
 
   return data ? (data as unknown as UiLayout) : null;
