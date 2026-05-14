@@ -187,12 +187,8 @@ export const useDriverEngine = (): DriverEngine => {
 
   /* ─── surge zones from geo_zones ─── */
   const loadSurge = useCallback(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
-      .from("geo_zones")
-      .select("zone_code,name,current_load_factor,surge_active")
-      .eq("is_active", true);
-    setSurgeZones(((data ?? []) as SurgeZone[]).filter((z) => z.surge_active));
+    const data = await DriverGateway.listActiveGeoZones();
+    setSurgeZones(((data ?? []) as unknown as SurgeZone[]).filter((z) => z.surge_active));
   }, []);
 
   /* ─── boot + realtime subscriptions on Sovereign Matrix ─── */
@@ -200,42 +196,22 @@ export const useDriverEngine = (): DriverEngine => {
     load();
     loadSurge();
 
-    if (!driverId) {
-      // first load resolves driverId; the next effect run will subscribe.
-    }
+    const nodesChannel = DriverGateway.subscribeDriverNodes(driverId, (payload) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const n = (payload.new ?? {}) as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const o = (payload.old ?? {}) as any;
+      if (n?.status === "delivered" && o?.status !== "delivered") {
+        deliveredTodayRef.current += 1;
+      }
+      load();
+    });
 
-    const nodesChannel = supabase
-      .channel(`driver-engine-nodes${driverId ? `-${driverId}` : ""}`)
-      .on(
-        "postgres_changes",
-        driverId
-          ? { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `driver_id=eq.${driverId}` }
-          : { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-        (payload) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const n = (payload.new ?? {}) as any;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const o = (payload.old ?? {}) as any;
-          if (n?.status === "delivered" && o?.status !== "delivered") {
-            deliveredTodayRef.current += 1;
-          }
-          load();
-        },
-      )
-      .subscribe();
-
-    const zonesCh = supabase
-      .channel("driver-engine-zones")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "geo_zones" },
-        () => loadSurge(),
-      )
-      .subscribe();
+    const zonesCh = DriverGateway.subscribeGeoZones(() => loadSurge());
 
     return () => {
-      supabase.removeChannel(nodesChannel);
-      supabase.removeChannel(zonesCh);
+      nodesChannel.unsubscribe();
+      zonesCh.unsubscribe();
     };
   }, [load, loadSurge, driverId]);
 
