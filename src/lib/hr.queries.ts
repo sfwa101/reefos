@@ -3,7 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   getEmployeeHubFn,
   listAdvanceRequestsFn,
-} from "./hr.functions";
+} from "@/core/hr/hr.functions";
 
 export const hrKeys = {
   all: ["hr"] as const,
