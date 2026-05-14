@@ -58,12 +58,8 @@ export const WalletAffiliateHub = ({
     if (!userId) return;
     let cancel = false;
     (async () => {
-      const { data } = await supabase
-        .from("wallet_balances")
-        .select("balance")
-        .eq("user_id", userId)
-        .maybeSingle();
-      if (!cancel) setBalance(Number(data?.balance ?? 0));
+      const balance = await FinanceGateway.getWalletBalanceByUserId(userId);
+      if (!cancel) setBalance(balance);
     })();
     return () => { cancel = true; };
   }, [userId, withdrawOpen]);
