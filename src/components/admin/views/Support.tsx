@@ -1,7 +1,7 @@
 import { LifeBuoy, AlertCircle, CheckCircle2, MessageSquare } from "lucide-react";
 import { toast } from "sonner";
 import { useServerFn } from "@tanstack/react-start";
-import { closeSupportTicketFn } from "@/lib/crm.functions";
+import { closeSupportTicketFn } from "@/core/crm/crm.functions";
 import { UniversalAdminGrid, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
 

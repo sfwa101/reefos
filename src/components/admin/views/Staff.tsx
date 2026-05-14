@@ -8,7 +8,7 @@ import {
   assignRoleFn,
   revokeRoleFn,
   type StaffProfileRow,
-} from "@/lib/hr.functions";
+} from "@/core/hr/hr.functions";
 import { toast } from "sonner";
 
 

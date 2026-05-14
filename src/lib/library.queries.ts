@@ -1,6 +1,6 @@
 // React Query options for the Library Gateway (Phase D-4).
 import { queryOptions } from "@tanstack/react-query";
-import { getMyKycStatusFn } from "./library.functions";
+import { getMyKycStatusFn } from "@/core/library/library.functions";
 
 export const libraryKeys = {
   all: ["library"] as const,

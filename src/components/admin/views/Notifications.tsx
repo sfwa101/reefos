@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { broadcastNotificationFn } from "@/lib/crm.functions";
+import { broadcastNotificationFn } from "@/core/crm/crm.functions";
 import { toast } from "sonner";
 
 type NotifRow = {

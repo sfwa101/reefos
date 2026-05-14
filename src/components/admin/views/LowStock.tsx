@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { listLowStockProductsFn, type LowStockItem } from "@/lib/ops.functions";
+import { listLowStockProductsFn, type LowStockItem } from "@/core/ops/ops.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, AlertTriangle, Package } from "lucide-react";

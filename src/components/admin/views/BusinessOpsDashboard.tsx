@@ -16,7 +16,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { tenantQueryKey } from "@/lib/tenantScope";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { fmtMoney } from "@/lib/format";
-import { getOpsKpisFn } from "@/lib/ops.functions";
+import { getOpsKpisFn } from "@/core/ops/ops.functions";
 
 const statusLabel: Record<string, string> = {
   pending: "بانتظار التأكيد",

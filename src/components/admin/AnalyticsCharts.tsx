@@ -7,7 +7,7 @@ import { lazy, Suspense, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAnalyticsChartsDataFn } from "@/lib/analytics.functions";
+import { getAnalyticsChartsDataFn } from "@/core/analytics/analytics.functions";
 
 const RevenueAreaChart = lazy(() =>
   import("@/components/admin/PremiumCharts").then((m) => ({ default: m.RevenueAreaChart })),

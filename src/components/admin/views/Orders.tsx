@@ -16,7 +16,7 @@ import { toast } from "sonner";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
-import { listMasterOrdersFn, setOrderStatusFn } from "@/lib/ops.functions";
+import { listMasterOrdersFn, setOrderStatusFn } from "@/core/ops/ops.functions";
 import { useAdminOrdersRealtime } from "@/hooks/useAdminOrdersRealtime";
 
 interface MasterOrderRow {
