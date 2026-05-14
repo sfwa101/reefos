@@ -169,8 +169,6 @@ export const CartGateway = {
   upsertCartRows,
   listCartKeys,
   deleteCartRowsByIds,
-  fetchLoyaltyTier,
-  onAuthChange,
   subscribeUserCart,
   subscribeSharedCart,
 };
