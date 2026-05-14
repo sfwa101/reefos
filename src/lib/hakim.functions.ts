@@ -1,7 +1,12 @@
-// Hakim Gateway — Wave R-1 · Batch 5.
+// Hakim Gateway — Wave R-1 · Batch 5 (P-4.2 server-fn migration).
 // Admin-only handlers for Hakim insights, anomalies, and category affinity.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import {
+  runHakimPulse,
+  runHakimAdvisor,
+  runHakimArchitect,
+} from "@/core/hakim-ai/hakim.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SbAny = any;
