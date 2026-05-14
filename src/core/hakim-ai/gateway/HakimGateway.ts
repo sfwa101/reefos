@@ -7,6 +7,11 @@
  * methods. Pre-existing `any` casts preserved (Wave P-7 will harden types).
  */
 import { supabase } from "@/integrations/supabase/client";
+import {
+  visionGenesisFn,
+  generateEmbeddingFn,
+  processImageAestheticFn,
+} from "@/core/vision/vision.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
