@@ -38,15 +38,11 @@ export type SovereignTheme = {
 export const SOVEREIGN_THEME_QUERY_KEY = ["sovereign-theme"] as const;
 
 async function fetchActiveTheme(tenantId: string): Promise<SovereignTheme | null> {
-  const { data, error } = await supabase
-    .from("salsabil_theme_matrix")
-    .select("id, tenant_id, theme_name, is_active, dna_payload")
-    .eq("tenant_id", tenantId)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as SovereignTheme | null) ?? null;
+  const data = await ThemeGateway.getActiveTheme(tenantId);
+  return (data as SovereignThemeRow | null) as SovereignTheme | null;
 }
+// Suppress unused-import warning for re-exported gateway type alias.
+export type _GwDna = GwDna;
 
 /** Track CSS variable keys we've previously injected so we can clean them
  *  up before re-applying — prevents ghost colors when DNA changes. */
