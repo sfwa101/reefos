@@ -6,10 +6,8 @@ import {
   runHakimPulse,
   runHakimAdvisor,
   runHakimArchitect,
+  type HakimSubmitBlueprintAsset,
 } from "@/core/hakim-ai/hakim.server";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type SbAny = any;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
