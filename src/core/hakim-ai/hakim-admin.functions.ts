@@ -8,6 +8,7 @@ import {
   runHakimArchitect,
   type HakimSubmitBlueprintAsset,
 } from "@/core/hakim-ai/hakim.server";
+import type { Json } from "@/integrations/supabase/types";
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
