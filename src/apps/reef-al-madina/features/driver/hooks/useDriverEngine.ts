@@ -159,12 +159,7 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: drv } = await supabase
-      .from("drivers")
-      .select("id")
-      .eq("user_id", uid)
-      .maybeSingle();
-    const id = (drv?.id as string | undefined) ?? null;
+    const id = await DriverGateway.getDriverIdForUser(uid);
     setDriverId(id);
 
     if (!id) {
@@ -174,14 +169,10 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: nodes } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select("id,master_order_id,status,total_amount,delivery_snapshot,assigned_at,picked_up_at,delivered_at")
-      .eq("driver_id", id)
-      .in("status", ACTIVE_STATUSES as unknown as string[])
-      .order("assigned_at", { ascending: false, nullsFirst: false });
-
-    const list = (nodes ?? []) as Record<string, unknown>[];
+    const list = await DriverGateway.listActiveDriverNodes(
+      id,
+      ACTIVE_STATUSES as unknown as string[],
+    );
     const taskList: DriverTask[] = [];
     const orderMap: Record<string, OrderInfo> = {};
     for (const n of list) {
