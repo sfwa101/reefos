@@ -37,14 +37,14 @@ export interface HakimSubmitBlueprintAsset {
     | "deposit_and_rental"
     | "milestone_installments";
   base_price: number;
-  traits: Record<string, unknown>;
+  traits: Record<string, Json>;
 }
 
 export interface HakimSubmitBlueprintArgs {
   module_name: string;
   description: string;
   suggested_assets: HakimSubmitBlueprintAsset[];
-  sdui_layout: { hero?: Record<string, unknown>; sections?: Array<Record<string, unknown>> };
+  sdui_layout: { hero?: Record<string, Json>; sections?: Array<Record<string, Json>> };
 }
 
 export type HakimToolCall =
