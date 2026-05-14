@@ -9,7 +9,7 @@
  * profiles.id == auth user id (== wallets.user_id). No client-side full scans.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import type { Wallet, WalletStatus } from "@/hooks/useTayseer";
 
 export interface WalletProfileLite {
@@ -31,13 +31,9 @@ async function fetchProfilesForUserIds(
   userIds: string[],
 ): Promise<Map<string, WalletProfileLite>> {
   if (userIds.length === 0) return new Map();
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("id,full_name,phone")
-    .in("id", userIds);
-  if (error) throw error;
+  const data = await FinanceGateway.listProfilesByIds(userIds);
   return new Map(
-    (data ?? []).map((p) => [
+    data.map((p) => [
       p.id as string,
       { id: p.id as string, full_name: p.full_name, phone: p.phone },
     ]),
@@ -45,14 +41,8 @@ async function fetchProfilesForUserIds(
 }
 
 async function searchByUuid(term: string): Promise<WalletSearchResult[]> {
-  const { data, error } = await supabase
-    .from("wallets")
-    .select("id,user_id,balance,currency,status,created_at,updated_at")
-    .or(`id.eq.${term},user_id.eq.${term}`)
-    .limit(PAGE_SIZE);
-  if (error) throw error;
-
-  const wallets = (data ?? []) as Wallet[];
+  const data = await FinanceGateway.searchWalletsByOrUuid(term, PAGE_SIZE);
+  const wallets = data as Wallet[];
   const profileMap = await fetchProfilesForUserIds(
     wallets.map((w) => w.user_id),
   );
@@ -60,25 +50,15 @@ async function searchByUuid(term: string): Promise<WalletSearchResult[]> {
 }
 
 async function searchByName(term: string): Promise<WalletSearchResult[]> {
-  const { data: profiles, error: pErr } = await supabase
-    .from("profiles")
-    .select("id,full_name,phone")
-    .or(`full_name.ilike.%${term}%,phone.ilike.%${term}%`)
-    .limit(PAGE_SIZE);
-  if (pErr) throw pErr;
+  const profiles = await FinanceGateway.searchProfilesByText(term, PAGE_SIZE);
 
-  const userIds = (profiles ?? []).map((p) => p.id as string);
+  const userIds = profiles.map((p) => p.id as string);
   if (userIds.length === 0) return [];
 
-  const { data: wallets, error: wErr } = await supabase
-    .from("wallets")
-    .select("id,user_id,balance,currency,status,created_at,updated_at")
-    .in("user_id", userIds)
-    .limit(PAGE_SIZE * 2);
-  if (wErr) throw wErr;
+  const wallets = await FinanceGateway.listWalletsByUserIds(userIds, PAGE_SIZE * 2);
 
   const profileMap = new Map(
-    (profiles ?? []).map((p) => [
+    profiles.map((p) => [
       p.id as string,
       {
         id: p.id as string,
@@ -88,7 +68,7 @@ async function searchByName(term: string): Promise<WalletSearchResult[]> {
     ]),
   );
 
-  return (wallets ?? []).map((w) => {
+  return wallets.map((w) => {
     const wallet = w as Wallet & { status: string };
     return {
       ...wallet,
