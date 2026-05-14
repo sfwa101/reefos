@@ -11,15 +11,23 @@
  * adapter from the legacy {@link ProductCardVM} projection.
  */
 import type {
-  CivilizationEntity,
+  EntityCapabilityBinding,
+  EntityEvent,
+  EntityLifecycleState,
+  EntityMemoryCell,
+  EntityPolicy,
+  EntityRelationship,
+  I18nText,
+  ISODateString,
   ProductBehavioralDNA,
   ProductDNA,
   ProductFinancialDNA,
   ProductIdentityDNA,
   ProductIntelligenceDNA,
   ProductSupplyDNA,
+  UUID,
 } from "@/core/commerce/knowledge/dna.types";
-import type { ProductCardVM } from "@/core/catalog/types";
+import type { ProductCardVM, I18nText as VMI18nText } from "@/core/catalog/types";
 
 export type {
   ProductDNA,
@@ -30,25 +38,48 @@ export type {
   ProductIntelligenceDNA,
 } from "@/core/commerce/knowledge/dna.types";
 
-/** Constitutional commerce envelope. */
-export type CommerceEntity = CivilizationEntity<ProductDNA> & {
+/**
+ * Constitutional commerce envelope. Structurally a
+ * {@link CivilizationEntity} bound to {@link ProductDNA}, declared
+ * directly to keep the `context` field strictly typed (the generic
+ * variant collapses to `JsonObject`).
+ */
+export interface CommerceEntity {
+  readonly entity_id: UUID;
   readonly entity_type: "product";
-};
+  readonly state: EntityLifecycleState;
+  readonly context: ProductDNA;
+  readonly relationships: ReadonlyArray<EntityRelationship>;
+  readonly capabilities: ReadonlyArray<EntityCapabilityBinding>;
+  readonly memory: ReadonlyArray<EntityMemoryCell>;
+  readonly events: ReadonlyArray<EntityEvent>;
+  readonly policies: ReadonlyArray<EntityPolicy>;
+  readonly created_at: ISODateString;
+  readonly updated_at: ISODateString;
+}
 
 const STOCK_IN = 99;
 const STOCK_LOW = 3;
+
+const toI18n = (t: VMI18nText | undefined): I18nText | undefined => {
+  if (!t) return undefined;
+  const out: I18nText = { ar: t.ar };
+  if (t.en !== undefined) out.en = t.en;
+  return out;
+};
 
 /**
  * Project a `ProductCardVM` into a strict `CommerceEntity`.
  * Pure, deterministic, side-effect free.
  */
 export function commerceEntityFromCard(card: ProductCardVM): CommerceEntity {
+  const name = toI18n(card.name);
   const identity: ProductIdentityDNA = {
     id: card.id,
     slug: card.slug,
     sku: card.sku ?? null,
-    name: card.name,
-    short_description: card.shortDescription,
+    name: name ?? { ar: card.slug },
+    short_description: toI18n(card.shortDescription),
     section_id: card.sectionId || null,
     tags: [...card.tags],
     badges: card.badges.map((b) => b.key),
