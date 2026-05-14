@@ -155,9 +155,7 @@ export const useWalletDashboard = () => {
   const ensureReferralCode = async (): Promise<string | null> => {
     if (!userId) return null;
     if (referralCode) return referralCode;
-    const { data, error } = await supabase.rpc("ensure_referral_code", {
-      _user_id: userId,
-    });
+    const { data, error } = await FinanceGateway.ensureReferralCode(userId);
     if (error) {
       toast.error("تعذّر إنشاء كود الدعوة");
       return null;
