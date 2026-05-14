@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export type PulseTone = "positive" | "neutral" | "warning" | "critical";
 export type PulseTile = { key: string; label: string; value: number | string };
@@ -29,9 +29,7 @@ export function useHakimPulse(page: string, tiles: PulseTile[]) {
     setLoading(true);
     (async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("hakim-pulse", {
-          body: { page, tiles },
-        });
+        const { data, error } = await HakimGateway.invokeHakimPulse({ page, tiles });
         if (cancelled) return;
         if (error || !data?.insights) {
           setInsights({});

@@ -5,7 +5,7 @@
  * every Universal Salsabil Asset minted into the Decentralized Matrix.
  */
 import { useMutation } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export type AestheticStyle =
   | "white"
@@ -65,18 +65,13 @@ export function useAestheticProcessor() {
       }
       if (!payloadB64) throw new Error("missing_image");
 
-      const { data, error } = await supabase.functions.invoke(
-        "process_image_aesthetic",
-        {
-          body: {
-            image_base64: payloadB64,
-            mime_type: payloadMime,
-            style,
-            palette_name: palette?.name ?? null,
-            palette_hex: palette?.hex ?? null,
-          },
-        },
-      );
+      const { data, error } = await HakimGateway.invokeProcessImageAesthetic({
+        image_base64: payloadB64,
+        mime_type: payloadMime,
+        style,
+        palette_name: palette?.name ?? null,
+        palette_hex: palette?.hex ?? null,
+      });
       if (error) throw new Error(error.message ?? "unknown");
       if (!data?.ok || !data?.image_data_url) {
         throw new Error(data?.error ?? "ai_error");

@@ -15,7 +15,7 @@
  *       admin-dashboard variant — import path differs to avoid collision.
  */
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway, type GatewayChannel } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export type HakimAnomalySeverity = "info" | "warning" | "error" | "critical";
 
@@ -54,20 +54,16 @@ export function useHakimPulse() {
     mounted.current = true;
 
     const loadAnomalies = async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
-        .from("hakim_anomalies")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(ANOMALY_LIMIT);
+      const data = await HakimGateway.listAnomalies(ANOMALY_LIMIT);
       if (!mounted.current) return;
       setAnomalies((data ?? []) as HakimAnomaly[]);
     };
 
     const loadPulse = async () => {
       try {
-        const { data, error } = await supabase.functions.invoke("hakim-pulse", {
-          body: { page: "admin", tiles: [] },
+        const { data, error } = await HakimGateway.invokeHakimPulse({
+          page: "admin",
+          tiles: [],
         });
         if (!mounted.current) return;
         if (!error && data) setInsights(data as HakimPulseSnapshot);
@@ -83,21 +79,14 @@ export function useHakimPulse() {
 
     const pollTimer = window.setInterval(loadPulse, POLL_MS);
 
-    const channel = supabase
-      .channel("hakim-anomalies-live")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "hakim_anomalies" },
-        () => {
-          loadAnomalies();
-        },
-      )
-      .subscribe();
+    const channel: GatewayChannel = HakimGateway.subscribeAnomalies(() => {
+      loadAnomalies();
+    });
 
     return () => {
       mounted.current = false;
       window.clearInterval(pollTimer);
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, []);
 

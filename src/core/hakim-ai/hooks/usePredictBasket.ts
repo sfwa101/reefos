@@ -5,7 +5,7 @@
  * loading/error states, and easy refetch on demand.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 import { useAuth } from "@/context/AuthContext";
 
 export type PredictedBasketLine = {
@@ -36,9 +36,7 @@ export type PredictBasketError =
   | "unknown";
 
 async function fetchPrediction(): Promise<PredictedBasket> {
-  const { data, error } = await supabase.functions.invoke("predict_basket", {
-    body: {},
-  });
+  const { data, error } = await HakimGateway.invokePredictBasket();
   if (error) {
     // Map FunctionsHttpError → typed error code when possible
     const code =

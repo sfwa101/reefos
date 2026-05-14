@@ -7,7 +7,7 @@
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 import { tenantQueryKey } from "@/lib/tenantScope";
 import type { USAGenesisPayload } from "./useVisionGenesis";
 
@@ -23,10 +23,7 @@ export function useMintUSA() {
   const qc = useQueryClient();
   return useMutation<string, Error, MintUSAInput>({
     mutationFn: async (payload) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("mint_universal_asset", {
-        payload,
-      });
+      const { data, error } = await HakimGateway.mintUniversalAsset(payload);
       if (error) throw new Error(error.message ?? "mint_failed");
       return String(data);
     },

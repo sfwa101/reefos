@@ -8,7 +8,7 @@ import {
   ShieldAlert,
   Users,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway, type GatewayChannel } from "@/core/hakim-ai/gateway/HakimGateway";
 import { toLatin } from "@/lib/format";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -50,14 +50,9 @@ export const HakimPulseMonitor = () => {
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const sb = supabase as any;
-    const [{ data: stats }, { data: rows }] = await Promise.all([
-      sb.rpc("hakim_pulse_stats", { _minutes: 60 }),
-      sb
-        .from("hakim_anomalies")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(30),
+    const [stats, rows] = await Promise.all([
+      HakimGateway.getPulseStats(60),
+      HakimGateway.listAnomalies(30),
     ]);
     setPulse((stats as Pulse) ?? null);
     setAnomalies((rows as Anomaly[]) ?? []);
@@ -66,25 +61,18 @@ export const HakimPulseMonitor = () => {
 
   useEffect(() => {
     load();
-    const channel = (supabase as any)
-      .channel("hakim_anomalies_feed")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "hakim_anomalies" },
-        () => load(),
-      )
-      .subscribe();
+    const channel: GatewayChannel = HakimGateway.subscribeAnomalies(() => load());
     const interval = window.setInterval(load, 60_000);
     return () => {
       try {
-        (supabase as any).removeChannel(channel);
+        channel.unsubscribe();
       } catch {}
       window.clearInterval(interval);
     };
   }, []);
 
   const resolve = async (id: string) => {
-    const { error } = await (supabase.rpc as any)("resolve_anomaly", { _id: id });
+    const { error } = await HakimGateway.resolveAnomaly(id);
     if (error) {
       toast.error("تعذّر التحديد كمحلول");
     } else {
