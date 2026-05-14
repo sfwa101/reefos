@@ -32,28 +32,23 @@ const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 }
 export type BentoTone =
   | "primary" | "info" | "success" | "warning" | "accent" | "purple" | "pink" | "teal" | "indigo";
 
-// Public API surface — `BentoMetric.compute/urgent` accept `any[]` to remain
-// assignable across all admin/vendor row shapes (USARecord, NodeRow, Driver,
-// Zone, etc. — none of which extend `Record<string, unknown>`). Tightening
-// these to a generic `<T>` would force every caller to pass an explicit type
-// argument; tightening to `unknown[]` breaks every caller's narrowed
-// `(rows: MyRow[]) => …` arrow. Both options are non-local refactors and
-// out-of-scope for Wave P-9 Batch D. Tracked for a future Layer-6 sweep.
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyRow = any;
-
-export type BentoMetric = {
+/**
+ * BentoMetric — Wave P-10 generic migration.
+ * `TRow` defaults to `unknown`, so callers that don't care about row shape
+ * still typecheck. Callers that pass `<UniversalAdminGrid<MyRow>` get
+ * fully-typed `compute`/`urgent` callbacks via contextual inference.
+ */
+export type BentoMetric<TRow = unknown> = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: AnyRow[]) => string | number;
-  urgent?: (rows: AnyRow[]) => boolean;
+  compute?: (rows: readonly TRow[]) => string | number;
+  urgent?: (rows: readonly TRow[]) => boolean;
   to?: string;
 };
 
-export type Column<T = AnyRow> = {
+export type Column<T = unknown> = {
   key: string;
   label?: string;
   render?: (row: T) => ReactNode;
@@ -61,14 +56,14 @@ export type Column<T = AnyRow> = {
   hideOnMobile?: boolean;
 };
 
-export type RowAction<T = AnyRow> = {
+export type RowAction<T = unknown> = {
   label: string;
   onClick: (row: T) => void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
 
-export type DataSource<T = AnyRow> = {
+export type DataSource<T = unknown> = {
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
@@ -76,7 +71,7 @@ export type DataSource<T = AnyRow> = {
   limit?: number;
   fetcher?: () => Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?: (row: AnyRow) => T;
+  map?: (row: unknown) => T;
 };
 
 export type EmptyState = {
@@ -85,10 +80,10 @@ export type EmptyState = {
   hint?: string;
 };
 
-export type UniversalAdminGridProps<T = AnyRow> = {
+export type UniversalAdminGridProps<T = unknown> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric[];
+  metrics?: BentoMetric<T>[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
   rowKey?: (row: T) => string;
