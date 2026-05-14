@@ -48,8 +48,8 @@ export const VendorGateway = {
     wallets: VendorWalletVM[];
     payouts: VendorPayoutVM[];
   }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const [w, p] = await Promise.all([
       sb.from("vendor_wallets").select("*"),
       sb
@@ -65,8 +65,8 @@ export const VendorGateway = {
   },
 
   async listVendorInventory(vendorId: string): Promise<VendorInventoryRowVM[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const { data, error } = await sb
       .from("salsabil_inventory_matrix")
       .select(`
@@ -82,13 +82,13 @@ export const VendorGateway = {
       .eq("location_code", vendorId)
       .order("updated_at", { ascending: false });
     if (error) throw error;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     return ((data ?? []) as any[]).map((r): VendorInventoryRowVM => {
       const av = (r.availability_data ?? {}) as Record<string, unknown>;
       const contracts = (r.sku?.asset?.salsabil_financial_contracts ?? [])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
         .filter((c: any) => c.is_active)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
         .sort((a: any, b: any) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime());
       const active = contracts[0];
       return {
@@ -119,8 +119,8 @@ export const VendorGateway = {
       created_at: string;
     };
   } | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const { data, error } = await sb
       .from("salsabil_vendor_members")
       .select(
@@ -137,8 +137,8 @@ export const VendorGateway = {
   },
 
   async getUserVendorIds(userId: string): Promise<string[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const { data, error } = await sb.rpc("user_vendor_ids", {
       _user_id: userId,
     });
@@ -198,8 +198,8 @@ export const VendorGateway = {
     skuId: string,
     availabilityData: { stock: number; is_active: boolean },
   ): Promise<{ error: { message: string } | null }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const { error } = await sb
       .from("salsabil_inventory_matrix")
       .upsert(
@@ -207,7 +207,7 @@ export const VendorGateway = {
           sku_id: skuId,
           inventory_type: "stock",
           availability_data: availabilityData,
-        },
+        } as never,
         { onConflict: "sku_id" },
       );
     return { error: error ? { message: error.message } : null };
@@ -264,8 +264,8 @@ export const VendorGateway = {
     ledger: AnyRow[];
     requests: AnyRow[];
   }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const [w, l, r] = await Promise.all([
       sb.from("vendor_wallets").select("*, vendors(name)"),
       sb
@@ -292,23 +292,23 @@ export const VendorGateway = {
     method: string;
     bankDetails: Record<string, unknown>;
   }): Promise<{ data: unknown; error: { message: string } | null }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)(
+    
+    const { data, error } = await supabase.rpc(
       "request_vendor_payout",
       {
         _vendor_id: args.vendorId,
         _amount: args.amount,
         _method: args.method,
         _bank_details: args.bankDetails ?? {},
-      },
+      } as never,
     );
     return { data, error: error ? { message: error.message } : null };
   },
 
   /* ─── Wave P-3 §12 — Settlements (RLS-scoped to current vendor members) ─── */
   async listVendorSettlements<T = Record<string, unknown>>(): Promise<T[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
+    
+    const { data } = await supabase
       .from("salsabil_vendor_settlements")
       .select("*")
       .order("created_at", { ascending: false })

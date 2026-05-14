@@ -60,7 +60,7 @@ export const DriverGateway = {
   ): Promise<{ error: { message: string } | null }> {
     const { error } = await supabase
       .from("salsabil_fulfillment_nodes")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       .update(patch as any)
       .eq("id", nodeId);
     return { error: error ? { message: error.message } : null };
@@ -97,8 +97,8 @@ export const DriverGateway = {
 
   /** Active geo_zones (raw rows; UI filters surge_active itself). */
   async listActiveGeoZones(): Promise<AnyRow[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
+    
+    const { data } = await supabase
       .from("geo_zones")
       .select("zone_code,name,current_load_factor,surge_active")
       .eq("is_active", true);

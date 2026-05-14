@@ -109,18 +109,29 @@ export const offlineQueueSize = async (): Promise<number> =>
   (await safeRead()).length;
 
 const executeOne = async (item: QueuedItem): Promise<void> => {
+  // Dynamic RPC / table names cannot be expressed via Supabase's literal-key
+  // generics; cast supabase to a typed callable shape instead of `as any`.
+  type DynamicRpc = (
+    name: string,
+    payload: Record<string, unknown>,
+  ) => Promise<{ error: { message: string } | null }>;
+  type DynamicFrom = (table: string) => {
+    update: (patch: Record<string, unknown>) => {
+      match: (
+        m: Record<string, string | number>,
+      ) => Promise<{ error: { message: string } | null }>;
+    };
+  };
+
   if (item.op === "rpc") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase.rpc as any)(item.rpcName, item.payload);
+    const rpc = supabase.rpc as unknown as DynamicRpc;
+    const { error } = await rpc(item.rpcName, item.payload);
     if (error) throw new Error(error.message);
     return;
   }
   if (item.op === "table.update") {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from(item.table)
-      .update(item.patch)
-      .match(item.match);
+    const from = supabase.from as unknown as DynamicFrom;
+    const { error } = await from(item.table).update(item.patch).match(item.match);
     if (error) throw new Error(error.message);
     return;
   }

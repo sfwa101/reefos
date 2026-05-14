@@ -30,12 +30,11 @@ export type SovereignEventInput = {
 
 export const logSovereignEvent = async (e: SovereignEventInput): Promise<void> => {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).rpc("log_sovereign_event", {
+    const { error } = await supabase.rpc("log_sovereign_event", {
       p_trace_id: e.trace_id,
       p_event_domain: e.event_domain,
       p_event_type: e.event_type,
-      p_payload: e.payload ?? {},
+      p_payload: (e.payload ?? {}) as never,
     });
     if (error) console.warn("[sovereign-tracing] append failed", error.message);
   } catch (err) {

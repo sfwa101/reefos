@@ -113,8 +113,8 @@ export const IdentityGateway = {
   async getActiveRoles(userId: string): Promise<AppRole[]> {
     if (!userId) return [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
+      
+      const { data } = await supabase
         .from("user_roles")
         .select("role, is_active")
         .eq("user_id", userId)
@@ -166,38 +166,40 @@ export const IdentityGateway = {
 
   // ─── Personas ───────────────────────────────────────────────────────────
   async listActivePersonas(): Promise<PersonaRowVM[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from("salsabil_persona_matrix")
       .select("*")
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    return (data ?? []) as PersonaRowVM[];
+    return (data ?? []) as unknown as PersonaRowVM[];
   },
 
   // ─── Loyalty ────────────────────────────────────────────────────────────
   async getLoyaltyProgress(userId: string): Promise<LoyaltyProgressVM | null> {
     if (!userId) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any).rpc("progress_to_next_level", {
-      _user_id: userId,
-    });
-    return (data as LoyaltyProgressVM) ?? null;
+    
+    const rpc = supabase.rpc as unknown as (
+      name: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: unknown; error: { message: string } | null }>;
+    const { data } = await rpc("progress_to_next_level", { _user_id: userId });
+    return (data as unknown as LoyaltyProgressVM) ?? null;
   },
 
   // ─── Payment methods ────────────────────────────────────────────────────
   async listPaymentMethods(userId: string): Promise<PaymentMethodVM[]> {
     if (!userId) return [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
+      
+      const { data, error } = await supabase
         .from("payment_methods")
         .select("id,kind,brand,last4,expires_label,is_default")
         .eq("user_id", userId)
         .order("is_default", { ascending: false });
       if (error || !Array.isArray(data)) return [];
-      return data as PaymentMethodVM[];
+      return data as unknown as PaymentMethodVM[];
     } catch {
       return [];
     }
@@ -252,7 +254,7 @@ export const IdentityGateway = {
   ): Promise<T | null> {
     const { data } = await supabase
       .from("profiles")
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       .upsert(payload as any, { onConflict: "id" })
       .select("*")
       .maybeSingle();
@@ -263,7 +265,7 @@ export const IdentityGateway = {
     uid: string,
     patch: Record<string, unknown>,
   ): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     await supabase.from("profiles").update(patch as any).eq("id", uid);
   },
 
@@ -310,8 +312,8 @@ export const IdentityGateway = {
   async getActiveRolesWithBranch(userId: string): Promise<RoleWithBranch[]> {
     if (!userId) return [];
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data } = await (supabase as any)
+      
+      const { data } = await supabase
         .from("user_roles")
         .select("role, branch_id, is_active")
         .eq("user_id", userId)

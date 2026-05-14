@@ -290,8 +290,8 @@ export const manageStaffRoleFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    
+    const sb = context.supabase;
     const args: Record<string, unknown> = {
       p_user_id: data.user_id ?? null,
       p_role: data.role,
@@ -299,7 +299,7 @@ export const manageStaffRoleFn = createServerFn({ method: "POST" })
     };
     if (data.role_id) args.p_role_id = data.role_id;
     if (typeof data.is_active === "boolean") args.p_is_active = data.is_active;
-    const { error } = await sb.rpc("admin_manage_staff_role", args);
+    const { error } = await sb.rpc("admin_manage_staff_role", args as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -309,8 +309,8 @@ export type StaffProfileRow = { id: string; full_name: string | null; phone: str
 export const listStaffProfilesFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<StaffProfileRow[]> => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    
+    const sb = context.supabase;
     const { data, error } = await sb
       .from("profiles")
       .select("id, full_name, phone")
@@ -331,8 +331,8 @@ export const updateKycStatusFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    
+    const sb = context.supabase;
     const { error } = await sb
       .from("kyc_verifications")
       .update({ status: data.status, reviewed_at: new Date().toISOString() })
@@ -385,13 +385,13 @@ export const assignRoleFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    
+    const sb = context.supabase;
     const { error } = await sb.rpc("admin_manage_staff_role", {
       p_user_id: data.user_id,
       p_role: data.role,
       p_action: "insert",
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -408,14 +408,14 @@ export const revokeRoleFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    
+    const sb = context.supabase;
     const { error } = await sb.rpc("admin_manage_staff_role", {
       p_user_id: null,
       p_role: data.role,
       p_action: "delete",
       p_role_id: data.role_id,
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
