@@ -31,13 +31,13 @@ export const MarketingGateway = {
 
     let category: string | null = null;
     if (userId) {
-      const { data } = await sb.rpc("category_affinity", { _user_id: userId });
+      const { data } = await sb.rpc<Array<{ category: string | null }>>("category_affinity", { _user_id: userId });
       const top = (data ?? [])[0];
       category = top?.category ?? null;
     }
 
     const { data: sale } = await sb
-      .from("flash_sales")
+      .from<{ id: string }>("flash_sales")
       .select("id")
       .eq("is_active", true)
       .order("starts_at", { ascending: false })
@@ -48,7 +48,7 @@ export const MarketingGateway = {
     const { data: items } = await sb
       .from("flash_sale_products")
       .select("product_id,product_name,discount_pct,category")
-      .eq("flash_sale_id", sale.id)
+      .eq("flash_sale_id", (sale as { id: string }).id)
       .order("rank")
       .limit(5);
 
