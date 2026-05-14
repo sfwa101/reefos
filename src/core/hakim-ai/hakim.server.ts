@@ -186,11 +186,13 @@ export async function runHakimAdvisor(
   if (aiRes.status === 402) return { error: "credits_exhausted" };
   if (!aiRes.ok) return { error: "ai_error" };
 
-  const aiData = (await aiRes.json()) as AnyJson;
+  const aiData = (await aiRes.json()) as OpenAIChatResponse;
   const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-  let parsed: AnyJson = {};
+  let parsed: Partial<HakimSubmitInsightArgs> = {};
   if (toolCall?.function?.arguments) {
-    try { parsed = JSON.parse(toolCall.function.arguments); } catch { /* noop */ }
+    try {
+      parsed = JSON.parse(toolCall.function.arguments) as Partial<HakimSubmitInsightArgs>;
+    } catch { /* noop */ }
   }
 
   const insight = {
@@ -204,10 +206,16 @@ export async function runHakimAdvisor(
   };
 
   const { data: saved } = await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_insights" as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert(insight as any)
+    .from("hakim_insights")
+    .insert({
+      kind: insight.kind,
+      severity: insight.severity,
+      title: insight.title,
+      summary: insight.summary,
+      recommendations: insight.recommendations as unknown as Json,
+      raw_snapshot: insight.raw_snapshot,
+      generated_for_date: insight.generated_for_date,
+    })
     .select()
     .single();
 
