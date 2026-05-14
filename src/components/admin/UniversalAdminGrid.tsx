@@ -79,7 +79,7 @@ export type EmptyState = {
 export type UniversalAdminGridProps<T = GridRow> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric<T>[];
+  metrics?: ReadonlyArray<BentoMetric<T>>;
   columns?: Column<T>[];
   dataSource: DataSource<T>;
   rowKey?: (row: T) => string;
