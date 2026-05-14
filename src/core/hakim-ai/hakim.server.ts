@@ -129,10 +129,10 @@ export async function runHakimAdvisor(
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!LOVABLE_API_KEY) return { error: "ai_error" };
 
-  const { data: snapshot, error: snapErr } = await userClient.rpc("financial_snapshot", {
+  const userRpc = userClient.rpc.bind(userClient) as unknown as DynamicRpc;
+  const { data: snapshot, error: snapErr } = await userRpc<Json>("financial_snapshot", {
     _days: days,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as AnyJson);
+  });
   if (snapErr) return { error: snapErr.message };
 
   const systemPrompt = `أنت "حكيم" — المستشار المالي الذكي لشركة "ريف المدينة". تحلل البيانات المالية وتقدم رؤى استباقية وتحذيرات مبكرة وتوصيات عملية. كن مختصراً، عربياً، وعملياً. ركز على: السيولة، الديون المستحقة، هوامش الربح المتآكلة، المنتجات الراكدة، فرص التحسين.`;
