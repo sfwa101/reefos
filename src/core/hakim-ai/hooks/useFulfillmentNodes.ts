@@ -14,7 +14,7 @@ export function useUpdateFulfillmentStatus() {
     mutationFn: async ({ node_id, status }) => {
       const { data, error } = await HakimGateway.updateFulfillmentNodeStatus(node_id, status);
       if (error) throw new Error(error.message);
-      return String(data.id);
+      return String(data?.id ?? node_id);
     },
     onSuccess: () => {
       toast.success("تم تحديث حالة الطلب");
