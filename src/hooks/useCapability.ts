@@ -61,15 +61,11 @@ export function useCapabilities(): CapState {
     let cancelled = false;
     void (async () => {
       // Project legacy roles into capabilities (idempotent).
-      await (supabase.rpc as unknown as (
-        fn: string, args: Record<string, unknown>,
-      ) => Promise<unknown>)("sync_user_capabilities_from_roles", { p_uid: user.id });
+      await IdentityGateway.syncCapabilitiesFromRoles(user.id);
 
-      const { data: ws } = await (supabase.rpc as unknown as (
-        fn: string,
-      ) => Promise<{ data: WorkspaceRow[] | null }>)("my_workspaces");
+      const ws = await IdentityGateway.listMyWorkspaces<WorkspaceRow>();
       if (cancelled) return;
-      const rows = (ws ?? []) as WorkspaceRow[];
+      const rows = ws as WorkspaceRow[];
       setWorkspaces(rows);
 
       // Pick active workspace if not yet chosen.
