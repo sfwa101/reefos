@@ -7,7 +7,7 @@
  *   DO NOT extend; new affiliate UX must consume the reef-al-madina hook.
  */
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 
 export type AffiliateTier = {
   id: string;
