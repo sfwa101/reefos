@@ -55,25 +55,10 @@ export function useSduiLayout(slug: string): State {
 
   // Realtime cache invalidation — admin edits to the active layout flow live.
   useEffect(() => {
-    const channel = supabase
-      .channel(`sdui-updates-${slug}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "sdui_layouts",
-          filter: `slug=eq.${slug}`,
-        },
-        () => {
-          void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
-        },
-      )
-      .subscribe();
-
-    return () => {
-      void supabase.removeChannel(channel);
-    };
+    const sub = RuntimeUIGateway.subscribeSduiLayoutUpdates(slug, () => {
+      void queryClient.invalidateQueries({ queryKey: tenantQueryKey("sdui_layouts", slug) });
+    });
+    return () => sub.unsubscribe();
   }, [slug, queryClient]);
 
   // Subscribe to Hakim's transient overlay so re-orderings cause a re-render
