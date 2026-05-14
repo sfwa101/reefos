@@ -113,8 +113,9 @@ const patchGlobals = () => {
 
   // Unhandled promise rejections
   window.addEventListener("unhandledrejection", (ev) => {
-    const reason: any = (ev as PromiseRejectionEvent).reason;
-    const msg = reason?.message || String(reason || "rejection");
+    const reason: unknown = (ev as PromiseRejectionEvent).reason;
+    const msg =
+      reason instanceof Error ? reason.message : String(reason ?? "rejection");
     report(
       "promise_rejection",
       "error",

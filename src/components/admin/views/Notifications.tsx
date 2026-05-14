@@ -52,8 +52,8 @@ export default function NotificationsPage() {
       qc.invalidateQueries({ queryKey: ["notifications"] });
       window.location.reload();
     },
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    onError: (e: any) => toast.error(e?.message || "فشل الإرسال"),
+    onError: (e: unknown) =>
+      toast.error(e instanceof Error ? e.message : "فشل الإرسال"),
   });
 
   return (

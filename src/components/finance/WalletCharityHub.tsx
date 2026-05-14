@@ -60,8 +60,8 @@ export const WalletCharityHub = ({
       qc.invalidateQueries({ queryKey: ["charity_campaigns"] });
       setSelected(null);
     },
-    onError: (e: any) => {
-      const msg = String(e?.message ?? e);
+    onError: (e: unknown) => {
+      const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("insufficient_balance"))
         toast.error("رصيد المحفظة غير كافٍ");
       else toast.error("تعذّر إتمام التبرع");
