@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
