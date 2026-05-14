@@ -76,17 +76,11 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
         emit();
         return;
       }
-      const { data } = await supabase
-        .from("favorites")
-        .select("product_id")
-        .eq("user_id", user.id);
-      const cloud = (data ?? []).map((r) => r.product_id as string);
+      const cloud = await IdentityGateway.listFavoriteIds(user.id);
       const local = loadLocal();
       const missing = local.filter((id) => !cloud.includes(id));
       if (missing.length > 0) {
-        await supabase
-          .from("favorites")
-          .insert(missing.map((product_id) => ({ user_id: user.id, product_id })));
+        await IdentityGateway.addFavorites(user.id, missing);
       }
       if (cancelled) return;
       const merged = Array.from(new Set([...cloud, ...missing]));
