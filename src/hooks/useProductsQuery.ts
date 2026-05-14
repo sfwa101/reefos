@@ -29,11 +29,10 @@ import {
 import { getWorkspaceIdSync, workspaceQueryKey } from "@/core/identity/workspace";
 
 /**
- * Workspace-scoped catalog cache key. Wave P-7 Batch D — was previously
- * `["tenant", getActiveTenantId(), "catalog", "products"]`. Now sourced
- * from the server-attested workspace identity. Exported as a FUNCTION so
- * the key reflects the live hydrated workspace id at call time (a
- * module-load const would freeze in the `<unhydrated>` partition).
+ * Workspace-scoped catalog cache key. Sourced from the server-attested
+ * workspace identity. Exported as a FUNCTION so the key reflects the
+ * live hydrated workspace id at call time (a module-load const would
+ * freeze in the `<unhydrated>` partition).
  */
 export const PRODUCTS_QUERY_KEY = (): ReadonlyArray<unknown> =>
   workspaceQueryKey("catalog", "products");
