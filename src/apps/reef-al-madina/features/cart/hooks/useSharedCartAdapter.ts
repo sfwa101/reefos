@@ -9,7 +9,7 @@ import { useSharedCartSync } from "./useSharedCartSync";
  * `useCartHydration`.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import { getActiveTenantId } from "@/context/TenantContext";
+import { workspaceQueryKey } from "@/core/identity/workspace";
 
 /**
  * Wave P-B B-3 — read the catalog snapshot through the QueryClient cache
@@ -19,9 +19,10 @@ import { getActiveTenantId } from "@/context/TenantContext";
  * lookup window because the corresponding lines are simply skipped (the
  * existing pre-P-B code already had the same `productMap.get(...) →
  * continue` semantics for unknown ids).
+ *
+ * Wave P-7 Batch D — key now sourced from server-attested workspace id.
  */
-const SNAPSHOT_KEY = () =>
-  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
+const SNAPSHOT_KEY = () => workspaceQueryKey("catalog", "products");
 
 const sharedLineIdentity = (
   productId: string,
