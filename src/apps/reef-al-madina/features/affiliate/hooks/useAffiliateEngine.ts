@@ -87,6 +87,9 @@ function useReferralCodeQuery(userId: string | undefined) {
       // Phase 57 — server-authoritative 6-digit code (National ID derived).
       return await MarketingGateway.ensureReferralCode(userId);
     },
+    onSuccess: (code) => {
+      if (userId) qc.setQueryData(QK.code(userId), code);
+    },
   });
 
   return { query, provision };
