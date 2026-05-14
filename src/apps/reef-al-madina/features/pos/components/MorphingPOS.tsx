@@ -37,6 +37,9 @@ export function MorphingPOS(props: MorphingPOSProps) {
     sectionCapabilities,
   });
   const { capabilities, mode, shift, shiftLoading, shiftError } = runtime;
+  const cart = useCartRuntime();
+  const totals = cart.state.snapshot.totals;
+  const currency = cart.state.snapshot.currency;
 
   const meta = MODE_META[mode];
 
