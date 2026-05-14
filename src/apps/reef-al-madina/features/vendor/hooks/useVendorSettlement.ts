@@ -103,8 +103,9 @@ export const useVendorSettlement = () => {
         if (error) throw error;
         await refresh();
         return { ok: true, data };
-      } catch (err: any) {
-        return { ok: false, error: err?.message ?? "payout_failed" };
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : "payout_failed";
+        return { ok: false, error: message };
       } finally {
         setSubmitting(false);
       }
