@@ -41,11 +41,7 @@ export function recordSduiFailure(blockId?: string | null): void {
 
 async function tripCircuitBreaker(key: string, reason: string): Promise<void> {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).rpc("admin_trigger_circuit_breaker", {
-      p_setting_key: key,
-      p_reason: reason,
-    });
+    const { error } = await RuntimeUIGateway.tripCircuitBreaker(key, reason);
     if (error) {
       // Most clients (non-admin) will be denied — that's expected.
       // Only the first admin tab present will succeed; others fail safely.
