@@ -31,6 +31,10 @@ export interface AddCartItemIntent {
   readonly dna: ProductFinancialDNA;
   readonly qty: number;
   readonly modifiers?: ReadonlyArray<CartLineModifier>;
+  /** Display name (i18n already resolved by caller). */
+  readonly name?: string;
+  /** Capability keys carried by this product (drives downstream routing). */
+  readonly capabilities?: ReadonlyArray<string>;
 }
 
 export interface CartRuntimeLine extends AddCartItemIntent {
