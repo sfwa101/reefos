@@ -93,7 +93,7 @@ export default function VendorInventory() {
   };
 
   // ---- Grid config ----
-  const metrics = useMemo<BentoMetric[]>(() => [
+  const metrics = useMemo<BentoMetric<VendorInvRow>[]>(() => [
     { key: "skus", label: "أصناف في مخزني", icon: Boxes, tone: "primary", compute: (r) => fmtNum(r.length) },
     { key: "units", label: "إجمالي الوحدات", icon: Package, tone: "info", compute: (r) => fmtNum(r.reduce((s, x) => s + (x.count || 0), 0)) },
     { key: "low", label: "مخزون منخفض", icon: AlertTriangle, tone: "warning", compute: (r) => fmtNum(r.filter((x) => x.count < 5).length), urgent: (r) => r.some((x) => x.count < 5) },
