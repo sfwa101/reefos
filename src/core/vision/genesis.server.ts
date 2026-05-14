@@ -362,6 +362,16 @@ export type PricingModel = (typeof PRICING_MODELS)[number];
 export type WeightUnit = "g" | "kg" | "ml" | "L" | "piece";
 export type Currency = "EGP" | "USD" | "EUR";
 
+export type JsonValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JsonValue[]
+  | { [key: string]: JsonValue };
+export type JsonObject = { [key: string]: JsonValue };
+
+
 export interface VisionAssetMarketing {
   short: string | null;
   long: string | null;
