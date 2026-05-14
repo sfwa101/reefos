@@ -106,4 +106,202 @@ export const VendorGateway = {
       };
     });
   },
+
+  /* ───────────────────── Vendor identity (multi-tenant) ───────────────────── */
+
+  async getCurrentVendorMembership(userId: string): Promise<{
+    role: string;
+    vendor: {
+      id: string;
+      business_name: string;
+      logo_url: string | null;
+      is_active: boolean;
+      created_at: string;
+    };
+  } | null> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data, error } = await sb
+      .from("salsabil_vendor_members")
+      .select(
+        "role, vendor:salsabil_vendors!inner(id, business_name, logo_url, is_active, created_at)",
+      )
+      .eq("user_id", userId)
+      .eq("vendor.is_active", true)
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data?.vendor) return null;
+    return { role: data.role as string, vendor: data.vendor };
+  },
+
+  async getUserVendorIds(userId: string): Promise<string[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data, error } = await sb.rpc("user_vendor_ids", {
+      _user_id: userId,
+    });
+    if (error) throw error;
+    return (data ?? []) as string[];
+  },
+
+  /* ───────────────────── Vendor catalog (Sovereign assets) ───────────────────── */
+
+  async listSovereignAssetsCatalog(): Promise<AnyRow[]> {
+    const { data, error } = await supabase
+      .from("salsabil_assets")
+      .select(`
+        id, name, category_path, media,
+        salsabil_skus (
+          id, sort_order, is_active,
+          salsabil_financial_contracts ( base_price ),
+          salsabil_inventory_matrix ( availability_data )
+        )
+      `)
+      .eq("is_active", true)
+      .eq("asset_type", "physical")
+      .order("name")
+      .limit(500);
+    if (error) throw error;
+    return (data ?? []) as unknown as AnyRow[];
+  },
+
+  /* ───────────────────── Vendor live ops (fulfillment nodes) ───────────────────── */
+
+  async listVendorLiveFulfillmentNodes(
+    vendorIds: string[],
+    activeStatuses: string[],
+  ): Promise<AnyRow[]> {
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select(`
+        id, status, vendor_id, master_order_id, created_at,
+        salsabil_master_orders!salsabil_fulfillment_nodes_master_fk ( delivery_info ),
+        salsabil_fulfillment_items (
+          id, quantity, price_at_time, created_at,
+          salsabil_skus (
+            id,
+            salsabil_assets ( id, name, media )
+          )
+        )
+      `)
+      .in("vendor_id", vendorIds)
+      .in("status", activeStatuses)
+      .order("created_at", { ascending: false })
+      .limit(80);
+    if (error) throw error;
+    return (data ?? []) as unknown as AnyRow[];
+  },
+
+  async upsertSkuInventory(
+    skuId: string,
+    availabilityData: { stock: number; is_active: boolean },
+  ): Promise<{ error: { message: string } | null }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { error } = await sb
+      .from("salsabil_inventory_matrix")
+      .upsert(
+        {
+          sku_id: skuId,
+          inventory_type: "stock",
+          availability_data: availabilityData,
+        },
+        { onConflict: "sku_id" },
+      );
+    return { error: error ? { message: error.message } : null };
+  },
+
+  subscribeVendorOps(
+    vendorIds: string[],
+    handlers: {
+      onFulfillmentNode: (payload: {
+        new?: AnyRow;
+        old?: AnyRow;
+        eventType?: string;
+      }) => void;
+      onFulfillmentItem: () => void;
+      onInventory: () => void;
+      onFinancialContract: () => void;
+    },
+  ): GatewayChannel {
+    const ch = supabase
+      .channel(`vendor-ops-${vendorIds.join("-")}`)
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
+        (payload: { new?: AnyRow; old?: AnyRow; eventType?: string }) =>
+          handlers.onFulfillmentNode(payload),
+      )
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "salsabil_fulfillment_items" },
+        () => handlers.onFulfillmentItem(),
+      )
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "salsabil_inventory_matrix" },
+        () => handlers.onInventory(),
+      )
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "salsabil_financial_contracts" },
+        () => handlers.onFinancialContract(),
+      )
+      .subscribe();
+    return {
+      unsubscribe: () => {
+        supabase.removeChannel(ch);
+      },
+    };
+  },
+
+  /* ───────────────────── Vendor settlement (wallets / ledger / payouts) ───────────────────── */
+
+  async loadSettlementSnapshot(): Promise<{
+    wallets: AnyRow[];
+    ledger: AnyRow[];
+    requests: AnyRow[];
+  }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const [w, l, r] = await Promise.all([
+      sb.from("vendor_wallets").select("*, vendors(name)"),
+      sb
+        .from("vendor_wallet_transactions")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(80),
+      sb
+        .from("vendor_payout_requests")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(20),
+    ]);
+    return {
+      wallets: (w.data ?? []) as AnyRow[],
+      ledger: (l.data ?? []) as AnyRow[],
+      requests: (r.data ?? []) as AnyRow[],
+    };
+  },
+
+  async requestVendorPayout(args: {
+    vendorId: string;
+    amount: number;
+    method: string;
+    bankDetails: Record<string, unknown>;
+  }): Promise<{ data: unknown; error: { message: string } | null }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)(
+      "request_vendor_payout",
+      {
+        _vendor_id: args.vendorId,
+        _amount: args.amount,
+        _method: args.method,
+        _bank_details: args.bankDetails ?? {},
+      },
+    );
+    return { data, error: error ? { message: error.message } : null };
+  },
 };
