@@ -212,7 +212,8 @@ const ARCHITECT_TOOL_SCHEMA = {
 
 export interface HakimArchitectOutput {
   ok: true;
-  blueprint: unknown;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  blueprint: any;
   generated_at: string;
 }
 
