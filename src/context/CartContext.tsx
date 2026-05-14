@@ -7,7 +7,9 @@ import {
   useRef,
   type ReactNode,
 } from "react";
-import { supabase } from "@/integrations/supabase/client";
+// Wave P-3 — All Supabase access (cart_items, profiles tier, auth listener,
+// realtime) routed through the Sovereign CartGateway.
+import { CartGateway, type GatewayChannel } from "@/core/orders/gateway/CartGateway";
 import {
   fetchRemoteCart,
   pushRemoteCart,
@@ -104,9 +106,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // (set this true) opt-in to mergeCarts; INITIAL_SESSION never does.
   const pendingMergeForUidRef = useRef<string | null>(null);
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
-    null,
-  );
+  const realtimeChannelRef = useRef<GatewayChannel | null>(null);
   const realtimeFetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -141,16 +141,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   /* ---- Listen to true SIGNED_IN events (manual login transitions only) ---- */
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user?.id) {
+    const sub = CartGateway.onAuthChange((event, payload) => {
+      if (event === "SIGNED_IN" && payload?.userId) {
         // A real login (not INITIAL_SESSION rehydrate). Opt this uid into merge.
-        pendingMergeForUidRef.current = session.user.id;
+        pendingMergeForUidRef.current = payload.userId;
       }
       if (event === "SIGNED_OUT") {
         pendingMergeForUidRef.current = null;
       }
     });
-    return () => sub.subscription.unsubscribe();
+    return () => sub.unsubscribe();
   }, []);
 
   /* ---- Remote sync + realtime — gated on resolved auth ---- */
@@ -169,13 +169,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchProfileTier = async (id: string) => {
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("loyalty_tier")
-          .eq("id", id)
-          .maybeSingle();
-        if (error || cancelled) return;
-        const raw = (data as { loyalty_tier?: unknown } | null)?.loyalty_tier;
+        const raw = await CartGateway.fetchLoyaltyTier(id);
+        if (cancelled) return;
         setTier(isCustomerTier(raw) ? raw : "bronze");
       } catch {
         /* keep current tier */
@@ -201,48 +196,36 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }
       const ch = realtimeChannelRef.current;
       if (ch) {
-        void supabase.removeChannel(ch);
+        ch.unsubscribe();
         realtimeChannelRef.current = null;
       }
     };
 
     const subscribeRealtime = (id: string) => {
       teardownRealtime();
-      const channel = supabase
-        .channel(`cart:${id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "*",
-            schema: "public",
-            table: "cart_items",
-            filter: `user_id=eq.${id}`,
-          },
-          () => {
-            if (realtimeFetchTimerRef.current) {
-              clearTimeout(realtimeFetchTimerRef.current);
-            }
-            realtimeFetchTimerRef.current = setTimeout(async () => {
-              realtimeFetchTimerRef.current = null;
-              const currentUid = userIdRef.current;
-              if (!currentUid || currentUid !== id) return;
-              try {
-                const remote = await fetchRemoteCart(currentUid);
-                const nextSignature = cartSignature(remote);
-                // Ignore self-echoes via signature match.
-                if (nextSignature === lastPushedSignatureRef.current) return;
-                if (nextSignature === cartSignature(linesFromStore())) return;
-                skipNextPushRef.current = true;
-                useCartStore.getState().replaceAll(remote);
-                lastPushedSignatureRef.current = nextSignature;
-                skipNextPushRef.current = false;
-              } catch (err) {
-                console.warn("[cart] realtime refetch failed:", err);
-              }
-            }, 250);
-          },
-        )
-        .subscribe();
+      const channel = CartGateway.subscribeUserCart(id, () => {
+        if (realtimeFetchTimerRef.current) {
+          clearTimeout(realtimeFetchTimerRef.current);
+        }
+        realtimeFetchTimerRef.current = setTimeout(async () => {
+          realtimeFetchTimerRef.current = null;
+          const currentUid = userIdRef.current;
+          if (!currentUid || currentUid !== id) return;
+          try {
+            const remote = await fetchRemoteCart(currentUid);
+            const nextSignature = cartSignature(remote);
+            // Ignore self-echoes via signature match.
+            if (nextSignature === lastPushedSignatureRef.current) return;
+            if (nextSignature === cartSignature(linesFromStore())) return;
+            skipNextPushRef.current = true;
+            useCartStore.getState().replaceAll(remote);
+            lastPushedSignatureRef.current = nextSignature;
+            skipNextPushRef.current = false;
+          } catch (err) {
+            console.warn("[cart] realtime refetch failed:", err);
+          }
+        }, 250);
+      });
       realtimeChannelRef.current = channel;
     };
 

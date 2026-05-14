@@ -10,7 +10,8 @@
 // meta-signature is a stable hash of variant/kind/booking/print fields.
 // External reads must replace local state; never replay rows through add().
 
-import { supabase } from "@/integrations/supabase/client";
+/** Wave P-3 — all `cart_items` I/O routed through the Sovereign CartGateway. */
+import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /** @deprecated Wave P-B B-3 — bridge type for legacy cart-row hydration. */
 import { type Product } from "@/core/catalog/legacy/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
@@ -75,12 +76,8 @@ async function fetchProductsByIds(ids: string[]): Promise<Map<string, Product>> 
 
 /** Fetch the current user's persisted cart. Returns [] if not logged in. */
 export async function fetchRemoteCart(userId: string): Promise<LocalLine[]> {
-  const { data, error } = await supabase
-    .from("cart_items")
-    .select("product_id, qty, meta, line_key")
-    .eq("user_id", userId);
-
-  if (error || !Array.isArray(data)) return [];
+  const data = await CartGateway.fetchUserCart(userId);
+  if (data.length === 0) return [];
 
   const ids = Array.from(new Set(data.map((r) => r.product_id).filter(Boolean)));
   const productMap = await fetchProductsByIds(ids);
@@ -116,8 +113,8 @@ export async function pushRemoteCart(
   const cleanLines = dedupeForPush(lines).filter((l) => l.qty > 0);
 
   if (cleanLines.length === 0) {
-    const del = await supabase.from("cart_items").delete().eq("user_id", userId);
-    if (del.error) console.warn("[cart] failed to clear remote cart:", del.error.message);
+    const { error } = await CartGateway.clearUserCart(userId);
+    if (error) console.warn("[cart] failed to clear remote cart:", error);
     return;
   }
 
@@ -141,27 +138,21 @@ export async function pushRemoteCart(
   });
 
   // Upsert all rows in one round-trip.
-  const up = await supabase
-    .from("cart_items")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .upsert(rows as any, { onConflict: "user_id,product_id,line_key" });
-  if (up.error) {
-    console.warn("[cart] upsert failed:", up.error.message);
+  const { error: upErr } = await CartGateway.upsertCartRows(rows);
+  if (upErr) {
+    console.warn("[cart] upsert failed:", upErr);
     return;
   }
 
   // Delete any rows that are no longer in the local cart.
   const keepKeys = rows.map((r) => `${r.product_id}::${r.line_key}`);
-  const { data: existing } = await supabase
-    .from("cart_items")
-    .select("id, product_id, line_key")
-    .eq("user_id", userId);
-  if (Array.isArray(existing) && existing.length > 0) {
+  const existing = await CartGateway.listCartKeys(userId);
+  if (existing.length > 0) {
     const stale = existing
-      .filter((r) => !keepKeys.includes(`${r.product_id}::${(r as { line_key?: string }).line_key ?? ""}`))
+      .filter((r) => !keepKeys.includes(`${r.product_id}::${r.line_key ?? ""}`))
       .map((r) => r.id);
     if (stale.length > 0) {
-      await supabase.from("cart_items").delete().in("id", stale);
+      await CartGateway.deleteCartRowsByIds(stale);
     }
   }
 }

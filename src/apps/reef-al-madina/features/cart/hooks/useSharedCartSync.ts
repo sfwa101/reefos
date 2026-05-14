@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-// EXEMPT (Wave P-D Phase D-2): `@/integrations/supabase/client` is imported
-// here ONLY for the realtime `supabase.channel(...)` subscription below. All
-// reads/writes are routed through `@/lib/cart.functions` per the blueprint.
-import { supabase } from "@/integrations/supabase/client";
+// Wave P-3 — All Supabase access (including realtime) routed through the
+// Sovereign CartGateway. This file no longer imports `@/integrations/supabase/client`.
+import { CartGateway } from "@/core/orders/gateway/CartGateway";
 import {
   hydrateSharedCartFn,
   setSharedCartStatusFn,
@@ -178,52 +177,39 @@ export const useSharedCartSync = (sharedCartId: string | null): UseSharedCartSyn
   useVisibilitySocket(
     () => {
       if (!sharedCartId) return;
-      const channel = supabase
-        .channel(`shared-cart-${sharedCartId}`)
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "shared_carts", filter: `id=eq.${sharedCartId}` },
-          (payload) => {
-            if (payload.eventType === "DELETE") setCart(null);
-            else setCart((payload.new as SharedCart) ?? null);
-          },
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "shared_cart_participants", filter: `cart_id=eq.${sharedCartId}` },
-          (payload) => {
-            setParticipants((prev) => {
-              if (payload.eventType === "INSERT") return [...prev, payload.new as SharedCartParticipant];
-              if (payload.eventType === "UPDATE")
-                return prev.map((p) => (p.id === (payload.new as SharedCartParticipant).id ? (payload.new as SharedCartParticipant) : p));
-              if (payload.eventType === "DELETE")
-                return prev.filter((p) => p.id !== (payload.old as SharedCartParticipant).id);
-              return prev;
-            });
-          },
-        )
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "shared_cart_items", filter: `cart_id=eq.${sharedCartId}` },
-          (payload) => {
-            setItems((prev) => {
-              let next = prev;
-              if (payload.eventType === "INSERT") next = [...prev, payload.new as SharedCartItem];
-              else if (payload.eventType === "UPDATE")
-                next = prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
-              else if (payload.eventType === "DELETE")
-                next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
-              const normalized = normalizeItems(next);
-              const signature = itemsSignature(normalized);
-              if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
-              lastLocalItemsSignatureRef.current = signature;
-              return normalized;
-            });
-          },
-        )
-        .subscribe();
+      const channel = CartGateway.subscribeSharedCart(sharedCartId, {
+        onCart: (payload) => {
+          if (payload.eventType === "DELETE") setCart(null);
+          else setCart((payload.new as SharedCart) ?? null);
+        },
+        onParticipants: (payload) => {
+          setParticipants((prev) => {
+            if (payload.eventType === "INSERT") return [...prev, payload.new as SharedCartParticipant];
+            if (payload.eventType === "UPDATE")
+              return prev.map((p) => (p.id === (payload.new as SharedCartParticipant).id ? (payload.new as SharedCartParticipant) : p));
+            if (payload.eventType === "DELETE")
+              return prev.filter((p) => p.id !== (payload.old as SharedCartParticipant).id);
+            return prev;
+          });
+        },
+        onItems: (payload) => {
+          setItems((prev) => {
+            let next = prev;
+            if (payload.eventType === "INSERT") next = [...prev, payload.new as SharedCartItem];
+            else if (payload.eventType === "UPDATE")
+              next = prev.map((i) => (i.id === (payload.new as SharedCartItem).id ? (payload.new as SharedCartItem) : i));
+            else if (payload.eventType === "DELETE")
+              next = prev.filter((i) => i.id !== (payload.old as SharedCartItem).id);
+            const normalized = normalizeItems(next);
+            const signature = itemsSignature(normalized);
+            if (signature === lastLocalItemsSignatureRef.current && itemsSignature(prev) === signature) return prev;
+            lastLocalItemsSignatureRef.current = signature;
+            return normalized;
+          });
+        },
+      });
       return () => {
-        supabase.removeChannel(channel);
+        channel.unsubscribe();
       };
     },
     () => {
