@@ -8,9 +8,11 @@
 import { useMemo } from "react";
 import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import { useCashierBrainRuntime } from "@/core/cashier/hooks/useCashierBrainRuntime";
+import { useCartRuntime } from "@/core/orders/runtime/useCartRuntime";
 import { useAuth } from "@/context/AuthContext";
 import { IOSCard } from "@/components/ios/IOSCard";
-import { ChefHat, ScanBarcode, Zap, Layers } from "lucide-react";
+import { fmtMoney } from "@/lib/format";
+import { ChefHat, ScanBarcode, Zap, Layers, Trash2 } from "lucide-react";
 import type { POSMode } from "@/core/cashier/domain/POSMode";
 
 export interface MorphingPOSProps {
