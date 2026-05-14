@@ -9,7 +9,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { parseBlocks, type SduiBlock } from "../engine/schemas";
 import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
 import { tenantQueryKey } from "@/lib/tenantScope";
