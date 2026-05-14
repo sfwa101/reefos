@@ -112,8 +112,7 @@ export interface HakimAdvisorOutput {
     title: string;
     summary: string;
     recommendations: Array<{ action: string; priority: string }>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    raw_snapshot: any;
+    raw_snapshot: unknown;
     generated_for_date: string;
   };
 }
