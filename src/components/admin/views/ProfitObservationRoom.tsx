@@ -36,7 +36,7 @@ import {
   recordAdminOverrideApprovalFn,
   type OverrideLogRow,
 } from "@/core/finance/profit-observation.functions";
-import { useAdminOverrideLogsRealtime } from "@/hooks/useAdminOverrideLogsRealtime";
+import { useAdminOverrideLogsRealtime } from "@/core/events/hooks/useAdminOverrideLogsRealtime";
 import { toLatin } from "@/lib/format";
 
 const ProfitObservationRoom = () => {

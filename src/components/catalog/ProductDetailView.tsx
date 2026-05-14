@@ -8,7 +8,7 @@ import { Star, Truck, ShieldCheck, Heart, Sparkles } from "lucide-react";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { listProductReviewsFn, listProductUnitsFn } from "@/core/catalog/catalog.functions";
-import { logBehavior } from "@/lib/behavior";
+import { logBehavior } from "@/core/events/behavior";
 import { motion } from "framer-motion";
 import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/core/commerce/knowledge/productEnrichment";
 import { extractHandlingTraits, traitLabel } from "@/core/commerce/knowledge/productTraits";
