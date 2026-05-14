@@ -123,12 +123,12 @@ export const SavingsJarDialog = ({
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`;
-    const { error } = await supabase.rpc("process_savings_jar_op", {
-      p_amount: args.amount ?? 0,
-      p_kind: kind,
-      p_label: args.label ?? kind,
-      p_idempotency_key: idem,
-      p_settings: (args.settings ?? null) as never,
+    const { error } = await FinanceGateway.processSavingsJarOp({
+      amount: args.amount ?? 0,
+      kind,
+      label: args.label ?? kind,
+      idempotencyKey: idem,
+      settings: args.settings ?? null,
     });
     if (error) {
       toast.error(error.message === "insufficient balance" ? "الرصيد غير كافٍ" : "تعذّر الحفظ");
