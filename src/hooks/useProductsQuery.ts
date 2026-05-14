@@ -15,7 +15,11 @@
 // surfaces all already expect.
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchCatalogQueryRows,
+  fetchCatalogHomeRows,
+  type CatalogQueryRow,
+} from "@/core/catalog/gateway/SovereignCatalogGateway";
 import {
   type Product,
   type ProductSource,
