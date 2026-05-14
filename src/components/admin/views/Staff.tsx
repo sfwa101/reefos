@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Users, ShieldCheck, Truck, Store, Plus } from "lucide-react";
-import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
+import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { fmtNum } from "@/lib/format";
 import {
   listStaffProfilesFn,
