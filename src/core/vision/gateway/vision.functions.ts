@@ -13,7 +13,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { runVisionGenesis } from "../genesis.server";
-import type { JsonObject } from "@/core/dna/types";
+import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
 import type {
   InferenceState,
   VisionInferenceTrace,

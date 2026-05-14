@@ -13,7 +13,7 @@ import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import { fetchRestaurantAssets, type RestoProductRow } from "@/lib/sovereignCatalog";
+import { fetchRestaurantAssets, type RestoProductRow } from "@/core/commerce/knowledge/sovereignCatalog";
 
 type RestoProduct = RestoProductRow;
 

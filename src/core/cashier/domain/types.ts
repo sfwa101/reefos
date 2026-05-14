@@ -7,9 +7,9 @@
  * genome the rest of the system writes.
  */
 
-import type { ProductFinancialDNA, UUID } from "@/core/dna/types";
+import type { ProductFinancialDNA, UUID } from "@/core/commerce/knowledge/dna.types";
 
-export type { ProductFinancialDNA } from "@/core/dna/types";
+export type { ProductFinancialDNA } from "@/core/commerce/knowledge/dna.types";
 
 // ────────────────────────────────────────────────────────────────────────────
 // Inputs

@@ -18,8 +18,8 @@ import ProductCard from "@/components/ProductCard";
 import { toLatin } from "@/lib/format";
 import { useUniversalSearch, useSearchHistory } from "@/modules/search";
 import { useFeaturedCategoriesQuery } from "@/hooks/useFeaturedCategories";
-import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
-import { extractHandlingTraits, traitLabel } from "@/lib/productTraits";
+import { searchSovereignAssets, assetToProduct } from "@/core/commerce/knowledge/sovereignCatalog";
+import { extractHandlingTraits, traitLabel } from "@/core/commerce/knowledge/productTraits";
 
 // Live Sovereign search — merges with in-memory `products`.
 // Returns DB-only matches (cached products are skipped to avoid dupes).

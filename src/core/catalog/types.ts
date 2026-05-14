@@ -17,7 +17,7 @@
 import type {
   ProductIdentityDNA,
   ProductFinancialDNA,
-} from "@/core/dna/types";
+} from "@/core/commerce/knowledge/dna.types";
 
 export type LocaleCode = "ar" | "en";
 export type CurrencyCode = "EGP" | "USD" | "EUR";
