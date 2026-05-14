@@ -88,10 +88,10 @@ export function useInfiniteCatalog(
     readonly [string, string, string, string, string, string, number],
     number
   >({
-    // Phase 41/43 — tenant-scoped key prevents cross-tenant cache bleed.
+    // Wave P-7 Batch D — workspace-scoped key (server-attested via JWT).
     queryKey: [
-      "tenant",
-      getActiveTenantId(),
+      "workspace",
+      getWorkspaceIdSync() ?? "<unhydrated>",
       "catalog",
       sourcesKey,
       params.subCategory ?? "",
@@ -103,6 +103,7 @@ export function useInfiniteCatalog(
     getNextPageParam: (last) => last.nextOffset,
     staleTime: 60_000,
     gcTime: 5 * 60_000,
+    enabled: getWorkspaceIdSync() !== null,
   });
 
   const products = useMemo<ReadonlyArray<Product>>(
