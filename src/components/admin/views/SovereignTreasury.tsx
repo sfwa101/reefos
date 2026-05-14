@@ -8,7 +8,7 @@
 import { useMemo } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { listVendorSettlementsFn, clearSovereignSettlementsFn } from "@/lib/sovereign.functions";
+import { listVendorSettlementsFn, clearSovereignSettlementsFn } from "@/core/system/sovereign.functions";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, Crown, Hourglass, Banknote, Send } from "lucide-react";

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, keepPreviousData } from "@tanstack/react-query";
 import { Activity, Search, ShieldCheck, ChevronDown, ChevronRight, RefreshCw, AlertTriangle } from "lucide-react";
-import { listEventTimelineFn } from "@/lib/sovereign.functions";
+import { listEventTimelineFn } from "@/core/system/sovereign.functions";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

@@ -2,7 +2,7 @@ import { Layers, Loader2, Network, ShieldAlert, Sparkles, Target, TrendingUp } f
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
-import { getCategoryAffinityFn } from "@/lib/hakim.functions";
+import { getCategoryAffinityFn } from "@/core/hakim-ai/hakim-admin.functions";
 import { fmtNum } from "@/lib/format";
 
 interface AffinityRow {

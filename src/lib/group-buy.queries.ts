@@ -3,7 +3,7 @@ import { queryOptions } from "@tanstack/react-query";
 import {
   getMyGroupBuyPledgeFn,
   listGroupBuyCampaignsFn,
-} from "./group-buy.functions";
+} from "@/core/marketing/group-buy.functions";
 
 export const groupBuyKeys = {
   all: ["group-buy"] as const,

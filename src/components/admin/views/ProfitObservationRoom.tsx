@@ -35,7 +35,7 @@ import {
   listAdminOverrideLogsFn,
   recordAdminOverrideApprovalFn,
   type OverrideLogRow,
-} from "@/lib/profit-observation.functions";
+} from "@/core/finance/profit-observation.functions";
 import { useAdminOverrideLogsRealtime } from "@/hooks/useAdminOverrideLogsRealtime";
 import { toLatin } from "@/lib/format";
 

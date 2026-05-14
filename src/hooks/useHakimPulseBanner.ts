@@ -2,7 +2,7 @@
 // admin components stay free of direct Supabase / edge-function calls.
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getHakimPulseBannerFn } from "@/lib/hakim.functions";
+import { getHakimPulseBannerFn } from "@/core/hakim-ai/hakim-admin.functions";
 
 export type HakimPulseBannerState = {
   pulse: string;

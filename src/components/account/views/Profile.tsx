@@ -4,7 +4,7 @@ import { CircleAlert, LockKeyhole, RefreshCcw } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
 import { useAuth } from "@/context/AuthContext";
-import { getMyProfileFn, updateMyProfileFn } from "@/lib/user.functions";
+import { getMyProfileFn, updateMyProfileFn } from "@/core/identity/user.functions";
 
 import { AVATAR_GALLERY } from "@/apps/reef-al-madina/features/account/profile/data";
 import { EMPTY_FORM, type DbProfile, type PageState, type ProfileForm, type SaveState, type TabKey } from "@/apps/reef-al-madina/features/account/profile/types";

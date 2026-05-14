@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { summonHakimArchitectFn } from "@/lib/hakim.functions";
+import { summonHakimArchitectFn } from "@/core/hakim-ai/hakim-admin.functions";
 import { toast } from "sonner";
 import {
   useHakimExecutor,

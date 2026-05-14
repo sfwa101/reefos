@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { listHakimSessionsFn, listHakimMessagesFn, type HakimSessionRow, type HakimMessageRow } from "@/lib/hakim-chat.functions";
+import { listHakimSessionsFn, listHakimMessagesFn, type HakimSessionRow, type HakimMessageRow } from "@/core/hakim-ai/hakim-chat.functions";
 import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 import { Loader2, ShieldAlert, Sparkles, Send, Calendar, Plus, MessageCircle } from "lucide-react";
 import { toast } from "sonner";

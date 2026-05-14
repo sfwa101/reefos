@@ -7,7 +7,7 @@ import {
   getMyProfileFn,
   listMyAddressesFn,
   listMyNotificationsFn,
-} from "./user.functions";
+} from "@/core/identity/user.functions";
 
 export const userKeys = {
   all: ["user"] as const,

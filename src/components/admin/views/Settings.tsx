@@ -3,7 +3,7 @@ import { Store, Coins, Save } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getAppSettingsFn, upsertAppSettingFn } from "@/lib/admin-settings.functions";
+import { getAppSettingsFn, upsertAppSettingFn } from "@/core/system/admin-settings.functions";
 import { toast } from "sonner";
 
 /**

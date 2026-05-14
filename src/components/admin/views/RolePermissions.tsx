@@ -1,7 +1,7 @@
 import { useCallback, useState } from "react";
 import { ShieldCheck, Key, Users, Lock } from "lucide-react";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { getPermissionMatrixFn, togglePermissionFn, type AppRole } from "@/lib/rbac.functions";
+import { getPermissionMatrixFn, togglePermissionFn, type AppRole } from "@/core/capabilities/rbac.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 

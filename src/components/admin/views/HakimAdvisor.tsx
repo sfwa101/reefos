@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
-import { listHakimInsightsFn, runHakimAdvisorFn, type HakimInsightRow } from "@/lib/hakim.functions";
+import { listHakimInsightsFn, runHakimAdvisorFn, type HakimInsightRow } from "@/core/hakim-ai/hakim-admin.functions";
 import { Loader2, ShieldAlert, Sparkles, Send, AlertTriangle, Info, CheckCircle2, AlertOctagon } from "lucide-react";
 import { toast } from "sonner";
 
