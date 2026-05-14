@@ -184,17 +184,12 @@ export const getHakimPulseBannerFn = createServerFn({ method: "POST" })
     return { metrics, page };
   })
   .middleware([requireAdmin])
-  .handler(async ({ data, context }): Promise<HakimPulseBannerResult> => {
-    const sb = context.supabase as SbAny;
+  .handler(async ({ data }): Promise<HakimPulseBannerResult> => {
     try {
-      const { data: out, error } = await sb.functions.invoke("hakim-pulse", { body: data });
-      if (error) return { error: "failed" };
-      const o = (out ?? {}) as Record<string, unknown>;
-      if (o.error === "rate_limited") return { error: "rate_limited" };
-      if (o.error === "credits_exhausted") return { error: "credits_exhausted" };
+      const out = await runHakimPulse({ page: data.page });
       return {
-        pulse: typeof o.pulse === "string" ? (o.pulse as string) : undefined,
-        insights: o.insights as HakimPulseBannerResult["insights"],
+        pulse: typeof out.pulse === "string" ? out.pulse : undefined,
+        insights: out.insights as HakimPulseBannerResult["insights"],
       };
     } catch {
       return { error: "failed" };
@@ -213,15 +208,8 @@ export const getHakimAdvisorReportFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ report: string }> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
-    if (error) throw new Error(error.message ?? "advisor_failed");
-    const o = (out ?? {}) as Record<string, unknown>;
-    if (o.error) throw new Error(String(o.error));
-    const report =
-      (typeof o.report === "string" && o.report) ||
-      (typeof o.content === "string" && o.content) ||
-      (typeof o.text === "string" && o.text) ||
-      "";
-    return { report: report || "تعذّر إنشاء التقرير الآن." };
+    const out = await runHakimAdvisor(data, context.supabase);
+    if ("error" in out) throw new Error(String(out.error));
+    const summary = out.insight?.summary;
+    return { report: (typeof summary === "string" && summary) || "تعذّر إنشاء التقرير الآن." };
   });
