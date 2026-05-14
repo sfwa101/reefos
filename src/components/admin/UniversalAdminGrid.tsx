@@ -32,17 +32,19 @@ const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 }
 export type BentoTone =
   | "primary" | "info" | "success" | "warning" | "accent" | "purple" | "pink" | "teal" | "indigo";
 
-export type BentoMetric = {
+export type GridRow = Record<string, unknown>;
+
+export type BentoMetric<T = GridRow> = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: any[]) => string | number;
-  urgent?: (rows: any[]) => boolean;
+  compute?: (rows: T[]) => string | number;
+  urgent?: (rows: T[]) => boolean;
   to?: string;
 };
 
-export type Column<T = any> = {
+export type Column<T = GridRow> = {
   key: string;
   label?: string;
   render?: (row: T) => ReactNode;
@@ -50,14 +52,14 @@ export type Column<T = any> = {
   hideOnMobile?: boolean;
 };
 
-export type RowAction<T = any> = {
+export type RowAction<T = GridRow> = {
   label: string;
   onClick: (row: T) => void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
 
-export type DataSource<T = any> = {
+export type DataSource<T = GridRow> = {
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
@@ -65,7 +67,7 @@ export type DataSource<T = any> = {
   limit?: number;
   fetcher?: () => Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?: (row: any) => T;
+  map?: (row: GridRow) => T;
 };
 
 export type EmptyState = {
@@ -74,10 +76,10 @@ export type EmptyState = {
   hint?: string;
 };
 
-export type UniversalAdminGridProps<T = any> = {
+export type UniversalAdminGridProps<T = GridRow> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric[];
+  metrics?: BentoMetric<T>[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
   rowKey?: (row: T) => string;
