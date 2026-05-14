@@ -26,11 +26,21 @@ export interface LedgerAppendInput {
   readonly currency: string;
   readonly direction: LedgerDirection;
   readonly memo?: string;
+  readonly shift_id?: string;
 }
 
 export interface LedgerTransaction extends LedgerAppendInput {
   readonly transaction_id: string;
   readonly recorded_at: number;
+}
+
+export interface ShiftAggregation {
+  readonly shiftId: string;
+  readonly currency: string;
+  readonly credits: number;
+  readonly debits: number;
+  readonly net: number;
+  readonly transactionCount: number;
 }
 
 const FORBIDDEN = (op: string): never => {
@@ -82,9 +92,36 @@ export class LedgerGateway {
       currency: tx.currency,
       direction: tx.direction,
       account: tx.account,
+      shiftId: tx.shift_id,
       appId: this.appId,
     });
     return tx;
+  }
+
+  /**
+   * Aggregate every transaction recorded for a shift. Sovereign source of
+   * truth for the expected drawer balance — derived purely from the
+   * append-only log. Cashier UIs MUST NOT compute this themselves.
+   */
+  aggregateShift(shiftId: string, currency: string): ShiftAggregation {
+    let credits = 0;
+    let debits = 0;
+    let count = 0;
+    for (const tx of this.log) {
+      if (tx.shift_id !== shiftId) continue;
+      if (tx.currency !== currency) continue;
+      count += 1;
+      if (tx.direction === "credit") credits += tx.amount;
+      else debits += tx.amount;
+    }
+    return {
+      shiftId,
+      currency,
+      credits,
+      debits,
+      net: credits - debits,
+      transactionCount: count,
+    };
   }
 
   /** Read-only projection of the append-only log. */

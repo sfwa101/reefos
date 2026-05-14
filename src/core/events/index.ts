@@ -101,6 +101,38 @@ export type SalsabilEvents = {
     currency: string;
     direction: "debit" | "credit";
     account: string;
+    shiftId?: string;
+    appId?: SalsabilAppId;
+  };
+  "ledger.variance.recorded": {
+    transactionId: string;
+    idempotencyKey: string;
+    shiftId: string;
+    expected: number;
+    actual: number;
+    variance: number;
+    direction: "debit" | "credit";
+    currency: string;
+    appId?: SalsabilAppId;
+  };
+  "pos.shift.opened": {
+    shiftId: string;
+    openedAt: number;
+    startingCash: number;
+    currency: string;
+    cashierId?: string;
+    appId?: SalsabilAppId;
+  };
+  "pos.shift.closed": {
+    shiftId: string;
+    closedAt: number;
+    startingCash: number;
+    expectedCash: number;
+    actualCash: number;
+    variance: number;
+    currency: string;
+    notes?: string;
+    cashierId?: string;
     appId?: SalsabilAppId;
   };
 };
