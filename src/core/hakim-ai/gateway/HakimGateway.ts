@@ -12,6 +12,8 @@ import {
   generateEmbeddingFn,
   processImageAestheticFn,
 } from "@/core/vision/vision.functions";
+import { hakimPulseFn } from "@/core/hakim-ai/hakim.functions";
+import { predictBasketFn } from "@/core/orders/predict.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
@@ -146,7 +148,12 @@ export const HakimGateway = {
   // ============= Edge function invocations =============
 
   async invokeHakimPulse(body: { page: string; tiles: unknown[] }) {
-    return await supabase.functions.invoke("hakim-pulse", { body });
+    try {
+      const data = await hakimPulseFn({ data: body });
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "pulse_failed" } };
+    }
   },
 
   async invokeGenerateEmbedding(text: string) {
@@ -159,7 +166,12 @@ export const HakimGateway = {
   },
 
   async invokePredictBasket() {
-    return await supabase.functions.invoke("predict_basket", { body: {} });
+    try {
+      const data = await predictBasketFn();
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "predict_failed" } };
+    }
   },
 
   async invokeProcessImageAesthetic(body: {

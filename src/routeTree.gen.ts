@@ -32,6 +32,7 @@ import { Route as RuntimeSlugRouteImport } from './routes/runtime/$slug'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
+import { Route as ApiHakimChatRouteImport } from './routes/api/hakim-chat'
 import { Route as AdminZakatRouteImport } from './routes/admin.zakat'
 import { Route as AdminWalletsRouteImport } from './routes/admin.wallets'
 import { Route as AdminTracingRouteImport } from './routes/admin.tracing'
@@ -256,6 +257,11 @@ const DriverDashboardRoute = DriverDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => DriverRoute,
+} as any)
+const ApiHakimChatRoute = ApiHakimChatRouteImport.update({
+  id: '/api/hakim-chat',
+  path: '/api/hakim-chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AdminZakatRoute = AdminZakatRouteImport.update({
   id: '/zakat',
@@ -923,6 +929,7 @@ export interface FileRoutesByFullPath {
   '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/api/hakim-chat': typeof ApiHakimChatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
@@ -1053,6 +1060,7 @@ export interface FileRoutesByTo {
   '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/api/hakim-chat': typeof ApiHakimChatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
@@ -1192,6 +1200,7 @@ export interface FileRoutesById {
   '/admin/tracing': typeof AdminTracingRoute
   '/admin/wallets': typeof AdminWalletsRoute
   '/admin/zakat': typeof AdminZakatRoute
+  '/api/hakim-chat': typeof ApiHakimChatRoute
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
@@ -1329,6 +1338,7 @@ export interface FileRouteTypes {
     | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
+    | '/api/hakim-chat'
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
@@ -1459,6 +1469,7 @@ export interface FileRouteTypes {
     | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
+    | '/api/hakim-chat'
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
@@ -1597,6 +1608,7 @@ export interface FileRouteTypes {
     | '/admin/tracing'
     | '/admin/wallets'
     | '/admin/zakat'
+    | '/api/hakim-chat'
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
@@ -1653,6 +1665,7 @@ export interface RootRouteChildren {
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
   VendorRoute: typeof VendorRouteWithChildren
+  ApiHakimChatRoute: typeof ApiHakimChatRoute
   RuntimeSlugRoute: typeof RuntimeSlugRoute
 }
 
@@ -1818,6 +1831,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/driver/dashboard'
       preLoaderRoute: typeof DriverDashboardRouteImport
       parentRoute: typeof DriverRoute
+    }
+    '/api/hakim-chat': {
+      id: '/api/hakim-chat'
+      path: '/api/hakim-chat'
+      fullPath: '/api/hakim-chat'
+      preLoaderRoute: typeof ApiHakimChatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/admin/zakat': {
       id: '/admin/zakat'
@@ -3020,6 +3040,7 @@ const rootRouteChildren: RootRouteChildren = {
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
   VendorRoute: VendorRouteWithChildren,
+  ApiHakimChatRoute: ApiHakimChatRoute,
   RuntimeSlugRoute: RuntimeSlugRoute,
 }
 export const routeTree = rootRouteImport

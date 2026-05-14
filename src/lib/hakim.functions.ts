@@ -1,7 +1,12 @@
-// Hakim Gateway — Wave R-1 · Batch 5.
+// Hakim Gateway — Wave R-1 · Batch 5 (P-4.2 server-fn migration).
 // Admin-only handlers for Hakim insights, anomalies, and category affinity.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import {
+  runHakimPulse,
+  runHakimAdvisor,
+  runHakimArchitect,
+} from "@/core/hakim-ai/hakim.server";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type SbAny = any;
@@ -135,12 +140,8 @@ export const runHakimAdvisorFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
-    if (error) throw new Error(error.message ?? "advisor_failed");
-    if (out && typeof out === "object" && "error" in out && out.error) {
-      throw new Error(String((out as { error: unknown }).error));
-    }
+    const out = await runHakimAdvisor(data, context.supabase);
+    if ("error" in out) throw new Error(String(out.error));
     return { ok: true };
   });
 
@@ -162,13 +163,9 @@ export const summonHakimArchitectFn = createServerFn({ method: "POST" })
     return { prompt };
   })
   .middleware([requireAdmin])
-  .handler(async ({ data, context }): Promise<HakimArchitectBlueprint> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim_architect", {
-      body: { prompt: data.prompt },
-    });
-    if (error) throw new Error(error.message ?? "ai_invoke_failed");
-    if (!out?.ok || !out?.blueprint) throw new Error(out?.error ?? "no_blueprint");
+  .handler(async ({ data }): Promise<HakimArchitectBlueprint> => {
+    const out = await runHakimArchitect(data.prompt);
+    if ("error" in out) throw new Error(String(out.error));
     return out.blueprint as HakimArchitectBlueprint;
   });
 

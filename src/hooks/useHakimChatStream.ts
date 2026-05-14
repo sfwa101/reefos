@@ -30,13 +30,12 @@ export function useHakimChatStream() {
     abortRef.current = ctl;
     try {
       const accessToken = await HakimGateway.getAccessTokenForChat();
-      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-chat`;
-      const resp = await fetch(url, {
+      const resp = await fetch("/api/hakim-chat", {
         method: "POST",
         signal: ctl.signal,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${accessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken ?? ""}`,
         },
         body: JSON.stringify(req),
       });
