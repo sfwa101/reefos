@@ -5,6 +5,7 @@
  * guard at the bottom forces a compile-time error if a new block kind
  * is added to the schema union without a renderer registered here.
  */
+import type { ReactElement } from "react";
 import type { Control, FieldValues } from "react-hook-form";
 import type { AdminBlock } from "./schemas";
 import { FormFieldBlock } from "./blocks/FormFieldBlock";
@@ -18,7 +19,7 @@ export interface AdminBlockContext {
   /** Current record (form mode) or row (table cell mode). */
   record?: Record<string, unknown>;
   /** react-hook-form control passthrough for form blocks. */
-  control?: unknown;
+  control?: Control<FieldValues>;
   /** Active locale (ar | en | …). */
   locale?: string;
 }
