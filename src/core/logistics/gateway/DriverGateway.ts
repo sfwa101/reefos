@@ -60,7 +60,8 @@ export const DriverGateway = {
   ): Promise<{ error: { message: string } | null }> {
     const { error } = await supabase
       .from("salsabil_fulfillment_nodes")
-      .update(patch)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .update(patch as any)
       .eq("id", nodeId);
     return { error: error ? { message: error.message } : null };
   },
