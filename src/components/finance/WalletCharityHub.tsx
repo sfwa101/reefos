@@ -47,10 +47,10 @@ export const WalletCharityHub = ({
       amount: number;
       source: "direct" | "general_pool";
     }) => {
-      const { data, error } = await supabase.rpc("donate_to_campaign", {
-        _campaign_id: vars.campaignId as unknown as string,
-        _amount: vars.amount,
-        _source: vars.source,
+      const { data, error } = await FinanceGateway.donateToCampaign({
+        campaignId: vars.campaignId,
+        amount: vars.amount,
+        source: vars.source,
       });
       if (error) throw error;
       return data;
