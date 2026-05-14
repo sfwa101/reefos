@@ -85,15 +85,9 @@ function clearDna() {
 
 /** Fetch the persona row matching the active key (Phase 18 Part 1). */
 async function fetchPersona(personaKey: string): Promise<PersonaRow | null> {
-  const { data, error } = await supabase
-    .from("salsabil_persona_matrix")
-    .select(
-      "id, persona_key, label_ar, icon, theme_overlay, capabilities, role_predicates, is_active, sort_order",
-    )
-    .eq("persona_key", personaKey)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error) throw error;
+  const data = await ThemeGateway.getPersonaByKey<PersonaRow>(personaKey);
+  return data ?? null;
+}
   return (data as unknown as PersonaRow | null) ?? null;
 }
 
