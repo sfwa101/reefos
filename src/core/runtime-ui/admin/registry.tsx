@@ -5,7 +5,7 @@
  * guard at the bottom forces a compile-time error if a new block kind
  * is added to the schema union without a renderer registered here.
  */
-import type { ReactElement } from "react";
+import type { Control, FieldValues } from "react-hook-form";
 import type { AdminBlock } from "./schemas";
 import { FormFieldBlock } from "./blocks/FormFieldBlock";
 import { FieldGroupBlock } from "./blocks/FieldGroupBlock";
