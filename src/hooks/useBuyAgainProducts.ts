@@ -39,39 +39,15 @@ export const useBuyAgainProducts = (
       if (!user?.id) return [];
 
       // 1) Most recent master orders for this customer.
-      const { data: masters, error: mErr } = await supabase
-        .from("salsabil_master_orders")
-        .select("id")
-        .eq("customer_id", user.id)
-        .order("created_at", { ascending: false })
-        .limit(20);
-      if (mErr) throw mErr;
-      const masterIds = (masters ?? []).map((m) => m.id);
+      const masterIds = await MarketingGateway.listRecentMasterOrderIds(user.id, 20);
       if (masterIds.length === 0) return [];
 
       // 2) All fulfillment nodes belonging to those master orders.
-      const { data: nodes, error: nErr } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .select("id")
-        .in("master_order_id", masterIds);
-      if (nErr) throw nErr;
-      const nodeIds = (nodes ?? []).map((n) => n.id);
+      const nodeIds = await MarketingGateway.listFulfillmentNodeIdsForMasters(masterIds);
       if (nodeIds.length === 0) return [];
 
       // 3) Items in those nodes — join SKU → asset_id.
-      const { data: items, error: iErr } = await supabase
-        .from("salsabil_fulfillment_items")
-        .select("created_at, salsabil_skus!inner(asset_id)")
-        .in("node_id", nodeIds)
-        .order("created_at", { ascending: false })
-        .limit(120);
-      if (iErr) throw iErr;
-
-      const seen = new Set<string>();
-      const out: string[] = [];
-      const rows = (items ?? []) as unknown as Array<{
-        salsabil_skus: { asset_id: string | null } | null;
-      }>;
+      const rows = await MarketingGateway.listFulfillmentItemsForNodes(nodeIds, 120);
       for (const it of rows) {
         const aid = it.salsabil_skus?.asset_id;
         if (!aid) continue;
