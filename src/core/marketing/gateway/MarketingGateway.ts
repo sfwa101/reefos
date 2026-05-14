@@ -70,4 +70,213 @@ export const MarketingGateway = {
       icon: input.icon ?? null,
     });
   },
+
+  /* ───────────────────── Featured categories (root) ───────────────────── */
+
+  async listFeaturedRootCategories(): Promise<AnyRow[]> {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("id, name, icon, sort_order, parent_id")
+      .is("parent_id", null)
+      .order("sort_order", { ascending: true, nullsFirst: false });
+    if (error) throw error;
+    return (data ?? []) as unknown as AnyRow[];
+  },
+
+  /* ───────────────────── Banners + Flash Sales ───────────────────── */
+
+  async listBanners(placement: string): Promise<AnyRow[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("banners")
+      .select(
+        "id,title,subtitle,image_url,placement,link_url,category_slug,sort_order,starts_at,ends_at,is_active",
+      )
+      .eq("placement", placement)
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as AnyRow[];
+  },
+
+  async getActiveFlashSale(): Promise<AnyRow | null> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: sales } = await (supabase as any)
+      .from("flash_sales")
+      .select("id,ends_at,cycle_label")
+      .eq("is_active", true)
+      .gt("ends_at", new Date().toISOString())
+      .order("starts_at", { ascending: false })
+      .limit(1);
+    return ((sales?.[0] ?? null) as AnyRow | null);
+  },
+
+  async listFlashSaleProducts(saleId: string): Promise<AnyRow[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: items } = await (supabase as any)
+      .from("flash_sale_products")
+      .select(
+        "id,product_id,product_name,category,original_price,discount_pct,reason,rank",
+      )
+      .eq("flash_sale_id", saleId)
+      .order("rank", { ascending: true });
+    return ((items ?? []) as AnyRow[]);
+  },
+
+  /* ───────────────────── Buy-again (Sovereign Matrix) ───────────────────── */
+
+  async listRecentMasterOrderIds(customerId: string, limit = 20): Promise<string[]> {
+    const { data, error } = await supabase
+      .from("salsabil_master_orders")
+      .select("id")
+      .eq("customer_id", customerId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
+  },
+
+  async listFulfillmentNodeIdsForMasters(masterIds: string[]): Promise<string[]> {
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id")
+      .in("master_order_id", masterIds);
+    if (error) throw error;
+    return ((data ?? []) as Array<{ id: string }>).map((r) => r.id);
+  },
+
+  async listFulfillmentItemsForNodes(
+    nodeIds: string[],
+    limit = 120,
+  ): Promise<Array<{ salsabil_skus: { asset_id: string | null } | null }>> {
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_items")
+      .select("created_at, salsabil_skus!inner(asset_id)")
+      .in("node_id", nodeIds)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as unknown as Array<{
+      salsabil_skus: { asset_id: string | null } | null;
+    }>;
+  },
+
+  /* ───────────────────── Spatio-temporal offers ───────────────────── */
+
+  async listActiveOffersMatrix(): Promise<{
+    data: AnyRow[];
+    error: { message: string } | null;
+  }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sb = supabase as any;
+    const { data, error } = await sb
+      .from("offers_matrix")
+      .select("*")
+      .eq("is_active", true)
+      .order("priority", { ascending: false });
+    return {
+      data: (data ?? []) as AnyRow[],
+      error: error ? { message: error.message } : null,
+    };
+  },
+
+  /* ───────────────────── Group Buy ───────────────────── */
+
+  subscribeGroupBuyCampaign(
+    campaignId: string,
+    handlers: {
+      onCampaignUpdate: (next: AnyRow) => void;
+      onPledgeChange: () => void;
+    },
+  ): GatewayChannel {
+    const ch = supabase
+      .channel(`gb-campaign-${campaignId}`)
+      .on(
+        "postgres_changes" as never,
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "group_buy_campaigns",
+          filter: `id=eq.${campaignId}`,
+        },
+        (payload: { new?: AnyRow }) => {
+          if (payload?.new) handlers.onCampaignUpdate(payload.new);
+        },
+      )
+      .on(
+        "postgres_changes" as never,
+        {
+          event: "*",
+          schema: "public",
+          table: "group_buy_pledges",
+          filter: `campaign_id=eq.${campaignId}`,
+        },
+        () => handlers.onPledgeChange(),
+      )
+      .subscribe();
+    return {
+      unsubscribe: () => {
+        supabase.removeChannel(ch);
+      },
+    };
+  },
+
+  /* ───────────────────── Affiliate / Referral ───────────────────── */
+
+  async getReferralCode(userId: string): Promise<string | null> {
+    const { data: rc } = await supabase
+      .from("referral_codes")
+      .select("code")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (rc?.code) return rc.code as string;
+    const { data: prof } = await supabase
+      .from("profiles")
+      .select("referral_code")
+      .eq("id", userId)
+      .maybeSingle();
+    return (prof?.referral_code as string | null) ?? null;
+  },
+
+  async ensureReferralCode(userId: string): Promise<string> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)(
+      "ensure_referral_code",
+      { _user_id: userId },
+    );
+    if (error) throw error;
+    return data as string;
+  },
+
+  async listAffiliateTiers(): Promise<AnyRow[]> {
+    const { data, error } = await supabase
+      .from("affiliate_tiers")
+      .select("*")
+      .order("rank", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as unknown as AnyRow[];
+  },
+
+  async getUserAffiliateState(userId: string): Promise<AnyRow | null> {
+    const { data, error } = await supabase
+      .from("user_affiliate_state")
+      .select("*")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    return (data ?? null) as unknown as AnyRow | null;
+  },
+
+  async listCommissionLedger(userId: string, limit = 100): Promise<AnyRow[]> {
+    const { data, error } = await supabase
+      .from("commission_ledger")
+      .select(
+        "id, order_id, product_name, category, commission_amount, status, created_at, paid_at, vest_release_at",
+      )
+      .eq("affiliate_user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+    if (error) throw error;
+    return (data ?? []) as unknown as AnyRow[];
+  },
 };
