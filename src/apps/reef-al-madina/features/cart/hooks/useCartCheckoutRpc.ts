@@ -7,7 +7,9 @@
  * Only `allocateOrderInventory` remains — still used by the orchestrator
  * for best-effort multi-warehouse fulfillment hints.
  */
-import { supabase } from "@/integrations/supabase/client";
+// Wave P-3 — Sovereign Cart boundary: this module no longer touches Supabase
+// directly. The legacy `placeOrderAtomic` was already purged; the remaining
+// `allocateOrderInventory` is a no-op kept for backward compatibility.
 
 /** Best-effort multi-warehouse allocation. Non-blocking; logs only on error. */
 export const allocateOrderInventory = async (
