@@ -6,7 +6,7 @@ import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/lib/sovereignCatalog";
-import { getNestedStockBreakdownFn } from "@/lib/ops.functions";
+import { getNestedStockBreakdownFn } from "@/core/ops/ops.functions";
 
 type Row = {
   id: string;        // sku_id (Sovereign)

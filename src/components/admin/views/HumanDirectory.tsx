@@ -7,7 +7,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { Search, Users, UserPlus } from "lucide-react";
-import { listHumanDirectoryFn, type HumanProfile, type HumanRelationship } from "@/lib/crm.functions";
+import { listHumanDirectoryFn, type HumanProfile, type HumanRelationship } from "@/core/crm/crm.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { HumanProfileSheet } from "@/components/admin/crm/HumanProfileSheet";

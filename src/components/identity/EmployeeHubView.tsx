@@ -12,7 +12,7 @@ import {
   type AdvanceKind,
   type AdvanceRequestRow,
   type AttendanceRow,
-} from "@/lib/hr.functions";
+} from "@/core/hr/hr.functions";
 
 type Attendance = AttendanceRow;
 type AdvanceReq = AdvanceRequestRow;

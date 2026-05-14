@@ -6,7 +6,7 @@ import {
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UniversalAdminGrid, type DataSource, type Column } from "@/components/admin/UniversalAdminGrid";
-import { getCustomer360Fn } from "@/lib/crm.functions";
+import { getCustomer360Fn } from "@/core/crm/crm.functions";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

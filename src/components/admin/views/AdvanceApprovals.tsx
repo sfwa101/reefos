@@ -10,7 +10,7 @@ import {
   rejectAdvanceFn,
   type AdvanceRequestRow,
   type EmployeeProfileRow,
-} from "@/lib/hr.functions";
+} from "@/core/hr/hr.functions";
 
 type Req = AdvanceRequestRow;
 type Profile = EmployeeProfileRow;

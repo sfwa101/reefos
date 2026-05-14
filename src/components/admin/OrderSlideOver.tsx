@@ -13,7 +13,7 @@ import {
   getMasterOrderDetailFn,
   assignDriverToOrderFn,
   listActiveDriversFn,
-} from "@/lib/ops.functions";
+} from "@/core/ops/ops.functions";
 
 type Props = { orderId: string | null; onClose: () => void };
 

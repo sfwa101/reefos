@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Phone, Users, ChevronLeft } from "lucide-react";
-import { listCustomersFn, type CustomerListRow } from "@/lib/crm.functions";
+import { listCustomersFn, type CustomerListRow } from "@/core/crm/crm.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

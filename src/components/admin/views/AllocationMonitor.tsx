@@ -11,7 +11,7 @@ import {
   listRecentMasterOrdersWithSubCountFn,
   getAllocationOverviewFn,
   allocateOrderInventoryFn,
-} from "@/lib/ops.functions";
+} from "@/core/ops/ops.functions";
 
 type UnassignedNode = {
   id: string;

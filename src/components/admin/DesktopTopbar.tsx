@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useAuth } from "@/context/AuthContext";
-import { countUnreadNotificationsFn } from "@/lib/notifications.functions";
+import { countUnreadNotificationsFn } from "@/core/notifications/notifications.functions";
 import { WorkspaceSwitcher } from "./WorkspaceSwitcher";
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,

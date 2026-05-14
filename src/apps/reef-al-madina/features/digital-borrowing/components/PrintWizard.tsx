@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import { useCartActions } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
-import { submitPrintJobFn, uploadPrintFileFn } from "@/lib/library.functions";
+import { submitPrintJobFn, uploadPrintFileFn } from "@/core/library/library.functions";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {

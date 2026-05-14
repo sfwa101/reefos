@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getDeliverySettingsFn, updateDeliverySettingsFn, type DeliverySettings as DS } from "@/lib/ops.functions";
+import { getDeliverySettingsFn, updateDeliverySettingsFn, type DeliverySettings as DS } from "@/core/ops/ops.functions";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Card, CardContent } from "@/components/ui/card";

@@ -8,7 +8,7 @@ import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
-import { createHumanFn } from "@/lib/crm.functions";
+import { createHumanFn } from "@/core/crm/crm.functions";
 import {
   Dialog,
   DialogContent,
