@@ -352,7 +352,7 @@ export function UniversalAdminGrid<T = any>({
             >
               <div style={{ height: virtualizer.getTotalSize(), position: "relative", width: "100%" }}>
                 {items.map((vi) => {
-                  const row: any = filtered[vi.index];
+                  const row = filtered[vi.index] as T;
                   const key = rowKey ? rowKey(row) : (row?.id ?? vi.index);
                   return (
                     <div
