@@ -24,6 +24,8 @@ export const EVENT_CATALOG = Object.freeze({
   CART_ITEM_QTY_CHANGED: "cart.item.qty_changed",
   CART_CLEARED: "cart.cleared",
   CART_UPDATED: "cart.updated",
+  ORDER_PLACED: "order.placed",
+  LEDGER_TRANSACTION_APPENDED: "ledger.transaction.appended",
 } as const);
 
 export type EventCatalogKey = keyof typeof EVENT_CATALOG;

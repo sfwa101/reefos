@@ -63,6 +63,26 @@ export type SalsabilEvents = {
     snapshotHash: string;
     appId?: SalsabilAppId;
   };
+  "order.placed": {
+    orderId: string;
+    idempotencyKey: string;
+    grandTotal: number;
+    currency: string;
+    itemCount: number;
+    paymentMethod: string;
+    snapshotHash: string;
+    appId?: SalsabilAppId;
+  };
+  "ledger.transaction.appended": {
+    transactionId: string;
+    idempotencyKey: string;
+    orderId: string;
+    amount: number;
+    currency: string;
+    direction: "debit" | "credit";
+    account: string;
+    appId?: SalsabilAppId;
+  };
 };
 
 export type SalsabilEventName = keyof SalsabilEvents;
