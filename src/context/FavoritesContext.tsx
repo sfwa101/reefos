@@ -99,15 +99,9 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
       set(next);
       if (user) {
         if (isFav) {
-          await supabase
-            .from("favorites")
-            .delete()
-            .eq("user_id", user.id)
-            .eq("product_id", id);
+          await IdentityGateway.removeFavorite(user.id, id);
         } else {
-          await supabase
-            .from("favorites")
-            .insert({ user_id: user.id, product_id: id });
+          await IdentityGateway.addFavorite(user.id, id);
         }
       }
     },
