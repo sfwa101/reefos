@@ -11,7 +11,7 @@
  *
  * Singleton — initialized once from the OS root via `initSduiWatchdog()`.
  */
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
 
 const WINDOW_MS = 60_000;
