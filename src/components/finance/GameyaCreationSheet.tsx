@@ -31,11 +31,11 @@ export const GameyaCreationSheet = ({
   const submit = async () => {
     if (!valid) return;
     setBusy(true);
-    const { data, error } = await supabase.rpc("create_gam_eya", {
-      _name: name.trim(),
-      _cycle_amount: amount,
-      _max_members: members,
-      _cycle_duration_months: members,
+    const { data, error } = await FinanceGateway.createGameya({
+      name: name.trim(),
+      cycleAmount: amount,
+      maxMembers: members,
+      cycleDurationMonths: members,
     });
     setBusy(false);
     if (error || !data) {
