@@ -114,24 +114,17 @@ export function useVendorOperations() {
   const refreshLiveItems = useCallback(async () => {
     if (vendorIds.length === 0) { setItems([]); return; }
     // Sovereign read: vendor's fulfillment nodes ➜ items ➜ sku ➜ asset.
-    const { data, error } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select(`
-        id, status, vendor_id, master_order_id, created_at,
-        salsabil_master_orders!salsabil_fulfillment_nodes_master_fk ( delivery_info ),
-        salsabil_fulfillment_items (
-          id, quantity, price_at_time, created_at,
-          salsabil_skus (
-            id,
-            salsabil_assets ( id, name, media )
-          )
-        )
-      `)
-      .in("vendor_id", vendorIds)
-      .in("status", Array.from(ACTIVE_NODE_STATUSES))
-      .order("created_at", { ascending: false })
-      .limit(80);
-    if (error) { setError(error.message); return; }
+    let data: unknown[];
+    try {
+      data = await VendorGateway.listVendorLiveFulfillmentNodes(
+        vendorIds,
+        Array.from(ACTIVE_NODE_STATUSES),
+      );
+    } catch (err) {
+      const e = err as { message?: string };
+      if (e?.message) setError(e.message);
+      return;
+    }
 
     const rows: VendorLiveOrderItem[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
