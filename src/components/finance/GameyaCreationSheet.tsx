@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { ChevronLeft, Loader2, Users, ShieldCheck, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toLatin } from "@/lib/format";
 
 const AMOUNT_PRESETS = [500, 1000, 2000, 5000];
