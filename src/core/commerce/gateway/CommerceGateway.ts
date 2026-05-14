@@ -13,6 +13,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { IdentityGateway } from "@/core/identity";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type SharedCartSplitType = "percentage" | "fixed" | "itemized";
 
@@ -27,7 +28,7 @@ export const CommerceGateway = {
     splitValue: number,
   ): Promise<void> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await dynamicSb
       .from("shared_cart_participants")
       .update({ split_type: splitType, split_value: splitValue })
       .eq("id", participantId);

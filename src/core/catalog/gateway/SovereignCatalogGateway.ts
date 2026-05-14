@@ -17,6 +17,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
@@ -593,7 +594,7 @@ export async function insertProductRequest(
   payload: Record<string, unknown>,
 ): Promise<{ error: string | null }> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { error } = await (supabase as any)
+  const { error } = await dynamicSb
     .from("product_requests")
     .insert(payload);
   return { error: error?.message ?? null };

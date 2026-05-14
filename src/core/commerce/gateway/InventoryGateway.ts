@@ -15,6 +15,7 @@
  *  - Diff against existing rows for `baseSkuId` and delete removed drafts.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type InventoryKind = "count" | "capacity" | "time_slots";
 
@@ -57,7 +58,7 @@ export const InventoryGateway = {
   async listForSku(skuId: string): Promise<InventoryRow[]> {
     if (!skuId) return [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    const { data, error } = await dynamicSb
       .from(TABLE)
       .select("*")
       .eq("sku_id", skuId);
@@ -69,7 +70,7 @@ export const InventoryGateway = {
   async wipeInventoryForSku(skuId: string): Promise<void> {
     if (!skuId) return;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    const { error } = await dynamicSb
       .from(TABLE)
       .delete()
       .eq("sku_id", skuId);
@@ -95,7 +96,7 @@ export const InventoryGateway = {
 
     // 1. Snapshot existing rows.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing, error: fetchErr } = await (supabase as any)
+    const { data: existing, error: fetchErr } = await dynamicSb
       .from(TABLE)
       .select("id")
       .eq("sku_id", baseSkuId);
@@ -134,7 +135,7 @@ export const InventoryGateway = {
     // 3. Upsert on the natural key (sku_id, location_code).
     if (rows.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: upErr } = await (supabase as any)
+      const { error: upErr } = await dynamicSb
         .from(TABLE)
         .upsert(rows, { onConflict: "sku_id,location_code" });
       if (upErr) throw new Error(upErr.message);
@@ -145,7 +146,7 @@ export const InventoryGateway = {
     const toDelete = Array.from(existingIds).filter((id) => !keptIds.has(id));
     if (toDelete.length > 0) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: delErr } = await (supabase as any)
+      const { error: delErr } = await dynamicSb
         .from(TABLE)
         .delete()
         .eq("sku_id", baseSkuId)

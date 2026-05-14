@@ -5,6 +5,7 @@
 // the `admin` role via the `has_role` security-definer RPC.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 // ---- Types ----------------------------------------------------------------
 export type CategoryRow = {
@@ -336,7 +337,7 @@ export const listSuppliersFullFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<SupplierFullRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const { data, error } = await sb
       .from("suppliers")
       .select("*")
@@ -362,7 +363,7 @@ export const createSupplierFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ id: string }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const { data: row, error } = await sb
       .from("suppliers")
       .insert({
@@ -375,7 +376,7 @@ export const createSupplierFn = createServerFn({ method: "POST" })
       .select("id")
       .single();
     if (error) throw new Error(error.message);
-    return { id: row.id as string };
+    return { id: (row as { id: string }).id };
   });
 
 // ============= Wave R-1 Batch 2 — Product Units =============
@@ -562,7 +563,7 @@ export const updateSupplierFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const { id, ...patch } = data;
     if (Object.keys(patch).length === 0) return { ok: true };
     const { error } = await sb.from("suppliers").update(patch).eq("id", id);
@@ -578,7 +579,7 @@ export const setSupplierActiveFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const { error } = await sb.from("suppliers").update({ is_active: data.is_active }).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
@@ -592,7 +593,7 @@ export const deleteSupplierFn = createServerFn({ method: "POST" })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     // Soft delete: deactivate first; hard delete only if no references — let DB constraints decide.
     const { error } = await sb.from("suppliers").update({ is_active: false }).eq("id", data.id);
     if (error) throw new Error(error.message);

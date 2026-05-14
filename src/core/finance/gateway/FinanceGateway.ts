@@ -10,13 +10,12 @@
  * keep the network-extraction strictly scoped — flagged for Wave P-7.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabase as any;
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const rpc = (supabase.rpc as any).bind(supabase);
+const sb = dynamicSb;
+const rpc = dynamicSb.rpc.bind(dynamicSb);
 
 export const FinanceGateway = {
   // ============= Tayseer ledger / wallet =============

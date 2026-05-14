@@ -18,6 +18,7 @@ import type {
   InferenceState,
   VisionInferenceTrace,
 } from "../domain/types";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 const LEGACY_MODEL = "gemini-pro-vision-legacy";
 const LEGACY_PROMPT_VERSION = "v0-legacy";
@@ -151,7 +152,7 @@ export const approveInferenceFn = createServerFn({ method: "POST" })
 
     // Mint via the existing legacy RPC. Persistence rules unchanged.
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error: mintError } = await (supabase.rpc as any)(
+    const { error: mintError } = await dynamicSb.rpc(
       "mint_universal_asset",
       { payload: trace.draft_payload },
     );

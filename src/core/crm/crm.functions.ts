@@ -2,6 +2,7 @@
 // Customer 360 aggregator + admin notification broadcaster, gated by `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 // ---- Types ----------------------------------------------------------------
 export type CrmProfile = {
@@ -191,7 +192,7 @@ export const listCustomersFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<CustomerListRow[]> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const { data, error } = await sb
       .from("profiles")
       .select("id,full_name,phone,birth_date,gender,budget_range,created_at")
@@ -236,7 +237,7 @@ export const listHumanDirectoryFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<HumanDirectoryState> => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = context.supabase as any;
+    const sb = asDynamic(context.supabase);
     const [{ data: profs, error: e1 }, { data: rels, error: e2 }] = await Promise.all([
       sb.from("profiles")
         .select("id,full_name,phone,governorate,created_at")

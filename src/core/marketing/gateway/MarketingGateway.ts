@@ -7,6 +7,7 @@
  *   • Returns a single typed VM for the inactivity nudger.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
@@ -26,17 +27,17 @@ export const MarketingGateway = {
    */
   async getInactivityPick(userId: string | null): Promise<InactivityPickVM | null> {
     
-    const sb = supabase as any;
+    const sb = dynamicSb;
 
     let category: string | null = null;
     if (userId) {
-      const { data } = await sb.rpc("category_affinity", { _user_id: userId });
+      const { data } = await sb.rpc<Array<{ category: string | null }>>("category_affinity", { _user_id: userId });
       const top = (data ?? [])[0];
       category = top?.category ?? null;
     }
 
     const { data: sale } = await sb
-      .from("flash_sales")
+      .from<{ id: string }>("flash_sales")
       .select("id")
       .eq("is_active", true)
       .order("starts_at", { ascending: false })
@@ -47,7 +48,7 @@ export const MarketingGateway = {
     const { data: items } = await sb
       .from("flash_sale_products")
       .select("product_id,product_name,discount_pct,category")
-      .eq("flash_sale_id", sale.id)
+      .eq("flash_sale_id", (sale as { id: string }).id)
       .order("rank")
       .limit(5);
 
@@ -168,7 +169,7 @@ export const MarketingGateway = {
     error: { message: string } | null;
   }> {
     
-    const sb = supabase as any;
+    const sb = dynamicSb;
     const { data, error } = await sb
       .from("offers_matrix")
       .select("*")
