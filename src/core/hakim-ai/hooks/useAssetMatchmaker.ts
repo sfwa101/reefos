@@ -4,7 +4,7 @@
  * Pipeline: text → generate_embedding edge fn → match_universal_asset RPC.
  */
 import { useCallback, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export interface MatchedAsset {
   id: string;
@@ -33,18 +33,15 @@ export function useAssetMatchmaker() {
         const text = [name, description ?? ""].filter(Boolean).join(" — ").trim();
         if (!text) return { matches: [], embedding: null };
 
-        const { data: embedRes, error: embedErr } = await supabase.functions.invoke(
-          "generate_embedding",
-          { body: { text } },
-        );
+        const { data: embedRes, error: embedErr } =
+          await HakimGateway.invokeGenerateEmbedding(text);
         if (embedErr) throw new Error(embedErr.message ?? "embedding_failed");
         const embedding: number[] | undefined = embedRes?.embedding;
         if (!embedding) throw new Error("no_embedding_returned");
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const { data, error: rpcErr } = await (supabase.rpc as any)(
-          "match_universal_asset",
-          { p_embedding: embedding, p_threshold: threshold },
+        const { data, error: rpcErr } = await HakimGateway.matchUniversalAsset(
+          embedding,
+          threshold,
         );
         if (rpcErr) throw new Error(rpcErr.message ?? "match_rpc_failed");
 

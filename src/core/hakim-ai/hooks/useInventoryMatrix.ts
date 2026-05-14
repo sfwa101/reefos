@@ -4,7 +4,7 @@
  */
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export interface InventoryRow {
   id: string;
@@ -20,13 +20,9 @@ export function useInventoryMatrix(skuId: string | undefined) {
     queryKey: ["salsabil_inventory", skuId],
     enabled: !!skuId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("salsabil_inventory_matrix")
-        .select("*")
-        .eq("sku_id", skuId!)
-        .order("updated_at", { ascending: false });
+      const { data, error } = await HakimGateway.listInventoryMatrix(skuId!);
       if (error) throw error;
-      return (data ?? []) as InventoryRow[];
+      return data as InventoryRow[];
     },
   });
 }
@@ -42,12 +38,11 @@ export function useUpdateInventory() {
   const qc = useQueryClient();
   return useMutation<string, Error, UpsertInventoryInput>({
     mutationFn: async ({ sku_id, location_id, inventory_type = "count", availability }: UpsertInventoryInput) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("upsert_inventory_matrix", {
-        p_sku_id: sku_id,
-        p_location_id: location_id,
-        p_inventory_type: inventory_type,
-        p_availability: availability,
+      const { data, error } = await HakimGateway.upsertInventoryMatrix({
+        sku_id,
+        location_id,
+        inventory_type,
+        availability,
       });
       if (error) throw new Error(error.message ?? "inventory_upsert_failed");
       return String(data);

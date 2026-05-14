@@ -6,7 +6,7 @@
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 import { tenantQueryKey } from "@/lib/tenantScope";
 
 export interface UpdateUSAInput {
@@ -20,12 +20,11 @@ export function useUpdateUSA() {
   const qc = useQueryClient();
   return useMutation<string, Error, UpdateUSAInput>({
     mutationFn: async ({ asset_id, name, description, base_price }) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase.rpc as any)("update_universal_asset", {
-        p_asset_id: asset_id,
-        p_name: name,
-        p_description: description,
-        p_base_price: base_price,
+      const { data, error } = await HakimGateway.updateUniversalAsset({
+        asset_id,
+        name,
+        description,
+        base_price,
       });
       if (error) throw new Error(error.message ?? "update_failed");
       return String(data);

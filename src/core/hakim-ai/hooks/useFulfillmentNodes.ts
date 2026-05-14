@@ -4,7 +4,7 @@
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export type FulfillmentStatus = "pending" | "preparing" | "prepared" | "shipped" | "delivered" | "cancelled";
 
@@ -12,13 +12,7 @@ export function useUpdateFulfillmentStatus() {
   const qc = useQueryClient();
   return useMutation<string, Error, { node_id: string; status: FulfillmentStatus }>({
     mutationFn: async ({ node_id, status }) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { data, error } = await (supabase as any)
-        .from("salsabil_fulfillment_nodes")
-        .update({ status })
-        .eq("id", node_id)
-        .select("id")
-        .single();
+      const { data, error } = await HakimGateway.updateFulfillmentNodeStatus(node_id, status);
       if (error) throw new Error(error.message);
       return String(data.id);
     },

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 import { emitSalsabilEvent } from "@/core/events";
 
 /**
@@ -37,18 +37,14 @@ async function report(
   source = "edge_worker",
   fingerprint?: string,
 ) {
-  try {
-    await (supabase.rpc as any)("report_anomaly", {
-      _type: type,
-      _severity: severity,
-      _description: description.slice(0, 500),
-      _payload: payload,
-      _source: source,
-      _fingerprint: fingerprint ?? null,
-    });
-  } catch {
-    /* swallow — never break the host app from telemetry */
-  }
+  await HakimGateway.reportAnomaly({
+    type,
+    severity,
+    description,
+    payload,
+    source,
+    fingerprint: fingerprint ?? null,
+  });
 }
 
 let globalPatched = false;
