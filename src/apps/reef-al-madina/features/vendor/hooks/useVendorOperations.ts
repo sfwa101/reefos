@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
@@ -58,11 +58,11 @@ export function useVendorOperations() {
       return;
     }
     if (!user) { setVendorIds([]); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("user_vendor_ids", { _user_id: user.id }).then(({ data, error }: { data: string[]; error: { message: string } | null }) => {
-      if (error) { setError(error.message); return; }
-      setVendorIds(data ?? []);
-    });
+    VendorGateway.getUserVendorIds(user.id)
+      .then((data) => setVendorIds(data ?? []))
+      .catch((err: { message?: string }) => {
+        if (err?.message) setError(err.message);
+      });
   }, [user]);
 
   const refreshProducts = useCallback(async () => {
@@ -71,21 +71,14 @@ export function useVendorOperations() {
     // The vendor cockpit now reads from salsabil_assets ➜ skus ➜ contracts/inventory
     // (vendor_id scoping at the asset level is a future phase; for now we expose
     // the active catalog so vendors can see/edit stock + price on Sovereign rows).
-    const { data, error } = await supabase
-      .from("salsabil_assets")
-      .select(`
-        id, name, category_path, media,
-        salsabil_skus (
-          id, sort_order, is_active,
-          salsabil_financial_contracts ( base_price ),
-          salsabil_inventory_matrix ( availability_data )
-        )
-      `)
-      .eq("is_active", true)
-      .eq("asset_type", "physical")
-      .order("name")
-      .limit(500);
-    if (error) { setError(error.message); return; }
+    let data: unknown[];
+    try {
+      data = await VendorGateway.listSovereignAssetsCatalog();
+    } catch (err) {
+      const e = err as { message?: string };
+      if (e?.message) setError(e.message);
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows: VendorProduct[] = ((data ?? []) as any[]).map((a) => {
       const skus = (a.salsabil_skus ?? []).slice().sort(
@@ -121,24 +114,17 @@ export function useVendorOperations() {
   const refreshLiveItems = useCallback(async () => {
     if (vendorIds.length === 0) { setItems([]); return; }
     // Sovereign read: vendor's fulfillment nodes ➜ items ➜ sku ➜ asset.
-    const { data, error } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select(`
-        id, status, vendor_id, master_order_id, created_at,
-        salsabil_master_orders!salsabil_fulfillment_nodes_master_fk ( delivery_info ),
-        salsabil_fulfillment_items (
-          id, quantity, price_at_time, created_at,
-          salsabil_skus (
-            id,
-            salsabil_assets ( id, name, media )
-          )
-        )
-      `)
-      .in("vendor_id", vendorIds)
-      .in("status", Array.from(ACTIVE_NODE_STATUSES))
-      .order("created_at", { ascending: false })
-      .limit(80);
-    if (error) { setError(error.message); return; }
+    let data: unknown[];
+    try {
+      data = await VendorGateway.listVendorLiveFulfillmentNodes(
+        vendorIds,
+        Array.from(ACTIVE_NODE_STATUSES),
+      );
+    } catch (err) {
+      const e = err as { message?: string };
+      if (e?.message) setError(e.message);
+      return;
+    }
 
     const rows: VendorLiveOrderItem[] = [];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -188,9 +174,8 @@ export function useVendorOperations() {
   // Realtime subscriptions — bound to Sovereign tables.
   useEffect(() => {
     if (vendorIds.length === 0) return;
-    const ch = supabase
-      .channel(`vendor-ops-${vendorIds.join("-")}`)
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" }, (payload) => {
+    const ch = VendorGateway.subscribeVendorOps(vendorIds, {
+      onFulfillmentNode: (payload) => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const row = (payload.new ?? payload.old) as any;
         if (!row?.vendor_id || !vendorIds.includes(row.vendor_id)) return;
@@ -198,37 +183,22 @@ export function useVendorOperations() {
         if (payload.eventType === "INSERT") {
           toast.success("طلب سيادي جديد لمتجرك");
         }
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_fulfillment_items" }, () => {
-        refreshLiveItems();
-      })
-      // Phase 15.3 — Sovereign realtime: stock and price updates flow through
-      // the Decentralized Matrix and Financial Contracts, not the dead `products` shim.
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_inventory_matrix" }, () => {
-        refreshProducts();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "salsabil_financial_contracts" }, () => {
-        refreshProducts();
-      })
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+      },
+      onFulfillmentItem: () => { refreshLiveItems(); },
+      onInventory: () => { refreshProducts(); },
+      onFinancialContract: () => { refreshProducts(); },
+    });
+    return () => { ch.unsubscribe(); };
   }, [vendorIds, refreshLiveItems, refreshProducts]);
 
   /** Phase 15.1 — Sovereign stock writes. `productId` here is a SKU id;
    *  we upsert the inventory row on `salsabil_inventory_matrix` keyed by sku_id. */
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from("salsabil_inventory_matrix")
-      .upsert(
-        {
-          sku_id: productId,
-          inventory_type: "stock",
-          availability_data: { stock: newQty, is_active: isActive },
-        },
-        { onConflict: "sku_id" },
-      );
+    const { error } = await VendorGateway.upsertSkuInventory(productId, {
+      stock: newQty,
+      is_active: isActive,
+    });
     if (error) {
       toast.error("تعذّر تحديث المخزون", { description: error.message });
       await refreshProducts();

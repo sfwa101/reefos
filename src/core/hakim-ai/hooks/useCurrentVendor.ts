@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { useAuth } from "@/context/AuthContext";
 
 export type VendorProfile = {
@@ -26,20 +26,9 @@ export function useCurrentVendor() {
     queryKey: ["current-vendor", user?.id],
     enabled: !!user?.id,
     queryFn: async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data, error } = await sb
-        .from("salsabil_vendor_members")
-        .select("role, vendor:salsabil_vendors!inner(id, business_name, logo_url, is_active, created_at)")
-        .eq("user_id", user!.id)
-        .eq("vendor.is_active", true)
-        .order("created_at", { ascending: true })
-        .limit(1)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (!data?.vendor) return null;
-      return { vendor: data.vendor as VendorProfile, role: data.role as string };
+      const data = await VendorGateway.getCurrentVendorMembership(user!.id);
+      if (!data) return null;
+      return { vendor: data.vendor as VendorProfile, role: data.role };
     },
   });
 }

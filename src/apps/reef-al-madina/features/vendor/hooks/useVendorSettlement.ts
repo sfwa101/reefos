@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 
 export type VendorWalletRow = {
   vendor_id: string;
@@ -55,31 +55,17 @@ export const useVendorSettlement = () => {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const sb = supabase as any;
-    const [w, l, r] = await Promise.all([
-      sb
-        .from("vendor_wallets")
-        .select("*, vendors(name)"),
-      sb
-        .from("vendor_wallet_transactions")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(80),
-      sb
-        .from("vendor_payout_requests")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(20),
-    ]);
+    const { wallets: w, ledger: l, requests: r } =
+      await VendorGateway.loadSettlementSnapshot();
 
     setWallets(
-      (w.data ?? []).map((row: any) => ({
+      (w ?? []).map((row: any) => ({
         ...row,
         vendor_name: row.vendors?.name ?? null,
-      })),
+      })) as VendorWalletRow[],
     );
-    setLedger(l.data ?? []);
-    setRequests(r.data ?? []);
+    setLedger((l ?? []) as unknown as VendorLedgerRow[]);
+    setRequests((r ?? []) as unknown as VendorPayoutRequestRow[]);
     setLoading(false);
   }, []);
 
@@ -108,15 +94,12 @@ export const useVendorSettlement = () => {
     ) => {
       setSubmitting(true);
       try {
-        const { data, error } = await (supabase.rpc as any)(
-          "request_vendor_payout",
-          {
-            _vendor_id: vendorId,
-            _amount: amount,
-            _method: method,
-            _bank_details: bankDetails ?? {},
-          },
-        );
+        const { data, error } = await VendorGateway.requestVendorPayout({
+          vendorId,
+          amount,
+          method,
+          bankDetails: bankDetails ?? {},
+        });
         if (error) throw error;
         await refresh();
         return { ok: true, data };
