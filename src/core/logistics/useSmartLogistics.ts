@@ -8,7 +8,7 @@
  * the LocationContext — no UI rewrite required.
  */
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
 import type { DeliveryZone } from "@/lib/geoZones";
 
 export type ZoneOpsMetrics = {
