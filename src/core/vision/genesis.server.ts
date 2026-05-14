@@ -266,7 +266,7 @@ async function callOpenAICompatible(opts: {
       text: `حلّل ${secondary ? "الصورتين معاً" : "هذه الصورة"} واستخرج الـ Product DNA الكامل. ${hint ? `سياق إضافي: ${hint}` : ""}`,
     },
     { type: "image_url", image_url: { url: primary } },
-    ...(secondary ? [{ type: "image_url", image_url: { url: secondary } }] : []),
+    ...(secondary ? [{ type: "image_url" as const, image_url: { url: secondary } }] : []),
   ];
   const payload = {
     model,
