@@ -394,4 +394,140 @@ export const FinanceGateway = {
   updateProfileHideBalanceFireAndForget(userId: string, value: boolean) {
     sb.from("profiles").update({ hide_balance: value }).eq("id", userId);
   },
+
+  // ============= Finance UI residuals (Sub-Wave 10) =============
+
+  async requestUserPayout(input: {
+    amount: number;
+    method: string;
+    bankDetails: { account: string; holder: string };
+  }) {
+    const { data, error } = await rpc("request_user_payout", {
+      _amount: input.amount,
+      _method: input.method,
+      _bank_details: input.bankDetails,
+    });
+    return { data, error };
+  },
+
+  async listUserVaults(userId: string) {
+    const { data } = await sb
+      .from("wallet_vaults")
+      .select("id,name,icon,target_amount,current_balance,locked_until")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false });
+    return (data ?? []) as Array<Record<string, unknown>>;
+  },
+
+  async listUserVaultBalances(userId: string) {
+    const { data } = await sb
+      .from("wallet_vaults")
+      .select("current_balance")
+      .eq("user_id", userId);
+    return (data ?? []) as Array<{ current_balance: number }>;
+  },
+
+  async listUserGameyaMembershipsWithCircles(userId: string) {
+    const { data } = await sb
+      .from("gam_eya_members")
+      .select("turn_number, gam_eyas(cycle_amount, max_members, current_cycle_index, status)")
+      .eq("user_id", userId);
+    return (data ?? []) as Array<Record<string, unknown>>;
+  },
+
+  async createGameya(input: {
+    name: string;
+    cycleAmount: number;
+    maxMembers: number;
+    cycleDurationMonths: number;
+  }) {
+    const { data, error } = await rpc("create_gam_eya", {
+      _name: input.name,
+      _cycle_amount: input.cycleAmount,
+      _max_members: input.maxMembers,
+      _cycle_duration_months: input.cycleDurationMonths,
+    });
+    return { data, error };
+  },
+
+  async joinGameya(input: { circleId: string; turnNumber: number }) {
+    const { error } = await rpc("join_gam_eya", {
+      _circle_id: input.circleId,
+      _turn_number: input.turnNumber,
+    });
+    return { error };
+  },
+
+  async processSavingsJarOp(input: {
+    amount: number;
+    kind: "deposit" | "withdraw" | "settings";
+    label: string;
+    idempotencyKey: string;
+    settings: Record<string, unknown> | null;
+  }) {
+    const { error } = await rpc("process_savings_jar_op", {
+      p_amount: input.amount,
+      p_kind: input.kind,
+      p_label: input.label,
+      p_idempotency_key: input.idempotencyKey,
+      p_settings: input.settings as never,
+    });
+    return { error };
+  },
+
+  async upsertCategoryBudget(input: {
+    userId: string;
+    category: string;
+    monthlyLimit: number;
+  }) {
+    return sb
+      .from("category_budgets")
+      .upsert(
+        { user_id: input.userId, category: input.category, monthly_limit: input.monthlyLimit },
+        { onConflict: "user_id,category" },
+      );
+  },
+
+  async deleteCategoryBudget(input: { userId: string; category: string }) {
+    return sb
+      .from("category_budgets")
+      .delete()
+      .eq("user_id", input.userId)
+      .eq("category", input.category);
+  },
+
+  async listActiveCharityCampaigns() {
+    const { data, error } = await sb
+      .from("charity_campaigns")
+      .select(
+        "id,auditor_id,title,description,cover_url,target_amount,current_amount,restricted_categories,is_active,ends_at,created_at",
+      )
+      .eq("is_active", true)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return (data ?? []) as Array<Record<string, unknown>>;
+  },
+
+  async donateToCampaign(input: {
+    campaignId: string | null;
+    amount: number;
+    source: "direct" | "general_pool";
+  }) {
+    const { data, error } = await rpc("donate_to_campaign", {
+      _campaign_id: input.campaignId as unknown as string,
+      _amount: input.amount,
+      _source: input.source,
+    });
+    return { data, error };
+  },
+
+  async getWalletBalanceByUserId(userId: string) {
+    const { data } = await sb
+      .from("wallet_balances")
+      .select("balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+    return Number((data as { balance?: number } | null)?.balance ?? 0);
+  },
 };
+
