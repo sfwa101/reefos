@@ -32,7 +32,7 @@ import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 import { SovereignSpiritBootstrap } from "@/core/spirit/SovereignSpiritBootstrap";
 import { MaintenanceGate } from "@/components/system/MaintenanceGate";
 import { SovereignDormancyOverlay } from "@/core/spirit/SovereignDormancyOverlay";
-import { TenantProvider } from "@/context/TenantContext";
+
 import { BackgroundSyncManager } from "@/hooks/useBackgroundSyncManager";
 // Wave P-0 — DEV-only Constitution Article 3 watchdog (no-op in prod).
 import "@/core/runtime-ui/watchdog.bootstrap";
