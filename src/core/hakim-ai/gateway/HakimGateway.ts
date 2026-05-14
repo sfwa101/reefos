@@ -243,7 +243,7 @@ export const HakimGateway = {
         _description: input.description.slice(0, 500),
         _payload: input.payload as never,
         _source: input.source,
-        _fingerprint: input.fingerprint,
+        _fingerprint: input.fingerprint ?? undefined,
       });
     } catch {
       /* swallow — telemetry must never break host */
