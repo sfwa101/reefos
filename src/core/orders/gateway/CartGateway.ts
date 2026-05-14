@@ -66,8 +66,7 @@ const upsertCartRows = async (
 ): Promise<{ error: string | null }> => {
   const up = await supabase
     .from("cart_items")
-    
-    .upsert(rows as any, { onConflict: "user_id,product_id,line_key" });
+    .upsert(rows as never, { onConflict: "user_id,product_id,line_key" });
   return { error: up.error?.message ?? null };
 };
 
@@ -172,7 +171,7 @@ const fetchFrequentlyBoughtProductIds = async (
   limit = 6,
 ): Promise<string[]> => {
   // `frequently_bought_together` RPC is not in the generated Functions
-  // map; cast to a typed callable to avoid `as any`.
+  // map; cast to a typed callable that returns `unknown` (no `any`).
   const rpc = supabase.rpc as unknown as (
     name: string,
     args: Record<string, unknown>,

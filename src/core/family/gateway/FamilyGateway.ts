@@ -92,8 +92,12 @@ export const FamilyGateway = {
       .select("group_id, user_id, role, joined_at")
       .eq("group_id", myMemb.group_id);
 
-    
-    const userIds: string[] = (rawMembers ?? []).map((m: any) => m.user_id);
+    type RawMember = { group_id: string; user_id: string; role: FamilyRole; joined_at: string };
+    type ProfileRow = { user_id: string; full_name: string | null; short_id: string | null };
+    type WalletLookupRow = { user_id: string; id: string };
+
+    const rawMembersTyped = (rawMembers ?? []) as unknown as RawMember[];
+    const userIds: string[] = rawMembersTyped.map((m) => m.user_id);
     const idsForLookup = userIds.length ? userIds : [NIL];
 
     const [{ data: profiles }, { data: walletsRows }] = await Promise.all([
@@ -101,15 +105,15 @@ export const FamilyGateway = {
       sb.from("wallets").select("id, user_id").eq("currency", "EGP").in("user_id", idsForLookup),
     ]);
 
-    
-    const profileMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
-    
-    const walletMap = new Map((walletsRows ?? []).map((w: any) => [w.user_id, w.id]));
+    const profileMap = new Map(
+      ((profiles ?? []) as unknown as ProfileRow[]).map((p) => [p.user_id, p] as const),
+    );
+    const walletMap = new Map(
+      ((walletsRows ?? []) as unknown as WalletLookupRow[]).map((w) => [w.user_id, w.id] as const),
+    );
 
-    
-    const members: FamilyMemberVM[] = (rawMembers ?? []).map((m: any) => {
-      
-      const p = profileMap.get(m.user_id) as any;
+    const members: FamilyMemberVM[] = rawMembersTyped.map((m) => {
+      const p = profileMap.get(m.user_id);
       return {
         group_id: m.group_id,
         user_id: m.user_id,
@@ -117,7 +121,7 @@ export const FamilyGateway = {
         joined_at: m.joined_at,
         full_name: p?.full_name ?? null,
         short_id: p?.short_id ?? null,
-        wallet_id: (walletMap.get(m.user_id) as string | undefined) ?? null,
+        wallet_id: walletMap.get(m.user_id) ?? null,
       };
     });
 

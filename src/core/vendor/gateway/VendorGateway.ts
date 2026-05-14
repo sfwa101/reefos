@@ -83,13 +83,27 @@ export const VendorGateway = {
       .order("updated_at", { ascending: false });
     if (error) throw error;
     
-    return ((data ?? []) as any[]).map((r): VendorInventoryRowVM => {
+    type ContractRow = { is_active: boolean; valid_from: string; base_price: number; currency: string };
+    type InvRow = {
+      id: string;
+      sku_id: string;
+      updated_at: string;
+      availability_data?: Record<string, unknown> | null;
+      sku?: {
+        sku_code?: string | null;
+        asset?: {
+          id?: string;
+          name?: string | null;
+          description?: string | null;
+          salsabil_financial_contracts?: ContractRow[];
+        } | null;
+      } | null;
+    };
+    return ((data ?? []) as unknown as InvRow[]).map((r): VendorInventoryRowVM => {
       const av = (r.availability_data ?? {}) as Record<string, unknown>;
       const contracts = (r.sku?.asset?.salsabil_financial_contracts ?? [])
-        
-        .filter((c: any) => c.is_active)
-        
-        .sort((a: any, b: any) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime());
+        .filter((c) => c.is_active)
+        .sort((a, b) => new Date(b.valid_from).getTime() - new Date(a.valid_from).getTime());
       const active = contracts[0];
       return {
         id: r.id,

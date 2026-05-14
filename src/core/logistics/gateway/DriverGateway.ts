@@ -8,8 +8,8 @@
  *   • Hooks consume typed methods + GatewayChannel handles. UI never imports
  *     the Supabase client for these tables.
  *
- * NOTE: pre-existing `as any` / inline payload casts are preserved verbatim
- * pending Wave P-7 (Type Sovereignty).
+ * Wave P-13: JSONB patch payloads use `as never` to satisfy the generated
+ * row typing without resorting to `any`.
  */
 import { supabase } from "@/integrations/supabase/client";
 
@@ -60,8 +60,7 @@ export const DriverGateway = {
   ): Promise<{ error: { message: string } | null }> {
     const { error } = await supabase
       .from("salsabil_fulfillment_nodes")
-      
-      .update(patch as any)
+      .update(patch as never)
       .eq("id", nodeId);
     return { error: error ? { message: error.message } : null };
   },

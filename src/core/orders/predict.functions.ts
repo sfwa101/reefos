@@ -7,14 +7,37 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyJson = any;
+type FreqRow = {
+  product_id: string;
+  qty_total?: number | null;
+  order_count?: number | null;
+  last_ordered_at?: string | null;
+  avg_interval_days?: number | null;
+};
+
+type ProductRow = {
+  id: string;
+  name: string;
+  unit: string;
+  category: string;
+  price: number | string;
+  image?: string | null;
+  image_url?: string | null;
+};
+
+type AiToolCall = {
+  function?: { arguments?: string };
+};
+
+type AiResponse = {
+  choices?: Array<{ message?: { tool_calls?: AiToolCall[] } }>;
+};
 
 const AI_GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const sb = supabaseAdmin as any;
+const sb = asDynamic(supabaseAdmin);
 
 export const predictBasketFn = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -23,13 +46,15 @@ export const predictBasketFn = createServerFn({ method: "POST" })
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
     if (!LOVABLE_API_KEY) return { error: "ai_error" as const };
 
-    const { data: freqRows, error: freqErr } = await sb
-      .from("user_product_frequency")
+    const freqRes = await sb
+      .from<FreqRow[]>("user_product_frequency")
       .select("product_id, qty_total, order_count, last_ordered_at, avg_interval_days")
       .eq("user_id", userId)
       .order("qty_total", { ascending: false })
       .order("last_ordered_at", { ascending: false })
       .limit(30);
+    const freqRows = (freqRes.data ?? []) as FreqRow[];
+    const freqErr = freqRes.error;
 
     const empty = {
       ok: true as const,
@@ -44,9 +69,9 @@ export const predictBasketFn = createServerFn({ method: "POST" })
       if (code === "PGRST205" || code === "42P01") return empty;
       return { error: "freq_query_failed" as const };
     }
-    if (!freqRows || freqRows.length === 0) return empty;
+    if (freqRows.length === 0) return empty;
 
-    const productIds = (freqRows as Array<{ product_id: string }>).map((r) => r.product_id);
+    const productIds = freqRows.map((r) => r.product_id);
     const { data: products, error: prodErr } = await sb
       .from("products")
       .select("id,name,price,unit,category,image,image_url")
@@ -59,8 +84,10 @@ export const predictBasketFn = createServerFn({ method: "POST" })
       return { error: "products_query_failed" as const };
     }
 
-    const productById = new Map(((products ?? []) as AnyJson[]).map((p) => [p.id, p] as const));
-    const candidates = (freqRows as AnyJson[])
+    const productsTyped = ((products ?? []) as unknown) as ProductRow[];
+    const freqTyped = freqRows;
+    const productById = new Map(productsTyped.map((p) => [p.id, p] as const));
+    const candidates = freqTyped
       .filter((r) => productById.has(r.product_id))
       .map((r) => {
         const p = productById.get(r.product_id)!;
@@ -130,7 +157,7 @@ export const predictBasketFn = createServerFn({ method: "POST" })
     if (aiRes.status === 402) return { error: "credits_exhausted" as const };
     if (!aiRes.ok) return { error: "ai_error" as const };
 
-    const aiData = (await aiRes.json()) as AnyJson;
+    const aiData = (await aiRes.json()) as AiResponse;
     const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
     let parsed: {
       headline?: string;

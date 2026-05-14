@@ -118,8 +118,14 @@ export const OrderGateway = {
       `)
       .eq("node_id", nodeId);
     if (error || !data) return [];
-    
-    return (data as any[]).map((r): VendorNodeItemVM => ({
+    type ItemRow = {
+      id: string;
+      sku_id: string;
+      quantity: number;
+      price_at_time: number | string;
+      sku?: { sku_code?: string | null; asset?: { name?: string | null } | null } | null;
+    };
+    return (data as unknown as ItemRow[]).map((r): VendorNodeItemVM => ({
       id: r.id,
       sku_id: r.sku_id,
       quantity: r.quantity,
@@ -141,16 +147,15 @@ export const OrderGateway = {
     const channel = supabase
       .channel(`vendor-fulfillment-${vendorId}`)
       .on(
-        
-        "postgres_changes" as any,
+        "postgres_changes" as never,
         {
           event: "*",
           schema: "public",
           table: "salsabil_fulfillment_nodes",
           filter: `vendor_id=eq.${vendorId}`,
         },
-        
-        (payload: any) => onEvent({ eventType: payload.eventType }),
+        (payload: { eventType?: "INSERT" | "UPDATE" | "DELETE" }) =>
+          onEvent({ eventType: payload.eventType ?? "UPDATE" }),
       )
       .subscribe();
     return () => {
