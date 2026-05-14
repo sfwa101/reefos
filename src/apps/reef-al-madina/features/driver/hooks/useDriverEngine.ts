@@ -14,7 +14,7 @@
  * which atomically writes the vendor's settlement row.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { DriverGateway } from "@/core/logistics/gateway/DriverGateway";
 import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
@@ -159,12 +159,7 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: drv } = await supabase
-      .from("drivers")
-      .select("id")
-      .eq("user_id", uid)
-      .maybeSingle();
-    const id = (drv?.id as string | undefined) ?? null;
+    const id = await DriverGateway.getDriverIdForUser(uid);
     setDriverId(id);
 
     if (!id) {
@@ -174,14 +169,10 @@ export const useDriverEngine = (): DriverEngine => {
       return;
     }
 
-    const { data: nodes } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select("id,master_order_id,status,total_amount,delivery_snapshot,assigned_at,picked_up_at,delivered_at")
-      .eq("driver_id", id)
-      .in("status", ACTIVE_STATUSES as unknown as string[])
-      .order("assigned_at", { ascending: false, nullsFirst: false });
-
-    const list = (nodes ?? []) as Record<string, unknown>[];
+    const list = await DriverGateway.listActiveDriverNodes(
+      id,
+      ACTIVE_STATUSES as unknown as string[],
+    );
     const taskList: DriverTask[] = [];
     const orderMap: Record<string, OrderInfo> = {};
     for (const n of list) {
@@ -196,12 +187,8 @@ export const useDriverEngine = (): DriverEngine => {
 
   /* ─── surge zones from geo_zones ─── */
   const loadSurge = useCallback(async () => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await (supabase as any)
-      .from("geo_zones")
-      .select("zone_code,name,current_load_factor,surge_active")
-      .eq("is_active", true);
-    setSurgeZones(((data ?? []) as SurgeZone[]).filter((z) => z.surge_active));
+    const data = await DriverGateway.listActiveGeoZones();
+    setSurgeZones(((data ?? []) as unknown as SurgeZone[]).filter((z) => z.surge_active));
   }, []);
 
   /* ─── boot + realtime subscriptions on Sovereign Matrix ─── */
@@ -209,42 +196,22 @@ export const useDriverEngine = (): DriverEngine => {
     load();
     loadSurge();
 
-    if (!driverId) {
-      // first load resolves driverId; the next effect run will subscribe.
-    }
+    const nodesChannel = DriverGateway.subscribeDriverNodes(driverId, (payload) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const n = (payload.new ?? {}) as any;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const o = (payload.old ?? {}) as any;
+      if (n?.status === "delivered" && o?.status !== "delivered") {
+        deliveredTodayRef.current += 1;
+      }
+      load();
+    });
 
-    const nodesChannel = supabase
-      .channel(`driver-engine-nodes${driverId ? `-${driverId}` : ""}`)
-      .on(
-        "postgres_changes",
-        driverId
-          ? { event: "*", schema: "public", table: "salsabil_fulfillment_nodes", filter: `driver_id=eq.${driverId}` }
-          : { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-        (payload) => {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const n = (payload.new ?? {}) as any;
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const o = (payload.old ?? {}) as any;
-          if (n?.status === "delivered" && o?.status !== "delivered") {
-            deliveredTodayRef.current += 1;
-          }
-          load();
-        },
-      )
-      .subscribe();
-
-    const zonesCh = supabase
-      .channel("driver-engine-zones")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "geo_zones" },
-        () => loadSurge(),
-      )
-      .subscribe();
+    const zonesCh = DriverGateway.subscribeGeoZones(() => loadSurge());
 
     return () => {
-      supabase.removeChannel(nodesChannel);
-      supabase.removeChannel(zonesCh);
+      nodesChannel.unsubscribe();
+      zonesCh.unsubscribe();
     };
   }, [load, loadSurge, driverId]);
 
@@ -284,10 +251,7 @@ export const useDriverEngine = (): DriverEngine => {
         }
       }
 
-      const { error } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .update(patch)
-        .eq("id", nodeId);
+      const { error } = await DriverGateway.updateFulfillmentNode(nodeId, patch);
       setBusyTaskId(null);
 
       if (error) {
@@ -344,10 +308,7 @@ export const useDriverEngine = (): DriverEngine => {
         patch.dropoff_lng = gps.lng;
       }
 
-      const { error } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .update(patch)
-        .eq("id", task.id);
+      const { error } = await DriverGateway.updateFulfillmentNode(task.id, patch);
       setBusyTaskId(null);
 
       if (error) {

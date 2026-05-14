@@ -10,7 +10,7 @@
  * appears immediately in the driver surface.
  */
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { DriverGateway } from "@/core/logistics/gateway/DriverGateway";
 import { IdentityGateway } from "@/core/identity";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -47,12 +47,8 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     (async () => {
       const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) return;
-      const { data } = await supabase
-        .from("drivers")
-        .select("id")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (!cancelled) setDriverId((data?.id as string | undefined) ?? null);
+      const id = await DriverGateway.getDriverIdForUser(uid);
+      if (!cancelled) setDriverId(id);
     })();
     return () => {
       cancelled = true;
@@ -64,39 +60,19 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     enabled: !!driverId,
     refetchInterval: 15_000,
     queryFn: async (): Promise<DispatchOffer[]> => {
-      const nowIso = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("salsabil_dispatch_offers")
-        .select("id,node_id,driver_id,status,expires_at,created_at")
-        .eq("driver_id", driverId!)
-        .eq("status", "pending")
-        .gt("expires_at", nowIso)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as DispatchOffer[];
+      const data = await DriverGateway.listPendingDispatchOffers(driverId!);
+      return (data ?? []) as unknown as DispatchOffer[];
     },
   });
 
   // Realtime subscription on offers for this driver
   useEffect(() => {
     if (!driverId) return;
-    const ch = supabase
-      .channel(`dispatch-radar-${driverId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "salsabil_dispatch_offers",
-          filter: `driver_id=eq.${driverId}`,
-        },
-        () => {
-          qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
-        },
-      )
-      .subscribe();
+    const ch = DriverGateway.subscribeDispatchOffers(driverId, () => {
+      qc.invalidateQueries({ queryKey: ["dispatch-radar", driverId] });
+    });
     return () => {
-      supabase.removeChannel(ch);
+      ch.unsubscribe();
     };
   }, [driverId, qc]);
 
@@ -120,10 +96,7 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     async (offerId: string): Promise<boolean> => {
       if (!driverId) return false;
       setAccepting(true);
-      const { data, error } = await supabase.rpc("accept_dispatch_offer", {
-        p_offer_id: offerId,
-        p_driver_id: driverId,
-      });
+      const { data, error } = await DriverGateway.acceptDispatchOffer(offerId, driverId);
       setAccepting(false);
       if (error) {
         toast.error(error.message);
