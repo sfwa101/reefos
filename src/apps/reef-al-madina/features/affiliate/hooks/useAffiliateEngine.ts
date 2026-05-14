@@ -100,12 +100,8 @@ function useAffiliateTiersQuery() {
     queryKey: QK.tiers(),
     staleTime: 60 * 60_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("affiliate_tiers")
-        .select("*")
-        .order("rank", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as AffiliateTier[];
+      const data = await MarketingGateway.listAffiliateTiers();
+      return (data ?? []) as unknown as AffiliateTier[];
     },
   });
 }
@@ -116,13 +112,8 @@ function useAffiliateStateQuery(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("user_affiliate_state")
-        .select("*")
-        .eq("user_id", userId!)
-        .maybeSingle();
-      if (error) throw error;
-      return (data ?? null) as AffiliateState | null;
+      const data = await MarketingGateway.getUserAffiliateState(userId!);
+      return (data ?? null) as unknown as AffiliateState | null;
     },
   });
 }
@@ -133,16 +124,8 @@ function useCommissionLedgerQuery(userId: string | undefined) {
     enabled: !!userId,
     staleTime: 30_000,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("commission_ledger")
-        .select(
-          "id, order_id, product_name, category, commission_amount, status, created_at, paid_at, vest_release_at",
-        )
-        .eq("affiliate_user_id", userId!)
-        .order("created_at", { ascending: false })
-        .limit(100);
-      if (error) throw error;
-      return (data ?? []) as CommissionEntry[];
+      const data = await MarketingGateway.listCommissionLedger(userId!, 100);
+      return (data ?? []) as unknown as CommissionEntry[];
     },
   });
 }
