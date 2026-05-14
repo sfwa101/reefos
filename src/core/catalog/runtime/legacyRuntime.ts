@@ -111,7 +111,7 @@ export function bindCatalogSource(client: QueryClient): void {
 
 function snapshot(): Product[] {
   const fromQuery =
-    boundClient?.getQueryData<Product[]>(PRODUCTS_QUERY_KEY) ?? [];
+    boundClient?.getQueryData<Product[]>(PRODUCTS_QUERY_KEY()) ?? [];
   const base = fromQuery.length > 0 ? fromQuery : selfBoundCache;
   if (base.length === 0) {
     // Fire-and-forget — populates `selfBoundCache` for the next render.
