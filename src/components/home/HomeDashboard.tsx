@@ -17,7 +17,7 @@
  */
 import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { logBehavior } from "@/lib/behavior";
+import { logBehavior } from "@/core/events/behavior";
 import { storeThemes } from "@/lib/storeThemes";
 import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";

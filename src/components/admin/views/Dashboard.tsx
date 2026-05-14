@@ -40,7 +40,7 @@ import {
 import { fmtMoney, fmtNum } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminDashboardOverviewFn } from "@/core/finance/finance.functions";
-import { useAdminDashboardRealtime } from "@/hooks/useAdminDashboardRealtime";
+import { useAdminDashboardRealtime } from "@/core/events/hooks/useAdminDashboardRealtime";
 
 const greeting = () => {
   const h = new Date().getHours();

@@ -9,7 +9,7 @@
  */
 import { useCallback, useEffect, useState } from "react";
 import { KdsGateway } from "@/core/kds/gateway/KdsGateway";
-import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
+import { useVisibilitySocket } from "@/core/events/hooks/useVisibilitySocket";
 import { readPrepMeta, type PrepMeta, type PrepStatus } from "../types";
 
 export interface KdsItem {

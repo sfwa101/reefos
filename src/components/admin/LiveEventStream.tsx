@@ -1,6 +1,6 @@
 import { Activity } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useLiveEventStream } from "@/hooks/useLiveEventStream";
+import { useLiveEventStream } from "@/core/events/hooks/useLiveEventStream";
 
 const domainTone: Record<string, string> = {
   order: "bg-primary/10 text-primary",

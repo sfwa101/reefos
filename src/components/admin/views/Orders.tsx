@@ -17,7 +17,7 @@ import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { listMasterOrdersFn, setOrderStatusFn } from "@/core/ops/ops.functions";
-import { useAdminOrdersRealtime } from "@/hooks/useAdminOrdersRealtime";
+import { useAdminOrdersRealtime } from "@/core/events/hooks/useAdminOrdersRealtime";
 
 interface MasterOrderRow {
   id: string;

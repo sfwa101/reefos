@@ -9,7 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bike, User, Loader2, X } from "lucide-react";
 import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
-import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
+import { useVisibilitySocket } from "@/core/events/hooks/useVisibilitySocket";
 
 export const Route = createFileRoute("/_dispatch/dispatch")({
   component: DispatchBoard,

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
-import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
+import { useVisibilitySocket } from "@/core/events/hooks/useVisibilitySocket";
 import { pledgeGroupBuyFn } from "@/core/marketing/group-buy.functions";
 import {
   groupBuyCampaignQueryOptions,

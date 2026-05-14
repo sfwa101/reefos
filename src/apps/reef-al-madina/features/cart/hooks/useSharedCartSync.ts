@@ -12,7 +12,7 @@ import {
   deleteSharedCartItemFn,
 } from "@/core/orders/cart.functions";
 import { useAuth } from "@/context/AuthContext";
-import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
+import { useVisibilitySocket } from "@/core/events/hooks/useVisibilitySocket";
 
 /* ============================================================
  * Phase 6 — Real-Time Shared Carts FSM
