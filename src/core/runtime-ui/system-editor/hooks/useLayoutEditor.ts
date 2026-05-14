@@ -47,12 +47,7 @@ export const useLayoutEditor = (pageKey: string) => {
   const reload = useCallback(async () => {
     setLoading(true);
     // 1) Try draft
-    const draft = await supabase
-      .from("ui_layouts")
-      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-      .eq("page_key", pageKey)
-      .eq("status", "draft")
-      .maybeSingle();
+    const draft = await RuntimeUIGateway.getUiLayoutByStatus(pageKey, "draft");
 
     if (draft.data) {
       setLayout(draft.data as unknown as UiLayout);
@@ -62,12 +57,7 @@ export const useLayoutEditor = (pageKey: string) => {
     }
 
     // 2) Fall back to published as a starting point
-    const pub = await supabase
-      .from("ui_layouts")
-      .select("id,page_key,section_order,section_config,section_titles,is_active,status,version,title")
-      .eq("page_key", pageKey)
-      .eq("status", "published")
-      .maybeSingle();
+    const pub = await RuntimeUIGateway.getUiLayoutByStatus(pageKey, "published");
 
     if (pub.data) {
       setLayout({ ...(pub.data as unknown as UiLayout), status: "draft", id: "new-draft" });
