@@ -43,8 +43,8 @@ export type BentoMetric<TRow = unknown> = {
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?: (rows: readonly TRow[]) => string | number;
-  urgent?: (rows: readonly TRow[]) => boolean;
+  compute?: (rows: TRow[]) => string | number;
+  urgent?: (rows: TRow[]) => boolean;
   to?: string;
 };
 
