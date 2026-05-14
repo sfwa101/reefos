@@ -501,8 +501,7 @@ export const listAssetSkusFn = createServerFn({ method: "GET" })
   });
 
 export const mintUniversalAssetFn = createServerFn({ method: "POST" })
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  .inputValidator((d: { payload: any }) => {
+  .inputValidator((d: { payload: Record<string, unknown> }) => {
     if (!d?.payload || typeof d.payload !== "object") throw new Error("payload_required");
     return { payload: d.payload };
   })

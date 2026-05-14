@@ -227,8 +227,11 @@ export function UniversalAdminGrid<T = any>({
   }, [useServer, dataSource.fetcher]);
 
   // ---- Unified rows ----
-  const rawRows = useMemo<any[]>(() => {
-    if (useServer) return infinite.data?.pages.flatMap((p: any) => p.items) ?? [];
+  const rawRows = useMemo<unknown[]>(() => {
+    if (useServer) {
+      const pages = infinite.data?.pages as Array<{ items: unknown[] }> | undefined;
+      return pages?.flatMap((p) => p.items) ?? [];
+    }
     return clientRows;
   }, [useServer, infinite.data, clientRows]);
 
@@ -242,8 +245,8 @@ export function UniversalAdminGrid<T = any>({
     if (useServer) return mapped;
     if (!debouncedQ || searchKeys.length === 0) return mapped;
     const needle = debouncedQ.toLowerCase();
-    return mapped.filter((row: any) =>
-      searchKeys.some((k) => String(row?.[k] ?? "").toLowerCase().includes(needle)),
+    return mapped.filter((row) =>
+      searchKeys.some((k) => String((row as Record<string, unknown>)?.[k] ?? "").toLowerCase().includes(needle)),
     );
   }, [useServer, mapped, debouncedQ, searchKeys]);
 

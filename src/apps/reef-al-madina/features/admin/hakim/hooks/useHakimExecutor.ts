@@ -24,8 +24,7 @@ export interface HakimBlueprint {
   module_name: string;
   description: string;
   suggested_assets: SuggestedAsset[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sdui_layout: any;
+  sdui_layout: Record<string, unknown> | null;
 }
 
 export interface ExecutionReport {

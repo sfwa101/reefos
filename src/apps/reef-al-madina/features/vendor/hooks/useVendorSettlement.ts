@@ -34,7 +34,7 @@ export type VendorPayoutRequestRow = {
   vendor_id: string;
   amount: number;
   method: "bank_transfer" | "vodafone_cash" | "instapay" | "cash";
-  bank_details: Record<string, any>;
+  bank_details: Record<string, unknown>;
   status: "pending" | "processing" | "completed" | "rejected" | "cancelled";
   rejection_reason: string | null;
   created_at: string;
@@ -58,8 +58,9 @@ export const useVendorSettlement = () => {
     const { wallets: w, ledger: l, requests: r } =
       await VendorGateway.loadSettlementSnapshot();
 
+    type RawWallet = VendorWalletRow & { vendors?: { name?: string | null } | null };
     setWallets(
-      (w ?? []).map((row: any) => ({
+      ((w ?? []) as unknown as RawWallet[]).map((row) => ({
         ...row,
         vendor_name: row.vendors?.name ?? null,
       })) as VendorWalletRow[],
@@ -90,7 +91,7 @@ export const useVendorSettlement = () => {
       vendorId: string,
       amount: number,
       method: VendorPayoutRequestRow["method"],
-      bankDetails: Record<string, any>,
+      bankDetails: Record<string, unknown>,
     ) => {
       setSubmitting(true);
       try {

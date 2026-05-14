@@ -36,10 +36,10 @@ export function useBanners(placement: string = "hero") {
     queryFn: async (): Promise<Banner[]> => {
       const nowIso = new Date().toISOString();
       const data = await MarketingGateway.listBanners(placement);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return ((data ?? []) as any[]).filter(
+      type RawBanner = { starts_at?: string | null; ends_at?: string | null };
+      return ((data ?? []) as RawBanner[]).filter(
         (b) => (!b.starts_at || b.starts_at <= nowIso) && (!b.ends_at || b.ends_at >= nowIso),
-      );
+      ) as unknown as Banner[];
     },
   });
 }
