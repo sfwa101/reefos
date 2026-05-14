@@ -26,24 +26,17 @@ import {
   type ProductVariant,
   type ProductAddon,
 } from "@/core/catalog/legacyProduct.types";
-import { getActiveTenantId } from "@/context/TenantContext";
+import { getWorkspaceIdSync, workspaceQueryKey } from "@/core/identity/workspace";
 
 /**
- * Tenant-scoped catalog cache key. Inlined here (was previously imported
- * from `@/lib/products`) as part of Wave P-B Step B-5 — Hooks & Queries
- * now own their own cache identity instead of leaning on the legacy
- * `@/lib/products` re-export.
- *
- * Kept identical to the legacy tuple shape so `boundClient.getQueryData`
- * lookups in `src/lib/products.ts` keep hitting the same entry while the
- * cart-side bridge is being phased out.
+ * Workspace-scoped catalog cache key. Wave P-7 Batch D — was previously
+ * `["tenant", getActiveTenantId(), "catalog", "products"]`. Now sourced
+ * from the server-attested workspace identity. Exported as a FUNCTION so
+ * the key reflects the live hydrated workspace id at call time (a
+ * module-load const would freeze in the `<unhydrated>` partition).
  */
-export const PRODUCTS_QUERY_KEY = [
-  "tenant",
-  getActiveTenantId(),
-  "catalog",
-  "products",
-] as const;
+export const PRODUCTS_QUERY_KEY = (): ReadonlyArray<unknown> =>
+  workspaceQueryKey("catalog", "products");
 
 // Phase 39 — Catalog SWR window: 5 min fresh, 24 h cached on disk.
 const STALE_MS = 5 * 60 * 1000;
