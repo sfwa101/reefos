@@ -13,6 +13,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { IdentityGateway } from "@/core/identity";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type SharedCartSplitType = "percentage" | "fixed" | "itemized";
 

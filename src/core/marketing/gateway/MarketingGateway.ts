@@ -7,6 +7,7 @@
  *   • Returns a single typed VM for the inactivity nudger.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type GatewayChannel = { unsubscribe: () => void };
 

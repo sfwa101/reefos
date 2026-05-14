@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { runVisionGenesis } from "../genesis.server";
 import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
 import type {
+import { dynamicSb } from "@/integrations/supabase/dynamic";
   InferenceState,
   VisionInferenceTrace,
 } from "../domain/types";

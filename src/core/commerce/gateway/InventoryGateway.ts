@@ -15,6 +15,7 @@
  *  - Diff against existing rows for `baseSkuId` and delete removed drafts.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type InventoryKind = "count" | "capacity" | "time_slots";
 

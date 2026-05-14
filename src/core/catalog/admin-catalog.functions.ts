@@ -5,6 +5,7 @@
 // the `admin` role via the `has_role` security-definer RPC.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 // ---- Types ----------------------------------------------------------------
 export type CategoryRow = {

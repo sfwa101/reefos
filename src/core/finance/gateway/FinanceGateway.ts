@@ -10,6 +10,7 @@
  * keep the network-extraction strictly scoped — flagged for Wave P-7.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type GatewayChannel = { unsubscribe: () => void };
 

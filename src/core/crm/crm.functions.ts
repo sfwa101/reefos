@@ -2,6 +2,7 @@
 // Customer 360 aggregator + admin notification broadcaster, gated by `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { asDynamic } from "@/integrations/supabase/dynamic";
 
 // ---- Types ----------------------------------------------------------------
 export type CrmProfile = {

@@ -13,6 +13,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeAuthoritativeSnapshot } from "./cashier.functions";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 const itemSchema = z.object({
   product_id: z.string().uuid(),

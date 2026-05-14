@@ -18,6 +18,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { installSupabaseUiWatchdog } from "@/core/runtime-ui/watchdog";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 

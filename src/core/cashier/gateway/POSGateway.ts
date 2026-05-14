@@ -13,6 +13,7 @@
  * Tracked for hardening in Wave P-7.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { dynamicSb } from "@/integrations/supabase/dynamic";
 
 export type PosShiftRow = {
   id: string;
