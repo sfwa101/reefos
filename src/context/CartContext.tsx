@@ -106,9 +106,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   // (set this true) opt-in to mergeCarts; INITIAL_SESSION never does.
   const pendingMergeForUidRef = useRef<string | null>(null);
   const pushTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const realtimeChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(
-    null,
-  );
+  const realtimeChannelRef = useRef<GatewayChannel | null>(null);
   const realtimeFetchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
