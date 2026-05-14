@@ -35,20 +35,21 @@ export type BentoTone =
 export type GridRow = Record<string, unknown>;
 
 // NOTE: callbacks below use METHOD SHORTHAND syntax (`compute?(rows): ...`)
-// rather than property+arrow (`compute?: (rows) => ...`). Method shorthand is
-// bivariant in parameter position even under `strictFunctionTypes`, which
-// preserves the public-API ergonomics that allow callers to pass
-// `(rows: MyRow[]) => …` against the kernel-default `unknown[]`. This is the
-// minimum-friction way to remove `any` from the SDUI grid surface while
-// keeping the existing typed-row consumers (Delivery / UsaLedger / Vendor*) green.
+// rather than property+arrow (`compute?: (rows) => ...`). Method shorthand
+// is bivariant in parameter position even under `strictFunctionTypes`,
+// preserving the public-API ergonomics that let callers pass narrowly-typed
+// row callbacks (e.g. `(rows: USARecord[]) => …`) against the kernel default
+// of `GridRow`. This is the minimum-friction way to remove `any` from the
+// SDUI grid surface without forcing every Admin/Vendor view to add explicit
+// generic parameters.
 
-export type BentoMetric = {
+export type BentoMetric<T = GridRow> = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?(rows: unknown[]): string | number;
-  urgent?(rows: unknown[]): boolean;
+  compute?(rows: T[]): string | number;
+  urgent?(rows: T[]): boolean;
   to?: string;
 };
 
@@ -75,7 +76,7 @@ export type DataSource<T = GridRow> = {
   limit?: number;
   fetcher?(): Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?(row: unknown): T;
+  map?(row: GridRow): T;
 };
 
 export type EmptyState = {
@@ -87,7 +88,7 @@ export type EmptyState = {
 export type UniversalAdminGridProps<T = GridRow> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric[];
+  metrics?: BentoMetric<T>[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
   rowKey?(row: T): string;
