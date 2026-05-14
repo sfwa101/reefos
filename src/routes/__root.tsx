@@ -26,6 +26,7 @@ import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
 import { SubdomainGuard } from "@/components/SubdomainGuard";
 
 import { BehaviorTrackerBootstrap } from "@/components/system/BehaviorTrackerBootstrap";
+import { WorkspaceHydrationBootstrap } from "@/core/identity/WorkspaceHydrationBootstrap";
 import { GlobalErrorBoundary } from "@/components/system/GlobalErrorBoundary";
 import { DevOSNavigator } from "@/components/system/DevOSNavigator";
 import { SovereignSpiritBootstrap } from "@/core/spirit/SovereignSpiritBootstrap";
@@ -189,6 +190,7 @@ function RootComponent() {
                           <BackgroundSyncManager />
                           
                           <BehaviorTrackerBootstrap />
+                          <WorkspaceHydrationBootstrap />
                           <SovereignSpiritBootstrap />
                           <SubdomainGuard />
                           <Toaster />
