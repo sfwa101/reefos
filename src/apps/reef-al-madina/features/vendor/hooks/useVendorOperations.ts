@@ -195,17 +195,10 @@ export function useVendorOperations() {
    *  we upsert the inventory row on `salsabil_inventory_matrix` keyed by sku_id. */
   const updateProductStock = useCallback(async (productId: string, newQty: number, isActive: boolean) => {
     setProducts(prev => prev.map(p => p.id === productId ? { ...p, stock: newQty, is_active: isActive } : p));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
-      .from("salsabil_inventory_matrix")
-      .upsert(
-        {
-          sku_id: productId,
-          inventory_type: "stock",
-          availability_data: { stock: newQty, is_active: isActive },
-        },
-        { onConflict: "sku_id" },
-      );
+    const { error } = await VendorGateway.upsertSkuInventory(productId, {
+      stock: newQty,
+      is_active: isActive,
+    });
     if (error) {
       toast.error("تعذّر تحديث المخزون", { description: error.message });
       await refreshProducts();
