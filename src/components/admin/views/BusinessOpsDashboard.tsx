@@ -36,7 +36,7 @@ export default function BusinessOpsDashboard() {
   // ── Single aggregated KPI/critical/low-stock query, polled every 15s ──
   const opsQuery = useQuery({
     queryKey: workspaceQueryKey("admin", "ops", "snapshot"),
-    enabled: allowed,
+    enabled: allowed && getWorkspaceIdSync() !== null,
     staleTime: 10_000,
     refetchInterval: 15_000,
     queryFn: () => getOpsKpisFn(),
