@@ -9,7 +9,7 @@
  * SWR-cached catalog. Zero reads of legacy `orders` / `order_items`.
  */
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
 import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
