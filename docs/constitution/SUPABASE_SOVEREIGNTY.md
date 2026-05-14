@@ -50,10 +50,15 @@ Rules:
 - Roles live in `user_roles` (separate table). **Never** store roles on `profiles` or `users`.
 - Frontend capability checks are UX. RLS is the security boundary. Both required.
 
-## 5. Tenancy Enforcement
+## 5. Tenancy Enforcement (Zero Trust)
 
-- Server reads tenant from session + `workspace_members`. Client claims are ignored.
-- Cross-tenant queries are forbidden outside of explicit sovereign-admin paths, which MUST audit-log.
+> See **`ZERO_TRUST_IDENTITY.md`** (Chapter 17) and **ADR-0002** for the full doctrine.
+
+- Workspace identity **MUST** be derived from the authenticated JWT `workspace_id` claim, injected by the Postgres `custom_access_token_hook`. Client-supplied workspace identifiers are **ignored** and **MUST NOT** appear as server-function arguments.
+- Server functions touching workspace-scoped data **MUST** compose `requireWorkspace` (from `@/core/identity/workspace-middleware`) and read identity exclusively from `context.workspaceId`. Where workspace scoping is not required, `requireSupabaseAuth` remains the minimum bar.
+- Gateways **MUST NOT** trust any tenant identifier originating from the request body, query string, headers (other than `Authorization`), or cookies.
+- Cross-tenant queries are forbidden outside explicit sovereign-admin paths, which **MUST** audit-log every access.
+- The `custom_access_token_hook` **MUST** remain enabled in Cloud → Auth Settings. Disabling it is a P0 incident — every authenticated server function will return 401.
 
 ## 6. Reserved Schemas
 
