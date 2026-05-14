@@ -24,6 +24,12 @@ export const CAP = Object.freeze({
   PACKAGING_HIERARCHY: "packaging_hierarchy",
   /** Phase D-1/D-2 — Multi-axis tag/graph classification. */
   MULTI_CLASSIFICATION: "multi_classification",
+  /** Phase 1 W1 — POS routes order tickets to a Kitchen Display System. */
+  SUPPORTS_KITCHEN_MODE: "supports_kitchen_mode",
+  /** Phase 1 W1 — POS prioritizes barcode scanning workflow. */
+  SUPPORTS_BARCODE_SCANNING: "supports_barcode_scanning",
+  /** Phase 1 W1 — POS exposes one-tap quick-buy tiles. */
+  SUPPORTS_QUICK_BUY: "supports_quick_buy",
 } as const);
 
 export type CapabilityKey = (typeof CAP)[keyof typeof CAP] | string;

@@ -18,6 +18,13 @@ import type {
   CashierContext,
   MemberTier,
 } from "./types";
+import {
+  makeCapabilityView,
+  resolvePOSMode,
+  type POSCapabilityView,
+  type POSMode,
+} from "./POSMode";
+import type { CapabilityKey } from "@/core/capabilities/CapabilityRegistry";
 
 /* ─────────────────────────── Helpers ─────────────────────────── */
 
@@ -149,5 +156,17 @@ export class CashierBrain {
 
   static calculateLine(line: CartLineInput, tierPct = 0): CartLineSnapshot {
     return calculateLine(line, tierPct);
+  }
+
+  /** Resolve POS mode purely from a capability set. */
+  static resolveMode(capabilities: Iterable<CapabilityKey>): POSMode {
+    return resolvePOSMode(makeCapabilityView(capabilities));
+  }
+
+  /** Lift capability keys into a {@link POSCapabilityView}. */
+  static capabilityView(
+    capabilities: Iterable<CapabilityKey>,
+  ): POSCapabilityView {
+    return makeCapabilityView(capabilities);
   }
 }
