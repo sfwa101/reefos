@@ -80,12 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = useCallback(async (uid: string) => {
     setProfileLoading(true);
     try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", uid)
-        .maybeSingle();
-      setProfile((data as unknown as Profile) ?? null);
+      const data = await IdentityGateway.fetchProfile<Profile>(uid);
+      setProfile(data ?? null);
     } catch {
       setProfile(null);
     } finally {
@@ -102,16 +98,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (name) payload.full_name = name;
 
     try {
-      const { data } = await supabase
-        .from("profiles")
-        .upsert(payload, { onConflict: "id" })
-        .select("*")
-        .maybeSingle();
-      setProfile((data as Profile) ?? null);
-
-      await supabase
-        .from("wallet_balances")
-        .upsert({ user_id: currentUser.id }, { onConflict: "user_id" });
+      const data = await IdentityGateway.upsertProfile<Profile>(payload);
+      setProfile(data ?? null);
+      await IdentityGateway.ensureWalletBalance(currentUser.id);
     } catch {
       await fetchProfile(currentUser.id);
     }
@@ -121,11 +110,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let active = true;
 
     // Subscribe first, then read existing session. Critically, we DO NOT
-    // flip `loading` to false until supabase.auth.getSession() has resolved,
+    // flip `loading` to false until getSession() has resolved,
     // because on slow devices INITIAL_SESSION can fire with a null session
     // before the persisted token is restored from localStorage. Flipping
     // early causes ProtectedRoutes to redirect to /auth (race condition).
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+    const sub = IdentityGateway.onAuthStateChange((event, s) => {
       if (!active) return;
 
       if (event === "SIGNED_OUT") {
@@ -144,8 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    supabase.auth.getSession()
-      .then(({ data: { session: s } }) => {
+    IdentityGateway.getSession()
+      .then((s) => {
         if (!active) return;
         if (s) {
           setSession(s);
@@ -162,7 +151,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
+      sub.unsubscribe();
     };
   }, [fetchProfile]);
 
