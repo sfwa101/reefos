@@ -7,7 +7,7 @@ import { Progress } from "@/components/ui/progress";
 import type { ReferralRow } from "@/core/finance/types/wallet.types";
 import { useAffiliateEngine } from "@/core/finance/hooks/useAffiliateEngine";
 import { WithdrawDialog } from "@/components/finance/WithdrawDialog";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { openWhatsApp } from "@/lib/whatsapp";
 
 // shopping bag icon (lucide doesn't expose ShoppingBagIcon by that name in older imports)
