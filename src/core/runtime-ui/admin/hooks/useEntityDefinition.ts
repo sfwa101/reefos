@@ -81,8 +81,8 @@ export function useEntityDefinition(entityKey: string | undefined) {
         };
       });
 
-      const formSchemas: FormSchemaRow[] = (schemas.data ?? []).map((s) => {
-        const row = s as Record<string, unknown>;
+      const formSchemas: FormSchemaRow[] = (schemas.data ?? []).map((s: Record<string, unknown>) => {
+        const row = s;
         return {
           id: row.id as string,
           mode: row.mode as string,
