@@ -384,7 +384,7 @@ export function UniversalAdminGrid<T = any>({
                             col.className ?? "flex-1",
                           )}
                         >
-                          {col.render ? col.render(row) : <span className="text-[13.5px]">{String(row?.[col.key] ?? "—")}</span>}
+                          {col.render ? col.render(row) : <span className="text-[13.5px]">{String(rowRecord?.[col.key] ?? "—")}</span>}
                         </div>
                       ))}
                       {rowActions?.length ? (
