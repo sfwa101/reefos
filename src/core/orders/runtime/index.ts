@@ -1,10 +1,16 @@
 export {
   computeCheckoutRails,
   computeChargeableAmount,
+  CheckoutRuntime,
+  checkoutRuntime,
 } from "./CheckoutRuntime";
 export type {
   CheckoutRailInput,
   CheckoutRailTotals,
+  CheckoutIntent,
+  CheckoutResult,
+  CheckoutRuntimeOptions,
+  PaymentMethod,
 } from "./CheckoutRuntime";
 export {
   CartRuntime,
