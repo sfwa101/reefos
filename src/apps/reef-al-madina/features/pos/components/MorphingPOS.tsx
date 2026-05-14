@@ -46,9 +46,13 @@ const MODE_META: Record<POSMode, { label: string; Icon: typeof ChefHat }> = {
   hybrid: { label: "Hybrid floor", Icon: Layers },
 };
 
-const localized = (t: { ar: string; en?: string } | undefined, locale: "ar" | "en"): string => {
+const localized = (
+  t: Record<string, string> | undefined,
+  locale: "ar" | "en",
+): string => {
   if (!t) return "";
-  return locale === "en" ? (t.en ?? t.ar) : t.ar;
+  if (locale === "en") return t.en ?? t.ar ?? "";
+  return t.ar ?? t.en ?? "";
 };
 
 export function MorphingPOS(props: MorphingPOSProps) {
