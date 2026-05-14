@@ -69,15 +69,9 @@ export const useFeaturedCategoriesQuery = () =>
   useQuery({
     queryKey: ["categories", "featured-root"] as const,
     queryFn: async (): Promise<FeaturedCategory[]> => {
-      const { data, error } = await supabase
-        .from("categories")
-        .select("id, name, icon, sort_order, parent_id")
-        .is("parent_id", null)
-        .order("sort_order", { ascending: true, nullsFirst: false });
+      const data = await MarketingGateway.listFeaturedRootCategories();
 
-      if (error) throw error;
-
-      return ((data ?? []) as Row[]).map((r) => {
+      return ((data ?? []) as unknown as Row[]).map((r) => {
         const baseHue = hueFromId(r.id);
         return {
           id: r.id,
