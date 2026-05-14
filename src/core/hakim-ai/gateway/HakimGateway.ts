@@ -120,26 +120,27 @@ export const HakimGateway = {
       throw new Error("image_base64 must be a data: URL (image/*)");
     }
 
-    let payload: (ProductDNAPayload & { error?: HakimErrorCode; details?: string; ok?: boolean }) | null = null;
+    let raw: unknown;
     try {
-      payload = (await visionGenesisFn({
+      raw = await visionGenesisFn({
         data: {
           image_base64: input.image_base64,
           secondary_image_base64: input.secondary_image_base64 ?? null,
           hint: input.hint,
           provider: input.provider ?? "gemini",
         },
-      })) as ProductDNAPayload & { error?: HakimErrorCode; details?: string; ok?: boolean };
+      });
     } catch (err) {
       throw new Error((err as Error)?.message ?? "unknown");
     }
 
-    if (!payload || payload.ok === false || (payload as { error?: string }).error) {
-      throw new Error(
-        payload?.details || (payload as { error?: string })?.error || "unknown",
-      );
+    const payload = raw as
+      | { ok?: boolean; error?: string; details?: string }
+      | null;
+    if (!payload || payload.ok === false || payload.error) {
+      throw new Error(payload?.details || payload?.error || "unknown");
     }
-    return payload;
+    return payload as unknown as ProductDNAPayload;
   },
 
   // ============= Edge function invocations =============
