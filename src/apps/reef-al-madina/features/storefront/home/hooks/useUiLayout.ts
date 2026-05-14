@@ -8,7 +8,7 @@
  */
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { tenantQueryKey } from "@/lib/tenantScope";
 import type { LayoutStatus, SectionKey, UiLayout } from "../types/sdui.types";
 
