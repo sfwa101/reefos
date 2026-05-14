@@ -10,6 +10,7 @@ import {
 // Wave P-3 — All Supabase access (cart_items, profiles tier, auth listener,
 // realtime) routed through the Sovereign CartGateway.
 import { CartGateway, type GatewayChannel } from "@/core/orders/gateway/CartGateway";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import {
   fetchRemoteCart,
   pushRemoteCart,
@@ -141,10 +142,10 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   /* ---- Listen to true SIGNED_IN events (manual login transitions only) ---- */
   useEffect(() => {
-    const sub = CartGateway.onAuthChange((event, payload) => {
-      if (event === "SIGNED_IN" && payload?.userId) {
+    const sub = IdentityGateway.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session?.user?.id) {
         // A real login (not INITIAL_SESSION rehydrate). Opt this uid into merge.
-        pendingMergeForUidRef.current = payload.userId;
+        pendingMergeForUidRef.current = session.user.id;
       }
       if (event === "SIGNED_OUT") {
         pendingMergeForUidRef.current = null;
@@ -169,7 +170,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchProfileTier = async (id: string) => {
       try {
-        const raw = await CartGateway.fetchLoyaltyTier(id);
+        const raw = await IdentityGateway.fetchLoyaltyTier(id);
         if (cancelled) return;
         setTier(isCustomerTier(raw) ? raw : "bronze");
       } catch {

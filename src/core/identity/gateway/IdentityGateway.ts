@@ -7,6 +7,24 @@
  *   • Returns typed VMs, never raw Supabase rows.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+
+export type AuthSession = Session;
+export type AuthUser = User;
+export type AuthEvent = AuthChangeEvent;
+export type AuthSubscription = { unsubscribe: () => void };
+
+export type SignUpOptions = {
+  emailRedirectTo?: string;
+  data?: Record<string, unknown>;
+};
+
+export type AuthResult = {
+  data: { user: User | null; session: Session | null };
+  error: { message: string } | null;
+};
+
+export type RoleWithBranch = { role: AppRole; branch_id: string | null };
 
 export type AppRole =
   | "admin"
@@ -183,5 +201,158 @@ export const IdentityGateway = {
     } catch {
       return [];
     }
+  },
+
+  // ─── Auth session ───────────────────────────────────────────────────────
+  async getSession(): Promise<Session | null> {
+    const { data } = await supabase.auth.getSession();
+    return data.session ?? null;
+  },
+
+  onAuthStateChange(
+    cb: (event: AuthEvent, session: Session | null) => void,
+  ): AuthSubscription {
+    const { data } = supabase.auth.onAuthStateChange(cb);
+    return { unsubscribe: () => data.subscription.unsubscribe() };
+  },
+
+  async signUpWithEmailPassword(
+    email: string,
+    password: string,
+    options?: SignUpOptions,
+  ): Promise<AuthResult> {
+    const { data, error } = await supabase.auth.signUp({ email, password, options });
+    return { data, error: error ? { message: error.message } : null };
+  },
+
+  async signInWithEmailPassword(
+    email: string,
+    password: string,
+  ): Promise<AuthResult> {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    return { data, error: error ? { message: error.message } : null };
+  },
+
+  async signOut(): Promise<void> {
+    await supabase.auth.signOut();
+  },
+
+  // ─── Profiles ───────────────────────────────────────────────────────────
+  async fetchProfile<T = Record<string, unknown>>(uid: string): Promise<T | null> {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("id", uid)
+      .maybeSingle();
+    return (data as unknown as T) ?? null;
+  },
+
+  async upsertProfile<T = Record<string, unknown>>(
+    payload: { id: string } & Record<string, unknown>,
+  ): Promise<T | null> {
+    const { data } = await supabase
+      .from("profiles")
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      .upsert(payload as any, { onConflict: "id" })
+      .select("*")
+      .maybeSingle();
+    return (data as unknown as T) ?? null;
+  },
+
+  async updateProfileFields(
+    uid: string,
+    patch: Record<string, unknown>,
+  ): Promise<void> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await supabase.from("profiles").update(patch as any).eq("id", uid);
+  },
+
+  async ensureWalletBalance(userId: string): Promise<void> {
+    await supabase
+      .from("wallet_balances")
+      .upsert({ user_id: userId }, { onConflict: "user_id" });
+  },
+
+  async fetchLoyaltyTier(userId: string): Promise<unknown> {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("loyalty_tier")
+      .eq("id", userId)
+      .maybeSingle();
+    if (error) return null;
+    return (data as { loyalty_tier?: unknown } | null)?.loyalty_tier ?? null;
+  },
+
+  // ─── Phone / referrals ──────────────────────────────────────────────────
+  async checkPhoneExists(normalizedPhone: string): Promise<boolean> {
+    try {
+      const { data, error } = await supabase.rpc("check_phone_exists", { p_phone: normalizedPhone });
+      if (error) return false;
+      return !!data;
+    } catch {
+      return false;
+    }
+  },
+
+  async applyReferralCode(code: string): Promise<void> {
+    try {
+      await supabase.rpc("apply_referral_code" as never, { p_code: code } as never);
+    } catch { /* non-fatal */ }
+  },
+
+  async ensureReferralCode(userId: string): Promise<void> {
+    try {
+      await supabase.rpc("ensure_referral_code" as never, { _user_id: userId } as never);
+    } catch { /* non-fatal */ }
+  },
+
+  // ─── Roles (with branch) ────────────────────────────────────────────────
+  async getActiveRolesWithBranch(userId: string): Promise<RoleWithBranch[]> {
+    if (!userId) return [];
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data } = await (supabase as any)
+        .from("user_roles")
+        .select("role, branch_id, is_active")
+        .eq("user_id", userId)
+        .eq("is_active", true);
+      return ((data ?? []) as Array<{ role: AppRole; branch_id: string | null }>).map(
+        (r) => ({ role: r.role, branch_id: r.branch_id ?? null }),
+      );
+    } catch {
+      return [];
+    }
+  },
+
+  // ─── Capabilities ───────────────────────────────────────────────────────
+  async syncCapabilitiesFromRoles(userId: string): Promise<void> {
+    await (supabase.rpc as unknown as (
+      fn: string, args: Record<string, unknown>,
+    ) => Promise<unknown>)("sync_user_capabilities_from_roles", { p_uid: userId });
+  },
+
+  async listMyWorkspaces<T = Record<string, unknown>>(): Promise<T[]> {
+    const { data } = await (supabase.rpc as unknown as (
+      fn: string,
+    ) => Promise<{ data: T[] | null }>)("my_workspaces");
+    return (data ?? []) as T[];
+  },
+
+  async listUserCapabilities(
+    userId: string,
+    workspaceId: string,
+  ): Promise<Array<{ capability: string; expires_at: string | null }>> {
+    const { data } = await (supabase
+      .from("user_capabilities" as never) as unknown as {
+      select: (s: string) => {
+        eq: (c: string, v: string) => {
+          eq: (c: string, v: string) => Promise<{ data: Array<{ capability: string; expires_at: string | null }> | null }>;
+        };
+      };
+    })
+      .select("capability, expires_at")
+      .eq("user_id", userId)
+      .eq("workspace_id", workspaceId);
+    return data ?? [];
   },
 };

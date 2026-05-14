@@ -12,7 +12,7 @@
  * call this in render without `Suspense`.
  */
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { useAuth } from "@/context/AuthContext";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import {
@@ -61,15 +61,11 @@ export function useCapabilities(): CapState {
     let cancelled = false;
     void (async () => {
       // Project legacy roles into capabilities (idempotent).
-      await (supabase.rpc as unknown as (
-        fn: string, args: Record<string, unknown>,
-      ) => Promise<unknown>)("sync_user_capabilities_from_roles", { p_uid: user.id });
+      await IdentityGateway.syncCapabilitiesFromRoles(user.id);
 
-      const { data: ws } = await (supabase.rpc as unknown as (
-        fn: string,
-      ) => Promise<{ data: WorkspaceRow[] | null }>)("my_workspaces");
+      const ws = await IdentityGateway.listMyWorkspaces<WorkspaceRow>();
       if (cancelled) return;
-      const rows = (ws ?? []) as WorkspaceRow[];
+      const rows = ws as WorkspaceRow[];
       setWorkspaces(rows);
 
       // Pick active workspace if not yet chosen.
@@ -94,17 +90,7 @@ export function useCapabilities(): CapState {
     }
     let cancelled = false;
     void (async () => {
-      const { data } = await (supabase
-        .from("user_capabilities" as never) as unknown as {
-        select: (s: string) => {
-          eq: (c: string, v: string) => {
-            eq: (c: string, v: string) => Promise<{ data: Array<{ capability: string; expires_at: string | null }> | null }>;
-          };
-        };
-      })
-        .select("capability, expires_at")
-        .eq("user_id", user.id)
-        .eq("workspace_id", activeWorkspaceId);
+      const data = await IdentityGateway.listUserCapabilities(user.id, activeWorkspaceId);
       if (cancelled) return;
       const now = Date.now();
       const set = new Set<string>(

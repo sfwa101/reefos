@@ -85,41 +85,10 @@ const deleteCartRowsByIds = async (ids: string[]): Promise<void> => {
 };
 
 /* ────────────────────────────────────────────────────────────────────────── *
- *  Loyalty tier (cross-domain projection — flagged in module header)        *
+ *  Cross-domain leaks (loyalty tier + auth listener) MOVED to               *
+ *  IdentityGateway in Wave P-3 Sub-Wave 2. Consume them from                *
+ *  `@/core/identity/gateway/IdentityGateway` instead.                       *
  * ────────────────────────────────────────────────────────────────────────── */
-
-const fetchLoyaltyTier = async (userId: string): Promise<unknown> => {
-  const { data, error } = await supabase
-    .from("profiles")
-    .select("loyalty_tier")
-    .eq("id", userId)
-    .maybeSingle();
-  if (error) return null;
-  return (data as { loyalty_tier?: unknown } | null)?.loyalty_tier ?? null;
-};
-
-/* ────────────────────────────────────────────────────────────────────────── *
- *  Auth listener (cart-merge trigger)                                       *
- * ────────────────────────────────────────────────────────────────────────── */
-
-export type AuthSignedInPayload = { userId: string };
-export type AuthListener = (
-  event: "SIGNED_IN" | "SIGNED_OUT" | "OTHER",
-  payload: AuthSignedInPayload | null,
-) => void;
-
-const onAuthChange = (cb: AuthListener): GatewayChannel => {
-  const { data } = supabase.auth.onAuthStateChange((event, session) => {
-    if (event === "SIGNED_IN" && session?.user?.id) {
-      cb("SIGNED_IN", { userId: session.user.id });
-    } else if (event === "SIGNED_OUT") {
-      cb("SIGNED_OUT", null);
-    } else {
-      cb("OTHER", null);
-    }
-  });
-  return { unsubscribe: () => data.subscription.unsubscribe() };
-};
 
 /* ────────────────────────────────────────────────────────────────────────── *
  *  Realtime — per-user cart_items                                           *
@@ -200,8 +169,6 @@ export const CartGateway = {
   upsertCartRows,
   listCartKeys,
   deleteCartRowsByIds,
-  fetchLoyaltyTier,
-  onAuthChange,
   subscribeUserCart,
   subscribeSharedCart,
 };

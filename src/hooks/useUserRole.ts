@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { useAuth } from "@/context/AuthContext";
 
 export type AppRole =
@@ -34,20 +34,16 @@ export function useUserRole(): RoleInfo {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await supabase
-          .from("user_roles")
-          .select("role, branch_id, is_active")
-          .eq("user_id", user.id)
-          .eq("is_active", true);
+        const data = await IdentityGateway.getActiveRolesWithBranch(user.id);
         if (cancelled) return;
         if (!data || data.length === 0) {
           setRole(null); setBranchId(null);
         } else {
           const sorted = [...data].sort(
-            (a, b) => (PRIORITY[a.role] ?? 99) - (PRIORITY[b.role] ?? 99)
+            (a, b) => (PRIORITY[a.role as string] ?? 99) - (PRIORITY[b.role as string] ?? 99)
           );
           setRole(sorted[0].role as AppRole);
-          setBranchId((sorted[0] as { branch_id: string | null }).branch_id ?? null);
+          setBranchId(sorted[0].branch_id ?? null);
         }
       } finally {
         if (!cancelled) setLoading(false);

@@ -8,7 +8,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 
 export type Profile = {
   id: string;
@@ -80,12 +80,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const fetchProfile = useCallback(async (uid: string) => {
     setProfileLoading(true);
     try {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", uid)
-        .maybeSingle();
-      setProfile((data as unknown as Profile) ?? null);
+      const data = await IdentityGateway.fetchProfile<Profile>(uid);
+      setProfile(data ?? null);
     } catch {
       setProfile(null);
     } finally {
@@ -102,16 +98,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (name) payload.full_name = name;
 
     try {
-      const { data } = await supabase
-        .from("profiles")
-        .upsert(payload, { onConflict: "id" })
-        .select("*")
-        .maybeSingle();
-      setProfile((data as Profile) ?? null);
-
-      await supabase
-        .from("wallet_balances")
-        .upsert({ user_id: currentUser.id }, { onConflict: "user_id" });
+      const data = await IdentityGateway.upsertProfile<Profile>(payload);
+      setProfile(data ?? null);
+      await IdentityGateway.ensureWalletBalance(currentUser.id);
     } catch {
       await fetchProfile(currentUser.id);
     }
@@ -121,11 +110,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     let active = true;
 
     // Subscribe first, then read existing session. Critically, we DO NOT
-    // flip `loading` to false until supabase.auth.getSession() has resolved,
+    // flip `loading` to false until getSession() has resolved,
     // because on slow devices INITIAL_SESSION can fire with a null session
     // before the persisted token is restored from localStorage. Flipping
     // early causes ProtectedRoutes to redirect to /auth (race condition).
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+    const sub = IdentityGateway.onAuthStateChange((event, s) => {
       if (!active) return;
 
       if (event === "SIGNED_OUT") {
@@ -144,8 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    supabase.auth.getSession()
-      .then(({ data: { session: s } }) => {
+    IdentityGateway.getSession()
+      .then((s) => {
         if (!active) return;
         if (s) {
           setSession(s);
@@ -162,20 +151,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     return () => {
       active = false;
-      sub.subscription.unsubscribe();
+      sub.unsubscribe();
     };
   }, [fetchProfile]);
 
   const signUpWithPhone = useCallback<AuthCtx["signUpWithPhone"]>(async (phone, password, fullName, extras) => {
     const email = phoneToEmail(phone);
     const normalized = normalizePhone(phone);
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/`,
-        data: { phone: normalized, full_name: fullName },
-      },
+    const { data, error } = await IdentityGateway.signUpWithEmailPassword(email, password, {
+      emailRedirectTo: `${window.location.origin}/`,
+      data: { phone: normalized, full_name: fullName },
     });
     if (error) return { error: humanize(error.message) };
     if (data.session?.user) {
@@ -183,10 +168,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       // Stamp the Level-1 hydration fields (governorate / city) if provided.
       if (extras && (extras.governorate || extras.city)) {
         try {
-          await supabase.from("profiles").update({
+          await IdentityGateway.updateProfileFields(data.session.user.id, {
             governorate: extras.governorate ?? null,
             city: extras.city ?? null,
-          }).eq("id", data.session.user.id);
+          });
           await fetchProfile(data.session.user.id);
         } catch { /* non-fatal */ }
       }
@@ -199,20 +184,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             ? window.localStorage.getItem("salsabil_ref_code")
             : null;
         if (ref && /^[0-9]{6}$/.test(ref)) {
-          await supabase.rpc("apply_referral_code" as never, { p_code: ref } as never);
+          await IdentityGateway.applyReferralCode(ref);
           window.localStorage.removeItem("salsabil_ref_code");
         }
       } catch { /* non-fatal */ }
-      try {
-        await supabase.rpc("ensure_referral_code" as never, { _user_id: data.session.user.id } as never);
-      } catch { /* non-fatal */ }
+      await IdentityGateway.ensureReferralCode(data.session.user.id);
     }
     return {};
   }, [ensureProfile, fetchProfile]);
 
   const signInWithPhone = useCallback<AuthCtx["signInWithPhone"]>(async (phone, password) => {
     const email = phoneToEmail(phone);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await IdentityGateway.signInWithEmailPassword(email, password);
     if (error) return { error: humanize(error.message) };
     if (data.user) await ensureProfile(data.user);
     return {};
@@ -220,15 +203,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const checkPhoneExists = useCallback<AuthCtx["checkPhoneExists"]>(async (phone) => {
     const normalized = normalizePhone(phone);
-    try {
-      const { data, error } = await supabase.rpc("check_phone_exists", { p_phone: normalized });
-      if (error) return false;
-      return !!data;
-    } catch { return false; }
+    return IdentityGateway.checkPhoneExists(normalized);
   }, []);
 
   const signOut = useCallback(async () => {
-    await supabase.auth.signOut();
+    await IdentityGateway.signOut();
   }, []);
 
   const refreshProfile = useCallback(async () => {
