@@ -9,7 +9,7 @@ import {
   groupForSub,
   supermarketTaxonomy,
 } from "@/lib/supermarketTaxonomy";
-import { volumeDealFor } from "@/lib/volumeDeals";
+import { volumeDealFor } from "@/core/commerce/pricing/volumeDeals";
 
 interface DualNavStoreProps {
   themeKey: StoreThemeKey;

@@ -22,7 +22,7 @@ import {
   type ButcheryRules,
   type PrepOption,
   type WeightOption,
-} from "@/lib/weighed-prep-rules";
+} from "@/core/commerce/variants/weighed-prep-rules";
 import type {
   IPricingStrategy,
   PricingContext,

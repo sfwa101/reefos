@@ -12,7 +12,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
-} from "@/lib/weighed-prep-rules";
+} from "@/core/commerce/variants/weighed-prep-rules";
 import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/weighed-prep/components/Panel";
 import { CutBuilder } from "@/apps/reef-al-madina/features/weighed-prep/components/CutBuilder";

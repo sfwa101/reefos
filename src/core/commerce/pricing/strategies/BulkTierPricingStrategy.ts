@@ -25,7 +25,7 @@ import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types"
 import {
   volumeDealFor,
   type VolumeDeal,
-} from "@/lib/volumeDeals";
+} from "@/core/commerce/pricing/volumeDeals";
 import type {
   IPricingStrategy,
   PricingContext,
