@@ -148,15 +148,5 @@ export async function findNearestDrivers(
   radiusMeters = 5_000,
   limit = 5,
 ): Promise<NearestDriver[]> {
-  const { data, error } = await supabase.rpc("find_nearest_drivers", {
-    p_lat: lat,
-    p_lng: lng,
-    p_radius_m: radiusMeters,
-    p_limit: limit,
-  });
-  if (error) {
-    console.error("[findNearestDrivers] failed", error.message);
-    return [];
-  }
-  return (data ?? []) as NearestDriver[];
+  return LogisticsExtras.findNearestDrivers(lat, lng, radiusMeters, limit) as Promise<NearestDriver[]>;
 }
