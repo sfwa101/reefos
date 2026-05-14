@@ -46,13 +46,15 @@ export const predictBasketFn = createServerFn({ method: "POST" })
     const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
     if (!LOVABLE_API_KEY) return { error: "ai_error" as const };
 
-    const { data: freqRows, error: freqErr } = await sb
-      .from("user_product_frequency")
+    const freqRes = await sb
+      .from<FreqRow[]>("user_product_frequency")
       .select("product_id, qty_total, order_count, last_ordered_at, avg_interval_days")
       .eq("user_id", userId)
       .order("qty_total", { ascending: false })
       .order("last_ordered_at", { ascending: false })
       .limit(30);
+    const freqRows = (freqRes.data ?? []) as FreqRow[];
+    const freqErr = freqRes.error;
 
     const empty = {
       ok: true as const,
@@ -67,9 +69,9 @@ export const predictBasketFn = createServerFn({ method: "POST" })
       if (code === "PGRST205" || code === "42P01") return empty;
       return { error: "freq_query_failed" as const };
     }
-    if (!freqRows || freqRows.length === 0) return empty;
+    if (freqRows.length === 0) return empty;
 
-    const productIds = (freqRows as Array<{ product_id: string }>).map((r) => r.product_id);
+    const productIds = freqRows.map((r) => r.product_id);
     const { data: products, error: prodErr } = await sb
       .from("products")
       .select("id,name,price,unit,category,image,image_url")
@@ -83,7 +85,7 @@ export const predictBasketFn = createServerFn({ method: "POST" })
     }
 
     const productsTyped = ((products ?? []) as unknown) as ProductRow[];
-    const freqTyped = (freqRows as unknown) as FreqRow[];
+    const freqTyped = freqRows;
     const productById = new Map(productsTyped.map((p) => [p.id, p] as const));
     const candidates = freqTyped
       .filter((r) => productById.has(r.product_id))
