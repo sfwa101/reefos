@@ -36,12 +36,12 @@ export default function CrossBranchTransfers() {
       metrics={[
         { key: "all", label: "إجمالي التحويلات", icon: ArrowRightLeft, tone: "primary", compute: (r) => r.length },
         { key: "pending", label: "قيد الانتظار", icon: Clock, tone: "warning",
-          compute: (r) => r.filter((x: any) => x.status === "pending").length,
-          urgent: (r) => r.some((x: any) => x.status === "pending") },
+          compute: (r) => r.filter((x) => x.status === "pending").length,
+          urgent: (r) => r.some((x) => x.status === "pending") },
         { key: "transit", label: "قيد النقل", icon: Truck, tone: "purple",
-          compute: (r) => r.filter((x: any) => x.status === "in_transit").length },
+          compute: (r) => r.filter((x) => x.status === "in_transit").length },
         { key: "done", label: "مُستلمة", icon: CheckCircle2, tone: "success",
-          compute: (r) => r.filter((x: any) => x.status === "received").length },
+          compute: (r) => r.filter((x) => x.status === "received").length },
       ]}
       dataSource={{
         table: "cross_branch_transfers",

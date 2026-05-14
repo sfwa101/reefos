@@ -96,7 +96,7 @@ export default function RolePermissions() {
         { key: "perms", label: "الصلاحيات", icon: Key, tone: "primary", compute: (r) => r.length },
         { key: "roles", label: "الأدوار", icon: Users, tone: "info", compute: () => ROLES.length },
         { key: "groups", label: "المجموعات", icon: Lock, tone: "purple",
-          compute: (r) => new Set(r.map((x: any) => x.group_name)).size },
+          compute: (r) => new Set(r.map((x) => x.group_name)).size },
         { key: "shield", label: "الحماية", icon: ShieldCheck, tone: "success", compute: () => "نشطة" },
       ]}
       dataSource={{

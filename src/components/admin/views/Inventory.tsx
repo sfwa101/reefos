@@ -28,14 +28,15 @@ export default function Inventory() {
   const [breakdowns, setBreakdowns] = useState<Record<string, string>>({});
   const [loadingBreakdown, setLoadingBreakdown] = useState<Record<string, boolean>>({});
 
-  const formatBreakdown = (raw: any): string => {
+  const formatBreakdown = (raw: unknown): string => {
     if (!raw) return "";
-    // Expected shape: { breakdown: [{ unit, qty }, ...], total_pieces: N } OR array of pairs
-    const list = Array.isArray(raw) ? raw : raw.breakdown || raw.units || [];
+    type Piece = { qty?: number; quantity?: number; unit?: string; unit_code?: string; code?: string };
+    const obj = raw as { breakdown?: Piece[]; units?: Piece[] };
+    const list: Piece[] = Array.isArray(raw) ? (raw as Piece[]) : (obj.breakdown ?? obj.units ?? []);
     if (!Array.isArray(list) || list.length === 0) return "";
     return list
-      .filter((p: any) => p && (p.qty ?? p.quantity ?? 0) > 0)
-      .map((p: any) => `${p.qty ?? p.quantity} ${p.unit ?? p.unit_code ?? p.code}`)
+      .filter((p) => p && (p.qty ?? p.quantity ?? 0) > 0)
+      .map((p) => `${p.qty ?? p.quantity} ${p.unit ?? p.unit_code ?? p.code}`)
       .join("، ");
   };
 
