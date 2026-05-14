@@ -54,15 +54,10 @@ function DriverShellInner() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.auth.getUser();
-      const uid = data.user?.id;
+      const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) return;
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", uid)
-        .maybeSingle();
-      if (!cancelled) setName((prof?.full_name as string | undefined) ?? null);
+      const fullName = await IdentityGateway.getProfileFullName(uid);
+      if (!cancelled) setName(fullName);
     })();
     return () => {
       cancelled = true;
