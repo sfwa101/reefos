@@ -15,7 +15,7 @@
  * each modifier so receipts, analytics, and Hakim-AI can introspect.
  */
 
-import type { Product, ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 import {
   getButcheryRules,
   isButcheryProduct,

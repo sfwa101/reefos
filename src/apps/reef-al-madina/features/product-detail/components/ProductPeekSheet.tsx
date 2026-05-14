@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useCart } from "@/context/CartContext";
 import { useFavorites } from "@/lib/favorites";
-import { getById } from "@/core/catalog/legacy/legacyRuntime";
+import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import { fmtMoney } from "@/lib/format";
 
 import ProductGallery from "../ProductGallery";

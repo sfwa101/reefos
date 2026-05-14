@@ -11,7 +11,7 @@
 // not catalog data.
 
 import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 // Royal blue palette specific to this hub
 export const PALETTE = {

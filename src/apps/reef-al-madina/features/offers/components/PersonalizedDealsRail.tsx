@@ -1,4 +1,4 @@
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import ProductCard from "@/components/ProductCard";
 import { Sparkles } from "lucide-react";
 

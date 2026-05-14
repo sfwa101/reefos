@@ -14,7 +14,7 @@
  * per-product overrides so we cover every meat SKU without per-row data.
  */
 
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 export type PrepTier = "raw" | "clean" | "cook";
 export type SlaTier = "fast" | "mid" | "slow";

@@ -8,7 +8,7 @@ import { useSharedCartSync } from "./useSharedCartSync";
  * consumers (CartContext / CartPanel / etc.) until they migrate to
  * `useCartHydration`.
  */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { getActiveTenantId } from "@/context/TenantContext";
 
 /**

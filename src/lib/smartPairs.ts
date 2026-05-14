@@ -1,5 +1,5 @@
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
-import { products } from "@/core/catalog/legacy/legacyRuntime";
+import type { Product } from "@/core/catalog/legacyProduct.types";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
 
 const PAIRS: Record<string, { partnerId: string; copy: string }> = {
   pasta: { partnerId: "oil", copy: "لا تنسَ زيت الزيتون لمكرونتك!" },

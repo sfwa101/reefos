@@ -18,7 +18,7 @@ import {
 import { useMemo } from "react";
 
 import { useProductsBySourceQuery } from "@/hooks/useProductsQuery";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 import type { CatId, Category, RxProduct } from "./types";
 

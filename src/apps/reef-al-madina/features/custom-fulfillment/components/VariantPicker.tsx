@@ -3,7 +3,7 @@
 
 import { Check, PackageCheck, Sparkles } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 type Variant = NonNullable<Product["variants"]>[number];
 type Addon = NonNullable<Product["addons"]>[number];

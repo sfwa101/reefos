@@ -37,7 +37,7 @@ import {
   updateIncentiveMilestoneFn,
   type TierRuleRow as TierRule,
   type MilestoneRow as Milestone,
-} from "@/core/commerce/business-rules.functions";
+} from "@/core/commerce/policies/business-rules.functions";
 
 type TierKey = TierRule["tier"];
 

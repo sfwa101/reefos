@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Sparkles, Star, Users, Repeat } from "lucide-react";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { useAuth } from "@/context/AuthContext";
 import { basketMarketing, sumBasketRetail, hydrateBasket } from "@/lib/bundle-thresholds";
 import { toLatin } from "@/lib/format";

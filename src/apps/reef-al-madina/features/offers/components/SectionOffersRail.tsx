@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { products } from "@/core/catalog/legacy/legacyRuntime";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
 import ProductCard from "@/components/ProductCard";
 import { Tag } from "lucide-react";
 

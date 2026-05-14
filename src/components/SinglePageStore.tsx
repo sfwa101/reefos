@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
 import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import UniversalPremiumSkeleton from "@/components/UniversalPremiumSkeleton";
 import { Search } from "lucide-react";
 

@@ -13,7 +13,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { type Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { type Product } from "@/core/catalog/legacyProduct.types";
 import ProductCard from "@/components/ProductCard";
 import { toLatin } from "@/lib/format";
 import { useUniversalSearch, useSearchHistory } from "@/modules/search";

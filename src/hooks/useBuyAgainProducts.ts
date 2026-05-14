@@ -12,7 +12,7 @@ import { useQuery } from "@tanstack/react-query";
 import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 import { useProductsQuery } from "@/hooks/useProductsQuery";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 const MAX = 12;
 

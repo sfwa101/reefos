@@ -1,6 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { Link } from "@tanstack/react-router";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import ProductCard from "./ProductCard";
 
 interface ProductCarouselProps {

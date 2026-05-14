@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
-import { products } from "@/core/catalog/legacy/legacyRuntime";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
 import { storeThemes } from "@/lib/storeThemes";
 import BasketCard from "@/core/runtime-ui/blocks/product/basket-card";
 import { findFrequency } from "@/lib/bundle-thresholds";

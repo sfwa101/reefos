@@ -12,7 +12,7 @@ import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/context/CartContext";
-import { products } from "@/core/catalog/legacy/legacyRuntime";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
 import type { SduiPredictiveRefillRailBlock } from "./schemas";
 
 const LEDGER_KEY = "salsabil.recent_purchases";

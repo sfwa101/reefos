@@ -12,7 +12,7 @@
  * rules are de-duplicated by key here).
  *
  * Usage:
- *   import { initPricingEngine, pricingEngine } from "@/core/engine/pricing/bootstrap";
+ *   import { initPricingEngine, pricingEngine } from "@/core/commerce/pricing/bootstrap";
  *   initPricingEngine();
  *   const breakdown = pricingEngine.calculate({ product, selection });
  */

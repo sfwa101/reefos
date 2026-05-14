@@ -6,7 +6,7 @@ import {
   type OpenResult,
 } from "@/lib/whatsapp";
 /** @deprecated Wave P-B B-3 — bridge type for WhatsApp message builder. */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 
 export type WaCartLine = { product: Product; qty: number; meta?: CartLineMeta };

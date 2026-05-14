@@ -12,8 +12,8 @@
  *   Cloud later without losing UX.
  */
 
-import { products } from "@/core/catalog/legacy/legacyRuntime";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 
 /* ===== Basket contents ===== */
 

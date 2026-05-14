@@ -14,8 +14,8 @@
  */
 import { useMemo } from "react";
 import ProductCard from "@/components/ProductCard";
-import { bySource } from "@/core/catalog/legacy/legacyRuntime";
-import type { ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
+import { bySource } from "@/core/catalog/runtime/legacyRuntime";
+import type { ProductSource } from "@/core/catalog/legacyProduct.types";
 
 interface StoreCategoryGridProps {
   /** The product source to filter by. */

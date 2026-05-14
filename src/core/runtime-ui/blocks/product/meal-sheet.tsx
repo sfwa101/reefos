@@ -3,7 +3,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Flame, Beef, Wheat, Droplet, Minus, Plus, Star, X } from "lucide-react";
 import type { KitchenMeal } from "@/lib/meal-menu-config";
 import { useCart } from "@/context/CartContext";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { toast } from "sonner";
 

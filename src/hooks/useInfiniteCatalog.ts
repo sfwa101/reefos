@@ -21,7 +21,7 @@ import { useMemo } from "react";
 import {
   type Product,
   type ProductSource,
-} from "@/core/catalog/legacy/legacyProduct.types";
+} from "@/core/catalog/legacyProduct.types";
 import { searchSovereignAssets, assetToProduct } from "@/lib/sovereignCatalog";
 import { getActiveTenantId } from "@/context/TenantContext";
 

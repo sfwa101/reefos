@@ -1,4 +1,4 @@
-import { useLiveRules } from "@/core/engine/pricing/config/useLiveRules";
+import { useLiveRules } from "@/core/commerce/pricing/config/useLiveRules";
 
 /**
  * Headless component — mounts `useLiveRules()` once near the root so

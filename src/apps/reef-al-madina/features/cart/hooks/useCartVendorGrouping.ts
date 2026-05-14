@@ -8,7 +8,7 @@ import { CartGateway } from "@/core/orders/gateway/CartGateway";
  * (CartCrossSellRail / CartContext.add) reads `l.product.*`. Will move to
  * `ProductCardVM[]` once §2.E migrates.
  */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { getActiveTenantId } from "@/context/TenantContext";
 
 const SNAPSHOT_KEY = () =>

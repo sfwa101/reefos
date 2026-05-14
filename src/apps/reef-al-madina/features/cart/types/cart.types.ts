@@ -4,7 +4,7 @@
  * `CartLine` and the 8 §2.E external consumers. New code MUST consume
  * `ProductCardVM` from `@/core/catalog/types`.
  */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 import type { VendorKey } from "@/lib/vendor-menu-config";
 
