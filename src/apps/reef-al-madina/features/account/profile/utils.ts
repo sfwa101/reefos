@@ -1,4 +1,4 @@
-import type { User } from "@supabase/supabase-js";
+import type { AuthUser as User } from "@/core/identity";
 import type { DbProfile, Gender, ProfileForm } from "./types";
 
 export const normalizeGender = (value?: string | null): Gender => (
