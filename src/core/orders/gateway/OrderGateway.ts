@@ -96,8 +96,8 @@ export const OrderGateway = {
     if (!node) return null;
     const snap = (node.delivery_snapshot ?? {}) as { handover?: { otp?: string } };
     if (snap.handover?.otp) return snap.handover.otp;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: otp } = await (supabase as any).rpc("get_handover_otp", {
+    
+    const { data: otp } = await supabase.rpc("get_handover_otp", {
       p_node_id: node.id as string,
     });
     return typeof otp === "string" ? otp : null;
@@ -108,8 +108,8 @@ export const OrderGateway = {
    */
   async getNodeItems(nodeId: string): Promise<VendorNodeItemVM[]> {
     if (!nodeId) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
     const { data, error } = await sb
       .from("salsabil_fulfillment_items")
       .select(`
@@ -118,7 +118,7 @@ export const OrderGateway = {
       `)
       .eq("node_id", nodeId);
     if (error || !data) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     return (data as any[]).map((r): VendorNodeItemVM => ({
       id: r.id,
       sku_id: r.sku_id,
@@ -141,7 +141,7 @@ export const OrderGateway = {
     const channel = supabase
       .channel(`vendor-fulfillment-${vendorId}`)
       .on(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
         "postgres_changes" as any,
         {
           event: "*",
@@ -149,7 +149,7 @@ export const OrderGateway = {
           table: "salsabil_fulfillment_nodes",
           filter: `vendor_id=eq.${vendorId}`,
         },
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        
         (payload: any) => onEvent({ eventType: payload.eventType }),
       )
       .subscribe();

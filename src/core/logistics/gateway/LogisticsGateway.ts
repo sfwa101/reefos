@@ -121,8 +121,8 @@ export const LogisticsGateway = {
    * RLS enforces that user_id matches the authenticated user.
    */
   async createAddress(input: CreateAddressInput): Promise<string | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from("addresses")
       .insert({
         user_id: input.userId,
@@ -301,8 +301,8 @@ export const LogisticsExtras = {
     otp: string;
     channel: "driver" | "walkin";
   }): Promise<{ error: { message: string } | null }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any).rpc("confirm_handover", {
+    
+    const { error } = await supabase.rpc("confirm_handover", {
       p_node_id: args.nodeId,
       p_otp: args.otp,
       p_channel: args.channel,

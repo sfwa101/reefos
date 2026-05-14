@@ -70,8 +70,8 @@ export const FamilyGateway = {
       vaults: [],
     };
     if (!userId) return empty;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sb = supabase as any;
+    
+    const sb = supabase;
 
     const { data: myMemb } = await sb
       .from("tayseer_family_members")
@@ -92,7 +92,7 @@ export const FamilyGateway = {
       .select("group_id, user_id, role, joined_at")
       .eq("group_id", myMemb.group_id);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const userIds: string[] = (rawMembers ?? []).map((m: any) => m.user_id);
     const idsForLookup = userIds.length ? userIds : [NIL];
 
@@ -101,14 +101,14 @@ export const FamilyGateway = {
       sb.from("wallets").select("id, user_id").eq("currency", "EGP").in("user_id", idsForLookup),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const profileMap = new Map((profiles ?? []).map((p: any) => [p.user_id, p]));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const walletMap = new Map((walletsRows ?? []).map((w: any) => [w.user_id, w.id]));
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const members: FamilyMemberVM[] = (rawMembers ?? []).map((m: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
       const p = profileMap.get(m.user_id) as any;
       return {
         group_id: m.group_id,
@@ -147,16 +147,16 @@ export const FamilyGateway = {
   },
 
   async createFamilyGroup(name: string, createdBy: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    
+    const { error } = await supabase
       .from("tayseer_family_groups")
       .insert({ name: name.trim(), created_by: createdBy });
     if (error) throw error;
   },
 
   async upsertWalletLimit(input: UpsertFamilyLimitInput): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    
+    const { error } = await supabase
       .from("tayseer_wallet_limits")
       .upsert(
         {
