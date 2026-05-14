@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway, type GatewayChannel } from "@/core/finance/gateway/FinanceGateway";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { tierProgress, type TierDef } from "@/lib/tiers";
 import type {
   Profile,
