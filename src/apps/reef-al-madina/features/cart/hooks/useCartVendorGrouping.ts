@@ -9,10 +9,9 @@ import { CartGateway } from "@/core/orders/gateway/CartGateway";
  * `ProductCardVM[]` once §2.E migrates.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import { getActiveTenantId } from "@/context/TenantContext";
+import { workspaceQueryKey } from "@/core/identity/workspace";
 
-const SNAPSHOT_KEY = () =>
-  ["tenant", getActiveTenantId(), "catalog", "products"] as const;
+const SNAPSHOT_KEY = () => workspaceQueryKey("catalog", "products");
 import {
   vendorForProduct,
   type VendorKey,
