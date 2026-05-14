@@ -208,15 +208,8 @@ export const getHakimAdvisorReportFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ report: string }> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim-advisor", { body: data });
-    if (error) throw new Error(error.message ?? "advisor_failed");
-    const o = (out ?? {}) as Record<string, unknown>;
-    if (o.error) throw new Error(String(o.error));
-    const report =
-      (typeof o.report === "string" && o.report) ||
-      (typeof o.content === "string" && o.content) ||
-      (typeof o.text === "string" && o.text) ||
-      "";
-    return { report: report || "تعذّر إنشاء التقرير الآن." };
+    const out = await runHakimAdvisor(data, context.supabase);
+    if ("error" in out) throw new Error(String(out.error));
+    const summary = out.insight?.summary;
+    return { report: (typeof summary === "string" && summary) || "تعذّر إنشاء التقرير الآن." };
   });
