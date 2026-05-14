@@ -43,13 +43,7 @@ export function SovereignSettlementsPanel() {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from("salsabil_vendor_settlements")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .then(({ data }: { data: Row[] | null }) => setRows(data ?? []));
+    VendorGateway.listVendorSettlements<Row>().then((data) => setRows(data));
   }, []);
 
   const visible = useMemo(() => {
