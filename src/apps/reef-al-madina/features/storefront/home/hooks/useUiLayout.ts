@@ -111,6 +111,7 @@ export const useUiLayout = (pageKey: string, statusOverride?: LayoutStatus) => {
   const query = useQuery({
     queryKey: workspaceQueryKey("ui_layouts", pageKey, status),
     queryFn: () => fetchUiLayout(pageKey, status),
+    enabled: getWorkspaceIdSync() !== null,
     staleTime: 60 * 60 * 1000, // Phase 39 — SDUI layouts: 1h fresh.
     gcTime: 24 * 60 * 60 * 1000,
   });
