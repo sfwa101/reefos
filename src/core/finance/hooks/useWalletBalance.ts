@@ -25,8 +25,7 @@ export const useWalletBalance = () => {
     let mounted = true;
     let uid: string | null = null;
     // Realtime channel handle — opened after we know the user id.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let channel: any = null;
+    let channel: GatewayChannel | null = null;
 
     const refetch = async (id: string) => {
       const [bal, prof, trust, spent] = await Promise.all([
