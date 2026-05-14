@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, Clock, Eye } from "lucide-react";
-import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
+import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } from "@/components/admin/UniversalAdminGrid";
 import { getKycSignedUrlsFn, updateKycStatusFn } from "@/core/hr/hr.functions";
 import { fmtNum } from "@/lib/format";
 import { toast } from "sonner";
