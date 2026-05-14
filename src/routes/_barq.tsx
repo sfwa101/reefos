@@ -14,7 +14,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { Bike, Radar, ListChecks, Wallet, Wifi, WifiOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { useDispatchRadar } from "@/apps/reef-al-madina/features/driver/hooks/useDispatchRadar";
 import { IncomingOfferModal } from "@/apps/reef-al-madina/features/driver/components/IncomingOfferModal";
