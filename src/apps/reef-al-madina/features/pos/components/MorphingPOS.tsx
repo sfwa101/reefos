@@ -96,6 +96,42 @@ export function MorphingPOS(props: MorphingPOSProps) {
         </div>
       </IOSCard>
       {body}
+      <IOSCard className="p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="text-[13px] font-medium">Cart</div>
+          <button
+            type="button"
+            onClick={cart.clear}
+            disabled={cart.state.lines.length === 0}
+            className="flex items-center gap-1 text-[11px] text-foreground-tertiary disabled:opacity-40"
+          >
+            <Trash2 className="h-3 w-3" /> Clear
+          </button>
+        </div>
+        {cart.state.lines.length === 0 ? (
+          <div className="text-[12px] text-foreground-tertiary">Empty cart.</div>
+        ) : (
+          <ul className="space-y-1.5 max-h-48 overflow-auto">
+            {cart.state.snapshot.items.map((item) => (
+              <li
+                key={item.id}
+                className="flex items-center justify-between text-[12px]"
+              >
+                <span className="truncate">{item.id}</span>
+                <span className="tabular-nums text-foreground-secondary">
+                  ×{item.qty} · {fmtMoney(item.line_total, currency)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-3 flex items-center justify-between border-t border-border/40 pt-2 text-[13px]">
+          <span className="text-foreground-secondary">Total</span>
+          <span className="font-semibold tabular-nums">
+            {fmtMoney(totals.grand_total, currency)}
+          </span>
+        </div>
+      </IOSCard>
     </div>
   );
 }
