@@ -94,15 +94,12 @@ export const useVendorSettlement = () => {
     ) => {
       setSubmitting(true);
       try {
-        const { data, error } = await (supabase.rpc as any)(
-          "request_vendor_payout",
-          {
-            _vendor_id: vendorId,
-            _amount: amount,
-            _method: method,
-            _bank_details: bankDetails ?? {},
-          },
-        );
+        const { data, error } = await VendorGateway.requestVendorPayout({
+          vendorId,
+          amount,
+          method,
+          bankDetails: bankDetails ?? {},
+        });
         if (error) throw error;
         await refresh();
         return { ok: true, data };
