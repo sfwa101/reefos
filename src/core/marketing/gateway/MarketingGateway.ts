@@ -25,7 +25,7 @@ export const MarketingGateway = {
    * Falls back to the first product of the active flash sale, or null.
    */
   async getInactivityPick(userId: string | null): Promise<InactivityPickVM | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const sb = supabase as any;
 
     let category: string | null = null;
@@ -62,8 +62,8 @@ export const MarketingGateway = {
     body: string;
     icon?: string;
   }): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("notifications").insert({
+    
+    await supabase.from("notifications").insert({
       user_id: input.userId,
       title: input.title,
       body: input.body,
@@ -86,8 +86,8 @@ export const MarketingGateway = {
   /* ───────────────────── Banners + Flash Sales ───────────────────── */
 
   async listBanners(placement: string): Promise<AnyRow[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from("banners")
       .select(
         "id,title,subtitle,image_url,placement,link_url,category_slug,sort_order,starts_at,ends_at,is_active",
@@ -100,8 +100,8 @@ export const MarketingGateway = {
   },
 
   async getActiveFlashSale(): Promise<AnyRow | null> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: sales } = await (supabase as any)
+    
+    const { data: sales } = await supabase
       .from("flash_sales")
       .select("id,ends_at,cycle_label")
       .eq("is_active", true)
@@ -112,8 +112,8 @@ export const MarketingGateway = {
   },
 
   async listFlashSaleProducts(saleId: string): Promise<AnyRow[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: items } = await (supabase as any)
+    
+    const { data: items } = await supabase
       .from("flash_sale_products")
       .select(
         "id,product_id,product_name,category,original_price,discount_pct,reason,rank",
@@ -167,7 +167,7 @@ export const MarketingGateway = {
     data: AnyRow[];
     error: { message: string } | null;
   }> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     const sb = supabase as any;
     const { data, error } = await sb
       .from("offers_matrix")
@@ -239,8 +239,8 @@ export const MarketingGateway = {
   },
 
   async ensureReferralCode(userId: string): Promise<string> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase.rpc as any)(
+    
+    const { data, error } = await supabase.rpc(
       "ensure_referral_code",
       { _user_id: userId },
     );
@@ -286,8 +286,8 @@ export const MarketingGateway = {
    * (frequency_tag, starts_at/ends_at) is performed by the caller.
    */
   async listActiveStorefrontRails(): Promise<AnyRow[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from("storefront_rails")
       .select("*")
       .eq("is_active", true)

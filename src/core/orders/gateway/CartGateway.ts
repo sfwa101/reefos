@@ -66,7 +66,7 @@ const upsertCartRows = async (
 ): Promise<{ error: string | null }> => {
   const up = await supabase
     .from("cart_items")
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    
     .upsert(rows as any, { onConflict: "user_id,product_id,line_key" });
   return { error: up.error?.message ?? null };
 };
@@ -171,8 +171,8 @@ const fetchFrequentlyBoughtProductIds = async (
   productIds: string[],
   limit = 6,
 ): Promise<string[]> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).rpc("frequently_bought_together", {
+  
+  const { data } = await supabase.rpc("frequently_bought_together", {
     _product_ids: productIds,
     _limit: limit,
   });
@@ -181,8 +181,8 @@ const fetchFrequentlyBoughtProductIds = async (
 };
 
 const fetchFinanceMinOrderTotal = async (): Promise<number> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  
+  const { data } = await supabase
     .from("app_settings")
     .select("value")
     .eq("key", "finance")
@@ -197,8 +197,8 @@ const validateCoupon = async (
   code: string,
   orderTotal: number,
 ): Promise<{ discount: number; error: string | null }> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase as any).rpc("validate_coupon", {
+  
+  const { data, error } = await supabase.rpc("validate_coupon", {
     _code: code,
     _order_total: orderTotal,
   });

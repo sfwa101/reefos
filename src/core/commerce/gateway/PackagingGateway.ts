@@ -73,8 +73,8 @@ function depthOf(
 export const PackagingGateway = {
   /** Fetch existing tiers for an asset, sorted root → leaf. */
   async listTiers(assetId: string): Promise<PackagingTier[]> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from(TABLE)
       .select("*")
       .eq("asset_id", assetId)
@@ -85,8 +85,8 @@ export const PackagingGateway = {
 
   /** Wipe every tier for an asset (used when the Admin disables packaging). */
   async wipeTiers(assetId: string): Promise<void> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    
+    const { error } = await supabase
       .from(TABLE)
       .delete()
       .eq("asset_id", assetId);
@@ -110,8 +110,8 @@ export const PackagingGateway = {
     if (!assetId) throw new Error("PackagingGateway.syncTiers: assetId required");
 
     // 1. Snapshot current DB rows.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing, error: fetchErr } = await (supabase as any)
+    
+    const { data: existing, error: fetchErr } = await supabase
       .from(TABLE)
       .select("id")
       .eq("asset_id", assetId);
@@ -160,8 +160,8 @@ export const PackagingGateway = {
         attributes: d.attributes ?? {},
       };
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any)
+      
+      const { error } = await supabase
         .from(TABLE)
         .upsert(row, { onConflict: "id" });
       if (error) throw new Error(error.message);
@@ -171,8 +171,8 @@ export const PackagingGateway = {
     const keptRealIds = new Set(idMap.values());
     const toDelete = Array.from(existingIds).filter((id) => !keptRealIds.has(id));
     if (toDelete.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: delErr } = await (supabase as any)
+      
+      const { error: delErr } = await supabase
         .from(TABLE)
         .delete()
         .eq("asset_id", assetId)

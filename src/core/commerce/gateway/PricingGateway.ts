@@ -109,8 +109,8 @@ export const PricingGateway = {
   /** Fetch all contracts for a SKU. */
   async listForSku(skuId: string): Promise<ContractRow[]> {
     if (!skuId) return [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from(TABLE)
       .select("*")
       .eq("sku_id", skuId);
@@ -121,8 +121,8 @@ export const PricingGateway = {
   /** Resolve the asset's base SKU (lowest sort_order, active). */
   async resolveBaseSku(assetId: string): Promise<string | null> {
     if (!assetId) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
+    
+    const { data, error } = await supabase
       .from("salsabil_skus")
       .select("id")
       .eq("asset_id", assetId)
@@ -138,8 +138,8 @@ export const PricingGateway = {
   /** Wipe all contracts for a SKU (asset toggle off, or full clear). */
   async wipeForSku(skuId: string): Promise<void> {
     if (!skuId) return;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { error } = await (supabase as any)
+    
+    const { error } = await supabase
       .from(TABLE)
       .delete()
       .eq("sku_id", skuId);
@@ -169,8 +169,8 @@ export const PricingGateway = {
     }
 
     // 1. Snapshot live rows for diff.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: existing, error: fetchErr } = await (supabase as any)
+    
+    const { data: existing, error: fetchErr } = await supabase
       .from(TABLE)
       .select("id")
       .eq("sku_id", baseSkuId);
@@ -219,8 +219,8 @@ export const PricingGateway = {
     // 3. Upsert (single batch — no FK ordering needed since SKU + tiers
     //    are already persisted by the time we arrive here).
     if (resolved.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: upErr } = await (supabase as any)
+      
+      const { error: upErr } = await supabase
         .from(TABLE)
         .upsert(
           resolved.map((r) => r.row),
@@ -233,8 +233,8 @@ export const PricingGateway = {
     const keptIds = new Set(resolved.map((r) => r.row.id));
     const toDelete = Array.from(existingIds).filter((id) => !keptIds.has(id));
     if (toDelete.length > 0) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error: delErr } = await (supabase as any)
+      
+      const { error: delErr } = await supabase
         .from(TABLE)
         .delete()
         .eq("sku_id", baseSkuId)
