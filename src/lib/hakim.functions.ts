@@ -163,13 +163,9 @@ export const summonHakimArchitectFn = createServerFn({ method: "POST" })
     return { prompt };
   })
   .middleware([requireAdmin])
-  .handler(async ({ data, context }): Promise<HakimArchitectBlueprint> => {
-    const sb = context.supabase as SbAny;
-    const { data: out, error } = await sb.functions.invoke("hakim_architect", {
-      body: { prompt: data.prompt },
-    });
-    if (error) throw new Error(error.message ?? "ai_invoke_failed");
-    if (!out?.ok || !out?.blueprint) throw new Error(out?.error ?? "no_blueprint");
+  .handler(async ({ data }): Promise<HakimArchitectBlueprint> => {
+    const out = await runHakimArchitect(data.prompt);
+    if ("error" in out) throw new Error(String(out.error));
     return out.blueprint as HakimArchitectBlueprint;
   });
 
