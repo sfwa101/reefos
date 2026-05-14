@@ -308,10 +308,7 @@ export const useDriverEngine = (): DriverEngine => {
         patch.dropoff_lng = gps.lng;
       }
 
-      const { error } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .update(patch)
-        .eq("id", task.id);
+      const { error } = await DriverGateway.updateFulfillmentNode(task.id, patch);
       setBusyTaskId(null);
 
       if (error) {
