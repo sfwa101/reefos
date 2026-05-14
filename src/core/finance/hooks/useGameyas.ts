@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 export type GameyaCircle = {
   id: string;
@@ -67,12 +67,7 @@ export const useGameyas = (userId: string | null) => {
       return;
     }
     setLoading(true);
-    const { data: membership } = await supabase
-      .from("gam_eya_members")
-      .select(
-        "turn_number, gam_eyas(id, name, cycle_amount, max_members, current_cycle_index, status, starts_at, cycle_duration_months, reward_pool, min_kyc_tier)",
-      )
-      .eq("user_id", userId);
+    const membership = await FinanceGateway.listGameyaMemberships(userId);
 
     const rows: GameyaCircle[] = ((membership ?? []) as Array<{
       turn_number: number;
