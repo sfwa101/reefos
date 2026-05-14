@@ -28,6 +28,9 @@ export const EVENT_CATALOG = Object.freeze({
   KDS_TICKET_CREATED: "kds.ticket.created",
   KDS_TICKET_UPDATED: "kds.ticket.updated",
   LEDGER_TRANSACTION_APPENDED: "ledger.transaction.appended",
+  LEDGER_VARIANCE_RECORDED: "ledger.variance.recorded",
+  POS_SHIFT_OPENED: "pos.shift.opened",
+  POS_SHIFT_CLOSED: "pos.shift.closed",
 } as const);
 
 export type EventCatalogKey = keyof typeof EVENT_CATALOG;
