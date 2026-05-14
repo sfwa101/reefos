@@ -79,21 +79,32 @@ export function useVendorOperations() {
       if (e?.message) setError(e.message);
       return;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const rows: VendorProduct[] = ((data ?? []) as any[]).map((a) => {
+    type SkuRow = {
+      id?: string;
+      sort_order?: number;
+      is_active?: boolean;
+      salsabil_financial_contracts?: Array<{ base_price?: number | string | null }> | null;
+      salsabil_inventory_matrix?: Array<{ availability_data?: { stock?: number; qty?: number; is_active?: boolean } | null }> | null;
+    };
+    type AssetRow = {
+      id: string;
+      name: string;
+      category_path?: string | null;
+      media?: unknown;
+      salsabil_skus?: SkuRow[] | null;
+    };
+    const rows: VendorProduct[] = ((data ?? []) as unknown as AssetRow[]).map((a) => {
       const skus = (a.salsabil_skus ?? []).slice().sort(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (x: any, y: any) => (x.sort_order ?? 0) - (y.sort_order ?? 0),
+        (x, y) => (x.sort_order ?? 0) - (y.sort_order ?? 0),
       );
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const primary: any = skus.find((s: any) => s.is_active !== false) ?? skus[0] ?? {};
+      const primary: SkuRow = skus.find((s) => s.is_active !== false) ?? skus[0] ?? {};
       const price = Number(primary?.salsabil_financial_contracts?.[0]?.base_price ?? 0);
       const availability = primary?.salsabil_inventory_matrix?.[0]?.availability_data ?? {};
       const stock = Number(availability?.stock ?? availability?.qty ?? 0);
       const isActive = availability?.is_active ?? true;
       const media = a.media;
       const image = Array.isArray(media)
-        ? (typeof media[0] === "string" ? media[0] : media[0]?.url ?? null)
+        ? (typeof media[0] === "string" ? media[0] : (media[0] as { url?: string })?.url ?? null)
         : null;
       return {
         id: primary?.id ?? a.id, // sku id is the addressable unit for stock writes
@@ -127,20 +138,45 @@ export function useVendorOperations() {
     }
 
     const rows: VendorLiveOrderItem[] = [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (data ?? []).forEach((node: any) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const deliveryInfo: any = node?.salsabil_master_orders?.delivery_info ?? {};
+    type FulfillmentItemRow = {
+      id: string;
+      quantity: number;
+      price_at_time?: number | string | null;
+      created_at?: string | null;
+      salsabil_skus?: {
+        id?: string;
+        salsabil_assets?: {
+          id?: string;
+          name?: string;
+          media?: unknown;
+        } | null;
+      } | null;
+    };
+    type NodeRow = {
+      id: string;
+      master_order_id?: string | null;
+      status: string;
+      created_at?: string | null;
+      salsabil_master_orders?: {
+        delivery_info?: {
+          service_type?: string;
+          payment_method?: string | null;
+        } | null;
+      } | null;
+      salsabil_fulfillment_items?: FulfillmentItemRow[] | null;
+    };
+    ((data ?? []) as unknown as NodeRow[]).forEach((node) => {
+      const deliveryInfo = node?.salsabil_master_orders?.delivery_info ?? {};
       const serviceType = deliveryInfo?.service_type ?? "delivery";
       const paymentMethod = deliveryInfo?.payment_method ?? null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const fis: any[] = node?.salsabil_fulfillment_items ?? [];
+      const fis: FulfillmentItemRow[] = node?.salsabil_fulfillment_items ?? [];
       fis.forEach((it) => {
         const sku = it?.salsabil_skus;
         const asset = sku?.salsabil_assets;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const media = (asset?.media as any) ?? {};
-        const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+        const media = (asset?.media ?? {}) as unknown;
+        const image = Array.isArray(media)
+          ? ((media[0] as { url?: string })?.url ?? null)
+          : ((media as { url?: string })?.url ?? null);
         rows.push({
           id: it.id,
           order_id: node.master_order_id ?? node.id,
@@ -176,8 +212,7 @@ export function useVendorOperations() {
     if (vendorIds.length === 0) return;
     const ch = VendorGateway.subscribeVendorOps(vendorIds, {
       onFulfillmentNode: (payload) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const row = (payload.new ?? payload.old) as any;
+        const row = (payload.new ?? payload.old) as { vendor_id?: string } | undefined;
         if (!row?.vendor_id || !vendorIds.includes(row.vendor_id)) return;
         refreshLiveItems();
         if (payload.eventType === "INSERT") {
