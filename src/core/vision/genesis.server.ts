@@ -406,7 +406,7 @@ export interface VisionSkuVariantAxes {
 }
 export interface VisionSkuDTO {
   sku_code: string;
-  attributes: Record<string, unknown>;
+  attributes: JsonObject;
   barcode: string | null;
   variant_axes: VisionSkuVariantAxes | null;
 }
@@ -414,7 +414,7 @@ export interface VisionFinancialContractDTO {
   pricing_model: PricingModel;
   base_price: number;
   currency: Currency;
-  contract_rules: Record<string, unknown>;
+  contract_rules: JsonObject;
 }
 
 export interface VisionGenesisOutput {
