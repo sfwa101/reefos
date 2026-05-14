@@ -197,10 +197,8 @@ export const useDriverEngine = (): DriverEngine => {
     loadSurge();
 
     const nodesChannel = DriverGateway.subscribeDriverNodes(driverId, (payload) => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const n = (payload.new ?? {}) as any;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const o = (payload.old ?? {}) as any;
+      const n = (payload.new ?? {}) as { status?: string };
+      const o = (payload.old ?? {}) as { status?: string };
       if (n?.status === "delivered" && o?.status !== "delivered") {
         deliveredTodayRef.current += 1;
       }

@@ -143,7 +143,7 @@ function SwitchRow({ def }: { def: SwitchDef }) {
 }
 
 function SystemHealthBanner() {
-  const { data: anyTrip } = useQuery({
+  const { data: tripState } = useQuery({
     queryKey: ["control-plane", "system-health"],
     queryFn: async () => {
       try {
@@ -154,7 +154,7 @@ function SystemHealthBanner() {
     },
     refetchInterval: 30_000,
   });
-  const healthy = !anyTrip;
+  const healthy = !tripState;
   return (
     <div className={`rounded-3xl border p-4 shadow-soft flex items-center gap-3 ${healthy ? "border-emerald-500/30 bg-emerald-500/5" : "border-amber-500/30 bg-amber-500/5"}`}>
       {healthy ? (

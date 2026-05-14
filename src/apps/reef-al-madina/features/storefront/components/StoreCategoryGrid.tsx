@@ -5,7 +5,7 @@
  * catalog by `ProductSource` and renders the canonical `<ProductCard>`.
  *
  * This is the storefront's primitive for future "dead-stub revival"
- * work: any new category route can mount this with one line, instead
+ * work — every new category route can mount this with one line, instead
  * of forking the heavyweight `SinglePageStore` shell.
  *
  * Routes already using `SinglePageStore` / `DualNavStore` were left

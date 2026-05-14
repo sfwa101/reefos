@@ -6,6 +6,7 @@
  * is added to the schema union without a renderer registered here.
  */
 import type { ReactElement } from "react";
+import type { Control, FieldValues } from "react-hook-form";
 import type { AdminBlock } from "./schemas";
 import { FormFieldBlock } from "./blocks/FormFieldBlock";
 import { FieldGroupBlock } from "./blocks/FieldGroupBlock";
@@ -18,8 +19,7 @@ export interface AdminBlockContext {
   /** Current record (form mode) or row (table cell mode). */
   record?: Record<string, unknown>;
   /** react-hook-form control passthrough for form blocks. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  control?: any;
+  control?: Control<FieldValues>;
   /** Active locale (ar | en | …). */
   locale?: string;
 }

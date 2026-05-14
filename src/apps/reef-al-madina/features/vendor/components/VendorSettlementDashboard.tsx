@@ -292,7 +292,7 @@ export const VendorSettlementDashboard = () => {
             </div>
             <div>
               <Label className="text-[11px]">طريقة الاستلام</Label>
-              <Select value={method} onValueChange={(v) => setMethod(v as any)}>
+              <Select value={method} onValueChange={(v) => setMethod(v as VendorPayoutRequestRow["method"])}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>

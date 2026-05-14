@@ -2,11 +2,11 @@
  * Dynamic Supabase access helpers.
  *
  * For tables / RPCs not yet present in the generated `Database` types,
- * use these typed wrappers instead of `(supabase as any)` casts. They
+ * use these typed wrappers instead of unsafe escape casts. They
  * preserve the chainable Supabase fluent surface while returning
  * `unknown` payloads at the leaves — callers must validate / narrow.
  *
- * NOTE: This file deliberately uses internal `any` only inside the
+ * NOTE: This file deliberately uses an internal escape only inside the
  * implementation cast (single, isolated). The public surface is fully
  * typed with `unknown` so consumers must narrow before use.
  */

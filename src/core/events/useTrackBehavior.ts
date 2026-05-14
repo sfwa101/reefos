@@ -9,6 +9,7 @@
  * Writes are fire-and-forget; failures never break the host app.
  */
 import { useEffect } from "react";
+import type { Handler } from "mitt";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -24,6 +25,8 @@ const TRACKED_EVENTS: SalsabilEventName[] = [
   "cart.abandoned",
 ];
 
+type TrackedPayload = SalsabilEvents[SalsabilEventName];
+
 export function useTrackBehavior(): void {
   const { user } = useAuth();
 
@@ -31,8 +34,8 @@ export function useTrackBehavior(): void {
     if (!user?.id) return;
     const userId = user.id;
 
-    const makeHandler = (eventType: SalsabilEventName) => {
-      return (payload: unknown) => {
+    const makeHandler = (eventType: SalsabilEventName): Handler<TrackedPayload> => {
+      return (payload) => {
         const appId = (payload as { appId?: string })?.appId ?? "reef";
         void (supabase
           .from("user_behavior_events") as unknown as {
@@ -48,19 +51,18 @@ export function useTrackBehavior(): void {
       };
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const handlers: Array<readonly [SalsabilEventName, (p: any) => void]> =
+    const handlers: Array<readonly [SalsabilEventName, Handler<TrackedPayload>]> =
       TRACKED_EVENTS.map((evt) => {
         const h = makeHandler(evt);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eventBus.on(evt, h as any);
+        // mitt's `on()` requires a Handler typed against the specific event payload;
+        // our wildcard handler accepts the union, so narrow at the call site only.
+        eventBus.on(evt, h as Handler<SalsabilEvents[typeof evt]>);
         return [evt, h] as const;
       });
 
     return () => {
       for (const [evt, h] of handlers) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        eventBus.off(evt, h as any);
+        eventBus.off(evt, h as Handler<SalsabilEvents[typeof evt]>);
       }
     };
   }, [user?.id]);

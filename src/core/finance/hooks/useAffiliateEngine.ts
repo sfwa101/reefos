@@ -68,8 +68,16 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
       MarketingGateway.getUserAffiliateState(userId),
     ]);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const allTiers: AffiliateTier[] = ((tiers ?? []) as any[]).map((t: any) => ({
+    type RawTier = {
+      id: string;
+      name: string;
+      rank: number;
+      min_successful_invites: number;
+      commission_fixed: number | string;
+      unlocks_wholesale: boolean;
+      badge_emoji: string | null;
+    };
+    const allTiers: AffiliateTier[] = ((tiers ?? []) as unknown as RawTier[]).map((t) => ({
       id: t.id,
       name: t.name,
       rank: t.rank,
@@ -78,12 +86,16 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
       unlocks_wholesale: t.unlocks_wholesale,
       badge_emoji: t.badge_emoji,
     }));
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sr = stateRow as any;
+    const sr = stateRow as {
+      successful_invites?: number;
+      total_commission_earned?: number;
+      unlocks_wholesale?: boolean;
+      current_tier_id?: string;
+    } | null;
     const invites: number = sr?.successful_invites ?? 0;
 
     const currentTier =
-      allTiers.find((t) => t.id === stateRow?.current_tier_id) ??
+      allTiers.find((t) => t.id === sr?.current_tier_id) ??
       allTiers[0] ??
       null;
     const nextTier =

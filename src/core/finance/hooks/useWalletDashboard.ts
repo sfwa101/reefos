@@ -77,15 +77,16 @@ export const useWalletDashboard = () => {
       // Sovereign Matrix: walk master_orders → fulfillment_nodes → fulfillment_items.
       // App grouping is captured at master_orders.delivery_info.app_id (Phase VII-A invariant).
       const masterData = await FinanceGateway.listMasterOrdersWithFulfillmentNodes(userId);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const masters = masterData as any[];
+      type MasterRow = {
+        delivery_info?: { app_id?: string } | null;
+        salsabil_fulfillment_nodes?: Array<{ id: string }> | null;
+      };
+      const masters = masterData as unknown as MasterRow[];
       const nodeIds: string[] = [];
       const nodeApp: Record<string, string> = {};
       masters.forEach((m) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const appKey = (m.delivery_info as any)?.app_id ?? "reef";
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (m.salsabil_fulfillment_nodes ?? []).forEach((n: any) => {
+        const appKey = m.delivery_info?.app_id ?? "reef";
+        (m.salsabil_fulfillment_nodes ?? []).forEach((n) => {
           nodeIds.push(n.id);
           nodeApp[n.id] = appKey;
         });

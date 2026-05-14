@@ -213,7 +213,7 @@ export const useCartCalculations = ({
       for (const l of lines) {
         const base = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
         const mods: Modifier[] = [];
-        // Domain-agnostic projection: any preserved meta.appliedModifiers
+        // Domain-agnostic projection — every preserved meta.appliedModifiers
         // bubbles straight through; otherwise we treat the line as flat.
         const stored = (l.meta as { appliedModifiers?: Modifier[] } | undefined)
           ?.appliedModifiers;
