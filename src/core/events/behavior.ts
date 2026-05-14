@@ -29,7 +29,7 @@ export async function logBehavior(opts: {
   const key = `${opts.event}:${opts.productId ?? ""}:${opts.category ?? ""}:${opts.query ?? ""}`;
   if (!opts.force && !shouldSend(key)) return;
   try {
-    await (supabase as any).rpc("log_behavior", {
+    await supabase.rpc("log_behavior", {
       _event: opts.event,
       _product_id: opts.productId ?? null,
       _category: opts.category ?? null,
@@ -45,7 +45,7 @@ export async function logBehavior(opts: {
 export async function fetchCategoryAffinity(userId: string | null): Promise<string[]> {
   if (!userId) return [];
   try {
-    const { data } = await (supabase as any).rpc("category_affinity", { _user_id: userId });
+    const { data } = await supabase.rpc("category_affinity", { _user_id: userId });
     return ((data ?? []) as Array<{ category: string; score: number }>)
       .sort((a, b) => Number(b.score) - Number(a.score))
       .map((r) => r.category);
