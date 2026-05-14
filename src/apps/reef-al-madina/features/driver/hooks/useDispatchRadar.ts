@@ -60,16 +60,8 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     enabled: !!driverId,
     refetchInterval: 15_000,
     queryFn: async (): Promise<DispatchOffer[]> => {
-      const nowIso = new Date().toISOString();
-      const { data, error } = await supabase
-        .from("salsabil_dispatch_offers")
-        .select("id,node_id,driver_id,status,expires_at,created_at")
-        .eq("driver_id", driverId!)
-        .eq("status", "pending")
-        .gt("expires_at", nowIso)
-        .order("created_at", { ascending: true });
-      if (error) throw error;
-      return (data ?? []) as DispatchOffer[];
+      const data = await DriverGateway.listPendingDispatchOffers(driverId!);
+      return (data ?? []) as unknown as DispatchOffer[];
     },
   });
 
