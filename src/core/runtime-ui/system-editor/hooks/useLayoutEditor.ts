@@ -10,7 +10,7 @@
  * the DB trigger).
  */
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import type {
   SectionConfig,
   SectionKey,
