@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { POSGateway } from "@/core/cashier/gateway/POSGateway";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import type { PosCartLine, PosProduct, PosShift } from "../types/pos.types";
-import { fetchPosCatalog } from "@/lib/sovereignCatalog";
+import { fetchPosCatalog } from "@/core/catalog/gateway/SovereignCatalogGateway";
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { callSovereignCheckout } from "@/core/hakim-ai/hooks/useSovereignCheckout";
@@ -89,17 +89,9 @@ export function usePosEngine() {
   // Load active shift
   const refreshShift = useCallback(async () => {
     if (!user) { setShift(null); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("pos_shifts")
-      .select("*")
-      .eq("cashier_id", user.id)
-      .eq("status", "open")
-      .order("opened_at", { ascending: false })
-      .limit(1)
-      .maybeSingle();
+    const { shift: row, error } = await POSGateway.fetchOpenShiftForCashier(user.id);
     if (error) { console.error(error); return; }
-    setShift((data ?? null) as PosShift | null);
+    setShift((row ?? null) as PosShift | null);
   }, [user]);
 
   useEffect(() => {
@@ -238,25 +230,20 @@ export function usePosEngine() {
   // Shift management
   const openShift = useCallback(async (openingBalance: number, branchId: string | null) => {
     if (!user) { toast.error("غير مسجل دخول"); return null; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any)
-      .from("pos_shifts")
-      .insert({ cashier_id: user.id, branch_id: branchId, opening_balance: openingBalance })
-      .select("*").single();
-    if (error) { toast.error("تعذّر فتح الورديّة", { description: error.message }); return null; }
-    setShift(data as PosShift);
+    const { shift: row, error } = await POSGateway.openShift(user.id, branchId, openingBalance);
+    if (error || !row) { toast.error("تعذّر فتح الورديّة", { description: error ?? undefined }); return null; }
+    setShift(row as PosShift);
     toast.success("تم فتح الورديّة");
-    return data as PosShift;
+    return row as PosShift;
   }, [user]);
 
   const closeShift = useCallback(async (actualBalance: number) => {
     if (!shift) return null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data, error } = await (supabase as any).rpc("close_pos_shift", { _shift_id: shift.id, _actual_balance: actualBalance });
-    if (error) { toast.error("تعذّر إغلاق الورديّة", { description: error.message }); return null; }
+    const { shift: row, error } = await POSGateway.closeShift(shift.id, actualBalance);
+    if (error) { toast.error("تعذّر إغلاق الورديّة", { description: error }); return null; }
     setShift(null);
     toast.success("تم إغلاق الورديّة");
-    return data as PosShift;
+    return row as PosShift;
   }, [shift]);
 
   // Checkout — Sovereign POS pipeline (Phase POS-2 Step 2):
@@ -326,12 +313,9 @@ export function usePosEngine() {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payRes = await (supabase as any).rpc("process_pos_cash_payment", {
-      p_order_id: orderId,
-      p_amount: authoritativeTotal,
-    });
+    const payRes = await POSGateway.processCashPayment(orderId, authoritativeTotal);
     if (payRes.error) {
-      if (isLikelyNetworkError(payRes.error)) {
+      if (isLikelyNetworkError({ message: payRes.error })) {
         await enqueueOfflineMutation({
           op: "rpc",
           rpcName: "process_pos_cash_payment",
@@ -339,20 +323,17 @@ export function usePosEngine() {
         });
         toast.warning("الطلب أُنشئ — الدفع سيُسوّى بعد الاتصال");
       } else {
-        toast.error("تعذّر تسوية الدفع", { description: payRes.error.message });
+        toast.error("تعذّر تسوية الدفع", { description: payRes.error });
         return null;
       }
     }
 
     // Shift counters (best-effort — non-fatal) — server total
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any)
-      .from("pos_shifts")
-      .update({
-        total_sales: shift.total_sales + authoritativeTotal,
-        total_orders: shift.total_orders + 1,
-      })
-      .eq("id", shift.id);
+    await POSGateway.incrementShiftCounters(
+      shift.id,
+      shift.total_sales + authoritativeTotal,
+      shift.total_orders + 1,
+    );
     setShift(s => s ? { ...s, total_sales: s.total_sales + authoritativeTotal, total_orders: s.total_orders + 1 } : s);
 
     const change = tendered - authoritativeTotal;
