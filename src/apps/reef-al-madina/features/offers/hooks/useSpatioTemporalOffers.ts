@@ -70,18 +70,13 @@ export const useSpatioTemporalOffers = () => {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const db = supabase as unknown as MatrixDb;
-      const { data, error } = await db
-        .from("offers_matrix")
-        .select("*")
-        .eq("is_active", true)
-        .order("priority", { ascending: false });
+      const { data, error } = await MarketingGateway.listActiveOffersMatrix();
       if (cancelled) return;
       if (error) {
         // eslint-disable-next-line no-console
         console.warn("[offers_matrix] load error", error.message);
       }
-      setRawRows(data ?? []);
+      setRawRows((data ?? []) as unknown as OfferMatrixRow[]);
       setLoading(false);
     };
     void load();
