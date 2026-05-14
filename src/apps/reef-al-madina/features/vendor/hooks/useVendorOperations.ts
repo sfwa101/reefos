@@ -71,21 +71,14 @@ export function useVendorOperations() {
     // The vendor cockpit now reads from salsabil_assets ➜ skus ➜ contracts/inventory
     // (vendor_id scoping at the asset level is a future phase; for now we expose
     // the active catalog so vendors can see/edit stock + price on Sovereign rows).
-    const { data, error } = await supabase
-      .from("salsabil_assets")
-      .select(`
-        id, name, category_path, media,
-        salsabil_skus (
-          id, sort_order, is_active,
-          salsabil_financial_contracts ( base_price ),
-          salsabil_inventory_matrix ( availability_data )
-        )
-      `)
-      .eq("is_active", true)
-      .eq("asset_type", "physical")
-      .order("name")
-      .limit(500);
-    if (error) { setError(error.message); return; }
+    let data: unknown[];
+    try {
+      data = await VendorGateway.listSovereignAssetsCatalog();
+    } catch (err) {
+      const e = err as { message?: string };
+      if (e?.message) setError(e.message);
+      return;
+    }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rows: VendorProduct[] = ((data ?? []) as any[]).map((a) => {
       const skus = (a.salsabil_skus ?? []).slice().sort(
