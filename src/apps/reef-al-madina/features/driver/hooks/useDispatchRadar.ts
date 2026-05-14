@@ -47,12 +47,8 @@ export function useDispatchRadar(): UseDispatchRadarResult {
     (async () => {
       const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) return;
-      const { data } = await supabase
-        .from("drivers")
-        .select("id")
-        .eq("user_id", uid)
-        .maybeSingle();
-      if (!cancelled) setDriverId((data?.id as string | undefined) ?? null);
+      const id = await DriverGateway.getDriverIdForUser(uid);
+      if (!cancelled) setDriverId(id);
     })();
     return () => {
       cancelled = true;
