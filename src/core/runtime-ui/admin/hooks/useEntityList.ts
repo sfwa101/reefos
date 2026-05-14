@@ -1,9 +1,9 @@
 /**
  * useEntityList — server-paginated infinite scroll for any registered
- * entity. Uses Supabase `.range()` exclusively. Zero client-side filtering.
+ * entity. Routed through RuntimeUIGateway.
  */
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 
 export const ENTITY_PAGE_SIZE = 50;
 
@@ -29,24 +29,20 @@ export function useEntityList(
       const to = from + ENTITY_PAGE_SIZE - 1;
       // P0: only request `exact` count on the first page; subsequent infinite
       // scroll pages skip the count entirely (massive p99 win on huge tables).
-      const selectOpts = pageParam === 0 ? { count: "exact" as const } : undefined;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      let q: any = supabase
-        .from(tableName as never)
-        .select("*", selectOpts)
-        .range(from, to);
-
-      if (filters.eq) {
-        for (const [k, v] of Object.entries(filters.eq)) q = q.eq(k, v);
-      }
-      if (filters.orderBy) {
-        q = q.order(filters.orderBy.column, { ascending: filters.orderBy.ascending ?? true });
-      }
-      const { data, error, count } = await q;
+      const { data, count, error } = await RuntimeUIGateway.listEntityRows(
+        tableName as string,
+        {
+          from,
+          to,
+          withCount: pageParam === 0,
+          eq: filters.eq,
+          orderBy: filters.orderBy,
+        },
+      );
       if (error) throw error;
       return {
-        rows: (data ?? []) as Record<string, unknown>[],
-        nextPage: (data?.length ?? 0) < ENTITY_PAGE_SIZE ? null : pageParam + 1,
+        rows: data,
+        nextPage: data.length < ENTITY_PAGE_SIZE ? null : pageParam + 1,
         total: count ?? 0,
       };
     },
