@@ -6,7 +6,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid, BarChart, Bar } from "recharts";
 import ReactMarkdown from "react-markdown";
 import { getExecutiveDashboardStatsFn } from "@/core/finance/finance.functions";
-import { getHakimAdvisorReportFn } from "@/lib/hakim.functions";
+import { getHakimAdvisorReportFn } from "@/core/hakim-ai/hakim-admin.functions";
 
 type Stats = {
   period_days: number;

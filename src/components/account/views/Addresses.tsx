@@ -6,7 +6,7 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "@/context/AuthContext";
-import { deleteAddressFn, listMyAddressesFn, setDefaultAddressFn } from "@/lib/user.functions";
+import { deleteAddressFn, listMyAddressesFn, setDefaultAddressFn } from "@/core/identity/user.functions";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";

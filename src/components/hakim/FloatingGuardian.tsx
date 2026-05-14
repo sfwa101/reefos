@@ -28,7 +28,7 @@ import {
   markHakimInsightReadFn,
   type HakimInsight,
   type HakimSnapshot,
-} from "@/lib/user.functions";
+} from "@/core/identity/user.functions";
 import {
   hakimInsightsQueryOptions,
   hakimSnapshotQueryOptions,

@@ -5,7 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { useSystemSetting, setSystemSetting } from "@/hooks/useSystemSettings";
 import { createTraceId, logSovereignEvent } from "@/lib/sovereignTracing";
-import { getCircuitBreakerForKeyFn, getSystemHealthBreakerFn } from "@/lib/sovereign.functions";
+import { getCircuitBreakerForKeyFn, getSystemHealthBreakerFn } from "@/core/system/sovereign.functions";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
 

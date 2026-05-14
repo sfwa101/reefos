@@ -3,7 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
-import { pledgeGroupBuyFn } from "@/lib/group-buy.functions";
+import { pledgeGroupBuyFn } from "@/core/marketing/group-buy.functions";
 import {
   groupBuyCampaignQueryOptions,
   myGroupBuyPledgeQueryOptions,

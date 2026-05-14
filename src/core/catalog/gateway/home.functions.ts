@@ -16,7 +16,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 
-import { getPublicLayoutFn } from "@/lib/section-manager.functions";
+import { getPublicLayoutFn } from "@/core/sections/section-manager.functions";
 import { listProductsBySectionFn } from "@/core/catalog/service/catalog.functions";
 import type { MobileHomeLayoutV1 } from "@/lib/section-manager.types";
 import type { ProductCardVM } from "@/core/catalog/types";

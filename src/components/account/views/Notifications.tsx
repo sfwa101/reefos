@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import BackHeader from "@/components/BackHeader";
 import { Bell, Tag, Truck, Sparkles, Gift, Loader2, CheckCheck, type LucideIcon } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { listMyNotificationsFn, markAllNotificationsReadFn } from "@/lib/user.functions";
+import { listMyNotificationsFn, markAllNotificationsReadFn } from "@/core/identity/user.functions";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 

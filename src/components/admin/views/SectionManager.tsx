@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import {
   getAppSettingsFn,
   upsertAppSettingFn,
-} from "@/lib/admin-settings.functions";
+} from "@/core/system/admin-settings.functions";
 import {
   MOBILE_HOME_LAYOUT_DRAFT_KEY,
   MOBILE_HOME_LAYOUT_KEY,

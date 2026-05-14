@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { RealtimeGateway } from "@/core/events/gateway/RealtimeGateway";
-import { listEventTimelineFn, type SovereignEventRow } from "@/lib/sovereign.functions";
+import { listEventTimelineFn, type SovereignEventRow } from "@/core/system/sovereign.functions";
 
 export type LiveTimelineEvent = SovereignEventRow;
 

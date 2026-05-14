@@ -9,7 +9,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   getPublicLayoutFn,
   DEFAULT_MOBILE_HOME_LAYOUT,
-} from "@/lib/section-manager.functions";
+} from "@/core/sections/section-manager.functions";
 import type { LayoutBlock, MobileHomeLayoutV1 } from "@/lib/section-manager.types";
 import { useCapability } from "@/hooks/useCapability";
 

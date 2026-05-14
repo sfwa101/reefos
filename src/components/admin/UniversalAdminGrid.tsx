@@ -6,7 +6,7 @@ import { useVirtualizer } from "@tanstack/react-virtual";
 import { Search, ChevronLeft, Inbox, Rows3, Rows2, type LucideIcon } from "lucide-react";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { listAdminGridFn } from "@/lib/admin-grid.functions";
+import { listAdminGridFn } from "@/core/runtime-ui/admin/admin-grid.functions";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 

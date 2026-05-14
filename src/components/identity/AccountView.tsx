@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useTheme } from "@/context/ThemeContext";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
-import { getMyAccountHubFn } from "@/lib/user.functions";
+import { getMyAccountHubFn } from "@/core/identity/user.functions";
 import { tierProgress } from "@/lib/tiers";
 import { useUserRoles } from "@/hooks/useUserRoles";
 import { formatCustomerId } from "@/apps/reef-al-madina/features/account/lib/customerId";

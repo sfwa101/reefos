@@ -1,7 +1,7 @@
 import { Eye, Lightbulb, Sparkles, Target, TrendingUp } from "lucide-react";
 import { toast } from "sonner";
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
-import { markHakimInsightReadFn } from "@/lib/hakim.functions";
+import { markHakimInsightReadFn } from "@/core/hakim-ai/hakim-admin.functions";
 import { fmtNum, fmtRelative } from "@/lib/format";
 
 interface InsightRow {
