@@ -346,11 +346,11 @@ export async function prepareHakimChatStream(
   const LOVABLE_API_KEY = process.env.LOVABLE_API_KEY;
   if (!LOVABLE_API_KEY) return { ok: false, status: 500, error: "missing_key" };
 
-  const { data: report, error: repErr } = await userClient.rpc("hakim_deep_report", {
+  const userRpc = userClient.rpc.bind(userClient) as unknown as DynamicRpc;
+  const { data: report, error: repErr } = await userRpc<Json>("hakim_deep_report", {
     _from: body.period_from ?? null,
     _to: body.period_to ?? null,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as AnyJson);
+  });
   if (repErr) return { ok: false, status: 403, error: repErr.message };
 
   const { data: userRes } = await userClient.auth.getUser();
@@ -360,10 +360,8 @@ export async function prepareHakimChatStream(
   let sid = body.session_id ?? undefined;
   if (!sid) {
     const { data: ses } = await supabaseAdmin
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .from("hakim_chat_sessions" as any)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .insert({ user_id: userId, title: body.message.slice(0, 60) } as any)
+      .from("hakim_chat_sessions")
+      .insert({ user_id: userId, title: body.message.slice(0, 60) })
       .select()
       .single();
     sid = (ses as { id?: string } | null)?.id ?? undefined;
@@ -371,14 +369,11 @@ export async function prepareHakimChatStream(
   if (!sid) return { ok: false, status: 500, error: "session_create_failed" };
 
   await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_chat_messages" as any)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .insert({ session_id: sid, role: "user", content: body.message } as any);
+    .from("hakim_chat_messages")
+    .insert({ session_id: sid, role: "user", content: body.message });
 
   const { data: hist } = await supabaseAdmin
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .from("hakim_chat_messages" as any)
+    .from("hakim_chat_messages")
     .select("role, content")
     .eq("session_id", sid)
     .order("created_at", { ascending: true })
