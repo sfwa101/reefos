@@ -65,10 +65,10 @@ export function WithdrawDialog({
     }
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc("request_user_payout", {
-        _amount: parsed.data.amount,
-        _method: parsed.data.method,
-        _bank_details: {
+      const { data, error } = await FinanceGateway.requestUserPayout({
+        amount: parsed.data.amount,
+        method: parsed.data.method,
+        bankDetails: {
           account: parsed.data.account,
           holder: parsed.data.holder,
         },
