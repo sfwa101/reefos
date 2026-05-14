@@ -14,7 +14,7 @@
  * which atomically writes the vendor's settlement row.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { DriverGateway } from "@/core/logistics/gateway/DriverGateway";
 import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
