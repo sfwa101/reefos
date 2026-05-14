@@ -430,12 +430,12 @@ export function UniversalAdminGrid<T = any>({
  * Computes m.compute(filtered) ONCE per [metrics, filtered] tuple instead of
  * on every virtualizer scroll re-render of the parent grid.
  */
-const BentoMetricsRow = memo(function BentoMetricsRow({
+function BentoMetricsRowImpl<T>({
   metrics,
   filtered,
 }: {
-  metrics: BentoMetric[];
-  filtered: any[];
+  metrics: BentoMetric<T>[];
+  filtered: T[];
 }) {
   const computed = useMemo(
     () =>
@@ -453,6 +453,12 @@ const BentoMetricsRow = memo(function BentoMetricsRow({
       ))}
     </div>
   );
-});
+}
+/**
+ * Phase U — Memoized Bento metrics row.
+ * `memo` strips generics — re-cast to the generic impl so callers get
+ * fully-typed `BentoMetric<T>[]` props.
+ */
+const BentoMetricsRow = memo(BentoMetricsRowImpl) as typeof BentoMetricsRowImpl;
 
 export default UniversalAdminGrid;
