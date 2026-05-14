@@ -167,10 +167,11 @@ async function fetchAllProducts(): Promise<Product[]> {
 
 export const productsQueryOptions = () =>
   queryOptions({
-    queryKey: PRODUCTS_QUERY_KEY,
+    queryKey: PRODUCTS_QUERY_KEY(),
     queryFn: fetchAllProducts,
     staleTime: STALE_MS,
     gcTime: GC_MS,
+    enabled: getWorkspaceIdSync() !== null,
   });
 
 /** SWR-cached full Sovereign catalog. */
