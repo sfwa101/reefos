@@ -207,7 +207,7 @@ export const VendorGateway = {
           sku_id: skuId,
           inventory_type: "stock",
           availability_data: availabilityData,
-        },
+        } as never,
         { onConflict: "sku_id" },
       );
     return { error: error ? { message: error.message } : null };
@@ -300,7 +300,7 @@ export const VendorGateway = {
         _amount: args.amount,
         _method: args.method,
         _bank_details: args.bankDetails ?? {},
-      },
+      } as never,
     );
     return { data, error: error ? { message: error.message } : null };
   },

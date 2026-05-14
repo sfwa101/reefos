@@ -299,7 +299,7 @@ export const manageStaffRoleFn = createServerFn({ method: "POST" })
     };
     if (data.role_id) args.p_role_id = data.role_id;
     if (typeof data.is_active === "boolean") args.p_is_active = data.is_active;
-    const { error } = await sb.rpc("admin_manage_staff_role", args);
+    const { error } = await sb.rpc("admin_manage_staff_role", args as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -391,7 +391,7 @@ export const assignRoleFn = createServerFn({ method: "POST" })
       p_user_id: data.user_id,
       p_role: data.role,
       p_action: "insert",
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });
@@ -415,7 +415,7 @@ export const revokeRoleFn = createServerFn({ method: "POST" })
       p_role: data.role,
       p_action: "delete",
       p_role_id: data.role_id,
-    });
+    } as never);
     if (error) throw new Error(error.message);
     return { ok: true as const };
   });

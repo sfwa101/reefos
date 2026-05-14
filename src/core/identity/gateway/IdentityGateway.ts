@@ -173,17 +173,19 @@ export const IdentityGateway = {
       .eq("is_active", true)
       .order("sort_order", { ascending: true });
     if (error) throw error;
-    return (data ?? []) as PersonaRowVM[];
+    return (data ?? []) as unknown as PersonaRowVM[];
   },
 
   // ─── Loyalty ────────────────────────────────────────────────────────────
   async getLoyaltyProgress(userId: string): Promise<LoyaltyProgressVM | null> {
     if (!userId) return null;
     
-    const { data } = await supabase.rpc("progress_to_next_level", {
-      _user_id: userId,
-    });
-    return (data as LoyaltyProgressVM) ?? null;
+    const rpc = supabase.rpc as unknown as (
+      name: string,
+      args: Record<string, unknown>,
+    ) => Promise<{ data: unknown; error: { message: string } | null }>;
+    const { data } = await rpc("progress_to_next_level", { _user_id: userId });
+    return (data as unknown as LoyaltyProgressVM) ?? null;
   },
 
   // ─── Payment methods ────────────────────────────────────────────────────
@@ -197,7 +199,7 @@ export const IdentityGateway = {
         .eq("user_id", userId)
         .order("is_default", { ascending: false });
       if (error || !Array.isArray(data)) return [];
-      return data as PaymentMethodVM[];
+      return data as unknown as PaymentMethodVM[];
     } catch {
       return [];
     }
