@@ -169,13 +169,8 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
     const fetchProfileTier = async (id: string) => {
       try {
-        const { data, error } = await supabase
-          .from("profiles")
-          .select("loyalty_tier")
-          .eq("id", id)
-          .maybeSingle();
-        if (error || cancelled) return;
-        const raw = (data as { loyalty_tier?: unknown } | null)?.loyalty_tier;
+        const raw = await CartGateway.fetchLoyaltyTier(id);
+        if (cancelled) return;
         setTier(isCustomerTier(raw) ? raw : "bronze");
       } catch {
         /* keep current tier */
