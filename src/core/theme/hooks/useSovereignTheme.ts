@@ -11,7 +11,7 @@
  */
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { ThemeGateway, type SovereignThemeRow, type ThemeDnaPayload as GwDna } from "@/core/theme/gateway/ThemeGateway";
 import { useAuthOptional } from "@/context/AuthContext";
 import {
   useSovereignContext,
