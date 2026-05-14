@@ -180,7 +180,7 @@ export const groupBySupermarketTaxonomy = (
     if (subs.length) out.push({ group, subs });
   }
 
-  // Fallback bucket: any product the admin added with a custom category that
+  // Fallback bucket — every product the admin added with a custom category that
   // doesn't match any matcher above still shows up here, grouped by its
   // `category` string from the DB. This keeps newly-added products visible
   // without requiring a code change to the taxonomy.

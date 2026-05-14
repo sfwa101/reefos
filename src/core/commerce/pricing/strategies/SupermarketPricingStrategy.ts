@@ -56,7 +56,7 @@ export class SupermarketPricingStrategy
   canHandle(context: PricingContext): boolean {
     const src = context.product.source;
     if (SUPERMARKET_FALLBACK_SOURCES.has(src)) return true;
-    // Final safety net: any per-piece SKU we don't recognise still
+    // Final safety net — every per-piece SKU we don't recognise still
     // gets discounts + points instead of being silently skipped.
     const unit = context.product.unit?.toLowerCase() ?? "";
     if (unit === "piece" || unit === "قطعة" || unit === "علبة" || unit === "كيس") {

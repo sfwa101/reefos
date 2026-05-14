@@ -47,7 +47,7 @@ export async function fetchVendorPortalStats(): Promise<{
   error: { message: string } | null;
 }> {
   // `vendor_portal_stats` is not present in the generated Functions map;
-  // call through a typed callable rather than `as any`.
+  // call through a typed callable rather than an unsafe escape.
   const rpc = supabase.rpc as unknown as (
     name: string,
   ) => Promise<{ data: unknown; error: { message: string } | null }>;

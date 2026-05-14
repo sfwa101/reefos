@@ -1,4 +1,4 @@
-// Strict Marketing Hub types — replaces every `as any` usage in the legacy file.
+// Strict Marketing Hub types — replaces every unsafe escape usage in the legacy file.
 // Keep this file the SOLE source of truth for the three Marketing panels.
 
 export type Tier = "bronze" | "silver" | "gold" | "platinum";

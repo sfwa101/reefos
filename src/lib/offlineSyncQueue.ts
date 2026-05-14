@@ -110,7 +110,7 @@ export const offlineQueueSize = async (): Promise<number> =>
 
 const executeOne = async (item: QueuedItem): Promise<void> => {
   // Dynamic RPC / table names cannot be expressed via Supabase's literal-key
-  // generics; cast supabase to a typed callable shape instead of `as any`.
+  // generics; cast supabase to a typed callable shape instead of an unsafe escape.
   type DynamicRpc = (
     name: string,
     payload: Record<string, unknown>,
