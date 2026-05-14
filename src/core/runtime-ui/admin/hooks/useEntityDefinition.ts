@@ -50,25 +50,19 @@ export function useEntityDefinition(entityKey: string | undefined) {
     enabled: !!entityKey,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data: def, error: dErr } = await supabase
-        .from("entity_definitions")
-        .select("*")
-        .eq("key", entityKey!)
-        .maybeSingle();
+      const { data: def, error: dErr } = await RuntimeUIGateway.getEntityDefinition(entityKey!);
       if (dErr) throw dErr;
       if (!def) return null;
 
       const [attrs, schemas] = await Promise.all([
-        supabase.from("entity_attributes")
-          .select("*").eq("entity_id", def.id).order("sort_order"),
-        supabase.from("admin_form_schemas")
-          .select("*").eq("entity_id", def.id).eq("active", true),
+        RuntimeUIGateway.listEntityAttributes(def.id as string),
+        RuntimeUIGateway.listActiveFormSchemas(def.id as string),
       ]);
       if (attrs.error) throw attrs.error;
       if (schemas.error) throw schemas.error;
 
-      const attributes: EntityAttributeRow[] = (attrs.data ?? []).map((a) => {
-        const row = a as Record<string, unknown>;
+      const attributes: EntityAttributeRow[] = (attrs.data ?? []).map((a: Record<string, unknown>) => {
+        const row = a;
         return {
           id: row.id as string,
           key: row.key as string,
