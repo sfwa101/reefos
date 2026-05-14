@@ -5,7 +5,7 @@
 import { useState, type FormEvent } from "react";
 import { z } from "zod";
 import { Loader2, Send, Camera, ImagePlus, CheckCircle2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { insertProductRequest } from "@/core/catalog/gateway/SovereignCatalogGateway";
 import { IdentityGateway } from "@/core/identity";
 import type { ProductRequestPayload } from "../types";
 
@@ -62,9 +62,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
       image_url: parsed.data.image_url?.trim() ? parsed.data.image_url.trim() : null,
     };
     setLoading(true);
-    const { error: dbErr } = await supabase
-      .from("product_requests")
-      .insert({ ...payload, user_id: uid });
+    const { error: dbErr } = await insertProductRequest({ ...payload, user_id: uid });
     setLoading(false);
     if (dbErr) {
       setError("تعذر إرسال الطلب، حاول لاحقاً");

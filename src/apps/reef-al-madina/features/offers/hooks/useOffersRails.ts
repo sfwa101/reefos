@@ -1,20 +1,7 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { isFrequencyActive } from "@/core/engine/offers/frequency";
 import type { StorefrontRail } from "../types/rail";
-
-type RailsDb = {
-  from(table: "storefront_rails"): {
-    select(s: string): {
-      eq(col: string, val: boolean): {
-        order(c: string, o: { ascending: boolean }): Promise<{
-          data: StorefrontRail[] | null;
-          error: { message: string } | null;
-        }>;
-      };
-    };
-  };
-};
 
 const isLive = (r: StorefrontRail, now: Date): boolean => {
   const ms = now.getTime();
@@ -31,15 +18,10 @@ export const useOffersRails = () => {
   useEffect(() => {
     let cancelled = false;
     const load = async () => {
-      const db = supabase as unknown as RailsDb;
-      const { data } = await db
-        .from("storefront_rails")
-        .select("*")
-        .eq("is_active", true)
-        .order("sort_order", { ascending: true });
+      const data = await MarketingGateway.listActiveStorefrontRails();
       if (cancelled) return;
       const now = new Date();
-      setRails((data ?? []).filter((r) => isLive(r, now)));
+      setRails((data as unknown as StorefrontRail[]).filter((r) => isLive(r, now)));
       setLoading(false);
     };
     void load();
@@ -50,4 +32,3 @@ export const useOffersRails = () => {
 
   return { rails, loading };
 };
-

@@ -15,7 +15,11 @@
 // surfaces all already expect.
 
 import { queryOptions, useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import {
+  fetchCatalogQueryRows,
+  fetchCatalogHomeRows,
+  type CatalogQueryRow,
+} from "@/core/catalog/gateway/SovereignCatalogGateway";
 import {
   type Product,
   type ProductSource,
@@ -92,28 +96,7 @@ const sourceFromCategory = (path: string | null): ProductSource => {
   return map[head] ?? "supermarket";
 };
 
-type SovereignRow = {
-  id: string;
-  name: string;
-  description: string | null;
-  category_path: string | null;
-  traits: Record<string, unknown> | null;
-  media: unknown;
-  salsabil_skus: Array<{
-    id: string;
-    sku_code: string;
-    attributes: Record<string, unknown> | null;
-    sort_order: number | null;
-    is_active: boolean | null;
-    salsabil_financial_contracts: Array<{
-      base_price: number | string | null;
-      currency: string | null;
-    }> | null;
-    salsabil_inventory_matrix: Array<{
-      availability_data: Record<string, unknown> | null;
-    }> | null;
-  }> | null;
-};
+type SovereignRow = CatalogQueryRow;
 
 function rowToProduct(row: SovereignRow): Product | null {
   const skus = row.salsabil_skus ?? [];
@@ -181,31 +164,11 @@ function rowToProduct(row: SovereignRow): Product | null {
   };
 }
 
-const SOVEREIGN_SELECT = `
-  id, name, description, category_path, traits, media,
-  salsabil_skus (
-    id, sku_code, attributes, sort_order, is_active,
-    salsabil_financial_contracts ( base_price, currency ),
-    salsabil_inventory_matrix ( availability_data )
-  )
-`;
-
 async function fetchAllProducts(): Promise<Product[]> {
   if (!isBrowser) return [];
-  const { data, error } = await supabase
-    .from("salsabil_assets")
-    .select(SOVEREIGN_SELECT)
-    .eq("is_active", true)
-    .eq("asset_type", "physical")
-    .order("created_at", { ascending: false })
-    .limit(2000);
-  if (error) {
-    console.error("[catalog] sovereign fetch failed:", error);
-    return [];
-  }
-  const rows = (data ?? []) as unknown as SovereignRow[];
+  const rows = await fetchCatalogQueryRows();
   return rows
-    .map(rowToProduct)
+    .map((r) => rowToProduct(r as SovereignRow))
     .filter((p): p is Product => p != null);
 }
 
@@ -246,38 +209,13 @@ export function useProductQuery(id: string | undefined) {
  * base64 blobs). We hydrate `image` with the lightweight FALLBACK_IMG
  * placeholder; product detail pages use the full select to fetch real media.
  */
-const MINIMAL_SOVEREIGN_SELECT = `
-  id, name, description, category_path, traits,
-  salsabil_skus (
-    id, sku_code, attributes, sort_order, is_active,
-    salsabil_financial_contracts ( base_price, currency ),
-    salsabil_inventory_matrix ( availability_data )
-  )
-`;
-
 async function fetchHomeProducts(
   limit: number,
   source?: ProductSource,
 ): Promise<Product[]> {
-  let q = supabase
-    .from("salsabil_assets")
-    .select(MINIMAL_SOVEREIGN_SELECT)
-    .eq("is_active", true)
-    .eq("asset_type", "physical")
-    .order("created_at", { ascending: false })
-    .limit(limit * 2); // overfetch; we filter by source after mapping
-  if (source) {
-    // category_path's leading segment encodes the source.
-    q = q.ilike("category_path", `${source}%`);
-  }
-  const { data, error } = await q;
-  if (error) {
-    console.error("[useHomeProductsQuery] sovereign fetch failed:", error);
-    return [];
-  }
-  const rows = (data ?? []) as unknown as SovereignRow[];
+  const rows = await fetchCatalogHomeRows(limit, source ?? null);
   const mapped = rows
-    .map((r) => rowToProduct({ ...r, media: null }))
+    .map((r) => rowToProduct({ ...(r as SovereignRow), media: null }))
     .filter((p): p is Product => p != null);
   const filtered = source ? mapped.filter((p) => p.source === source) : mapped;
   const sliced = filtered.slice(0, limit);

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // Wave P-3 — All Supabase access (including realtime) routed through the
-// Sovereign CartGateway. This file no longer imports `@/integrations/supabase/client`.
+// Sovereign CartGateway. Direct client imports are prohibited.
 import { CartGateway } from "@/core/orders/gateway/CartGateway";
 import {
   hydrateSharedCartFn,

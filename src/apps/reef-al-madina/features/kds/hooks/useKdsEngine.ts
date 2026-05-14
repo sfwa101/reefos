@@ -1,13 +1,14 @@
 /**
- * useKdsEngine — Phase 55.
+ * useKdsEngine — Phase 55. Wave P-3 Sub-Wave 11: Supabase access (incl.
+ * realtime) routed through KdsGateway.
  *
- * Live feed of kitchen-bound fulfillment nodes. Loads pending/preparing nodes
- * with their items + SKU names, then subscribes via `useVisibilitySocket`
- * (Phase 44 governance) to react to inserts/updates without burning an idle
- * socket when the tab is hidden.
+ * Live feed of kitchen-bound fulfillment nodes. Loads pending/preparing
+ * nodes with their items + SKU names, then subscribes via
+ * `useVisibilitySocket` (Phase 44 governance) to react to inserts/updates
+ * without burning an idle socket when the tab is hidden.
  */
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { KdsGateway } from "@/core/kds/gateway/KdsGateway";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 import { readPrepMeta, type PrepMeta, type PrepStatus } from "../types";
 
@@ -32,39 +33,14 @@ export interface KdsTicket {
 const ACTIVE_NODE_STATUSES = ["pending", "assigned", "preparing", "ready_for_pickup"];
 
 const fetchTickets = async (): Promise<KdsTicket[]> => {
-  // 1. Load active nodes
-  const { data: nodes, error } = await supabase
-    .from("salsabil_fulfillment_nodes")
-    .select("id, master_order_id, status, total_amount, notes, created_at, delivery_snapshot")
-    .in("status", ACTIVE_NODE_STATUSES)
-    .order("created_at", { ascending: true });
-  if (error) throw error;
-  const list = (nodes ?? []) as Array<{
-    id: string;
-    master_order_id: string | null;
-    status: string;
-    total_amount: number;
-    notes: string | null;
-    created_at: string;
-    delivery_snapshot: unknown;
-  }>;
+  const list = await KdsGateway.fetchActiveNodes(ACTIVE_NODE_STATUSES);
   if (list.length === 0) return [];
 
-  // 2. Load items for those nodes (+ sku names)
   const ids = list.map((n) => n.id);
-  const { data: items } = await supabase
-    .from("salsabil_fulfillment_items")
-    .select("id, node_id, sku_id, quantity, salsabil_skus(name_ar, sku_code)")
-    .in("node_id", ids);
+  const items = await KdsGateway.fetchItemsForNodes(ids);
 
   const itemsByNode = new Map<string, KdsItem[]>();
-  for (const raw of (items ?? []) as Array<{
-    id: string;
-    node_id: string;
-    sku_id: string;
-    quantity: number;
-    salsabil_skus: { name_ar?: string | null; sku_code?: string | null } | null;
-  }>) {
+  for (const raw of items) {
     const arr = itemsByNode.get(raw.node_id) ?? [];
     arr.push({
       id: raw.id,
@@ -111,15 +87,10 @@ export const useKdsEngine = () => {
   // Realtime — visibility-governed
   useVisibilitySocket(
     () => {
-      const channel = supabase
-        .channel("kds-fulfillment-nodes")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-          () => { refresh(); },
-        )
-        .subscribe();
-      return () => { supabase.removeChannel(channel); };
+      const channel = KdsGateway.subscribeFulfillmentNodes(() => {
+        refresh();
+      });
+      return () => { channel.unsubscribe(); };
     },
     () => { refresh(); },
     [refresh],
@@ -138,11 +109,7 @@ export const useKdsEngine = () => {
       };
 
       // Read-modify-write the JSONB snapshot to preserve other keys.
-      const { data: cur } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        .select("delivery_snapshot, status")
-        .eq("id", nodeId)
-        .maybeSingle();
+      const cur = await KdsGateway.fetchNodeSnapshot(nodeId);
       const snapshot = (cur?.delivery_snapshot ?? {}) as Record<string, unknown>;
       const merged = { ...snapshot, prep_meta };
 
@@ -151,12 +118,7 @@ export const useKdsEngine = () => {
       };
       if (next === "ready") updates.status = "ready_for_pickup";
 
-      const { error: upErr } = await supabase
-        .from("salsabil_fulfillment_nodes")
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        .update(updates as any)
-        .eq("id", nodeId);
-      if (upErr) throw upErr;
+      await KdsGateway.updateNodeSnapshot(nodeId, updates);
 
       // Optimistic local update; realtime will reconcile.
       setTickets((cur) =>

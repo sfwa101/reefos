@@ -163,6 +163,50 @@ const subscribeSharedCart = (
   };
 };
 
+/* ────────────────────────────────────────────────────────────────────────── *
+ *  Wave P-3 Sub-Wave 11 — Cart UI residuals                                 *
+ * ────────────────────────────────────────────────────────────────────────── */
+
+const fetchFrequentlyBoughtProductIds = async (
+  productIds: string[],
+  limit = 6,
+): Promise<string[]> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any).rpc("frequently_bought_together", {
+    _product_ids: productIds,
+    _limit: limit,
+  });
+  if (!Array.isArray(data)) return [];
+  return (data as Array<{ product_id: string }>).map((r) => r.product_id);
+};
+
+const fetchFinanceMinOrderTotal = async (): Promise<number> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .from("app_settings")
+    .select("value")
+    .eq("key", "finance")
+    .maybeSingle();
+  const raw = (data?.value as { min_order_total?: number | string } | null)
+    ?.min_order_total;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+};
+
+const validateCoupon = async (
+  code: string,
+  orderTotal: number,
+): Promise<{ discount: number; error: string | null }> => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc("validate_coupon", {
+    _code: code,
+    _order_total: orderTotal,
+  });
+  if (error) return { discount: 0, error: error.message };
+  const payload = (data ?? {}) as { discount?: number };
+  return { discount: Number(payload.discount ?? 0), error: null };
+};
+
 export const CartGateway = {
   fetchUserCart,
   clearUserCart,
@@ -171,4 +215,7 @@ export const CartGateway = {
   deleteCartRowsByIds,
   subscribeUserCart,
   subscribeSharedCart,
+  fetchFrequentlyBoughtProductIds,
+  fetchFinanceMinOrderTotal,
+  validateCoupon,
 };
