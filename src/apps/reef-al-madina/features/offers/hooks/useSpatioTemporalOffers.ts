@@ -7,25 +7,12 @@
  * as a defence-in-depth over RLS public-read.
  */
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { MarketingGateway } from "@/core/marketing/gateway/MarketingGateway";
 import { useAuth } from "@/context/AuthContext";
 import type {
   OfferMatrixRow,
   UserContext,
 } from "../types/offerMatrix";
-
-type MatrixDb = {
-  from(table: "offers_matrix"): {
-    select(s: string): {
-      eq(col: string, val: boolean): {
-        order(c: string, o: { ascending: boolean }): Promise<{
-          data: OfferMatrixRow[] | null;
-          error: { message: string } | null;
-        }>;
-      };
-    };
-  };
-};
 
 const TIER_RANK: Record<UserContext["tier"], number> = {
   bronze: 0,
