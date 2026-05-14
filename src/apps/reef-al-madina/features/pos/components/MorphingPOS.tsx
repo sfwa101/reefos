@@ -162,7 +162,7 @@ function MorphingPOSInner(props: MorphingPOSProps) {
   );
 
   const modeBanner = (() => {
-    if (capabilities.size === 0) {
+    if (capabilities.keys.length === 0) {
       return (
         <div className="rounded-2xl border border-amber-500/30 bg-amber-500/5 p-3 text-[12px] text-amber-700 dark:text-amber-400">
           لم يتم منح أي قدرات لنقطة البيع لهذه المحطة. اضبط القسم من الإدارة.
