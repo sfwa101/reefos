@@ -8,7 +8,7 @@
  */
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 
 export type Profile = {
   id: string;
