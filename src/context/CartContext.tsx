@@ -141,16 +141,16 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   /* ---- Listen to true SIGNED_IN events (manual login transitions only) ---- */
   useEffect(() => {
-    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === "SIGNED_IN" && session?.user?.id) {
+    const sub = CartGateway.onAuthChange((event, payload) => {
+      if (event === "SIGNED_IN" && payload?.userId) {
         // A real login (not INITIAL_SESSION rehydrate). Opt this uid into merge.
-        pendingMergeForUidRef.current = session.user.id;
+        pendingMergeForUidRef.current = payload.userId;
       }
       if (event === "SIGNED_OUT") {
         pendingMergeForUidRef.current = null;
       }
     });
-    return () => sub.subscription.unsubscribe();
+    return () => sub.unsubscribe();
   }, []);
 
   /* ---- Remote sync + realtime — gated on resolved auth ---- */
