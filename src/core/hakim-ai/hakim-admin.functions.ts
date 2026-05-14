@@ -19,7 +19,7 @@ export const markHakimInsightReadFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { error } = await sb
       .from("hakim_insights")
       .update({ is_read: true })
@@ -36,7 +36,7 @@ export const resolveHakimAnomalyFn = createServerFn({ method: "POST" })
   })
   .middleware([requireAdmin])
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { error } = await sb
       .from("hakim_anomalies")
       .update({ resolved: true, resolved_at: new Date().toISOString() })
@@ -58,7 +58,7 @@ export type CategoryAffinityRow = {
 export const getCategoryAffinityFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<CategoryAffinityRow[]> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const sinceIso = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
     const { data, error } = await sb
       .from("user_behavior_logs")
@@ -118,7 +118,7 @@ export type HakimInsightRow = {
 export const listHakimInsightsFn = createServerFn({ method: "GET" })
   .middleware([requireAdmin])
   .handler(async ({ context }): Promise<HakimInsightRow[]> => {
-    const sb = context.supabase as SbAny;
+    const sb = context.supabase;
     const { data, error } = await sb
       .from("hakim_insights")
       .select("*")
@@ -147,10 +147,10 @@ export const runHakimAdvisorFn = createServerFn({ method: "POST" })
 export type HakimArchitectBlueprint = {
   module_name: string;
   description: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  suggested_assets: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sdui_layout: any;
+  
+  suggested_assets: HakimSubmitBlueprintAsset[];
+  
+  sdui_layout: { hero?: Record<string, unknown>; sections?: Array<Record<string, unknown>> };
 };
 
 export const summonHakimArchitectFn = createServerFn({ method: "POST" })
