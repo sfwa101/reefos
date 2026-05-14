@@ -189,8 +189,7 @@ export default function OrderDetail() {
   const idx = FLOW.findIndex(s => s.value === order.status);
   const next = idx >= 0 && idx < FLOW.length - 1 ? FLOW[idx + 1] : null;
   const canAssignDriver = ["pending", "confirmed", "preparing", "ready"].includes(order.status);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const addr: any = order.delivery_info ?? {};
+  const addr = (order.delivery_info ?? {}) as { city?: string; district?: string; street?: string; building?: string };
   const addressLine = [addr.city, addr.district, addr.street, addr.building].filter(Boolean).join(" - ");
 
   return (

@@ -115,7 +115,7 @@ export default function Zakat() {
   );
 }
 
-function Stat({ label, value, highlight, negative }: any) {
+function Stat({ label, value, highlight, negative }: { label: string; value: string | number; highlight?: boolean; negative?: boolean }) {
   return (
     <div className={`p-2 rounded-lg ${highlight ? "bg-success/15 border border-success/30" : "bg-surface-muted"}`}>
       <p className="text-[10px] text-foreground-tertiary">{label}</p>

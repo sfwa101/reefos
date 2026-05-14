@@ -135,7 +135,7 @@ export default function FinanceDashboard() {
 
 function FinanceTile({
   icon: Icon, label, value, tone, sub, urgent,
-}: { icon: any; label: string; value: string; tone: string; sub?: string; urgent?: boolean }) {
+}: { icon: React.ElementType; label: string; value: string; tone: string; sub?: string; urgent?: boolean }) {
   return (
     <div className={cn(
       "group relative overflow-hidden rounded-3xl p-4 bg-card border shadow-soft hover:shadow-tile transition-all hover:-translate-y-0.5",

@@ -37,7 +37,7 @@ export function IOSList({ children, className }: { children: ReactNode; classNam
 }
 
 export function IOSRow({ children, className, onClick }: { children: ReactNode; className?: string; onClick?: () => void }) {
-  const Tag: any = onClick ? "button" : "div";
+  const Tag = (onClick ? "button" : "div") as React.ElementType;
   return (
     <Tag
       onClick={onClick}

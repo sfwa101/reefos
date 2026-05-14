@@ -121,7 +121,7 @@ export default function ExecutiveDashboard() {
   );
 }
 
-function KpiCard({ icon: Icon, label, value, accent }: { icon: any; label: string; value: string; accent: string }) {
+function KpiCard({ icon: Icon, label, value, accent }: { icon: React.ElementType; label: string; value: string; accent: string }) {
   return (
     <div className="bg-surface rounded-2xl p-4 border border-border/40">
       <div className={`h-9 w-9 rounded-xl bg-gradient-to-br ${accent} flex items-center justify-center text-white mb-2`}>

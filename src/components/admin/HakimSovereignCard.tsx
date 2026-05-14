@@ -240,7 +240,7 @@ export function HakimSovereignCard() {
   );
 }
 
-function KpiBlock({ label, value, icon: Icon, accent }: { label: string; value: string; icon: any; accent?: boolean }) {
+function KpiBlock({ label, value, icon: Icon, accent }: { label: string; value: string; icon: React.ElementType; accent?: boolean }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center gap-1 opacity-70">
@@ -254,7 +254,7 @@ function KpiBlock({ label, value, icon: Icon, accent }: { label: string; value: 
   );
 }
 
-function KpiCard({ label, value, icon: Icon, tone }: { label: string; value: string; icon: any; tone: string }) {
+function KpiCard({ label, value, icon: Icon, tone }: { label: string; value: string; icon: React.ElementType; tone: string }) {
   return (
     <div className="bg-surface rounded-2xl border border-border/40 p-3.5 shadow-soft">
       <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${tone} flex items-center justify-center text-white mb-2`}>

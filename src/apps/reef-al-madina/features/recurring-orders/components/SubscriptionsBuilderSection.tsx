@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { subscriptionMeals, type SubscriptionMeal } from "@/lib/subscriptionMeals";
 
 type PlanId = "loss" | "maintain" | "muscle" | "family";
-const plans: { id: PlanId; title: string; icon: any; calories: string; basePrice: number; color: string; tag: string }[] = [
+const plans: { id: PlanId; title: string; icon: React.ElementType; calories: string; basePrice: number; color: string; tag: string }[] = [
   { id: "loss", title: "خسارة الوزن", icon: Sparkles, calories: "1200 سعرة/يوم", basePrice: 1850, color: "from-rose-500 to-pink-400", tag: "الأكثر طلبًا" },
   { id: "maintain", title: "الحفاظ على الوزن", icon: Heart, calories: "1800 سعرة/يوم", basePrice: 2200, color: "from-emerald-500 to-teal-400", tag: "متوازن" },
   { id: "muscle", title: "بناء العضلات", icon: Dumbbell, calories: "2400 سعرة/يوم", basePrice: 2650, color: "from-amber-500 to-orange-400", tag: "بروتين عالي" },

@@ -11,7 +11,7 @@ import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { openWhatsApp } from "@/lib/whatsapp";
 
 // shopping bag icon (lucide doesn't expose ShoppingBagIcon by that name in older imports)
-function ShoppingBagIcon(props: any) {
+function ShoppingBagIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -98,9 +98,10 @@ export const WalletAffiliateHub = ({
     const c = await ensure();
     if (!c) return;
     const text = `🌿 انضم إلى ريف المدينة عبر كود الدعوة: *${c}* واحصل على خصم خاص على أول طلب! 🎁`;
-    if (typeof navigator !== "undefined" && (navigator as any).share) {
+    const nav = navigator as Navigator & { share?: (data: { text: string }) => Promise<void> };
+    if (typeof navigator !== "undefined" && typeof nav.share === "function") {
       try {
-        await (navigator as any).share({ text });
+        await nav.share({ text });
         return;
       } catch {}
     }
