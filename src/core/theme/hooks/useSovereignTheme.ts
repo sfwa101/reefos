@@ -88,8 +88,6 @@ async function fetchPersona(personaKey: string): Promise<PersonaRow | null> {
   const data = await ThemeGateway.getPersonaByKey<PersonaRow>(personaKey);
   return data ?? null;
 }
-  return (data as unknown as PersonaRow | null) ?? null;
-}
 
 /** Deep-merge persona overlay on top of base DNA (colors + effects). */
 function mergeDna(
