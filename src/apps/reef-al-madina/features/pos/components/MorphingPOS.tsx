@@ -119,7 +119,7 @@ export function MorphingPOS(props: MorphingPOSProps) {
               >
                 <span className="truncate">{item.id}</span>
                 <span className="tabular-nums text-foreground-secondary">
-                  ×{item.qty} · {fmtMoney(item.line_total, currency)}
+                  ×{item.qty} · {fmtMoney(item.line_total)} {currency}
                 </span>
               </li>
             ))}
