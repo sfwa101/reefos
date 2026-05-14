@@ -6,7 +6,28 @@
  * DeepSeek). Imported only by `.functions.ts` server-fn handlers; never
  * by client code.
  */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+// Wave P-9 C: typed boundaries; remaining `any` confined to recursive JSON-Schema walker
+// and the LLM-payload normalizer (Strategy A — Batch D will tighten SDUI/runtime polymorphism).
+
+class ProviderHTTPError extends Error {
+  readonly status: number;
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "ProviderHTTPError";
+    this.status = status;
+  }
+}
+
+type GeminiPart =
+  | { text: string }
+  | { inlineData: { mimeType: string; data: string } }
+  | { functionCall?: { name: string; args: unknown } };
+
+type OpenAIContentPart =
+  | { type: "text"; text: string }
+  | { type: "image_url"; image_url: { url: string } };
+
+type SchemaNode = Record<string, unknown> | unknown[] | string | number | boolean | null;
 
 const ASSET_TYPES = ["physical", "digital", "service", "rental", "milestone_project"] as const;
 const PRICING_MODELS = [
