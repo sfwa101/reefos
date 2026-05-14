@@ -26,11 +26,21 @@ export interface LedgerAppendInput {
   readonly currency: string;
   readonly direction: LedgerDirection;
   readonly memo?: string;
+  readonly shift_id?: string;
 }
 
 export interface LedgerTransaction extends LedgerAppendInput {
   readonly transaction_id: string;
   readonly recorded_at: number;
+}
+
+export interface ShiftAggregation {
+  readonly shiftId: string;
+  readonly currency: string;
+  readonly credits: number;
+  readonly debits: number;
+  readonly net: number;
+  readonly transactionCount: number;
 }
 
 const FORBIDDEN = (op: string): never => {
