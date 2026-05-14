@@ -13,7 +13,7 @@
 /** Wave P-3 — all `cart_items` I/O routed through the Sovereign CartGateway. */
 import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /** @deprecated Wave P-B B-3 — bridge type for legacy cart-row hydration. */
-import { type Product } from "@/core/catalog/legacy/legacyProduct.types";
+import { type Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/context/CartContext";
 import { fetchAssetsByLegacyIds, assetToProduct } from "@/lib/sovereignCatalog";
 

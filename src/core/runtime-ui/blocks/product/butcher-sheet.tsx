@@ -8,7 +8,7 @@ import { useCart } from "@/context/CartContext";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
@@ -17,8 +17,8 @@ import { butcheryToModifiers } from "@/lib/pricingAdapters";
 import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/weighed-prep/components/Panel";
 import { CutBuilder } from "@/apps/reef-al-madina/features/weighed-prep/components/CutBuilder";
 import { PrepOptions } from "@/apps/reef-al-madina/features/weighed-prep/components/PrepOptions";
-import { useLivePrice } from "@/core/engine/pricing/hooks/useLivePrice";
-import type { WeighedSelection } from "@/core/engine/pricing/strategies/WeighedPricingStrategy";
+import { useLivePrice } from "@/core/commerce/pricing/hooks/useLivePrice";
+import type { WeighedSelection } from "@/core/commerce/pricing/strategies/WeighedPricingStrategy";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 

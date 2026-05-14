@@ -25,7 +25,7 @@ import { queryOptions, useQuery } from "@tanstack/react-query";
 
 import { catalogGateway } from "@/core/catalog/gateway";
 import type { ProductCardVM } from "@/core/catalog/types";
-import type { Product, ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 
 import { useSectionSubcategories, type SubcategoryItem } from "@/core/catalog/hooks/useSectionSubcategories";
 

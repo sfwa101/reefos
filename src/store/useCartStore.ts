@@ -26,7 +26,7 @@ import { useShallow } from "zustand/react/shallow";
  * consumers that still read `l.product.*`. Migrated leaves consume
  * `ProductCardVM` via `useCartHydration` instead.
  */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { Modifier } from "@/lib/pricingEngine";
 
 // ---------------------------------------------------------------------------

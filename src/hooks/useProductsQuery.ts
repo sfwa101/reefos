@@ -25,7 +25,7 @@ import {
   type ProductSource,
   type ProductVariant,
   type ProductAddon,
-} from "@/core/catalog/legacy/legacyProduct.types";
+} from "@/core/catalog/legacyProduct.types";
 import { getActiveTenantId } from "@/context/TenantContext";
 
 /**

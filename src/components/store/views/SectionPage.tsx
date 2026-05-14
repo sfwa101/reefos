@@ -18,7 +18,7 @@ import { getSectionIdentity } from "@/core/catalog/registry/SectionIdentityRegis
 import { resolveSectionTree } from "@/core/runtime-ui/ResolveRenderTree";
 import { RuntimeRenderer } from "@/core/runtime-ui/RuntimeRenderer";
 import { registerCoreBlocks } from "@/core/runtime-ui/blocks";
-import type { ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
+import type { ProductSource } from "@/core/catalog/legacyProduct.types";
 import type { StoreThemeKey } from "@/lib/storeThemes";
 import type { SectionIdentity } from "@/core/catalog/registry/SectionIdentityRegistry";
 

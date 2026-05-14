@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { CommerceGateway } from "@/core/commerce";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
-import { products as allProducts } from "@/core/catalog/legacy/legacyRuntime";
+import type { Product } from "@/core/catalog/legacyProduct.types";
+import { products as allProducts } from "@/core/catalog/runtime/legacyRuntime";
 import ProductCard from "@/components/ProductCard";
 import { History } from "lucide-react";
 

@@ -3,7 +3,7 @@ import { motion, AnimatePresence, useMotionValue, useTransform, animate } from "
 import { CalendarDays, Minus, Pencil, Plus, Trash2, X, Wallet, Tag, Snowflake } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 /** @deprecated Wave P-B B-3 — bridge type; CartLineItem still reads `l.product.*` until §2.E migrates. */
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
   type CartLineMeta,
   useCartLineBreakdown,

@@ -20,8 +20,8 @@ import {
 import {
   evaluateCartLineItem,
   type CartPricingResult,
-} from "@/core/engine/pricing/cartPricingAdapter";
-import type { PricingContext } from "@/core/engine/pricing/types";
+} from "@/core/commerce/pricing/cartPricingAdapter";
+import type { PricingContext } from "@/core/commerce/pricing/types";
 import {
   useCartStore,
   useCartActions as useCartStoreActions,

@@ -1,5 +1,5 @@
 import SinglePageStore, { type StoreCategory } from "@/components/SinglePageStore";
-import { products, registerProducts } from "@/core/catalog/legacy/legacyRuntime";
+import { products, registerProducts } from "@/core/catalog/runtime/legacyRuntime";
 import { storeThemes } from "@/lib/storeThemes";
 import { Crown, Boxes, Truck, BadgePercent } from "lucide-react";
 import { useMemo } from "react";

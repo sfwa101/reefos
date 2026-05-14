@@ -7,7 +7,7 @@ import FlashSalesGrid from "@/apps/reef-al-madina/features/offers/components/Fla
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components/FakkaRoundupToggle";
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
-import { products } from "@/core/catalog/legacy/legacyRuntime";
+import { products } from "@/core/catalog/runtime/legacyRuntime";
 import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
 import { AmanahLockShield } from "./AmanahLockShield";
 import type { SduiOfferFlashSaleBlock } from "./schemas";

@@ -1,7 +1,7 @@
 // Single borrowable book card. Pure presentation — opens the borrow sheet via callback.
 
 import { BookOpen } from "lucide-react";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
 import { PALETTE } from "../data";
 import OptimizedImage from "@/components/ui/OptimizedImage";

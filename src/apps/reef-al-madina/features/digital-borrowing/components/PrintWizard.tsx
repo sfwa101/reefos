@@ -9,7 +9,7 @@ import {
 import { useCartActions } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { submitPrintJobFn, uploadPrintFileFn } from "@/core/library/library.functions";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
   calcPrintTotal, PRINT_PRICES, PRINT_PREP_HOURS,

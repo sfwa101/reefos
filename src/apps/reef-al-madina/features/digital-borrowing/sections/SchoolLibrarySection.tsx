@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product } from "@/core/catalog/legacyProduct.types";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { myKycStatusQueryOptions } from "@/lib/library.queries";

@@ -21,7 +21,7 @@
  * This strategy makes every bulk decision an explicit modifier.
  */
 
-import type { Product, ProductSource } from "@/core/catalog/legacy/legacyProduct.types";
+import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 import {
   volumeDealFor,
   type VolumeDeal,
