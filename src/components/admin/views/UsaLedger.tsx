@@ -50,7 +50,7 @@ interface RawAsset {
 export default function UsaLedger() {
   const [editing, setEditing] = useState<USARecord | null>(null);
 
-  const metrics = useMemo<BentoMetric[]>(
+  const metrics = useMemo<BentoMetric<USARecord>[]>(
     () => [
       {
         key: "total",
