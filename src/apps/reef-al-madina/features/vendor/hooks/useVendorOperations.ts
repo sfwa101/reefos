@@ -58,11 +58,11 @@ export function useVendorOperations() {
       return;
     }
     if (!user) { setVendorIds([]); return; }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any).rpc("user_vendor_ids", { _user_id: user.id }).then(({ data, error }: { data: string[]; error: { message: string } | null }) => {
-      if (error) { setError(error.message); return; }
-      setVendorIds(data ?? []);
-    });
+    VendorGateway.getUserVendorIds(user.id)
+      .then((data) => setVendorIds(data ?? []))
+      .catch((err: { message?: string }) => {
+        if (err?.message) setError(err.message);
+      });
   }, [user]);
 
   const refreshProducts = useCallback(async () => {
