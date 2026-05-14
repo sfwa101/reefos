@@ -18,6 +18,13 @@ import type {
   CashierContext,
   MemberTier,
 } from "./types";
+import {
+  makeCapabilityView,
+  resolvePOSMode,
+  type POSCapabilityView,
+  type POSMode,
+} from "./POSMode";
+import type { CapabilityKey } from "@/core/capabilities/CapabilityRegistry";
 
 /* ─────────────────────────── Helpers ─────────────────────────── */
 
