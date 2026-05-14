@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useCapability } from "@/hooks/useCapability";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
@@ -18,8 +18,10 @@ type Profile = EmployeeProfileRow;
 const KIND: Record<string, string> = { advance: "سلفة", petty_cash: "نثرية", reimbursement: "استرداد" };
 
 export default function AdvanceApprovals() {
-  const { role, loading: roleLoading } = useUserRole();
-  const allowed = role === "admin" || role === "finance" || role === "branch_manager";
+  // Law 5 (Capability over Role): authorization resolves to a capability key,
+  // never a hardcoded role string. Server middleware re-checks this on every
+  // approve/reject call — the UI gate is UX, not security.
+  const { allowed, loading: roleLoading } = useCapability("hr.advance.approve");
   const [rows, setRows] = useState<Req[]>([]);
   const [profiles, setProfiles] = useState<Record<string, Profile>>({});
   const [filter, setFilter] = useState<"pending" | "all">("pending");
