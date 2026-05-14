@@ -58,24 +58,18 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
 
     // Make sure a code + state row exists.
     try {
-      await supabase.rpc("ensure_referral_code", { _user_id: userId });
+      await MarketingGateway.ensureReferralCode(userId);
     } catch {
       /* non-fatal */
     }
 
-    const [{ data: tiers }, { data: stateRow }] = await Promise.all([
-      supabase
-        .from("affiliate_tiers")
-        .select("*")
-        .order("rank", { ascending: true }),
-      supabase
-        .from("user_affiliate_state")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle(),
+    const [tiers, stateRow] = await Promise.all([
+      MarketingGateway.listAffiliateTiers(),
+      MarketingGateway.getUserAffiliateState(userId),
     ]);
 
-    const allTiers: AffiliateTier[] = (tiers ?? []).map((t) => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const allTiers: AffiliateTier[] = ((tiers ?? []) as any[]).map((t: any) => ({
       id: t.id,
       name: t.name,
       rank: t.rank,
@@ -84,7 +78,9 @@ export const useAffiliateEngine = (userId: string | null | undefined) => {
       unlocks_wholesale: t.unlocks_wholesale,
       badge_emoji: t.badge_emoji,
     }));
-    const invites: number = stateRow?.successful_invites ?? 0;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const sr = stateRow as any;
+    const invites: number = sr?.successful_invites ?? 0;
 
     const currentTier =
       allTiers.find((t) => t.id === stateRow?.current_tier_id) ??
