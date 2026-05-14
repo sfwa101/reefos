@@ -512,7 +512,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
                     flavor: optStr(s.variant_axes.flavor, 64),
                   }
                 : null,
-          }))
+          }); })
         : [],
       financial_contract: {
         pricing_model: pricingModel,
