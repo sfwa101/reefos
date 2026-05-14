@@ -10,6 +10,7 @@ import {
 // Wave P-3 — All Supabase access (cart_items, profiles tier, auth listener,
 // realtime) routed through the Sovereign CartGateway.
 import { CartGateway, type GatewayChannel } from "@/core/orders/gateway/CartGateway";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import {
   fetchRemoteCart,
   pushRemoteCart,
