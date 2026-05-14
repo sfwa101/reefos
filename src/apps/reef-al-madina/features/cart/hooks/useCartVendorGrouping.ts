@@ -20,7 +20,7 @@ import {
 import {
   fulfillmentTypeFor,
   isSweetsProduct,
-} from "@/lib/custom-fulfillment-rules";
+} from "@/core/commerce/variants/custom-fulfillment-rules";
 import type { VendorGroup } from "../types/cart.types";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };

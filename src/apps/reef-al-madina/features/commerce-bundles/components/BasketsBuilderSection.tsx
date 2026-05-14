@@ -4,7 +4,7 @@ import BackHeader from "@/components/BackHeader";
 import { products } from "@/core/catalog/runtime/legacyRuntime";
 import { storeThemes } from "@/lib/storeThemes";
 import BasketCard from "@/core/runtime-ui/blocks/product/basket-card";
-import { findFrequency } from "@/lib/bundle-thresholds";
+import { findFrequency } from "@/core/commerce/policies/bundle-thresholds";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { Sparkles, PackagePlus, ShoppingBasket, CalendarClock, ChevronLeft } from "lucide-react";

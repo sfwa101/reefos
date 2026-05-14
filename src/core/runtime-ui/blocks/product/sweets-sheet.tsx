@@ -16,7 +16,7 @@ import {
   formatBookingDate,
   DEPOSIT_PCT,
   DEPOSIT_THRESHOLD,
-} from "@/lib/custom-fulfillment-rules";
+} from "@/core/commerce/variants/custom-fulfillment-rules";
 import { sweetsBookingToModifiers } from "@/lib/pricingAdapters";
 import { mod, type Modifier } from "@/lib/pricingEngine";
 import { VariantPicker } from "@/apps/reef-al-madina/features/custom-fulfillment/components/VariantPicker";

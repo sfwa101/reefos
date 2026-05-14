@@ -1,5 +1,5 @@
 import { fmtMoney, toLatin } from "@/lib/format";
-import { formatBookingShort, isSweetsProduct, fulfillmentTypeFor } from "@/lib/custom-fulfillment-rules";
+import { formatBookingShort, isSweetsProduct, fulfillmentTypeFor } from "@/core/commerce/variants/custom-fulfillment-rules";
 import {
   buildWaUrl,
   isMobileWaContext,

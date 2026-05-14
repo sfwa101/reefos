@@ -7,7 +7,7 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   DEPOSIT_THRESHOLD,
-} from "@/lib/custom-fulfillment-rules";
+} from "@/core/commerce/variants/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
 import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";

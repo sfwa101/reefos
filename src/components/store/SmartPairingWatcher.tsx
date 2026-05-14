@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useCart } from "@/context/CartContext";
-import { pairFor } from "@/lib/smartPairs";
+import { pairFor } from "@/core/commerce/policies/smartPairs";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 

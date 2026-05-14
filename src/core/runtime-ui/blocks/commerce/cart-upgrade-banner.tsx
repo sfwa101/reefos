@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, ArrowLeftRight, ShoppingBasket } from "lucide-react";
-import { detectBasketUpgrade } from "@/lib/bundle-thresholds";
+import { detectBasketUpgrade } from "@/core/commerce/policies/bundle-thresholds";
 import { useCart } from "@/context/CartContext";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";

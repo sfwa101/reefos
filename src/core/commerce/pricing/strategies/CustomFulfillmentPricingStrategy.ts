@@ -31,7 +31,7 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
   type FulfillmentType,
-} from "@/lib/custom-fulfillment-rules";
+} from "@/core/commerce/variants/custom-fulfillment-rules";
 import type {
   IPricingStrategy,
   PricingContext,

@@ -20,7 +20,7 @@ import {
   deleteSubscription,
   migrateLegacySubscriptions,
 } from "@/lib/saved-bundles";
-import type { SubscriptionRecord } from "@/lib/bundle-thresholds";
+import type { SubscriptionRecord } from "@/core/commerce/policies/bundle-thresholds";
 
 const KEY = (userId: string) => ["saved-baskets", "subscription", userId] as const;
 

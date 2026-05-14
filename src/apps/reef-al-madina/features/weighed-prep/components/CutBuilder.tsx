@@ -4,7 +4,7 @@
 import { Info, Scale } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { Panel } from "./Panel";
-import type { WeightOption } from "@/lib/weighed-prep-rules";
+import type { WeightOption } from "@/core/commerce/variants/weighed-prep-rules";
 
 type Props = {
   weights: WeightOption[];

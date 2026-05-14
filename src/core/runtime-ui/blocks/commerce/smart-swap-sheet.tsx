@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Check, ArrowRightLeft, TrendingUp, TrendingDown } from "lucide-react";
-import { swapsFor, productById } from "@/lib/bundle-thresholds";
+import { swapsFor, productById } from "@/core/commerce/policies/bundle-thresholds";
 import { toLatin } from "@/lib/format";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 
