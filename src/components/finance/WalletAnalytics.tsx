@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { BarChart3, Wand2, Pencil, Check } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import {
@@ -158,18 +158,9 @@ export const BudgetTracker = ({
     const n = Number(draft.replace(/\D/g, "")) || 0;
     setBusy(true);
     if (n === 0) {
-      await supabase
-        .from("category_budgets")
-        .delete()
-        .eq("user_id", userId)
-        .eq("category", cat);
+      await FinanceGateway.deleteCategoryBudget({ userId, category: cat });
     } else {
-      await supabase
-        .from("category_budgets")
-        .upsert(
-          { user_id: userId, category: cat, monthly_limit: n },
-          { onConflict: "user_id,category" },
-        );
+      await FinanceGateway.upsertCategoryBudget({ userId, category: cat, monthlyLimit: n });
     }
     const next = { ...budgets };
     if (n === 0) delete next[cat];

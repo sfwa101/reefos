@@ -8,7 +8,7 @@ import {
   Plus,
   Minus,
 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
@@ -97,28 +97,19 @@ export const SavingsJarDialog = ({
   const [busy, setBusy] = useState(false);
 
   const refresh = async () => {
-    const [{ data: j }, { data: t }] = await Promise.all([
-      supabase
-        .from("savings_jar")
-        .select("balance,auto_save_enabled,round_to,goal,goal_label")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("savings_transactions")
-        .select("id,amount,kind,label,created_at")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(10),
+    const [j, t] = await Promise.all([
+      FinanceGateway.getSavingsJar(userId),
+      FinanceGateway.listSavingsTransactions(userId, 10),
     ]);
     onUpdate(
-      (j ?? {
+      ((j as unknown) ?? {
         balance: 0,
         auto_save_enabled: false,
         round_to: 5,
         goal: null,
         goal_label: null,
       }) as SavingsJar,
-      (t ?? []) as SavingsTx[],
+      ((t as unknown) ?? []) as SavingsTx[],
     );
   };
 
@@ -132,12 +123,12 @@ export const SavingsJarDialog = ({
       typeof crypto !== "undefined" && "randomUUID" in crypto
         ? crypto.randomUUID()
         : `${Date.now()}-${Math.random()}`;
-    const { error } = await supabase.rpc("process_savings_jar_op", {
-      p_amount: args.amount ?? 0,
-      p_kind: kind,
-      p_label: args.label ?? kind,
-      p_idempotency_key: idem,
-      p_settings: (args.settings ?? null) as never,
+    const { error } = await FinanceGateway.processSavingsJarOp({
+      amount: args.amount ?? 0,
+      kind,
+      label: args.label ?? kind,
+      idempotencyKey: idem,
+      settings: args.settings ?? null,
     });
     if (error) {
       toast.error(error.message === "insufficient balance" ? "الرصيد غير كافٍ" : "تعذّر الحفظ");

@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Heart, HandHeart, Loader2, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
   CATEGORY_LABELS,
@@ -22,15 +22,8 @@ import {
 const DONATE_PRESETS = [10, 25, 50, 100];
 
 async function fetchCampaigns(): Promise<CharityCampaign[]> {
-  const { data, error } = await supabase
-    .from("charity_campaigns")
-    .select(
-      "id,auditor_id,title,description,cover_url,target_amount,current_amount,restricted_categories,is_active,ends_at,created_at",
-    )
-    .eq("is_active", true)
-    .order("created_at", { ascending: false });
-  if (error) throw error;
-  return (data ?? []) as CharityCampaign[];
+  const data = await FinanceGateway.listActiveCharityCampaigns();
+  return data as unknown as CharityCampaign[];
 }
 
 export const WalletCharityHub = ({
@@ -54,10 +47,10 @@ export const WalletCharityHub = ({
       amount: number;
       source: "direct" | "general_pool";
     }) => {
-      const { data, error } = await supabase.rpc("donate_to_campaign", {
-        _campaign_id: vars.campaignId as unknown as string,
-        _amount: vars.amount,
-        _source: vars.source,
+      const { data, error } = await FinanceGateway.donateToCampaign({
+        campaignId: vars.campaignId,
+        amount: vars.amount,
+        source: vars.source,
       });
       if (error) throw error;
       return data;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Coins, PiggyBank, Users, Wallet2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toLatin } from "@/lib/format";
 
 /**
@@ -25,22 +25,13 @@ export const NetWorthCard = ({
     if (!userId) return;
     let mounted = true;
     (async () => {
-      const [{ data: vaults }, { data: memberships }] = await Promise.all([
-        supabase
-          .from("wallet_vaults")
-          .select("current_balance")
-          .eq("user_id", userId),
-        supabase
-          .from("gam_eya_members")
-          .select("turn_number, gam_eyas(cycle_amount, max_members, current_cycle_index, status)")
-          .eq("user_id", userId),
+      const [vaults, memberships] = await Promise.all([
+        FinanceGateway.listUserVaultBalances(userId),
+        FinanceGateway.listUserGameyaMembershipsWithCircles(userId),
       ]);
       if (!mounted) return;
       setVaultsTotal(
-        ((vaults ?? []) as Array<{ current_balance: number }>).reduce(
-          (s, v) => s + Number(v.current_balance || 0),
-          0,
-        ),
+        vaults.reduce((s, v) => s + Number(v.current_balance || 0), 0),
       );
       type MRow = {
         turn_number: number;
@@ -52,7 +43,7 @@ export const NetWorthCard = ({
         } | null;
       };
       let due = 0;
-      for (const m of (memberships ?? []) as MRow[]) {
+      for (const m of memberships as unknown as MRow[]) {
         const g = m.gam_eyas;
         if (!g || g.status !== "active") continue;
         if (m.turn_number > g.current_cycle_index) {

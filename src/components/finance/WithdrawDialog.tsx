@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 type Method = "bank_transfer" | "vodafone_cash" | "instapay";
 const MIN_AMOUNT = 500;
@@ -65,10 +65,10 @@ export function WithdrawDialog({
     }
     setBusy(true);
     try {
-      const { data, error } = await supabase.rpc("request_user_payout", {
-        _amount: parsed.data.amount,
-        _method: parsed.data.method,
-        _bank_details: {
+      const { data, error } = await FinanceGateway.requestUserPayout({
+        amount: parsed.data.amount,
+        method: parsed.data.method,
+        bankDetails: {
           account: parsed.data.account,
           holder: parsed.data.holder,
         },
