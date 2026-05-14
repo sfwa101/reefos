@@ -19,6 +19,11 @@ export const EVENT_CATALOG = Object.freeze({
   SEARCH_PERFORMED: "search.performed",
   CATEGORY_ENTERED: "category.entered",
   CART_ABANDONED: "cart.abandoned",
+  CART_ITEM_ADDED: "cart.item.added",
+  CART_ITEM_REMOVED: "cart.item.removed",
+  CART_ITEM_QTY_CHANGED: "cart.item.qty_changed",
+  CART_CLEARED: "cart.cleared",
+  CART_UPDATED: "cart.updated",
 } as const);
 
 export type EventCatalogKey = keyof typeof EVENT_CATALOG;
