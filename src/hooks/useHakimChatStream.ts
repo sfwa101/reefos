@@ -2,7 +2,7 @@
 // streaming from the hakim-chat edge function so admin pages don't import the
 // raw Supabase client directly (Article 5 — Layered Architecture).
 import { useCallback, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";
 
 export type HakimStreamMessage = { role: "user" | "assistant"; content: string };
 
@@ -29,14 +29,14 @@ export function useHakimChatStream() {
     const ctl = new AbortController();
     abortRef.current = ctl;
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const accessToken = await HakimGateway.getAccessTokenForChat();
       const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/hakim-chat`;
       const resp = await fetch(url, {
         method: "POST",
         signal: ctl.signal,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${session?.access_token || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          Authorization: `Bearer ${accessToken || import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
         },
         body: JSON.stringify(req),
       });
