@@ -71,6 +71,26 @@ export type SalsabilEvents = {
     itemCount: number;
     paymentMethod: string;
     snapshotHash: string;
+    lines: ReadonlyArray<{
+      lineId: string;
+      productId: string;
+      name?: string;
+      qty: number;
+      capabilities: ReadonlyArray<string>;
+    }>;
+    appId?: SalsabilAppId;
+  };
+  "kds.ticket.created": {
+    ticketId: string;
+    orderId: string;
+    lineCount: number;
+    appId?: SalsabilAppId;
+  };
+  "kds.ticket.updated": {
+    ticketId: string;
+    orderId: string;
+    previousStatus: "queued" | "preparing" | "ready" | "delivered";
+    status: "queued" | "preparing" | "ready" | "delivered";
     appId?: SalsabilAppId;
   };
   "ledger.transaction.appended": {

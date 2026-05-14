@@ -25,6 +25,8 @@ export const EVENT_CATALOG = Object.freeze({
   CART_CLEARED: "cart.cleared",
   CART_UPDATED: "cart.updated",
   ORDER_PLACED: "order.placed",
+  KDS_TICKET_CREATED: "kds.ticket.created",
+  KDS_TICKET_UPDATED: "kds.ticket.updated",
   LEDGER_TRANSACTION_APPENDED: "ledger.transaction.appended",
 } as const);
 
