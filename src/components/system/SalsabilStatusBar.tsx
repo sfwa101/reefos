@@ -27,13 +27,7 @@ export const SalsabilStatusBar = () => {
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     queryFn: async (): Promise<number> => {
-      const { data, error } = await supabase
-        .from("wallets")
-        .select("balance")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data?.balance ?? 0;
+      return IdentityGateway.getWalletBalance(user!.id);
     },
   });
 
