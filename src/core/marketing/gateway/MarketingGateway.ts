@@ -279,4 +279,20 @@ export const MarketingGateway = {
     if (error) throw error;
     return (data ?? []) as unknown as AnyRow[];
   },
+
+  /**
+   * Wave P-3 Sub-Wave 11 — Storefront rails feed for the offers page.
+   * Returns active rails ordered by `sort_order`. Live-window filtering
+   * (frequency_tag, starts_at/ends_at) is performed by the caller.
+   */
+  async listActiveStorefrontRails(): Promise<AnyRow[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase as any)
+      .from("storefront_rails")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as AnyRow[];
+  },
 };
