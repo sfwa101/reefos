@@ -32,51 +32,51 @@ const DENSITY_HEIGHT: Record<Density, number> = { compact: 44, comfortable: 64 }
 export type BentoTone =
   | "primary" | "info" | "success" | "warning" | "accent" | "purple" | "pink" | "teal" | "indigo";
 
-export type GridRow = Record<string, unknown>;
+// Public API surface — `BentoMetric.compute/urgent` accept `any[]` to remain
+// assignable across all admin/vendor row shapes (USARecord, NodeRow, Driver,
+// Zone, etc. — none of which extend `Record<string, unknown>`). Tightening
+// these to a generic `<T>` would force every caller to pass an explicit type
+// argument; tightening to `unknown[]` breaks every caller's narrowed
+// `(rows: MyRow[]) => …` arrow. Both options are non-local refactors and
+// out-of-scope for Wave P-9 Batch D. Tracked for a future Layer-6 sweep.
 
-// NOTE: callbacks below use METHOD SHORTHAND syntax (`compute?(rows): ...`)
-// rather than property+arrow (`compute?: (rows) => ...`). Method shorthand
-// is bivariant in parameter position even under `strictFunctionTypes`,
-// preserving the public-API ergonomics that let callers pass narrowly-typed
-// row callbacks (e.g. `(rows: USARecord[]) => …`) against the kernel default
-// of `GridRow`. This is the minimum-friction way to remove `any` from the
-// SDUI grid surface without forcing every Admin/Vendor view to add explicit
-// generic parameters.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyRow = any;
 
-export type BentoMetric<T = GridRow> = {
+export type BentoMetric = {
   key: string;
   label: string;
   icon: LucideIcon;
   tone?: BentoTone;
-  compute?(rows: T[]): string | number;
-  urgent?(rows: T[]): boolean;
+  compute?: (rows: AnyRow[]) => string | number;
+  urgent?: (rows: AnyRow[]) => boolean;
   to?: string;
 };
 
-export type Column<T = GridRow> = {
+export type Column<T = AnyRow> = {
   key: string;
   label?: string;
-  render?(row: T): ReactNode;
+  render?: (row: T) => ReactNode;
   className?: string;
   hideOnMobile?: boolean;
 };
 
-export type RowAction<T = GridRow> = {
+export type RowAction<T = AnyRow> = {
   label: string;
-  onClick(row: T): void;
+  onClick: (row: T) => void;
   icon?: LucideIcon;
   tone?: "default" | "destructive" | "success";
 };
 
-export type DataSource<T = GridRow> = {
+export type DataSource<T = AnyRow> = {
   table?: string;
   select?: string;
   orderBy?: { column: string; ascending?: boolean };
   /** Page size for server pagination. Default 50. */
   limit?: number;
-  fetcher?(): Promise<T[]>;
+  fetcher?: () => Promise<T[]>;
   searchKeys?: (keyof T | string)[];
-  map?(row: GridRow): T;
+  map?: (row: AnyRow) => T;
 };
 
 export type EmptyState = {
@@ -85,19 +85,19 @@ export type EmptyState = {
   hint?: string;
 };
 
-export type UniversalAdminGridProps<T = GridRow> = {
+export type UniversalAdminGridProps<T = AnyRow> = {
   title: string;
   subtitle?: string;
-  metrics?: BentoMetric<T>[];
+  metrics?: BentoMetric[];
   columns?: Column<T>[];
   dataSource: DataSource<T>;
-  rowKey?(row: T): string;
-  onRowClick?(row: T): void;
+  rowKey?: (row: T) => string;
+  onRowClick?: (row: T) => void;
   rowActions?: RowAction<T>[];
   searchPlaceholder?: string;
   empty?: EmptyState;
   topSlot?: ReactNode;
-  renderList?(rows: T[]): ReactNode;
+  renderList?: (rows: T[]) => ReactNode;
 };
 
 // -------- Tone palette --------
