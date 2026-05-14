@@ -90,17 +90,7 @@ export function useCapabilities(): CapState {
     }
     let cancelled = false;
     void (async () => {
-      const { data } = await (supabase
-        .from("user_capabilities" as never) as unknown as {
-        select: (s: string) => {
-          eq: (c: string, v: string) => {
-            eq: (c: string, v: string) => Promise<{ data: Array<{ capability: string; expires_at: string | null }> | null }>;
-          };
-        };
-      })
-        .select("capability, expires_at")
-        .eq("user_id", user.id)
-        .eq("workspace_id", activeWorkspaceId);
+      const data = await IdentityGateway.listUserCapabilities(user.id, activeWorkspaceId);
       if (cancelled) return;
       const now = Date.now();
       const set = new Set<string>(
