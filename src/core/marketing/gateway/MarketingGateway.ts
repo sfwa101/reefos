@@ -8,6 +8,10 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 
+export type GatewayChannel = { unsubscribe: () => void };
+
+type AnyRow = Record<string, unknown>;
+
 export interface InactivityPickVM {
   product_id: string;
   product_name: string;
