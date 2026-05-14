@@ -87,8 +87,8 @@ const WalletShell = () => (
 export const Route = createFileRoute("/_app/wallet")({
   // Auth gate — wallet exposes financial state, must redirect anon → /auth.
   beforeLoad: async ({ location }) => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
+    const session = await IdentityGateway.getSession();
+    if (!session) {
       throw redirect({
         to: "/auth",
         search: { redirect: location.href } as never,
