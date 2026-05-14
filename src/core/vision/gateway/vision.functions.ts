@@ -12,6 +12,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { runVisionGenesis } from "../genesis.server";
 import type { JsonObject } from "@/core/dna/types";
 import type {
   InferenceState,
@@ -84,21 +85,15 @@ function rowToTrace(row: VisionInferenceRow): VisionInferenceTrace {
 export const inferEntityFn = createServerFn({ method: "POST" })
   .inputValidator((input) => visionInputSchema.parse(input))
   .handler(async ({ data }): Promise<VisionInferenceTrace> => {
-    const { data: aiRaw, error: aiError } = await supabase.functions.invoke(
-      "vision_genesis",
-      {
-        body: {
-          image_base64: data.image_base64,
-          mime_type: "image/jpeg",
-          hint: typeof data.context?.hint === "string" ? data.context.hint : undefined,
-        },
-      },
-    );
-    if (aiError) {
-      throw new Error(`vision_genesis_failed: ${aiError.message}`);
+    const aiRaw = await runVisionGenesis({
+      image_base64: data.image_base64,
+      hint: typeof data.context?.hint === "string" ? data.context.hint : undefined,
+    });
+    if (!aiRaw || aiRaw.ok === false) {
+      throw new Error(`vision_genesis_failed: ${aiRaw?.details ?? aiRaw?.error ?? "unknown"}`);
     }
 
-    const rawOutput = (aiRaw ?? {}) as JsonObject;
+    const rawOutput = (aiRaw ?? {}) as unknown as JsonObject;
     // Strip transport noise; whatever the edge fn returns IS the draft.
     const { error: _err, ...draftPayload } = rawOutput as Record<string, unknown>;
     void _err;

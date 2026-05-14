@@ -1,18 +1,12 @@
-// Vision Genesis — Phase C-4 · Universal Independence Protocol
-// Multi-provider sovereign router: Gemini (native), OpenRouter, DeepSeek.
-// Standardized output: { ok, asset, skus, financial_contract, ... }
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
-
-const json = (body: unknown, status = 200) =>
-  new Response(JSON.stringify(body), {
-    status,
-    headers: { ...corsHeaders, "Content-Type": "application/json" },
-  });
+/**
+ * Vision Genesis — Server-only core logic (Wave P-4.1).
+ *
+ * Ported verbatim from the legacy `supabase/functions/vision_genesis/`
+ * Edge Function. Multi-provider sovereign router (Gemini → OpenRouter →
+ * DeepSeek). Imported only by `.functions.ts` server-fn handlers; never
+ * by client code.
+ */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 const ASSET_TYPES = ["physical", "digital", "service", "rental", "milestone_project"] as const;
 const PRICING_MODELS = [
@@ -23,7 +17,7 @@ const PRICING_MODELS = [
   "milestone_installments",
 ] as const;
 
-type Provider = "gemini" | "openrouter" | "deepseek";
+export type VisionProvider = "gemini" | "openrouter" | "deepseek";
 
 const PALETTES: Array<{ name: string; hex: string }> = [
   { name: "mint green", hex: "#D1FAE5" },
@@ -34,7 +28,8 @@ const PALETTES: Array<{ name: string; hex: string }> = [
   { name: "sand beige", hex: "#F5F1E8" },
   { name: "sage", hex: "#E2E8DD" },
 ];
-function pickPalette(category: string | null, traits: string[]): { name: string; hex: string } {
+
+export function pickPalette(category: string | null, traits: string[]): { name: string; hex: string } {
   const c = (category ?? "").toLowerCase();
   const t = traits.map((x) => x.toLowerCase()).join(" ");
   const blob = `${c} ${t}`;
@@ -64,7 +59,6 @@ const SYSTEM_PROMPT = `أنت "حكيم Vision" — قشرة استخراج ال
 7. حدد النوع: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات.
 8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).`;
 
-// ─── Tool Schema (shared shape) ───────────────────────────────────────
 const TOOL_PARAMETERS = {
   type: "object",
   properties: {
@@ -139,29 +133,23 @@ const TOOL_PARAMETERS = {
   required: ["asset", "skus", "financial_contract"],
 } as const;
 
-// ─── Provider invocations ─────────────────────────────────────────────
-// All return: { parsed: any } or throw an Error with .status
 type ProviderResult = { parsed: unknown; raw?: unknown };
 
 function dataUrlParts(dataUrl: string): { mime: string; b64: string } {
-  // data:image/<mime>;base64,<b64>
   const m = /^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/.exec(dataUrl);
   if (!m) throw new Error("invalid_data_url");
   return { mime: m[1], b64: m[2] };
 }
 
-// Convert JSON-Schema (with `type: ["X","null"]`) to Gemini OpenAPI 3 schema
-// (single `type` + `nullable: true`). Also strips `null` from enums and drops
-// unsupported keywords like `additionalProperties`.
 function toGeminiSchema(node: any): any {
   if (Array.isArray(node)) return node.map(toGeminiSchema);
   if (!node || typeof node !== "object") return node;
   const out: any = {};
   for (const [k, v] of Object.entries(node)) {
-    if (k === "additionalProperties") continue; // unsupported by Gemini
+    if (k === "additionalProperties") continue;
     if (k === "type" && Array.isArray(v)) {
       const nonNull = v.filter((t) => t !== "null");
-      out.type = (nonNull[0] ?? "string");
+      out.type = nonNull[0] ?? "string";
       if (v.includes("null")) out.nullable = true;
     } else if (k === "enum" && Array.isArray(v)) {
       const cleaned = v.filter((x) => x !== null);
@@ -178,10 +166,6 @@ function toGeminiSchema(node: any): any {
     } else {
       out[k] = toGeminiSchema(v);
     }
-  }
-  // Gemini requires `type` on every schema node; default to "string".
-  if (!("type" in out) && !("properties" in out) && !("enum" in out)) {
-    // leave as-is
   }
   return out;
 }
@@ -304,18 +288,18 @@ async function callOpenAICompatible(opts: {
 }
 
 async function invokeProvider(
-  provider: Provider,
+  provider: VisionProvider,
   primary: string,
   secondary: string | null,
   hint: string | undefined,
 ): Promise<ProviderResult> {
   if (provider === "gemini") {
-    const key = Deno.env.get("Gemini");
+    const key = process.env.Gemini;
     if (!key) throw new Error("missing_key:Gemini");
     return callGemini({ apiKey: key, primary, secondary, hint });
   }
   if (provider === "openrouter") {
-    const key = Deno.env.get("OpenRouter");
+    const key = process.env.OpenRouter;
     if (!key) throw new Error("missing_key:OpenRouter");
     return callOpenAICompatible({
       endpoint: "https://openrouter.ai/api/v1/chat/completions",
@@ -328,7 +312,7 @@ async function invokeProvider(
     });
   }
   if (provider === "deepseek") {
-    const key = Deno.env.get("DeepSeek");
+    const key = process.env.DeepSeek;
     if (!key) throw new Error("missing_key:DeepSeek");
     return callOpenAICompatible({
       endpoint: "https://api.deepseek.com/v1/chat/completions",
@@ -343,23 +327,34 @@ async function invokeProvider(
   throw new Error("unknown_provider");
 }
 
-Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
+export interface VisionGenesisInput {
+  image_base64?: string;
+  secondary_image_base64?: string | null;
+  images_base64?: string[];
+  hint?: string;
+  provider?: VisionProvider;
+}
 
+export interface VisionGenesisOutput {
+  ok: boolean;
+  error?: string;
+  details?: string;
+  attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
+  asset?: any;
+  skus?: any[];
+  financial_contract?: any;
+  prompt_version?: string;
+  provider?: VisionProvider | null;
+  provider_attempts?: Array<{ provider: VisionProvider; ok: boolean; error?: string }>;
+  generated_at?: string;
+  aesthetic_image_data_url?: string | null;
+  aesthetic_palette?: { name: string; hex: string };
+  critical_crash?: string;
+  stack?: string;
+}
+
+export async function runVisionGenesis(body: VisionGenesisInput): Promise<VisionGenesisOutput> {
   try {
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
-    const ANON_KEY =
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEY") || Deno.env.get("SUPABASE_ANON_KEY")!;
-
-    // Auth gate
-    const authHeader = req.headers.get("Authorization") ?? "";
-    const userClient = createClient(SUPABASE_URL, ANON_KEY, {
-      global: { headers: { Authorization: authHeader } },
-    });
-    const { data: userData, error: userErr } = await userClient.auth.getUser();
-    if (userErr || !userData?.user) return json({ error: "unauthorized" }, 401);
-
-    const body = await req.json().catch(() => ({}));
     const {
       image_base64,
       secondary_image_base64,
@@ -380,39 +375,36 @@ Deno.serve(async (req) => {
         ];
 
     if (datas.length === 0)
-      return json({ error: "missing_image", details: "image_base64 is required" }, 400);
+      return { ok: false, error: "missing_image", details: "image_base64 is required" };
 
     const MAX_DATA_URL_BYTES = 600 * 1024;
     const DATA_URL_RE = /^data:image\/(jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/;
     for (const d of datas) {
       if (!DATA_URL_RE.test(d))
-        return json({ error: "invalid_image", details: "image must be a data:image/* base64 URL" }, 400);
+        return { ok: false, error: "invalid_image", details: "image must be a data:image/* base64 URL" };
       if (d.length > MAX_DATA_URL_BYTES)
-        return json(
-          {
-            error: "invalid_image",
-            details: `image_too_large:${d.length} (compress client-side, max ${MAX_DATA_URL_BYTES})`,
-          },
-          400,
-        );
+        return {
+          ok: false,
+          error: "invalid_image",
+          details: `image_too_large:${d.length} (compress client-side, max ${MAX_DATA_URL_BYTES})`,
+        };
     }
 
     const primaryUrl = datas[0];
     const secondaryUrl = datas.length > 1 ? datas[1] : null;
 
-    // Provider selection — default Gemini, failover to OpenRouter.
-    const allowed: Provider[] = ["gemini", "openrouter", "deepseek"];
-    const primary: Provider = allowed.includes(requestedProvider) ? requestedProvider : "gemini";
-    const failoverChain: Provider[] =
+    const allowed: VisionProvider[] = ["gemini", "openrouter", "deepseek"];
+    const primary: VisionProvider =
+      requestedProvider && allowed.includes(requestedProvider) ? requestedProvider : "gemini";
+    const failoverChain: VisionProvider[] =
       primary === "gemini" ? ["gemini", "openrouter"] : [primary];
 
     let parsed: any = null;
-    let usedProvider: Provider | null = null;
-    const attempts: Array<{ provider: Provider; ok: boolean; error?: string }> = [];
+    let usedProvider: VisionProvider | null = null;
+    const attempts: Array<{ provider: VisionProvider; ok: boolean; error?: string }> = [];
 
     for (const p of failoverChain) {
       try {
-        console.log(`[C4][vision_genesis] invoking provider=${p}`);
         const result = await invokeProvider(p, primaryUrl, secondaryUrl, hint);
         parsed = result.parsed;
         usedProvider = p;
@@ -420,22 +412,21 @@ Deno.serve(async (req) => {
         break;
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        console.error(`[C4][vision_genesis] provider=${p} failed:`, msg);
+        console.error(`[vision_genesis] provider=${p} failed:`, msg);
         attempts.push({ provider: p, ok: false, error: msg });
       }
     }
 
     if (!parsed || !usedProvider) {
-      // Soft-fail: return 200 so the frontend can read provider_attempts
-      // instead of seeing an opaque 502 from the Edge runtime.
-      return json({ ok: false, error: "AI_API_ERROR", details: "all providers failed", attempts }, 200);
+      return { ok: false, error: "AI_API_ERROR", details: "all providers failed", attempts };
     }
 
-    // Sanitize
-    const assetType = ASSET_TYPES.includes(parsed?.asset?.asset_type)
+    const assetType = (ASSET_TYPES as readonly string[]).includes(parsed?.asset?.asset_type)
       ? parsed.asset.asset_type
       : "physical";
-    const pricingModel = PRICING_MODELS.includes(parsed?.financial_contract?.pricing_model)
+    const pricingModel = (PRICING_MODELS as readonly string[]).includes(
+      parsed?.financial_contract?.pricing_model,
+    )
       ? parsed.financial_contract.pricing_model
       : "flat";
 
@@ -519,22 +510,85 @@ Deno.serve(async (req) => {
       generated_at: new Date().toISOString(),
     };
 
-    // Aesthetic palette (no external image generation in sovereign mode).
     const aestheticPalette = pickPalette(sanitized.asset.category_path, sanitized.asset.traits);
 
-    return json({
+    return {
       ok: true,
       ...sanitized,
       aesthetic_image_data_url: null,
       aesthetic_palette: aestheticPalette,
-    });
+    };
   } catch (e) {
-    // GLOBAL SAFETY NET — convert any Deno-isolate crash into a readable
-    // 200 JSON payload so the UI can surface the real error instead of a
-    // opaque 502 Bad Gateway.
     console.error("vision_genesis CRITICAL CRASH:", e);
     const msg = e instanceof Error ? e.message : String(e);
     const stack = e instanceof Error ? e.stack?.slice(0, 1200) : undefined;
-    return json({ ok: false, critical_crash: msg, stack }, 200);
+    return { ok: false, critical_crash: msg, stack };
   }
-});
+}
+
+// ─── Embedding (deterministic SHA-256 based) ────────────────────────────
+const EMBED_DIMS = 768;
+
+export async function generateDeterministicEmbedding(text: string): Promise<number[]> {
+  const enc = new TextEncoder();
+  const normalized = text.trim().toLowerCase();
+  const out = new Float64Array(EMBED_DIMS);
+  const rounds = Math.ceil(EMBED_DIMS / 32);
+  for (let r = 0; r < rounds; r++) {
+    const buf = await crypto.subtle.digest("SHA-256", enc.encode(`${r}:${normalized}`));
+    const view = new DataView(buf);
+    for (let i = 0; i < 32 && r * 32 + i < EMBED_DIMS; i++) {
+      out[r * 32 + i] = (view.getUint8(i) - 127.5) / 127.5;
+    }
+  }
+  let norm = 0;
+  for (let i = 0; i < EMBED_DIMS; i++) norm += out[i] * out[i];
+  norm = Math.sqrt(norm) || 1;
+  return Array.from(out, (v) => v / norm);
+}
+
+// ─── Product image generation (Lovable AI Gateway) ──────────────────────
+function buildProductImagePrompt(name: string, source: string | null): string {
+  const ctx = (source ?? "").toLowerCase();
+  const ctxHint =
+    ctx === "pharmacy"
+      ? "pharmacy product packaging on white background"
+      : ctx === "produce"
+        ? "fresh produce, vibrant, on light wooden surface"
+        : ctx === "meat"
+          ? "raw butcher cut, professional food photography"
+          : ctx === "dairy"
+            ? "dairy product packaging, soft daylight"
+            : ctx === "sweets"
+              ? "Egyptian/Middle-Eastern dessert, plated, warm light"
+              : ctx === "library"
+                ? "stationery item, flat lay on desk"
+                : ctx === "restaurants" || ctx === "recipes"
+                  ? "served meal, top-down food photography"
+                  : "Egyptian supermarket product on clean studio background";
+  return `Professional commercial product photo of "${name}". ${ctxHint}. Sharp focus, soft shadows, e-commerce catalog style, square 1:1, high detail, no text overlays, no watermarks.`;
+}
+
+export async function generateProductImageBytes(name: string, source: string | null): Promise<Uint8Array> {
+  const apiKey = process.env.LOVABLE_API_KEY;
+  if (!apiKey) throw new Error("missing_key:LOVABLE_API_KEY");
+  const prompt = buildProductImagePrompt(name, source);
+  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({
+      model: "google/gemini-2.5-flash-image",
+      messages: [{ role: "user", content: prompt }],
+      modalities: ["image", "text"],
+    }),
+  });
+  if (!r.ok) throw new Error(`AI ${r.status}: ${await r.text()}`);
+  const j = await r.json();
+  const dataUrl: string | undefined = j.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+  if (!dataUrl) throw new Error("No image returned");
+  const b64 = dataUrl.split(",")[1] ?? dataUrl;
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return bytes;
+}

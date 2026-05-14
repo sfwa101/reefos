@@ -7,6 +7,11 @@
  * methods. Pre-existing `any` casts preserved (Wave P-7 will harden types).
  */
 import { supabase } from "@/integrations/supabase/client";
+import {
+  visionGenesisFn,
+  generateEmbeddingFn,
+  processImageAestheticFn,
+} from "@/core/vision/vision.functions";
 
 export type GatewayChannel = { unsubscribe: () => void };
 
@@ -115,31 +120,27 @@ export const HakimGateway = {
       throw new Error("image_base64 must be a data: URL (image/*)");
     }
 
-    const { data, error } = await supabase.functions.invoke("vision_genesis", {
-      body: {
-        image_base64: input.image_base64,
-        secondary_image_base64: input.secondary_image_base64 ?? null,
-        hint: input.hint,
-        provider: input.provider ?? "gemini",
-      },
-    });
-
-    if (error) {
-      const env = await readErrorEnvelope(error, data);
-      const message =
-        env?.details || env?.error || (error as Error).message || "unknown";
-      throw new Error(message);
+    let raw: unknown;
+    try {
+      raw = await visionGenesisFn({
+        data: {
+          image_base64: input.image_base64,
+          secondary_image_base64: input.secondary_image_base64 ?? null,
+          hint: input.hint,
+          provider: input.provider ?? "gemini",
+        },
+      });
+    } catch (err) {
+      throw new Error((err as Error)?.message ?? "unknown");
     }
 
-    const payload = data as
-      | (ProductDNAPayload & { error?: HakimErrorCode; details?: string })
+    const payload = raw as
+      | { ok?: boolean; error?: string; details?: string }
       | null;
-    if (!payload || (payload as { error?: string }).error) {
-      throw new Error(
-        payload?.details || (payload as { error?: string })?.error || "unknown",
-      );
+    if (!payload || payload.ok === false || payload.error) {
+      throw new Error(payload?.details || payload?.error || "unknown");
     }
-    return payload;
+    return payload as unknown as ProductDNAPayload;
   },
 
   // ============= Edge function invocations =============
@@ -149,7 +150,12 @@ export const HakimGateway = {
   },
 
   async invokeGenerateEmbedding(text: string) {
-    return await supabase.functions.invoke("generate_embedding", { body: { text } });
+    try {
+      const data = await generateEmbeddingFn({ data: { text } });
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "embedding_failed" } };
+    }
   },
 
   async invokePredictBasket() {
@@ -163,7 +169,12 @@ export const HakimGateway = {
     palette_name: string | null;
     palette_hex: string | null;
   }) {
-    return await supabase.functions.invoke("process_image_aesthetic", { body });
+    try {
+      const data = await processImageAestheticFn({ data: body });
+      return { data, error: null as null | { message: string } };
+    } catch (e) {
+      return { data: null, error: { message: (e as Error)?.message ?? "aesthetic_failed" } };
+    }
   },
 
   async getAccessTokenForChat(): Promise<string | null> {
