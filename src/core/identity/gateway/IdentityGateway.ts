@@ -7,6 +7,24 @@
  *   • Returns typed VMs, never raw Supabase rows.
  */
 import { supabase } from "@/integrations/supabase/client";
+import type { AuthChangeEvent, Session, User } from "@supabase/supabase-js";
+
+export type AuthSession = Session;
+export type AuthUser = User;
+export type AuthEvent = AuthChangeEvent;
+export type AuthSubscription = { unsubscribe: () => void };
+
+export type SignUpOptions = {
+  emailRedirectTo?: string;
+  data?: Record<string, unknown>;
+};
+
+export type AuthResult = {
+  data: { user: User | null; session: Session | null };
+  error: { message: string } | null;
+};
+
+export type RoleWithBranch = { role: AppRole; branch_id: string | null };
 
 export type AppRole =
   | "admin"
