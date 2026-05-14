@@ -11,7 +11,7 @@
  */
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { tayseerKeys } from "@/hooks/useTayseer";
 
 export type TayseerPayInput = { order_id: string; amount: number };
@@ -41,11 +41,7 @@ const friendly = (raw: string): string => {
 export const callTayseerPayment = async (
   input: TayseerPayInput,
 ): Promise<TayseerPayResult> => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data, error } = await (supabase.rpc as any)("process_tayseer_payment", {
-    p_order_id: input.order_id,
-    p_amount: input.amount,
-  });
+  const { data, error } = await FinanceGateway.processTayseerPayment(input);
   if (error) throw new Error(friendly(error.message ?? "payment_failed"));
   return data as TayseerPayResult;
 };
