@@ -6,7 +6,7 @@ import { HakimPulseBanner } from "@/components/admin/HakimPulseBanner";
 import { HakimChatDrawer } from "@/components/admin/HakimChatDrawer";
 import { Skeleton } from "@/components/ui/skeleton";
 import { fmtMoney, fmtNum } from "@/lib/format";
-import { getFinanceOverviewFn, type FinanceOverview, type FinanceTopSupplier } from "@/lib/finance.functions";
+import { getFinanceOverviewFn, type FinanceOverview, type FinanceTopSupplier } from "@/core/finance/finance.functions";
 import { cn } from "@/lib/utils";
 
 export default function FinanceDashboard() {

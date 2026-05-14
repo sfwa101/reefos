@@ -6,7 +6,7 @@ import {
   scanRibaSuspicionsFn,
   updateRibaFlagStatusFn,
   type RibaFlag,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { Loader2, ShieldAlert, ScanSearch, AlertOctagon, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";

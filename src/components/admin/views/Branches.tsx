@@ -12,7 +12,7 @@ import {
   upsertBranchFn,
   setBranchActiveFn,
   type BranchRow as Branch,
-} from "@/lib/admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 
 export default function Branches() {
   const [items, setItems] = useState<Branch[]>([]);

@@ -7,7 +7,7 @@ import {
   setCharityRuleActiveFn,
   type CharityRule as Rule,
   type CharityDue as Due,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, HeartHandshake } from "lucide-react";
 import { toast } from "sonner";

@@ -5,7 +5,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listPendingTopupsFn, approveTopupFn, rejectTopupFn,
   type PendingTopupRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Clock, User } from "lucide-react";

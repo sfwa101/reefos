@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 import {
   listSuppliersFn,
   submitPurchaseInvoiceFn,
-} from "@/lib/admin-catalog.functions";
+} from "@/core/catalog/admin-catalog.functions";
 
 type Supplier = { id: string; name: string };
 type Product = { id: string; name: string; cost_price: number | null; stock: number | null };

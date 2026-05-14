@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
-import { getCheckoutContextFn, clearMyCartFn } from "@/lib/cart.functions";
+import { getCheckoutContextFn, clearMyCartFn } from "@/core/orders/cart.functions";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
 import {

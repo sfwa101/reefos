@@ -1,6 +1,6 @@
 // React Query options for the Catalog Gateway (Phase D-4).
 import { queryOptions } from "@tanstack/react-query";
-import { listProductReviewsFn, listProductUnitsFn } from "./catalog.functions";
+import { listProductReviewsFn, listProductUnitsFn } from "@/core/catalog/catalog.functions";
 
 export const catalogKeys = {
   all: ["catalog"] as const,

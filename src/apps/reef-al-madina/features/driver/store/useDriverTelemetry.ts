@@ -7,7 +7,7 @@
  * on every GPS tick.
  */
 import { create } from "zustand";
-import { publishDriverPositionFn } from "@/lib/driver.functions";
+import { publishDriverPositionFn } from "@/core/logistics/driver.functions";
 
 const THROTTLE_MS = 10_000;
 

@@ -5,7 +5,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import {
   listExpensesFn, createExpenseFn, updateExpenseFn, deleteExpenseFn,
   type ExpenseRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Receipt, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";

@@ -16,7 +16,7 @@ import {
   setBannerActiveFn,
   deleteBannerFn,
   uploadBannerImageFn,
-} from "@/lib/marketing.functions";
+} from "@/core/marketing/marketing.functions";
 
 const blankForm: BannerForm = {
   title: "", subtitle: "", image_url: "", placement: "hero",

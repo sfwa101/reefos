@@ -1,8 +1,8 @@
 /**
- * usePredictBasket — Phase 5 client adapter for the `predict_basket`
- * Lovable Cloud edge function. Wraps `supabase.functions.invoke` in a
- * TanStack Query so the Hakim Predictive Cart UI gets caching,
- * loading/error states, and easy refetch on demand.
+ * usePredictBasket — Sovereign client adapter (Wave P-4.3). Calls the
+ * TanStack `predictBasketFn` via `HakimGateway.invokePredictBasket()`
+ * and exposes a TanStack Query for caching, loading/error states, and
+ * on-demand refetch in the Hakim Predictive Cart UI.
  */
 import { useQuery } from "@tanstack/react-query";
 import { HakimGateway } from "@/core/hakim-ai/gateway/HakimGateway";

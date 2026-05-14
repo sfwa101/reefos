@@ -11,7 +11,7 @@ import {
   listAffiliateSettingsFn, createAffiliateSettingFn, updateAffiliateSettingFn,
   deleteAffiliateSettingFn,
   type AffiliateSettingRow,
-} from "@/lib/finance.functions";
+} from "@/core/finance/finance.functions";
 
 export default function AffiliateSettings() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();

@@ -39,7 +39,7 @@ import {
 } from "lucide-react";
 import { fmtMoney, fmtNum } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
-import { getAdminDashboardOverviewFn } from "@/lib/finance.functions";
+import { getAdminDashboardOverviewFn } from "@/core/finance/finance.functions";
 import { useAdminDashboardRealtime } from "@/hooks/useAdminDashboardRealtime";
 
 const greeting = () => {
