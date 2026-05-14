@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 export type GameyaCircle = {
   id: string;
@@ -67,12 +67,7 @@ export const useGameyas = (userId: string | null) => {
       return;
     }
     setLoading(true);
-    const { data: membership } = await supabase
-      .from("gam_eya_members")
-      .select(
-        "turn_number, gam_eyas(id, name, cycle_amount, max_members, current_cycle_index, status, starts_at, cycle_duration_months, reward_pool, min_kyc_tier)",
-      )
-      .eq("user_id", userId);
+    const membership = await FinanceGateway.listGameyaMemberships(userId);
 
     const rows: GameyaCircle[] = ((membership ?? []) as Array<{
       turn_number: number;
@@ -98,7 +93,7 @@ export const useOpenCircles = () => {
 
   const refresh = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.rpc("list_open_gam_eyas");
+    const data = await FinanceGateway.listOpenGameyas();
     setCircles((data ?? []) as OpenCircle[]);
     setLoading(false);
   }, []);
@@ -122,11 +117,7 @@ export const useTrustScore = (userId: string | null) => {
     }
     let mounted = true;
     (async () => {
-      const { data } = await supabase
-        .from("user_trust_score")
-        .select("score, tier, is_trusted")
-        .eq("user_id", userId)
-        .maybeSingle();
+      const data = await FinanceGateway.getUserTrustScore(userId);
       if (!mounted) return;
       if (data) setTrust(data as TrustScore);
       setLoading(false);
@@ -150,17 +141,9 @@ export const useGameyaDetails = (circleId: string | null) => {
     let mounted = true;
     (async () => {
       setLoading(true);
-      const [{ data: mem }, { data: inst }] = await Promise.all([
-        supabase
-          .from("gam_eya_members")
-          .select("id,user_id,turn_number,is_trusted")
-          .eq("gam_eya_id", circleId)
-          .order("turn_number", { ascending: true }),
-        supabase
-          .from("gam_eya_installments")
-          .select("id,cycle_index,due_date,amount_due,amount_paid,status,user_id")
-          .eq("gam_eya_id", circleId)
-          .order("cycle_index", { ascending: true }),
+      const [mem, inst] = await Promise.all([
+        FinanceGateway.listGameyaMembers(circleId),
+        FinanceGateway.listGameyaInstallments(circleId),
       ]);
       if (!mounted) return;
       const memRows = (mem ?? []) as Array<{
@@ -170,9 +153,9 @@ export const useGameyaDetails = (circleId: string | null) => {
         is_trusted: boolean;
       }>;
       const userIds = Array.from(new Set(memRows.map((m) => m.user_id)));
-      const { data: profs } = userIds.length
-        ? await supabase.from("profiles").select("id, full_name").in("id", userIds)
-        : { data: [] as Array<{ id: string; full_name: string | null }> };
+      const profs = userIds.length
+        ? await FinanceGateway.listProfileNamesByIds(userIds)
+        : ([] as Array<{ id: string; full_name: string | null }>);
       const nameMap = new Map(
         ((profs ?? []) as Array<{ id: string; full_name: string | null }>).map((p) => [
           p.id,

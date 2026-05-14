@@ -7,7 +7,7 @@
  * single channel through which the customer sees their financial life.
  */
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway, type GatewayChannel } from "@/core/finance/gateway/FinanceGateway";
 
 export type WalletTxn = {
   id: string;
@@ -68,18 +68,12 @@ export const useWalletTransactions = (userId: string | null) => {
     }
     let mounted = true;
     let walletId: string | null = null;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let channel: any = null;
+    let channel: GatewayChannel | null = null;
 
     const loadEntries = async (wid: string) => {
-      const { data } = await supabase
-        .from("ledger_entries")
-        .select("id, amount, description, created_at")
-        .eq("wallet_id", wid)
-        .order("created_at", { ascending: false })
-        .limit(100);
+      const data = await FinanceGateway.listLedgerEntriesByWallet(wid, 100);
       if (!mounted) return;
-      const mapped: WalletTxn[] = ((data ?? []) as Array<{
+      const mapped: WalletTxn[] = (data as Array<{
         id: string;
         amount: number;
         description: string | null;
@@ -104,12 +98,7 @@ export const useWalletTransactions = (userId: string | null) => {
 
     (async () => {
       setLoading(true);
-      const { data: wallet } = await supabase
-        .from("wallets")
-        .select("id")
-        .eq("user_id", userId)
-        .eq("currency", "EGP")
-        .maybeSingle();
+      const wallet = await FinanceGateway.getEgpWalletByUser(userId);
 
       if (!wallet?.id) {
         if (mounted) {
@@ -122,26 +111,14 @@ export const useWalletTransactions = (userId: string | null) => {
       await loadEntries(wallet.id);
 
       // Realtime — append new ledger entries as they're written server-side.
-      channel = supabase
-        .channel(`wallet-ledger:${wallet.id}`)
-        .on(
-          "postgres_changes",
-          {
-            event: "INSERT",
-            schema: "public",
-            table: "ledger_entries",
-            filter: `wallet_id=eq.${wallet.id}`,
-          },
-          () => {
-            if (walletId) loadEntries(walletId);
-          },
-        )
-        .subscribe();
+      channel = FinanceGateway.subscribeWalletLedger(wallet.id, () => {
+        if (walletId) loadEntries(walletId);
+      });
     })();
 
     return () => {
       mounted = false;
-      if (channel) supabase.removeChannel(channel);
+      if (channel) channel.unsubscribe();
     };
   }, [userId]);
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toast } from "sonner";
 import {
   CATEGORY_LABELS,
@@ -76,12 +76,9 @@ export const useWalletDashboard = () => {
 
       // Sovereign Matrix: walk master_orders → fulfillment_nodes → fulfillment_items.
       // App grouping is captured at master_orders.delivery_info.app_id (Phase VII-A invariant).
-      const masterRes = await supabase
-        .from("salsabil_master_orders")
-        .select("id, delivery_info, salsabil_fulfillment_nodes!salsabil_fulfillment_nodes_master_fk(id)")
-        .eq("customer_id", userId);
+      const masterData = await FinanceGateway.listMasterOrdersWithFulfillmentNodes(userId);
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const masters = ((masterRes.data ?? []) as any[]);
+      const masters = masterData as any[];
       const nodeIds: string[] = [];
       const nodeApp: Record<string, string> = {};
       masters.forEach((m) => {
@@ -94,36 +91,17 @@ export const useWalletDashboard = () => {
         });
       });
 
-      const [
-        { data: items },
-        { data: refRows },
-        { data: refCode },
-        { data: budgetRows },
-      ] = await Promise.all([
-        supabase
-          .from("salsabil_fulfillment_items")
-          .select("price_at_time,quantity,created_at,node_id, salsabil_skus(salsabil_assets(category_path,traits))")
-          .in("node_id", nodeIds.length ? nodeIds : ["00000000-0000-0000-0000-000000000000"]),
-        supabase
-          .from("referrals")
-          .select("id,status,commission,first_order_at,created_at")
-          .eq("referrer_id", userId)
-          .order("created_at", { ascending: false }),
-        supabase
-          .from("referral_codes")
-          .select("code")
-          .eq("user_id", userId)
-          .maybeSingle(),
-        supabase
-          .from("category_budgets")
-          .select("category,monthly_limit")
-          .eq("user_id", userId),
+      const [items, refRows, refCode, budgetRows] = await Promise.all([
+        FinanceGateway.listFulfillmentItemsWithAssets(nodeIds),
+        FinanceGateway.listUserReferrals(userId),
+        FinanceGateway.getUserReferralCode(userId),
+        FinanceGateway.listCategoryBudgets(userId),
       ]);
 
       if (!mounted) return;
 
       setReferrals((refRows ?? []) as ReferralRow[]);
-      setReferralCode(refCode?.code ?? null);
+      setReferralCode((refCode as { code?: string } | null)?.code ?? null);
 
       const bMap: Record<string, number> = {};
       ((budgetRows ?? []) as Budget[]).forEach((b) => {
@@ -177,9 +155,7 @@ export const useWalletDashboard = () => {
   const ensureReferralCode = async (): Promise<string | null> => {
     if (!userId) return null;
     if (referralCode) return referralCode;
-    const { data, error } = await supabase.rpc("ensure_referral_code", {
-      _user_id: userId,
-    });
+    const { data, error } = await FinanceGateway.ensureReferralCode(userId);
     if (error) {
       toast.error("تعذّر إنشاء كود الدعوة");
       return null;

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 /**
  * useHideBalance — Papara-style stealth mode.
@@ -17,16 +17,11 @@ export function useHideBalance(userId: string | null) {
     if (!userId) return;
     let mounted = true;
     (async () => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const sb = supabase as any;
-      const { data } = await sb
-        .from("profiles")
-        .select("hide_balance")
-        .eq("id", userId)
-        .maybeSingle();
-      if (!mounted || data?.hide_balance == null) return;
-      setHidden(Boolean(data.hide_balance));
-      localStorage.setItem(KEY, data.hide_balance ? "1" : "0");
+      const data = await FinanceGateway.getProfileHideBalance(userId);
+      const row = data as { hide_balance?: boolean | null } | null;
+      if (!mounted || row?.hide_balance == null) return;
+      setHidden(Boolean(row.hide_balance));
+      localStorage.setItem(KEY, row.hide_balance ? "1" : "0");
     })();
     return () => {
       mounted = false;
@@ -38,11 +33,7 @@ export function useHideBalance(userId: string | null) {
       const next = !prev;
       localStorage.setItem(KEY, next ? "1" : "0");
       if (userId) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (supabase as any)
-          .from("profiles")
-          .update({ hide_balance: next })
-          .eq("id", userId);
+        FinanceGateway.updateProfileHideBalanceFireAndForget(userId, next);
       }
       return next;
     });

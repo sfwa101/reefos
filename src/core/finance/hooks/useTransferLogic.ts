@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 
 /**
  * Allowed spending categories for restricted P2P transfers.
@@ -50,7 +50,7 @@ export const useTransferLogic = (): TransferLogicState => {
 
   const refreshKyc = useCallback(async () => {
     setKycLoading(true);
-    const { data, error } = await supabase.rpc("get_user_kyc_level");
+    const { data, error } = await FinanceGateway.getUserKycLevel();
     if (!error && typeof data === "number") {
       const lvl = Math.max(0, Math.min(2, Math.trunc(data))) as KycLevel;
       setKycLevel(lvl);
@@ -79,10 +79,10 @@ export const useTransferLogic = (): TransferLogicState => {
       // versions; current RPC signature only consumes the three core fields.
       void restricted;
       void payload.expiresAt;
-      const { error } = await supabase.rpc("wallet_transfer", {
-        _recipient_phone: payload.recipientPhone,
-        _amount: payload.amount,
-        _note: payload.note || undefined,
+      const { error } = await FinanceGateway.walletTransfer({
+        recipientPhone: payload.recipientPhone,
+        amount: payload.amount,
+        note: payload.note,
       });
 
       if (error) {
