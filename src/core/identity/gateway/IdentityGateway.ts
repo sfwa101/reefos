@@ -200,6 +200,7 @@ export const IdentityGateway = {
       return data as PaymentMethodVM[];
     } catch {
       return [];
+    }
   },
 
   // ─── Auth session ───────────────────────────────────────────────────────
