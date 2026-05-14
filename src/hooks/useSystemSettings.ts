@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { SystemGateway } from "@/core/system/gateway/SystemGateway";
 
 /**
- * Lightweight reader for `public.app_settings` (key/value JSONB store).
+ * Lightweight reader for system app-settings (key/value JSONB store).
  * Falls back to the provided default when fetch fails so the UI never blocks.
  */
 export function useSystemSetting<T>(key: string, fallback: T): {
@@ -15,17 +15,8 @@ export function useSystemSetting<T>(key: string, fallback: T): {
 
   const refresh = async () => {
     try {
-      const { data, error } = await supabase
-        .from("app_settings")
-        .select("value")
-        .eq("key", key)
-        .maybeSingle();
-      if (error) throw error;
-      if (data && data.value !== null && data.value !== undefined) {
-        setValue(data.value as T);
-      } else {
-        setValue(fallback);
-      }
+      const v = await SystemGateway.getSetting<T>(key);
+      setValue(v ?? fallback);
     } catch (e) {
       console.warn("[system-settings] fallback for", key, e);
       setValue(fallback);
@@ -43,12 +34,5 @@ export function useSystemSetting<T>(key: string, fallback: T): {
 }
 
 export async function setSystemSetting<T>(key: string, value: T): Promise<boolean> {
-  const { error } = await supabase
-    .from("app_settings")
-    .upsert([{ key, value: value as never }], { onConflict: "key" });
-  if (error) {
-    console.error("[system-settings] save failed", key, error);
-    return false;
-  }
-  return true;
+  return SystemGateway.setSetting(key, value);
 }

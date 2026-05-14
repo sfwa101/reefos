@@ -149,3 +149,202 @@ export const LogisticsGateway = {
 };
 
 export type LogisticsGatewayType = typeof LogisticsGateway;
+
+/* ────────────────── Wave P-3 §12 — Sovereign Logistics extensions ────────────────── */
+
+export type GatewayChannel = { unsubscribe: () => void };
+type AnyRow = Record<string, unknown>;
+
+export type GeoZoneRow = {
+  zone_code: string;
+  name: string;
+  short_name: string;
+  districts: string[] | null;
+  delivery_fee: number;
+  free_delivery_threshold: number | null;
+  eta_label: string;
+  eta_minutes: number | null;
+  cod_allowed: boolean;
+  accepts_perishables: boolean;
+  accent: string | null;
+  sort_order: number;
+};
+
+export type ZoneOpsRow = {
+  zone_code: string;
+  current_load_factor: number;
+  base_eta_minutes: number | null;
+  surge_active: boolean;
+};
+
+export type DispatchTicketRow = {
+  id: string;
+  master_order_id: string | null;
+  total_amount: number;
+  notes: string | null;
+  created_at: string;
+};
+
+export type DriverPickupNodeRow = {
+  id: string;
+  master_order_id: string | null;
+  status: string;
+  total_amount: number;
+  delivery_snapshot: unknown;
+};
+
+export const LogisticsExtras = {
+  /* Geo zones — full catalog with display metadata. */
+  async listActiveGeoZones(): Promise<GeoZoneRow[]> {
+    const { data, error } = await supabase
+      .from("geo_zones")
+      .select(
+        "zone_code,name,short_name,districts,delivery_fee,free_delivery_threshold,eta_label,eta_minutes,cod_allowed,accepts_perishables,accent,sort_order",
+      )
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true });
+    if (error || !data) return [];
+    return data as GeoZoneRow[];
+  },
+
+  /* Geo zone operational metrics (for surge / ETA engine). */
+  async listGeoZoneOps(zoneCode?: string): Promise<ZoneOpsRow[]> {
+    let q = supabase
+      .from("geo_zones")
+      .select("zone_code,current_load_factor,base_eta_minutes,surge_active")
+      .eq("is_active", true);
+    if (zoneCode) q = q.eq("zone_code", zoneCode);
+    const { data, error } = await q;
+    if (error || !data) return [];
+    return data as ZoneOpsRow[];
+  },
+
+  /* Realtime: geo_zones (optionally filtered by zone_code). */
+  subscribeGeoZoneOps(
+    zoneCode: string | undefined,
+    onChange: (row: AnyRow | undefined) => void,
+  ): GatewayChannel {
+    const ch = supabase
+      .channel(`geo-zones-ops${zoneCode ? `:${zoneCode}` : ""}`)
+      .on(
+        "postgres_changes" as never,
+        zoneCode
+          ? { event: "*", schema: "public", table: "geo_zones", filter: `zone_code=eq.${zoneCode}` }
+          : { event: "*", schema: "public", table: "geo_zones" },
+        (payload: { new?: AnyRow; old?: AnyRow }) => {
+          onChange(payload.new ?? payload.old);
+        },
+      )
+      .subscribe();
+    return { unsubscribe: () => { supabase.removeChannel(ch); } };
+  },
+
+  /* Dispatch board — nodes ready for pickup. */
+  async listReadyForPickupNodes(): Promise<DispatchTicketRow[]> {
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id, master_order_id, total_amount, notes, created_at")
+      .eq("status", "ready_for_pickup")
+      .order("created_at", { ascending: true });
+    if (error || !data) return [];
+    return data as DispatchTicketRow[];
+  },
+
+  /* Realtime: all fulfillment nodes (dispatch board). */
+  subscribeFulfillmentNodes(onChange: () => void): GatewayChannel {
+    const ch = supabase
+      .channel("dispatch-nodes")
+      .on(
+        "postgres_changes" as never,
+        { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
+        () => onChange(),
+      )
+      .subscribe();
+    return { unsubscribe: () => { supabase.removeChannel(ch); } };
+  },
+
+  /* Driver pickup queue — nodes assigned/ready for THIS driver. */
+  async listDriverPickupNodes(driverId: string): Promise<DriverPickupNodeRow[]> {
+    const { data, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id, master_order_id, status, total_amount, delivery_snapshot")
+      .eq("driver_id", driverId)
+      .in("status", ["assigned", "ready_for_pickup"]);
+    if (error || !data) return [];
+    return data as DriverPickupNodeRow[];
+  },
+
+  /* Realtime: this driver's nodes. */
+  subscribeDriverPickupNodes(
+    driverId: string,
+    onChange: () => void,
+  ): GatewayChannel {
+    const ch = supabase
+      .channel(`driver-ops-pickups-${driverId}`)
+      .on(
+        "postgres_changes" as never,
+        {
+          event: "*",
+          schema: "public",
+          table: "salsabil_fulfillment_nodes",
+          filter: `driver_id=eq.${driverId}`,
+        },
+        () => onChange(),
+      )
+      .subscribe();
+    return { unsubscribe: () => { supabase.removeChannel(ch); } };
+  },
+
+  /* Confirm handover RPC. */
+  async confirmHandover(args: {
+    nodeId: string;
+    otp: string;
+    channel: "driver" | "walkin";
+  }): Promise<{ error: { message: string } | null }> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).rpc("confirm_handover", {
+      p_node_id: args.nodeId,
+      p_otp: args.otp,
+      p_channel: args.channel,
+    });
+    return { error: error ? { message: error.message } : null };
+  },
+
+  /* Nearest drivers RPC (PostGIS). */
+  async findNearestDrivers(
+    lat: number,
+    lng: number,
+    radiusMeters = 5_000,
+    limit = 5,
+  ): Promise<Array<{ driver_id: string; distance_m: number; updated_at: string }>> {
+    const { data, error } = await supabase.rpc("find_nearest_drivers", {
+      p_lat: lat,
+      p_lng: lng,
+      p_radius_m: radiusMeters,
+      p_limit: limit,
+    });
+    if (error) {
+      console.error("[findNearestDrivers] failed", error.message);
+      return [];
+    }
+    return (data ?? []) as Array<{ driver_id: string; distance_m: number; updated_at: string }>;
+  },
+
+  /* Maeen — active delivery existence check. */
+  async hasActiveDelivery(userId: string, activeStatuses: readonly string[]): Promise<boolean> {
+    const { data: masters, error: mErr } = await supabase
+      .from("salsabil_master_orders")
+      .select("id")
+      .eq("customer_id", userId);
+    if (mErr) throw mErr;
+    const masterIds = (masters ?? []).map((m) => m.id as string);
+    if (masterIds.length === 0) return false;
+    const { count, error } = await supabase
+      .from("salsabil_fulfillment_nodes")
+      .select("id", { count: "exact", head: true })
+      .in("master_order_id", masterIds)
+      .in("status", activeStatuses as unknown as string[]);
+    if (error) throw error;
+    return (count ?? 0) > 0;
+  },
+};

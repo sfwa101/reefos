@@ -304,4 +304,15 @@ export const VendorGateway = {
     );
     return { data, error: error ? { message: error.message } : null };
   },
+
+  /* ─── Wave P-3 §12 — Settlements (RLS-scoped to current vendor members) ─── */
+  async listVendorSettlements<T = Record<string, unknown>>(): Promise<T[]> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any)
+      .from("salsabil_vendor_settlements")
+      .select("*")
+      .order("created_at", { ascending: false })
+      .limit(200);
+    return (data ?? []) as T[];
+  },
 };

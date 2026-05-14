@@ -10,7 +10,7 @@ import { useEffect, useState } from "react";
 import { Wallet, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { toLatin } from "@/lib/format";
 
 export const SalsabilStatusBar = () => {
@@ -27,13 +27,7 @@ export const SalsabilStatusBar = () => {
     staleTime: 60_000,
     gcTime: 5 * 60_000,
     queryFn: async (): Promise<number> => {
-      const { data, error } = await supabase
-        .from("wallets")
-        .select("balance")
-        .eq("user_id", user!.id)
-        .maybeSingle();
-      if (error) throw error;
-      return data?.balance ?? 0;
+      return IdentityGateway.getWalletBalance(user!.id);
     },
   });
 

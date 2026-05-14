@@ -11,7 +11,7 @@
  */
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
+import { ThemeGateway, type SovereignThemeRow, type ThemeDnaPayload as GwDna } from "@/core/theme/gateway/ThemeGateway";
 import { useAuthOptional } from "@/context/AuthContext";
 import {
   useSovereignContext,
@@ -38,15 +38,11 @@ export type SovereignTheme = {
 export const SOVEREIGN_THEME_QUERY_KEY = ["sovereign-theme"] as const;
 
 async function fetchActiveTheme(tenantId: string): Promise<SovereignTheme | null> {
-  const { data, error } = await supabase
-    .from("salsabil_theme_matrix")
-    .select("id, tenant_id, theme_name, is_active, dna_payload")
-    .eq("tenant_id", tenantId)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as SovereignTheme | null) ?? null;
+  const data = await ThemeGateway.getActiveTheme(tenantId);
+  return (data as SovereignThemeRow | null) as SovereignTheme | null;
 }
+// Suppress unused-import warning for re-exported gateway type alias.
+export type _GwDna = GwDna;
 
 /** Track CSS variable keys we've previously injected so we can clean them
  *  up before re-applying — prevents ghost colors when DNA changes. */
@@ -89,16 +85,8 @@ function clearDna() {
 
 /** Fetch the persona row matching the active key (Phase 18 Part 1). */
 async function fetchPersona(personaKey: string): Promise<PersonaRow | null> {
-  const { data, error } = await supabase
-    .from("salsabil_persona_matrix")
-    .select(
-      "id, persona_key, label_ar, icon, theme_overlay, capabilities, role_predicates, is_active, sort_order",
-    )
-    .eq("persona_key", personaKey)
-    .eq("is_active", true)
-    .maybeSingle();
-  if (error) throw error;
-  return (data as unknown as PersonaRow | null) ?? null;
+  const data = await ThemeGateway.getPersonaByKey<PersonaRow>(personaKey);
+  return data ?? null;
 }
 
 /** Deep-merge persona overlay on top of base DNA (colors + effects). */

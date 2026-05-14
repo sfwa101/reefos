@@ -11,7 +11,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { useAuth } from "@/context/AuthContext";
 
 const KEY = "reef-favs-v1";
@@ -76,17 +76,11 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
         emit();
         return;
       }
-      const { data } = await supabase
-        .from("favorites")
-        .select("product_id")
-        .eq("user_id", user.id);
-      const cloud = (data ?? []).map((r) => r.product_id as string);
+      const cloud = await IdentityGateway.listFavoriteIds(user.id);
       const local = loadLocal();
       const missing = local.filter((id) => !cloud.includes(id));
       if (missing.length > 0) {
-        await supabase
-          .from("favorites")
-          .insert(missing.map((product_id) => ({ user_id: user.id, product_id })));
+        await IdentityGateway.addFavorites(user.id, missing);
       }
       if (cancelled) return;
       const merged = Array.from(new Set([...cloud, ...missing]));
@@ -105,15 +99,9 @@ export const FavoritesProvider = ({ children }: { children: ReactNode }) => {
       set(next);
       if (user) {
         if (isFav) {
-          await supabase
-            .from("favorites")
-            .delete()
-            .eq("user_id", user.id)
-            .eq("product_id", id);
+          await IdentityGateway.removeFavorite(user.id, id);
         } else {
-          await supabase
-            .from("favorites")
-            .insert({ user_id: user.id, product_id: id });
+          await IdentityGateway.addFavorite(user.id, id);
         }
       }
     },

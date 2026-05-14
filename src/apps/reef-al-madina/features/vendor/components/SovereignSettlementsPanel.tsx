@@ -8,7 +8,7 @@
  *  - status filter tabs: All / Pending / Cleared
  */
 import { useEffect, useMemo, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney, fmtDate } from "@/lib/format";
 import { Loader2, TrendingUp, Receipt, PiggyBank } from "lucide-react";
@@ -43,13 +43,7 @@ export function SovereignSettlementsPanel() {
   const [filter, setFilter] = useState<FilterKey>("all");
 
   useEffect(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (supabase as any)
-      .from("salsabil_vendor_settlements")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(200)
-      .then(({ data }: { data: Row[] | null }) => setRows(data ?? []));
+    VendorGateway.listVendorSettlements<Row>().then((data) => setRows(data));
   }, []);
 
   const visible = useMemo(() => {

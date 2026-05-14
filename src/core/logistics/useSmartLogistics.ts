@@ -8,7 +8,7 @@
  * the LocationContext — no UI rewrite required.
  */
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
 import type { DeliveryZone } from "@/lib/geoZones";
 
 export type ZoneOpsMetrics = {
@@ -82,17 +82,8 @@ export function useSmartLogistics(zoneCode?: string) {
     let active = true;
 
     const load = async () => {
-      let q = supabase
-        .from("geo_zones")
-        .select("zone_code,current_load_factor,base_eta_minutes,surge_active")
-        .eq("is_active", true);
-      if (zoneCode) q = q.eq("zone_code", zoneCode);
-      const { data, error } = await q;
+      const data = await LogisticsExtras.listGeoZoneOps(zoneCode);
       if (!active) return;
-      if (error || !data) {
-        setLoaded(true);
-        return;
-      }
       const next: OpsMap = {};
       for (const row of data as ZoneOpsMetrics[]) {
         next[row.zone_code] = {
@@ -108,44 +99,32 @@ export function useSmartLogistics(zoneCode?: string) {
 
     load();
 
-    const channel = supabase
-      .channel(`geo-zones-ops${zoneCode ? `:${zoneCode}` : ""}`)
-      .on(
-        "postgres_changes",
-        zoneCode
-          ? { event: "*", schema: "public", table: "geo_zones", filter: `zone_code=eq.${zoneCode}` }
-          : { event: "*", schema: "public", table: "geo_zones" },
-        (payload) => {
-          const row = (payload.new ?? payload.old) as
-            | (ZoneOpsMetrics & { is_active?: boolean })
-            | undefined;
-          if (!row?.zone_code) return;
-          setOps((prev) => {
-            const prevRow = prev[row.zone_code];
-            const nextRow: ZoneOpsMetrics = {
-              zone_code: row.zone_code,
-              current_load_factor: Number(row.current_load_factor ?? 1),
-              base_eta_minutes: row.base_eta_minutes ?? null,
-              surge_active: !!row.surge_active,
-            };
-            // Skip no-op updates to avoid re-render storms.
-            if (
-              prevRow &&
-              prevRow.current_load_factor === nextRow.current_load_factor &&
-              prevRow.base_eta_minutes === nextRow.base_eta_minutes &&
-              prevRow.surge_active === nextRow.surge_active
-            ) {
-              return prev;
-            }
-            return { ...prev, [row.zone_code]: nextRow };
-          });
-        },
-      )
-      .subscribe();
+    const channel = LogisticsExtras.subscribeGeoZoneOps(zoneCode, (raw) => {
+      const row = raw as (ZoneOpsMetrics & { is_active?: boolean }) | undefined;
+      if (!row?.zone_code) return;
+      setOps((prev) => {
+        const prevRow = prev[row.zone_code];
+        const nextRow: ZoneOpsMetrics = {
+          zone_code: row.zone_code,
+          current_load_factor: Number(row.current_load_factor ?? 1),
+          base_eta_minutes: row.base_eta_minutes ?? null,
+          surge_active: !!row.surge_active,
+        };
+        if (
+          prevRow &&
+          prevRow.current_load_factor === nextRow.current_load_factor &&
+          prevRow.base_eta_minutes === nextRow.base_eta_minutes &&
+          prevRow.surge_active === nextRow.surge_active
+        ) {
+          return prev;
+        }
+        return { ...prev, [row.zone_code]: nextRow };
+      });
+    });
 
     return () => {
       active = false;
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [zoneCode]);
 
@@ -169,15 +148,5 @@ export async function findNearestDrivers(
   radiusMeters = 5_000,
   limit = 5,
 ): Promise<NearestDriver[]> {
-  const { data, error } = await supabase.rpc("find_nearest_drivers", {
-    p_lat: lat,
-    p_lng: lng,
-    p_radius_m: radiusMeters,
-    p_limit: limit,
-  });
-  if (error) {
-    console.error("[findNearestDrivers] failed", error.message);
-    return [];
-  }
-  return (data ?? []) as NearestDriver[];
+  return LogisticsExtras.findNearestDrivers(lat, lng, radiusMeters, limit) as Promise<NearestDriver[]>;
 }

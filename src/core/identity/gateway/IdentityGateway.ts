@@ -355,4 +355,66 @@ export const IdentityGateway = {
       .eq("workspace_id", workspaceId);
     return data ?? [];
   },
+
+  /* ─── Wave P-3 §12 — Theme preference / display name / wallet / favorites ─── */
+
+  async getThemePreference(userId: string): Promise<string | null> {
+    const { data } = await supabase
+      .from("profiles")
+      .select("theme_preference")
+      .eq("id", userId)
+      .maybeSingle();
+    const v = (data as { theme_preference?: string | null } | null)?.theme_preference;
+    return v ?? null;
+  },
+
+  async setThemePreference(userId: string, value: string): Promise<void> {
+    await supabase.from("profiles").update({ theme_preference: value }).eq("id", userId);
+  },
+
+  async getProfileFullName(userId: string): Promise<string | null> {
+    const { data } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", userId)
+      .maybeSingle();
+    return (data?.full_name as string | undefined) ?? null;
+  },
+
+  async getWalletBalance(userId: string): Promise<number> {
+    const { data, error } = await supabase
+      .from("wallets")
+      .select("balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw error;
+    return (data?.balance as number | undefined) ?? 0;
+  },
+
+  async listFavoriteIds(userId: string): Promise<string[]> {
+    const { data } = await supabase
+      .from("favorites")
+      .select("product_id")
+      .eq("user_id", userId);
+    return (data ?? []).map((r) => r.product_id as string);
+  },
+
+  async addFavorites(userId: string, productIds: string[]): Promise<void> {
+    if (productIds.length === 0) return;
+    await supabase
+      .from("favorites")
+      .insert(productIds.map((product_id) => ({ user_id: userId, product_id })));
+  },
+
+  async addFavorite(userId: string, productId: string): Promise<void> {
+    await supabase.from("favorites").insert({ user_id: userId, product_id: productId });
+  },
+
+  async removeFavorite(userId: string, productId: string): Promise<void> {
+    await supabase
+      .from("favorites")
+      .delete()
+      .eq("user_id", userId)
+      .eq("product_id", productId);
+  },
 };

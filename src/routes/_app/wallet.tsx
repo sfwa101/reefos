@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { lazyPage } from "@/routes/-lazyRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 
 const Wallet = lazyPage(() => import("@/components/finance/WalletView"));
 
@@ -87,8 +87,8 @@ const WalletShell = () => (
 export const Route = createFileRoute("/_app/wallet")({
   // Auth gate — wallet exposes financial state, must redirect anon → /auth.
   beforeLoad: async ({ location }) => {
-    const { data } = await supabase.auth.getSession();
-    if (!data.session) {
+    const session = await IdentityGateway.getSession();
+    if (!session) {
       throw redirect({
         to: "/auth",
         search: { redirect: location.href } as never,

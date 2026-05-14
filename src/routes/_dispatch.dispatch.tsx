@@ -8,7 +8,7 @@ import { useCallback, useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { Bike, User, Loader2, X } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
 import { useVisibilitySocket } from "@/hooks/useVisibilitySocket";
 
 export const Route = createFileRoute("/_dispatch/dispatch")({
@@ -31,12 +31,8 @@ function DispatchBoard() {
   const [target, setTarget] = useState<{ ticket: DispatchTicket; channel: Channel } | null>(null);
 
   const refresh = useCallback(async () => {
-    const { data, error } = await supabase
-      .from("salsabil_fulfillment_nodes")
-      .select("id, master_order_id, total_amount, notes, created_at")
-      .eq("status", "ready_for_pickup")
-      .order("created_at", { ascending: true });
-    if (!error) setTickets((data ?? []) as DispatchTicket[]);
+    const data = await LogisticsExtras.listReadyForPickupNodes();
+    setTickets(data as DispatchTicket[]);
     setLoading(false);
   }, []);
 
@@ -44,15 +40,8 @@ function DispatchBoard() {
 
   useVisibilitySocket(
     () => {
-      const ch = supabase
-        .channel("dispatch-nodes")
-        .on(
-          "postgres_changes",
-          { event: "*", schema: "public", table: "salsabil_fulfillment_nodes" },
-          () => { refresh(); },
-        )
-        .subscribe();
-      return () => { supabase.removeChannel(ch); };
+      const ch = LogisticsExtras.subscribeFulfillmentNodes(() => { refresh(); });
+      return () => { ch.unsubscribe(); };
     },
     () => { refresh(); },
     [refresh],
@@ -156,13 +145,12 @@ function OtpDialog({
     }
     setSubmitting(true);
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const { error } = await (supabase as any).rpc("confirm_handover", {
-        p_node_id: ticket.id,
-        p_otp: otp.trim(),
-        p_channel: channel,
+      const { error } = await LogisticsExtras.confirmHandover({
+        nodeId: ticket.id,
+        otp: otp.trim(),
+        channel,
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message);
       toast.success("تم تسليم الطلب بنجاح");
       onConfirmed(ticket.id);
     } catch (e) {

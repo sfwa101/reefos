@@ -14,7 +14,7 @@ import {
   useLocation,
 } from "@tanstack/react-router";
 import { Bike, Radar, ListChecks, Wallet, Wifi, WifiOff } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { useDispatchRadar } from "@/apps/reef-al-madina/features/driver/hooks/useDispatchRadar";
 import { IncomingOfferModal } from "@/apps/reef-al-madina/features/driver/components/IncomingOfferModal";
@@ -54,15 +54,10 @@ function DriverShellInner() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.auth.getUser();
-      const uid = data.user?.id;
+      const uid = await IdentityGateway.getCurrentUserId();
       if (!uid) return;
-      const { data: prof } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", uid)
-        .maybeSingle();
-      if (!cancelled) setName((prof?.full_name as string | undefined) ?? null);
+      const fullName = await IdentityGateway.getProfileFullName(uid);
+      if (!cancelled) setName(fullName);
     })();
     return () => {
       cancelled = true;
