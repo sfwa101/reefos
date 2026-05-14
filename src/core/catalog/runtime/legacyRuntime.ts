@@ -63,7 +63,7 @@ function triggerSelfBind(): void {
         const result = await productsQueryOptions().queryFn!({
           // The queryFn does not actually consume these args — they are
           // here only to satisfy TanStack's QueryFunctionContext shape.
-          queryKey: PRODUCTS_QUERY_KEY,
+          queryKey: PRODUCTS_QUERY_KEY(),
           signal: new AbortController().signal,
           meta: undefined,
           client: boundClient as unknown as QueryClient,
@@ -73,7 +73,7 @@ function triggerSelfBind(): void {
           selfBoundCache = arr;
           if (boundClient) {
             try {
-              boundClient.setQueryData<Product[]>(PRODUCTS_QUERY_KEY, arr);
+              boundClient.setQueryData<Product[]>(PRODUCTS_QUERY_KEY(), arr);
             } catch {
               /* swallow — shim is best-effort */
             }
@@ -102,7 +102,7 @@ export function bindCatalogSource(client: QueryClient): void {
   // If the self-bind already ran, push its data into the freshly-bound client.
   if (selfBoundCache.length > 0) {
     try {
-      client.setQueryData<Product[]>(PRODUCTS_QUERY_KEY, selfBoundCache);
+      client.setQueryData<Product[]>(PRODUCTS_QUERY_KEY(), selfBoundCache);
     } catch {
       /* ignore */
     }
@@ -111,7 +111,7 @@ export function bindCatalogSource(client: QueryClient): void {
 
 function snapshot(): Product[] {
   const fromQuery =
-    boundClient?.getQueryData<Product[]>(PRODUCTS_QUERY_KEY) ?? [];
+    boundClient?.getQueryData<Product[]>(PRODUCTS_QUERY_KEY()) ?? [];
   const base = fromQuery.length > 0 ? fromQuery : selfBoundCache;
   if (base.length === 0) {
     // Fire-and-forget — populates `selfBoundCache` for the next render.
@@ -179,5 +179,5 @@ export async function ensureProductsLoaded(): Promise<Product[]> {
 /** @deprecated Wave P-B — invalidation is owned by the gateway/cache. */
 export async function refetchProducts(): Promise<void> {
   if (!boundClient) return;
-  await boundClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY });
+  await boundClient.invalidateQueries({ queryKey: PRODUCTS_QUERY_KEY() });
 }
