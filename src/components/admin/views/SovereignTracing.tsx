@@ -98,7 +98,7 @@ export default function SovereignTracingPage() {
   const { data, isFetching, isError, error, refetch } = useQuery({
     queryKey,
     placeholderData: keepPreviousData,
-    enabled: !rolesLoading && hasRole("admin"),
+    enabled: !rolesLoading && hasRole("admin") && getWorkspaceIdSync() !== null,
     queryFn: async (): Promise<EventRow[]> => {
       const rows = await listEventTimelineFn({
         data: {
