@@ -97,23 +97,14 @@ export function useActiveDriverTracking({ nodeId, driverId, orderId }: Args) {
     getDriverPositionFn({ data: { driverId: resolvedDriverId } })
       .then((row) => apply(row as Record<string, unknown> | null));
 
-    const channel = supabase
-      .channel(`driver-pos-${resolvedDriverId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "driver_positions",
-          filter: `driver_id=eq.${resolvedDriverId}`,
-        },
-        (payload) => apply(payload.new as Record<string, unknown>),
-      )
-      .subscribe();
+    const channel = DriverGateway.subscribeDriverPosition(
+      resolvedDriverId,
+      (row) => apply(row),
+    );
 
     return () => {
       active = false;
-      supabase.removeChannel(channel);
+      channel.unsubscribe();
     };
   }, [resolvedDriverId]);
 
