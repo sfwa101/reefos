@@ -2,6 +2,7 @@ import { Outlet, Link, useLocation } from "@tanstack/react-router";
 import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Truck, Wallet, Map } from "lucide-react";
 import { IncomingOfferModal } from "@/apps/reef-al-madina/features/driver/components/IncomingOfferModal";
+import { DutyToggle } from "@/components/driver/DutyToggle";
 
 export default function DriverShell() {
   const { pathname } = useLocation();
