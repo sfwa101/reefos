@@ -36,9 +36,9 @@ import {
 import type { PricingContext } from "@/core/commerce/pricing/types";
 import {
   useCartProjectionStore,
-  useCartActions as useCartStoreActions,
+  useCartActions as useProjectionActions,
   useCartLinesArray,
-  useCartLineQty as useCartStoreLineQty,
+  useCartLineQty as useProjectionLineQty,
   useCartTotalItems,
   lineKey,
   replaceCartLines,
@@ -350,9 +350,9 @@ export const useCartLines = (): CartLine[] => useCartLinesArray();
 export const useCartCount = (): number => useCartTotalItems();
 
 export const useCartLineQty = (productId: string): number =>
-  useCartStoreLineQty(productId);
+  useProjectionLineQty(productId);
 
-export const useCartActions = (): CartActions => useCartStoreActions();
+export const useCartActions = (): CartActions => useProjectionActions();
 
 /* ---- Pricing-driven selectors ---- */
 
