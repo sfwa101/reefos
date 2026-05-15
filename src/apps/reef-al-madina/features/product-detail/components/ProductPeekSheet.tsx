@@ -11,6 +11,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
