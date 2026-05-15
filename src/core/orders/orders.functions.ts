@@ -83,7 +83,7 @@ export const createOrder = createServerFn({ method: 'POST' })
       p_delivery_info: (data.delivery_info ?? {}) as unknown as never,
       p_idempotency_key: data.idempotency_key,
       p_payment_method: data.payment_method,
-      p_expected_snapshot_hash: expectedSnapshotHash,
+      p_client_snapshot_hash: expectedSnapshotHash,
     });
 
     if (error) {
