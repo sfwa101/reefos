@@ -109,20 +109,18 @@ export const offlineQueueSize = async (): Promise<number> =>
   (await safeRead()).length;
 
 const executeOne = async (item: QueuedItem): Promise<void> => {
-  // Dynamic RPC / table names cannot be expressed via Supabase's literal-key
-  // generics; cast supabase to a typed callable shape instead of an unsafe escape.
-  type DynamicRpc = (
-    name: string,
-    payload: Record<string, unknown>,
-  ) => Promise<{ error: { message: string } | null }>;
-  type DynamicFrom = (table: string) => {
-    update: (patch: Record<string, unknown>) => {
-      match: (
-        m: Record<string, string | number>,
-      ) => Promise<{ error: { message: string } | null }>;
-    };
-  };
-
+  // P0 / V-2 — Offline replay TEMPORARILY DISABLED.
+  // The Emperor's directive: while we stabilize the live network path
+  // before the first sale, the queue must not silently fire raw
+  // `supabase.rpc` / `supabase.from` calls from the client. We accept
+  // the trade-off (no offline drain) until the replay path is rewired
+  // through server functions.
+  //
+  // TODO: Re-enable via Server Functions (e.g. replayQueuedOpFn under
+  // `requireSupabaseAuth`) so RLS and tracing apply to drained ops.
+  void item;
+  throw new Error("offline_replay_disabled");
+  /*
   if (item.op === "rpc") {
     const rpc = supabase.rpc as unknown as DynamicRpc;
     const { error } = await rpc(item.rpcName, item.payload);
@@ -136,13 +134,13 @@ const executeOne = async (item: QueuedItem): Promise<void> => {
     return;
   }
   if (item.op === "sovereign.checkout") {
-    // Server re-runs CashierBrain & vetoes on hash mismatch (Article 12.1).
     const { callSovereignCheckout } = await import(
       "@/core/hakim-ai/hooks/useSovereignCheckout"
     );
     await callSovereignCheckout(item.payload);
     return;
   }
+  */
 };
 
 let processing = false;
