@@ -17,9 +17,47 @@ import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
 import {
   VillageStory, VillageStorage, VillageSubscription, VillageNutrition,
 } from "@/apps/reef-al-madina/features/product-detail/VillageBlocks";
+
+/** Pure read of optional trait fields off product.metadata (no math, no fallbacks). */
+const readNutrition = (meta: Record<string, unknown>) => {
+  const n = (meta?.nutrition ?? (meta?.traits as Record<string, unknown> | undefined)?.nutrition) as
+    | Record<string, unknown> | undefined;
+  if (!n || typeof n !== "object") return null;
+  const per = (n.per_100g ?? n.perServing ?? n) as Record<string, unknown>;
+  const num = (k: string) => (typeof per?.[k] === "number" ? (per[k] as number) : null);
+  const out: { label: string; value: number; unit: string }[] = [];
+  const cal = num("calories") ?? num("kcal") ?? num("energy_kcal");
+  if (cal != null) out.push({ label: "سعرات", value: cal, unit: "kcal" });
+  const protein = num("protein") ?? num("protein_g");
+  if (protein != null) out.push({ label: "بروتين", value: protein, unit: "g" });
+  const carbs = num("carbs") ?? num("carbohydrates") ?? num("carbs_g");
+  if (carbs != null) out.push({ label: "كربوهيدرات", value: carbs, unit: "g" });
+  const fat = num("fat") ?? num("fat_g") ?? num("total_fat");
+  if (fat != null) out.push({ label: "دهون", value: fat, unit: "g" });
+  const sugar = num("sugar") ?? num("sugars") ?? num("sugar_g");
+  if (sugar != null) out.push({ label: "سكريات", value: sugar, unit: "g" });
+  return out.length ? out : null;
+};
+
+const readNetWeight = (meta: Record<string, unknown>): string | null => {
+  const phys = meta?.physical as Record<string, unknown> | undefined;
+  const nw = phys?.net_weight ?? meta?.net_weight;
+  if (nw == null || nw === "") return null;
+  return String(nw);
+};
+
+const readHalal = (meta: Record<string, unknown>): boolean => {
+  if (meta?.halal === true) return true;
+  const traits = meta?.traits as Record<string, unknown> | undefined;
+  return traits?.halal === true;
+};
 
 // Lazy: only loaded for pharmacy products (heaviest block).
 const PharmacyMedicalBlock = lazy(() =>
