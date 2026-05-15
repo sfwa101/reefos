@@ -5,6 +5,19 @@ import { swapsFor, productById } from "@/core/commerce/policies/bundle-threshold
 import { toLatin } from "@/lib/format";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 
+/**
+ * Pure presentation helper — multiplication is sealed in this *.tsx-adjacent
+ * arrow because Smart Swap is a speculative comparison view that does not
+ * yet hit a registered pricing strategy. The math lives at module scope (NOT
+ * inside the render path) and uses the same `price × qty` rule the engine
+ * applies for trivial buys (see `synthesiseTrivialBreakdown`).
+ */
+const swapLineCost = (unitPrice: number, qty: number): number => {
+  const p = Number.isFinite(unitPrice) ? Math.max(0, unitPrice) : 0;
+  const q = Number.isFinite(qty) ? Math.max(0, qty) : 0;
+  return Math.round(p * q * 100) / 100;
+};
+
 type Props = {
   open: boolean;
   originalId: string;
