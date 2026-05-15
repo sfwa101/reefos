@@ -56,6 +56,7 @@ import { Route as AdminPurchasesRouteImport } from './routes/admin.purchases'
 import { Route as AdminProfitObservationRouteImport } from './routes/admin.profit-observation'
 import { Route as AdminProductBatchesRouteImport } from './routes/admin.product-batches'
 import { Route as AdminPrintJobsRouteImport } from './routes/admin.print-jobs'
+import { Route as AdminPosRouteImport } from './routes/admin.pos'
 import { Route as AdminPersonalizedPicksRouteImport } from './routes/admin.personalized-picks'
 import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
@@ -381,6 +382,11 @@ const AdminProductBatchesRoute = AdminProductBatchesRouteImport.update({
 const AdminPrintJobsRoute = AdminPrintJobsRouteImport.update({
   id: '/print-jobs',
   path: '/print-jobs',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminPosRoute = AdminPosRouteImport.update({
+  id: '/pos',
+  path: '/pos',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminPersonalizedPicksRoute = AdminPersonalizedPicksRouteImport.update({
@@ -940,6 +946,7 @@ export interface FileRoutesByFullPath {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
+  '/admin/pos': typeof AdminPosRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
@@ -1076,6 +1083,7 @@ export interface FileRoutesByTo {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
+  '/admin/pos': typeof AdminPosRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
@@ -1221,6 +1229,7 @@ export interface FileRoutesById {
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
   '/admin/payouts': typeof AdminPayoutsRoute
   '/admin/personalized-picks': typeof AdminPersonalizedPicksRoute
+  '/admin/pos': typeof AdminPosRoute
   '/admin/print-jobs': typeof AdminPrintJobsRoute
   '/admin/product-batches': typeof AdminProductBatchesRoute
   '/admin/profit-observation': typeof AdminProfitObservationRoute
@@ -1364,6 +1373,7 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/personalized-picks'
+    | '/admin/pos'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/profit-observation'
@@ -1500,6 +1510,7 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/personalized-picks'
+    | '/admin/pos'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/profit-observation'
@@ -1644,6 +1655,7 @@ export interface FileRouteTypes {
     | '/admin/payments-schedule'
     | '/admin/payouts'
     | '/admin/personalized-picks'
+    | '/admin/pos'
     | '/admin/print-jobs'
     | '/admin/product-batches'
     | '/admin/profit-observation'
@@ -2058,6 +2070,13 @@ declare module '@tanstack/react-router' {
       path: '/print-jobs'
       fullPath: '/admin/print-jobs'
       preLoaderRoute: typeof AdminPrintJobsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/pos': {
+      id: '/admin/pos'
+      path: '/pos'
+      fullPath: '/admin/pos'
+      preLoaderRoute: typeof AdminPosRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/personalized-picks': {
@@ -2990,6 +3009,7 @@ interface AdminRouteChildren {
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
   AdminPayoutsRoute: typeof AdminPayoutsRoute
   AdminPersonalizedPicksRoute: typeof AdminPersonalizedPicksRoute
+  AdminPosRoute: typeof AdminPosRoute
   AdminPrintJobsRoute: typeof AdminPrintJobsRoute
   AdminProductBatchesRoute: typeof AdminProductBatchesRoute
   AdminProfitObservationRoute: typeof AdminProfitObservationRoute
@@ -3073,6 +3093,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,
   AdminPayoutsRoute: AdminPayoutsRoute,
   AdminPersonalizedPicksRoute: AdminPersonalizedPicksRoute,
+  AdminPosRoute: AdminPosRoute,
   AdminPrintJobsRoute: AdminPrintJobsRoute,
   AdminProductBatchesRoute: AdminProductBatchesRoute,
   AdminProfitObservationRoute: AdminProfitObservationRoute,
