@@ -28,6 +28,7 @@ import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
 import { homeProductCardAdapter } from "../adapter";
+import { preorderDepositAmount } from "@/core/commerce/policies/deposits";
 
 export const toCompareItem = (p: ProductCardVM): CompareItem => {
   const view = homeProductCardAdapter(p);
