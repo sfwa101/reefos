@@ -344,3 +344,33 @@ export const chatHakimFn = createServerFn({ method: "POST" })
       return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
     }
   });
+
+// ─── Wallet Balance (P0 / V-1) ────────────────────────────────────
+// Sanctioned server-side read of `wallets.balance` for the global
+// SalsabilStatusBar. Replaces the prior client-side gateway call so
+// the wallet read flows through requireSupabaseAuth + RLS, never
+// landing in a UI bundle as a direct `supabase.from("wallets")`.
+export const getWalletBalanceFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ balance: number }> => {
+    const { supabase, userId } = context;
+    const sb = supabase as unknown as {
+      from: (t: string) => {
+        select: (s: string) => {
+          eq: (c: string, v: string) => {
+            maybeSingle: () => Promise<{
+              data: { balance: number | string | null } | null;
+              error: { message: string } | null;
+            }>;
+          };
+        };
+      };
+    };
+    const { data, error } = await sb
+      .from("wallets")
+      .select("balance")
+      .eq("user_id", userId)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return { balance: Number(data?.balance ?? 0) };
+  });
