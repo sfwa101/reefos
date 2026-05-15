@@ -587,6 +587,9 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
       nutrition,
       physical,
       allergens: optStrArr(a.allergens, 20),
+      barcode: optStr(a.barcode, 64),
+      halal: typeof a.halal === "boolean" ? a.halal : null,
+      tier_rules: isObj(a.tier_rules) ? toJsonObject(a.tier_rules) : null,
     };
 
     const sanitizedSkus: VisionSkuDTO[] = skusRaw.slice(0, 20).map((sRaw, i) => {
