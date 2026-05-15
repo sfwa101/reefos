@@ -64,6 +64,7 @@ import { Route as AdminPartnerLedgersRouteImport } from './routes/admin.partner-
 import { Route as AdminOsRouteImport } from './routes/admin.os'
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
+import { Route as AdminModulesRouteImport } from './routes/admin.modules'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
 import { Route as AdminLowStockRouteImport } from './routes/admin.low-stock'
 import { Route as AdminKycRouteImport } from './routes/admin.kyc'
@@ -419,6 +420,11 @@ const AdminOffersRoute = AdminOffersRouteImport.update({
 const AdminMoreRoute = AdminMoreRouteImport.update({
   id: '/more',
   path: '/more',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminModulesRoute = AdminModulesRouteImport.update({
+  id: '/modules',
+  path: '/modules',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMarketingRoute = AdminMarketingRouteImport.update({
@@ -918,6 +924,7 @@ export interface FileRoutesByFullPath {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
+  '/admin/modules': typeof AdminModulesRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/os': typeof AdminOsRoute
@@ -1052,6 +1059,7 @@ export interface FileRoutesByTo {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
+  '/admin/modules': typeof AdminModulesRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/os': typeof AdminOsRoute
@@ -1195,6 +1203,7 @@ export interface FileRoutesById {
   '/admin/kyc': typeof AdminKycRoute
   '/admin/low-stock': typeof AdminLowStockRoute
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
+  '/admin/modules': typeof AdminModulesRoute
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
   '/admin/os': typeof AdminOsRoute
@@ -1336,6 +1345,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
+    | '/admin/modules'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/os'
@@ -1470,6 +1480,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
+    | '/admin/modules'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/os'
@@ -1612,6 +1623,7 @@ export interface FileRouteTypes {
     | '/admin/kyc'
     | '/admin/low-stock'
     | '/admin/marketing'
+    | '/admin/modules'
     | '/admin/more'
     | '/admin/offers'
     | '/admin/os'
@@ -2090,6 +2102,13 @@ declare module '@tanstack/react-router' {
       path: '/more'
       fullPath: '/admin/more'
       preLoaderRoute: typeof AdminMoreRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/modules': {
+      id: '/admin/modules'
+      path: '/modules'
+      fullPath: '/admin/modules'
+      preLoaderRoute: typeof AdminModulesRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/marketing': {
@@ -2942,6 +2961,7 @@ interface AdminRouteChildren {
   AdminKycRoute: typeof AdminKycRoute
   AdminLowStockRoute: typeof AdminLowStockRoute
   AdminMarketingRoute: typeof AdminMarketingRouteWithChildren
+  AdminModulesRoute: typeof AdminModulesRoute
   AdminMoreRoute: typeof AdminMoreRoute
   AdminOffersRoute: typeof AdminOffersRoute
   AdminOsRoute: typeof AdminOsRoute
@@ -3023,6 +3043,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminKycRoute: AdminKycRoute,
   AdminLowStockRoute: AdminLowStockRoute,
   AdminMarketingRoute: AdminMarketingRouteWithChildren,
+  AdminModulesRoute: AdminModulesRoute,
   AdminMoreRoute: AdminMoreRoute,
   AdminOffersRoute: AdminOffersRoute,
   AdminOsRoute: AdminOsRoute,

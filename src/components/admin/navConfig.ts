@@ -12,6 +12,7 @@ import {
   Box,
   Compass,
   Factory,
+  Layers3,
   LayoutDashboard,
   Library,
   Megaphone,
