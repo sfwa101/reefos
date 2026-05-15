@@ -17,6 +17,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { Phone, Lock, User, Sparkles, Eye, EyeOff, MapPin, Loader2, ChevronRight, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import reefLogo from "@/assets/reef-logo.webp";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
 import { IdentityGateway } from "@/core/identity";
