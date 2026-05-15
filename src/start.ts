@@ -23,6 +23,7 @@
  * and the Phase 46 circuit breaker for burst protection.
  */
 import { createMiddleware, createStart } from "@tanstack/react-start";
+import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
 const securityHeaders = createMiddleware().server(async ({ next, request }) => {
   const result = await next();
