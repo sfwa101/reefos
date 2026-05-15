@@ -42,6 +42,9 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
+import { HakimLayer } from "./hakim/HakimLayer";
+import { useHakimLayer } from "./hakim/useHakimLayer";
+
 type NavItem = {
   to: string;
   label: string;
