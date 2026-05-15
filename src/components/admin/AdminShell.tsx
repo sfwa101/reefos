@@ -190,14 +190,14 @@ function AdminSidebar({ activePath, items }: { activePath: string; items: NavIte
 
 /* ------------------------------------------------------------------ */
 
-function AdminBottomNav({ activePath }: { activePath: string }) {
+function AdminBottomNav({ activePath, items }: { activePath: string; items: NavItem[] }) {
   return (
     <nav
       className="fixed bottom-4 left-4 right-4 z-40 glass-steel-strong rounded-3xl p-1.5 shadow-elevated lg:hidden"
       aria-label="تنقل الإدارة"
     >
       <ul className="flex items-center justify-between">
-        {BOTTOM_NAV.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon;
           const active =
             item.to === "/admin"
