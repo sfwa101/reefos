@@ -13,13 +13,13 @@ import tseslint from "typescript-eslint";
  *
  *   1. Kernel Purity (Article 2)        — `src/core/**` MUST NOT import
  *      from `@/apps/**`. Domains may not depend on a specific vertical.
- *   2. Gateway Exclusivity (Article 4)  — `supabase.from(...)` and
- *      `supabase.rpc(...)` are forbidden everywhere EXCEPT Sovereign
- *      Gateways (`**/gateway/**`), server functions (`**/*.functions.ts`),
- *      and the Supabase integration glue (`src/integrations/supabase/**`).
- *   3. UI Component Purity (Article 6)  — Raw `<button>` / `<input>` JSX
- *      is forbidden outside `src/components/ui/**`. Use the shadcn
- *      primitives (`@/components/ui/button`, `@/components/ui/input`).
+ *   2. Gateway Exclusivity (Article 4)  — supabase.from(...) and
+ *      supabase.rpc(...) are forbidden everywhere EXCEPT Sovereign
+ *      Gateways (gateway directories), server functions (.functions.ts
+ *      files), and the Supabase integration glue (src/integrations/supabase).
+ *   3. UI Component Purity (Article 6)  — Raw button / input JSX
+ *      is forbidden outside src/components/ui. Use the shadcn primitives
+ *      (@/components/ui/button, @/components/ui/input).
  *
  * Legacy violations are reported (see EXECUTION_REPORT_AUTOMATED_CONSTITUTION.md)
  * but do not break `bun run build`, since Vite does not invoke ESLint.
