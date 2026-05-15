@@ -18,7 +18,8 @@
  * naturally as ISO strings since callers pass strings already.
  */
 import { get, set } from "idb-keyval";
-import { supabase } from "@/integrations/supabase/client";
+// P0 / V-2 — `supabase` import intentionally removed; replay path is
+// disabled until the server-function rewrite (see executeOne TODO).
 
 const QUEUE_KEY = "salsabil.offlineSyncQueue.v1";
 
