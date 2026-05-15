@@ -8,6 +8,7 @@ import {
 /** @deprecated Wave P-B B-3 — bridge type for WhatsApp message builder. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
+import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
 
 export type WaCartLine = { product: Product; qty: number; meta?: CartLineMeta };
 
@@ -50,16 +51,16 @@ const isBookingLine = (lid: string, src: string, sub?: string) =>
   isSweetsProduct(src) && fulfillmentTypeFor(lid, sub) === "C";
 
 const fmtInstantLine = (l: WaCartLine) => {
-  const unit = l.meta?.unitPrice ?? l.product.price;
-  return `▪️ ${toLatin(l.qty)}x ${l.product.name} (${fmtMoney(unit * l.qty)})`;
+  const lineTotal = lineGrandTotal(l);
+  return `▪️ ${toLatin(l.qty)}x ${l.product.name} (${fmtMoney(lineTotal)})`;
 };
 
 const fmtBookingLine = (l: WaCartLine) => {
-  const unit = l.meta?.unitPrice ?? l.product.price;
+  const lineTotal = lineGrandTotal(l);
   const day = l.meta?.bookingDate
     ? formatBookingShort(new Date(l.meta.bookingDate))
     : "—";
-  return `▪️ ${toLatin(l.qty)}x ${l.product.name} — استلام ${day} (${fmtMoney(unit * l.qty)})`;
+  return `▪️ ${toLatin(l.qty)}x ${l.product.name} — استلام ${day} (${fmtMoney(lineTotal)})`;
 };
 
 const payShortLabel = (payment: string, fallback: string): string =>

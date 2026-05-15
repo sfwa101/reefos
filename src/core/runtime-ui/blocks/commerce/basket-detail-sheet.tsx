@@ -368,7 +368,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                                       </span>
                                     )}
                                   </span>
-                                  <span className="block text-[10px] text-muted-foreground">×{toLatin(it.qty)} · {toLatin(it.product.price * it.qty)} ج.م</span>
+                                  <span className="block text-[10px] text-muted-foreground">×{toLatin(it.qty)} · {toLatin(lineGrandTotal({ product: it.product, qty: it.qty }))} ج.م</span>
                                 </span>
                                 <button
                                   onClick={() => requestSwap(it.originalId)}
