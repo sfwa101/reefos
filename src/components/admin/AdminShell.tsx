@@ -88,6 +88,8 @@ function AdminHeader({
           </div>
         </Link>
 
+        <SovereignSwitcher />
+
         <button
           type="button"
           onClick={() => openLayer("command")}
