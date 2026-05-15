@@ -12,6 +12,9 @@ import { QueryClientProvider, type QueryClient } from "@tanstack/react-query";
 import appCss from "../styles.css?url";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SovereignThemeProvider } from "@/core/theme/SovereignThemeProvider";
+import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
+import { getOSCompany } from "@/core/identity/osCompanies";
+import { getWorkspaceIdSync } from "@/core/identity/workspace";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
 import { CartProvider } from "@/core/orders/runtime/react/CartProvider";
@@ -88,8 +91,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "apple-mobile-web-app-title", content: "ريف المدينة" },
       { name: "twitter:title", content: "ريف المدينة — عبق الريف داخل المدينة" },
       { name: "twitter:description", content: "كل ماتحتاج اليه في مكان واحد" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -108,7 +119,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       // fetch fired by the home loader resolves DNS/TLS during HTML parse.
       ...(import.meta.env.VITE_SUPABASE_URL
         ? [
-            { rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL as string, crossOrigin: "anonymous" as const },
+            {
+              rel: "preconnect",
+              href: import.meta.env.VITE_SUPABASE_URL as string,
+              crossOrigin: "anonymous" as const,
+            },
             { rel: "dns-prefetch", href: import.meta.env.VITE_SUPABASE_URL as string },
           ]
         : []),
@@ -174,43 +189,58 @@ function RootComponent() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        
         <ThemeProvider>
           <LocaleProvider>
-          <UIProvider>
-            <TooltipProvider>
-              <AuthProvider>
-                <SovereignThemeProvider tenantId="reef">
-                <LocationProvider>
-                  <CartProvider>
-                      <CompareProvider>
-                        <FavoritesProvider>
-                          <LiveRulesBootstrap />
-                          <BackgroundSyncManager />
-                          
-                          <BehaviorTrackerBootstrap />
-                          <WorkspaceHydrationBootstrap />
-                          <SovereignSpiritBootstrap />
-                          <SubdomainGuard />
-                          <Toaster />
-                          <SovereignDormancyOverlay />
-                          <MaintenanceGate>
-                            <Outlet />
-                          </MaintenanceGate>
-                        </FavoritesProvider>
-                      </CompareProvider>
-                  </CartProvider>
-                </LocationProvider>
-                </SovereignThemeProvider>
-              </AuthProvider>
-            </TooltipProvider>
-          </UIProvider>
+            <UIProvider>
+              <TooltipProvider>
+                <AuthProvider>
+                  <SovereignTenantBridge>
+                    <LocationProvider>
+                      <CartProvider>
+                        <CompareProvider>
+                          <FavoritesProvider>
+                            <LiveRulesBootstrap />
+                            <BackgroundSyncManager />
+
+                            <BehaviorTrackerBootstrap />
+                            <WorkspaceHydrationBootstrap />
+                            <SovereignSpiritBootstrap />
+                            <SubdomainGuard />
+                            <Toaster />
+                            <SovereignDormancyOverlay />
+                            <MaintenanceGate>
+                              <Outlet />
+                            </MaintenanceGate>
+                          </FavoritesProvider>
+                        </CompareProvider>
+                      </CartProvider>
+                    </LocationProvider>
+                  </SovereignTenantBridge>
+                </AuthProvider>
+              </TooltipProvider>
+            </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
-        
+
         {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
         {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>
     </GlobalErrorBoundary>
   );
+}
+
+/**
+ * SovereignTenantBridge — reactive tenant resolver for the theme matrix.
+ *
+ * Replaces the hardcoded `tenantId="reef"`. Resolution order:
+ *   1. Server-attested workspace id from `getWorkspaceIdSync()` (JWT).
+ *   2. Active OS company kind chosen via `<SovereignSwitcher />`.
+ *   3. Fallback to "reef" so the storefront keeps rendering pre-auth.
+ */
+function SovereignTenantBridge({ children }: { children: React.ReactNode }) {
+  const activeId = useActiveOSCompany((s) => s.activeId);
+  const wsId = getWorkspaceIdSync();
+  const company = getOSCompany(activeId);
+  const tenantId = wsId ?? company.workspaceKind ?? "reef";
+  return <SovereignThemeProvider tenantId={tenantId}>{children}</SovereignThemeProvider>;
 }

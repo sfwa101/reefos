@@ -61,6 +61,7 @@ import { Route as AdminPayoutsRouteImport } from './routes/admin.payouts'
 import { Route as AdminPaymentsScheduleRouteImport } from './routes/admin.payments-schedule'
 import { Route as AdminPartnersRouteImport } from './routes/admin.partners'
 import { Route as AdminPartnerLedgersRouteImport } from './routes/admin.partner-ledgers'
+import { Route as AdminOsRouteImport } from './routes/admin.os'
 import { Route as AdminOffersRouteImport } from './routes/admin.offers'
 import { Route as AdminMoreRouteImport } from './routes/admin.more'
 import { Route as AdminMarketingRouteImport } from './routes/admin.marketing'
@@ -401,6 +402,11 @@ const AdminPartnersRoute = AdminPartnersRouteImport.update({
 const AdminPartnerLedgersRoute = AdminPartnerLedgersRouteImport.update({
   id: '/partner-ledgers',
   path: '/partner-ledgers',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminOsRoute = AdminOsRouteImport.update({
+  id: '/os',
+  path: '/os',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminOffersRoute = AdminOffersRouteImport.update({
@@ -901,6 +907,7 @@ export interface FileRoutesByFullPath {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/os': typeof AdminOsRoute
   '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
@@ -1032,6 +1039,7 @@ export interface FileRoutesByTo {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/os': typeof AdminOsRoute
   '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
@@ -1172,6 +1180,7 @@ export interface FileRoutesById {
   '/admin/marketing': typeof AdminMarketingRouteWithChildren
   '/admin/more': typeof AdminMoreRoute
   '/admin/offers': typeof AdminOffersRoute
+  '/admin/os': typeof AdminOsRoute
   '/admin/partner-ledgers': typeof AdminPartnerLedgersRoute
   '/admin/partners': typeof AdminPartnersRoute
   '/admin/payments-schedule': typeof AdminPaymentsScheduleRoute
@@ -1310,6 +1319,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/os'
     | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
@@ -1441,6 +1451,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/os'
     | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
@@ -1580,6 +1591,7 @@ export interface FileRouteTypes {
     | '/admin/marketing'
     | '/admin/more'
     | '/admin/offers'
+    | '/admin/os'
     | '/admin/partner-ledgers'
     | '/admin/partners'
     | '/admin/payments-schedule'
@@ -2033,6 +2045,13 @@ declare module '@tanstack/react-router' {
       path: '/partner-ledgers'
       fullPath: '/admin/partner-ledgers'
       preLoaderRoute: typeof AdminPartnerLedgersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/os': {
+      id: '/admin/os'
+      path: '/os'
+      fullPath: '/admin/os'
+      preLoaderRoute: typeof AdminOsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/offers': {
@@ -2874,6 +2893,7 @@ interface AdminRouteChildren {
   AdminMarketingRoute: typeof AdminMarketingRouteWithChildren
   AdminMoreRoute: typeof AdminMoreRoute
   AdminOffersRoute: typeof AdminOffersRoute
+  AdminOsRoute: typeof AdminOsRoute
   AdminPartnerLedgersRoute: typeof AdminPartnerLedgersRoute
   AdminPartnersRoute: typeof AdminPartnersRoute
   AdminPaymentsScheduleRoute: typeof AdminPaymentsScheduleRoute
@@ -2953,6 +2973,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMarketingRoute: AdminMarketingRouteWithChildren,
   AdminMoreRoute: AdminMoreRoute,
   AdminOffersRoute: AdminOffersRoute,
+  AdminOsRoute: AdminOsRoute,
   AdminPartnerLedgersRoute: AdminPartnerLedgersRoute,
   AdminPartnersRoute: AdminPartnersRoute,
   AdminPaymentsScheduleRoute: AdminPaymentsScheduleRoute,

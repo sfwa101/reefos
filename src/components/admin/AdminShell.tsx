@@ -19,57 +19,18 @@
  */
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
-import {
-  Bell,
-  BarChart3,
-  Box,
-  Home,
-  LayoutDashboard,
-  Megaphone,
-  Moon,
-  Package,
-  Search,
-  Settings,
-  ShoppingBag,
-  Sparkles,
-  Sun,
-  Users,
-  Wallet,
-} from "lucide-react";
+import { Bell, Home, Moon, Search, Sparkles, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 
 import { HakimLayer } from "./hakim/HakimLayer";
 import { useHakimLayer } from "./hakim/useHakimLayer";
+import { SovereignSwitcher } from "./SovereignSwitcher";
+import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
+import { getPrimaryNav, getBottomNav, type NavItem } from "./navConfig";
 
-type NavItem = {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-/** Primary admin destinations — bound to existing TanStack routes. */
-const PRIMARY_NAV: NavItem[] = [
-  { to: "/admin", label: "اللوحة", icon: LayoutDashboard },
-  { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
-  { to: "/admin/customers", label: "العملاء", icon: Users },
-  { to: "/admin/inventory", label: "المخزون", icon: Package },
-  { to: "/admin/marketing", label: "التسويق", icon: Megaphone },
-  { to: "/admin/finance", label: "المالية", icon: Wallet },
-  { to: "/admin/analytics", label: "التحليلات", icon: BarChart3 },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
-];
-
-/** Mobile bottom-dock — 5 most-used surfaces. */
-const BOTTOM_NAV: NavItem[] = [
-  { to: "/admin", label: "اللوحة", icon: LayoutDashboard },
-  { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
-  { to: "/admin/customers", label: "العملاء", icon: Users },
-  { to: "/admin/inventory", label: "المخزون", icon: Box },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
-];
+/* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
 
@@ -91,13 +52,7 @@ function useActivePath() {
 
 /* ------------------------------------------------------------------ */
 
-function AdminHeader({
-  isDark,
-  toggleTheme,
-}: {
-  isDark: boolean;
-  toggleTheme: () => void;
-}) {
+function AdminHeader({ isDark, toggleTheme }: { isDark: boolean; toggleTheme: () => void }) {
   const openLayer = useHakimLayer((s) => s.open);
   return (
     <header className="sticky top-0 z-50 glass-steel border-b border-white/40 h-16">
@@ -120,6 +75,8 @@ function AdminHeader({
           </div>
         </Link>
 
+        <SovereignSwitcher />
+
         <button
           type="button"
           onClick={() => openLayer("command")}
@@ -134,7 +91,6 @@ function AdminHeader({
             ⌘K
           </kbd>
         </button>
-
 
         <div className="ms-auto flex items-center gap-2 md:ms-0">
           <Button
@@ -175,7 +131,7 @@ function AdminHeader({
 
 /* ------------------------------------------------------------------ */
 
-function AdminSidebar({ activePath }: { activePath: string }) {
+function AdminSidebar({ activePath, items }: { activePath: string; items: NavItem[] }) {
   return (
     <aside className="hidden lg:block w-60 shrink-0 px-4 py-6">
       <nav className="glass-steel sticky top-24 rounded-3xl p-2.5 shadow-elevated">
@@ -183,7 +139,7 @@ function AdminSidebar({ activePath }: { activePath: string }) {
           الإدارة
         </p>
         <ul className="space-y-1">
-          {PRIMARY_NAV.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
             const active =
               item.to === "/admin"
@@ -220,14 +176,14 @@ function AdminSidebar({ activePath }: { activePath: string }) {
 
 /* ------------------------------------------------------------------ */
 
-function AdminBottomNav({ activePath }: { activePath: string }) {
+function AdminBottomNav({ activePath, items }: { activePath: string; items: NavItem[] }) {
   return (
     <nav
       className="fixed bottom-4 left-4 right-4 z-40 glass-steel-strong rounded-3xl p-1.5 shadow-elevated lg:hidden"
       aria-label="تنقل الإدارة"
     >
       <ul className="flex items-center justify-between">
-        {BOTTOM_NAV.map((item) => {
+        {items.map((item) => {
           const Icon = item.icon;
           const active =
             item.to === "/admin"
@@ -286,23 +242,23 @@ function HakimFloatingLauncher() {
 export function AdminShell() {
   const { isDark, toggle } = useTheme();
   const activePath = useActivePath();
+  const activeOSId = useActiveOSCompany((s) => s.activeId);
+  const primary = getPrimaryNav(activeOSId);
+  const bottom = getBottomNav(activeOSId);
 
   return (
-    <div
-      className="steel-glass bg-mesh font-body min-h-screen w-full"
-      dir="rtl"
-    >
+    <div className="steel-glass bg-mesh font-body min-h-screen w-full" dir="rtl">
       <AdminHeader isDark={isDark} toggleTheme={toggle} />
 
       <div className="mx-auto flex w-full max-w-screen-2xl">
-        <AdminSidebar activePath={activePath} />
+        <AdminSidebar activePath={activePath} items={primary} />
 
         <main className="flex-1 min-w-0 px-3 pb-32 pt-4 lg:px-6 lg:pb-10">
           <Outlet />
         </main>
       </div>
 
-      <AdminBottomNav activePath={activePath} />
+      <AdminBottomNav activePath={activePath} items={bottom} />
       <HakimFloatingLauncher />
       <HakimLayer />
     </div>
