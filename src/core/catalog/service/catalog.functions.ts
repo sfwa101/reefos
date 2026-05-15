@@ -509,6 +509,9 @@ export const getProductDNAFn = createServerFn({ method: "POST" })
       .eq("is_active", true)
       .maybeSingle();
 
+    if (error) throw error;
+    if (!row) throw new Error(`Product DNA not found for id=${data.id}`);
+
     const asset = row as unknown as SovereignAsset;
     const primary = pickPrimarySku(asset);
     const contract =
