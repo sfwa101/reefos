@@ -204,7 +204,7 @@ function RootComponent() {
                       </CompareProvider>
                   </CartProvider>
                 </LocationProvider>
-                </SovereignThemeProvider>
+                </SovereignTenantBridge>
               </AuthProvider>
             </TooltipProvider>
           </UIProvider>
