@@ -1,104 +1,91 @@
 /**
  * Modules & Engines — /admin/modules
  *
- * WAVE UI-13.5 — replaces the standalone "Settings" anchor in the mobile
- * bottom nav. Surfaces the orchestration cells (modules / engines) and
- * nests the Settings hub as a tab so admins keep full env control without
- * cluttering the shell.
+ * Sovereign Capability Surface. Reads the dynamic registry at
+ * `src/core/system/capabilities/registry.ts` and renders a 6-tab glass
+ * dashboard exposing every active engine/gateway in the civilization.
+ *
+ * Live metrics (e.g. offline queue depth) are hydrated from read-only
+ * client gateways (`offlineQueueSize`) — zero `supabase.from()` here.
  */
-import { useState, lazy, Suspense } from "react";
-import {
-  Blocks,
-  Boxes,
-  Cog,
-  Layers3,
-  Settings as SettingsIcon,
-  ShieldCheck,
-  Sparkles,
-  Wrench,
-} from "lucide-react";
-import { motion } from "framer-motion";
+import { useEffect, useState, lazy, Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { SectionHeader } from "@/components/admin/ui/SectionHeader";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
 import { useReefMode } from "@/core/identity/useReefMode";
+import {
+  TAB_META,
+  getCapabilitiesByTab,
+  type Capability,
+  type CapabilityTab,
+} from "@/core/system/capabilities/registry";
+import { offlineQueueSize } from "@/lib/offlineSyncQueue";
 
 const SettingsView = lazy(() => import("@/components/admin/views/Settings"));
 
-type TabId = "modules" | "settings";
-
-type ModuleCell = {
-  id: string;
-  title: string;
-  description: string;
-  icon: typeof Blocks;
-  accent: string;
-};
-
-const MODULE_CELLS: ModuleCell[] = [
-  {
-    id: "core",
-    title: "النواة التشغيلية",
-    description: "محركات الطلبات، المخزون، والمالية المتصلة بالـ Gateways السيادية.",
-    icon: Boxes,
-    accent: "from-sky-400/30 to-indigo-500/20",
-  },
-  {
-    id: "factory",
-    title: "مصنع التطبيقات",
-    description: "خلايا جذعية لإنتاج واجهات POS / KDS / Driver عند الطلب.",
-    icon: Layers3,
-    accent: "from-emerald-400/30 to-teal-500/20",
-  },
-  {
-    id: "hakim",
-    title: "محرّك حكيم",
-    description: "بصيرة، تنبؤ، ومخططات تنفيذية فورية للقرارات الإدارية.",
-    icon: Sparkles,
-    accent: "from-fuchsia-400/30 to-violet-500/20",
-  },
-  {
-    id: "governance",
-    title: "الحوكمة والامتثال",
-    description: "صلاحيات، ربا أودِت، وسجلات تتبّع للقرارات الحساسة.",
-    icon: ShieldCheck,
-    accent: "from-amber-400/30 to-orange-500/20",
-  },
-  {
-    id: "tools",
-    title: "أدوات الصيانة",
-    description: "إعادة فهرسة، تنظيف ذاكرة، ومُنشّطات الخلفية.",
-    icon: Wrench,
-    accent: "from-rose-400/30 to-pink-500/20",
-  },
-  {
-    id: "settings",
-    title: "الإعدادات السيادية",
-    description: "متغيرات النظام، العملة، الضرائب، والشحن.",
-    icon: Cog,
-    accent: "from-slate-400/30 to-zinc-500/20",
-  },
+const TAB_ORDER: CapabilityTab[] = [
+  "core",
+  "factory",
+  "hakim",
+  "governance",
+  "tools",
+  "settings",
 ];
 
-function TabButton({
+const STATUS_LABEL: Record<Capability["status"], string> = {
+  live: "نشط",
+  standby: "احتياطي",
+  beta: "تجريبي",
+};
+
+const STATUS_DOT: Record<Capability["status"], string> = {
+  live: "bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.18)]",
+  standby: "bg-zinc-400 shadow-[0_0_0_4px_rgba(161,161,170,0.18)]",
+  beta: "bg-amber-500 shadow-[0_0_0_4px_rgba(245,158,11,0.18)]",
+};
+
+function useOfflineQueueSize() {
+  const [size, setSize] = useState<number | null>(null);
+  useEffect(() => {
+    let mounted = true;
+    const tick = async () => {
+      try {
+        const n = await offlineQueueSize();
+        if (mounted) setSize(n);
+      } catch {
+        if (mounted) setSize(0);
+      }
+    };
+    tick();
+    const id = setInterval(tick, 5000);
+    return () => {
+      mounted = false;
+      clearInterval(id);
+    };
+  }, []);
+  return size;
+}
+
+function TabPill({
+  tab,
   active,
   onClick,
-  icon: Icon,
-  label,
 }: {
+  tab: CapabilityTab;
   active: boolean;
   onClick: () => void;
-  icon: typeof Blocks;
-  label: string;
 }) {
+  const meta = TAB_META[tab];
+  const Icon = meta.icon;
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`relative flex items-center gap-2 rounded-2xl px-4 py-2 text-[12.5px] font-extrabold transition ${
+      aria-pressed={active}
+      className={`relative flex shrink-0 items-center gap-2 rounded-2xl px-3.5 py-2 text-[12.5px] font-extrabold transition ${
         active ? "text-primary-foreground" : "text-foreground/70 hover:text-foreground"
       }`}
-      aria-pressed={active}
     >
       {active && (
         <motion.span
@@ -108,15 +95,70 @@ function TabButton({
         />
       )}
       <Icon className="relative h-4 w-4" strokeWidth={2.4} />
-      <span className="relative">{label}</span>
+      <span className="relative whitespace-nowrap">{meta.title}</span>
     </button>
   );
 }
 
+function CapabilityCard({
+  capability,
+  metric,
+}: {
+  capability: Capability;
+  metric?: number | null;
+}) {
+  const Icon = capability.icon;
+  const showMetric = capability.metricKey === "offlineQueueSize";
+  return (
+    <motion.div
+      whileHover={{ y: -2 }}
+      className="glass-steel relative overflow-hidden rounded-3xl p-5 shadow-steel-soft transition"
+    >
+      <div
+        className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${capability.accent} opacity-70`}
+      />
+      <div className="relative flex flex-col gap-3 text-right">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/60 text-foreground shadow-elevated backdrop-blur">
+            <Icon className="h-5 w-5" strokeWidth={2.3} />
+          </div>
+          <div className="flex flex-col items-end gap-1.5">
+            <span className="inline-flex items-center gap-2 rounded-full bg-white/70 px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wider text-foreground/80 backdrop-blur">
+              <span className={`h-2 w-2 rounded-full ${STATUS_DOT[capability.status]}`} />
+              {STATUS_LABEL[capability.status]}
+            </span>
+            {showMetric && (
+              <span className="rounded-full bg-foreground/90 px-2.5 py-1 text-[10.5px] font-extrabold text-background">
+                {metric ?? "…"} في الانتظار
+              </span>
+            )}
+          </div>
+        </div>
+        <div>
+          <p className="font-display text-[15px] font-extrabold text-foreground">
+            {capability.title}
+          </p>
+          <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-foreground/70">
+            {capability.description}
+          </p>
+        </div>
+        <code
+          dir="ltr"
+          className="truncate rounded-xl bg-white/50 px-2 py-1 text-[10.5px] font-medium text-foreground/60 backdrop-blur"
+          title={capability.source}
+        >
+          {capability.source}
+        </code>
+      </div>
+    </motion.div>
+  );
+}
+
 export default function Modules() {
-  const [tab, setTab] = useState<TabId>("modules");
+  const [tab, setTab] = useState<CapabilityTab>("core");
   const activeOSId = useActiveOSCompany((s) => s.activeId);
   const reefMode = useReefMode((s) => s.mode);
+  const offlineSize = useOfflineQueueSize();
 
   const eyebrow =
     activeOSId === "global"
@@ -125,80 +167,79 @@ export default function Modules() {
         ? "Reef Al Madina · Factory"
         : "Reef Al Madina · ERP";
 
+  const capabilities = getCapabilitiesByTab(tab);
+  const meta = TAB_META[tab];
+
   return (
-    <div className="space-y-6">
+    <div className="bg-mesh space-y-6">
       <SectionHeader
         eyebrow={eyebrow}
         title="الوحدات والمحركات"
-        description="مركز قيادة الخلايا التشغيلية والمحركات السيادية، مع وصول مباشر للإعدادات."
-        action={
-          <div className="glass-steel-strong inline-flex items-center gap-1 rounded-3xl p-1">
-            <TabButton
-              active={tab === "modules"}
-              onClick={() => setTab("modules")}
-              icon={Blocks}
-              label="الوحدات"
-            />
-            <TabButton
-              active={tab === "settings"}
-              onClick={() => setTab("settings")}
-              icon={SettingsIcon}
-              label="الإعدادات"
-            />
-          </div>
-        }
+        description="مركز قيادة الخلايا التشغيلية والمحركات السيادية، مع وصول مباشر لكل قدرة نشطة."
       />
 
-      {tab === "modules" ? (
+      <div className="glass-steel-strong sticky top-2 z-10 -mx-1 overflow-x-auto rounded-3xl p-1.5">
+        <div className="flex items-center gap-1">
+          {TAB_ORDER.map((t) => (
+            <TabPill key={t} tab={t} active={tab === t} onClick={() => setTab(t)} />
+          ))}
+        </div>
+      </div>
+
+      <div className="glass-steel relative overflow-hidden rounded-3xl p-4 shadow-steel-soft">
+        <div
+          className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${meta.accent} opacity-50`}
+        />
+        <div className="relative flex items-center gap-3 text-right">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/60 backdrop-blur">
+            <meta.icon className="h-5 w-5" strokeWidth={2.3} />
+          </div>
+          <div>
+            <p className="font-display text-[15px] font-extrabold">{meta.title}</p>
+            <p className="text-[12.5px] font-medium text-foreground/70">{meta.subtitle}</p>
+          </div>
+        </div>
+      </div>
+
+      <AnimatePresence mode="wait">
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
+          key={tab}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3"
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.22 }}
+          className="space-y-4"
         >
-          {MODULE_CELLS.map((cell) => {
-            const Icon = cell.icon;
-            return (
-              <motion.button
-                key={cell.id}
-                type="button"
-                whileHover={{ y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => cell.id === "settings" && setTab("settings")}
-                className="glass-steel relative overflow-hidden rounded-3xl p-5 text-right shadow-steel-soft transition"
-              >
-                <div
-                  className={`pointer-events-none absolute inset-0 bg-gradient-to-br ${cell.accent} opacity-70`}
+          {capabilities.length > 0 ? (
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {capabilities.map((cap) => (
+                <CapabilityCard
+                  key={cap.id}
+                  capability={cap}
+                  metric={cap.metricKey === "offlineQueueSize" ? offlineSize : null}
                 />
-                <div className="relative flex flex-col gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/60 text-foreground shadow-elevated backdrop-blur">
-                    <Icon className="h-5 w-5" strokeWidth={2.3} />
-                  </div>
-                  <div>
-                    <p className="font-display text-[15px] font-extrabold text-foreground">
-                      {cell.title}
-                    </p>
-                    <p className="mt-1 text-[12.5px] font-medium leading-relaxed text-foreground/70">
-                      {cell.description}
-                    </p>
-                  </div>
-                </div>
-              </motion.button>
-            );
-          })}
+              ))}
+            </div>
+          ) : (
+            <div className="glass-steel rounded-3xl p-8 text-center text-sm text-foreground/60 shadow-steel-soft">
+              لا توجد قدرات نشطة في هذا التبويب بعد.
+            </div>
+          )}
+
+          {tab === "settings" && (
+            <motion.div
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: 0.05 }}
+              className="glass-steel-strong rounded-3xl p-2 shadow-steel-soft sm:p-4"
+            >
+              <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
+                <SettingsView />
+              </Suspense>
+            </motion.div>
+          )}
         </motion.div>
-      ) : (
-        <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.25 }}
-          className="glass-steel rounded-3xl p-2 shadow-steel-soft sm:p-4"
-        >
-          <Suspense fallback={<Skeleton className="h-96 w-full rounded-2xl" />}>
-            <SettingsView />
-          </Suspense>
-        </motion.div>
-      )}
+      </AnimatePresence>
     </div>
   );
 }
