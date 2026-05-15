@@ -17,6 +17,7 @@
  *   4) If everything fails, return `{ ok: false, url, text }` so the UI can
  *      show a fallback dialog with copy-to-clipboard and a manual link.
  */
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type WaTarget = {
   /** International phone, digits only. e.g. "201080068689". */
@@ -63,7 +64,6 @@ export const openWhatsApp = (
   const source = opts?.source ?? "unknown";
 
   try {
-    console.log("[wa] dispatching via hidden anchor", { source, url });
     const link = document.createElement("a");
     link.href = url;
     link.target = "_blank";
@@ -73,7 +73,7 @@ export const openWhatsApp = (
     document.body.removeChild(link);
     return { ok: true, method: "window-open" };
   } catch (e) {
-    console.warn("[wa] anchor click failed", { source, error: e });
+    Tracer.warn("whatsapp", "anchor_click_failed", { source, error: String(e) });
     return { ok: false, url, text, reason: "anchor_failed" };
   }
 };
@@ -92,7 +92,7 @@ export const copyTextToClipboard = async (text: string): Promise<boolean> => {
       return true;
     }
   } catch (e) {
-    console.warn("[wa] clipboard api failed, falling back", e);
+    Tracer.warn("whatsapp", "clipboard_api_failed", { error: String(e) });
   }
   try {
     const ta = document.createElement("textarea");

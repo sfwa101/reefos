@@ -23,6 +23,7 @@ import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/core/system/observability/SovereignTracingGateway";
+import { Tracer } from "@/core/system/observability/Tracer";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
@@ -124,7 +125,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         setTrustLimit(Number(ctx.wallet?.credit_limit ?? 0));
         setCustomerName(ctx.fullName);
       } catch (e) {
-        console.warn("[cart] failed to hydrate checkout context:", e);
+        Tracer.warn("checkout", "hydrate_context_failed", { error: String(e) });
       }
     })();
   }, [user]);
@@ -270,7 +271,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   const checkoutWA = async () => {
     if (submittingRef.current) {
-      console.warn("[checkout] duplicate submit blocked (in-flight)");
+      Tracer.warn("checkout", "duplicate_submit_blocked", {});
       return;
     }
     const sinceLast = Date.now() - lastSubmitAtRef.current;
@@ -286,10 +287,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     lastSubmitAtRef.current = Date.now();
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
-    console.info("[checkout] WhatsApp checkout invoked", {
-      source,
-      cartLines: lines.length,
-    });
+    Tracer.info("checkout", "wa_checkout_invoked", { source, cartLines: lines.length });
     // Phase 38 — distributed tracing: one trace_id per submit attempt; the
     // same id is reused for `checkout_attempt` and (on success) `checkout_success`.
     const traceId = createTraceId();
@@ -423,7 +421,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           });
         } catch (e) {
           const msg = e instanceof Error ? e.message : "حدث خطأ أثناء تسجيل الطلب";
-          console.error("[checkout] process_checkout_sovereign failed", e);
+          Tracer.error("checkout", "process_checkout_sovereign_failed", e);
           void logSovereignEvent({
             trace_id: traceId,
             event_domain: "checkout",
@@ -465,7 +463,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
               });
             } catch (e) {
               const msg = e instanceof Error ? e.message : "فشل الدفع من محفظة تيسير";
-              console.error("[checkout] process_tayseer_payment failed", e);
+              Tracer.error("checkout", "tayseer_payment_failed", e);
               void logSovereignEvent({
                 trace_id: traceId,
                 event_domain: "wallet",
@@ -537,7 +535,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         try {
           await clearMyCartFn();
         } catch (e) {
-          console.warn("[checkout] failed to purge remote cart_items:", e);
+          Tracer.warn("checkout", "purge_remote_cart_failed", { error: String(e) });
         }
       }
       fireConfetti();
@@ -545,7 +543,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       // Kill-switch: in-app completion only.
       if (!enableWaCheckout) {
         try { sessionStorage.removeItem("reef:checkout:wa-fallback"); } catch { /* noop */ }
-        console.info("[checkout] WhatsApp disabled by admin → in-app completion", { source });
+        Tracer.info("checkout", "wa_disabled_inapp_completion", { source });
         toast.success("تم استلام طلبك بنجاح 🎉");
         navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
         setSubmitting(false);
@@ -560,24 +558,21 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       });
 
       if (!openResult.ok) {
-        console.warn("[checkout] WhatsApp open blocked, success fallback armed", {
-          source,
-          reason: openResult.reason,
-        });
+        Tracer.warn("checkout", "wa_open_blocked", { source, reason: openResult.reason });
         try {
           sessionStorage.setItem(
             "reef:checkout:wa-fallback",
             JSON.stringify({ phone: mainPhone, text: mainMessage, orderId, total: orderTotal }),
           );
         } catch (e) {
-          console.warn("[checkout] failed to persist WhatsApp fallback", e);
+          Tracer.warn("checkout", "wa_fallback_persist_failed", { error: String(e) });
         }
         setWaFallback({ phone: mainPhone, text: mainMessage, orderId, total: orderTotal });
         toast.message("اضغط على فتح واتساب لإكمال الطلب", {
           description: "منع المتصفح الفتح التلقائي",
         });
       } else {
-        console.info("[checkout] WhatsApp opened", { source, method: openResult.method });
+        Tracer.info("checkout", "wa_opened", { source, method: openResult.method });
         try {
           sessionStorage.removeItem("reef:checkout:wa-fallback");
         } catch {
@@ -585,25 +580,13 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         }
       }
 
-      const restaurantGroups = vendorGroups.filter((g) => g.vendor.kind === "restaurant");
-      if (restaurantGroups.length > 0) {
-        console.info(
-          "[checkout] vendor messages prepared (delivered via DB notifications):",
-          restaurantGroups.map((g) =>
-            g.vendor.kind === "restaurant" ? g.vendor.restaurant.name : "?",
-          ),
-        );
-      }
-      if (sweetsBuckets.C.lines.length > 0) {
-        console.info("[checkout] producer booking present (DB-routed)");
-      }
 
       toast.success("تم إرسال طلبك إلى واتساب 🎉");
       navigate({ to: "/order-success", search: { id: orderId, total: orderTotal } });
       setSubmitting(false);
       submittingRef.current = false;
     } catch (err) {
-      console.error("[checkout] unexpected error:", err);
+      Tracer.error("checkout", "unexpected_error", err);
       toast.error("حدث خطأ غير متوقّع");
       setSubmitting(false);
       submittingRef.current = false;

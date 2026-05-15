@@ -19,6 +19,7 @@
  *   }
  */
 import { supabase } from "@/integrations/supabase/client";
+import { Tracer } from "@/core/system/observability/Tracer";
 import {
   STORAGE,
   type SubscriptionRecord,
@@ -88,7 +89,7 @@ export async function listSubscriptions(
     .eq("is_active", true)
     .order("created_at", { ascending: false });
   if (error) {
-    console.error("[savedBaskets] list failed:", error);
+    Tracer.error("orders", "saved_baskets_list_failed", error);
     return [];
   }
   return (data ?? [])
@@ -117,7 +118,7 @@ export async function createSubscription(
     .select("id")
     .single();
   if (error) {
-    console.error("[savedBaskets] create failed:", error);
+    Tracer.error("orders", "saved_baskets_create_failed", error);
     return null;
   }
   return data?.id ?? null;
@@ -135,7 +136,7 @@ export async function updateSubscription(
     })
     .eq("id", rec.id);
   if (error) {
-    console.error("[savedBaskets] update failed:", error);
+    Tracer.error("orders", "saved_baskets_update_failed", error);
     return false;
   }
   return true;
@@ -148,7 +149,7 @@ export async function deleteSubscription(id: string): Promise<boolean> {
     .update({ is_active: false })
     .eq("id", id);
   if (error) {
-    console.error("[savedBaskets] delete failed:", error);
+    Tracer.error("orders", "saved_baskets_delete_failed", error);
     return false;
   }
   return true;
@@ -194,7 +195,7 @@ export async function migrateLegacySubscriptions(
   }));
   const { error } = await supabase.from("saved_baskets").insert(rows);
   if (error) {
-    console.error("[savedBaskets] migrate failed:", error);
+    Tracer.error("orders", "saved_baskets_migrate_failed", error);
     return 0;
   }
   try {

@@ -12,6 +12,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { supabaseAdmin } from "@/integrations/supabase/client.server";
 import { asDynamic } from "@/integrations/supabase/dynamic";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const SYMBOL_MAP: Record<string, string> = {
   BTC: "bitcoin",
@@ -59,18 +60,18 @@ export const tayseerOracleFn = createServerFn({ method: "POST" })
             { onConflict: "symbol" },
           );
         if (e1) {
-          console.error("upsert", q.symbol, e1.message);
+          Tracer.error("finance", "tayseer_quote_upsert_failed", { symbol: q.symbol, message: e1.message });
           continue;
         }
         const { error: e2 } = await sb
           .from("oracle_price_history")
           .insert({ symbol: q.symbol, price_usd: q.price_usd });
-        if (e2) console.error("history", q.symbol, e2.message);
+        if (e2) Tracer.error("finance", "tayseer_history_failed", { symbol: q.symbol, message: e2.message });
         updated++;
       }
       return { ok: true as const, updated, ran_at: new Date().toISOString() };
     } catch (err) {
-      console.error("tayseer-oracle error", err);
+      Tracer.error("finance", "tayseer_oracle_error", err);
       return { ok: false as const, error: String(err) };
     }
   });
