@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useAuth } from "@/context/AuthContext";
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
-import { getCheckoutContextFn, clearMyCartFn } from "@/core/orders/cart.functions";
 import { fmtMoney } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
 import {
@@ -25,8 +24,9 @@ import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/core/system/observability/SovereignTracingGateway";
 import { Tracer } from "@/core/system/observability/Tracer";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
-import { useSharedCartAdapter } from "./useSharedCartAdapter";
-import { useCartCalculations } from "./useCartCalculations";
+import { useCartItems } from "./useCartItems";
+import { useCartSync } from "./useCartSync";
+import { useCartTotals } from "./useCartTotals";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules, useCartHasErrors } from "@/core/orders/runtime/react/CartProvider";
@@ -54,7 +54,7 @@ export const paymentOptions = PAYMENT_METHODS;
 export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => {
   const sharedCartId = opts?.sharedCartId ?? null;
 
-  const cart = useSharedCartAdapter(sharedCartId);
+  const cart = useCartItems(sharedCartId);
   const { lines, count, total, setQty, remove, add, clear, updateMeta, isSharedMode, shared } = cart;
 
   const { user } = useAuth();
@@ -70,8 +70,6 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     useCartValidation(total);
 
   const [tip, setTip] = useState(0);
-  const [addresses, setAddresses] = useState<Addr[]>([]);
-  const [addrId, setAddrId] = useState<string>("");
   const [guestNotes, setGuestNotes] = useState("");
   const [payment, setPayment] = useState<string>("wallet");
   const [submitting, setSubmitting] = useState(false);
@@ -83,13 +81,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const lastSubmitAtRef = useRef<number>(0);
   const SUBMIT_COOLDOWN_MS = 3_000;
   const [waFallback, setWaFallback] = useState<WaFallbackPayload | null>(null);
-  const [walletBalance, setWalletBalance] = useState<number>(0);
-  const [trustLimit, setTrustLimit] = useState<number>(0);
   const [showRecharge, setShowRecharge] = useState(false);
   const [secondaryPayment, setSecondaryPayment] = useState<string>("cash");
   const [saveChange, setSaveChange] = useState<boolean>(true);
   const [donateChange, setDonateChange] = useState<boolean>(false);
-  const [customerName, setCustomerName] = useState<string>("");
   const [guestName, setGuestName] = useState<string>("");
   const [guestPhone, setGuestPhone] = useState<string>("");
   const [guestAddress, setGuestAddress] = useState<string>("");
@@ -102,33 +97,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const [charity, setCharity] = useState<number>(0);
   const [charityCauseId, setCharityCauseId] = useState<string>("food");
 
-  useEffect(() => {
-    if (!user) {
-      setAddresses([]);
-      setAddrId("");
-      setWalletBalance(0);
-      return;
-    }
-    (async () => {
-      // Phase 52 — Tayseer Kernel Integration. Reads balance + credit_limit
-      // strictly from the canonical `public.wallets` table (EGP). The legacy
-      // `wallet_balances` + `user_trust_limit` path is retired (Law 2).
-      // Wave P-D Phase D-2 — routed through the sanctioned Cart Gateway
-      // (`getCheckoutContextFn`) instead of direct `supabase.from(...)`.
-      try {
-        const ctx = await getCheckoutContextFn();
-        const list = (ctx.addresses as Addr[]) ?? [];
-        setAddresses(list);
-        const def = list.find((a) => a.is_default) ?? list[0];
-        if (def) setAddrId(def.id);
-        setWalletBalance(Number(ctx.wallet?.balance ?? 0));
-        setTrustLimit(Number(ctx.wallet?.credit_limit ?? 0));
-        setCustomerName(ctx.fullName);
-      } catch (e) {
-        Tracer.warn("checkout", "hydrate_context_failed", { error: String(e) });
-      }
-    })();
-  }, [user]);
+  // Wave Cart-Atomize — server-sync (addresses, wallet, trust, name) is
+  // now owned by `useCartSync`; this orchestrator only consumes the surface.
+  const sync = useCartSync(user ?? null);
+  const { addresses, addrId, setAddrId, customerName, walletBalance, trustLimit } = sync;
 
   useEffect(() => {
     const a = addresses.find((x) => x.id === addrId);
@@ -147,7 +119,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
   const deferredLines = useDeferredValue(lines);
   const deferredTotal = useDeferredValue(total);
 
-  const calc = useCartCalculations({
+  const calc = useCartTotals({
     lines: deferredLines,
     total: deferredTotal,
     zone,
@@ -532,11 +504,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       //    debounced background push and any realtime refetch race that
       //    would otherwise resurrect the cart on the next page load.
       if (currentUser?.id) {
-        try {
-          await clearMyCartFn();
-        } catch (e) {
-          Tracer.warn("checkout", "purge_remote_cart_failed", { error: String(e) });
-        }
+        await sync.purgeRemoteCart();
       }
       fireConfetti();
 
