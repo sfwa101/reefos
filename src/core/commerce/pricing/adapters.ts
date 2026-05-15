@@ -7,7 +7,7 @@
  * structural projection to `PricingModifier`).
  *
  * Constitutional source of truth — relocated from the destroyed
- * `src/lib/pricingAdapters.ts` to enforce Law 9 across the pricing
+ * `the destroyed legacy pricing adapters` to enforce Law 9 across the pricing
  * namespace. Behavior is byte-for-byte identical.
  */
 

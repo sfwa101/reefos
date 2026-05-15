@@ -2,7 +2,7 @@
  * Salsabil OS — Wave P-1.2 · Sovereign Modifier Surface.
  *
  * Constitutional source of truth for the modifier-based pricing utilities
- * historically housed in `src/lib/pricingEngine.ts`. Moved verbatim into
+ * historically housed in `the destroyed legacy pricing module`. Moved verbatim into
  * `core/commerce/pricing/` so Law 9 (Single Source of Truth) is enforced
  * for the entire pricing namespace.
  *
@@ -56,7 +56,7 @@ const round = (n: number) => Math.round(n * 100) / 100;
 
 /**
  * Universal pricing pipeline (mirrors the orchestrator's `foldModifiers`
- * and the prior `lib/pricingEngine.ts` implementation byte-for-byte to
+ * and the prior `the destroyed legacy pricing module` implementation byte-for-byte to
  * preserve shadow-pricing audit equivalence).
  */
 export function calculateUniversalPrice(
