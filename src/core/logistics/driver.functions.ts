@@ -276,3 +276,91 @@ export const endDriverShiftFn = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true as const, ended: 1 };
   });
+
+/* ─────────────────────────── Dispatch task FSM (Wave D-1.B) ─────────────────────────── */
+
+export type DispatchTaskAction = "arrived_vendor" | "picked_up" | "delivered";
+
+type NodeQuery = {
+  from: (t: string) => {
+    select: (s: string) => {
+      eq: (c: string, v: string) => {
+        maybeSingle: () => Promise<{
+          data: { id: string; driver_id: string | null; status: string | null } | null;
+          error: { message: string } | null;
+        }>;
+      };
+    };
+    update: (v: Record<string, unknown>) => {
+      eq: (c: string, v: string) => Promise<{
+        error: { message: string } | null;
+      }>;
+    };
+  };
+};
+
+export const updateDispatchTaskStatusFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    (d: {
+      nodeId: string;
+      action: DispatchTaskAction;
+      lat?: number | null;
+      lng?: number | null;
+    }) => d,
+  )
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }): Promise<{ ok: true; status: string }> => {
+    const { supabase, userId } = context;
+    const driverId = await resolveDriverId(supabase, userId);
+
+    // Verify ownership (defence in depth — RLS also enforces).
+    const { data: row, error: rowErr } = await (supabase as unknown as NodeQuery)
+      .from("salsabil_fulfillment_nodes")
+      .select("id,driver_id,status")
+      .eq("id", data.nodeId)
+      .maybeSingle();
+    if (rowErr) throw new Error(rowErr.message);
+    if (!row) throw new Error("task_not_found");
+    if (row.driver_id !== driverId) throw new Error("not_assigned_to_you");
+
+    const nowIso = new Date().toISOString();
+    let patch: Record<string, unknown>;
+    let nextStatus: string;
+
+    switch (data.action) {
+      case "arrived_vendor":
+        nextStatus = "preparing";
+        patch = { arrived_vendor_at: nowIso };
+        break;
+      case "picked_up":
+        nextStatus = "out_for_delivery";
+        patch = {
+          status: nextStatus,
+          picked_up_at: nowIso,
+          ...(data.lat != null && data.lng != null
+            ? { pickup_lat: data.lat, pickup_lng: data.lng }
+            : {}),
+        };
+        break;
+      case "delivered":
+        nextStatus = "delivered";
+        patch = {
+          status: nextStatus,
+          delivered_at: nowIso,
+          ...(data.lat != null && data.lng != null
+            ? { dropoff_lat: data.lat, dropoff_lng: data.lng }
+            : {}),
+        };
+        break;
+      default:
+        throw new Error("invalid_action");
+    }
+
+    const { error: upErr } = await (supabase as unknown as NodeQuery)
+      .from("salsabil_fulfillment_nodes")
+      .update(patch)
+      .eq("id", data.nodeId);
+    if (upErr) throw new Error(upErr.message);
+
+    return { ok: true as const, status: nextStatus };
+  });
