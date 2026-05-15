@@ -1100,3 +1100,118 @@ html[data-view-mode="simplified"] .glass {
   section, .print-block { break-inside: avoid; page-break-inside: avoid; }
   @page { margin: 14mm; }
 }
+
+/* ============================================================
+   WAVE UI-4 — STEEL GLASS GENESIS
+   Apple-inspired Steel Glass identity for Admin / Partner shells.
+   These tokens are ADDITIVE — the Storefront's existing green
+   `--background` / `--primary` palette in `:root` above remains the
+   default. Steel Glass activates only on subtrees that opt-in via
+   the `.steel-glass` utility class (applied to AdminShell later).
+   ============================================================ */
+:root {
+  /* Steel Glass color reservoir (HSL) — referenced by `.steel-glass` scope. */
+  --steel-background: 220 20% 97%;
+  --steel-foreground: 220 25% 12%;
+  --steel-surface: 220 22% 99%;
+  --steel-surface-muted: 220 18% 94%;
+  --steel-primary: 220 25% 18%;
+  --steel-primary-foreground: 220 20% 98%;
+  --steel-primary-glow: 220 35% 32%;
+  --steel-accent: 210 95% 56%;
+  --steel-accent-foreground: 220 25% 99%;
+  --steel-border: 220 16% 88%;
+  --steel-ring: 220 30% 30%;
+  --steel-muted: 220 14% 92%;
+  --steel-muted-foreground: 220 10% 42%;
+
+  /* Reusable shadows + gradients */
+  --steel-shadow-elevated:
+    0 1px 2px hsl(220 25% 10% / 0.04),
+    0 8px 24px -8px hsl(220 25% 10% / 0.10),
+    0 24px 48px -16px hsl(220 25% 10% / 0.12);
+  --steel-shadow-soft: 0 2px 12px -4px hsl(220 25% 10% / 0.08);
+  --steel-mesh:
+    radial-gradient(at 18% 12%, hsl(210 95% 56% / 0.10) 0px, transparent 55%),
+    radial-gradient(at 82% 8%, hsl(220 35% 32% / 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 95%, hsl(210 95% 56% / 0.06) 0px, transparent 60%);
+}
+
+.dark {
+  --steel-background: 220 25% 6%;
+  --steel-foreground: 220 18% 96%;
+  --steel-surface: 220 22% 9%;
+  --steel-surface-muted: 220 20% 13%;
+  --steel-primary: 220 18% 96%;
+  --steel-primary-foreground: 220 25% 10%;
+  --steel-primary-glow: 210 95% 62%;
+  --steel-accent: 210 95% 60%;
+  --steel-accent-foreground: 220 25% 8%;
+  --steel-border: 220 16% 18%;
+  --steel-ring: 210 95% 60%;
+  --steel-muted: 220 18% 14%;
+  --steel-muted-foreground: 220 12% 64%;
+
+  --steel-shadow-elevated:
+    0 1px 2px hsl(220 25% 2% / 0.4),
+    0 8px 24px -8px hsl(220 25% 2% / 0.55),
+    0 24px 48px -16px hsl(220 25% 2% / 0.65);
+  --steel-shadow-soft: 0 2px 12px -4px hsl(220 25% 2% / 0.45);
+  --steel-mesh:
+    radial-gradient(at 18% 12%, hsl(210 95% 60% / 0.14) 0px, transparent 55%),
+    radial-gradient(at 82% 8%, hsl(220 35% 50% / 0.10) 0px, transparent 50%),
+    radial-gradient(at 50% 95%, hsl(210 95% 60% / 0.08) 0px, transparent 60%);
+}
+
+@layer components {
+  /* Mesh background — Apple-style ambient gradient field. */
+  .bg-mesh {
+    background-image: var(--steel-mesh);
+    background-color: hsl(var(--steel-background));
+  }
+
+  /* Layered elevation — used by Steel Glass cards/sheets. */
+  .shadow-elevated { box-shadow: var(--steel-shadow-elevated); }
+  .shadow-steel-soft { box-shadow: var(--steel-shadow-soft); }
+
+  /* Steel-tinted glass (distinct from existing storefront `.glass`). */
+  .glass-steel {
+    background: hsl(var(--steel-surface) / 0.72);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid hsl(var(--steel-border) / 0.6);
+  }
+  .glass-steel-strong {
+    background: hsl(var(--steel-surface) / 0.88);
+    backdrop-filter: blur(28px) saturate(190%);
+    -webkit-backdrop-filter: blur(28px) saturate(190%);
+    border: 1px solid hsl(var(--steel-border) / 0.7);
+  }
+
+  /* Opt-in scope: any subtree wrapped in `.steel-glass` rebinds the
+     core semantic tokens (background, foreground, primary, etc.) to
+     Steel Glass values. The Storefront stays untouched. */
+  .steel-glass {
+    --background: var(--steel-background);
+    --foreground: var(--steel-foreground);
+    --surface: var(--steel-surface);
+    --surface-muted: var(--steel-surface-muted);
+    --card: var(--steel-surface);
+    --card-foreground: var(--steel-foreground);
+    --popover: var(--steel-surface);
+    --popover-foreground: var(--steel-foreground);
+    --primary: var(--steel-primary);
+    --primary-foreground: var(--steel-primary-foreground);
+    --primary-glow: var(--steel-primary-glow);
+    --accent: var(--steel-accent);
+    --accent-foreground: var(--steel-accent-foreground);
+    --border: var(--steel-border);
+    --input: var(--steel-border);
+    --ring: var(--steel-ring);
+    --muted: var(--steel-muted);
+    --muted-foreground: var(--steel-muted-foreground);
+
+    color: hsl(var(--steel-foreground));
+    font-family: 'Outfit', 'Figtree', 'Tajawal', system-ui, sans-serif;
+  }
+}
