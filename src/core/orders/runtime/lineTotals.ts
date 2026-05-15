@@ -111,6 +111,36 @@ export function evaluateCartLineCanonical(
   };
 }
 
+/**
+ * Wave P-1.5 — Speculative line evaluator.
+ *
+ * Pure engine-layer function used by product sheets that need to render a
+ * "if I add this with these options, what would it cost?" total BEFORE the
+ * line exists in the cart. UI layers MUST NOT inline `unitPrice * qty` —
+ * they call this instead. Returns a rounded number suitable for display.
+ */
+export function speculativeLineTotal(unitPrice: number, qty: number): number {
+  return synthesiseTrivialBreakdown(unitPrice, qty).lineTotal;
+}
+
+/**
+ * Wave P-1.5 — Sum a list of `{ unit_price, quantity }` rows (e.g. shared
+ * cart DB items, projection rows). Lives in the engine layer so presentation
+ * code can never multiply price × quantity itself.
+ */
+export interface PricedQuantityRow {
+  readonly unit_price: number;
+  readonly quantity: number;
+}
+
+export function sumPricedQuantityRows(
+  rows: ReadonlyArray<PricedQuantityRow>,
+): number {
+  let total = 0;
+  for (const r of rows) total += synthesiseTrivialBreakdown(r.unit_price, r.quantity).lineTotal;
+  return round2(total);
+}
+
 /** Sum the canonical grand totals across an array of cart lines. */
 export function sumCanonicalGrandTotals(
   lines: ReadonlyArray<CartLine>,
