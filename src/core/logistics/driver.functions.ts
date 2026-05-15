@@ -364,3 +364,44 @@ export const updateDispatchTaskStatusFn = createServerFn({ method: "POST" })
 
     return { ok: true as const, status: nextStatus };
   });
+
+/* ─────────────────────────── COD Cash Collection (Wave D-1.C) ─────────────────────────── */
+
+export type CashCollectionResult = {
+  ok: true;
+  amount: number;
+  order_id: string;
+};
+
+export const recordDriverCashCollectionFn = createServerFn({ method: "POST" })
+  .inputValidator((d: { nodeId: string; confirmedAmount: number }) => d)
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ data, context }): Promise<CashCollectionResult> => {
+    const { supabase } = context;
+    const rpc = (
+      supabase as unknown as {
+        rpc: (
+          name: string,
+          args: Record<string, unknown>,
+        ) => Promise<{ data: unknown; error: { message: string } | null }>;
+      }
+    ).rpc;
+    const { data: row, error } = await rpc("record_driver_cod_collection", {
+      _node_id: data.nodeId,
+      _confirmed_amount: data.confirmedAmount,
+    });
+    if (error) throw new Error(error.message);
+    const out = row as {
+      ok?: boolean;
+      amount?: number;
+      order_id?: string;
+    } | null;
+    if (!out?.ok || out.amount == null || !out.order_id) {
+      throw new Error("collection_failed");
+    }
+    return {
+      ok: true as const,
+      amount: Number(out.amount),
+      order_id: out.order_id,
+    };
+  });
