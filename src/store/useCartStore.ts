@@ -501,6 +501,14 @@ export const useCartActions = (): CartActions => {
   return ref.current;
 };
 
+/**
+ * Imperative bridge for non-React call sites (realtime sync, server effects).
+ * Equivalent to {@link useCartActions().replaceAll} but safe outside hooks.
+ */
+export function replaceCartLines(lines: ReadonlyArray<CartLine>): void {
+  cartRuntime.replaceAll(lines.map((l) => legacyLineToIntent(l)));
+}
+
 /** O(1): re-renders only when THIS product's qty changes. */
 export const useCartLineQty = (productId: string): number =>
   useCartStore((s) => {
