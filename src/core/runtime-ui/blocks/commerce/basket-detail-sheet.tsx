@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
+import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
 import { useAuth } from "@/context/AuthContext";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toLatin } from "@/lib/format";
@@ -368,7 +369,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                                       </span>
                                     )}
                                   </span>
-                                  <span className="block text-[10px] text-muted-foreground">×{toLatin(it.qty)} · {toLatin(it.product.price * it.qty)} ج.م</span>
+                                  <span className="block text-[10px] text-muted-foreground">×{toLatin(it.qty)} · {toLatin(lineGrandTotal({ product: it.product, qty: it.qty }))} ج.م</span>
                                 </span>
                                 <button
                                   onClick={() => requestSwap(it.originalId)}

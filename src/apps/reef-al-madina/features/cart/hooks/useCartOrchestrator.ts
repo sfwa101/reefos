@@ -29,6 +29,7 @@ import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
 import { useCartCheckoutRules, useCartHasErrors } from "@/core/orders/runtime/react/CartProvider";
+import { sumCanonicalGrandTotalsWhere } from "@/core/orders/runtime/lineTotals";
 /** @deprecated Wave P-B B-3 — capability check; will move to `vm.capabilities.includes("perishable")` in B-7+. */
 import { isPerishable } from "@/core/catalog/legacyProduct.types";
 import { computeLogisticsQuote } from "@/core/logistics/core/quote";
@@ -444,10 +445,10 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
           // waits for this RPC before declaring success, so the order's
           // payment_status flips to 'paid' inside the same user action.
           // Phase 54 — Wakalah lines are not yet owned; never deduct upfront.
-          const wakalahTotal = lines.reduce((acc, l) => {
+          const wakalahTotal = sumCanonicalGrandTotalsWhere(lines, (l) => {
             const mode = (l.meta?.properties as Record<string, unknown> | undefined)?.procurement_mode;
-            return mode === "wakalah" ? acc + (l.product.price * l.qty) : acc;
-          }, 0);
+            return mode === "wakalah";
+          });
           const tayseerCharge = Math.max(0, walletApplied - wakalahTotal);
           if (payment === "wallet" && tayseerCharge > 0) {
             try {

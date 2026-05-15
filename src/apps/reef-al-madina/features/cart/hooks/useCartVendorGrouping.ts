@@ -21,6 +21,7 @@ import {
   isSweetsProduct,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import type { VendorGroup } from "../types/cart.types";
+import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
 
 type Line = { product: Product; qty: number; meta?: CartLineMeta };
 
@@ -93,7 +94,7 @@ export const useCartVendorGrouping = (lines: Line[], payment: string) => {
       }
       const g = map.get(key)!;
       g.lines.push(l);
-      g.subtotal += l.product.price * l.qty;
+      g.subtotal += lineGrandTotal(l);
     }
     for (const g of map.values()) {
       if (g.vendor.kind === "restaurant") {

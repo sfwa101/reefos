@@ -13,6 +13,7 @@ import { usePredictBasket, type PredictedBasketLine } from "@/core/hakim-ai/hook
 import { Skeleton } from "@/components/ui/skeleton";
 import { toLatin } from "@/lib/format";
 import type { CartLine } from "@/core/orders/runtime/types";
+import { sumCanonicalGrandTotals } from "@/core/orders/runtime/lineTotals";
 /** @deprecated Wave P-B B-3 — bridge type; predicted basket synthesizes a Product to feed the deprecated CartLine.product field. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 
@@ -38,7 +39,7 @@ export function HakimPredictiveBasket({ className = "" }: { className?: string }
 
   const lines = useMemo(() => (data?.basket ?? []).map(lineToCartLine), [data]);
   const total = useMemo(
-    () => lines.reduce((s, l) => s + l.product.price * l.qty, 0),
+    () => sumCanonicalGrandTotals(lines),
     [lines],
   );
 

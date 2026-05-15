@@ -10,6 +10,7 @@ import { useSharedCartSync } from "./useSharedCartSync";
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { workspaceQueryKey } from "@/core/identity/workspace";
+import { sumCanonicalGrandTotals } from "@/core/orders/runtime/lineTotals";
 
 /**
  * Wave P-B B-3 — read the catalog snapshot through the QueryClient cache
@@ -70,7 +71,7 @@ export const useSharedCartAdapter = (sharedCartId: string | null) => {
   const lines = isSharedMode ? sharedLines : local.lines;
   const count = isSharedMode ? sharedLines.reduce((s, l) => s + l.qty, 0) : local.count;
   const total = isSharedMode
-    ? sharedLines.reduce((s, l) => s + l.product.price * l.qty, 0)
+    ? sumCanonicalGrandTotals(sharedLines)
     : local.total;
 
   const setQty: typeof local.setQty = isSharedMode
