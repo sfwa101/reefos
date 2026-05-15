@@ -18,6 +18,7 @@
 import { supabase } from "@/integrations/supabase/client";
 import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
@@ -374,7 +375,7 @@ export async function upsertSkuStock(skuId: string, stock: number): Promise<void
         },
       });
     } catch (err) {
-      console.error("[inventory-ledger] dual-write failed (legacy update succeeded):", err);
+      Tracer.error("catalog", "inventory_ledger_dual_write_failed", err);
     }
   }
 }
@@ -546,7 +547,7 @@ export async function fetchCatalogQueryRows(): Promise<CatalogQueryRow[]> {
     .order("created_at", { ascending: false })
     .limit(2000);
   if (error) {
-    console.error("[catalog] sovereign fetch failed:", error);
+    Tracer.error("catalog", "sovereign_fetch_failed", error);
     return [];
   }
   return (data ?? []) as unknown as CatalogQueryRow[];
@@ -567,7 +568,7 @@ export async function fetchCatalogHomeRows(
   if (source) q = q.ilike("category_path", `${source}%`);
   const { data, error } = await q;
   if (error) {
-    console.error("[useHomeProductsQuery] sovereign fetch failed:", error);
+    Tracer.error("catalog", "home_products_fetch_failed", error);
     return [];
   }
   return (data ?? []) as unknown as CatalogQueryRow[];

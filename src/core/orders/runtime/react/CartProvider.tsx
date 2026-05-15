@@ -23,6 +23,7 @@ import {
 } from "react";
 import { CartGateway, type GatewayChannel } from "@/core/orders/gateway/CartGateway";
 import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
+import { Tracer } from "@/core/system/observability/Tracer";
 import {
   fetchRemoteCart,
   pushRemoteCart,
@@ -230,7 +231,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             lastPushedSignatureRef.current = nextSignature;
             skipNextPushRef.current = false;
           } catch (err) {
-            console.warn("[cart] realtime refetch failed:", err);
+            Tracer.warn("cart", "realtime_refetch_failed", { error: String(err) });
           }
         }, 250);
       });
@@ -250,7 +251,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             const remote = await fetchRemoteCart(id);
             applyRemote(remote);
           } catch (err) {
-            console.warn("[cart] visibility resume refetch failed:", err);
+            Tracer.warn("cart", "visibility_refetch_failed", { error: String(err) });
           }
         })();
       }
@@ -299,7 +300,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
           await pushRemoteCart(uid, next);
         }
       } catch (err) {
-        console.warn("[cart] sync on login failed:", err);
+        Tracer.warn("cart", "sync_on_login_failed", { error: String(err) });
       }
 
       if (!cancelled) subscribeRealtime(uid);
