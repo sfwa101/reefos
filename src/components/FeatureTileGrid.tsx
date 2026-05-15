@@ -1,5 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 interface FeatureTile {
   id: string;
@@ -21,7 +22,7 @@ const FeatureTileGrid = ({ tiles, onSelect }: FeatureTileGridProps) => {
       {tiles.map((tile, idx) => {
         const big = tile.size === "lg";
         return (
-          <button
+          <Button
             key={tile.id}
             onClick={() => onSelect(tile.id)}
             className={`tile-overlay group relative overflow-hidden rounded-[1.75rem] text-right shadow-tile transition-transform duration-500 ease-apple hover:-translate-y-0.5 active:scale-[0.98] ${
@@ -54,7 +55,7 @@ const FeatureTileGrid = ({ tiles, onSelect }: FeatureTileGridProps) => {
                 </div>
               </div>
             </div>
-          </button>
+          </Button>
         );
       })}
     </div>

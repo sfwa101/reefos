@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { useGameyaDetails, type GameyaCircle } from "@/core/finance/hooks/useGameyas";
+import { Button } from "@/components/ui/button";
 
 /**
  * GameyaDetailsSheet — full transparency view for a single circle.
@@ -58,12 +59,12 @@ export const GameyaDetailsSheet = ({
       >
         {/* Header */}
         <div className="flex items-center gap-2 border-b border-border/50 p-5">
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <div className="min-w-0 flex-1">
             <h2 className="truncate font-display text-lg font-extrabold">
               {circle.name}

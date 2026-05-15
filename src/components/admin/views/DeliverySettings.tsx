@@ -72,10 +72,10 @@ function Inner() {
         <p className="font-display text-[15px]">المناطق القريبة (تعطيل الباركود فيها)</p>
         <div className="flex gap-2 flex-wrap">
           {s.disable_barcode_zones.map(z => (
-            <button key={z} onClick={() => update({ disable_barcode_zones: s.disable_barcode_zones.filter(x => x !== z) })}
+            <Button key={z} onClick={() => update({ disable_barcode_zones: s.disable_barcode_zones.filter(x => x !== z) })}
               className="bg-muted hover:bg-destructive/10 hover:text-destructive rounded-md px-3 py-1 text-[12px]">
               {z} ✕
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex gap-2">

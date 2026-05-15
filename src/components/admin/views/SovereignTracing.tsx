@@ -60,14 +60,14 @@ function PayloadViewer({ payload }: { payload: unknown }) {
 
   return (
     <div className="text-[11.5px] font-mono">
-      <button
+      <Button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex items-center gap-1 text-foreground-secondary hover:text-foreground transition-base"
       >
         {open ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
         <span className="truncate max-w-[420px]">{open ? "إخفاء الحمولة" : preview}</span>
-      </button>
+      </Button>
       {open && (
         <pre dir="ltr" className="mt-2 p-3 rounded-lg bg-muted/40 border border-border/40 overflow-auto max-h-80 text-[11px] leading-relaxed">
           {text}

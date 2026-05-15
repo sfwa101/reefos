@@ -20,6 +20,7 @@ import {
 import { GameyaCreationSheet } from "./GameyaCreationSheet";
 import { GameyaDetailsSheet } from "./GameyaDetailsSheet";
 import { JoinGameyaSheet } from "./JoinGameyaSheet";
+import { Button } from "@/components/ui/button";
 
 /**
  * GameyasDockContent — Money-Fellows-style dock for the new Wallet.
@@ -87,14 +88,14 @@ export const GameyasDockContent = ({ userId }: { userId: string | null }) => {
           />
         </div>
 
-        <button
+        <Button
           type="button"
           onClick={() => setShowCreate(true)}
           className="relative mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary px-3 py-2.5 text-xs font-extrabold text-primary-foreground shadow-md ring-1 ring-primary/40 transition active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           فتح جمعية جديدة
-        </button>
+        </Button>
       </section>
 
       {/* 2) OPEN CIRCLES — DISCOVER */}

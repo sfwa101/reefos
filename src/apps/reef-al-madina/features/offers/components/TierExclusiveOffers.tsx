@@ -1,4 +1,5 @@
 import { Crown, Lock, Sparkles, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export type TierOffer = {
   id: string;
@@ -77,14 +78,14 @@ const TierExclusiveOffers = ({
                   <p className="text-[10px] leading-tight text-foreground/75">
                     اطلب بـ {amountToUpgrade} ج إضافية للترقية
                   </p>
-                  <button
+                  <Button
                     type="button"
                     className="mt-1 inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1 text-[10px] font-bold text-background shadow"
                   >
                     <Sparkles className="h-3 w-3" />
                     رقّي مستواي
                     <ChevronLeft className="h-3 w-3" />
-                  </button>
+                  </Button>
                 </div>
               )}
             </div>

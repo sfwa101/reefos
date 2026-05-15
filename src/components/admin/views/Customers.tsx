@@ -7,6 +7,7 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Input } from "@/components/ui/input";
 
 type Customer = CustomerListRow;
 
@@ -43,7 +44,7 @@ export default function Customers() {
       <div className="px-4 lg:px-6 pt-2 pb-6 max-w-4xl mx-auto">
         <div className="relative mb-3">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-          <input value={q} onChange={e => setQ(e.target.value)} placeholder="ابحث بالاسم أو الجوال"
+          <Input value={q} onChange={e => setQ(e.target.value)} placeholder="ابحث بالاسم أو الجوال"
             className="w-full bg-surface-muted rounded-2xl h-11 pr-10 pl-4 text-[14px] placeholder:text-foreground-tertiary border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
         </div>
 

@@ -10,6 +10,7 @@ import type { ProductCardVM } from "@/core/catalog/types";
 import { CATS } from "../dictionaries";
 import { ProductCard } from "./ProductCard";
 import { RailHeader } from "./RailHeader";
+import { Button } from "@/components/ui/button";
 
 export const ProductsGrid = ({
   cat,
@@ -72,12 +73,12 @@ export const ProductsGrid = ({
           <p className="text-sm font-bold text-muted-foreground">
             لا توجد نتائج تطابق بحثك
           </p>
-          <button
+          <Button
             onClick={onResetAll}
             className="rounded-full bg-primary px-4 py-2 text-[11px] font-extrabold text-primary-foreground shadow-pill"
           >
             إعادة ضبط الفلاتر
-          </button>
+          </Button>
         </div>
       )}
     </section>

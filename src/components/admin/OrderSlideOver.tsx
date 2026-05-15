@@ -9,6 +9,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ExternalLink, Truck, Phone, Receipt, Package } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import {
   getMasterOrderDetailFn,
   assignDriverToOrderFn,
@@ -99,7 +100,7 @@ export function OrderSlideOver({ orderId, onClose }: Props) {
                     <p className="text-[12px] text-foreground-tertiary">لا يوجد مناديب متاحون</p>
                   )}
                   {(drivers ?? []).map((d) => (
-                    <button
+                    <Button
                       key={d.id}
                       disabled={busy}
                       onClick={() => assign(d.id)}
@@ -107,7 +108,7 @@ export function OrderSlideOver({ orderId, onClose }: Props) {
                     >
                       <span>{d.full_name ?? "مندوب"}</span>
                       <span className="text-[10px] text-foreground-tertiary num" dir="ltr">{d.phone ?? ""}</span>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>

@@ -12,6 +12,7 @@ import { listVendorSettlementsFn, clearSovereignSettlementsFn } from "@/core/sys
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, Crown, Hourglass, Banknote, Send } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type SettlementRow = {
   id: string;
@@ -151,7 +152,7 @@ export default function SovereignTreasury() {
                     </div>
                   </div>
                   {v.pending_count > 0 && (
-                    <button
+                    <Button
                       type="button"
                       disabled={clearMut.isPending}
                       onClick={() => clearMut.mutate(v.vendor_id)}
@@ -163,7 +164,7 @@ export default function SovereignTreasury() {
                         <Send className="h-3.5 w-3.5" />
                       )}
                       صرف المستحقات
-                    </button>
+                    </Button>
                   )}
                 </div>
               </IOSCard>

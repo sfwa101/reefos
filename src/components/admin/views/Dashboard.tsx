@@ -41,6 +41,7 @@ import { fmtMoney, fmtNum } from "@/lib/format";
 import { useAuth } from "@/context/AuthContext";
 import { getAdminDashboardOverviewFn } from "@/core/finance/finance.functions";
 import { useAdminDashboardRealtime } from "@/core/events/hooks/useAdminDashboardRealtime";
+import { Button } from "@/components/ui/button";
 
 const greeting = () => {
   const h = new Date().getHours();
@@ -340,7 +341,7 @@ export default function Dashboard() {
               {recent.map((o) => {
                 const meta = statusMeta[o.status] ?? { label: o.status, cls: "bg-muted text-foreground-secondary" };
                 return (
-                  <button
+                  <Button
                     key={o.id}
                     onClick={() => setActiveOrderId(o.id)}
                     className="w-full px-4 lg:px-5 py-3 flex items-center gap-3 hover:bg-surface-muted/50 transition text-right press min-h-[56px]"
@@ -364,7 +365,7 @@ export default function Dashboard() {
                     </span>
                     <p className="text-[14px] font-display num shrink-0 min-w-[80px] text-left">{fmtMoney(o.total ?? 0)}</p>
                     <ChevronLeft className="h-4 w-4 text-foreground-tertiary shrink-0" />
-                  </button>
+                  </Button>
                 );
               })}
             </div>

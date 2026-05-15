@@ -12,6 +12,7 @@ import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import type { ProductCardVM } from "@/core/catalog/types";
 
 import type { Bundle } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const BundleCard = ({
   bundle,
@@ -89,12 +90,12 @@ export const BundleCard = ({
               {toLatin(original.toLocaleString("en-US"))} ج.م
             </div>
           </div>
-          <button
+          <Button
             onClick={onBuy}
             className="rounded-full bg-foreground px-3 py-2 text-[11px] font-extrabold text-background shadow-pill active:scale-95"
           >
             اشترِ الحزمة
-          </button>
+          </Button>
         </div>
       </div>
     </article>

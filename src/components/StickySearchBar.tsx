@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ScanBarcode, Search } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 /**
  * StickySearchBar — Phase 11.6.
@@ -47,14 +48,14 @@ const StickySearchBar = () => {
         >
           ابحث عن منتج، قسم، أو ماركة…
         </Link>
-        <button
+        <Button
           type="button"
           aria-label="مسح باركود"
           onClick={() => window.dispatchEvent(new CustomEvent("reef:open-barcode"))}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary transition active:scale-[0.95]"
         >
           <ScanBarcode className="h-5 w-5" strokeWidth={2.2} />
-        </button>
+        </Button>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@
  */
 import { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STORAGE_PREFIX = "salsabil_eithar_";
 
@@ -35,7 +36,7 @@ export const EitharToggle = ({ offerId }: { offerId: string }) => {
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={toggle}
       aria-pressed={on}
@@ -48,7 +49,7 @@ export const EitharToggle = ({ offerId }: { offerId: string }) => {
     >
       <Heart className="h-3 w-3" />
       تفعيل الإيثار
-    </button>
+    </Button>
   );
 };
 

@@ -12,6 +12,7 @@ import { VendorGateway } from "@/core/vendor/gateway/VendorGateway";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney, fmtDate } from "@/lib/format";
 import { Loader2, TrendingUp, Receipt, PiggyBank } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Row = {
   id: string;
@@ -94,7 +95,7 @@ export function SovereignSettlementsPanel() {
       {/* Status filter tabs */}
       <div className="flex gap-1.5 p-1 bg-surface-secondary rounded-xl">
         {FILTERS.map((f) => (
-          <button
+          <Button
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
@@ -105,7 +106,7 @@ export function SovereignSettlementsPanel() {
             }`}
           >
             {f.label}
-          </button>
+          </Button>
         ))}
       </div>
 

@@ -8,6 +8,7 @@
  */
 import { LayoutGrid, Sparkle } from "lucide-react";
 import { CATS } from "../dictionaries";
+import { Button } from "@/components/ui/button";
 
 export const CategoriesGrid = ({
   cat,
@@ -37,7 +38,7 @@ export const CategoriesGrid = ({
           const Icon = c.Icon;
           const active = cat === c.id;
           return (
-            <button
+            <Button
               key={c.id}
               onClick={() => setCat(c.id)}
               className={`inline-flex shrink-0 items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-extrabold transition active:scale-95 ${
@@ -49,7 +50,7 @@ export const CategoriesGrid = ({
             >
               <Icon className="h-3.5 w-3.5" />
               {c.name}
-            </button>
+            </Button>
           );
         })}
       </div>

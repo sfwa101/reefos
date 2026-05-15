@@ -7,6 +7,7 @@ import { Banknote, Hourglass, CheckCircle2, XCircle, Wallet } from "lucide-react
 import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { fmtMoney, fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type UserPayout = {
   id: string;
@@ -74,7 +75,7 @@ export default function AdminPayouts() {
           { id: "users" as const, label: "أرباح الإحالات", icon: Wallet },
           { id: "vendors" as const, label: "البائعون", icon: Banknote },
         ]).map((t) => (
-          <button
+          <Button
             key={t.id}
             onClick={() => setTab(t.id)}
             className={cn(
@@ -85,7 +86,7 @@ export default function AdminPayouts() {
             )}
           >
             <t.icon className="h-4 w-4" /> {t.label}
-          </button>
+          </Button>
         ))}
       </div>
 

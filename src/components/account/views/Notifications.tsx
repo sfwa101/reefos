@@ -6,6 +6,7 @@ import { listMyNotificationsFn, markAllNotificationsReadFn } from "@/core/identi
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 type Notif = {
   id: string;
@@ -73,9 +74,9 @@ const Notifications = () => {
         <div className="mb-2 flex items-baseline justify-between px-1">
           <h3 className="text-xs font-bold text-muted-foreground">الإشعارات</h3>
           {list.some((n) => !n.read) && (
-            <button onClick={markAllRead} className="flex items-center gap-1 text-[11px] font-bold text-primary">
+            <Button onClick={markAllRead} className="flex items-center gap-1 text-[11px] font-bold text-primary">
               <CheckCheck className="h-3 w-3" /> تعليم الكل
-            </button>
+            </Button>
           )}
         </div>
 

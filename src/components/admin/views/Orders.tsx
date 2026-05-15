@@ -19,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { listMasterOrdersFn, setOrderStatusFn } from "@/core/ops/ops.functions";
 import { useAdminOrdersRealtime } from "@/core/events/hooks/useAdminOrdersRealtime";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 interface MasterOrderRow {
   id: string;
@@ -178,7 +179,7 @@ export default function Orders() {
         <div className="overflow-x-auto -mx-4 px-4 no-scrollbar">
           <div className="inline-flex gap-1.5 bg-surface-muted rounded-full p-1">
             {TABS.map((t) => (
-              <button
+              <Button
                 key={t.key}
                 onClick={() => setTab(t.key)}
                 className={cn(
@@ -187,7 +188,7 @@ export default function Orders() {
                 )}
               >
                 {t.label}
-              </button>
+              </Button>
             ))}
           </div>
         </div>

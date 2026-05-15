@@ -14,6 +14,7 @@ import { fmtMoney } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { PurchaseInvoiceBuilder } from "@/apps/reef-al-madina/features/admin/components/PurchaseInvoiceBuilder";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type Invoice = PurchaseInvoiceRow;
 
@@ -81,7 +82,7 @@ export default function PurchaseInvoices() {
             { id: "list" as const, label: "الفواتير", icon: FileText },
             { id: "new" as const, label: "فاتورة جديدة", icon: PackagePlus },
           ]).map((t) => (
-            <button
+            <Button
               key={t.id}
               onClick={() => setTab(t.id)}
               className={cn(
@@ -93,7 +94,7 @@ export default function PurchaseInvoices() {
             >
               <t.icon className="h-4 w-4" />
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
 

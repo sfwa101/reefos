@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 /** Animated number — counts up/down to `value` over a short interval. */
 export const AnimatedNumber = ({
@@ -44,7 +45,7 @@ export const Panel = ({
   const [open, setOpen] = useState(defaultOpen);
   return (
     <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
-      <button
+      <Button
         type="button"
         onClick={() => setOpen((v) => !v)}
         className="flex w-full items-center justify-between gap-2 px-3.5 py-3 text-right"
@@ -55,7 +56,7 @@ export const Panel = ({
           {hint && <span className="text-[10px] font-bold text-muted-foreground">{hint}</span>}
         </span>
         <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
-      </button>
+      </Button>
       <AnimatePresence initial={false}>
         {open && (
           <motion.div

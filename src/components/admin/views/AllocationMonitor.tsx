@@ -161,7 +161,7 @@ export default function AllocationMonitor() {
               <p className="text-sm text-muted-foreground">لا توجد طلبات</p>
             ) : (
               orders.map((o) => (
-                <button
+                <Button
                   key={o.id}
                   onClick={() => loadAllocation(o.id)}
                   className={`w-full text-right rounded-lg border p-3 transition ${
@@ -178,7 +178,7 @@ export default function AllocationMonitor() {
                     <span>{Number(o.total).toFixed(2)} ج.م</span>
                     <span>{new Date(o.created_at).toLocaleString("ar-EG")}</span>
                   </div>
-                </button>
+                </Button>
               ))
             )}
           </CardContent>

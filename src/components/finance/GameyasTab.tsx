@@ -5,6 +5,7 @@ import { toLatin } from "@/lib/format";
 import { useGameyas, type GameyaCircle } from "@/core/finance/hooks/useGameyas";
 import { GameyaCreationSheet } from "./GameyaCreationSheet";
 import { GameyaDetailsSheet } from "./GameyaDetailsSheet";
+import { Button } from "@/components/ui/button";
 
 /**
  * GameyasTab — Live list of cooperative circles + entry points to the
@@ -39,14 +40,14 @@ export const GameyasTab = ({ userId }: { userId: string | null }) => {
             </p>
           </div>
         </div>
-        <button
+        <Button
           type="button"
           onClick={() => setShowCreate(true)}
           className="relative mt-4 inline-flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary px-3 py-2.5 text-xs font-extrabold text-primary-foreground shadow-md ring-1 ring-primary/40 transition active:scale-[0.98]"
         >
           <Plus className="h-3.5 w-3.5" />
           فتح جمعية جديدة
-        </button>
+        </Button>
         <div className="relative mt-3 flex items-center gap-2 rounded-xl bg-foreground/5 p-2.5 text-[10px] text-muted-foreground ring-1 ring-border/40">
           <ShieldCheck className="h-3.5 w-3.5 shrink-0 text-primary" />
           <span>محمية بالضامن التكافلي · بلا غرامات تأخير</span>
