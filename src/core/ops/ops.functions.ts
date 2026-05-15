@@ -289,6 +289,8 @@ export type MasterOrderDetail = {
     id: string;
     quantity: number;
     price: number;
+    /** Pre-computed canonical line total (price × quantity) — see Wave P-1.4. */
+    total: number;
     product_name: string;
     product_image: string | null;
   }>;
