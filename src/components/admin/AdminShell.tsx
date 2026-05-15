@@ -45,7 +45,7 @@ import { Input } from "@/components/ui/input";
 type NavItem = {
   to: string;
   label: string;
-  icon: ComponentType<{ className?: string }>;
+  icon: LucideIcon;
 };
 
 /** Primary admin destinations — bound to existing TanStack routes. */
