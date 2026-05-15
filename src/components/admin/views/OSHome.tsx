@@ -234,7 +234,7 @@ function Stat({ label, value, dot }: { label: string; value: number; dot: string
   );
 }
 
-function GovCard({ to, title, subtitle }: { to: string; title: string; subtitle: string }) {
+function GovCard({ to, title, description }: { to: string; title: string; description: string }) {
   return (
     <Link
       to={to}
@@ -242,7 +242,7 @@ function GovCard({ to, title, subtitle }: { to: string; title: string; subtitle:
     >
       <div>
         <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-muted-foreground">
-          {subtitle}
+          {description}
         </p>
         <p className="font-display text-[15px] font-extrabold tracking-tight">
           {title}
