@@ -468,6 +468,52 @@ const ProductDetail = () => {
             </section>
           )}
 
+          {(() => {
+            const nutrition = readNutrition(meta);
+            const netWeight = readNetWeight(meta);
+            if (!nutrition && !netWeight) return null;
+            return (
+              <section className="glass-strong rounded-2xl px-4 shadow-soft">
+                <Accordion type="single" collapsible defaultValue="nutrition">
+                  <AccordionItem value="nutrition" className="border-0">
+                    <AccordionTrigger className="py-3 font-display text-base font-extrabold hover:no-underline">
+                      المعلومات الغذائية والتفاصيل
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      {netWeight && (
+                        <div className="mb-3 flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2 text-[12px]">
+                          <span className="font-bold text-muted-foreground">الوزن الصافي</span>
+                          <span className="font-extrabold tabular-nums">{netWeight}</span>
+                        </div>
+                      )}
+                      {nutrition && (
+                        <>
+                          <p className="mb-2 text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
+                            القيم الغذائية لكل ١٠٠ جرام
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {nutrition.map((row) => (
+                              <div
+                                key={row.label}
+                                className="rounded-xl bg-primary-soft/40 p-2.5 text-center ring-1 ring-primary/10"
+                              >
+                                <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+                                  {toLatin(row.value)}
+                                  <span className="ms-0.5 text-[9px] font-bold text-muted-foreground">{row.unit}</span>
+                                </p>
+                                <p className="text-[10px] font-bold text-muted-foreground">{row.label}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </section>
+            );
+          })()}
+
           <section className="glass-strong rounded-2xl p-4 shadow-soft">
             <h3 className="mb-2 font-display text-base font-extrabold">عن المنتج</h3>
             <p className="text-sm leading-relaxed text-muted-foreground">
