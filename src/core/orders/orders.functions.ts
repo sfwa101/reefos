@@ -50,8 +50,8 @@ export const createOrder = createServerFn({ method: 'POST' })
 
     const { data: orderId, error } = await supabase.rpc('process_checkout_sovereign', {
       p_customer_id: userId,
-      p_cart_items: data.items,
-      p_delivery_info: data.delivery_info ?? {},
+      p_cart_items: data.items as unknown as never,
+      p_delivery_info: (data.delivery_info ?? {}) as unknown as never,
       p_payment_method: data.payment_method,
       p_idempotency_key: data.idempotency_key,
     });
