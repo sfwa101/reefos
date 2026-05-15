@@ -177,14 +177,17 @@ export function useVendorOperations() {
         const image = Array.isArray(media)
           ? ((media[0] as { url?: string })?.url ?? null)
           : ((media as { url?: string })?.url ?? null);
+        const price = Number(it.price_at_time ?? 0);
+        const quantity = it.quantity;
         rows.push({
           id: it.id,
           order_id: node.master_order_id ?? node.id,
           product_id: asset?.id ?? sku?.id ?? "",
           product_name: asset?.name ?? "منتج",
           product_image: image,
-          quantity: it.quantity,
-          price: Number(it.price_at_time ?? 0),
+          quantity,
+          price,
+          total: historicalLineTotal({ price, quantity }),
           created_at: it.created_at ?? node.created_at ?? new Date().toISOString(),
           order_status: node.status,
           service_type: serviceType,
