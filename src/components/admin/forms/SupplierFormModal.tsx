@@ -19,7 +19,8 @@ const SupplierSchema = z.object({
   payment_terms_days: z.coerce.number().int().min(0).max(365).default(30),
   closing_day: z.coerce.number().int().min(1).max(31).optional(),
 });
-type SupplierFormValues = z.infer<typeof SupplierSchema>;
+type SupplierFormInput = z.input<typeof SupplierSchema>;
+type SupplierFormValues = z.output<typeof SupplierSchema>;
 
 export function SupplierFormModal({
   open,
@@ -31,7 +32,7 @@ export function SupplierFormModal({
   const qc = useQueryClient();
   const createSupplier = useServerFn(createSupplierFn);
 
-  const form = useForm<SupplierFormValues>({
+  const form = useForm<SupplierFormInput, unknown, SupplierFormValues>({
     resolver: zodResolver(SupplierSchema),
     defaultValues: { name: "", contact_phone: "", payment_terms_days: 30 },
   });

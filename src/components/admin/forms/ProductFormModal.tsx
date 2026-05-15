@@ -44,7 +44,8 @@ const ProductSchema = z.object({
   reorder_point: z.coerce.number().int().nonnegative().default(0),
   supplier_id: z.string().trim().optional().or(z.literal("")),
 });
-type ProductFormValues = z.infer<typeof ProductSchema>;
+type ProductFormInput = z.input<typeof ProductSchema>;
+type ProductFormValues = z.output<typeof ProductSchema>;
 
 export function ProductFormModal({
   open,
@@ -56,7 +57,7 @@ export function ProductFormModal({
   const [tab, setTab] = useState("basic");
   const upsert = useEntityMutation();
 
-  const form = useForm<ProductFormValues>({
+  const form = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(ProductSchema),
     defaultValues: {
       name_ar: "",

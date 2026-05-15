@@ -43,7 +43,8 @@ const ExpenseSchema = z.object({
   reference: z.string().trim().max(120).optional().or(z.literal("")),
   notes: z.string().trim().max(500).optional().or(z.literal("")),
 });
-type ExpenseFormValues = z.infer<typeof ExpenseSchema>;
+type ExpenseFormInput = z.input<typeof ExpenseSchema>;
+type ExpenseFormValues = z.output<typeof ExpenseSchema>;
 
 export function ExpenseFormModal({
   open,
@@ -56,7 +57,7 @@ export function ExpenseFormModal({
   const createExpense = useServerFn(createExpenseFn);
 
   const today = new Date().toISOString().slice(0, 10);
-  const form = useForm<ExpenseFormValues>({
+  const form = useForm<ExpenseFormInput, unknown, ExpenseFormValues>({
     resolver: zodResolver(ExpenseSchema),
     defaultValues: {
       category: "operations",
