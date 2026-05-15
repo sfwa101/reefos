@@ -19,6 +19,7 @@
  */
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
+import type { LucideIcon } from "lucide-react";
 import {
   Bell,
   BarChart3,
