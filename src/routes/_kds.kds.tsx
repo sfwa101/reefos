@@ -95,13 +95,18 @@ function TicketCard({
 }) {
   const ageMs = now - new Date(ticket.created_at).getTime();
   const ageMin = Math.max(0, Math.floor(ageMs / 60_000));
-  const isLate = ticket.prep.status !== "ready" && ageMs > LATE_THRESHOLD_MS;
+  const isReady = ticket.prep.status === "ready";
+  const isLate = !isReady && ageMs > LATE_THRESHOLD_MS;
+  const isWarn = !isReady && !isLate && ageMs > WARN_THRESHOLD_MS;
 
-  const statusColor =
-    ticket.prep.status === "ready" ? "border-emerald-500/40 bg-emerald-500/5"
-    : ticket.prep.status === "preparing" ? "border-amber-500/40 bg-amber-500/5"
-    : isLate ? "border-destructive/60 bg-destructive/10 ring-1 ring-destructive/30"
-    : "border-border bg-card/60";
+  // Priority colors per Constitution v5 §IV (KDS): green/yellow/red by wait.
+  const statusColor = isReady
+    ? "border-emerald-500/40 bg-emerald-500/5"
+    : isLate
+      ? "border-destructive/60 bg-destructive/10 ring-1 ring-destructive/30"
+      : isWarn
+        ? "border-amber-500/40 bg-amber-500/5"
+        : "border-emerald-500/30 bg-emerald-500/[0.04]";
 
   const shortId = ticket.id.slice(0, 6).toUpperCase();
 
