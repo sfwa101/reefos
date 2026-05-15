@@ -95,7 +95,7 @@ export const validatedSovereignCheckoutFn = createServerFn({ method: "POST" })
         p_delivery_info: data.delivery_info,
         p_idempotency_key: data.idempotency_key,
         p_payment_method: "cash_on_delivery",
-        p_expected_snapshot_hash: data.expected_snapshot_hash,
+        p_client_snapshot_hash: data.expected_snapshot_hash,
       },
     );
 
