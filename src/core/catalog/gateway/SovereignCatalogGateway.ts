@@ -599,3 +599,204 @@ export async function insertProductRequest(
     .insert(payload);
   return { error: error?.message ?? null };
 }
+
+// ════════════════════════════════════════════════════════════════════════════
+// Wave Cleanup-B — Catalog Gateway Consolidation.
+//
+// The legacy `catalogGateway` facade (ProductCardVM/ProductDetailsVM), the
+// TanStack queryOptions helpers (`catalogQueries`), the cache invalidation
+// helpers (`catalogCache`), and the CommerceEntity-shaped `CatalogGateway`
+// (formerly at `@/core/commerce/gateway/CatalogGateway`) all live HERE.
+// One sovereign module — zero duplicate gateways.
+// ════════════════════════════════════════════════════════════════════════════
+import { queryOptions, type QueryClient } from "@tanstack/react-query";
+import { CatalogService, type PriceQuoteLineInput } from "@/core/catalog/service/CatalogService";
+import type { PriceQuoteVM } from "@/core/catalog/service/catalog.functions";
+import { getSectionIdentityFn, listSectionsFn } from "@/core/sections/sections.functions";
+import type {
+  ProductCardVM,
+  ProductDetailsVM,
+  ProductListVM,
+  ProductRelationVM,
+} from "@/core/catalog/types";
+import type { SectionIdentity } from "@/core/sections/types";
+import {
+  commerceEntityFromCard,
+  type CommerceEntity,
+} from "@/core/commerce/entity/CommerceEntity";
+
+export interface ListSectionParams {
+  slug: string;
+  limit?: number;
+  offset?: number;
+  sort?: "popularity" | "new" | "price_asc" | "price_desc" | "seasonal";
+}
+
+export const catalogGateway = {
+  // ─── Sections ───
+  listSections(): Promise<SectionIdentity[]> {
+    return listSectionsFn();
+  },
+  getSection(slug: string): Promise<SectionIdentity | null> {
+    return getSectionIdentityFn({ data: { slug } });
+  },
+
+  // ─── Listing ───
+  listSection(params: ListSectionParams): Promise<ProductListVM> {
+    return CatalogService.listBySection({
+      sectionSlug: params.slug,
+      limit: params.limit,
+      offset: params.offset,
+      sort: params.sort,
+    });
+  },
+
+  // ─── Details ───
+  getDetails(slug: string): Promise<ProductDetailsVM | null> {
+    return CatalogService.getDetails(slug);
+  },
+
+  // ─── Cart hydration / static-catalog killer ───
+  getManyById(ids: readonly string[]): Promise<ProductCardVM[]> {
+    return CatalogService.getManyById(ids);
+  },
+  getDetailsById(id: string): Promise<ProductDetailsVM | null> {
+    return CatalogService.getDetailsById(id);
+  },
+  priceQuote(lines: readonly PriceQuoteLineInput[]): Promise<PriceQuoteVM> {
+    return CatalogService.priceQuote(lines);
+  },
+
+  // ─── Recommendations ───
+  getRelations(productId: string, limit = 12): Promise<ProductRelationVM[]> {
+    return CatalogService.getRelations(productId, undefined, limit);
+  },
+
+  // ─── Curated rails ───
+  trending(slug: string, limit = 12): Promise<ProductCardVM[]> {
+    return CatalogService.listBySection({ sectionSlug: slug, sort: "popularity", limit }).then(
+      (r) => r.items,
+    );
+  },
+  newArrivals(slug: string, limit = 12): Promise<ProductCardVM[]> {
+    return CatalogService.listBySection({ sectionSlug: slug, sort: "new", limit }).then(
+      (r) => r.items,
+    );
+  },
+  offers(slug: string, limit = 12): Promise<ProductCardVM[]> {
+    return CatalogService.listBySection({ sectionSlug: slug, sort: "price_desc", limit }).then(
+      (r) => r.items.filter((p) => p.price.compareAt && p.price.compareAt > p.price.amount),
+    );
+  },
+};
+
+export type CatalogGatewayFacade = typeof catalogGateway;
+
+// ─── TanStack Query options (formerly catalogQueries.ts) ──────────────────
+export const catalogKeys = {
+  all: ["catalog"] as const,
+  sections: () => [...catalogKeys.all, "sections"] as const,
+  section: (slug: string) => [...catalogKeys.all, "section", slug] as const,
+  list: (p: ListSectionParams) =>
+    [...catalogKeys.all, "list", p.slug, p.sort ?? "popularity", p.limit ?? 24, p.offset ?? 0] as const,
+  details: (slug: string) => [...catalogKeys.all, "details", slug] as const,
+  relations: (id: string) => [...catalogKeys.all, "relations", id] as const,
+  trending: (slug: string, limit = 12) => [...catalogKeys.all, "trending", slug, limit] as const,
+  offers: (slug: string, limit = 12) => [...catalogKeys.all, "offers", slug, limit] as const,
+};
+
+export const sectionsQuery = () =>
+  queryOptions({
+    queryKey: catalogKeys.sections(),
+    queryFn: () => catalogGateway.listSections(),
+    staleTime: 5 * 60_000,
+  });
+
+export const sectionQuery = (slug: string) =>
+  queryOptions({
+    queryKey: catalogKeys.section(slug),
+    queryFn: () => catalogGateway.getSection(slug),
+    staleTime: 5 * 60_000,
+  });
+
+export const sectionListQuery = (params: ListSectionParams) =>
+  queryOptions({
+    queryKey: catalogKeys.list(params),
+    queryFn: () => catalogGateway.listSection(params),
+    staleTime: 60_000,
+  });
+
+export const productDetailsQuery = (slug: string) =>
+  queryOptions({
+    queryKey: catalogKeys.details(slug),
+    queryFn: () => catalogGateway.getDetails(slug),
+    staleTime: 60_000,
+  });
+
+export const productRelationsQuery = (productId: string) =>
+  queryOptions({
+    queryKey: catalogKeys.relations(productId),
+    queryFn: () => catalogGateway.getRelations(productId),
+    staleTime: 5 * 60_000,
+  });
+
+export const trendingQuery = (slug: string, limit = 12) =>
+  queryOptions({
+    queryKey: catalogKeys.trending(slug, limit),
+    queryFn: () => catalogGateway.trending(slug, limit),
+    staleTime: 60_000,
+  });
+
+export const offersQuery = (slug: string, limit = 12) =>
+  queryOptions({
+    queryKey: catalogKeys.offers(slug, limit),
+    queryFn: () => catalogGateway.offers(slug, limit),
+    staleTime: 60_000,
+  });
+
+// ─── Cache helpers (formerly catalogCache.ts) ──────────────────────────────
+export const catalogCache = {
+  invalidateAll(qc: QueryClient) {
+    return qc.invalidateQueries({ queryKey: catalogKeys.all });
+  },
+  invalidateSection(qc: QueryClient, slug: string) {
+    return qc.invalidateQueries({ queryKey: catalogKeys.section(slug) });
+  },
+  invalidateProduct(qc: QueryClient, slug: string) {
+    return qc.invalidateQueries({ queryKey: catalogKeys.details(slug) });
+  },
+  prefetchSection(qc: QueryClient, slug: string) {
+    return qc.prefetchQuery(sectionListQuery({ slug }));
+  },
+  prefetchProduct(qc: QueryClient, slug: string) {
+    return qc.prefetchQuery(productDetailsQuery(slug));
+  },
+};
+
+// ─── CommerceEntity facade (formerly commerce/gateway/CatalogGateway.ts) ───
+export interface ListSectionEntitiesParams {
+  readonly sectionSlug: string;
+  readonly limit?: number;
+  readonly offset?: number;
+}
+
+export const CatalogGateway = {
+  async listSectionEntities(
+    params: ListSectionEntitiesParams,
+  ): Promise<CommerceEntity[]> {
+    const list = await catalogGateway.listSection({
+      slug: params.sectionSlug,
+      limit: params.limit,
+      offset: params.offset,
+    });
+    return list.items.map(commerceEntityFromCard);
+  },
+
+  async getEntitiesByIds(ids: readonly string[]): Promise<CommerceEntity[]> {
+    if (ids.length === 0) return [];
+    const cards = await catalogGateway.getManyById(ids);
+    return cards.map(commerceEntityFromCard);
+  },
+};
+
+export type CatalogGatewayType = typeof CatalogGateway;
