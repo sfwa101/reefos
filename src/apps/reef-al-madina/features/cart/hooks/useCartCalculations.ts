@@ -250,32 +250,13 @@ export const useCartCalculations = ({
         { items: cashierItems, context: { member_tier: "guest" } },
         {
           onSuccess: (snapshot) => {
-            // Phase C5 — capture the latest authoritative snapshot hash so
-            // the checkout submit can hand it to the Sovereign Price Judge.
+            // Wave P-1.3 — authoritative snapshot hash for the Price Judge.
             setCashierSnapshotHash(snapshot.snapshot_hash);
             setCashierSnapshotSignature(cartSignature);
-
-            const delta = Math.abs(snapshot.totals.grand_total - grand);
-            if (delta > 0.01) {
-              if (import.meta.env.DEV) {
-                console.warn(
-                  `[CASHIER-SHADOW-MISMATCH] Legacy: ${grand}, Brain: ${snapshot.totals.grand_total}, Hash: ${snapshot.snapshot_hash}`,
-                  {
-                    legacy: { subtotal, discount, delivery, grand },
-                    brain: snapshot.totals,
-                  },
-                );
-              }
-            } else if (import.meta.env.DEV) {
-              console.info("[cashier-shadow] match", {
-                grand,
-                hash: snapshot.snapshot_hash,
-              });
-            }
           },
           onError: (err) => {
             if (import.meta.env.DEV) {
-              console.warn("[cashier-shadow] preview failed:", err.message);
+              console.warn("[cashier] preview failed:", err.message);
             }
           },
         },
