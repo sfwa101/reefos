@@ -12,6 +12,7 @@ import {
   Box,
   Compass,
   Factory,
+  Layers3,
   LayoutDashboard,
   Library,
   Megaphone,
@@ -52,7 +53,7 @@ const ERP_BOTTOM: NavItem[] = [
   { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { to: "/admin/customers", label: "العملاء", icon: Users },
   { to: "/admin/inventory", label: "المخزون", icon: Box },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
+  { to: "/admin/modules", label: "الوحدات والمحركات", icon: Layers3 },
 ];
 
 const REEF_FACTORY_NAV: NavItem[] = [
@@ -70,7 +71,7 @@ const REEF_FACTORY_BOTTOM: NavItem[] = [
   { to: "/admin/factory/merchants", label: "التجار", icon: Store },
   { to: "/admin/factory/cashiers", label: "كاشير", icon: MonitorSmartphone },
   { to: "/admin/factory/drivers", label: "سائقون", icon: Truck },
-  { to: "/admin/factory/apps", label: "تطبيقات", icon: AppWindow },
+  { to: "/admin/modules", label: "الوحدات", icon: Layers3 },
 ];
 
 const OS_NAV: NavItem[] = [
