@@ -254,6 +254,14 @@ export function assetToProduct(row: RawAsset): Product | null {
       low_stock_threshold: lowStockThreshold,
     },
     description: row.description ?? undefined,
+    packagingTiers: (() => {
+      const tiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
+      return tiers;
+    })(),
+    defaultTierId: (() => {
+      const tiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
+      return tiers.find((t) => t.is_default_sell)?.tier_id ?? tiers[0]?.tier_id ?? null;
+    })(),
   };
 }
 
