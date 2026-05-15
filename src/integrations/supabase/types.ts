@@ -9986,6 +9986,10 @@ export type Database = {
       }
       recompute_vendor_wallet: { Args: { _vendor_id: string }; Returns: Json }
       recompute_wallet_balance: { Args: { _user: string }; Returns: number }
+      record_driver_cod_collection: {
+        Args: { _confirmed_amount: number; _node_id: string }
+        Returns: Json
+      }
       redeem_coupon: {
         Args: { _code: string; _order_id: string; _order_total: number }
         Returns: Json
