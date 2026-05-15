@@ -26,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   updateDispatchTaskStatusFn,
+  recordDriverCashCollectionFn,
   type DispatchTaskAction,
 } from "@/core/logistics/driver.functions";
 import type {
