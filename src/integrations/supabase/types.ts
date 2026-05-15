@@ -9924,15 +9924,26 @@ export type Database = {
       }
       postgis_version: { Args: never; Returns: string }
       postgis_wagyu_version: { Args: never; Returns: string }
-      process_checkout_sovereign: {
-        Args: {
-          p_cart_items: Json
-          p_customer_id: string
-          p_delivery_info: Json
-          p_idempotency_key?: string
-        }
-        Returns: string
-      }
+      process_checkout_sovereign:
+        | {
+            Args: {
+              p_cart_items: Json
+              p_customer_id: string
+              p_delivery_info: Json
+              p_idempotency_key?: string
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              p_cart_items: Json
+              p_customer_id: string
+              p_delivery_info: Json
+              p_idempotency_key?: string
+              p_payment_method?: string
+            }
+            Returns: string
+          }
       process_commission_vesting: { Args: never; Returns: Json }
       process_due_subscriptions: {
         Args: never
