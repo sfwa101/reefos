@@ -7,6 +7,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
   type CartLineMeta,
   useCartLineBreakdown,
+  useCartLineTotals,
 } from "@/core/orders/runtime/react/CartProvider";
 import {
   bookingTimeSlots,
@@ -38,12 +39,13 @@ const CartLineItemImpl = ({
   const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.6, 0]);
   const unitPrice = l.meta?.unitPrice ?? l.product.price;
 
-  // Phase 5.3 — engine-driven breakdown (null = legacy line, keep old UI).
+  // Wave P-1.3 — engine-authoritative breakdown (always non-null for cart lines).
   const breakdown = useCartLineBreakdown(l.product.id);
   const engine = breakdown?.kind === "ok" ? breakdown.breakdown : null;
-  const legacyLineTotal = unitPrice * l.qty;
-  const displayTotal = engine ? engine.grandTotal : legacyLineTotal;
-  const showStrike = engine !== null && engine.discountTotal > 0;
+  const totals = useCartLineTotals(l.product.id); // canonical, never null while line exists
+  const lineSubtotal = totals?.lineTotal ?? 0;
+  const displayTotal = totals?.grandTotal ?? 0;
+  const showStrike = (totals?.discountTotal ?? 0) > 0;
 
   const isBooking =
     isSweetsProduct(l.product.source) &&
@@ -54,7 +56,6 @@ const CartLineItemImpl = ({
     0,
     days.findIndex((d) => d.toISOString().slice(0, 10) === l.meta?.bookingDate),
   );
-  const lineSubtotal = unitPrice * l.qty;
   const depositRequired = isBooking && lineSubtotal >= DEPOSIT_THRESHOLD;
   const payDeposit = isBooking && (depositRequired || (l.meta?.payDeposit ?? true));
   const shipMode = (l.meta?.shipMode ?? "split") as "split" | "wait";
@@ -174,9 +175,9 @@ const CartLineItemImpl = ({
             )}
             <div className="mt-auto flex items-center justify-between pt-2">
               <span className="font-display text-base font-extrabold text-primary">
-                {showStrike && (
+                {showStrike && totals && (
                   <span className="me-1.5 align-middle text-[10.5px] font-bold tabular-nums text-muted-foreground line-through decoration-1">
-                    {fmtMoney(Math.round(legacyLineTotal + engine.discountTotal))}
+                    {fmtMoney(Math.round(totals.lineTotal))}
                   </span>
                 )}
                 <NumberFlow value={displayTotal} />{" "}
