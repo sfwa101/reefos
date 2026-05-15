@@ -2,6 +2,7 @@
 // Aggregates the Business-Ops Dashboard data behind `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { historicalLineTotal } from "@/core/commerce/pricing/historicalLineTotal";
 
 export type OpsKpiSnapshot = {
   revenue: number;
