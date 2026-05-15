@@ -16,7 +16,7 @@
  * callers continue to compile while migration completes.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
+import type { PackagingOptionVM, Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
 import { Tracer } from "@/core/system/observability/Tracer";
 
