@@ -5,7 +5,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { OrderGateway, type SovereignOrderVM as SovereignOrder, type SovereignOrderNodeVM as SovereignNode } from "@/core/orders";
 import { fmtMoney, toLatin } from "@/lib/format";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import { toast } from "sonner";
 

@@ -13,7 +13,7 @@ import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { useFavorites } from "@/lib/favorites";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import { fmtMoney } from "@/lib/format";

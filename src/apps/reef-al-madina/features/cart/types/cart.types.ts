@@ -5,7 +5,7 @@
  * `ProductCardVM` from `@/core/catalog/types`.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import type { CartLineMeta } from "@/context/CartContext";
+import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import type { VendorKey } from "@/lib/vendor-menu-config";
 
 export type Addr = {

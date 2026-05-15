@@ -19,7 +19,7 @@
  *
  * Structural compatibility: the legacy `Product` shape (and the cart
  * `capturedSnapshot`) are both structurally assignable to `PricingInput`,
- * so existing callers (CartContext, ButcherSheet, …) need no changes.
+ * so existing callers (CartRuntime, ButcherSheet, …) need no changes.
  * =================================================================== */
 export interface PricingInput {
   /** Stable product identifier (used for receipt/audit and registry lookups). */

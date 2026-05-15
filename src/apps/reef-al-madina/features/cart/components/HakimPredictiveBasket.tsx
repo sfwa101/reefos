@@ -12,7 +12,7 @@ import { useReplaceCart } from "@/hooks/useReplaceCart";
 import { usePredictBasket, type PredictedBasketLine } from "@/core/hakim-ai/hooks/usePredictBasket";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toLatin } from "@/lib/format";
-import type { CartLine } from "@/store/useCartStore";
+import type { CartLine } from "@/core/orders/runtime/types";
 /** @deprecated Wave P-B B-3 — bridge type; predicted basket synthesizes a Product to feed the deprecated CartLine.product field. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 

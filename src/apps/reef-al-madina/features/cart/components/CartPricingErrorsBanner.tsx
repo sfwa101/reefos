@@ -1,6 +1,6 @@
 import { AlertTriangle } from "lucide-react";
 import { motion } from "framer-motion";
-import { useCartErrors } from "@/context/CartContext";
+import { useCartErrors } from "@/core/orders/runtime/react/CartProvider";
 
 /**
  * Phase 2.J — Graceful Failure UI.

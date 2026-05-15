@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import {
   Calculator, CheckCircle2, Clock, Minus, Plus, Upload,
 } from "lucide-react";
-import { useCartActions } from "@/context/CartContext";
+import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
 import { useAuth } from "@/context/AuthContext";
 import { submitPrintJobFn, uploadPrintFileFn } from "@/core/library/library.functions";
 import type { Product } from "@/core/catalog/legacyProduct.types";

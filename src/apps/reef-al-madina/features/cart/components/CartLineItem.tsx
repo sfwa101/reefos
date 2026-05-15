@@ -7,7 +7,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
   type CartLineMeta,
   useCartLineBreakdown,
-} from "@/context/CartContext";
+} from "@/core/orders/runtime/react/CartProvider";
 import {
   bookingTimeSlots,
   buildBookingDays,

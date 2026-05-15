@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Info, ShoppingBag, Star } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";

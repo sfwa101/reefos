@@ -14,7 +14,7 @@
 import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /** @deprecated Wave P-B B-3 — bridge type for legacy cart-row hydration. */
 import { type Product } from "@/core/catalog/legacyProduct.types";
-import type { CartLineMeta } from "@/context/CartContext";
+import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import { fetchAssetsByLegacyIds, assetToProduct } from "@/core/commerce/knowledge/sovereignCatalog";
 
 export type RemoteLine = {

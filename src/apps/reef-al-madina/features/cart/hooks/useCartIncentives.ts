@@ -27,7 +27,7 @@ import {
 import {
   useCartProfit,
   type CartProfitSummary,
-} from "@/context/CartContext";
+} from "@/core/orders/runtime/react/CartProvider";
 import { liveRules } from "@/core/commerce/pricing/config/liveRulesCache";
 
 export type MilestoneKey = string;

@@ -4,7 +4,7 @@ import {
   X, Star, Clock, MessageSquare, ShoppingBag, Flame, ChevronLeft, Check, Plus,
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";

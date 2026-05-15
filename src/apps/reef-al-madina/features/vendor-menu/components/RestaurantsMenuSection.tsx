@@ -8,7 +8,7 @@ import { Clock, Plus, Search, Star, UtensilsCrossed } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useCartActions, useCartLineQty } from "@/context/CartContext";
+import { useCartActions, useCartLineQty } from "@/core/orders/runtime/react/CartProvider";
 import { storeThemes } from "@/lib/storeThemes";
 import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";

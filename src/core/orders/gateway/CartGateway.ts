@@ -11,7 +11,7 @@
  *     Supabase client directly.
  *
  * Anomaly flag: `fetchLoyaltyTier` reads `profiles.loyalty_tier`. This is
- * cross-domain (identity) but currently lives in `CartContext` to drive
+ * cross-domain (identity) but currently lives in `CartRuntime` to drive
  * pricing. Tracked for relocation to IdentityGateway in a future sub-wave;
  * carried over verbatim here to honor the no-logic-rewrite constraint.
  */

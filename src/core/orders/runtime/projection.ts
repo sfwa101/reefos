@@ -1,13 +1,13 @@
 /**
  * Salsabil OS — Phase P-1.1.D-β · Sovereign Cart Projection.
  *
- * The Zustand store (`useCartStore`) is a pure read-only PROJECTION of the
+ * The Zustand store (`useCartProjectionStore`) is a pure read-only PROJECTION of the
  * Sovereign {@link cartRuntime}. ALL mutating intents flow into the runtime;
  * the store mirrors `cartRuntime.getState()` and writes the projection to
  * `localStorage` so the cart survives reloads.
  *
  * This module owns the projection bridge. The legacy file
- * `src/store/useCartStore.ts` is now a 100%-logic-free re-export shim
+ * `src/store/useCartProjectionStore.ts` is now a 100%-logic-free re-export shim
  * pointing at this module.
  */
 
@@ -317,7 +317,7 @@ export const migrateLegacyCartShape = (
 // Store — read-only projection.
 // ---------------------------------------------------------------------------
 
-export const useCartStore = create<CartState>()(
+export const useCartProjectionStore = create<CartState>()(
   persist<CartState>(
     () => ({
       items: {} as Record<string, CartLine>,
@@ -372,7 +372,7 @@ function ensureProjectionBridge(): void {
   bridgeInstalled = true;
   cartRuntime.subscribe((state) => {
     const projected = projectRuntimeState(state);
-    useCartStore.setState(projected, true);
+    useCartProjectionStore.setState(projected, true);
   });
 }
 ensureProjectionBridge();
@@ -424,13 +424,13 @@ export function replaceCartLines(lines: ReadonlyArray<CartLine>): void {
 }
 
 export const useCartLineQty = (productId: string): number =>
-  useCartStore((s) => {
+  useCartProjectionStore((s) => {
     const key = s.productIndex[productId];
     return key ? (s.items[key]?.qty ?? 0) : 0;
   });
 
 export const useCartTotalItems = (): number =>
-  useCartStore((s) => {
+  useCartProjectionStore((s) => {
     let n = 0;
     for (const k in s.items) n += s.items[k].qty;
     return n;
@@ -446,6 +446,6 @@ const linesArraySelector = (s: CartState): CartLine[] => {
   return _linesCacheArr;
 };
 export const useCartLinesArray = (): CartLine[] =>
-  useCartStore(linesArraySelector);
+  useCartProjectionStore(linesArraySelector);
 
 export { useShallow, useEffect, useMemo };

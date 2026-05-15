@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useCartActions, useCartLineQty } from "@/context/CartContext";
+import { useCartActions, useCartLineQty } from "@/core/orders/runtime/react/CartProvider";
 import { Bot, Calculator, CheckCircle2, Plus, Sparkle, Star, X } from "lucide-react";
 import { toast } from "sonner";
 import OptimizedImage from "@/components/ui/OptimizedImage";

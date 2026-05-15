@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import type { CartLineMeta } from "@/context/CartContext";
+import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 /** @deprecated Wave P-B B-3 — calculations already prefer `capturedPrice` over `product.price`. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import {

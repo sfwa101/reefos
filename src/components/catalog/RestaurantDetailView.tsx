@@ -6,7 +6,7 @@ import { getRestaurant } from "@/lib/vendor-menu-config";
 import { products as ALL_PRODUCTS } from "@/core/catalog/runtime/legacyRuntime";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { toLatin, fmtMoney } from "@/lib/format";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";

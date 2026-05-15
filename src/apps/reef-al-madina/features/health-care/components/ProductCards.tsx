@@ -1,4 +1,4 @@
-import { useCartActions, useCartLineQty } from "@/context/CartContext";
+import { useCartActions, useCartLineQty } from "@/core/orders/runtime/react/CartProvider";
 import { CheckCircle2, Minus, Plus, Sparkle, Star } from "lucide-react";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import type { RxProduct } from "../types";

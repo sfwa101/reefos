@@ -6,7 +6,7 @@
  * survive the V3 transition unchanged so the ~60 legacy consumers compile
  * without modification.
  *
- * The legacy locations (`@/store/useCartStore`, `@/context/CartContext`)
+ * The legacy locations (`@/core/orders/runtime/projection`, `@/core/orders/runtime/react/CartProvider`)
  * re-export from this module marked `@deprecated`.
  */
 

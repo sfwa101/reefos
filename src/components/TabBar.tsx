@@ -1,6 +1,6 @@
 import { Home, Tag, LayoutGrid, Wallet, ShoppingBag, ShoppingCart, type LucideIcon } from "lucide-react";
 import { Link, useLocation } from "@tanstack/react-router";
-import { useCartCount } from "@/context/CartContext";
+import { useCartCount } from "@/core/orders/runtime/react/CartProvider";
 import { toLatin } from "@/lib/format";
 
 type TabItem = {

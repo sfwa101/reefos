@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { useAuth } from "@/context/AuthContext";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toLatin } from "@/lib/format";

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Minus, Plus, Star, X } from "lucide-react";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";

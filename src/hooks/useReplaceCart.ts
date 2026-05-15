@@ -8,7 +8,8 @@
  */
 import { useCallback } from "react";
 import { toast } from "sonner";
-import { useCartActions, type CartLine } from "@/store/useCartStore";
+import { useCartActions } from "@/core/orders/runtime/projection";
+import type { CartLine } from "@/core/orders/runtime/types";
 
 export type ReplaceCartLine = CartLine;
 

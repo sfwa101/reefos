@@ -1,7 +1,7 @@
 /**
  * Cart Pricing Adapter — Phase 2.F
  * ----------------------------------------------------------------
- * Thin, READ-ONLY bridge between the legacy `CartContext` and the new
+ * Thin, READ-ONLY bridge between the legacy `CartRuntime` and the new
  * `PricingEngine`. This file is intentionally NOT wired anywhere yet —
  * it exists so we can review the fallback contract before SEV-0 risk.
  *
@@ -13,7 +13,7 @@
  *         │ yes                 │ no
  *         ▼                     ▼
  *   try engine.calculate()   return { kind: "fallback" }
- *         │                  → CartContext keeps using legacy
+ *         │                  → CartRuntime keeps using legacy
  *         │                    `pricingEngine.ts` / `pricingAdapters.ts`
  *         ▼
  *   ┌───────────────────────┐
