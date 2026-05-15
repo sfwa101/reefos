@@ -23,7 +23,7 @@ export const WorkspaceHydrationBootstrap = (): null => {
     whoAmI()
       .then((dto) => {
         if (cancelled) return;
-        hydrateWorkspaceId(dto.workspaceId);
+        if (dto.workspaceId) hydrateWorkspaceId(dto.workspaceId);
       })
       .catch((err) => {
         // 401 expected until the custom_access_token_hook is enabled
