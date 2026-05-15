@@ -71,7 +71,7 @@ const REEF_FACTORY_BOTTOM: NavItem[] = [
   { to: "/admin/factory/merchants", label: "التجار", icon: Store },
   { to: "/admin/factory/cashiers", label: "كاشير", icon: MonitorSmartphone },
   { to: "/admin/factory/drivers", label: "سائقون", icon: Truck },
-  { to: "/admin/factory/apps", label: "تطبيقات", icon: AppWindow },
+  { to: "/admin/modules", label: "الوحدات", icon: Layers3 },
 ];
 
 const OS_NAV: NavItem[] = [
