@@ -19,6 +19,8 @@ import {
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import SmartSwapSheet from "@/core/runtime-ui/blocks/commerce/smart-swap-sheet";
 import AnimatedNumber from "@/components/baskets/AnimatedNumber";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Mode = "oneoff" | "subscribe";
 type GiftMeta = {
@@ -184,12 +186,12 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
             <div className="relative h-44 w-full overflow-hidden">
               <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-              <button
+              <Button
                 onClick={onClose} aria-label="إغلاق"
                 className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground shadow-pill"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
               {marketing && (
                 <span className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold shadow-pill ring-1
                   ${marketing.badgeTone === "amber" ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 ring-amber-500/40" : ""}
@@ -227,7 +229,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
               {/* Mode tabs */}
               <div className="flex rounded-2xl bg-foreground/5 p-1">
                 {(["oneoff", "subscribe"] as Mode[]).map((m) => (
-                  <button
+                  <Button
                     key={m}
                     onClick={() => setMode(m)}
                     className={`flex-1 rounded-xl py-2 text-[12px] font-extrabold transition ${
@@ -235,7 +237,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                     }`}
                   >
                     {m === "oneoff" ? "شراء لمرة واحدة" : `اشترك ووفر ${toLatin(freqObj.discountPct)}%`}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
@@ -249,7 +251,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                     {subFrequencies.map((f) => {
                       const active = f.id === freq;
                       return (
-                        <button
+                        <Button
                           key={f.id}
                           onClick={() => setFreq(f.id)}
                           className={`rounded-xl px-2 py-2 text-center text-[10.5px] font-extrabold transition ${
@@ -258,7 +260,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                         >
                           {f.shortLabel}
                           <span className="block text-[9px] font-bold opacity-80">−{toLatin(f.discountPct)}%</span>
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -274,7 +276,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
               )}
 
               {/* Gift toggle */}
-              <button
+              <Button
                 onClick={() => setGift((g) => !g)}
                 className={`flex w-full items-center justify-between rounded-2xl border-2 p-3 text-right transition ${
                   gift ? "border-violet-500 bg-violet-500/10" : "border-border bg-background"
@@ -296,24 +298,24 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                 <span className={`h-5 w-9 rounded-full p-0.5 transition ${gift ? "bg-violet-600" : "bg-foreground/15"}`}>
                   <span className={`block h-4 w-4 rounded-full bg-white transition ${gift ? "translate-x-[-16px] rtl:translate-x-[-16px]" : ""}`} />
                 </span>
-              </button>
+              </Button>
 
               {gift && (
                 <section className="space-y-2 rounded-2xl border border-violet-500/30 bg-violet-500/5 p-3">
-                  <input
+                  <Input
                     placeholder="اسم المستلم"
                     value={giftMeta.recipientName}
                     onChange={(e) => setGiftMeta((m) => ({ ...m, recipientName: e.target.value }))}
                     className="w-full rounded-xl border-2 border-border bg-background px-3 py-2 text-[12px] outline-none focus:border-violet-500"
                   />
-                  <input
+                  <Input
                     placeholder="رقم هاتف المستلم"
                     inputMode="tel"
                     value={giftMeta.recipientPhone}
                     onChange={(e) => setGiftMeta((m) => ({ ...m, recipientPhone: e.target.value }))}
                     className="w-full rounded-xl border-2 border-border bg-background px-3 py-2 text-[12px] outline-none focus:border-violet-500"
                   />
-                  <input
+                  <Input
                     placeholder="عنوان المستلم بالكامل"
                     value={giftMeta.recipientAddress}
                     onChange={(e) => setGiftMeta((m) => ({ ...m, recipientAddress: e.target.value }))}
@@ -336,7 +338,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
               {/* Contents accordion */}
               {hasContents && (
                 <section className="overflow-hidden rounded-2xl border border-border/60 bg-card shadow-soft">
-                  <button
+                  <Button
                     onClick={() => setShowContents((v) => !v)}
                     className="flex w-full items-center justify-between p-3 text-right"
                   >
@@ -345,7 +347,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                       <span className="text-sm font-extrabold">محتويات السلة ({toLatin(items.length)})</span>
                     </span>
                     <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${showContents ? "rotate-180" : ""}`} />
-                  </button>
+                  </Button>
                   <AnimatePresence initial={false}>
                     {showContents && (
                       <motion.div
@@ -371,13 +373,13 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                                   </span>
                                   <span className="block text-[10px] text-muted-foreground">×{toLatin(it.qty)} · {toLatin(lineGrandTotal({ product: it.product, qty: it.qty }))} ج.م</span>
                                 </span>
-                                <button
+                                <Button
                                   onClick={() => requestSwap(it.originalId)}
                                   aria-label="استبدال"
                                   className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-700 transition hover:bg-emerald-500/20 dark:text-emerald-300"
                                 >
                                   <ArrowRightLeft className="h-3.5 w-3.5" />
-                                </button>
+                                </Button>
                               </li>
                             );
                           })}
@@ -415,7 +417,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
 
             {/* Sticky footer */}
             <div className="sticky bottom-0 border-t border-border/60 bg-card/95 p-4">
-              <button
+              <Button
                 onClick={handleConfirm}
                 className={`flex w-full items-center justify-center gap-2 rounded-2xl py-3 font-display text-sm font-extrabold text-white shadow-pill transition active:scale-[0.98] ${
                   mode === "subscribe" ? "bg-emerald-600" : "bg-foreground"
@@ -425,7 +427,7 @@ const BasketSheet = ({ product, open, onClose }: Props) => {
                 {mode === "subscribe"
                   ? <>ابدأ الاشتراك · <AnimatedNumber value={finalPrice} suffix=" ج.م" /></>
                   : <>{gift ? <>أرسل كهدية · <Mail className="h-4 w-4" /></> : "أضف للسلة"} · <AnimatedNumber value={finalPrice} suffix=" ج.م" /></>}
-              </button>
+              </Button>
             </div>
 
             {swapOpen && (

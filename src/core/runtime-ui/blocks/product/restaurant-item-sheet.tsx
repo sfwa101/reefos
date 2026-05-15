@@ -7,6 +7,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   product: Product | null;
@@ -110,13 +111,13 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
           <div className="relative h-56 shrink-0 overflow-hidden rounded-t-[2rem]">
             <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-            <button
+            <Button
               onClick={onClose}
               aria-label="إغلاق"
               className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
             >
               <X className="h-4 w-4" strokeWidth={2.5} />
-            </button>
+            </Button>
             <div className="absolute inset-x-0 bottom-0 p-4 text-white">
               {product.brand && (
                 <span
@@ -151,7 +152,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
                   {product.variants.map((v) => {
                     const active = variantId === v.id;
                     return (
-                      <button
+                      <Button
                         key={v.id}
                         onClick={() => setVariantId(v.id)}
                         className="flex w-full items-center justify-between rounded-2xl border-2 p-3.5 text-right transition"
@@ -181,7 +182,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
                           {v.priceDelta >= 0 ? "+" : ""}
                           {fmtMoney(v.priceDelta)}
                         </span>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -196,7 +197,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
                   {product.addons.map((a) => {
                     const active = addonIds.includes(a.id);
                     return (
-                      <button
+                      <Button
                         key={a.id}
                         onClick={() => toggleAddon(a.id)}
                         className="flex w-full items-center justify-between rounded-2xl border p-3 text-right transition"
@@ -221,7 +222,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
                         <span className="text-xs font-bold text-muted-foreground tabular-nums">
                           +{fmtMoney(a.price)}
                         </span>
-                      </button>
+                      </Button>
                     );
                   })}
                 </div>
@@ -246,26 +247,26 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
           <div className="absolute inset-x-0 bottom-0 border-t border-border/60 bg-background/95 p-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-1">
-                <button
+                <Button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-background shadow-sm"
                   aria-label="إنقاص"
                 >
                   <Minus className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="w-7 text-center font-display text-base font-extrabold tabular-nums">
                   {toLatin(qty)}
                 </span>
-                <button
+                <Button
                   onClick={() => setQty((q) => q + 1)}
                   className="flex h-9 w-9 items-center justify-center rounded-full text-white shadow-sm"
                   style={{ background: accent }}
                   aria-label="زيادة"
                 >
                   <Plus className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
-              <button
+              <Button
                 onClick={handleAdd}
                 className="flex flex-1 items-center justify-between rounded-2xl px-5 py-3.5 font-bold text-white shadow-pill transition active:scale-[0.98]"
                 style={{ background: accent }}
@@ -274,7 +275,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
                 <span className="font-display text-base font-extrabold tabular-nums">
                   {fmtMoney(total)}
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

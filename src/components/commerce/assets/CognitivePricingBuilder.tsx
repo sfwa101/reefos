@@ -233,14 +233,14 @@ function PricingCard({
           </div>
         </div>
         {c && (
-          <button
+          <Button
             type="button"
             onClick={onRemove}
             className="h-7 w-7 inline-flex items-center justify-center rounded-lg text-foreground-tertiary hover:text-rose-600 hover:bg-rose-500/10 press"
             title="إزالة العقد"
           >
             <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </header>
 
@@ -248,7 +248,7 @@ function PricingCard({
         <div className="grid grid-cols-12 gap-2">
           <label className="col-span-7 block">
             <span className="block text-[10px] font-bold text-foreground-tertiary mb-1">السعر الأساسي</span>
-            <input
+            <Input
               type="number"
               inputMode="decimal"
               step="0.01"
@@ -300,7 +300,7 @@ function PricingCard({
 
         {/* Advanced Rules — Policy Graph */}
         <div className="rounded-xl border border-border/60">
-          <button
+          <Button
             type="button"
             onClick={() => setAdvanced(!advanced)}
             className="w-full flex items-center justify-between px-3 py-2 text-[11.5px] font-bold press"
@@ -319,7 +319,7 @@ function PricingCard({
             ) : (
               <ChevronRight className="h-3.5 w-3.5 text-foreground-tertiary" />
             )}
-          </button>
+          </Button>
 
           {advanced && (
             <div className="border-t border-border/60 p-2.5 space-y-2 bg-background/40">
@@ -346,7 +346,7 @@ function PricingCard({
                   }
                 />
               ))}
-              <button
+              <Button
                 type="button"
                 onClick={() =>
                   onChange((prev) => ({
@@ -357,7 +357,7 @@ function PricingCard({
                 className="w-full h-9 rounded-xl border border-dashed border-primary/40 bg-primary/5 text-primary text-[11.5px] font-extrabold press inline-flex items-center justify-center gap-1.5"
               >
                 <Plus className="h-3.5 w-3.5" /> إضافة سياسة تسعير
-              </button>
+              </Button>
             </div>
           )}
         </div>
@@ -383,13 +383,13 @@ function PolicyRow({
     <div className="rounded-xl border border-border bg-background p-2 space-y-2">
       <div className="flex items-center justify-between">
         <span className="text-[10px] font-extrabold text-foreground-tertiary">إذا</span>
-        <button
+        <Button
           type="button"
           onClick={onRemove}
           className="h-6 w-6 inline-flex items-center justify-center rounded-md text-foreground-tertiary hover:text-rose-600 hover:bg-rose-500/10 press"
         >
           <Trash2 className="h-3 w-3" />
-        </button>
+        </Button>
       </div>
       <div className="grid grid-cols-12 gap-1.5">
         <select
@@ -418,7 +418,7 @@ function PolicyRow({
             <option key={op} value={op}>{OP_LABEL[op]}</option>
           ))}
         </select>
-        <input
+        <Input
           value={String(rule.condition.value)}
           onChange={(e) =>
             onUpdate({ ...rule, condition: { ...rule.condition, value: e.target.value } })
@@ -442,7 +442,7 @@ function PolicyRow({
           ))}
         </select>
         <div className="col-span-5 relative">
-          <input
+          <Input
             type="number"
             inputMode="decimal"
             step="0.01"
@@ -498,6 +498,8 @@ function removePolicy(rules: ContractRules, id: string): ContractRules {
  * across re-renders without polluting the parent).
  * ================================================================= */
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 function useLocalToggle(_key: string, initial: boolean) {
   return useState<boolean>(initial);
 }

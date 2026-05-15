@@ -3,6 +3,8 @@ import { Plus, Pencil, Trash2, X, Loader2, FolderTree, Folder } from "lucide-rea
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   listCategoriesFn,
   upsertCategoryFn,
@@ -47,13 +49,13 @@ export default function Categories() {
       <div className="px-4 lg:px-6 pt-2 pb-6 max-w-3xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <p className="text-[13px] text-foreground-secondary">إدارة شجرة الفئات والفئات الفرعية</p>
-          <button
+          <Button
             onClick={() => setCreating({ parent_id: null })}
             className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground flex items-center gap-1.5 press shadow-sm font-semibold text-[13px]"
           >
             <Plus className="h-4 w-4" />
             فئة رئيسية
-          </button>
+          </Button>
         </div>
 
         {items === null ? (
@@ -128,16 +130,16 @@ function CategoryRow({
         <p className="text-[11px] text-foreground-tertiary num">ترتيب: {c.sort_order}</p>
       </div>
       {onAddChild && (
-        <button onClick={onAddChild} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" title="إضافة فرعية">
+        <Button onClick={onAddChild} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" title="إضافة فرعية">
           <Plus className="h-4 w-4" />
-        </button>
+        </Button>
       )}
-      <button onClick={onEdit} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" title="تعديل">
+      <Button onClick={onEdit} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" title="تعديل">
         <Pencil className="h-3.5 w-3.5" />
-      </button>
-      <button onClick={onDelete} className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press" title="حذف">
+      </Button>
+      <Button onClick={onDelete} className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press" title="حذف">
         <Trash2 className="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -185,20 +187,20 @@ function CategoryEditor({
       <div className="bg-background w-full lg:max-w-md rounded-t-3xl lg:rounded-3xl" onClick={(e) => e.stopPropagation()} dir="rtl">
         <div className="px-5 py-3 border-b border-border/40 flex items-center justify-between">
           <h2 className="font-display text-[18px]">{isNew ? "فئة جديدة" : "تعديل الفئة"}</h2>
-          <button onClick={onClose} className="h-9 w-9 rounded-full bg-surface-muted flex items-center justify-center press">
+          <Button onClick={onClose} className="h-9 w-9 rounded-full bg-surface-muted flex items-center justify-center press">
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
         <div className="p-5 space-y-3">
           <Field label="الاسم *">
-            <input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
+            <Input value={name} onChange={(e) => setName(e.target.value)} className={inputCls} />
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="أيقونة (Emoji)">
-              <input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="🍎" className={inputCls} />
+              <Input value={icon} onChange={(e) => setIcon(e.target.value)} placeholder="🍎" className={inputCls} />
             </Field>
             <Field label="الترتيب">
-              <input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} className={inputCls + " num text-right"} />
+              <Input type="number" value={sortOrder} onChange={(e) => setSortOrder(Number(e.target.value))} className={inputCls + " num text-right"} />
             </Field>
           </div>
           <Field label="الفئة الأم">
@@ -211,11 +213,11 @@ function CategoryEditor({
           </Field>
         </div>
         <div className="px-5 py-3 border-t border-border/40 flex gap-2">
-          <button onClick={onClose} className="flex-1 h-11 rounded-2xl bg-surface-muted text-[14px] font-semibold press">إلغاء</button>
-          <button onClick={save} disabled={saving} className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-[14px] font-semibold press flex items-center justify-center gap-2 disabled:opacity-50">
+          <Button onClick={onClose} className="flex-1 h-11 rounded-2xl bg-surface-muted text-[14px] font-semibold press">إلغاء</Button>
+          <Button onClick={save} disabled={saving} className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-[14px] font-semibold press flex items-center justify-center gap-2 disabled:opacity-50">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />}
             حفظ
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -14,6 +14,8 @@ import {
 
 import { SORTS } from "../dictionaries";
 import type { FulfillmentFilter, SortId } from "../types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const SearchAndFilters = ({
   q,
@@ -40,7 +42,7 @@ export const SearchAndFilters = ({
     <div className="flex gap-2">
       <div className="relative flex-1">
         <Search className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-        <input
+        <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="ابحث عن جهاز، أداة، علامة تجارية…"
@@ -48,16 +50,16 @@ export const SearchAndFilters = ({
           style={{ ["--tw-ring-color" as string]: `hsl(${hue} / 0.4)` }}
         />
         {q && (
-          <button
+          <Button
             onClick={() => setQ("")}
             aria-label="مسح"
             className="absolute left-3 top-1/2 flex h-6 w-6 -translate-y-1/2 items-center justify-center rounded-full bg-foreground/5"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         )}
       </div>
-      <button
+      <Button
         onClick={onOpenFilters}
         className={`relative flex h-11 shrink-0 items-center gap-1 rounded-2xl px-3.5 text-[12px] font-extrabold shadow-soft ring-1 transition active:scale-95 ${
           filtersActive
@@ -73,7 +75,7 @@ export const SearchAndFilters = ({
             ●
           </span>
         )}
-      </button>
+      </Button>
     </div>
 
     {/* Quick fulfillment chips */}
@@ -85,7 +87,7 @@ export const SearchAndFilters = ({
       ].map((opt) => {
         const active = fulFilter === opt.id;
         return (
-          <button
+          <Button
             key={opt.id}
             onClick={() => setFulFilter(opt.id)}
             className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-[10.5px] font-extrabold transition active:scale-95 ${
@@ -101,20 +103,20 @@ export const SearchAndFilters = ({
             {opt.id === "instant" && <Truck className="h-3 w-3" />}
             {opt.id === "preorder" && <CalendarClock className="h-3 w-3" />}
             {opt.label}
-          </button>
+          </Button>
         );
       })}
       {sort !== "relevance" && (
         <span className="inline-flex items-center gap-1 rounded-full bg-foreground/10 px-3 py-1 text-[10.5px] font-extrabold text-foreground">
           <ArrowUpDown className="h-3 w-3" />
           {SORTS.find((s) => s.id === sort)?.label}
-          <button
+          <Button
             onClick={() => setSort("relevance")}
             aria-label="إلغاء الفرز"
             className="ml-1"
           >
             <X className="h-3 w-3" />
-          </button>
+          </Button>
         </span>
       )}
     </div>

@@ -5,6 +5,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getAppSettingsFn, upsertAppSettingFn } from "@/core/system/admin-settings.functions";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 /**
  * Settings Hub — /admin/settings
@@ -107,7 +109,7 @@ export default function Settings() {
               ) : (
                 <>
                   <Field label="اسم المتجر">
-                    <input
+                    <Input
                       type="text"
                       value={general.store_name}
                       onChange={(e) => setGeneral({ ...general, store_name: e.target.value })}
@@ -116,7 +118,7 @@ export default function Settings() {
                     />
                   </Field>
                   <Field label="رابط الشعار (Logo URL)" hint="يظهر في رأس التطبيق وعلى الفواتير">
-                    <input
+                    <Input
                       type="url"
                       value={general.logo_url}
                       onChange={(e) => setGeneral({ ...general, logo_url: e.target.value })}
@@ -138,14 +140,14 @@ export default function Settings() {
                   </Field>
 
                   <div className="flex justify-end pt-2">
-                    <button
+                    <Button
                       onClick={() => save("general", general)}
                       disabled={savingTab === "general"}
                       className="press inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-2xl px-5 py-2.5 text-[13px] font-bold shadow-soft disabled:opacity-50"
                     >
                       <Save className="h-4 w-4" />
                       {savingTab === "general" ? "جارٍ الحفظ..." : "حفظ التغييرات"}
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}
@@ -164,7 +166,7 @@ export default function Settings() {
               ) : (
                 <>
                   <Field label="نسبة الضريبة (٪)" hint="تُطبق على الفواتير تلقائياً">
-                    <input
+                    <Input
                       type="number"
                       step="0.1"
                       min={0}
@@ -175,7 +177,7 @@ export default function Settings() {
                     />
                   </Field>
                   <Field label="مصاريف الشحن الافتراضية" hint="بالعملة المحددة في الإعدادات العامة">
-                    <input
+                    <Input
                       type="number"
                       step="1"
                       min={0}
@@ -185,7 +187,7 @@ export default function Settings() {
                     />
                   </Field>
                   <Field label="الحد الأدنى لقيمة الطلب" hint="لن يتمكن العميل من إتمام طلب أقل من هذه القيمة">
-                    <input
+                    <Input
                       type="number"
                       step="1"
                       min={0}
@@ -196,14 +198,14 @@ export default function Settings() {
                   </Field>
 
                   <div className="flex justify-end pt-2">
-                    <button
+                    <Button
                       onClick={() => save("finance", finance)}
                       disabled={savingTab === "finance"}
                       className="press inline-flex items-center gap-2 bg-primary text-primary-foreground rounded-2xl px-5 py-2.5 text-[13px] font-bold shadow-soft disabled:opacity-50"
                     >
                       <Save className="h-4 w-4" />
                       {savingTab === "finance" ? "جارٍ الحفظ..." : "حفظ التغييرات"}
-                    </button>
+                    </Button>
                   </div>
                 </>
               )}

@@ -25,6 +25,8 @@ import { CartSummary } from "./CartSummary";
 import { CartLogisticsBanners } from "./CartLogisticsBanners";
 import { NumberFlow } from "./NumberFlow";
 import { SmartFakkaRail } from "./SmartFakkaRail";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
@@ -111,7 +113,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                     : "إخفاء الفاتورة وفرض الدفع المسبق"}
                 </p>
               </div>
-              <button
+              <Button
                 type="button"
                 role="switch"
                 aria-checked={o.giftMode}
@@ -125,7 +127,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                     o.giftMode ? "right-0.5" : "right-[1.4rem]"
                   }`}
                 />
-              </button>
+              </Button>
             </label>
 
             <AnimatePresence>
@@ -140,7 +142,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                     <p className="text-[11px] font-extrabold text-rose-600">
                       بيانات المستلم 🎀
                     </p>
-                    <input
+                    <Input
                       type="text"
                       value={o.giftRecipientName}
                       onChange={(e) => o.setGiftRecipientName(e.target.value)}
@@ -148,7 +150,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                       maxLength={80}
                       className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
                     />
-                    <input
+                    <Input
                       type="tel"
                       inputMode="tel"
                       value={o.giftRecipientPhone}
@@ -166,13 +168,13 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                       className="w-full rounded-xl bg-background px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-rose-400/40"
                     />
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setGiftMsgOpen((v) => !v)}
                     className="text-[11px] font-extrabold text-rose-600 underline-offset-2 hover:underline"
                   >
                     {giftMsgOpen ? "إخفاء رسالة الهدية" : "+ إضافة رسالة (اختياري)"}
-                  </button>
+                  </Button>
                   {giftMsgOpen && (
                     <textarea
                       value={o.giftMessage}
@@ -201,21 +203,21 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
               <div className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-primary/10 text-primary">
                 <Tag className="h-4 w-4" />
               </div>
-              <input
+              <Input
                 value={o.promo}
                 onChange={(e) => o.setPromo(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && o.applyPromo()}
                 placeholder="كود الخصم (REEF10، WELCOME25)"
                 className="flex-1 bg-transparent text-sm font-bold outline-none"
               />
-              <button
+              <Button
                 onClick={o.applyPromo}
                 className={`rounded-[10px] px-4 py-2 text-xs font-extrabold transition ${
                   o.appliedPromo ? "bg-primary text-primary-foreground" : "bg-foreground text-background"
                 }`}
               >
                 {o.appliedPromo ? <Check className="h-4 w-4" /> : "تطبيق"}
-              </button>
+              </Button>
             </div>
             <AnimatePresence>
               {o.appliedPromo && (
@@ -278,7 +280,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                 </span>
               </div>
               <div className="space-y-2">
-                <input
+                <Input
                   type="text"
                   value={o.guestName}
                   onChange={(e) => o.setGuestName(e.target.value)}
@@ -286,7 +288,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
                   maxLength={80}
                   className="w-full rounded-xl bg-foreground/5 px-3 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/40"
                 />
-                <input
+                <Input
                   type="tel"
                   inputMode="tel"
                   value={o.guestPhone}
@@ -328,7 +330,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
           style={{ paddingBottom: "calc(env(safe-area-inset-bottom, 0px) + 0.75rem)" }}
         >
           <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
-            <button
+            <Button
               type="button"
               onClick={onSubmit}
               disabled={o.submitting || blockedMessage !== null}
@@ -355,9 +357,9 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
               <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
                 {toLatin(computeChargeableAmount(o.effectiveGrand))} ج
               </span>
-            </button>
+            </Button>
 
-            <button
+            <Button
               type="button"
               aria-label="العودة للرئيسية"
               onClick={() => {
@@ -372,7 +374,7 @@ export const CheckoutSheet = ({ open, onOpenChange, o, hasPricingErrors, isLocke
             >
               <Home className="h-5 w-5" strokeWidth={2.4} />
               <span className="text-[9.5px] font-extrabold leading-none">الرئيسية</span>
-            </button>
+            </Button>
           </div>
         </div>
       </SheetContent>

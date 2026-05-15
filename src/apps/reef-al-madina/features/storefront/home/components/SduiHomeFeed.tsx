@@ -46,6 +46,7 @@ import { useSectionManagerStore } from "@/components/admin/section-manager/useSe
 import { EditableBlockWrapper } from "./EditableBlockWrapper";
 import { LiveBlockInspector } from "./LiveBlockInspector";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const KIND_ICON: Record<LayoutBlockKind, typeof Sparkles> = {
   hero_banner: ImageIcon,
@@ -157,14 +158,14 @@ function HomeBlock({
       </p>
 
       {editMode && supportsItemAdd && onAddItem ? (
-        <button
+        <Button
           type="button"
           onClick={() => onAddItem(block)}
           className="mt-3 inline-flex items-center gap-1.5 rounded-lg border border-dashed border-primary/50 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary hover:bg-primary/10"
         >
           <Plus className="h-3.5 w-3.5" />
           {block.kind === "grid" ? "إضافة فئة" : "إضافة منتج"}
-        </button>
+        </Button>
       ) : null}
     </section>
   );
@@ -220,7 +221,7 @@ function HomeFeedEditable({
 function InsertButton({ onClick }: { onClick: () => void }) {
   return (
     <div className="flex items-center justify-center">
-      <button
+      <Button
         type="button"
         onClick={onClick}
         className="group flex h-7 items-center gap-1.5 rounded-full border border-dashed border-primary/40 bg-primary/[0.03] px-3 text-[11px] font-medium text-primary/80 opacity-60 transition hover:opacity-100"
@@ -228,7 +229,7 @@ function InsertButton({ onClick }: { onClick: () => void }) {
       >
         <Plus className="h-3 w-3" />
         إدراج قسم
-      </button>
+      </Button>
     </div>
   );
 }
@@ -254,7 +255,7 @@ function ClayModeSaveBar({
       <span className="px-2 text-[11px] font-medium text-muted-foreground">
         {dirty ? "تغييرات غير محفوظة" : "محفوظ"}
       </span>
-      <button
+      <Button
         type="button"
         onClick={onSaveDraft}
         disabled={!dirty || saving !== null}
@@ -262,8 +263,8 @@ function ClayModeSaveBar({
       >
         <Save className="h-3.5 w-3.5" />
         {saving === "draft" ? "..." : "حفظ مسودة"}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         onClick={onPublish}
         disabled={saving !== null}
@@ -271,15 +272,15 @@ function ClayModeSaveBar({
       >
         <Send className="h-3.5 w-3.5" />
         {saving === "publish" ? "..." : "نشر"}
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         onClick={onExit}
         className="ml-1 flex h-7 w-7 items-center justify-center rounded-full text-muted-foreground hover:bg-muted"
         aria-label="إغلاق وضع التحرير"
       >
         <X className="h-3.5 w-3.5" />
-      </button>
+      </Button>
     </div>
   );
 }
@@ -289,7 +290,7 @@ function ClayModeSaveBar({
 // ---------------------------------------------------------------------------
 function LiveEditToggle({ active, onClick }: { active: boolean; onClick: () => void }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       className={cn(
@@ -301,7 +302,7 @@ function LiveEditToggle({ active, onClick }: { active: boolean; onClick: () => v
     >
       <Pencil className="h-4 w-4" />
       {active ? "إنهاء التحرير" : "وضع التحرير"}
-    </button>
+    </Button>
   );
 }
 

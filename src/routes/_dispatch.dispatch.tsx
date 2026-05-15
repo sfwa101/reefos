@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { Bike, User, Loader2, X } from "lucide-react";
 import { LogisticsExtras } from "@/core/logistics/gateway/LogisticsGateway";
 import { useVisibilitySocket } from "@/core/events/hooks/useVisibilitySocket";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_dispatch/dispatch")({
   component: DispatchBoard,
@@ -104,20 +106,20 @@ function DispatchCard({
         <p className="text-[11.5px] text-muted-foreground line-clamp-2">{ticket.notes}</p>
       )}
       <div className="grid grid-cols-2 gap-2 mt-auto">
-        <button
+        <Button
           type="button"
           onClick={() => onPick("walkin")}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-primary text-primary-foreground px-2.5 py-2 text-[11.5px] font-extrabold active:scale-[0.98] transition"
         >
           <User className="h-3.5 w-3.5" /> عميل
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => onPick("driver")}
           className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-secondary text-secondary-foreground px-2.5 py-2 text-[11.5px] font-extrabold active:scale-[0.98] transition ring-1 ring-border"
         >
           <Bike className="h-3.5 w-3.5" /> مندوب
-        </button>
+        </Button>
       </div>
     </div>
   );
@@ -178,20 +180,20 @@ function OtpDialog({
               {channel === "walkin" ? "عميل (Walk-in)" : "مندوب توصيل"}
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
             aria-label="إغلاق"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <label className="block text-[11.5px] text-muted-foreground mb-1.5">
           رمز التحقق (OTP)
         </label>
-        <input
+        <Input
           type="tel"
           inputMode="numeric"
           autoFocus
@@ -204,14 +206,14 @@ function OtpDialog({
         />
 
         <div className="grid grid-cols-2 gap-2 mt-4">
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="rounded-lg bg-muted text-muted-foreground px-3 py-2 text-[12px] font-bold"
           >
             إلغاء
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={submit}
             disabled={submitting}
@@ -219,7 +221,7 @@ function OtpDialog({
           >
             {submitting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             تأكيد التسليم
-          </button>
+          </Button>
         </div>
       </div>
     </div>

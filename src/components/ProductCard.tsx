@@ -15,6 +15,7 @@ import SweetsProductSheet from "@/core/runtime-ui/blocks/product/sweets-sheet";
 import ButcherSheet from "@/core/runtime-ui/blocks/product/butcher-sheet";
 import { isButcheryProduct } from "@/core/commerce/variants/weighed-prep-rules";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 interface ProductCardProps {
   product: Product;
@@ -138,22 +139,22 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
               <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
             </span>
             {qty === 0 ? (
-              <button
+              <Button
                 onClick={handleAdd}
                 aria-label="أضف إلى السلة"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
               >
                 <Plus className="h-4 w-4" strokeWidth={3} />
-              </button>
+              </Button>
             ) : (
               <div className="flex h-9 items-center gap-1 rounded-full bg-primary text-primary-foreground shadow-pill">
-                <button onClick={handleDec} aria-label="إنقاص" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
+                <Button onClick={handleDec} aria-label="إنقاص" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
                   <Minus className="h-3.5 w-3.5" strokeWidth={3} />
-                </button>
+                </Button>
                 <span className="min-w-[1ch] text-center text-sm font-extrabold tabular-nums">{toLatin(qty)}</span>
-                <button onClick={handleInc} aria-label="زيادة" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
+                <Button onClick={handleInc} aria-label="زيادة" className="flex h-9 w-8 items-center justify-center rounded-full active:scale-90">
                   <Plus className="h-3.5 w-3.5" strokeWidth={3} />
-                </button>
+                </Button>
               </div>
             )}
           </div>
@@ -175,7 +176,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
         </div>
       )}
       {opensSheet ? (
-        <button
+        <Button
           type="button"
           onClick={(e) => {
             e.preventDefault();
@@ -242,7 +243,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             <span>وفّر {toLatin(volumeBadge.save)}</span>
           </span>
         )}
-        </button>
+        </Button>
       ) : (
         <Link
           to="/product/$productId"
@@ -282,7 +283,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             وفّر {toLatin(Math.round(product.oldPrice - product.price))} ج.م
           </span>
         )}
-          <button
+          <Button
             onClick={handleFav}
             aria-label="مفضلة"
             className={`absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full transition ${
@@ -290,7 +291,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             }`}
           >
             <Heart className={`h-3.5 w-3.5 ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
-          </button>
+          </Button>
           {volumeBadge && (
             <span
               className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full px-2 py-1 text-[9.5px] font-extrabold text-primary-foreground shadow-pill tabular-nums ring-1 ring-white/30"
@@ -310,7 +311,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
 
       <div className="flex flex-1 flex-col gap-1 p-3">
         {opensSheet ? (
-          <button
+          <Button
             type="button"
             onClick={(e) => {
               e.preventDefault();
@@ -322,7 +323,7 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
               {product.name}
             </h3>
-          </button>
+          </Button>
         ) : (
           <Link to="/product/$productId" params={{ productId: product.id }} className="block">
             <h3 className="line-clamp-2 text-[13px] font-bold leading-tight text-foreground">
@@ -364,32 +365,32 @@ const ProductCardImpl = ({ product, variant = "grid", volumeBadge, onOpen }: Pro
             )}
 
             {qty === 0 ? (
-              <button
+              <Button
                 onClick={handleAdd}
                 aria-label="أضف إلى السلة"
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill transition active:scale-90"
               >
                 <Plus className="h-4 w-4" strokeWidth={3} />
-              </button>
+              </Button>
             ) : (
               <div className="flex h-9 items-center gap-1 rounded-full bg-primary text-primary-foreground shadow-pill">
-                <button
+                <Button
                   onClick={handleDec}
                   aria-label="إنقاص"
                   className="flex h-9 w-8 items-center justify-center rounded-full transition active:scale-90"
                 >
                   <Minus className="h-3.5 w-3.5" strokeWidth={3} />
-                </button>
+                </Button>
                 <span className="min-w-[1ch] text-center text-sm font-extrabold tabular-nums">
                   {toLatin(qty)}
                 </span>
-                <button
+                <Button
                   onClick={handleInc}
                   aria-label="زيادة"
                   className="flex h-9 w-8 items-center justify-center rounded-full transition active:scale-90"
                 >
                   <Plus className="h-3.5 w-3.5" strokeWidth={3} />
-                </button>
+                </Button>
               </div>
             )}
           </div>

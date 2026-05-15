@@ -7,6 +7,8 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/core/commerce/knowledge/sovereignCatalog";
 import { getNestedStockBreakdownFn } from "@/core/ops/ops.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Row = {
   id: string;        // sku_id (Sovereign)
@@ -115,7 +117,7 @@ export default function Inventory() {
         <div className="flex gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-            <input
+            <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث..."
@@ -150,19 +152,19 @@ export default function Inventory() {
                           <Boxes className="h-3 w-3" /> {breakdowns[r.id]}
                         </p>
                       ) : (
-                        <button
+                        <Button
                           type="button"
                           onClick={() => loadBreakdown(r.id)}
                           className="text-[10px] text-primary/80 hover:text-primary mt-0.5 flex items-center gap-1"
                         >
                           <Boxes className="h-3 w-3" />
                           {loadingBreakdown[r.id] ? "..." : "عرض الوحدات المتداخلة"}
-                        </button>
+                        </Button>
                       )}
                     </div>
                     <div className="w-24">
                       <label className="block text-[10px] text-foreground-tertiary mb-0.5">السعر</label>
-                      <input
+                      <Input
                         type="number"
                         step="0.01"
                         value={priceVal}
@@ -172,7 +174,7 @@ export default function Inventory() {
                     </div>
                     <div className="w-20">
                       <label className="block text-[10px] text-foreground-tertiary mb-0.5">المخزون</label>
-                      <input
+                      <Input
                         type="number"
                         value={stockVal}
                         onChange={(e) => setEdit(r.id, { stock: e.target.value })}
@@ -199,14 +201,14 @@ export default function Inventory() {
 
       {dirtyCount > 0 && (
         <div className="fixed bottom-tab lg:bottom-4 left-4 right-4 lg:right-auto lg:w-96 z-30">
-          <button
+          <Button
             onClick={saveAll}
             disabled={saving}
             className="w-full h-13 rounded-2xl bg-primary text-primary-foreground font-semibold text-[14px] shadow-2xl press flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
             حفظ {dirtyCount} تغيير
-          </button>
+          </Button>
         </div>
       )}
 

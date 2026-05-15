@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, memo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "@/components/ui/button";
 import {
   ArrowRight, ChevronLeft, ChevronRight, Heart, Share2, X, ZoomIn,
 } from "lucide-react";
@@ -69,7 +70,7 @@ const ProductGallery = memo(function ProductGallery({
             style={isVillage ? { height: "55vh" } : undefined}
           >
             {images.map((src, i) => (
-              <button
+              <Button
                 key={i}
                 type="button"
                 onClick={() => setZoomOpen(true)}
@@ -81,7 +82,7 @@ const ProductGallery = memo(function ProductGallery({
                   alt={`${productName} - ${i + 1}`}
                   className="h-full w-full object-cover transition-transform duration-700 ease-apple group-hover:scale-105"
                 />
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -96,59 +97,59 @@ const ProductGallery = memo(function ProductGallery({
             <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-3"
               style={{ paddingTop: "max(0.75rem, env(safe-area-inset-top))" }}
             >
-              <button
+              <Button
                 onClick={onBack}
                 aria-label="رجوع"
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft ring-1 ring-white/30 transition active:scale-90"
               >
                 <ArrowRight className="h-4 w-4" strokeWidth={2.6} />
-              </button>
+              </Button>
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   onClick={onShare}
                   aria-label="مشاركة"
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft ring-1 ring-white/30 transition active:scale-90"
                 >
                   <Share2 className="h-4 w-4" strokeWidth={2.4} />
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => toggleFav(productId)}
                   aria-label="مفضلة"
                   className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-white shadow-soft ring-1 ring-white/30 transition active:scale-90"
                 >
                   <Heart className={`h-4 w-4 transition ${fav ? "fill-white" : ""}`} strokeWidth={2.4} />
-                </button>
+                </Button>
               </div>
             </div>
           )}
 
           {images.length > 1 && !isVillage && (
             <>
-              <button
+              <Button
                 onClick={goPrev}
                 className="absolute right-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground shadow-soft ring-1 ring-border/40 transition active:scale-90"
                 aria-label="السابق"
               >
                 <ChevronRight className="h-4 w-4" strokeWidth={2.4} />
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={goNext}
                 className="absolute left-3 top-1/2 -translate-y-1/2 flex h-9 w-9 items-center justify-center rounded-full bg-background/80 text-foreground shadow-soft ring-1 ring-border/40 transition active:scale-90"
                 aria-label="التالي"
               >
                 <ChevronLeft className="h-4 w-4" strokeWidth={2.4} />
-              </button>
+              </Button>
             </>
           )}
 
           {!isVillage && (
-            <button
+            <Button
               onClick={() => setZoomOpen(true)}
               className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[10px] font-extrabold text-foreground shadow-soft ring-1 ring-border/40"
             >
               <ZoomIn className="h-3 w-3" strokeWidth={2.6} />
               تكبير
-            </button>
+            </Button>
           )}
 
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
@@ -186,13 +187,13 @@ const ProductGallery = memo(function ProductGallery({
               className="max-h-[88vh] max-w-[92vw] cursor-zoom-out object-contain"
               onClick={(e) => e.stopPropagation()}
             />
-            <button
+            <Button
               onClick={() => setZoomOpen(false)}
               className="absolute right-4 top-4 flex h-11 w-11 items-center justify-center rounded-full bg-white/15 text-white ring-1 ring-white/30 transition active:scale-90"
               aria-label="إغلاق"
             >
               <X className="h-5 w-5" strokeWidth={2.4} />
-            </button>
+            </Button>
           </motion.div>
         )}
       </AnimatePresence>

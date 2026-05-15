@@ -4,6 +4,8 @@ import { fmtMoney } from "@/lib/format";
 import { Search, Plus, Minus, Trash2, ScanLine, Package2 } from "lucide-react";
 import type { PosCartLine, PosProduct } from "../types/pos.types";
 import { posLineTotal } from "../lib/posTotals";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   query: string;
@@ -25,7 +27,7 @@ export function PosBarcodeCart({ query, setQuery, filtered, cart, onAdd, onInc, 
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-        <input
+        <Input
           ref={inputRef}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
@@ -41,7 +43,7 @@ export function PosBarcodeCart({ query, setQuery, filtered, cart, onAdd, onInc, 
           {filtered.length === 0 ? (
             <IOSCard className="text-center text-foreground-tertiary text-[12px] py-4">لا نتائج.</IOSCard>
           ) : filtered.map(p => (
-            <button
+            <Button
               key={p.id}
               onClick={() => { onAdd(p); setQuery(""); inputRef.current?.focus(); }}
               disabled={disabled || p.stock === 0}
@@ -55,7 +57,7 @@ export function PosBarcodeCart({ query, setQuery, filtered, cart, onAdd, onInc, 
                 <p className="text-[10px] text-foreground-tertiary">مخزون: {p.stock}</p>
               </div>
               <span className="text-[13px] font-semibold text-primary num">{fmtMoney(p.price)}</span>
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -83,10 +85,10 @@ export function PosBarcodeCart({ query, setQuery, filtered, cart, onAdd, onInc, 
                     <p className="text-[11px] text-foreground-tertiary num">{fmtMoney(l.price)} × {l.qty} = <span className="text-primary font-semibold">{fmtMoney(posLineTotal(l))}</span></p>
                   </div>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => onDec(l.product_id)} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" aria-label="إنقاص"><Minus className="h-3.5 w-3.5" /></button>
+                    <Button onClick={() => onDec(l.product_id)} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" aria-label="إنقاص"><Minus className="h-3.5 w-3.5" /></Button>
                     <span className="min-w-[2ch] text-center font-semibold text-[13px] num">{l.qty}</span>
-                    <button onClick={() => onInc(l.product_id)} className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center press" aria-label="زيادة"><Plus className="h-3.5 w-3.5" /></button>
-                    <button onClick={() => onRemove(l.product_id)} className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press" aria-label="حذف"><Trash2 className="h-3.5 w-3.5" /></button>
+                    <Button onClick={() => onInc(l.product_id)} className="h-8 w-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center press" aria-label="زيادة"><Plus className="h-3.5 w-3.5" /></Button>
+                    <Button onClick={() => onRemove(l.product_id)} className="h-8 w-8 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press" aria-label="حذف"><Trash2 className="h-3.5 w-3.5" /></Button>
                   </div>
                 </div>
               </IOSCard>

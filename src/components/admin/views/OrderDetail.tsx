@@ -18,6 +18,7 @@ import { IOSCard, IOSList, IOSRow, IOSSection } from "@/components/ios/IOSCard";
 import { fmtMoney, fmtDate } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   getMasterOrderDetailFn,
   setOrderStatusFn,
@@ -218,22 +219,22 @@ export default function OrderDetail() {
 
           <div className="space-y-2">
             {canAssignDriver && (
-              <button disabled={updating} onClick={openAssignDriver}
+              <Button disabled={updating} onClick={openAssignDriver}
                 className="w-full h-11 rounded-full bg-gradient-to-r from-primary to-primary-glow text-primary-foreground font-semibold text-[14px] press disabled:opacity-50 flex items-center justify-center gap-2">
                 <Truck className="h-4 w-4" /> تأكيد وتعيين مندوب
-              </button>
+              </Button>
             )}
             {next && (
-              <button disabled={updating} onClick={() => setStatus(next.value)}
+              <Button disabled={updating} onClick={() => setStatus(next.value)}
                 className="w-full h-11 rounded-full bg-surface-muted text-foreground font-semibold text-[14px] press disabled:opacity-50 flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4" /> تحويل إلى: {next.label}
-              </button>
+              </Button>
             )}
             {!["cancelled", "delivered"].includes(order.status) && (
-              <button disabled={updating} onClick={() => setStatus("cancelled")}
+              <Button disabled={updating} onClick={() => setStatus("cancelled")}
                 className="w-full h-11 rounded-full bg-destructive/10 text-destructive font-semibold text-[14px] press">
                 إلغاء الطلب
-              </button>
+              </Button>
             )}
           </div>
         </IOSCard>
@@ -300,7 +301,7 @@ export default function OrderDetail() {
           <div className="w-full sm:max-w-md rounded-t-[24px] sm:rounded-[24px] bg-card p-5 shadow-float ring-1 ring-border/40" onClick={(e) => e.stopPropagation()} dir="rtl">
             <div className="flex items-center justify-between mb-4">
               <h2 className="font-display text-lg font-extrabold">اختر مندوب التوصيل</h2>
-              <button onClick={() => setShowAssign(false)} className="h-9 w-9 rounded-[10px] bg-foreground/5 flex items-center justify-center"><X className="h-4 w-4" /></button>
+              <Button onClick={() => setShowAssign(false)} className="h-9 w-9 rounded-[10px] bg-foreground/5 flex items-center justify-center"><X className="h-4 w-4" /></Button>
             </div>
             <p className="text-[12px] text-foreground-tertiary mb-3">سيتم تعيين المندوب لكل عُقد التنفيذ التابعة لهذا الطلب وتحويل الحالة إلى "قيد التوصيل".</p>
             <div className="space-y-2 max-h-[60vh] overflow-y-auto">
@@ -308,7 +309,7 @@ export default function OrderDetail() {
                 <p className="text-center text-[13px] text-foreground-tertiary py-8">لا يوجد مناديب متاحون حالياً</p>
               )}
               {drivers.map((d) => (
-                <button
+                <Button
                   key={d.id}
                   disabled={updating}
                   onClick={() => confirmAndAssign(d.id, d.full_name ?? "مندوب")}
@@ -324,7 +325,7 @@ export default function OrderDetail() {
                     </div>
                   </div>
                   <ChevronRight className="h-4 w-4 text-foreground-tertiary rotate-180" />
-                </button>
+                </Button>
               ))}
             </div>
           </div>
@@ -338,9 +339,9 @@ function Topbar({ title, onBack }: { title: string; onBack: () => void }) {
   return (
     <header className="glass-strong sticky top-0 z-30 border-b border-border/40" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       <div className="px-2 h-12 flex items-center gap-1">
-        <button onClick={onBack} className="h-9 w-9 rounded-full hover:bg-surface-muted press flex items-center justify-center">
+        <Button onClick={onBack} className="h-9 w-9 rounded-full hover:bg-surface-muted press flex items-center justify-center">
           <ChevronRight className="h-5 w-5" />
-        </button>
+        </Button>
         <h1 className="font-display text-[17px] flex-1 text-center pr-9 truncate">{title}</h1>
       </div>
     </header>

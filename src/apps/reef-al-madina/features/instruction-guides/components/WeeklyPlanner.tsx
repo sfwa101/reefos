@@ -5,6 +5,7 @@ import { Calendar, Check, Minus, Plus, Sparkles } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { DAYS, RECIPES, SECTIONS, type RecipeSection } from "@/apps/reef-al-madina/features/instruction-guides/data";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 export type DayPlan = Partial<Record<RecipeSection, string>>;
 
@@ -30,9 +31,9 @@ function WeeklyPlannerImpl({
         <h3 className="font-display text-xl font-extrabold flex items-center gap-2">
           <Calendar className="h-5 w-5 text-primary" /> منيو الأسبوع
         </h3>
-        <button onClick={suggestForDay} className="flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-[11px] font-bold text-primary">
+        <Button onClick={suggestForDay} className="flex items-center gap-1 rounded-full bg-primary-soft px-3 py-1 text-[11px] font-bold text-primary">
           <Sparkles className="h-3 w-3" /> اقترح يومي
-        </button>
+        </Button>
       </div>
 
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
@@ -40,7 +41,7 @@ function WeeklyPlannerImpl({
           const filledCount = Object.values(plan[d] ?? {}).filter(Boolean).length;
           const isActive = d === activeDay;
           return (
-            <button
+            <Button
               key={d}
               onClick={() => setActiveDay(d)}
               className={`shrink-0 rounded-2xl px-4 py-2 text-center transition ease-apple ${
@@ -49,7 +50,7 @@ function WeeklyPlannerImpl({
             >
               <p className="text-[10px] font-medium opacity-80">{d}</p>
               <p className="text-[10px] font-extrabold tabular-nums">{toLatin(filledCount)}/3</p>
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -66,7 +67,7 @@ function WeeklyPlannerImpl({
                   const isSel = selected === r.id;
                   const price = Math.round(r.basePrice * (planServings / r.baseServings));
                   return (
-                    <button
+                    <Button
                       key={r.id}
                       onClick={() => planSet(activeDay, s, r.id)}
                       className={`relative w-32 shrink-0 overflow-hidden rounded-2xl text-right transition ${
@@ -89,7 +90,7 @@ function WeeklyPlannerImpl({
                           <Check className="h-3.5 w-3.5" strokeWidth={3} />
                         </span>
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -104,13 +105,13 @@ function WeeklyPlannerImpl({
           <p className="text-[11px] text-muted-foreground">يضرب سعر كل وجبة بالكمية</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setPlanServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
+          <Button onClick={() => setPlanServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
             <Minus className="h-3.5 w-3.5" />
-          </button>
+          </Button>
           <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(planServings)}</span>
-          <button onClick={() => setPlanServings((s) => Math.min(8, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+          <Button onClick={() => setPlanServings((s) => Math.min(8, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <Plus className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
       </div>
     </section>

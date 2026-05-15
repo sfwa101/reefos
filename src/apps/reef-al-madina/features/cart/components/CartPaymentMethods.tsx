@@ -3,6 +3,7 @@ import { Cake, HandHeart, PiggyBank, Wallet, Lock } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import type { useCartOrchestrator } from "../hooks/useCartOrchestrator";
 import { PAYMENT_METHODS } from "../data/paymentMethods";
+import { Button } from "@/components/ui/button";
 
 type O = ReturnType<typeof useCartOrchestrator>;
 
@@ -158,16 +159,16 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                   const Icon = m.icon;
                   const a = o.secondaryPayment === m.id;
                   return (
-                    <button key={m.id} type="button" onClick={() => o.setSecondaryPayment(m.id)} className={`flex flex-col items-center gap-1 rounded-[12px] border-2 p-2 transition ${a ? "border-primary bg-primary-soft" : "border-border bg-background"}`}>
+                    <Button key={m.id} type="button" onClick={() => o.setSecondaryPayment(m.id)} className={`flex flex-col items-center gap-1 rounded-[12px] border-2 p-2 transition ${a ? "border-primary bg-primary-soft" : "border-border bg-background"}`}>
                       <Icon className={`h-4 w-4 ${a ? "text-primary" : "text-muted-foreground"}`} strokeWidth={2.4} />
                       <span className="text-[10px] font-bold leading-tight">{m.label}</span>
-                    </button>
+                    </Button>
                   );
                 })}
             </div>
             <div className="mt-2 flex items-center justify-between text-[10px] font-bold text-muted-foreground">
               <span>محفظة: <span className="text-primary">{fmtMoney(o.walletApplied)}</span></span>
-              <button type="button" onClick={() => o.setShowRecharge(true)} className="rounded-[8px] bg-accent/20 px-2 py-1 text-[10px] font-extrabold text-accent-foreground">شحن المحفظة</button>
+              <Button type="button" onClick={() => o.setShowRecharge(true)} className="rounded-[8px] bg-accent/20 px-2 py-1 text-[10px] font-extrabold text-accent-foreground">شحن المحفظة</Button>
             </div>
           </motion.div>
         )}
@@ -208,7 +209,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
             </div>
 
             <div className="grid grid-cols-3 gap-1.5">
-              <button
+              <Button
                 type="button"
                 onClick={() => {
                   o.setSaveChange(false);
@@ -221,8 +222,8 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                 }`}
               >
                 لا شيء
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   o.setSaveChange(true);
@@ -235,8 +236,8 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                 }`}
               >
                 <PiggyBank className="h-3 w-3" /> حصّالة
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => {
                   o.setSaveChange(false);
@@ -249,7 +250,7 @@ export const CartPaymentMethods = ({ o }: { o: O }) => {
                 }`}
               >
                 <HandHeart className="h-3 w-3" /> صدقة
-              </button>
+              </Button>
             </div>
           </motion.div>
         )}

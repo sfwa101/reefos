@@ -2,9 +2,10 @@ import { useCartActions, useCartLineQty } from "@/core/orders/runtime/react/Cart
 import { CheckCircle2, Minus, Plus, Sparkle, Star } from "lucide-react";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import type { RxProduct } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const RecCard = ({ p, onOpen }: { p: RxProduct; onOpen: () => void }) => (
-  <button
+  <Button
     onClick={onOpen}
     className="group relative flex w-[180px] shrink-0 snap-start flex-col overflow-hidden rounded-[20px] bg-card text-right ring-1 ring-border/50 shadow-soft transition active:scale-[0.98]"
   >
@@ -33,7 +34,7 @@ export const RecCard = ({ p, onOpen }: { p: RxProduct; onOpen: () => void }) => 
         </span>
       </div>
     </div>
-  </button>
+  </Button>
 );
 
 export const DetailedProductCard = ({ p, onOpen }: { p: RxProduct; onOpen: () => void }) => {
@@ -43,7 +44,7 @@ export const DetailedProductCard = ({ p, onOpen }: { p: RxProduct; onOpen: () =>
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-[20px] bg-card ring-1 ring-border/50 shadow-soft">
-      <button onClick={onOpen} className="relative aspect-square w-full overflow-hidden bg-muted">
+      <Button onClick={onOpen} className="relative aspect-square w-full overflow-hidden bg-muted">
         <OptimizedImage
           src={p.image}
           alt={p.name}
@@ -60,14 +61,14 @@ export const DetailedProductCard = ({ p, onOpen }: { p: RxProduct; onOpen: () =>
         <span className="absolute left-2 top-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-background/95 ring-1 ring-border/40">
           <Sparkle className="h-3 w-3 text-primary" />
         </span>
-      </button>
+      </Button>
       <div className="flex flex-1 flex-col p-3">
         <p className="text-[10px] font-bold text-muted-foreground">{p.brand}</p>
-        <button onClick={onOpen} className="mt-0.5 text-right">
+        <Button onClick={onOpen} className="mt-0.5 text-right">
           <h4 className="line-clamp-2 text-[13px] font-extrabold leading-snug text-foreground">
             {p.name}
           </h4>
-        </button>
+        </Button>
         <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">{p.unit}</p>
 
         <div className="mt-1.5 flex flex-wrap gap-1">
@@ -96,31 +97,31 @@ export const DetailedProductCard = ({ p, onOpen }: { p: RxProduct; onOpen: () =>
             <span className="text-[14px] font-extrabold text-primary">{p.price} ج.م</span>
           </div>
           {qty === 0 ? (
-            <button
+            <Button
               onClick={() =>
                 add({ id: p.id, name: p.name, price: p.price, image: p.image, unit: p.unit, category: "صيدلية", source: "pharmacy" })
               }
               className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill active:scale-90"
             >
               <Plus className="h-4 w-4" strokeWidth={2.6} />
-            </button>
+            </Button>
           ) : (
             <div className="flex items-center gap-1.5 rounded-full bg-primary/10 px-1.5 py-1">
-              <button
+              <Button
                 onClick={() => setQty(p.id, qty - 1)}
                 className="flex h-6 w-6 items-center justify-center rounded-full bg-card text-foreground active:scale-90"
               >
                 <Minus className="h-3 w-3" />
-              </button>
+              </Button>
               <span className="min-w-[18px] text-center text-[11px] font-extrabold tabular-nums text-primary">
                 {qty}
               </span>
-              <button
+              <Button
                 onClick={() => setQty(p.id, qty + 1)}
                 className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90"
               >
                 <Plus className="h-3 w-3" />
-              </button>
+              </Button>
             </div>
           )}
         </div>

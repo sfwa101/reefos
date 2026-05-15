@@ -20,6 +20,7 @@ import { CutBuilder } from "@/apps/reef-al-madina/features/weighed-prep/componen
 import { PrepOptions } from "@/apps/reef-al-madina/features/weighed-prep/components/PrepOptions";
 import { useLivePrice } from "@/core/commerce/pricing/hooks/useLivePrice";
 import type { WeighedSelection } from "@/core/commerce/pricing/strategies/WeighedPricingStrategy";
+import { Button } from "@/components/ui/button";
 
 type Props = { product: Product; open: boolean; onClose: () => void };
 
@@ -185,13 +186,13 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
             <div className="relative h-44 w-full overflow-hidden">
               <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
-              <button
+              <Button
                 onClick={onClose}
                 aria-label="إغلاق"
                 className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground shadow-pill"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
               <motion.span
                 key={sla}
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -257,7 +258,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
 
               {/* Recipe Upsell */}
               {rules.recipe && (
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     onClose();
@@ -288,7 +289,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                       <ChevronLeft className="h-4 w-4" />
                     </span>
                   </div>
-                </button>
+                </Button>
               )}
 
               {/* Cross-sell */}
@@ -316,7 +317,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                             <span className="text-[10px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
                               +{toLatin(c.price)} ج.م
                             </span>
-                            <button
+                            <Button
                               type="button"
                               onClick={() => toggle(c.id, crossIds, setCrossIds)}
                               aria-label={active ? "إزالة" : "إضافة"}
@@ -325,7 +326,7 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
                               }`}
                             >
                               {active ? <Check className="h-3.5 w-3.5" strokeWidth={3.5} /> : <Plus className="h-3.5 w-3.5" strokeWidth={3.5} />}
-                            </button>
+                            </Button>
                           </div>
                         );
                       })}
@@ -358,19 +359,19 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
               {/* Qty + total */}
               <section className="flex items-center justify-between gap-3 rounded-2xl bg-foreground/5 p-3">
                 <div className="flex items-center gap-2">
-                  <button
+                  <Button
                     onClick={() => setQty(Math.max(1, qty - 1))}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-background text-foreground shadow-pill"
                     aria-label="إنقاص"
-                  >−</button>
+                  >−</Button>
                   <span className="min-w-[1.5ch] text-center font-display text-base font-extrabold tabular-nums">
                     {toLatin(qty)}
                   </span>
-                  <button
+                  <Button
                     onClick={() => setQty(qty + 1)}
                     className="flex h-8 w-8 items-center justify-center rounded-full bg-rose-600 text-white shadow-pill"
                     aria-label="زيادة"
-                  >+</button>
+                  >+</Button>
                 </div>
                 <div className="text-left">
                   <p className="text-[10px] font-bold text-muted-foreground">الإجمالي</p>
@@ -395,13 +396,13 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
 
             {/* Sticky footer */}
             <div className="sticky bottom-0 border-t border-border/60 bg-card/95 p-4">
-              <button
+              <Button
                 onClick={confirm}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-rose-600 py-3 font-display text-sm font-extrabold text-white shadow-pill transition active:scale-[0.98]"
               >
                 <ShoppingBag className="h-4 w-4" />
                 أضف إلى السلة · <AnimatedNumber value={grand} /> ج.م
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>

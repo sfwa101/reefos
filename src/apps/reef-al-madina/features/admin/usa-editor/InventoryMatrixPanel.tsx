@@ -7,6 +7,8 @@ import { Loader2, Plus, Save, Boxes, Trash2 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useInventoryMatrix, useUpdateInventory, type InventoryRow } from "@/core/hakim-ai/hooks/useInventoryMatrix";
 import { listAssetSkusFn } from "@/core/catalog/admin-catalog.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface SkuRow { id: string; sku_code: string; }
 
@@ -94,7 +96,7 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
       {skus.length > 1 && (
         <div className="flex flex-wrap gap-2">
           {skus.map((s) => (
-            <button
+            <Button
               key={s.id}
               type="button"
               onClick={() => setActiveSku(s.id)}
@@ -105,7 +107,7 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
               }`}
             >
               {s.sku_code}
-            </button>
+            </Button>
           ))}
         </div>
       )}
@@ -115,13 +117,13 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
           <span className="text-[11px] font-bold text-foreground-tertiary">
             مصفوفة المواقع / البائعين
           </span>
-          <button
+          <Button
             type="button"
             onClick={addRow}
             className="text-[11px] font-bold inline-flex items-center gap-1 text-primary hover:underline"
           >
             <Plus className="h-3.5 w-3.5" /> إضافة موقع
-          </button>
+          </Button>
         </div>
 
         {loadingInv ? (
@@ -136,13 +138,13 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
           <div className="space-y-2">
             {drafts.map((r) => (
               <div key={r.key} className="flex items-center gap-2">
-                <input
+                <Input
                   value={r.location_id}
                   onChange={(e) => patch(r.key, { location_id: e.target.value })}
                   placeholder="موقع المخزن / البائع"
                   className="flex-1 h-10 rounded-xl border border-border bg-background px-3 text-[12.5px] outline-none focus:border-primary"
                 />
-                <input
+                <Input
                   type="number"
                   inputMode="numeric"
                   min="0"
@@ -152,21 +154,21 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
                   dir="ltr"
                   className="w-24 h-10 rounded-xl border border-border bg-background px-3 text-[13px] num font-semibold outline-none focus:border-primary text-left"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={() => removeRow(r.key)}
                   className="h-10 w-10 inline-flex items-center justify-center rounded-xl text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                   aria-label="حذف"
                 >
                   <Trash2 className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={saveAll}
         disabled={update.isPending || drafts.length === 0}
@@ -177,7 +179,7 @@ export default function InventoryMatrixPanel({ assetId }: { assetId: string }) {
         ) : (
           <><Save className="h-4 w-4" /> حفظ مصفوفة المخزون</>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

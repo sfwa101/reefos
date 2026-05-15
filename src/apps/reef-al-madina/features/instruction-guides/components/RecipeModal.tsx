@@ -11,6 +11,7 @@ import { type Product } from "@/core/catalog/legacyProduct.types";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { RECIPE_CONTENT, type Recipe, type ToolItem } from "@/apps/reef-al-madina/features/instruction-guides/data";
+import { Button } from "@/components/ui/button";
 
 export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClose: () => void }) {
   const { add } = useCart();
@@ -72,9 +73,9 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between bg-background/90 p-3">
-          <button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5">
+          <Button onClick={onClose} className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5">
             <X className="h-4 w-4" />
-          </button>
+          </Button>
           <span className="text-xs font-bold text-muted-foreground">تفاصيل الوصفة</span>
           <span className="w-9" />
         </div>
@@ -95,7 +96,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
               <>
                 <img src={recipe.image} alt={recipe.name} className="aspect-[4/3] w-full object-cover" />
                 {content?.videoUrl && (
-                  <button
+                  <Button
                     onClick={() => setShowVideo(true)}
                     className="absolute inset-0 flex items-center justify-center bg-black/20 transition hover:bg-black/30"
                   >
@@ -103,7 +104,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                       <PlayCircle className="h-5 w-5 text-foreground" />
                       <span className="text-xs font-extrabold text-foreground">شاهد طريقة التحضير</span>
                     </div>
-                  </button>
+                  </Button>
                 )}
               </>
             )}
@@ -129,7 +130,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                 { k: "steps", l: "خطوات التحضير" },
                 { k: "tools", l: "الأواني" },
               ] as const).map((t) => (
-                <button
+                <Button
                   key={t.k}
                   onClick={() => setTab(t.k)}
                   className={`flex-1 rounded-full py-1.5 text-[11px] font-extrabold transition ${
@@ -137,7 +138,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                   }`}
                 >
                   {t.l}
-                </button>
+                </Button>
               ))}
             </div>
 
@@ -168,13 +169,13 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                     <span className="text-sm font-bold">عدد الأفراد</span>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
+                    <Button onClick={() => setServings((s) => Math.max(1, s - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
                       <Minus className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                     <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(servings)}</span>
-                    <button onClick={() => setServings((s) => Math.min(12, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Button onClick={() => setServings((s) => Math.min(12, s + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                       <Plus className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
 
@@ -188,7 +189,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                       const off = excluded.has(ing.id);
                       const locked = !!ing.essential;
                       return (
-                        <button
+                        <Button
                           key={ing.id}
                           onClick={() => toggle(ing)}
                           disabled={locked}
@@ -216,7 +217,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                           <span className="text-xs font-bold text-primary tabular-nums">
                             {off ? "—" : `${toLatin(ing.cost)} ج`}
                           </span>
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -228,13 +229,13 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                     <p className="text-[10px] text-muted-foreground">اطلب الوصفة أكثر من مرة لمزيد من الأفراد</p>
                   </div>
                   <div className="flex items-center gap-3">
-                    <button onClick={() => setOrderQty((q) => Math.max(1, q - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
+                    <Button onClick={() => setOrderQty((q) => Math.max(1, q - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">
                       <Minus className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                     <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{toLatin(orderQty)}</span>
-                    <button onClick={() => setOrderQty((q) => q + 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                    <Button onClick={() => setOrderQty((q) => q + 1)} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
                       <Plus className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </>
@@ -256,12 +257,12 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                   ))}
                 </ol>
                 {content.videoUrl && !showVideo && (
-                  <button
+                  <Button
                     onClick={() => setShowVideo(true)}
                     className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl bg-foreground py-3 text-sm font-extrabold text-background shadow-pill"
                   >
                     <PlayCircle className="h-4 w-4" /> شاهد الفيديو الكامل
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -307,7 +308,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                             )}
                           </div>
                           {effective && displayPrice ? (
-                            <button
+                            <Button
                               onClick={() => addTool(t)}
                               className={`flex shrink-0 items-center gap-1 rounded-full px-3 py-1.5 text-[11px] font-extrabold shadow-pill active:scale-95 ${
                                 inStock ? "bg-primary text-primary-foreground" : "bg-amber-500 text-white"
@@ -317,7 +318,7 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
                               <span className="tabular-nums">
                                 {inStock ? "" : "البديل "}{toLatin(displayPrice)} ج
                               </span>
-                            </button>
+                            </Button>
                           ) : (
                             <span className="shrink-0 rounded-full bg-foreground/5 px-2.5 py-1 text-[10px] font-bold text-muted-foreground">
                               غير متوفر
@@ -339,13 +340,13 @@ export default function RecipeModal({ recipe, onClose }: { recipe: Recipe; onClo
           className="border-t border-border bg-background p-3"
           style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
         >
-          <button
+          <Button
             onClick={handleAdd}
             className="flex w-full items-center justify-between rounded-2xl bg-primary px-5 py-4 font-bold text-primary-foreground shadow-pill transition active:scale-[0.98]"
           >
             <span className="text-sm">أضف الوصفة للسلة</span>
             <span className="font-display text-base font-extrabold tabular-nums">{fmtMoney(totalPrice)}</span>
-          </button>
+          </Button>
         </div>
       </div>
     </div>

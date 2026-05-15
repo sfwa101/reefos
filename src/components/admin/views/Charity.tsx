@@ -11,6 +11,8 @@ import {
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, HeartHandshake } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export default function Charity() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -88,19 +90,19 @@ export default function Charity() {
 
         <div className="flex gap-2">
           {[7, 30, 90].map((d) => (
-            <button key={d} onClick={() => setPeriodDays(d)} className={`px-3 py-1.5 rounded-lg text-[12px] ${periodDays === d ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+            <Button key={d} onClick={() => setPeriodDays(d)} className={`px-3 py-1.5 rounded-lg text-[12px] ${periodDays === d ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
               {d} يوم
-            </button>
+            </Button>
           ))}
         </div>
 
-        <button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
+        <Button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
           <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : "إضافة قاعدة"}
-        </button>
+        </Button>
 
         {showForm && (
           <div className="bg-surface rounded-2xl p-4 border border-border/40 space-y-2">
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="اسم القاعدة (مثال: زكاة شهرية)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="اسم القاعدة (مثال: زكاة شهرية)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
               <select className="bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.base} onChange={(e) => setForm({ ...form, base: e.target.value })}>
                 <option value="net_profit">من صافي الربح</option>
@@ -114,11 +116,11 @@ export default function Charity() {
               </select>
             </div>
             {form.base === "custom_amount" ? (
-              <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المبلغ الثابت" value={form.fixed_amount} onChange={(e) => setForm({ ...form, fixed_amount: e.target.value })} />
+              <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المبلغ الثابت" value={form.fixed_amount} onChange={(e) => setForm({ ...form, fixed_amount: e.target.value })} />
             ) : (
-              <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="النسبة %" value={form.percentage} onChange={(e) => setForm({ ...form, percentage: e.target.value })} />
+              <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="النسبة %" value={form.percentage} onChange={(e) => setForm({ ...form, percentage: e.target.value })} />
             )}
-            <button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</button>
+            <Button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</Button>
           </div>
         )}
 
@@ -135,9 +137,9 @@ export default function Charity() {
                   </p>
                 </div>
                 {due && <p className="font-display text-[13px] text-success">{fmtMoney(due.due_amount)}</p>}
-                <button onClick={() => toggle(r.id, r.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${r.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
+                <Button onClick={() => toggle(r.id, r.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${r.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
                   {r.is_active ? "نشط" : "موقوف"}
-                </button>
+                </Button>
               </div>
             );
           })}
