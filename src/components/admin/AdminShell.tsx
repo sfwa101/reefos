@@ -251,29 +251,27 @@ function AdminBottomNav({ activePath }: { activePath: string }) {
 
 /* ------------------------------------------------------------------ */
 
-/** Floating Hakim launcher — UI placeholder, wired to the engine later. */
+/** Floating Hakim launcher — opens the global Hakim side panel. */
 function HakimFloatingLauncher() {
+  const open = useHakimLayer((s) => s.open);
   return (
-    <Link
-      to="/admin/hakim"
+    <motion.button
+      type="button"
+      onClick={() => open("panel")}
       aria-label="مساعد حكيم"
-      className="group fixed bottom-24 left-4 z-50 lg:bottom-6"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 240, damping: 22, delay: 0.2 }}
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.94 }}
+      className="group fixed bottom-24 left-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary via-primary-glow to-accent text-primary-foreground shadow-elevated ring-2 ring-white/60 lg:bottom-6"
     >
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 240, damping: 22, delay: 0.2 }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
-        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary via-primary-glow to-accent text-primary-foreground shadow-elevated ring-2 ring-white/60"
-      >
-        <Sparkles className="h-6 w-6" strokeWidth={2.4} />
-        <span className="absolute right-0.5 top-0.5 flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
-        </span>
-      </motion.div>
-    </Link>
+      <Sparkles className="h-6 w-6" strokeWidth={2.4} />
+      <span className="absolute right-0.5 top-0.5 flex h-3 w-3">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
+      </span>
+    </motion.button>
   );
 }
 
