@@ -7,6 +7,7 @@
 // token, never from client input.
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // ─── Profile ──────────────────────────────────────────────────────
 const PROFILE_COLUMNS =
@@ -330,7 +331,7 @@ export const chatHakimFn = createServerFn({ method: "POST" })
         }),
       });
       if (!aiRes.ok) {
-        console.error("hakim-chat ai error", aiRes.status);
+        Tracer.error("identity", "hakim_chat_ai_error", { args: ["hakim-chat ai error", aiRes.status] });
         return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
       }
       const json = (await aiRes.json()) as {
@@ -339,7 +340,7 @@ export const chatHakimFn = createServerFn({ method: "POST" })
       const reply = json?.choices?.[0]?.message?.content ?? "…";
       return { reply };
     } catch (e) {
-      console.error("hakim-chat error", e);
+      Tracer.error("identity", "hakim_chat_error", { args: ["hakim-chat error", e] });
       return { reply: "تعذّر الوصول إلى حكيم الآن. حاول لاحقاً." };
     }
   });

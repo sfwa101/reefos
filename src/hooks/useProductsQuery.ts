@@ -27,6 +27,7 @@ import {
   type ProductAddon,
 } from "@/core/catalog/legacyProduct.types";
 import { getWorkspaceIdSync, workspaceQueryKey } from "@/core/identity/workspace";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 /**
  * Workspace-scoped catalog cache key. Sourced from the server-attested
@@ -213,10 +214,7 @@ async function fetchHomeProducts(
   const filtered = source ? mapped.filter((p) => p.source === source) : mapped;
   const sliced = filtered.slice(0, limit);
   if (sliced.length === 0) {
-    console.warn(
-      "[CatalogGateway] Section returned 0 products for slug:",
-      source ?? "(all)",
-    );
+    Tracer.warn("hooks", "cataloggateway_section_returned_0_products_for_slug", { args: ["[CatalogGateway] Section returned 0 products for slug:", source ?? "(all)"] });
   }
   return sliced;
 }

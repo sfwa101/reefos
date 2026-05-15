@@ -1,3 +1,5 @@
+import { Tracer } from "@/core/system/observability/Tracer";
+
 /**
  * Vision Genesis — Server-only core logic (Wave P-4.1).
  *
@@ -497,7 +499,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
         break;
       } catch (e) {
         const msg = e instanceof Error ? e.message : String(e);
-        console.error(`[vision_genesis] provider=${p} failed:`, msg);
+        Tracer.error("vision", "log", { args: [`[vision_genesis] provider=${p} failed:`, msg] });
         attempts.push({ provider: p, ok: false, error: msg });
       }
     }
@@ -622,7 +624,7 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
       aesthetic_palette: aestheticPalette,
     };
   } catch (e) {
-    console.error("vision_genesis CRITICAL CRASH:", e);
+    Tracer.error("vision", "vision_genesis_critical_crash", { args: ["vision_genesis CRITICAL CRASH:", e] });
     const msg = e instanceof Error ? e.message : String(e);
     const stack = e instanceof Error ? e.stack?.slice(0, 1200) : undefined;
     return { ok: false, critical_crash: msg, stack };

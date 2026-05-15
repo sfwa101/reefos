@@ -8,6 +8,7 @@ import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQ
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { callSovereignCheckout } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 import { posCartSubtotal } from "../lib/posTotals";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -91,7 +92,7 @@ export function usePosEngine() {
   const refreshShift = useCallback(async () => {
     if (!user) { setShift(null); return; }
     const { shift: row, error } = await POSGateway.fetchOpenShiftForCashier(user.id);
-    if (error) { console.error(error); return; }
+    if (error) { Tracer.error("pos", "log", { args: [error] }); return; }
     setShift((row ?? null) as PosShift | null);
   }, [user]);
 
@@ -179,7 +180,7 @@ export function usePosEngine() {
           },
           onError: (err) => {
             if (import.meta.env.DEV) {
-              console.warn("[pos-cashier] preview failed:", err.message);
+              Tracer.warn("pos", "pos_cashier_preview_failed", { args: ["[pos-cashier] preview failed:", err.message] });
             }
           },
         },

@@ -16,6 +16,7 @@ import { CartGateway } from "@/core/orders/gateway/CartGateway";
 import { type Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import { fetchAssetsByLegacyIds, assetToProduct } from "@/core/commerce/knowledge/sovereignCatalog";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type RemoteLine = {
   product_id: string;
@@ -114,7 +115,7 @@ export async function pushRemoteCart(
 
   if (cleanLines.length === 0) {
     const { error } = await CartGateway.clearUserCart(userId);
-    if (error) console.warn("[cart] failed to clear remote cart:", error);
+    if (error) Tracer.warn("lib", "cart_failed_to_clear_remote_cart", { args: ["[cart] failed to clear remote cart:", error] });
     return;
   }
 
@@ -140,7 +141,7 @@ export async function pushRemoteCart(
   // Upsert all rows in one round-trip.
   const { error: upErr } = await CartGateway.upsertCartRows(rows);
   if (upErr) {
-    console.warn("[cart] upsert failed:", upErr);
+    Tracer.warn("lib", "cart_upsert_failed", { args: ["[cart] upsert failed:", upErr] });
     return;
   }
 

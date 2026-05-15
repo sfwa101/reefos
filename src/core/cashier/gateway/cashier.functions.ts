@@ -18,6 +18,7 @@ import type {
   ProductFinancialDNA,
 } from "@/core/cashier/domain/types";
 import type { JsonObject } from "@/core/commerce/knowledge/dna.types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // ─────────────────────────── Schemas ───────────────────────────
 
@@ -170,10 +171,10 @@ export const previewCashierFn = createServerFn({ method: "POST" })
           );
 
         if (ledgerError) {
-          console.error("[CASHIER-LEDGER] insert failed:", ledgerError.message);
+          Tracer.error("cashier", "cashier_ledger_insert_failed", { args: ["[CASHIER-LEDGER] insert failed:", ledgerError.message] });
         }
       } catch (err) {
-        console.error("[CASHIER-LEDGER] unexpected error:", err);
+        Tracer.error("cashier", "cashier_ledger_unexpected_error", { args: ["[CASHIER-LEDGER] unexpected error:", err] });
       }
     })();
 

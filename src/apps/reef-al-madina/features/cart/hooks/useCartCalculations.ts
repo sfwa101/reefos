@@ -12,6 +12,7 @@ import {
 import { toLatin } from "@/lib/format";
 import { evaluateCartLineCanonical } from "@/core/orders/runtime/lineTotals";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -256,7 +257,7 @@ export const useCartCalculations = ({
           },
           onError: (err) => {
             if (import.meta.env.DEV) {
-              console.warn("[cashier] preview failed:", err.message);
+              Tracer.warn("cart", "cashier_preview_failed", { args: ["[cashier] preview failed:", err.message] });
             }
           },
         },

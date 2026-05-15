@@ -1,4 +1,5 @@
 import { Component, type ReactNode } from "react";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -20,7 +21,7 @@ export class GlobalErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: unknown) {
     // eslint-disable-next-line no-console
-    console.error("[GlobalErrorBoundary]", error, info);
+    Tracer.error("system", "globalerrorboundary", { args: ["[GlobalErrorBoundary]", error, info] });
   }
 
   private handleReload = () => {

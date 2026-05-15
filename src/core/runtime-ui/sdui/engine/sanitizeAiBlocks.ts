@@ -1,3 +1,5 @@
+import { Tracer } from "@/core/system/observability/Tracer";
+
 /**
  * sanitizeAiBlocks — Phase 40 AI Sandboxing.
  *
@@ -70,10 +72,10 @@ export function sanitizeAiBlocks(raw: unknown): unknown {
     if (!isSafe(block, 0)) {
       if (typeof console !== "undefined") {
         // eslint-disable-next-line no-console
-        console.warn("[SDUI] AI block stripped by sandbox", {
-          id: (block as { id?: unknown }).id,
-          type: (block as { type?: unknown }).type,
-        });
+        Tracer.warn("runtime-ui", "sdui_ai_block_stripped_by_sandbox", { args: ["[SDUI] AI block stripped by sandbox", {
+                    id: (block as { id?: unknown }).id,
+                    type: (block as { type?: unknown }).type,
+                  }] });
       }
       continue;
     }

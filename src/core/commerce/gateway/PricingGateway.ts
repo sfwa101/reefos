@@ -28,6 +28,7 @@ import type {
   PolicyOperator,
   PolicyActionKey,
 } from "@/core/commerce/types/financialContract";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const TABLE = "salsabil_financial_contracts";
 
@@ -193,9 +194,7 @@ export const PricingGateway = {
           // Already a real DB id (re-edit of a previously saved tier).
           tierId = local;
         } else {
-          console.warn(
-            `[PricingGateway] dropping contract: unresolved tier id "${local}"`,
-          );
+          Tracer.warn("commerce", "log", { args: [`[PricingGateway] dropping contract: unresolved tier id "${local}"`] });
           continue;
         }
       }

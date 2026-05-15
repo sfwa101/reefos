@@ -7,6 +7,7 @@ import { MediaGateway } from "@/core/media";
 import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type KycStatus = "pending" | "verified" | "rejected";
 type KycRow = {
@@ -109,7 +110,7 @@ const Verification = () => {
       setFrontFile(null); setBackFile(null);
       toast.success("تم إرسال الطلب — ستصلك نتيجة التوثيق قريبًا");
     } catch (e) {
-      console.error("kyc submit error", e);
+      Tracer.error("account", "kyc_submit_error", { args: ["kyc submit error", e] });
       toast.error("تعذّر إرسال الطلب، حاول مرة أخرى");
     } finally {
       setSaving(false);

@@ -15,6 +15,7 @@ import { sanitizeAiBlocks } from "../engine/sanitizeAiBlocks";
 import { workspaceQueryKey, getWorkspaceIdSync } from "@/core/identity/workspace";
 import { HakimGenerativeOverlay } from "@/core/hakim-ai/generative/HakimGenerativeOverlay";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 /**
  * Emergency fallback block — guaranteed valid against the SDUI schema.
@@ -100,7 +101,7 @@ export function useSduiLayout(slug: string): State {
     //    payload is wholly corrupted.
     if (typeof console !== "undefined") {
       // eslint-disable-next-line no-console
-      console.warn(`[SDUI] payload for "${slug}" produced 0 valid blocks — using emergency fallback`);
+      Tracer.warn("runtime-ui", "log", { args: [`[SDUI] payload for "${slug}" produced 0 valid blocks — using emergency fallback`] });
     }
     return EMERGENCY_FALLBACK;
     // overlayTick triggers recompute when intent scores change.

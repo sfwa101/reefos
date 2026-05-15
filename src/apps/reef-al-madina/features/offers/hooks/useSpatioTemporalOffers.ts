@@ -13,6 +13,7 @@ import type {
   OfferMatrixRow,
   UserContext,
 } from "../types/offerMatrix";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const TIER_RANK: Record<UserContext["tier"], number> = {
   bronze: 0,
@@ -74,7 +75,7 @@ export const useSpatioTemporalOffers = () => {
       if (cancelled) return;
       if (error) {
         // eslint-disable-next-line no-console
-        console.warn("[offers_matrix] load error", error.message);
+        Tracer.warn("offers", "offers_matrix_load_error", { args: ["[offers_matrix] load error", error.message] });
       }
       setRawRows((data ?? []) as unknown as OfferMatrixRow[]);
       setLoading(false);

@@ -34,6 +34,7 @@ import {
   hakimSnapshotQueryOptions,
   userKeys,
 } from "@/lib/user.queries";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type InsightRow = HakimInsight;
 type Snapshot = HakimSnapshot;
@@ -94,7 +95,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
     try {
       await markHakimInsightReadFn({ data: { id } });
     } catch (e) {
-      console.error("hakim insight dismiss error", e);
+      Tracer.error("hakim", "hakim_insight_dismiss_error", { args: ["hakim insight dismiss error", e] });
     } finally {
       void qc.invalidateQueries({
         queryKey: userKeys.hakimInsights(activeWorkspaceId ?? null),

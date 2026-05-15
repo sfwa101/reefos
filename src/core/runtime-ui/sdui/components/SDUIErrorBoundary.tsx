@@ -7,6 +7,7 @@
  * falls back to a neutral empty `<div>` so the rest of the page survives.
  */
 import { Component, type ReactNode } from "react";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type Props = {
   /** Identifies the failing block in logs (e.g. block.id or section key). */
@@ -28,12 +29,8 @@ export class SDUIErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: unknown) {
     if (typeof console !== "undefined") {
       // eslint-disable-next-line no-console
-      console.error(
-        `[SDUIErrorBoundary] ${this.props.blockKind ?? "block"}` +
-          `${this.props.blockId ? ` "${this.props.blockId}"` : ""} crashed`,
-        error,
-        info,
-      );
+      Tracer.error("runtime-ui", "log", { args: [`[SDUIErrorBoundary] ${this.props.blockKind ?? "block"}` +
+                  `${this.props.blockId ? ` "${this.props.blockId}"` : ""} crashed`, error, info] });
     }
     // Best-effort sovereign tracing — never throw from a boundary.
     try {

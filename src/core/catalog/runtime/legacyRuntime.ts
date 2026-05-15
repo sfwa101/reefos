@@ -42,6 +42,7 @@ import type {
 // Re-exported here so existing callers keep compiling.
 export { PRODUCTS_QUERY_KEY } from "@/hooks/useProductsQuery";
 import { PRODUCTS_QUERY_KEY } from "@/hooks/useProductsQuery";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 let boundClient: QueryClient | null = null;
 const extraProducts: Product[] = [];
@@ -81,7 +82,7 @@ function triggerSelfBind(): void {
         }
       } catch (err) {
         // eslint-disable-next-line no-console
-        console.warn("[legacyRuntime] self-bind fetch failed:", err);
+        Tracer.warn("catalog", "legacyruntime_self_bind_fetch_failed", { args: ["[legacyRuntime] self-bind fetch failed:", err] });
       } finally {
         selfBindInFlight = false;
         selfBindAttempted = true;

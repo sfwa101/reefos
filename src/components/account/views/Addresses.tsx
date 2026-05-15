@@ -10,6 +10,7 @@ import { deleteAddressFn, listMyAddressesFn, setDefaultAddressFn } from "@/core/
 import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type Addr = {
   id: string;
@@ -113,7 +114,7 @@ const Addresses = () => {
       const data = await listMyAddressesFn();
       setList(data as Addr[]);
     } catch (e) {
-      console.error("addresses load error", e);
+      Tracer.error("account", "addresses_load_error", { args: ["addresses load error", e] });
       setList([]);
     } finally {
       setLoading(false);

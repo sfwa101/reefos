@@ -16,6 +16,7 @@ import { IdentityTab } from "@/apps/reef-al-madina/features/account/profile/comp
 import { LifestyleTab } from "@/apps/reef-al-madina/features/account/profile/components/LifestyleTab";
 import { BudgetTab } from "@/apps/reef-al-madina/features/account/profile/components/BudgetTab";
 import { AvatarTab } from "@/apps/reef-al-madina/features/account/profile/components/AvatarTab";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const Profile = () => {
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -46,7 +47,7 @@ const Profile = () => {
       return next;
     } catch (e) {
       const message = e instanceof Error ? e.message : "تعذّر التحميل";
-      console.error("profile fetch error", e);
+      Tracer.error("account", "profile_fetch_error", { args: ["profile fetch error", e] });
       const fallback = buildForm(user, profile as Partial<DbProfile> | null);
       setForm(fallback);
       setInitialForm(fallback);
@@ -125,7 +126,7 @@ const Profile = () => {
       await updateMyProfileFn({ data: payload });
     } catch (e) {
       const message = e instanceof Error ? e.message : "تعذّر الحفظ";
-      console.error("profile save error", e);
+      Tracer.error("account", "profile_save_error", { args: ["profile save error", e] });
       setSaveState("error");
       setErrorMessage(message);
       toast.error(`تعذّر الحفظ — ${message}`);

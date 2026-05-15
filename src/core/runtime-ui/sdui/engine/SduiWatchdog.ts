@@ -13,6 +13,7 @@
  */
 import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { createTraceId, logSovereignEvent } from "@/core/system/observability/SovereignTracingGateway";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const WINDOW_MS = 60_000;
 const THRESHOLD = 5;
@@ -45,7 +46,7 @@ async function tripCircuitBreaker(key: string, reason: string): Promise<void> {
     if (error) {
       // Most clients (non-admin) will be denied — that's expected.
       // Only the first admin tab present will succeed; others fail safely.
-      console.warn("[SduiWatchdog] trip RPC denied/failed:", error.message);
+      Tracer.warn("runtime-ui", "sduiwatchdog_trip_rpc_denied_failed", { args: ["[SduiWatchdog] trip RPC denied/failed:", error.message] });
       return;
     }
     await logSovereignEvent({
@@ -55,7 +56,7 @@ async function tripCircuitBreaker(key: string, reason: string): Promise<void> {
       payload: { key, reason },
     });
   } catch (e) {
-    console.warn("[SduiWatchdog] trip threw", e);
+    Tracer.warn("runtime-ui", "sduiwatchdog_trip_threw", { args: ["[SduiWatchdog] trip threw", e] });
   }
 }
 

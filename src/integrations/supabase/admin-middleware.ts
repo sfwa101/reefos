@@ -13,6 +13,7 @@
 //   500 — RPC failure / misconfiguration
 import { createMiddleware } from '@tanstack/react-start'
 import { requireSupabaseAuth } from './auth-middleware'
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export const requireAdmin = createMiddleware({ type: 'function' })
   .middleware([requireSupabaseAuth])
@@ -25,7 +26,7 @@ export const requireAdmin = createMiddleware({ type: 'function' })
     })
 
     if (error) {
-      console.error('[requireAdmin] has_role RPC failed', error)
+      Tracer.error("integrations", "requireadmin_has_role_rpc_failed", { args: ['[requireAdmin] has_role RPC failed', error] })
       throw new Response('Forbidden: role check failed', { status: 500 })
     }
 

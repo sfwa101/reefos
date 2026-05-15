@@ -27,6 +27,7 @@ import {
   type PricingInput,
   type PricingSelection,
 } from "../types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // One-shot wiring guard — initPricingEngine is itself idempotent, but
 // avoiding the function call entirely after the first hook mount keeps
@@ -116,7 +117,7 @@ export function useLivePrice<TSelection extends PricingSelection>(
               err,
             );
       // eslint-disable-next-line no-console
-      console.error("[useLivePrice]", wrapped);
+      Tracer.error("commerce", "useliveprice", { args: ["[useLivePrice]", wrapped] });
       return { breakdown: null, error: wrapped };
     }
   }, [supported, product, selection, context, options?.strategyKey]);

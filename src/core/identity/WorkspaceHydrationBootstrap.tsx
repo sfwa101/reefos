@@ -11,6 +11,7 @@ import { useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { whoAmI } from "@/core/identity/whoami.functions";
 import { hydrateWorkspaceId } from "@/core/identity/workspace";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export const WorkspaceHydrationBootstrap = (): null => {
   const { user } = useAuth();
@@ -27,7 +28,7 @@ export const WorkspaceHydrationBootstrap = (): null => {
       .catch((err) => {
         // 401 expected until the custom_access_token_hook is enabled
         // in Cloud → Auth Settings. Log once, do not crash the app.
-        console.warn("[WorkspaceHydration] whoAmI failed", err);
+        Tracer.warn("identity", "workspacehydration_whoami_failed", { args: ["[WorkspaceHydration] whoAmI failed", err] });
       });
     return () => {
       cancelled = true;

@@ -18,6 +18,7 @@ import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { listMasterOrdersFn, setOrderStatusFn } from "@/core/ops/ops.functions";
 import { useAdminOrdersRealtime } from "@/core/events/hooks/useAdminOrdersRealtime";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 interface MasterOrderRow {
   id: string;
@@ -106,7 +107,7 @@ export default function Orders() {
     try {
       raw = await listMasterOrdersFn();
     } catch (e) {
-      console.error("[admin/orders] fetch failed:", (e as Error).message);
+      Tracer.error("admin", "admin_orders_fetch_failed", { args: ["[admin/orders] fetch failed:", (e as Error).message] });
       toast.error(`تعذر جلب الطلبات: ${(e as Error).message}`);
       return [];
     }

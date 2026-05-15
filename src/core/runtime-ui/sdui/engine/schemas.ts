@@ -13,6 +13,7 @@ import {
   OfferNeighborhoodPoolBlockSchema,
   PredictiveRefillRailBlockSchema,
 } from "../blocks/offers/schemas";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export const HeroBlockSchema = z.object({
   type: z.literal("hero"),
@@ -219,7 +220,7 @@ export function parseBlocks(raw: unknown): SduiBlock[] {
     if (r.success) out.push(r.data);
     else if (typeof console !== "undefined") {
       // eslint-disable-next-line no-console
-      console.warn("[SDUI] dropped invalid block", r.error.issues[0]?.message);
+      Tracer.warn("runtime-ui", "sdui_dropped_invalid_block", { args: ["[SDUI] dropped invalid block", r.error.issues[0]?.message] });
     }
   }
   return out;

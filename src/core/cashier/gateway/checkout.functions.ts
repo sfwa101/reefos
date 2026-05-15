@@ -14,6 +14,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { computeAuthoritativeSnapshot } from "./cashier.functions";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const itemSchema = z.object({
   product_id: z.string().uuid(),
@@ -75,11 +76,11 @@ export const validatedSovereignCheckoutFn = createServerFn({ method: "POST" })
 
     // 2) Hash veto — deterministic equality, no tolerance.
     if (snapshot.snapshot_hash !== data.expected_snapshot_hash) {
-      console.warn("[CASHIER-VETO] snapshot hash mismatch", {
-        client: data.expected_snapshot_hash,
-        server: snapshot.snapshot_hash,
-        actor: userId,
-      });
+      Tracer.warn("cashier", "cashier_veto_snapshot_hash_mismatch", { args: ["[CASHIER-VETO] snapshot hash mismatch", {
+                client: data.expected_snapshot_hash,
+                server: snapshot.snapshot_hash,
+                actor: userId,
+              }] });
       throw new Error(PRICE_TAMPER_ERROR);
     }
 

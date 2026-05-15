@@ -8,6 +8,7 @@
  */
 import { create } from "zustand";
 import { publishDriverPositionFn } from "@/core/logistics/driver.functions";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const THROTTLE_MS = 10_000;
 
@@ -52,7 +53,7 @@ async function pushPosition(
     });
   } catch (e) {
     // eslint-disable-next-line no-console
-    console.error("[driverTelemetry] publish failed", (e as Error).message);
+    Tracer.error("driver", "drivertelemetry_publish_failed", { args: ["[driverTelemetry] publish failed", (e as Error).message] });
     throw e;
   }
 }
