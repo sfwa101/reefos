@@ -80,6 +80,22 @@ type RawSku = {
   }> | null;
 };
 
+type RawPackagingTier = {
+  id: string;
+  asset_id?: string;
+  parent_tier_id: string | null;
+  tier_label: string;
+  uom_code: string | null;
+  conversion_to_parent: number | string | null;
+  conversion_to_base: number | string | null;
+  barcode: string | null;
+  price_override: number | string | null;
+  is_stock_keeping: boolean | null;
+  is_default_sell: boolean | null;
+  is_active: boolean | null;
+  sort_order: number | null;
+};
+
 type RawAsset = {
   id: string;
   name: string;
@@ -89,7 +105,14 @@ type RawAsset = {
   media: unknown;
   is_active: boolean;
   salsabil_skus: RawSku[] | null;
+  salsabil_packaging_tiers?: RawPackagingTier[] | null;
 };
+
+const PACKAGING_TIER_FIELDS = `
+  id, parent_tier_id, tier_label, uom_code,
+  conversion_to_parent, conversion_to_base, barcode, price_override,
+  is_stock_keeping, is_default_sell, is_active, sort_order
+` as const;
 
 const SOVEREIGN_SELECT = `
   id, name, description, category_path, traits, media, is_active,
@@ -97,7 +120,8 @@ const SOVEREIGN_SELECT = `
     id, sku_code, attributes, sort_order, is_active, barcode,
     salsabil_financial_contracts ( base_price, contract_rules ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 ` as const;
 
 const pickPrimarySku = (skus: RawSku[]): RawSku | undefined => {
