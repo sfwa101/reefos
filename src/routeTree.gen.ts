@@ -81,6 +81,7 @@ import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
 import { Route as AdminFactoryRouteImport } from './routes/admin.factory'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
+import { Route as AdminErpMutationsRouteImport } from './routes/admin.erp-mutations'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
 import { Route as AdminDriverCashSettlementsRouteImport } from './routes/admin.driver-cash-settlements'
 import { Route as AdminDiscountOverridesRouteImport } from './routes/admin.discount-overrides'
@@ -507,6 +508,11 @@ const AdminExecutiveRoute = AdminExecutiveRouteImport.update({
   path: '/executive',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminErpMutationsRoute = AdminErpMutationsRouteImport.update({
+  id: '/erp-mutations',
+  path: '/erp-mutations',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDriverSettlementsRoute = AdminDriverSettlementsRouteImport.update({
   id: '/driver-settlements',
   path: '/driver-settlements',
@@ -908,6 +914,7 @@ export interface FileRoutesByFullPath {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/erp-mutations': typeof AdminErpMutationsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/factory': typeof AdminFactoryRouteWithChildren
@@ -1043,6 +1050,7 @@ export interface FileRoutesByTo {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/erp-mutations': typeof AdminErpMutationsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/factory': typeof AdminFactoryRouteWithChildren
@@ -1187,6 +1195,7 @@ export interface FileRoutesById {
   '/admin/discount-overrides': typeof AdminDiscountOverridesRoute
   '/admin/driver-cash-settlements': typeof AdminDriverCashSettlementsRoute
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
+  '/admin/erp-mutations': typeof AdminErpMutationsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
   '/admin/factory': typeof AdminFactoryRouteWithChildren
@@ -1329,6 +1338,7 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
+    | '/admin/erp-mutations'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/factory'
@@ -1464,6 +1474,7 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
+    | '/admin/erp-mutations'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/factory'
@@ -1607,6 +1618,7 @@ export interface FileRouteTypes {
     | '/admin/discount-overrides'
     | '/admin/driver-cash-settlements'
     | '/admin/driver-settlements'
+    | '/admin/erp-mutations'
     | '/admin/executive'
     | '/admin/expenses'
     | '/admin/factory'
@@ -2221,6 +2233,13 @@ declare module '@tanstack/react-router' {
       path: '/executive'
       fullPath: '/admin/executive'
       preLoaderRoute: typeof AdminExecutiveRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/erp-mutations': {
+      id: '/admin/erp-mutations'
+      path: '/erp-mutations'
+      fullPath: '/admin/erp-mutations'
+      preLoaderRoute: typeof AdminErpMutationsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/driver-settlements': {
@@ -2945,6 +2964,7 @@ interface AdminRouteChildren {
   AdminDiscountOverridesRoute: typeof AdminDiscountOverridesRoute
   AdminDriverCashSettlementsRoute: typeof AdminDriverCashSettlementsRoute
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
+  AdminErpMutationsRoute: typeof AdminErpMutationsRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
   AdminFactoryRoute: typeof AdminFactoryRouteWithChildren
@@ -3027,6 +3047,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDiscountOverridesRoute: AdminDiscountOverridesRoute,
   AdminDriverCashSettlementsRoute: AdminDriverCashSettlementsRoute,
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
+  AdminErpMutationsRoute: AdminErpMutationsRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
   AdminExpensesRoute: AdminExpensesRoute,
   AdminFactoryRoute: AdminFactoryRouteWithChildren,
