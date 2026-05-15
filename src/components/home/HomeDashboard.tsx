@@ -22,6 +22,7 @@ import { storeThemes } from "@/lib/storeThemes";
 import { useHomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
 import { LayoutFactory } from "@/apps/reef-al-madina/features/storefront/home/components/LayoutFactory";
 import { SduiHomeFeed } from "@/apps/reef-al-madina/features/storefront/home/components/SduiHomeFeed";
+import { SovereignSmartShowcase } from "@/apps/reef-al-madina/features/storefront/home/components/SovereignSmartShowcase";
 import { DetailSheet } from "@/apps/reef-al-madina/features/storefront/home/components/DetailSheet";
 import { FiltersSheet } from "@/apps/reef-al-madina/features/storefront/home/components/FiltersSheet";
 import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
@@ -64,6 +65,8 @@ const HomePage = () => {
       dir="rtl"
     >
       <SduiHomeFeed />
+
+      <SovereignSmartShowcase orchestrator={orchestrator} />
 
       <LayoutFactory
         pageKey={HOME_PAGE_KEY}
