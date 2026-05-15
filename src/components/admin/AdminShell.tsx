@@ -78,6 +78,7 @@ function AdminHeader({ isDark, toggleTheme }: { isDark: boolean; toggleTheme: ()
         </Link>
 
         <SovereignSwitcher />
+        <ReefModeToggle />
 
         <button
           type="button"
