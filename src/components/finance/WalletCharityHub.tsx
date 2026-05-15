@@ -5,6 +5,8 @@ import { Heart, HandHeart, Loader2, Sparkles, X } from "lucide-react";
 import { toast } from "sonner";
 import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { fmtMoney, toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   CATEGORY_LABELS,
   type CharityCampaign,
@@ -91,7 +93,7 @@ export const WalletCharityHub = ({
         </div>
         <div className="mt-3 flex flex-wrap gap-2">
           {DONATE_PRESETS.map((p) => (
-            <button
+            <Button
               key={p}
               type="button"
               disabled={donate.isPending || walletBalance < p}
@@ -101,7 +103,7 @@ export const WalletCharityHub = ({
               className="rounded-full bg-card px-3 py-1.5 text-[11px] font-extrabold ring-1 ring-rose-500/25 transition hover:bg-rose-500/10 disabled:opacity-50"
             >
               {toLatin(p)} ج.م
-            </button>
+            </Button>
           ))}
         </div>
       </motion.div>
@@ -219,18 +221,18 @@ export const WalletCharityHub = ({
                     تبرع مباشر للحملة — يُحوَّل من رصيدك فوراً.
                   </p>
                 </div>
-                <button
+                <Button
                   onClick={() => setSelected(null)}
                   className="rounded-full bg-muted p-1.5"
                   aria-label="إغلاق"
                 >
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
 
               <div className="mb-3 grid grid-cols-4 gap-2">
                 {DONATE_PRESETS.map((p) => (
-                  <button
+                  <Button
                     key={p}
                     type="button"
                     onClick={() => setAmount(p)}
@@ -241,7 +243,7 @@ export const WalletCharityHub = ({
                     }`}
                   >
                     {toLatin(p)}
-                  </button>
+                  </Button>
                 ))}
               </div>
 
@@ -249,7 +251,7 @@ export const WalletCharityHub = ({
                 <span className="text-[11px] font-bold text-muted-foreground">
                   مبلغ مخصّص (ج.م)
                 </span>
-                <input
+                <Input
                   type="number"
                   min={1}
                   value={amount}
@@ -275,7 +277,7 @@ export const WalletCharityHub = ({
                 </div>
               )}
 
-              <button
+              <Button
                 type="button"
                 disabled={
                   donate.isPending || amount <= 0 || amount > walletBalance
@@ -295,7 +297,7 @@ export const WalletCharityHub = ({
                   <HandHeart className="h-4 w-4" />
                 )}
                 تبرّع بمبلغ {toLatin(amount)} ج.م
-              </button>
+              </Button>
               {amount > walletBalance && (
                 <p className="mt-2 text-center text-[10px] font-bold text-destructive">
                   الرصيد غير كافٍ

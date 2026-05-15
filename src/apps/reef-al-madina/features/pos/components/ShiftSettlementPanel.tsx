@@ -8,6 +8,8 @@
 import { useState } from "react";
 import { useShiftRuntime } from "@/core/cashier/runtime/useShiftRuntime";
 import type { ShiftSettlementResult } from "@/core/cashier/runtime/ShiftRuntime";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export function ShiftSettlementPanel() {
   const { snapshot, openShift, closeShift } = useShiftRuntime();
@@ -60,7 +62,7 @@ export function ShiftSettlementPanel() {
         {result && <SettlementSummary result={result} />}
 
         <label className="block text-[12px] text-muted-foreground">رصيد افتتاحي</label>
-        <input
+        <Input
           inputMode="decimal"
           value={openingInput}
           onChange={(e) => setOpeningInput(e.target.value)}
@@ -68,12 +70,12 @@ export function ShiftSettlementPanel() {
           placeholder="0.00"
         />
         {error && <p className="text-[12px] text-destructive">{error}</p>}
-        <button
+        <Button
           onClick={onOpen}
           className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-semibold"
         >
           فتح الورديّة
-        </button>
+        </Button>
       </section>
     );
   }
@@ -88,7 +90,7 @@ export function ShiftSettlementPanel() {
         أدخل العَدّ الفعلي للنقد. النظام يحسب المتوقَّع والفروقات تلقائياً.
       </p>
       <label className="block text-[12px] text-muted-foreground">العَدّ الفعلي للدُرج</label>
-      <input
+      <Input
         inputMode="decimal"
         autoFocus
         value={actualInput}
@@ -97,13 +99,13 @@ export function ShiftSettlementPanel() {
         placeholder="0.00"
       />
       {error && <p className="text-[12px] text-destructive">{error}</p>}
-      <button
+      <Button
         onClick={onClose}
         disabled={actualInput === ""}
         className="w-full h-11 rounded-xl bg-destructive text-destructive-foreground font-semibold disabled:opacity-50"
       >
         إغلاق الورديّة
-      </button>
+      </Button>
     </section>
   );
 }

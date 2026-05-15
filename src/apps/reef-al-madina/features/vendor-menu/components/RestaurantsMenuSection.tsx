@@ -14,6 +14,8 @@ import { toLatin } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fetchRestaurantAssets, type RestoProductRow } from "@/core/commerce/knowledge/sovereignCatalog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type RestoProduct = RestoProductRow;
 
@@ -103,7 +105,7 @@ const MealRow = ({ p }: { p: RestoProduct }) => {
               ج.م
             </span>
           </div>
-          <button
+          <Button
             onClick={handleAdd}
             aria-label="أضف إلى السلة"
             className={cn(
@@ -117,7 +119,7 @@ const MealRow = ({ p }: { p: RestoProduct }) => {
             <span className="tabular-nums">
               {qty === 0 ? "أضف" : toLatin(qty)}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
     </article>
@@ -270,7 +272,7 @@ const RestaurantsMenuSection = () => {
           className="h-4 w-4 text-muted-foreground"
           strokeWidth={2.4}
         />
-        <input
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder="ابحث عن وجبة أو مطعم…"
@@ -288,7 +290,7 @@ const RestaurantsMenuSection = () => {
             {allBrands.map((b) => {
               const active = activeBrand === b;
               return (
-                <button
+                <Button
                   key={b}
                   onClick={() => handleJump(b)}
                   className={cn(
@@ -299,7 +301,7 @@ const RestaurantsMenuSection = () => {
                   )}
                 >
                   {b}
-                </button>
+                </Button>
               );
             })}
           </div>

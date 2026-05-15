@@ -16,6 +16,7 @@ import { villageMetaFor } from "@/core/commerce/knowledge/sourcing-meta";
 import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
+import { Button } from "@/components/ui/button";
 import {
   VillageStory, VillageStorage, VillageSubscription, VillageNutrition,
 } from "@/apps/reef-al-madina/features/product-detail/VillageBlocks";
@@ -191,13 +192,13 @@ const ProductDetail = () => {
                 <p className="text-xs text-muted-foreground">{product.unit}</p>
               </div>
               {!isVillage && (
-                <button
+                <Button
                   onClick={() => toggle(product.id)}
                   className="glass-strong flex h-10 w-10 items-center justify-center rounded-full shadow-soft transition active:scale-90"
                   aria-label="مفضلة"
                 >
                   <Heart className={`h-4 w-4 transition ${fav ? "fill-destructive text-destructive" : ""}`} strokeWidth={2} />
-                </button>
+                </Button>
               )}
             </div>
 
@@ -266,7 +267,7 @@ const ProductDetail = () => {
                     ? Number(u.selling_price)
                     : (product?.price ?? 0) * u.conversion_factor;
                   return (
-                    <button
+                    <Button
                       key={u.id}
                       onClick={() => setUnitId(u.id)}
                       className={`rounded-2xl p-3 text-right transition active:scale-[0.98] ${
@@ -282,7 +283,7 @@ const ProductDetail = () => {
                       <p className="mt-1 font-display text-sm font-extrabold tabular-nums">
                         {toLatin(Math.round(price))} ج.م
                       </p>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -311,7 +312,7 @@ const ProductDetail = () => {
                 {product.variants.map((v) => {
                   const active = v.id === variantId;
                   return (
-                    <button
+                    <Button
                       key={v.id}
                       onClick={() => setVariantId(v.id)}
                       className={`rounded-full px-4 py-2 text-xs font-bold transition ${
@@ -324,7 +325,7 @@ const ProductDetail = () => {
                           {v.priceDelta > 0 ? `+${v.priceDelta}` : v.priceDelta}
                         </span>
                       )}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -339,7 +340,7 @@ const ProductDetail = () => {
                 {product.addons.map((a) => {
                   const active = addonIds.includes(a.id);
                   return (
-                    <button
+                    <Button
                       key={a.id}
                       onClick={() => toggleAddon(a.id)}
                       className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-right transition ${
@@ -355,7 +356,7 @@ const ProductDetail = () => {
                       <span className="font-display text-sm font-extrabold text-primary tabular-nums">
                         +{fmtMoney(a.price)}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>

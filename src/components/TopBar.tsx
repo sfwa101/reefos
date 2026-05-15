@@ -15,6 +15,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
+import { Button } from "@/components/ui/button";
 
 /**
  * TopBar — Phase 26 (Sovereign Minimalism).
@@ -102,7 +103,7 @@ const TopBar = () => {
           </Link>
 
           {/* CENTER — Address Pill (dynamic only) */}
-          <button
+          <Button
             type="button"
             onClick={() => setPickerOpen(true)}
             aria-label="تغيير عنوان التوصيل"
@@ -112,7 +113,7 @@ const TopBar = () => {
           >
             <MapPin className="h-4 w-4 text-primary" strokeWidth={2.4} />
             <span className="truncate">{addressText}</span>
-          </button>
+          </Button>
 
           {/* RIGHT — Hamburger → /account */}
           <Link
@@ -164,7 +165,7 @@ const TopBar = () => {
                     const active = a.id === activeId;
                     return (
                       <li key={a.id}>
-                        <button
+                        <Button
                           type="button"
                           onClick={() => onPickAddress(a)}
                           className={`flex w-full items-start justify-between gap-2 rounded-2xl px-4 py-3 text-right transition active:scale-[0.99] ${
@@ -184,20 +185,20 @@ const TopBar = () => {
                             </span>
                           </span>
                           {active && <Check className="mt-1 h-4 w-4 shrink-0" strokeWidth={2.6} />}
-                        </button>
+                        </Button>
                       </li>
                     );
                   })
                 )}
               </ul>
 
-              <button
+              <Button
                 type="button"
                 onClick={() => { setPickerOpen(false); setAddrSheetOpen(true); }}
                 className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-[12.5px] font-extrabold text-primary-foreground"
               >
                 <Plus className="h-4 w-4" strokeWidth={2.6} /> عنوان جديد على الخريطة
-              </button>
+              </Button>
             </>
           )}
         </SheetContent>

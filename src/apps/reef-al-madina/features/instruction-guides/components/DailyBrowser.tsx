@@ -10,6 +10,7 @@ import {
   type Recipe, type RecipeSection,
 } from "@/apps/reef-al-madina/features/instruction-guides/data";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   activeMeal: RecipeSection;
@@ -37,7 +38,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
           const isActive = s === activeMeal;
           const open = isMealOpenNow(s, now);
           return (
-            <button
+            <Button
               key={s}
               onClick={() => setActiveMeal(s)}
               className={`relative overflow-hidden rounded-2xl px-3 py-3 text-center transition ease-apple ${
@@ -53,7 +54,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -75,7 +76,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
 
       <div className="-mx-4 flex gap-2 overflow-x-auto px-4 no-scrollbar">
         {FILTERS.map((f) => (
-          <button
+          <Button
             key={f}
             onClick={() => setFilter(f)}
             className={`shrink-0 rounded-full px-4 py-2 text-xs font-bold transition ${
@@ -83,7 +84,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
             }`}
           >
             {f}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -103,7 +104,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
                 )}
               </div>
 
-              <button onClick={() => onOpen(r)} className="flex w-full text-right">
+              <Button onClick={() => onOpen(r)} className="flex w-full text-right">
                 <div className="relative h-32 w-32 shrink-0">
                   <OptimizedImage
                     src={r.image}
@@ -139,7 +140,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
                     </div>
                   </div>
                 </div>
-              </button>
+              </Button>
 
               <div className="flex items-center justify-between border-t border-border/40 bg-background/30 px-3 py-2">
                 {lowStock ? (
@@ -149,7 +150,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
                 ) : (
                   <span className="text-[10px] font-bold text-muted-foreground">تخصيص المكونات لتقليل السعر</span>
                 )}
-                <button
+                <Button
                   onClick={(e) => {
                     e.stopPropagation();
                     add({
@@ -166,7 +167,7 @@ function DailyBrowserImpl({ activeMeal, setActiveMeal, now, filter, setFilter, f
                 >
                   <Plus className="h-3 w-3" strokeWidth={3} />
                   أضف سريع
-                </button>
+                </Button>
               </div>
             </div>
           );

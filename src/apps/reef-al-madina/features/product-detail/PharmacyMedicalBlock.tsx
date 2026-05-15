@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 /**
  * Pharmacy: Professional medical info + Smart Dosage Calculator UI.
@@ -122,7 +124,7 @@ const PharmacyMedicalBlock = ({
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
             <span className="mb-1 block text-[10.5px] font-bold text-primary-foreground/80">الوزن (كجم)</span>
-            <input
+            <Input
               inputMode="numeric"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
@@ -132,7 +134,7 @@ const PharmacyMedicalBlock = ({
           </label>
           <label className="block">
             <span className="mb-1 block text-[10.5px] font-bold text-primary-foreground/80">العمر (سنة)</span>
-            <input
+            <Input
               inputMode="numeric"
               value={age}
               onChange={(e) => setAge(e.target.value)}
@@ -141,13 +143,13 @@ const PharmacyMedicalBlock = ({
             />
           </label>
         </div>
-        <button
+        <Button
           onClick={compute}
           className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary-foreground px-3 py-2.5 text-[13px] font-extrabold text-emerald-800 shadow-pill transition active:scale-[0.98]"
         >
           <Sparkles className="h-3.5 w-3.5" strokeWidth={2.6} />
           احسب الجرعة المقترحة
-        </button>
+        </Button>
         {computed && (
           <div className="mt-3 rounded-xl bg-primary-foreground/10 p-3 text-[12px] font-bold leading-relaxed ring-1 ring-primary-foreground/20">
             {computed}

@@ -15,6 +15,7 @@ import { useEffect, useMemo } from "react";
 import { Boxes, Warehouse, MapPin, AlertTriangle, Layers } from "lucide-react";
 import type { PackagingTierDraft } from "@/core/commerce";
 import type { InventoryDraft, InventoryKind } from "@/core/commerce/gateway/InventoryGateway";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   packagingTiers: PackagingTierDraft[];
@@ -143,7 +144,7 @@ export default function LivingInventoryBuilder({
         <span className="text-[10.5px] font-bold text-foreground-tertiary mb-1.5 inline-flex items-center gap-1">
           <MapPin className="h-3 w-3" /> رمز الموقع / الفرع
         </span>
-        <input
+        <Input
           value={draft.location_code}
           onChange={(e) => updateDraft({ location_code: e.target.value })}
           placeholder="MAIN_STORE"
@@ -178,7 +179,7 @@ export default function LivingInventoryBuilder({
           <span className="text-[10.5px] font-bold text-foreground-tertiary mb-1.5 inline-flex items-center gap-1">
             <Boxes className="h-3 w-3" /> الكمية المتاحة
           </span>
-          <input
+          <Input
             type="number"
             inputMode="numeric"
             min="0"
@@ -198,7 +199,7 @@ export default function LivingInventoryBuilder({
           <span className="text-[10.5px] font-bold text-foreground-tertiary mb-1.5">
             الطاقة القصوى
           </span>
-          <input
+          <Input
             type="number"
             inputMode="numeric"
             min="0"

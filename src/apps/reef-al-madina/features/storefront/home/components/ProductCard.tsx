@@ -29,6 +29,7 @@ import type { ProductCardVM } from "@/core/catalog/types";
 import { fmt } from "../dictionaries";
 import { homeProductCardAdapter } from "../adapter";
 import { preorderDepositAmount } from "@/core/commerce/policies/deposits";
+import { Button } from "@/components/ui/button";
 
 export const toCompareItem = (p: ProductCardVM): CompareItem => {
   const view = homeProductCardAdapter(p);
@@ -164,7 +165,7 @@ export const ProductCard = ({
               {toLatin(price.toLocaleString("en-US"))}
               <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
             </span>
-            <button
+            <Button
               onClick={handleAdd}
               disabled={isHardOOS}
               aria-label={isHardOOS ? "نفد" : isWakalah ? "أضفه إن توفر" : "أضف إلى السلة"}
@@ -178,7 +179,7 @@ export const ProductCard = ({
               }`}
             >
               {isHardOOS ? "نفد" : isWakalah ? "وكالة" : <Plus className="h-4 w-4" strokeWidth={3} />}
-            </button>
+            </Button>
           </div>
         </div>
       </article>
@@ -240,7 +241,7 @@ export const ProductCard = ({
           </span>
         )}
 
-        <button
+        <Button
           onClick={handleCompare}
           aria-label={inCompare ? "إزالة من المقارنة" : "أضف للمقارنة"}
           className={`absolute bottom-2 left-2 flex h-7 w-7 items-center justify-center rounded-full shadow-soft backdrop-blur transition active:scale-90 ${
@@ -252,7 +253,7 @@ export const ProductCard = ({
           }`}
         >
           <Scale className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
 
       <div className="flex flex-1 flex-col gap-1 p-3">
@@ -283,7 +284,7 @@ export const ProductCard = ({
             )}
           </div>
 
-          <button
+          <Button
             onClick={handleAdd}
             disabled={isHardOOS}
             aria-label={
@@ -325,7 +326,7 @@ export const ProductCard = ({
                 {toLatin(qty)}
               </>
             )}
-          </button>
+          </Button>
         </div>
 
         {isPre && (

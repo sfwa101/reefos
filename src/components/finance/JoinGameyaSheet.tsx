@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toLatin } from "@/lib/format";
 import type { OpenCircle, TrustScore } from "@/core/finance/hooks/useGameyas";
+import { Button } from "@/components/ui/button";
 
 /**
  * JoinGameyaSheet — Halal turn-picker.
@@ -91,13 +92,13 @@ export const JoinGameyaSheet = ({
       >
         {/* header */}
         <div className="mb-4 flex items-center gap-2">
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-muted text-muted-foreground"
             aria-label="إغلاق"
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <div className="min-w-0">
             <h2 className="font-display text-lg font-extrabold truncate">{circle.name}</h2>
             <p className="text-[11px] text-muted-foreground tabular-nums">
@@ -129,7 +130,7 @@ export const JoinGameyaSheet = ({
             const selected = picked === t.n;
             const disabled = t.taken || t.locked;
             return (
-              <button
+              <Button
                 key={t.n}
                 type="button"
                 disabled={disabled}
@@ -154,7 +155,7 @@ export const JoinGameyaSheet = ({
                 ) : (
                   <span className="text-[8.5px] mt-0.5 opacity-50">متاح</span>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -167,14 +168,14 @@ export const JoinGameyaSheet = ({
           </span>
         </div>
 
-        <button
+        <Button
           onClick={submit}
           disabled={!picked || busy}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-40"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
           انضم إلى الجمعية
-        </button>
+        </Button>
       </motion.div>
     </motion.div>
   );

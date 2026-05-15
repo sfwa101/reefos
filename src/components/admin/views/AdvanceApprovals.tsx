@@ -4,6 +4,7 @@ import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CheckCircle2, XCircle, Clock } from "lucide-react";
 import { toast } from "sonner";
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
+import { Button } from "@/components/ui/button";
 import {
   approveAdvanceFn,
   listAdvanceRequestsFn,
@@ -80,8 +81,8 @@ export default function AdvanceApprovals() {
       <MobileTopbar title="طلبات السلف والنثريّة" />
       <main className="p-4">
         <div className="mb-3 flex gap-2">
-          <button onClick={() => setFilter("pending")} className={`rounded-full px-4 py-1.5 text-xs font-bold ${filter === "pending" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>قيد المراجعة</button>
-          <button onClick={() => setFilter("all")} className={`rounded-full px-4 py-1.5 text-xs font-bold ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>الكل</button>
+          <Button onClick={() => setFilter("pending")} className={`rounded-full px-4 py-1.5 text-xs font-bold ${filter === "pending" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>قيد المراجعة</Button>
+          <Button onClick={() => setFilter("all")} className={`rounded-full px-4 py-1.5 text-xs font-bold ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-muted"}`}>الكل</Button>
         </div>
 
         {loading ? (
@@ -113,14 +114,14 @@ export default function AdvanceApprovals() {
                   </div>
                   {r.status === "pending" && (
                     <div className="mt-3 grid grid-cols-2 gap-2">
-                      <button disabled={busyId === r.id} onClick={() => approve(r.id)}
+                      <Button disabled={busyId === r.id} onClick={() => approve(r.id)}
                         className="rounded-full bg-success py-2 text-xs font-bold text-success-foreground disabled:opacity-50">
                         <CheckCircle2 className="me-1 inline h-3.5 w-3.5" /> موافقة
-                      </button>
-                      <button disabled={busyId === r.id} onClick={() => reject(r.id)}
+                      </Button>
+                      <Button disabled={busyId === r.id} onClick={() => reject(r.id)}
                         className="rounded-full bg-destructive py-2 text-xs font-bold text-destructive-foreground disabled:opacity-50">
                         <XCircle className="me-1 inline h-3.5 w-3.5" /> رفض
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </li>

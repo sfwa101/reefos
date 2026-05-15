@@ -12,6 +12,8 @@ import {
   type CategoryStat,
 } from "@/core/finance/types/wallet.types";
 import { monthAdvisor, progressTone } from "@/core/finance/lib/walletAdvisor";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 /* ================= SPENDING DONUT ================= */
 export const SpendingDonut = ({ stats }: { stats: CategoryStat[] }) => (
@@ -204,7 +206,7 @@ export const BudgetTracker = ({
                 </div>
                 {isEditing ? (
                   <div className="flex items-center gap-1.5">
-                    <input
+                    <Input
                       type="text"
                       inputMode="numeric"
                       dir="ltr"
@@ -214,22 +216,22 @@ export const BudgetTracker = ({
                       placeholder="0"
                       className="w-20 rounded-lg bg-foreground/5 px-2 py-1 text-right text-[12px] font-extrabold tabular-nums outline-none focus:ring-2 focus:ring-primary/40"
                     />
-                    <button
+                    <Button
                       onClick={() => save(cat)}
                       disabled={busy}
                       className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary text-primary-foreground disabled:opacity-50"
                     >
                       <Check className="h-3.5 w-3.5" strokeWidth={3} />
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <button
+                  <Button
                     onClick={() => start(cat)}
                     className="flex items-center gap-1 rounded-lg bg-foreground/5 px-2 py-1 text-[10px] font-extrabold text-foreground"
                   >
                     <Pencil className="h-3 w-3" />
                     {limit > 0 ? `${toLatin(limit)} ج` : "حدّد سقف"}
-                  </button>
+                  </Button>
                 )}
               </div>
 

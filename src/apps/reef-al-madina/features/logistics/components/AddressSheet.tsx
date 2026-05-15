@@ -16,6 +16,8 @@ import { useAuth } from "@/context/AuthContext";
 import { useReverseGeocode } from "@/hooks/useReverseGeocode";
 import { ClientOnly } from "@tanstack/react-router";
 import type { BuildingType } from "@/core/logistics/core/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const RealMap = lazy(() => import("./RealMap"));
 
@@ -140,7 +142,7 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
           {/* Label chips */}
           <div className="grid grid-cols-3 gap-2">
             {LABELS.map(({ id, Icon }) => (
-              <button
+              <Button
                 key={id}
                 type="button"
                 onClick={() => setLabel(id)}
@@ -149,7 +151,7 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
                 }`}
               >
                 <Icon className="h-4 w-4" strokeWidth={2.6} /> {id}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -162,7 +164,7 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
           {/* Building type chips */}
           <div className="grid grid-cols-4 gap-2">
             {BUILDING_TYPES.map((b) => (
-              <button
+              <Button
                 key={b.id}
                 type="button"
                 onClick={() => setBuildingType(b.id)}
@@ -171,7 +173,7 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
                 }`}
               >
                 {b.label}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -193,14 +195,14 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
             className="w-full rounded-2xl border border-border/60 bg-background px-4 py-3 text-sm outline-none focus:border-primary"
           />
 
-          <button
+          <Button
             onClick={save}
             disabled={saving}
             className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-pill active:scale-[0.99] disabled:opacity-60"
           >
             {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
             حفظ العنوان
-          </button>
+          </Button>
 
           <p className="flex items-start gap-1.5 pt-1 text-[10px] text-muted-foreground">
             <Building2 className="mt-0.5 h-3 w-3 shrink-0 text-primary" />
@@ -213,7 +215,7 @@ export const AddressSheet = ({ open, onOpenChange, onSaved }: Props) => {
 };
 
 const Inp = ({ v, on, ph }: { v: string; on: (s: string) => void; ph: string }) => (
-  <input
+  <Input
     value={v}
     onChange={(e) => on(e.target.value)}
     placeholder={ph}

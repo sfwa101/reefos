@@ -10,6 +10,7 @@ import {
 import { Loader2, ShieldAlert, ScanSearch, AlertOctagon, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type Flag = RibaFlag;
 
@@ -61,19 +62,19 @@ export default function RibaAudit() {
               <p className="font-display text-[15px]">حارس المعاملات الشرعية</p>
               <p className="text-[11px] text-foreground-tertiary">يفحص المصروفات والفواتير لرصد شبهات الربا</p>
             </div>
-            <button onClick={scan} disabled={scanning}
+            <Button onClick={scan} disabled={scanning}
               className="h-10 px-3 rounded-lg bg-warning text-warning-foreground text-[13px] font-semibold flex items-center gap-1 disabled:opacity-50">
               {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <ScanSearch className="h-4 w-4" />} مسح الآن
-            </button>
+            </Button>
           </div>
         </div>
 
         <div className="flex gap-2">
           {[{ k: "flagged", l: "مفتوحة" }, { k: "reviewed", l: "مراجَعة" }, { k: "dismissed", l: "مرفوضة" }, { k: "all", l: "الكل" }].map((t) => (
-            <button key={t.k} onClick={() => setFilter(t.k)}
+            <Button key={t.k} onClick={() => setFilter(t.k)}
               className={`px-3 py-1.5 rounded-full text-[12px] ${filter === t.k ? "bg-primary text-primary-foreground" : "bg-surface-muted"}`}>
               {t.l}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -99,14 +100,14 @@ export default function RibaAudit() {
                 )}
                 {f.status === "flagged" && (
                   <div className="flex gap-2">
-                    <button onClick={() => updateStatus(f.id, "reviewed")}
+                    <Button onClick={() => updateStatus(f.id, "reviewed")}
                       className="flex-1 h-8 rounded-lg bg-success/15 text-success text-[12px] font-medium flex items-center justify-center gap-1">
                       <CheckCircle2 className="h-3 w-3" /> تمت المراجعة
-                    </button>
-                    <button onClick={() => updateStatus(f.id, "dismissed")}
+                    </Button>
+                    <Button onClick={() => updateStatus(f.id, "dismissed")}
                       className="flex-1 h-8 rounded-lg bg-muted text-foreground-tertiary text-[12px]">
                       رفض الشبهة
-                    </button>
+                    </Button>
                   </div>
                 )}
                 {f.status !== "flagged" && (

@@ -35,6 +35,8 @@ import {
   userKeys,
 } from "@/lib/user.queries";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type InsightRow = HakimInsight;
 type Snapshot = HakimSnapshot;
@@ -133,7 +135,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
     : "ring-1 ring-border/60";
 
   const pill = (
-    <button
+    <Button
       type="button"
       onClick={() => setOpen(true)}
       aria-label="حكيم — رؤية ذكية جديدة"
@@ -147,7 +149,7 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
       <span className="grid h-4 min-w-[16px] place-items-center rounded-full bg-primary/10 px-1 text-[10px] font-bold tabular-nums text-primary">
         {insights.length}
       </span>
-    </button>
+    </Button>
   );
 
   const sheet = (
@@ -183,14 +185,14 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
                   </p>
                 )}
               </div>
-              <button
+              <Button
                 type="button"
                 onClick={() => dismiss(top.id)}
                 aria-label="إغلاق"
                 className="grid h-7 w-7 place-items-center rounded-full bg-card text-muted-foreground ring-1 ring-border/60 active:scale-95"
               >
                 <X className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           </div>
         )}
@@ -260,20 +262,20 @@ export function FloatingGuardian({ workspace = "wallet", inline = false }: Props
           }}
           className="flex items-center gap-2"
         >
-          <input
+          <Input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="اسأل حكيم…"
             className="flex-1 rounded-full bg-card text-foreground placeholder:text-muted-foreground ring-1 ring-border/60 px-4 py-2 text-[13px] outline-none focus:ring-primary"
           />
-          <button
+          <Button
             type="submit"
             disabled={!input.trim() || sending}
             className="grid h-10 w-10 place-items-center rounded-full bg-primary text-primary-foreground shadow-sm active:scale-95 disabled:opacity-40"
             aria-label="إرسال"
           >
             <Send className="h-4 w-4" />
-          </button>
+          </Button>
         </form>
       </SheetContent>
     </Sheet>

@@ -1,6 +1,8 @@
 import { Plus, Trash2 } from "lucide-react";
 import { inputCls } from "./primitives";
 import type { ProductAddonRow, ProductVariantRow } from "./types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface RowConfig<T> {
   title: string;
@@ -26,13 +28,13 @@ function RowList<T extends { id: string }>({
           <p className="text-[13px] font-bold">{title}</p>
           <p className="text-[11px] text-foreground-tertiary">{hint}</p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={onAdd}
           className="h-9 px-3 rounded-xl bg-primary/10 text-primary text-[12px] font-semibold flex items-center gap-1 press"
         >
           <Plus className="h-3.5 w-3.5" /> إضافة
-        </button>
+        </Button>
       </div>
       {items.length === 0 ? (
         <p className="text-[12px] text-foreground-tertiary text-center py-3">{emptyText}</p>
@@ -40,26 +42,26 @@ function RowList<T extends { id: string }>({
         <div className="space-y-2">
           {items.map((row, i) => (
             <div key={row.id} className="flex items-center gap-2">
-              <input
+              <Input
                 value={(row[labelKey] as unknown as string) ?? ""}
                 onChange={(e) => onUpdate(i, { [labelKey]: e.target.value } as Partial<T>)}
                 placeholder="الاسم"
                 className={inputCls + " flex-1"}
               />
-              <input
+              <Input
                 type="number" step="0.01"
                 value={(row[numericKey] as unknown as number) ?? 0}
                 onChange={(e) => onUpdate(i, { [numericKey]: Number(e.target.value) || 0 } as Partial<T>)}
                 placeholder={numericPlaceholder}
                 className={inputCls + " w-24 num text-right"}
               />
-              <button
+              <Button
                 type="button"
                 onClick={() => onRemove(i)}
                 className="h-11 w-11 rounded-xl bg-destructive/10 text-destructive press flex items-center justify-center shrink-0"
               >
                 <Trash2 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

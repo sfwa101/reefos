@@ -10,6 +10,7 @@ import {
   useSharedCartSync,
 } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 import { sumPricedQuantityRows } from "@/core/orders/runtime/lineTotals";
+import { Button } from "@/components/ui/button";
 
 /**
  * Phase 7 — Global Approval Banner
@@ -88,30 +89,30 @@ const GlobalApprovalBanner = () => {
               </Link>
             </div>
             <div className="mt-2 flex gap-2">
-              <button
+              <Button
                 onClick={() => guard(reject, "تم الرفض — أُعيد فتح السلة")}
                 disabled={busy}
                 className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-amber-950/15 px-3 py-2 text-[11px] font-extrabold disabled:opacity-50"
               >
                 <X className="h-3.5 w-3.5" />
                 رفض
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => guard(approve, "تمت الموافقة وحجز الرصيد ✅")}
                 disabled={busy}
                 className="flex flex-2 flex-1 items-center justify-center gap-1.5 rounded-xl bg-amber-950 px-3 py-2 text-[11px] font-extrabold text-amber-50 disabled:opacity-50"
               >
                 <Check className="h-3.5 w-3.5" />
                 موافق وادفع حصتي
-              </button>
+              </Button>
             </div>
             {cart && (
-              <button
+              <Button
                 onClick={() => setSharedCartId(null)}
                 className="mt-1.5 w-full text-center text-[10px] font-bold opacity-70 underline"
               >
                 مغادرة السلة المشتركة
-              </button>
+              </Button>
             )}
           </div>
         </motion.div>

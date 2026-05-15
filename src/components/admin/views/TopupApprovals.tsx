@@ -9,6 +9,8 @@ import {
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
 import { CheckCircle2, XCircle, Loader2, ShieldAlert, Clock, User } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const METHOD_LABEL: Record<string, string> = {
   vodafone_cash: "فودافون كاش", instapay: "إنستاباي",
@@ -121,7 +123,7 @@ export default function TopupApprovals() {
               {t.note && <p className="text-[11.5px] pt-1 border-t border-border/40">📝 {t.note}</p>}
             </div>
 
-            <input
+            <Input
               value={reason[t.id] ?? ""}
               onChange={(e) => setReason(s => ({ ...s, [t.id]: e.target.value }))}
               placeholder="سبب الرفض (مطلوب عند الرفض)"
@@ -129,21 +131,21 @@ export default function TopupApprovals() {
             />
 
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <Button
                 onClick={() => approve(t.id)}
                 disabled={busyId === t.id}
                 className="h-11 rounded-xl bg-success text-success-foreground font-bold text-[13px] press disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 {busyId === t.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
                 اعتماد
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={() => reject(t.id)}
                 disabled={busyId === t.id}
                 className="h-11 rounded-xl bg-destructive text-destructive-foreground font-bold text-[13px] press disabled:opacity-50 flex items-center justify-center gap-1.5"
               >
                 <XCircle className="h-4 w-4" /> رفض
-              </button>
+              </Button>
             </div>
           </div>
         ))}

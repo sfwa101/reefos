@@ -10,6 +10,7 @@ import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
+import { Button } from "@/components/ui/button";
 
 const RestaurantDetail = () => {
   const { id } = useParams({ from: "/_app/restaurant/$id" });
@@ -78,13 +79,13 @@ const RestaurantDetail = () => {
     <div className="-mx-4 -mt-4 pb-12 sm:mx-0 sm:mt-0">
       {/* ===== Brand hero header ===== */}
       <header className="relative px-4 pb-6 pt-4 text-primary-foreground" style={{ background: banner }}>
-        <button
+        <Button
           onClick={() => navigate({ to: "/store/$slug", params: { slug: "restaurants" } })}
           className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground/25 transition active:scale-95"
           aria-label="رجوع"
         >
           <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
-        </button>
+        </Button>
         <div className="flex items-center gap-3">
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-foreground shadow-xl">
             <span className="text-3xl font-extrabold" style={{ color: accent }}>
@@ -129,7 +130,7 @@ const RestaurantDetail = () => {
           {sections.map((s) => {
             const active = activeTab === s.id;
             return (
-              <button
+              <Button
                 key={s.id}
                 onClick={() => {
                   setActiveTab(s.id);
@@ -143,7 +144,7 @@ const RestaurantDetail = () => {
                 }}
               >
                 {s.label}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -214,7 +215,7 @@ const MenuCard = ({
     (product.addons && product.addons.length > 0);
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onOpen}
       className="group relative flex flex-col rounded-2xl bg-card p-2 text-right shadow-soft ring-1 ring-border/40 transition active:scale-[0.97]"
@@ -263,7 +264,7 @@ const MenuCard = ({
       <span className="mt-1 font-display text-sm font-extrabold tabular-nums">
         {fmtMoney(product.price)}
       </span>
-    </button>
+    </Button>
   );
 };
 

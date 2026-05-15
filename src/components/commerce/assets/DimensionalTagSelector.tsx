@@ -22,6 +22,8 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { TagsGateway } from "@/core/commerce";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import type {
   AssetTag,
   AssetTagDraft,
@@ -233,7 +235,7 @@ export default function DimensionalTagSelector({
           المحاور
         </span>
         {axisCandidates.map((axis) => (
-          <button
+          <Button
             key={axis}
             type="button"
             onClick={() => {
@@ -247,7 +249,7 @@ export default function DimensionalTagSelector({
             }`}
           >
             {axisLabel(axis)}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -255,7 +257,7 @@ export default function DimensionalTagSelector({
       <div className="rounded-2xl border border-border bg-background-secondary/40 p-2.5 space-y-2">
         <div className="flex items-center gap-2">
           <Tags className="h-4 w-4 text-primary shrink-0" />
-          <input
+          <Input
             ref={inputRef}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -278,7 +280,7 @@ export default function DimensionalTagSelector({
         {(suggestions.length > 0 || canCreate) && (
           <div className="rounded-xl bg-background border border-border/70 max-h-56 overflow-y-auto divide-y divide-border/40">
             {suggestions.map((tag) => (
-              <button
+              <Button
                 key={tag.id}
                 type="button"
                 onClick={() => addExisting(tag)}
@@ -293,11 +295,11 @@ export default function DimensionalTagSelector({
                 <span className="text-[10px] font-bold uppercase tracking-wider text-foreground-tertiary bg-muted/60 px-2 py-0.5 rounded-full shrink-0">
                   {axisLabel(tag.tag_key)}
                 </span>
-              </button>
+              </Button>
             ))}
 
             {canCreate && (
-              <button
+              <Button
                 type="button"
                 onClick={addCreate}
                 className="w-full flex items-center justify-between gap-2 px-3 py-2 text-right hover:bg-emerald-500/10 press"
@@ -314,7 +316,7 @@ export default function DimensionalTagSelector({
                 <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full shrink-0">
                   {axisLabel(parsed.axis)}
                 </span>
-              </button>
+              </Button>
             )}
           </div>
         )}
@@ -371,14 +373,14 @@ export default function DimensionalTagSelector({
                       {isNew && (
                         <span className="text-[9px] font-extrabold opacity-70 ml-0.5">جديد</span>
                       )}
-                      <button
+                      <Button
                         type="button"
                         onClick={() => removeAt(idx)}
                         className="h-5 w-5 rounded-full inline-flex items-center justify-center hover:bg-foreground/10 press"
                         aria-label="إزالة"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </span>
                   );
                 })}

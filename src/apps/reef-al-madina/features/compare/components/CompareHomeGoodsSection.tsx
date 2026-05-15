@@ -21,6 +21,7 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const fmt = (n: number) => `${toLatin(n.toLocaleString("en-US"))} ج.م`;
 
@@ -95,13 +96,13 @@ const CompareHomeGoodsSection = () => {
         <span className="px-2 text-[12px] font-extrabold text-foreground">
           مقارنة دقيقة بين {toLatin(items.length)} منتجات
         </span>
-        <button
+        <Button
           onClick={clear}
           className="inline-flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1.5 text-[11px] font-extrabold text-destructive"
         >
           <Trash2 className="h-3.5 w-3.5" />
           مسح الكل
-        </button>
+        </Button>
       </div>
 
       {/* Horizontal scroll comparison */}
@@ -122,13 +123,13 @@ const CompareHomeGoodsSection = () => {
                 key={it.id}
                 className="relative flex flex-col overflow-hidden rounded-2xl bg-card shadow-soft ring-1 ring-border/50"
               >
-                <button
+                <Button
                   onClick={() => remove(it.id)}
                   className="absolute right-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-background/90 text-foreground shadow-soft backdrop-blur"
                   aria-label="حذف من المقارنة"
                 >
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
 
                 <div className="relative aspect-square bg-secondary/40">
                   <img
@@ -228,7 +229,7 @@ const CompareHomeGoodsSection = () => {
                     </p>
                   )}
 
-                  <button
+                  <Button
                     onClick={() => handleAdd(it)}
                     className={`mt-2 flex h-10 items-center justify-center gap-1 rounded-full text-[11.5px] font-extrabold shadow-pill transition active:scale-95 ${
                       isPre
@@ -247,7 +248,7 @@ const CompareHomeGoodsSection = () => {
                         أضف للسلة
                       </>
                     )}
-                  </button>
+                  </Button>
                 </div>
               </article>
             );

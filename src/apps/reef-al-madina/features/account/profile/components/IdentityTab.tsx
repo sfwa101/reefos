@@ -6,6 +6,7 @@ import { Section, SmartField, ReadonlyField } from "./Primitives";
 import { genderOptions, occupations } from "../data";
 import { extractPhoneFromPseudoEmail } from "../utils";
 import type { Gender, ProfileForm } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const IdentityTab = ({
   form, userEmail, onChange, onClearSaveState,
@@ -62,14 +63,14 @@ export const IdentityTab = ({
             const Icon = o.icon;
             const active = form.occupation === o.value;
             return (
-              <button key={o.value} type="button" onClick={() => upd({ occupation: o.value })}
+              <Button key={o.value} type="button" onClick={() => upd({ occupation: o.value })}
                 className={cn("flex flex-col items-center gap-2 rounded-[1.3rem] border px-3 py-4 text-center transition ease-apple",
                   active ? "border-primary bg-primary-soft shadow-soft" : "border-border/60 bg-background/80")}>
                 <div className={cn("flex h-10 w-10 items-center justify-center rounded-full", active ? "bg-primary text-primary-foreground" : "bg-muted text-primary")}>
                   <Icon className="h-5 w-5" />
                 </div>
                 <span className="text-[12px] font-extrabold text-foreground">{o.label}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -77,16 +78,16 @@ export const IdentityTab = ({
 
       <Section icon={Users} title="عدد أفراد الأسرة" helper="يساعدنا في اقتراح أحجام العبوات المناسبة.">
         <div className="flex items-center justify-between gap-3 rounded-[1.3rem] border border-border/60 bg-background/80 p-3">
-          <button type="button"
+          <Button type="button"
             onClick={() => upd({ householdSize: Math.max(0, form.householdSize - 1) })}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg font-extrabold text-foreground">−</button>
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-lg font-extrabold text-foreground">−</Button>
           <div className="text-center">
             <div className="font-display text-3xl font-extrabold text-foreground tabular-nums">{form.householdSize || "—"}</div>
             <div className="text-[11px] text-muted-foreground">{form.householdSize > 0 ? "فرد" : "غير محدد"}</div>
           </div>
-          <button type="button"
+          <Button type="button"
             onClick={() => upd({ householdSize: Math.min(20, form.householdSize + 1) })}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-extrabold text-primary-foreground shadow-pill">+</button>
+            className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-lg font-extrabold text-primary-foreground shadow-pill">+</Button>
         </div>
       </Section>
     </>

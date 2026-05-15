@@ -3,6 +3,7 @@ import { CalendarDays } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter, SheetClose } from "@/components/ui/sheet";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   /** YYYY-MM-DD or "" */
@@ -41,7 +42,7 @@ const BirthDatePicker = ({ value, onChange, minDate, maxDate, className }: Props
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <button
+        <Button
           type="button"
           className={cn(
             "flex w-full items-center justify-between gap-3 rounded-[1.2rem] border border-border/60 bg-background/80 px-4 py-3 text-right transition active:scale-[0.99]",
@@ -55,7 +56,7 @@ const BirthDatePicker = ({ value, onChange, minDate, maxDate, className }: Props
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-soft text-primary">
             <CalendarDays className="h-4 w-4" />
           </span>
-        </button>
+        </Button>
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-3xl">
         <SheetHeader className="text-right">
@@ -77,18 +78,18 @@ const BirthDatePicker = ({ value, onChange, minDate, maxDate, className }: Props
         </div>
         <SheetFooter className="grid grid-cols-2 gap-2">
           <SheetClose asChild>
-            <button type="button" className="h-12 rounded-full border border-border/60 bg-background text-sm font-extrabold">
+            <Button type="button" className="h-12 rounded-full border border-border/60 bg-background text-sm font-extrabold">
               إلغاء
-            </button>
+            </Button>
           </SheetClose>
-          <button
+          <Button
             type="button"
             onClick={confirm}
             disabled={!draft}
             className="h-12 rounded-full bg-primary text-sm font-extrabold text-primary-foreground shadow-pill disabled:opacity-50"
           >
             تأكيد
-          </button>
+          </Button>
         </SheetFooter>
       </SheetContent>
     </Sheet>

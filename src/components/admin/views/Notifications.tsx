@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { broadcastNotificationFn } from "@/core/crm/crm.functions";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 type NotifRow = {
   id: string;
@@ -82,13 +83,13 @@ export default function NotificationsPage() {
           },
         ]}
         topSlot={
-          <button
+          <Button
             onClick={() => setOpen(true)}
             className="w-full md:w-auto inline-flex items-center justify-center gap-2 px-5 h-11 rounded-2xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground font-semibold text-[14px] shadow-soft press"
           >
             <Plus className="h-4 w-4" />
             إرسال إشعار جديد
-          </button>
+          </Button>
         }
         dataSource={{
           table: "notifications",
@@ -147,7 +148,7 @@ export default function NotificationsPage() {
             <div className="space-y-2">
               <Label>الشريحة المستهدفة</Label>
               <div className="grid grid-cols-2 gap-2">
-                <button
+                <Button
                   type="button"
                   onClick={() => setSegment("all")}
                   className={`flex items-center justify-center gap-2 h-11 rounded-xl border text-[13px] font-semibold press ${
@@ -158,8 +159,8 @@ export default function NotificationsPage() {
                 >
                   <Users className="h-4 w-4" />
                   كل العملاء
-                </button>
-                <button
+                </Button>
+                <Button
                   type="button"
                   onClick={() => setSegment("vip")}
                   className={`flex items-center justify-center gap-2 h-11 rounded-xl border text-[13px] font-semibold press ${
@@ -170,24 +171,24 @@ export default function NotificationsPage() {
                 >
                   <Crown className="h-4 w-4" />
                   VIP فقط
-                </button>
+                </Button>
               </div>
             </div>
           </div>
           <DialogFooter className="gap-2">
-            <button
+            <Button
               onClick={() => setOpen(false)}
               className="h-10 px-4 rounded-xl bg-surface border border-border/50 text-[13px] font-semibold press"
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={() => sendMut.mutate()}
               disabled={sendMut.isPending || !title.trim()}
               className="h-10 px-5 rounded-xl bg-gradient-to-br from-primary to-primary-glow text-primary-foreground text-[13px] font-semibold press disabled:opacity-50"
             >
               {sendMut.isPending ? "جاري الإرسال..." : "إرسال"}
-            </button>
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
