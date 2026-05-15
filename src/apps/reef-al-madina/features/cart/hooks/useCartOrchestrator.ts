@@ -504,11 +504,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
       //    debounced background push and any realtime refetch race that
       //    would otherwise resurrect the cart on the next page load.
       if (currentUser?.id) {
-        try {
-          await clearMyCartFn();
-        } catch (e) {
-          Tracer.warn("checkout", "purge_remote_cart_failed", { error: String(e) });
-        }
+        await sync.purgeRemoteCart();
       }
       fireConfetti();
 
