@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { MediaGateway } from "@/core/media";
 import { decodeEgyptianId, normalizeIdInput, type DecodedEgyptianId } from "./egyptianIdDecoder";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
