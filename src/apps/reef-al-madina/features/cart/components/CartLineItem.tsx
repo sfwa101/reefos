@@ -37,7 +37,7 @@ const CartLineItemImpl = ({
 }) => {
   const x = useMotionValue(0);
   const bgOpacity = useTransform(x, [-120, -60, 0], [1, 0.6, 0]);
-  const unitPrice = l.meta?.unitPrice ?? l.product.price;
+
 
   // Wave P-1.3 — engine-authoritative breakdown (always non-null for cart lines).
   const breakdown = useCartLineBreakdown(l.product.id);
