@@ -1,14 +1,20 @@
 /**
  * useVisionGenesis — Sovereign Vision Hook (Phase C-4).
  *
+ * Routes via createServerFn — zero edge calls.
+ *
  * Constitutional flow:
  *   UI → ImageCompressor (max 1024px, WebP q≈0.8, < 150 KB)
  *      → blobToDataUrl (inline base64)
- *      → HakimGateway (Edge inference)
+ *      → HakimGateway.inferProductDNA
+ *      → visionGenesisFn (createServerFn + requireSupabaseAuth)
+ *      → runVisionGenesis (server)
  *
- * The hook owns NO direct Supabase imports, NO functions.invoke calls,
- * and NO Storage uploads for vision inference (Storage is no longer in
- * the critical path — the AI Gateway gets the inline data directly).
+ * The hook owns NO direct Supabase imports, NO `functions.invoke` calls,
+ * and NO Storage uploads for vision inference. All server-side work runs
+ * inside a TanStack server function — there are no Supabase Edge Functions
+ * in this path. Storage is not in the critical path; the AI Gateway
+ * receives inline base64 data directly.
  */
 import { useMutation } from "@tanstack/react-query";
 import { compressImage, blobToDataUrl } from "@/core/media";

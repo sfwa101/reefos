@@ -1,0 +1,709 @@
+{
+  "planned": [
+    {
+      "file": "src/apps/reef-al-madina/features/cart/hooks/useCartWhatsApp.ts",
+      "total": 2,
+      "replace": 1,
+      "delete": 1,
+      "by": {
+        "log": 1,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/hooks/usePosEngine.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/account/views/Profile.tsx",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 2,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/cashier/gateway/cashier.functions.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 2,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/identity/user.functions.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 2,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/engine/SduiWatchdog.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 2,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/vision/genesis.server.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 2,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/lib/cartSync.ts",
+      "total": 2,
+      "replace": 2,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 2,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/marketing/PanelErrorBoundary.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/WhatsAppFallbackDialog.tsx",
+      "total": 1,
+      "replace": 0,
+      "delete": 1,
+      "by": {
+        "log": 1,
+        "info": 0,
+        "warn": 0,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/hooks/useCartCalculations.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/driver/store/useDriverTelemetry.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/offers/hooks/useSpatioTemporalOffers.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/POSErrorBoundary.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/AppShell.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/account/views/Addresses.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/account/views/Notifications.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/account/views/Verification.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/admin/views/Orders.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/hakim/FloatingGuardian.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/identity/AccountView.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/orders/OrderSuccessView.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/components/system/GlobalErrorBoundary.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/cashier/gateway/checkout.functions.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/catalog/runtime/legacyRuntime.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/commerce/gateway/InventoryGateway.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/commerce/gateway/PricingGateway.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/commerce/pricing/hooks/useLivePrice.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/hakim-ai/hooks/useSovereignCheckout.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/identity/WorkspaceHydrationBootstrap.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/inventory/gateway/inventory.functions.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/logistics/gateway/LogisticsGateway.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/admin/components/AdminBlockRenderer.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/admin/components/AdminErrorBoundary.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/admin/schemas.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/components/SDUIErrorBoundary.tsx",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/engine/sanitizeAiBlocks.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/engine/schemas.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/hooks/useSduiLayout.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/runtime-ui/watchdog.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/core/system/gateway/SystemGateway.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/hooks/useProductsQuery.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/hooks/useSystemSettings.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 1,
+        "error": 0,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/integrations/supabase/admin-middleware.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/integrations/supabase/auth-middleware.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/integrations/supabase/client.server.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/integrations/supabase/client.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    },
+    {
+      "file": "src/routes/api/hakim-chat.ts",
+      "total": 1,
+      "replace": 1,
+      "delete": 0,
+      "by": {
+        "log": 0,
+        "info": 0,
+        "warn": 0,
+        "error": 1,
+        "debug": 0,
+        "trace": 0
+      }
+    }
+  ],
+  "skipped": [
+    {
+      "file": "src/core/system/observability/SovereignTracingGateway.ts",
+      "reason": "whitelist",
+      "count": 2
+    },
+    {
+      "file": "src/core/system/observability/Tracer.ts",
+      "reason": "whitelist",
+      "count": 3
+    }
+  ],
+  "summary": {
+    "files_to_modify": 49,
+    "total_callsites": 57,
+    "will_replace": 55,
+    "will_delete": 2,
+    "skipped_count": 2
+  }
+}

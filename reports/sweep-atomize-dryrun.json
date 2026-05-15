@@ -1,0 +1,1363 @@
+{
+  "planned": [
+    {
+      "file": "src/apps/reef-al-madina/features/instruction-guides/components/RecipeModal.tsx",
+      "buttons": 11,
+      "inputs": 0,
+      "total": 11
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/CheckoutSheet.tsx",
+      "buttons": 5,
+      "inputs": 5,
+      "total": 10
+    },
+    {
+      "file": "src/components/admin/views/Categories.tsx",
+      "buttons": 7,
+      "inputs": 3,
+      "total": 10
+    },
+    {
+      "file": "src/components/admin/views/Expenses.tsx",
+      "buttons": 4,
+      "inputs": 6,
+      "total": 10
+    },
+    {
+      "file": "src/components/commerce/assets/PackagingHierarchyBuilder.tsx",
+      "buttons": 6,
+      "inputs": 4,
+      "total": 10
+    },
+    {
+      "file": "src/components/finance/WalletSavingsJars.tsx",
+      "buttons": 7,
+      "inputs": 3,
+      "total": 10
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/basket-detail-sheet.tsx",
+      "buttons": 7,
+      "inputs": 3,
+      "total": 10
+    },
+    {
+      "file": "src/modules/search/components/SearchOverlay.tsx",
+      "buttons": 9,
+      "inputs": 1,
+      "total": 10
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/usa-editor/USAEditor.tsx",
+      "buttons": 7,
+      "inputs": 2,
+      "total": 9
+    },
+    {
+      "file": "src/components/ProductCard.tsx",
+      "buttons": 9,
+      "inputs": 0,
+      "total": 9
+    },
+    {
+      "file": "src/components/admin/views/Partners.tsx",
+      "buttons": 6,
+      "inputs": 3,
+      "total": 9
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/marketing/CouponsPanel.tsx",
+      "buttons": 8,
+      "inputs": 0,
+      "total": 8
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/BasicInfoForm.tsx",
+      "buttons": 1,
+      "inputs": 7,
+      "total": 8
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/CartLineItem.tsx",
+      "buttons": 8,
+      "inputs": 0,
+      "total": 8
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/product-detail/ProductGallery.tsx",
+      "buttons": 8,
+      "inputs": 0,
+      "total": 8
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/LiveBlockInspector.tsx",
+      "buttons": 6,
+      "inputs": 2,
+      "total": 8
+    },
+    {
+      "file": "src/components/admin/views/HakimChat.tsx",
+      "buttons": 5,
+      "inputs": 3,
+      "total": 8
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/marketing/BannersPanel.tsx",
+      "buttons": 7,
+      "inputs": 0,
+      "total": 7
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/PricingAndInventory.tsx",
+      "buttons": 1,
+      "inputs": 6,
+      "total": 7
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/VisionGenesisUploader.tsx",
+      "buttons": 6,
+      "inputs": 1,
+      "total": 7
+    },
+    {
+      "file": "src/components/admin/crm/CreateHumanDialog.tsx",
+      "buttons": 2,
+      "inputs": 5,
+      "total": 7
+    },
+    {
+      "file": "src/components/admin/views/Charity.tsx",
+      "buttons": 4,
+      "inputs": 3,
+      "total": 7
+    },
+    {
+      "file": "src/components/admin/views/CostBulk.tsx",
+      "buttons": 4,
+      "inputs": 3,
+      "total": 7
+    },
+    {
+      "file": "src/components/admin/views/Settings.tsx",
+      "buttons": 2,
+      "inputs": 5,
+      "total": 7
+    },
+    {
+      "file": "src/components/commerce/assets/CognitivePricingBuilder.tsx",
+      "buttons": 4,
+      "inputs": 3,
+      "total": 7
+    },
+    {
+      "file": "src/components/finance/WalletTransferDialog.tsx",
+      "buttons": 4,
+      "inputs": 3,
+      "total": 7
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/usa-editor/InventoryMatrixPanel.tsx",
+      "buttons": 4,
+      "inputs": 2,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/SharedCartManager.tsx",
+      "buttons": 5,
+      "inputs": 1,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/ProductCards.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/PosShiftManager.tsx",
+      "buttons": 4,
+      "inputs": 2,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/FiltersSheet.tsx",
+      "buttons": 5,
+      "inputs": 1,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/SduiHomeFeed.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/components/admin/SmartActionComposer.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/components/admin/views/BusinessRules.tsx",
+      "buttons": 4,
+      "inputs": 2,
+      "total": 6
+    },
+    {
+      "file": "src/components/admin/views/OrderDetail.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/butcher-sheet.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/meal-sheet.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/restaurant-item-sheet.tsx",
+      "buttons": 6,
+      "inputs": 0,
+      "total": 6
+    },
+    {
+      "file": "src/modules/search/components/RequestProductForm.tsx",
+      "buttons": 2,
+      "inputs": 4,
+      "total": 6
+    },
+    {
+      "file": "src/routes/_dispatch.dispatch.tsx",
+      "buttons": 5,
+      "inputs": 1,
+      "total": 6
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/marketing/FlashPanel.tsx",
+      "buttons": 5,
+      "inputs": 0,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/SmartTagSuggester.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/CartPaymentMethods.tsx",
+      "buttons": 5,
+      "inputs": 0,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/RechargeDialog.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/instruction-guides/components/WeeklyPlanner.tsx",
+      "buttons": 5,
+      "inputs": 0,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/PosBarcodeCart.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/SearchAndFilters.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/account/views/Verification.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/admin/HakimFAB.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/admin/views/Inventory.tsx",
+      "buttons": 2,
+      "inputs": 3,
+      "total": 5
+    },
+    {
+      "file": "src/components/admin/views/Notifications.tsx",
+      "buttons": 5,
+      "inputs": 0,
+      "total": 5
+    },
+    {
+      "file": "src/components/commerce/assets/DimensionalTagSelector.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/finance/GameyaCreationSheet.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/finance/WalletCharityHub.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/finance/WalletTopupDialog.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/components/identity/EmployeeHubView.tsx",
+      "buttons": 4,
+      "inputs": 1,
+      "total": 5
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/basket-builder.tsx",
+      "buttons": 5,
+      "inputs": 0,
+      "total": 5
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/OptionsBuilder.tsx",
+      "buttons": 2,
+      "inputs": 2,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/ProductOverlay.tsx",
+      "buttons": 2,
+      "inputs": 2,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/instruction-guides/components/DailyBrowser.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/logistics/components/AddressSheet.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/PosQuickPay.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/ShiftSettlementPanel.tsx",
+      "buttons": 2,
+      "inputs": 2,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/EditableBlockWrapper.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/vendor/components/VendorInventoryGrid.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/UniversalAdminGrid.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/views/AdvanceApprovals.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/views/HumanDirectory.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/views/ProfitObservationRoom.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/views/RibaAudit.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/components/admin/views/Staff.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/components/catalog/ProductDetailView.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/components/finance/WalletAssetConvertSheet.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/components/hakim/FloatingGuardian.tsx",
+      "buttons": 3,
+      "inputs": 1,
+      "total": 4
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/fulfillment-selector.tsx",
+      "buttons": 4,
+      "inputs": 0,
+      "total": 4
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/IdentityTab.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/LifestyleTab.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/CartAddressSelector.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/WhatsAppFallbackDialog.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/compare/components/CompareHomeGoodsSection.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/kds/components/KDSBoard.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/product-detail/PharmacyMedicalBlock.tsx",
+      "buttons": 1,
+      "inputs": 2,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/ProductCard.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/vendor-menu/components/RestaurantsMenuSection.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "total": 3
+    },
+    {
+      "file": "src/components/BirthDatePicker.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/GlobalApprovalBanner.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/TopBar.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/account/views/Payments.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/account/views/Settings.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/admin/views/Kyc.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/admin/views/SectionManager.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/admin/views/TopupApprovals.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "total": 3
+    },
+    {
+      "file": "src/components/catalog/RestaurantDetailView.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/commerce/assets/LivingInventoryBuilder.tsx",
+      "buttons": 0,
+      "inputs": 3,
+      "total": 3
+    },
+    {
+      "file": "src/components/desktop/CartPanel.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/finance/JoinGameyaSheet.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/finance/WalletAffiliateHub.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/finance/WalletAnalytics.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "total": 3
+    },
+    {
+      "file": "src/components/finance/WalletBalanceCard.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/finance/WalletView.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/orders/CartView.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/components/store/DualNavStore.tsx",
+      "buttons": 2,
+      "inputs": 1,
+      "total": 3
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/blocks.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/smart-swap-sheet.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/subscription-manager.tsx",
+      "buttons": 3,
+      "inputs": 0,
+      "total": 3
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/AvatarTab.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/ProfileSaveBar.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/components/PurchaseInvoiceBuilder.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/SmartFakkaRail.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/custom-fulfillment/components/VariantPicker.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/digital-borrowing/components/BorrowSheet.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/digital-borrowing/components/KYCGateDialog.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/ScannerOverlay.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/CheckoutPanel.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/product-detail/StickyAddCTA.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/product-detail/VillageBlocks.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/DetailSheet.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/vendor/components/VendorLiveOrdersFeed.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/SinglePageStore.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/components/account/views/Addresses.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/HakimChatDrawer.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/HakimSovereignCard.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/section-manager/BlockInspector.tsx",
+      "buttons": 0,
+      "inputs": 2,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/views/AdminHub.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/views/HakimAdvisor.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/components/admin/views/Zakat.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/components/pos/PosSyncPill.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/system/DevOSNavigator.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/components/vendor/views/VendorShell.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/capabilities/identity/KycUpgradeGate.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/commerce/modifier-engine/atoms/QuantityAtom.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/commerce/cart-upgrade-banner.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/restaurant-card.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/sweets-sheet.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/core/runtime-ui/cards/templates/MealCard.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/routes/_kds.kds.tsx",
+      "buttons": 2,
+      "inputs": 0,
+      "total": 2
+    },
+    {
+      "file": "src/routes/_pos.pos.close-shift.tsx",
+      "buttons": 1,
+      "inputs": 1,
+      "total": 2
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/BudgetTab.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/Primitives.tsx",
+      "buttons": 0,
+      "inputs": 1,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/account/profile/components/ProfileTabsNav.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/marketing/PanelErrorBoundary.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/SpecsForm.tsx",
+      "buttons": 0,
+      "inputs": 1,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/admin/product-editor/primitives.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/cart/components/HakimPredictiveBasket.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/commerce-bundles/components/BasketsBuilderSection.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/digital-borrowing/components/BorrowCard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/digital-borrowing/components/BundlesGrid.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/digital-borrowing/sections/SchoolLibrarySection.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/driver/components/DriverDutyToggle.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/CategoryRail.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/EmptyState.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/health-care/components/SmartBar.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/logistics/components/RealMap.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/main-hub/components/MainSearchHeader.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/main-hub/components/PromotionSlider.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/offers/components/EitharToggle.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/offers/components/FakkaRoundupToggle.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/offers/components/TierExclusiveOffers.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/POSErrorBoundary.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/BundleCard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/CategoriesGrid.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/CompareBar.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/storefront/home/components/ProductsGrid.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/vendor/components/SovereignSettlementsPanel.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/weighed-prep/components/CutBuilder.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/apps/reef-al-madina/features/weighed-prep/components/Panel.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/BackHeader.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/FeatureTileGrid.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/LiveBanners.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/LockedOfferCard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/PromoCarousel.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/StickySearchBar.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/account/views/Notifications.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/account/views/Orders.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/account/views/Profile.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/HakimPulseBanner.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/OrderSlideOver.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/PrintReportButton.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/WorkspaceSwitcher.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/crm/HumanProfileSheet.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/section-manager/BlockPalette.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/AllocationMonitor.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/Customers.tsx",
+      "buttons": 0,
+      "inputs": 1,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/Dashboard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/DeliverySettings.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/ExecutiveDashboard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/More.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/Orders.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/PaymentsSchedule.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/Payouts.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/PurchaseInvoices.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/RolePermissions.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/SovereignTracing.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/admin/views/SovereignTreasury.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/BalanceCard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/BalanceCardsCarousel.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/GameyaDetailsSheet.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/GameyasDockContent.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/GameyasTab.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/NeoCardsCarousel.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/NeoSuperCard.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/VaultsDockContent.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/VaultsGrid.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/WalletPosBarcode.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/WalletTabs.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/WalletTransactionList.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/finance/WithdrawDialog.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/identity/AccountView.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/orders/OrderSuccessView.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/search/SearchView.tsx",
+      "buttons": 0,
+      "inputs": 1,
+      "total": 1
+    },
+    {
+      "file": "src/components/system/GlobalErrorBoundary.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/components/vendor/views/VendorProducts.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/capabilities/SearchAtom.tsx",
+      "buttons": 0,
+      "inputs": 1,
+      "total": 1
+    },
+    {
+      "file": "src/core/commerce/modifier-engine/atoms/SelectionAtom.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/commerce/modifier-engine/atoms/VisualPickerAtom.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/basket-card.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/runtime-ui/blocks/product/compare-section.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/blocks/offers/AmanahLockShield.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/runtime-ui/sdui/blocks/offers/SduiPredictiveRefillRail.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/core/runtime-ui/sections/SectionHeroBanner.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/modules/search/components/BarcodeScannerSheet.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/router.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    },
+    {
+      "file": "src/routes/_app/wallet.tsx",
+      "buttons": 1,
+      "inputs": 0,
+      "total": 1
+    }
+  ],
+  "skipped": [
+    {
+      "file": "src/apps/reef-al-madina/features/pos/components/MorphingPOS.tsx",
+      "reason": "dynamic-spread",
+      "buttons": 5,
+      "inputs": 0
+    },
+    {
+      "file": "src/components/admin/section-manager/BlockCard.tsx",
+      "reason": "dynamic-spread",
+      "buttons": 1,
+      "inputs": 0
+    }
+  ],
+  "summary": {
+    "files_to_modify": 223,
+    "total_callsites": 700,
+    "buttons": 567,
+    "inputs": 133,
+    "skipped_count": 2
+  }
+}
