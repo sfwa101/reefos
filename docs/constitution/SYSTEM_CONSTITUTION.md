@@ -1,8 +1,14 @@
-# REEFOS — System Constitution
+# REEFOS — System Constitution · **v3.0 (Imperial Override)**
 
-> **Status:** Ratified · Phase 1 — Sovereign Governance Initialization
-> **Scope:** Binding on every human contributor, AI agent, automation, and runtime module operating inside REEFOS.
-> **Precedence:** This document overrides any tutorial, framework default, or stylistic preference. Where a conflict exists, the Constitution wins.
+> **Status:** Ratified · Phase P-1 — Sovereign Cleanup & Nucleus Hardening
+> **Scope:** Binding on every human contributor, AI agent, automation, and runtime module operating inside REEFOS / Salsabil OS.
+> **Precedence:** This document overrides any tutorial, framework default, or stylistic preference. The companion `SOVEREIGN_V3_MANDATE.md` overrides this document for matters of intent and phase priority. Where a conflict exists, V3 wins.
+
+---
+
+## 0a. V3 Imperial Override (Summary)
+
+The four V3 Core Laws — **Sovereign Singularity**, **Gateway Exclusivity**, **Presentation Purity (V3)**, **Event-Driven Truth** — are blocking. They are detailed in `SOVEREIGN_V3_MANDATE.md` §4 and enforced in `ARCHITECTURE_LAWS.md` Laws 1–11. The "Purification First" mandate (Option A) is the only active operational mode: no new vertical, no new feature surface, no new capability key may be admitted until the Reef Al Madina transaction loop (Cart → Pricing → Checkout → KDS → Ledger → Shift) is 100 % V3-compliant.
 
 ---
 

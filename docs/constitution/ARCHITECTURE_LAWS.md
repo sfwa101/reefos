@@ -1,6 +1,17 @@
-# REEFOS — Architecture Laws
+# REEFOS — Architecture Laws · **v3.0**
 
-> Subordinate to `SYSTEM_CONSTITUTION.md`. Defines the **hard architectural laws** every module, file, and contributor MUST obey.
+> Subordinate to `SYSTEM_CONSTITUTION.md` and `SOVEREIGN_V3_MANDATE.md`. Defines the **hard architectural laws** every module, file, and contributor MUST obey. Under V3, Laws 2, 3, 6, and 9 are **blocking** (CI failure / revert on sight).
+
+---
+
+## V3 Core Laws (Imperial Override — read first)
+
+- **Sovereign Singularity** — exactly ONE canonical implementation per concern (Cart, Pricing, Auth, Ledger, Inventory, Shift, KDS, Identity, Catalog). All others are `@deprecated` on sight, destroyed within the wave.
+- **Gateway Exclusivity** — zero data-plane calls outside `src/core/<domain>/gateway/`. Any `supabase.*`, raw `fetch` to an external API, or third-party SDK call elsewhere is a blocking violation.
+- **Presentation Purity (V3)** — UI is a pure Runtime Renderer. No arithmetic, no role-string branching, no direct gateway calls, no untyped state mutation.
+- **Event-Driven Truth** — every state change is the projection of a registered immutable event in `src/core/events/catalog.ts`. Imperative side-effects bypassing the event bus are forbidden.
+
+These map onto the numbered laws below — they do not replace them, they raise their severity.
 
 ---
 
