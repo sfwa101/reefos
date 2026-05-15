@@ -40,7 +40,9 @@ import {
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
+import { HakimLayer } from "./hakim/HakimLayer";
+import { useHakimLayer } from "./hakim/useHakimLayer";
 
 type NavItem = {
   to: string;
@@ -96,6 +98,7 @@ function AdminHeader({
   isDark: boolean;
   toggleTheme: () => void;
 }) {
+  const openLayer = useHakimLayer((s) => s.open);
   return (
     <header className="sticky top-0 z-50 glass-steel border-b border-white/40 h-16">
       <div className="mx-auto flex h-full max-w-screen-2xl items-center gap-3 px-4 lg:px-6">
@@ -117,15 +120,21 @@ function AdminHeader({
           </div>
         </Link>
 
-        <div className="relative ms-auto hidden flex-1 max-w-md md:block">
-          <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="بحث سريع · طلب، عميل، منتج…"
-            className="h-10 rounded-2xl border-white/40 bg-white/40 pe-10 text-[13px] font-medium backdrop-blur-md placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary/30"
-            aria-label="بحث سريع"
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => openLayer("command")}
+          aria-label="افتح شريط الأوامر"
+          className="relative ms-auto hidden h-10 w-full max-w-md flex-1 items-center gap-2 rounded-2xl border border-white/40 bg-white/40 px-4 text-[13px] font-medium backdrop-blur-md transition hover:bg-white/60 md:flex"
+        >
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <span className="flex-1 text-right text-muted-foreground/80">
+            بحث سريع · طلب، عميل، منتج…
+          </span>
+          <kbd className="rounded-md border border-white/60 bg-white/60 px-1.5 py-0.5 text-[10px] font-extrabold text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
+
 
         <div className="ms-auto flex items-center gap-2 md:ms-0">
           <Button
@@ -248,29 +257,27 @@ function AdminBottomNav({ activePath }: { activePath: string }) {
 
 /* ------------------------------------------------------------------ */
 
-/** Floating Hakim launcher — UI placeholder, wired to the engine later. */
+/** Floating Hakim launcher — opens the global Hakim side panel. */
 function HakimFloatingLauncher() {
+  const open = useHakimLayer((s) => s.open);
   return (
-    <Link
-      to="/admin/hakim"
+    <motion.button
+      type="button"
+      onClick={() => open("panel")}
       aria-label="مساعد حكيم"
-      className="group fixed bottom-24 left-4 z-50 lg:bottom-6"
+      initial={{ scale: 0, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: "spring", stiffness: 240, damping: 22, delay: 0.2 }}
+      whileHover={{ scale: 1.06 }}
+      whileTap={{ scale: 0.94 }}
+      className="group fixed bottom-24 left-4 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary via-primary-glow to-accent text-primary-foreground shadow-elevated ring-2 ring-white/60 lg:bottom-6"
     >
-      <motion.div
-        initial={{ scale: 0, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ type: "spring", stiffness: 240, damping: 22, delay: 0.2 }}
-        whileHover={{ scale: 1.06 }}
-        whileTap={{ scale: 0.94 }}
-        className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-primary via-primary-glow to-accent text-primary-foreground shadow-elevated ring-2 ring-white/60"
-      >
-        <Sparkles className="h-6 w-6" strokeWidth={2.4} />
-        <span className="absolute right-0.5 top-0.5 flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
-        </span>
-      </motion.div>
-    </Link>
+      <Sparkles className="h-6 w-6" strokeWidth={2.4} />
+      <span className="absolute right-0.5 top-0.5 flex h-3 w-3">
+        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+        <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white" />
+      </span>
+    </motion.button>
   );
 }
 
@@ -297,6 +304,7 @@ export function AdminShell() {
 
       <AdminBottomNav activePath={activePath} />
       <HakimFloatingLauncher />
+      <HakimLayer />
     </div>
   );
 }
