@@ -15,16 +15,38 @@ import {
   MessageCircle,
   Navigation,
   Phone,
-  ScanLine,
+  Store,
+  PackageCheck,
 } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  updateDispatchTaskStatusFn,
+  type DispatchTaskAction,
+} from "@/core/logistics/driver.functions";
 import type {
   DriverEvent,
   DriverTask,
   OrderInfo,
 } from "../types/driver.types";
+
+function getGpsBest(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 6_000 },
+    );
+  });
+}
 
 export const TaskActionCard = ({
   task,
