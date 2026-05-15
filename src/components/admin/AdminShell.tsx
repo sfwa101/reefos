@@ -27,7 +27,9 @@ import { Button } from "@/components/ui/button";
 import { HakimLayer } from "./hakim/HakimLayer";
 import { useHakimLayer } from "./hakim/useHakimLayer";
 import { SovereignSwitcher } from "./SovereignSwitcher";
+import { ReefModeToggle } from "./ReefModeToggle";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
+import { useReefMode } from "@/core/identity/useReefMode";
 import { getPrimaryNav, getBottomNav, type NavItem } from "./navConfig";
 
 /* ------------------------------------------------------------------ */
