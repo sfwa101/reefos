@@ -406,6 +406,9 @@ export interface VisionAssetDTO {
   nutrition: VisionAssetNutrition | null;
   physical: VisionAssetPhysical | null;
   allergens: string[] | null;
+  barcode: string | null;
+  halal: boolean | null;
+  tier_rules: JsonObject | null;
 }
 export interface VisionSkuVariantAxes {
   size: string | null;
