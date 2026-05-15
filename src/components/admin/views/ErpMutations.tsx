@@ -16,7 +16,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-import SectionHeader from "@/components/admin/ui/SectionHeader";
+import { SectionHeader } from "@/components/admin/ui/SectionHeader";
 import {
   ExpenseFormModal,
   ProductFormModal,
