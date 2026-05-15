@@ -19,7 +19,7 @@ import { CompareProvider } from "@/context/CompareContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { LocationProvider } from "@/context/LocationContext";
-import { SharedCartProvider } from "@/context/SharedCartContext";
+
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { LiveRulesBootstrap } from "@/components/LiveRulesBootstrap";
@@ -183,7 +183,6 @@ function RootComponent() {
                 <SovereignThemeProvider tenantId="reef">
                 <LocationProvider>
                   <CartProvider>
-                    <SharedCartProvider>
                       <CompareProvider>
                         <FavoritesProvider>
                           <LiveRulesBootstrap />
@@ -200,7 +199,6 @@ function RootComponent() {
                           </MaintenanceGate>
                         </FavoritesProvider>
                       </CompareProvider>
-                    </SharedCartProvider>
                   </CartProvider>
                 </LocationProvider>
                 </SovereignThemeProvider>
