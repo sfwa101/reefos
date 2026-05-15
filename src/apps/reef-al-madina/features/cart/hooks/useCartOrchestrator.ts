@@ -287,10 +287,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
     lastSubmitAtRef.current = Date.now();
 
     const source = "CartCheckoutActions:onCheckout→useCartOrchestrator.checkoutWA";
-    console.info("[checkout] WhatsApp checkout invoked", {
-      source,
-      cartLines: lines.length,
-    });
+    Tracer.info("checkout", "wa_checkout_invoked", { source, cartLines: lines.length });
     // Phase 38 — distributed tracing: one trace_id per submit attempt; the
     // same id is reused for `checkout_attempt` and (on success) `checkout_success`.
     const traceId = createTraceId();
