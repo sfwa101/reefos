@@ -10,7 +10,7 @@ import { CAP } from "@/core/capabilities";
 import type { RenderBlock, RenderDescriptor } from "./types";
 import { type SectionIdentity as RegistrySectionIdentity, SECTION_CAP } from "@/core/catalog/registry/SectionIdentityRegistry";
 import { storeThemes } from "@/lib/storeThemes";
-import type { HomeOrchestrator } from "@/apps/reef-al-madina/features/storefront/home/hooks/useHomeOrchestrator";
+import type { HomeOrchestrator } from "@/core/contracts/home-orchestrator";
 
 export type ViewMode = "list" | "details" | "section";
 
