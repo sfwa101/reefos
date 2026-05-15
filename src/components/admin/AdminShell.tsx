@@ -256,6 +256,9 @@ function HakimFloatingLauncher() {
 export function AdminShell() {
   const { isDark, toggle } = useTheme();
   const activePath = useActivePath();
+  const activeOSId = useActiveOSCompany((s) => s.activeId);
+  const primary = getPrimaryNav(activeOSId);
+  const bottom = getBottomNav(activeOSId);
 
   return (
     <div
@@ -265,14 +268,14 @@ export function AdminShell() {
       <AdminHeader isDark={isDark} toggleTheme={toggle} />
 
       <div className="mx-auto flex w-full max-w-screen-2xl">
-        <AdminSidebar activePath={activePath} />
+        <AdminSidebar activePath={activePath} items={primary} />
 
         <main className="flex-1 min-w-0 px-3 pb-32 pt-4 lg:px-6 lg:pb-10">
           <Outlet />
         </main>
       </div>
 
-      <AdminBottomNav activePath={activePath} />
+      <AdminBottomNav activePath={activePath} items={bottom} />
       <HakimFloatingLauncher />
       <HakimLayer />
     </div>
