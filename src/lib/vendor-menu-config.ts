@@ -241,7 +241,7 @@ export const vendorBrandHue = (v: VendorKey): string => {
   return "142 55% 38%";
 };
 
-/** Resolve a vendor for a product (used in CartContext-side grouping). */
+/** Resolve a vendor for a product (used in CartRuntime-side grouping). */
 export const vendorForProduct = (
   productId: string,
   source: string,

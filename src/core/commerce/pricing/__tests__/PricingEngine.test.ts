@@ -2,7 +2,7 @@
  * PricingEngine — Unit Tests (Phase 2.E)
  * ----------------------------------------------------------------
  * Mathematical & financial proof of the engine's correctness BEFORE
- * wiring it into CartContext. Covers:
+ * wiring it into CartRuntime. Covers:
  *   1. Baseline      — passthrough strategy (engine doesn't break simple SKUs)
  *   2. Worst-case    — Meat + custom weight + addons + VIP loyalty + bulk
  *   3. Constraints   — Sweets Type C deposit math + explicit throw on missing booking

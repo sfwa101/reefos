@@ -7,7 +7,7 @@
  *   • Realtime subscription with visibility-aware pause/resume.
  *   • Pricing-driven selector hooks (totals, deposits, loyalty, profit).
  *
- * The legacy file `src/context/CartContext.tsx` is now a 100%-logic-free
+ * The legacy file `src/context/CartRuntime.tsx` is now a 100%-logic-free
  * re-export shim pointing at this module.
  */
 
@@ -35,7 +35,7 @@ import {
 } from "@/core/commerce/pricing/cartPricingAdapter";
 import type { PricingContext } from "@/core/commerce/pricing/types";
 import {
-  useCartStore,
+  useCartProjectionStore,
   useCartActions as useCartStoreActions,
   useCartLinesArray,
   useCartLineQty as useCartStoreLineQty,
@@ -75,7 +75,7 @@ type CartCtxValue = {
 const Ctx = createContext<CartCtxValue | null>(null);
 
 const linesFromStore = (): CartLine[] =>
-  Object.values(useCartStore.getState().items);
+  Object.values(useCartProjectionStore.getState().items);
 
 const cartSignature = (lines: ReadonlyArray<CartLine>): string =>
   lines
@@ -139,7 +139,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       }, 600);
     };
 
-    const unsub = useCartStore.subscribe((state, prev) => {
+    const unsub = useCartProjectionStore.subscribe((state, prev) => {
       if (state.items !== prev.items) schedulePush();
     });
     return () => {

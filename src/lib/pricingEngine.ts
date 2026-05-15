@@ -252,7 +252,7 @@ export const mod = {
 
 /* ===================================================================
  * Universal cart-line meta (Generic Stem-Cell shape).
- * CartLineMeta in CartContext stays backwards-compatible; this is the
+ * CartLineMeta in CartRuntime stays backwards-compatible; this is the
  * forward-looking shape that every section will migrate to.
  * =================================================================== */
 

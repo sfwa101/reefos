@@ -5,7 +5,7 @@ import { useSharedCartSync } from "./useSharedCartSync";
 /**
  * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape kept only
  * to populate the deprecated `CartLine.product` field for §2.E external
- * consumers (CartContext / CartPanel / etc.) until they migrate to
+ * consumers (CartRuntime / CartPanel / etc.) until they migrate to
  * `useCartHydration`.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
@@ -45,7 +45,7 @@ const sharedLineIdentity = (
 
 /**
  * Adapts the shared-cart RPC surface into the same shape as the local
- * CartContext so all downstream derivations work transparently in either
+ * CartRuntime so all downstream derivations work transparently in either
  * mode. Pure refactor extracted from useCartOrchestrator.
  */
 export const useSharedCartAdapter = (sharedCartId: string | null) => {

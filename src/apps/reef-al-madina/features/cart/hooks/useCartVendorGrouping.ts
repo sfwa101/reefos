@@ -5,7 +5,7 @@ import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /**
  * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape. The
  * cross-sell rail still emits `Product[]` because its consumer
- * (CartCrossSellRail / CartContext.add) reads `l.product.*`. Will move to
+ * (CartCrossSellRail / CartRuntime.add) reads `l.product.*`. Will move to
  * `ProductCardVM[]` once §2.E migrates.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";

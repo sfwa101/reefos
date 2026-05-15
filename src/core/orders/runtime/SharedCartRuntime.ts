@@ -3,7 +3,7 @@
  *
  * Layer 4 (Domain). Single source of truth for the active shared-cart id.
  *
- * Replaces the legacy `SharedCartContext` Provider. Storage policy and
+ * Replaces the legacy `SharedCartRuntime` Provider. Storage policy and
  * cross-tab sync are encoded once, here, with no React provider — UI
  * subscribes via {@link useSharedCart} (built on `useSyncExternalStore`).
  *
