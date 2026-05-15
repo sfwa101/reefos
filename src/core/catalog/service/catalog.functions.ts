@@ -19,8 +19,8 @@ import type {
   JsonValue,
 } from "../types";
 import {
-  projectProductDNA,
-  type UsaProductRow,
+  projectAssetDNA,
+  type SalsabilAssetRow,
 } from "@/core/commerce/knowledge/projectors/projectProductDNA";
 import type { ProductCivilizationEntity } from "@/core/commerce/knowledge/dna.types";
 
@@ -509,34 +509,36 @@ export const getProductDNAFn = createServerFn({ method: "POST" })
       .eq("is_active", true)
       .maybeSingle();
 
-    if (error) throw error;
-    if (!row) throw new Error(`Product DNA not found for id=${data.id}`);
-
     const asset = row as unknown as SovereignAsset;
     const primary = pickPrimarySku(asset);
-    const contract = primary?.salsabil_financial_contracts?.find((c) => c.is_active !== false)
-      ?? primary?.salsabil_financial_contracts?.[0];
-    const traits = (asset.traits ?? {}) as Record<string, unknown>;
+    const contract =
+      primary?.salsabil_financial_contracts?.find((c) => c.is_active !== false) ??
+      primary?.salsabil_financial_contracts?.[0] ??
+      null;
 
-    const synthesized: UsaProductRow = {
+    const sovereignRow: SalsabilAssetRow = {
       id: asset.id,
-      slug: (traits.slug as string | undefined) ?? asset.id,
-      sku: primary?.sku_code ?? null,
-      section_id: null,
-      name_i18n: { ar: asset.name } as unknown as JsonValue,
-      description_i18n: asset.description
-        ? ({ ar: asset.description } as unknown as JsonValue)
+      name: asset.name,
+      description: asset.description,
+      category_path: asset.category_path,
+      asset_type: asset.asset_type,
+      traits: (asset.traits ?? {}) as unknown as JsonValue,
+      media: (asset.media ?? []) as unknown as JsonValue,
+      is_active: asset.is_active,
+      created_at: asset.created_at,
+      primary_sku: primary
+        ? {
+            sku_code: primary.sku_code,
+            attributes: (primary.attributes ?? {}) as unknown as JsonValue,
+          }
         : null,
-      base_price: contract?.base_price ?? 0,
-      currency: contract?.currency ?? "EGP",
-      sale_unit: ((primary?.attributes as Record<string, unknown> | null)?.unit
-        ?? traits.unit ?? null) as string | null,
-      is_perishable: traits.perishable === true,
-      tags: Array.isArray(traits.tags)
-        ? (traits.tags as unknown[]).filter((t): t is string => typeof t === "string")
+      primary_contract: contract
+        ? {
+            base_price: contract.base_price,
+            currency: contract.currency,
+          }
         : null,
-      attributes: traits as unknown as JsonValue,
-    } as UsaProductRow;
+    };
 
-    return projectProductDNA(synthesized);
+    return projectAssetDNA(sovereignRow);
   });
