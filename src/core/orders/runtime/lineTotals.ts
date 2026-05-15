@@ -130,3 +130,35 @@ export function sumCanonicalSubtotals(
   for (const l of lines) total += evaluateCartLineCanonical(l, tier).breakdown.lineTotal;
   return round2(total);
 }
+
+/**
+ * Wave P-1.3.B — Tier-aware non-hook accessor.
+ *
+ * Returns the canonical grand total for ONE cart line. Identical math to
+ * `useCartLineTotals` (which delegates here). Safe to call outside React —
+ * orchestrators, WhatsApp builders, vendor groupers, predictive baskets and
+ * any background utility MUST use this instead of `product.price * qty`.
+ */
+export function lineGrandTotal(
+  line: CartLine,
+  tier: CustomerTierLite = "guest",
+): number {
+  return evaluateCartLineCanonical(line, tier).breakdown.grandTotal;
+}
+
+/**
+ * Wave P-1.3.B — Predicate-filtered canonical sum. Use when an orchestrator
+ * needs to sum only a subset of lines (e.g. wakalah-only, vendor-scoped)
+ * without re-implementing `price * qty`.
+ */
+export function sumCanonicalGrandTotalsWhere(
+  lines: ReadonlyArray<CartLine>,
+  predicate: (line: CartLine) => boolean,
+  tier: CustomerTierLite = "guest",
+): number {
+  let total = 0;
+  for (const l of lines) {
+    if (predicate(l)) total += evaluateCartLineCanonical(l, tier).breakdown.grandTotal;
+  }
+  return round2(total);
+}
