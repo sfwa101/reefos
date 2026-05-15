@@ -246,8 +246,9 @@ export function AdminShell() {
   const { isDark, toggle } = useTheme();
   const activePath = useActivePath();
   const activeOSId = useActiveOSCompany((s) => s.activeId);
-  const primary = getPrimaryNav(activeOSId);
-  const bottom = getBottomNav(activeOSId);
+  const reefMode = useReefMode((s) => s.mode);
+  const primary = getPrimaryNav(activeOSId, reefMode);
+  const bottom = getBottomNav(activeOSId, reefMode);
 
   return (
     <div className="steel-glass bg-mesh font-body min-h-screen w-full" dir="rtl">
