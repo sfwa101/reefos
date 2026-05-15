@@ -20,6 +20,7 @@ import {
   Sparkles, UploadCloud, Wand2, X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Tracer } from "@/core/system/observability/Tracer";
 import { cn } from "@/lib/utils";
 import { useAestheticProcessor } from "@/core/hakim-ai/hooks/useAestheticProcessor";
 import {
@@ -197,7 +198,7 @@ function GenesisPage() {
       ]));
       toast.success("استخرج حكيم البيانات — راجع واعتمد");
     } catch (err) {
-      console.error("[Genesis] analyze error", err);
+      Tracer.error("admin", "genesis_analyze_error", err);
       const msg = err instanceof Error ? err.message : String(err);
       toast.error(msg || "فشل تحليل الصورة", { duration: 8000 });
     } finally { setStage("idle"); }
@@ -241,7 +242,7 @@ function GenesisPage() {
       toast.success("تم سكّ الأصل بنجاح");
       setTimeout(() => navigate({ to: "/admin/assets" }), 800);
     } catch (err) {
-      console.error("[Genesis] mint error", err);
+      Tracer.error("admin", "genesis_mint_error", err);
       toast.error("فشل النشر");
       setStage("idle");
     }
