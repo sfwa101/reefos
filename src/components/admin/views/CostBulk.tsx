@@ -10,6 +10,7 @@ import {
   upsertAssetAffiliatePct,
   type SkuAdminRow,
 } from "@/core/commerce/knowledge/sovereignCatalog";
+import { costFromMarginPct } from "@/core/commerce/pricing/marginUtils";
 
 
 type Row = SkuAdminRow;
@@ -75,7 +76,7 @@ export default function CostBulk() {
     if (!filtered) return;
     const next = { ...edits };
     filtered.forEach((r) => {
-      const cost = Math.max(0, r.price * (1 - target / 100));
+      const cost = costFromMarginPct(r.price, target);
       next[r.id] = { ...next[r.id], cost: cost.toFixed(2) };
     });
     setEdits(next);
