@@ -10,20 +10,70 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { listProductReviewsFn, listProductUnitsFn } from "@/core/catalog/catalog.functions";
 import { logBehavior } from "@/core/events/behavior";
 import { motion } from "framer-motion";
-import { trustBadgesFor, chefBlockFor, relatedProductsFor } from "@/core/commerce/knowledge/productEnrichment";
+import {
+  trustBadgesFor,
+  chefBlockFor,
+  relatedProductsFor,
+} from "@/core/commerce/knowledge/productEnrichment";
 import { extractHandlingTraits, traitLabel } from "@/core/commerce/knowledge/productTraits";
 import { villageMetaFor } from "@/core/commerce/knowledge/sourcing-meta";
 import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 import ProductGallery from "@/apps/reef-al-madina/features/product-detail/ProductGallery";
 import StickyAddCTA from "@/apps/reef-al-madina/features/product-detail/StickyAddCTA";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
-  VillageStory, VillageStorage, VillageSubscription, VillageNutrition,
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
+  VillageStory,
+  VillageStorage,
+  VillageSubscription,
+  VillageNutrition,
 } from "@/apps/reef-al-madina/features/product-detail/VillageBlocks";
 
+/** Pure read of optional trait fields off product.metadata (no math, no fallbacks). */
+const readNutrition = (meta: Record<string, unknown>) => {
+  const n = (meta?.nutrition ??
+    (meta?.traits as Record<string, unknown> | undefined)?.nutrition) as
+    | Record<string, unknown>
+    | undefined;
+  if (!n || typeof n !== "object") return null;
+  const per = (n.per_100g ?? n.perServing ?? n) as Record<string, unknown>;
+  const num = (k: string) => (typeof per?.[k] === "number" ? (per[k] as number) : null);
+  const out: { label: string; value: number; unit: string }[] = [];
+  const cal = num("calories") ?? num("kcal") ?? num("energy_kcal");
+  if (cal != null) out.push({ label: "سعرات", value: cal, unit: "kcal" });
+  const protein = num("protein") ?? num("protein_g");
+  if (protein != null) out.push({ label: "بروتين", value: protein, unit: "g" });
+  const carbs = num("carbs") ?? num("carbohydrates") ?? num("carbs_g");
+  if (carbs != null) out.push({ label: "كربوهيدرات", value: carbs, unit: "g" });
+  const fat = num("fat") ?? num("fat_g") ?? num("total_fat");
+  if (fat != null) out.push({ label: "دهون", value: fat, unit: "g" });
+  const sugar = num("sugar") ?? num("sugars") ?? num("sugar_g");
+  if (sugar != null) out.push({ label: "سكريات", value: sugar, unit: "g" });
+  return out.length ? out : null;
+};
+
+const readNetWeight = (meta: Record<string, unknown>): string | null => {
+  const phys = meta?.physical as Record<string, unknown> | undefined;
+  const nw = phys?.net_weight ?? meta?.net_weight;
+  if (nw == null || nw === "") return null;
+  return String(nw);
+};
+
+const readHalal = (meta: Record<string, unknown>): boolean => {
+  if (meta?.halal === true) return true;
+  const traits = meta?.traits as Record<string, unknown> | undefined;
+  return traits?.halal === true;
+};
+
 // Lazy: only loaded for pharmacy products (heaviest block).
-const PharmacyMedicalBlock = lazy(() =>
-  import("@/apps/reef-al-madina/features/product-detail/PharmacyMedicalBlock"),
+const PharmacyMedicalBlock = lazy(
+  () => import("@/apps/reef-al-madina/features/product-detail/PharmacyMedicalBlock"),
 );
 
 const ProductDetail = () => {
@@ -37,7 +87,13 @@ const ProductDetail = () => {
   const [variantId, setVariantId] = useState<string | null>(null);
   const [addonIds, setAddonIds] = useState<string[]>([]);
   const [reviewCount, setReviewCount] = useState<number | null>(null);
-  type PUnit = { id: string; unit_code: string; conversion_factor: number; selling_price: number | null; is_default_sell: boolean };
+  type PUnit = {
+    id: string;
+    unit_code: string;
+    conversion_factor: number;
+    selling_price: number | null;
+    is_default_sell: boolean;
+  };
   const [productUnits, setProductUnits] = useState<PUnit[]>([]);
   const [unitId, setUnitId] = useState<string | null>(null);
   const [priceFlash, setPriceFlash] = useState(0);
@@ -79,21 +135,27 @@ const ProductDetail = () => {
         setUnitId(null);
       }
     })();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [product?.id]);
 
   const selectedUnit = productUnits.find((u) => u.id === unitId);
   const variant = product?.variants?.find((v) => v.id === variantId);
   const addonsTotal = useMemo(
-    () => (product?.addons ?? []).filter((a) => addonIds.includes(a.id)).reduce((s, a) => s + a.price, 0),
+    () =>
+      (product?.addons ?? [])
+        .filter((a) => addonIds.includes(a.id))
+        .reduce((s, a) => s + a.price, 0),
     [product?.addons, addonIds],
   );
   const baseUnitPrice = (product?.price ?? 0) + (variant?.priceDelta ?? 0) + addonsTotal;
-  const unitPrice = selectedUnit?.selling_price != null
-    ? Number(selectedUnit.selling_price) + (variant?.priceDelta ?? 0) + addonsTotal
-    : selectedUnit
-      ? baseUnitPrice * selectedUnit.conversion_factor
-      : baseUnitPrice;
+  const unitPrice =
+    selectedUnit?.selling_price != null
+      ? Number(selectedUnit.selling_price) + (variant?.priceDelta ?? 0) + addonsTotal
+      : selectedUnit
+        ? baseUnitPrice * selectedUnit.conversion_factor
+        : baseUnitPrice;
   const total = speculativeLineTotal(unitPrice, qty);
 
   useEffect(() => {
@@ -105,7 +167,12 @@ const ProductDetail = () => {
       <div>
         <BackHeader title="المنتج غير موجود" />
         <p className="text-sm text-muted-foreground">لم يتم العثور على المنتج المطلوب.</p>
-        <Link to="/" className="mt-4 inline-block rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground">العودة للرئيسية</Link>
+        <Link
+          to="/"
+          className="mt-4 inline-block rounded-full bg-primary px-4 py-2 text-sm font-bold text-primary-foreground"
+        >
+          العودة للرئيسية
+        </Link>
       </div>
     );
   }
@@ -124,13 +191,17 @@ const ProductDetail = () => {
 
   const handleAdd = () => {
     const variantSuffix = variant ? ` (${variant.label})` : "";
-    const addonLabels = (product.addons ?? []).filter((a) => addonIds.includes(a.id)).map((a) => a.label);
+    const addonLabels = (product.addons ?? [])
+      .filter((a) => addonIds.includes(a.id))
+      .map((a) => a.label);
     const subSuffix = subMode ? " (اشتراك أسبوعي)" : "";
-    const suffix = variantSuffix + (addonLabels.length ? ` + ${addonLabels.join(" + ")}` : "") + subSuffix;
+    const suffix =
+      variantSuffix + (addonLabels.length ? ` + ${addonLabels.join(" + ")}` : "") + subSuffix;
     const customId = `${product.id}${variant ? `__${variant.id}` : ""}${addonIds.length ? `__${addonIds.sort().join("-")}` : ""}${subMode ? "__sub" : ""}`;
-    const finalPrice = subMode && village?.routine
-      ? Math.round(unitPrice * (1 - village.routine.discountPct / 100))
-      : unitPrice;
+    const finalPrice =
+      subMode && village?.routine
+        ? Math.round(unitPrice * (1 - village.routine.discountPct / 100))
+        : unitPrice;
     add({ ...product, id: customId, name: `${product.name}${suffix}`, price: finalPrice }, qty);
     setAddBurst(true);
     window.setTimeout(() => setAddBurst(false), 900);
@@ -144,12 +215,15 @@ const ProductDetail = () => {
       } else if (navigator.clipboard) {
         await navigator.clipboard.writeText(url);
       }
-    } catch { /* ignore */ }
+    } catch {
+      /* ignore */
+    }
   };
 
-  const displayTotal = isVillage && subMode && village?.routine
-    ? Math.round(total * (1 - village.routine.discountPct / 100))
-    : total;
+  const displayTotal =
+    isVillage && subMode && village?.routine
+      ? Math.round(total * (1 - village.routine.discountPct / 100))
+      : total;
   const ctaLabel = isVillage && subMode ? "اشترك واحجز حصتك" : "أضف للسلة";
 
   return (
@@ -188,7 +262,9 @@ const ProductDetail = () => {
                     {product.brand}
                   </Link>
                 )}
-                <h1 className="font-display text-2xl font-extrabold leading-tight">{product.name}</h1>
+                <h1 className="font-display text-2xl font-extrabold leading-tight">
+                  {product.name}
+                </h1>
                 <p className="text-xs text-muted-foreground">{product.unit}</p>
               </div>
               {!isVillage && (
@@ -197,7 +273,10 @@ const ProductDetail = () => {
                   className="glass-strong flex h-10 w-10 items-center justify-center rounded-full shadow-soft transition active:scale-90"
                   aria-label="مفضلة"
                 >
-                  <Heart className={`h-4 w-4 transition ${fav ? "fill-destructive text-destructive" : ""}`} strokeWidth={2} />
+                  <Heart
+                    className={`h-4 w-4 transition ${fav ? "fill-destructive text-destructive" : ""}`}
+                    strokeWidth={2}
+                  />
                 </Button>
               )}
             </div>
@@ -209,7 +288,9 @@ const ProductDetail = () => {
                     key={b.label}
                     className="inline-flex items-center gap-1 rounded-full bg-primary-soft/70 px-2.5 py-1 text-[10.5px] font-extrabold text-primary ring-1 ring-primary/15"
                   >
-                    <span aria-hidden className="text-[12px] leading-none">{b.emoji}</span>
+                    <span aria-hidden className="text-[12px] leading-none">
+                      {b.emoji}
+                    </span>
                     {b.label}
                   </span>
                 ))}
@@ -237,13 +318,49 @@ const ProductDetail = () => {
               );
             })()}
 
+            {/* Halal & Stock indicators (sourced from traits / product.stock) */}
+            <div className="flex flex-wrap items-center gap-2">
+              {readHalal(meta) && (
+                <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-extrabold">
+                  <ShieldCheck className="h-3 w-3" />
+                  حلال موثّق
+                </Badge>
+              )}
+              {(() => {
+                const stock = product.stock;
+                if (stock == null) return null;
+                if (stock <= 0) {
+                  return (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2.5 py-1 text-[10.5px] font-extrabold text-destructive ring-1 ring-destructive/30">
+                      نفد من المخزون
+                    </span>
+                  );
+                }
+                const low = product.lowStockThreshold ?? 0;
+                if (low > 0 && stock <= low) {
+                  return (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[10.5px] font-extrabold text-amber-800 ring-1 ring-amber-300">
+                      كمية محدودة · باقي {toLatin(stock)}
+                    </span>
+                  );
+                }
+                return (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-extrabold text-emerald-800 ring-1 ring-emerald-300">
+                    متوفر
+                  </span>
+                );
+              })()}
+            </div>
+
             {product.rating && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 font-bold text-accent-foreground">
                   <Star className="h-3 w-3 fill-accent text-accent" strokeWidth={0} />
                   {product.rating}
                 </span>
-                <span className="text-muted-foreground tabular-nums">{toLatin(reviewCount ?? 0)} تقييم</span>
+                <span className="text-muted-foreground tabular-nums">
+                  {toLatin(reviewCount ?? 0)} تقييم
+                </span>
               </div>
             )}
           </section>
@@ -263,9 +380,10 @@ const ProductDetail = () => {
               <div className="grid grid-cols-2 gap-2">
                 {productUnits.map((u) => {
                   const active = u.id === unitId;
-                  const price = u.selling_price != null
-                    ? Number(u.selling_price)
-                    : (product?.price ?? 0) * u.conversion_factor;
+                  const price =
+                    u.selling_price != null
+                      ? Number(u.selling_price)
+                      : (product?.price ?? 0) * u.conversion_factor;
                   return (
                     <Button
                       key={u.id}
@@ -277,7 +395,9 @@ const ProductDetail = () => {
                       }`}
                     >
                       <p className="text-[13px] font-extrabold">{u.unit_code}</p>
-                      <p className={`text-[10px] ${active ? "opacity-90" : "text-muted-foreground"}`}>
+                      <p
+                        className={`text-[10px] ${active ? "opacity-90" : "text-muted-foreground"}`}
+                      >
                         = {toLatin(u.conversion_factor)} قطعة
                       </p>
                       <p className="mt-1 font-display text-sm font-extrabold tabular-nums">
@@ -316,7 +436,9 @@ const ProductDetail = () => {
                       key={v.id}
                       onClick={() => setVariantId(v.id)}
                       className={`rounded-full px-4 py-2 text-xs font-bold transition ${
-                        active ? "bg-primary text-primary-foreground shadow-pill" : "bg-foreground/5"
+                        active
+                          ? "bg-primary text-primary-foreground shadow-pill"
+                          : "bg-foreground/5"
                       }`}
                     >
                       {v.label}
@@ -347,9 +469,13 @@ const ProductDetail = () => {
                         active ? "border-primary bg-primary-soft" : "border-border"
                       }`}
                     >
-                      <div className={`flex h-5 w-5 items-center justify-center rounded-md border-2 ${
-                        active ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/40"
-                      }`}>
+                      <div
+                        className={`flex h-5 w-5 items-center justify-center rounded-md border-2 ${
+                          active
+                            ? "border-primary bg-primary text-primary-foreground"
+                            : "border-muted-foreground/40"
+                        }`}
+                      >
                         {active && <span className="text-[10px]">✓</span>}
                       </div>
                       <p className="flex-1 text-sm font-bold">{a.label}</p>
@@ -385,16 +511,71 @@ const ProductDetail = () => {
             <section
               className="rounded-2xl p-4 shadow-soft ring-1 ring-primary/10"
               style={{
-                background: "linear-gradient(135deg, hsl(var(--primary-soft) / 0.6), hsl(var(--secondary) / 0.4))",
+                background:
+                  "linear-gradient(135deg, hsl(var(--primary-soft) / 0.6), hsl(var(--secondary) / 0.4))",
               }}
             >
               <div className="mb-2 flex items-center gap-2">
-                <span className="text-2xl" aria-hidden>{chef.emoji}</span>
-                <h3 className="font-display text-base font-extrabold text-foreground">{chef.title}</h3>
+                <span className="text-2xl" aria-hidden>
+                  {chef.emoji}
+                </span>
+                <h3 className="font-display text-base font-extrabold text-foreground">
+                  {chef.title}
+                </h3>
               </div>
               <p className="text-[13px] leading-relaxed text-foreground/80">{chef.body}</p>
             </section>
           )}
+
+          {(() => {
+            const nutrition = readNutrition(meta);
+            const netWeight = readNetWeight(meta);
+            if (!nutrition && !netWeight) return null;
+            return (
+              <section className="glass-strong rounded-2xl px-4 shadow-soft">
+                <Accordion type="single" collapsible defaultValue="nutrition">
+                  <AccordionItem value="nutrition" className="border-0">
+                    <AccordionTrigger className="py-3 font-display text-base font-extrabold hover:no-underline">
+                      المعلومات الغذائية والتفاصيل
+                    </AccordionTrigger>
+                    <AccordionContent className="pb-4">
+                      {netWeight && (
+                        <div className="mb-3 flex items-center justify-between rounded-xl bg-secondary/60 px-3 py-2 text-[12px]">
+                          <span className="font-bold text-muted-foreground">الوزن الصافي</span>
+                          <span className="font-extrabold tabular-nums">{netWeight}</span>
+                        </div>
+                      )}
+                      {nutrition && (
+                        <>
+                          <p className="mb-2 text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground">
+                            القيم الغذائية لكل ١٠٠ جرام
+                          </p>
+                          <div className="grid grid-cols-3 gap-2">
+                            {nutrition.map((row) => (
+                              <div
+                                key={row.label}
+                                className="rounded-xl bg-primary-soft/40 p-2.5 text-center ring-1 ring-primary/10"
+                              >
+                                <p className="font-display text-base font-extrabold tabular-nums text-foreground">
+                                  {toLatin(row.value)}
+                                  <span className="ms-0.5 text-[9px] font-bold text-muted-foreground">
+                                    {row.unit}
+                                  </span>
+                                </p>
+                                <p className="text-[10px] font-bold text-muted-foreground">
+                                  {row.label}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+              </section>
+            );
+          })()}
 
           <section className="glass-strong rounded-2xl p-4 shadow-soft">
             <h3 className="mb-2 font-display text-base font-extrabold">عن المنتج</h3>
