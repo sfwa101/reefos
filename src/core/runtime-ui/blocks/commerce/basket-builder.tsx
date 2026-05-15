@@ -11,6 +11,8 @@ import {
   BUILD_BOX_THRESHOLDS,
   tierForSubtotal,
   nextTierForSubtotal,
+  sumBuildBoxSubtotal,
+  buildBoxDiscountedUnitPrice,
 } from "@/core/commerce/policies/bundle-thresholds";
 import AnimatedNumber from "@/components/baskets/AnimatedNumber";
 import { PackagePlus, Plus, Minus, Sparkles, Check, ShoppingCart } from "lucide-react";
@@ -48,7 +50,7 @@ const BasketBuilderBlock = () => {
   );
 
   const subtotal = useMemo(
-    () => lines.reduce((s, l) => s + l.product.price * l.qty, 0),
+    () => sumBuildBoxSubtotal(lines),
     [lines],
   );
   const tier = tierForSubtotal(subtotal);
@@ -72,7 +74,7 @@ const BasketBuilderBlock = () => {
     const ratio = subtotal > 0 ? final / subtotal : 1;
     lines.forEach((l) => {
       add(l.product, l.qty, {
-        unitPrice: Math.round(l.product.price * ratio),
+        unitPrice: buildBoxDiscountedUnitPrice(l.product.price, ratio),
         bookingNote: tier ? `سلة مخصصة · ${tier.label} ${toLatin(discountPct)}%` : "سلة مخصصة",
       });
     });
