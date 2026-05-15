@@ -23,6 +23,7 @@ import { allocateOrderInventory } from "./useCartCheckoutRpc";
 import { callSovereignCheckout, newIdempotencyKey } from "@/core/hakim-ai/hooks/useSovereignCheckout";
 import { callTayseerPayment } from "@/hooks/useTayseerRapidPay";
 import { createTraceId, logSovereignEvent } from "@/core/system/observability/SovereignTracingGateway";
+import { Tracer } from "@/core/system/observability/Tracer";
 import { buildWhatsAppMessage, buildOrderNotes, dispatchWhatsApp } from "./useCartWhatsApp";
 import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
@@ -124,7 +125,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
         setTrustLimit(Number(ctx.wallet?.credit_limit ?? 0));
         setCustomerName(ctx.fullName);
       } catch (e) {
-        console.warn("[cart] failed to hydrate checkout context:", e);
+        Tracer.warn("checkout", "hydrate_context_failed", { error: String(e) });
       }
     })();
   }, [user]);
@@ -270,7 +271,7 @@ export const useCartOrchestrator = (opts?: { sharedCartId?: string | null }) => 
 
   const checkoutWA = async () => {
     if (submittingRef.current) {
-      console.warn("[checkout] duplicate submit blocked (in-flight)");
+      Tracer.warn("checkout", "duplicate_submit_blocked", {});
       return;
     }
     const sinceLast = Date.now() - lastSubmitAtRef.current;
