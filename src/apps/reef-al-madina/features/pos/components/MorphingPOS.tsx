@@ -34,7 +34,7 @@ import {
   Receipt,
 } from "lucide-react";
 import type { POSMode } from "@/core/cashier/domain/POSMode";
-import { CatalogGateway } from "@/core/commerce/gateway/CatalogGateway";
+import { CatalogGateway } from "@/core/catalog/gateway/SovereignCatalogGateway";
 import type { CommerceEntity } from "@/core/commerce/entity/CommerceEntity";
 import { useLivingInventory } from "@/core/inventory/runtime/useLivingInventory";
 import {

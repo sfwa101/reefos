@@ -25,7 +25,7 @@
  */
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 
-import { catalogGateway } from "@/core/catalog/gateway/catalogGateway";
+import { catalogGateway } from "@/core/catalog/gateway/SovereignCatalogGateway";
 import type { ProductCardVM } from "@/core/catalog/types";
 
 export interface CartHydrationResult {
