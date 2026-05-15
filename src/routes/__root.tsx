@@ -91,8 +91,16 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       { name: "apple-mobile-web-app-title", content: "ريف المدينة" },
       { name: "twitter:title", content: "ريف المدينة — عبق الريف داخل المدينة" },
       { name: "twitter:description", content: "كل ماتحتاج اليه في مكان واحد" },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png" },
+      {
+        property: "og:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png",
+      },
+      {
+        name: "twitter:image",
+        content:
+          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/b043576f-09fc-4882-9b5e-46be7fffc5c5/id-preview-93b4aa28--40d2b8b1-07e5-422e-a4d5-9fc0d9e486cc.lovable.app-1777305072244.png",
+      },
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
@@ -111,7 +119,11 @@ export const Route = createRootRouteWithContext<RouterContext>()({
       // fetch fired by the home loader resolves DNS/TLS during HTML parse.
       ...(import.meta.env.VITE_SUPABASE_URL
         ? [
-            { rel: "preconnect", href: import.meta.env.VITE_SUPABASE_URL as string, crossOrigin: "anonymous" as const },
+            {
+              rel: "preconnect",
+              href: import.meta.env.VITE_SUPABASE_URL as string,
+              crossOrigin: "anonymous" as const,
+            },
             { rel: "dns-prefetch", href: import.meta.env.VITE_SUPABASE_URL as string },
           ]
         : []),
@@ -177,40 +189,39 @@ function RootComponent() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
-        
         <ThemeProvider>
           <LocaleProvider>
-          <UIProvider>
-            <TooltipProvider>
-              <AuthProvider>
-                <SovereignTenantBridge>
-                <LocationProvider>
-                  <CartProvider>
-                      <CompareProvider>
-                        <FavoritesProvider>
-                          <LiveRulesBootstrap />
-                          <BackgroundSyncManager />
-                          
-                          <BehaviorTrackerBootstrap />
-                          <WorkspaceHydrationBootstrap />
-                          <SovereignSpiritBootstrap />
-                          <SubdomainGuard />
-                          <Toaster />
-                          <SovereignDormancyOverlay />
-                          <MaintenanceGate>
-                            <Outlet />
-                          </MaintenanceGate>
-                        </FavoritesProvider>
-                      </CompareProvider>
-                  </CartProvider>
-                </LocationProvider>
-                </SovereignTenantBridge>
-              </AuthProvider>
-            </TooltipProvider>
-          </UIProvider>
+            <UIProvider>
+              <TooltipProvider>
+                <AuthProvider>
+                  <SovereignTenantBridge>
+                    <LocationProvider>
+                      <CartProvider>
+                        <CompareProvider>
+                          <FavoritesProvider>
+                            <LiveRulesBootstrap />
+                            <BackgroundSyncManager />
+
+                            <BehaviorTrackerBootstrap />
+                            <WorkspaceHydrationBootstrap />
+                            <SovereignSpiritBootstrap />
+                            <SubdomainGuard />
+                            <Toaster />
+                            <SovereignDormancyOverlay />
+                            <MaintenanceGate>
+                              <Outlet />
+                            </MaintenanceGate>
+                          </FavoritesProvider>
+                        </CompareProvider>
+                      </CartProvider>
+                    </LocationProvider>
+                  </SovereignTenantBridge>
+                </AuthProvider>
+              </TooltipProvider>
+            </UIProvider>
           </LocaleProvider>
         </ThemeProvider>
-        
+
         {/* Dev-Node — Phase 36 Titanium Shield: gated to development builds only. */}
         {import.meta.env.DEV && <DevOSNavigator />}
       </QueryClientProvider>

@@ -126,10 +126,7 @@ export const OS_COMPANIES: ReadonlyArray<OSCompany> = [
   },
 ];
 
-export const STATUS_META: Record<
-  OSCompanyStatus,
-  { label: string; dot: string; chip: string }
-> = {
+export const STATUS_META: Record<OSCompanyStatus, { label: string; dot: string; chip: string }> = {
   live: {
     label: "حي",
     dot: "bg-emerald-500",
@@ -154,12 +151,48 @@ export const OS_MODULES: ReadonlyArray<{
   icon: LucideIcon;
   shared_by: ReadonlyArray<OSCompanyId>;
 }> = [
-  { id: "identity", name: "الهوية والصلاحيات", domain: "Identity", icon: ShieldCheck, shared_by: ["global", "reef", "tayseer", "khalil"] },
-  { id: "wallet", name: "المحفظة المالية", domain: "Finance", icon: Activity, shared_by: ["tayseer", "reef", "khalil"] },
-  { id: "catalog", name: "الكتالوج العالمي", domain: "Commerce", icon: Store, shared_by: ["reef", "khalil", "asrab"] },
-  { id: "hakim_ai", name: "محرك حكيم", domain: "AI", icon: Sparkles, shared_by: ["global", "reef", "hakim"] },
-  { id: "logistics", name: "اللوجستيات", domain: "Operations", icon: Factory, shared_by: ["reef", "asrab", "nabd"] },
-  { id: "library", name: "مكتبة المعرفة", domain: "Knowledge", icon: Library, shared_by: ["noor_eldin", "global"] },
+  {
+    id: "identity",
+    name: "الهوية والصلاحيات",
+    domain: "Identity",
+    icon: ShieldCheck,
+    shared_by: ["global", "reef", "tayseer", "khalil"],
+  },
+  {
+    id: "wallet",
+    name: "المحفظة المالية",
+    domain: "Finance",
+    icon: Activity,
+    shared_by: ["tayseer", "reef", "khalil"],
+  },
+  {
+    id: "catalog",
+    name: "الكتالوج العالمي",
+    domain: "Commerce",
+    icon: Store,
+    shared_by: ["reef", "khalil", "asrab"],
+  },
+  {
+    id: "hakim_ai",
+    name: "محرك حكيم",
+    domain: "AI",
+    icon: Sparkles,
+    shared_by: ["global", "reef", "hakim"],
+  },
+  {
+    id: "logistics",
+    name: "اللوجستيات",
+    domain: "Operations",
+    icon: Factory,
+    shared_by: ["reef", "asrab", "nabd"],
+  },
+  {
+    id: "library",
+    name: "مكتبة المعرفة",
+    domain: "Knowledge",
+    icon: Library,
+    shared_by: ["noor_eldin", "global"],
+  },
 ];
 
 export function getOSCompany(id: OSCompanyId): OSCompany {

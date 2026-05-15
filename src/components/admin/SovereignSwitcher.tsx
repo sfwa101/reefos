@@ -14,24 +14,14 @@ import { Check, ChevronDown, Layers, Sparkles } from "lucide-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import {
-  OS_COMPANIES,
-  STATUS_META,
-  type OSCompany,
-} from "@/core/identity/osCompanies";
+import { OS_COMPANIES, STATUS_META, type OSCompany } from "@/core/identity/osCompanies";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
 import {
   useSovereignContext,
   type WorkspaceKind,
 } from "@/core/capabilities/store/useSovereignContext";
 
-function CompanyAvatar({
-  company,
-  size = "md",
-}: {
-  company: OSCompany;
-  size?: "sm" | "md";
-}) {
+function CompanyAvatar({ company, size = "md" }: { company: OSCompany; size?: "sm" | "md" }) {
   const Icon = company.icon;
   const dim = size === "sm" ? "h-7 w-7" : "h-10 w-10";
   const iconDim = size === "sm" ? "h-3.5 w-3.5" : "h-5 w-5";
@@ -88,9 +78,7 @@ export function SovereignSwitcher() {
         >
           <CompanyAvatar company={active} size="sm" />
           <div className="hidden text-right leading-tight md:block">
-            <p className="text-[12px] font-extrabold tracking-tight">
-              {active.name}
-            </p>
+            <p className="text-[12px] font-extrabold tracking-tight">{active.name}</p>
             <p className="text-[9.5px] font-bold uppercase tracking-wider text-muted-foreground">
               {STATUS_META[active.status].label}
             </p>
@@ -179,12 +167,8 @@ function CompanyGroup({
               >
                 <CompanyAvatar company={c} />
                 <div className="flex-1 min-w-0 text-right">
-                  <p className="text-[13px] font-extrabold leading-tight truncate">
-                    {c.name}
-                  </p>
-                  <p className="text-[10.5px] text-muted-foreground truncate">
-                    {c.tagline}
-                  </p>
+                  <p className="text-[13px] font-extrabold leading-tight truncate">{c.name}</p>
+                  <p className="text-[10.5px] text-muted-foreground truncate">{c.tagline}</p>
                 </div>
                 <span
                   className={cn(
@@ -195,9 +179,7 @@ function CompanyGroup({
                   <span className={cn("h-1.5 w-1.5 rounded-full", status.dot)} />
                   {status.label}
                 </span>
-                {isActive && (
-                  <Check className="h-4 w-4 text-primary shrink-0" />
-                )}
+                {isActive && <Check className="h-4 w-4 text-primary shrink-0" />}
               </motion.button>
             </li>
           );

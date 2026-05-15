@@ -19,14 +19,7 @@
  */
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import {
-  Bell,
-  Home,
-  Moon,
-  Search,
-  Sparkles,
-  Sun,
-} from "lucide-react";
+import { Bell, Home, Moon, Search, Sparkles, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -59,13 +52,7 @@ function useActivePath() {
 
 /* ------------------------------------------------------------------ */
 
-function AdminHeader({
-  isDark,
-  toggleTheme,
-}: {
-  isDark: boolean;
-  toggleTheme: () => void;
-}) {
+function AdminHeader({ isDark, toggleTheme }: { isDark: boolean; toggleTheme: () => void }) {
   const openLayer = useHakimLayer((s) => s.open);
   return (
     <header className="sticky top-0 z-50 glass-steel border-b border-white/40 h-16">
@@ -104,7 +91,6 @@ function AdminHeader({
             ⌘K
           </kbd>
         </button>
-
 
         <div className="ms-auto flex items-center gap-2 md:ms-0">
           <Button
@@ -261,10 +247,7 @@ export function AdminShell() {
   const bottom = getBottomNav(activeOSId);
 
   return (
-    <div
-      className="steel-glass bg-mesh font-body min-h-screen w-full"
-      dir="rtl"
-    >
+    <div className="steel-glass bg-mesh font-body min-h-screen w-full" dir="rtl">
       <AdminHeader isDark={isDark} toggleTheme={toggle} />
 
       <div className="mx-auto flex w-full max-w-screen-2xl">

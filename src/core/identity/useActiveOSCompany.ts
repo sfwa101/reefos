@@ -20,7 +20,9 @@ function readStored(): OSCompanyId {
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
     if (v && OS_COMPANIES.some((c) => c.id === v)) return v as OSCompanyId;
-  } catch { /* noop */ }
+  } catch {
+    /* noop */
+  }
   return DEFAULT_ID;
 }
 
@@ -33,7 +35,11 @@ export const useActiveOSCompany = create<OSCompanyState>((set) => ({
   activeId: readStored(),
   setActive: (id: OSCompanyId) => {
     if (typeof window !== "undefined") {
-      try { window.localStorage.setItem(STORAGE_KEY, id); } catch { /* noop */ }
+      try {
+        window.localStorage.setItem(STORAGE_KEY, id);
+      } catch {
+        /* noop */
+      }
     }
     set({ activeId: id });
   },

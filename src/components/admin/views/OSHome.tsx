@@ -14,12 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { SectionHeader } from "@/components/admin/ui/SectionHeader";
-import {
-  OS_COMPANIES,
-  OS_MODULES,
-  STATUS_META,
-  getOSCompany,
-} from "@/core/identity/osCompanies";
+import { OS_COMPANIES, OS_MODULES, STATUS_META, getOSCompany } from "@/core/identity/osCompanies";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
 
 export function OSHome() {
@@ -49,8 +44,8 @@ export function OSHome() {
               لوحة الحضارة السيادية
             </h1>
             <p className="mt-1 max-w-xl text-sm text-foreground/70">
-              من هنا تنبض كل شركات Salsabil — تتحكم بالـ DNA المشترك،
-              توزّع الوحدات، وتراقب الحضارة بأكملها.
+              من هنا تنبض كل شركات Salsabil — تتحكم بالـ DNA المشترك، توزّع الوحدات، وتراقب الحضارة
+              بأكملها.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-3 lg:gap-4">
@@ -70,7 +65,10 @@ export function OSHome() {
           <TabsTrigger value="roster" className="flex-1 rounded-xl text-[12.5px] font-extrabold">
             الشركات
           </TabsTrigger>
-          <TabsTrigger value="governance" className="flex-1 rounded-xl text-[12.5px] font-extrabold">
+          <TabsTrigger
+            value="governance"
+            className="flex-1 rounded-xl text-[12.5px] font-extrabold"
+          >
             الحوكمة
           </TabsTrigger>
         </TabsList>
@@ -153,12 +151,7 @@ export function OSHome() {
                   whileTap={{ scale: 0.98 }}
                   className="group glass-steel relative overflow-hidden rounded-3xl p-5 text-right shadow-soft transition hover:shadow-elevated"
                 >
-                  <div
-                    className={cn(
-                      "absolute inset-x-0 top-0 h-1 bg-gradient-to-r",
-                      c.accent,
-                    )}
-                  />
+                  <div className={cn("absolute inset-x-0 top-0 h-1 bg-gradient-to-r", c.accent)} />
                   <div className="flex items-start gap-3">
                     <div
                       className={cn(
@@ -172,9 +165,7 @@ export function OSHome() {
                       <h3 className="font-display text-[16px] font-extrabold tracking-tight truncate">
                         {c.name}
                       </h3>
-                      <p className="text-[11.5px] text-foreground/60 truncate">
-                        {c.tagline}
-                      </p>
+                      <p className="text-[11.5px] text-foreground/60 truncate">{c.tagline}</p>
                     </div>
                     <ArrowUpRight className="h-4 w-4 text-muted-foreground opacity-0 transition group-hover:opacity-100" />
                   </div>
@@ -202,15 +193,16 @@ export function OSHome() {
 
         {/* Governance */}
         <TabsContent value="governance" className="space-y-4">
-          <SectionHeader
-            eyebrow="Governance"
-            title="مراكز التحكم السيادية"
-          />
+          <SectionHeader eyebrow="Governance" title="مراكز التحكم السيادية" />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <GovCard to="/admin/control-plane" title="مستوى التحكم" description="Control Plane" />
             <GovCard to="/admin/audit-log" title="سجل التدقيق" description="Audit Log" />
             <GovCard to="/admin/role-permissions" title="الأدوار والصلاحيات" description="RBAC" />
-            <GovCard to="/admin/sovereign-treasury" title="الخزينة السيادية" description="Treasury" />
+            <GovCard
+              to="/admin/sovereign-treasury"
+              title="الخزينة السيادية"
+              description="Treasury"
+            />
             <GovCard to="/admin/tracing" title="التتبع السيادي" description="Tracing" />
             <GovCard to="/admin/system-settings" title="إعدادات النظام" description="System" />
           </div>
@@ -244,9 +236,7 @@ function GovCard({ to, title, description }: { to: string; title: string; descri
         <p className="text-[10.5px] font-extrabold uppercase tracking-widest text-muted-foreground">
           {description}
         </p>
-        <p className="font-display text-[15px] font-extrabold tracking-tight">
-          {title}
-        </p>
+        <p className="font-display text-[15px] font-extrabold tracking-tight">{title}</p>
       </div>
       <ArrowUpRight className="h-4 w-4 text-muted-foreground transition group-hover:translate-x-[-2px] group-hover:text-primary" />
     </Link>
