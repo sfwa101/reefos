@@ -99,6 +99,7 @@ function AdminHeader({
   isDark: boolean;
   toggleTheme: () => void;
 }) {
+  const openLayer = useHakimLayer((s) => s.open);
   return (
     <header className="sticky top-0 z-50 glass-steel border-b border-white/40 h-16">
       <div className="mx-auto flex h-full max-w-screen-2xl items-center gap-3 px-4 lg:px-6">
