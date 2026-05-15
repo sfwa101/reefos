@@ -22,10 +22,10 @@ import {
 } from "@/core/runtime-ui/system-editor/hooks/useLayoutEditor";
 import { SECTION_REGISTRY, type PageKey } from "@/core/runtime-ui/sdui/registry";
 import type {
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
   SectionConfig, SectionKey,
 } from "@/core/runtime-ui/sdui/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const PAGE_TABS: { key: PageKey; label: string; previewPath: string }[] = [
   { key: "main_hub", label: "الرئيسية (Hero)", previewPath: "/" },
