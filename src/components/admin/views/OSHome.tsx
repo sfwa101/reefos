@@ -80,7 +80,7 @@ export function OSHome() {
           <SectionHeader
             eyebrow="Global DNA"
             title="الوحدات المشتركة"
-            subtitle="القدرات الجذعية المتاحة لكل شركات Salsabil OS"
+            description="القدرات الجذعية المتاحة لكل شركات Salsabil OS"
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OS_MODULES.map((m, i) => {
@@ -135,7 +135,7 @@ export function OSHome() {
           <SectionHeader
             eyebrow="Civilization"
             title="شركات الحضارة"
-            subtitle="انقر لتفعيل أي شركة كسياق نشط"
+            description="انقر لتفعيل أي شركة كسياق نشط"
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OS_COMPANIES.map((c, i) => {
@@ -207,12 +207,12 @@ export function OSHome() {
             title="مراكز التحكم السيادية"
           />
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <GovCard to="/admin/control-plane" title="مستوى التحكم" subtitle="Control Plane" />
-            <GovCard to="/admin/audit-log" title="سجل التدقيق" subtitle="Audit Log" />
-            <GovCard to="/admin/role-permissions" title="الأدوار والصلاحيات" subtitle="RBAC" />
-            <GovCard to="/admin/sovereign-treasury" title="الخزينة السيادية" subtitle="Treasury" />
-            <GovCard to="/admin/tracing" title="التتبع السيادي" subtitle="Tracing" />
-            <GovCard to="/admin/system-settings" title="إعدادات النظام" subtitle="System" />
+            <GovCard to="/admin/control-plane" title="مستوى التحكم" description="Control Plane" />
+            <GovCard to="/admin/audit-log" title="سجل التدقيق" description="Audit Log" />
+            <GovCard to="/admin/role-permissions" title="الأدوار والصلاحيات" description="RBAC" />
+            <GovCard to="/admin/sovereign-treasury" title="الخزينة السيادية" description="Treasury" />
+            <GovCard to="/admin/tracing" title="التتبع السيادي" description="Tracing" />
+            <GovCard to="/admin/system-settings" title="إعدادات النظام" description="System" />
           </div>
         </TabsContent>
       </Tabs>
