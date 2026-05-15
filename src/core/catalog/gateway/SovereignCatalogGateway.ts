@@ -153,6 +153,51 @@ const skuCost = (sku: RawSku | undefined): number | null => {
 
 /* ── Public Product shape (matches legacy `useProductsQuery` mapping) ── */
 
+const toNumberOr = (v: unknown, fallback: number): number => {
+  if (v == null) return fallback;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+/**
+ * Wave P-9 — translate raw `salsabil_packaging_tiers` rows into UI-facing
+ * `PackagingOptionVM[]`. Pure, side-effect-free. Returns [] when the asset
+ * has no tiers (preserves backward compatibility for legacy callers).
+ */
+export function buildPackagingOptions(
+  rawTiers: RawPackagingTier[] | null | undefined,
+  skuBasePrice: number,
+): PackagingOptionVM[] {
+  if (!rawTiers || rawTiers.length === 0) return [];
+  return rawTiers
+    .filter((t) => t.is_active !== false)
+    .map<PackagingOptionVM>((t) => {
+      const override = t.price_override != null ? Number(t.price_override) : null;
+      const hasOverride = override != null && Number.isFinite(override);
+      const unit_price = hasOverride
+        ? (override as number)
+        : Number.isFinite(skuBasePrice) ? skuBasePrice : 0;
+      const price_source: PackagingOptionVM["price_source"] = hasOverride
+        ? "tier_override"
+        : (Number.isFinite(skuBasePrice) && skuBasePrice > 0 ? "sku_base" : "none");
+      return {
+        tier_id: t.id,
+        parent_tier_id: t.parent_tier_id,
+        label: t.tier_label,
+        uom_code: t.uom_code,
+        conversion_to_parent: toNumberOr(t.conversion_to_parent, 1),
+        conversion_to_base: toNumberOr(t.conversion_to_base, 1),
+        unit_price,
+        price_source,
+        barcode: t.barcode,
+        is_default_sell: t.is_default_sell === true,
+        is_stock_keeping: t.is_stock_keeping === true,
+        sort_order: t.sort_order ?? 0,
+      };
+    })
+    .sort((a, b) => a.sort_order - b.sort_order);
+}
+
 export function assetToProduct(row: RawAsset): Product | null {
   const skus = row.salsabil_skus ?? [];
   const primary = pickPrimarySku(skus);
