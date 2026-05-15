@@ -27,7 +27,9 @@ import { Button } from "@/components/ui/button";
 import { HakimLayer } from "./hakim/HakimLayer";
 import { useHakimLayer } from "./hakim/useHakimLayer";
 import { SovereignSwitcher } from "./SovereignSwitcher";
+import { ReefModeToggle } from "./ReefModeToggle";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
+import { useReefMode } from "@/core/identity/useReefMode";
 import { getPrimaryNav, getBottomNav, type NavItem } from "./navConfig";
 
 /* ------------------------------------------------------------------ */
@@ -76,6 +78,7 @@ function AdminHeader({ isDark, toggleTheme }: { isDark: boolean; toggleTheme: ()
         </Link>
 
         <SovereignSwitcher />
+        <ReefModeToggle />
 
         <button
           type="button"
@@ -243,8 +246,9 @@ export function AdminShell() {
   const { isDark, toggle } = useTheme();
   const activePath = useActivePath();
   const activeOSId = useActiveOSCompany((s) => s.activeId);
-  const primary = getPrimaryNav(activeOSId);
-  const bottom = getBottomNav(activeOSId);
+  const reefMode = useReefMode((s) => s.mode);
+  const primary = getPrimaryNav(activeOSId, reefMode);
+  const bottom = getBottomNav(activeOSId, reefMode);
 
   return (
     <div className="steel-glass bg-mesh font-body min-h-screen w-full" dir="rtl">
