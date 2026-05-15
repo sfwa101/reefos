@@ -15,12 +15,17 @@ export type {
 export {
   CartRuntime,
   cartRuntime,
+  computeLineKey,
 } from "./CartRuntime";
 export type {
   CartRuntimeState,
   CartRuntimeLine,
   CartRuntimeListener,
   AddCartItemIntent,
+  CartLineKind,
+  CartLineKindData,
+  CartLineDisplay,
+  CartLineExtensions,
 } from "./CartRuntime";
 export { useCartRuntime } from "./useCartRuntime";
 export type { UseCartRuntime } from "./useCartRuntime";

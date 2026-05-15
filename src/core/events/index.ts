@@ -56,6 +56,15 @@ export type SalsabilEvents = {
     itemCount: number;
     appId?: SalsabilAppId;
   };
+  "cart.line.meta_updated": {
+    lineId: string;
+    productId: string;
+    appId?: SalsabilAppId;
+  };
+  "cart.replaced": {
+    itemCount: number;
+    appId?: SalsabilAppId;
+  };
   "cart.updated": {
     itemCount: number;
     grandTotal: number;

@@ -1,36 +1,52 @@
-// ============================================================================
-// Zustand cart store — Phase 22.2
-// ----------------------------------------------------------------------------
-// Atomic store for cart state. Replaces the ref + useSyncExternalStore
-// plumbing previously embedded in CartContext.
-//
-// Design notes:
-//   • `items` is a Record<string, CartLine> keyed by `lineKey` (NOT productId
-//     alone) so variant / booking / print-config lines remain distinct.
-//     This preserves the existing business identity rule from cartSync.ts.
-//   • A productId → lineKey index (`productIndex`) gives O(1) per-product
-//     selectors (useCartLineQty(productId)) without scanning the dictionary.
-//   • All mutation actions are pure object spreads → React will only notify
-//     selectors whose returned slice actually changed.
-//   • The store is `persist`-wrapped so the cart survives reloads even before
-//     the auth-driven remote sync hydrates.
-// ============================================================================
+/**
+ * Salsabil OS — Phase P-1.1.B · Inverted Cart Store.
+ * ============================================================================
+ *
+ * `useCartStore` is now a **pure read-only PROJECTION** of the Sovereign
+ * {@link cartRuntime}. The Zustand store no longer owns cart state — it
+ * mirrors `cartRuntime.getState()` and writes the projection to
+ * `localStorage` so the cart survives reloads.
+ *
+ * Singularity (Law 9): every cart mutation in the OS now flows through
+ * `cartRuntime.{add,remove,setQty,updateMeta,clear,replaceAll}`. The
+ * legacy hooks below are stable React adapters that delegate to the
+ * runtime — they are NOT a parallel state machine.
+ *
+ * Backwards-compat: the public types (`CartLine`, `CartLineMeta`,
+ * `CartActions`, `CartState`) and selector hooks (`useCartLineQty`,
+ * `useCartLinesArray`, `useCartTotalItems`, `useCartActions`) keep their
+ * pre-V3 signatures so the ~60 legacy consumers compile unchanged. The
+ * deprecated `product: Product` bridge is preserved through P-1.1.D.
+ * ============================================================================
+ */
 
+import { useEffect, useMemo, useRef } from "react";
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { useShallow } from "zustand/react/shallow";
+import {
+  cartRuntime,
+  computeLineKey as computeRuntimeLineKey,
+  type CartLineKindData,
+  type CartLineDisplay,
+  type CartRuntimeLine,
+  type CartRuntimeState,
+  type AddCartItemIntent,
+} from "@/core/orders/runtime/CartRuntime";
+import type {
+  ProductFinancialDNA,
+  CartLineModifier,
+} from "@/core/cashier/domain/types";
 /**
  * @deprecated Wave P-B (Static Catalog Killer) — `Product` is the legacy
- * denormalized shape. The store keeps it ONLY to populate the transitional
- * `product: Product` bridge field on `CartLine` for the 8 §2.E external
- * consumers that still read `l.product.*`. Migrated leaves consume
- * `ProductCardVM` via `useCartHydration` instead.
+ * denormalized shape, kept ONLY as a transitional bridge until every UI
+ * leaf consumes `ProductCardVM` via `useCartHydration`.
  */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { Modifier } from "@/lib/pricingEngine";
 
 // ---------------------------------------------------------------------------
-// Public types
+// Public types — preserved for ~60 legacy consumers (do not narrow).
 // ---------------------------------------------------------------------------
 
 export type CartLineMeta = {
@@ -62,18 +78,6 @@ export type CartLineMeta = {
   prepHours?: number;
 };
 
-/**
- * Wave P-B (Static Catalog Killer) — `CartLine` shape.
- *
- * Canonical: identity + intent + display snapshot
- *   (`productId`, `variantId?`, `qty`, `capturedPrice`, `capturedName`,
- *   `capturedImage?`, `capturedAt?`).
- *
- * Transitional: `product: Product` is retained as a DEPRECATED bridge so
- * existing cart UI compiles unchanged through Step B-3, where the leaves
- * migrate to `useCartHydration`. New canonical fields are populated by
- * `add()` and by `migrateLegacyCartShape()` for persisted carts.
- */
 export type CartLine = {
   productId?: string;
   variantId?: string;
@@ -99,7 +103,7 @@ export type CartActions = {
 
 export type CartState = {
   items: Record<string, CartLine>;
-  /** productId → lineKey lookup index (rebuilt on every mutation). */
+  /** productId → lineKey lookup index (rebuilt on every projection tick). */
   productIndex: Record<string, string>;
 };
 
@@ -110,41 +114,177 @@ export type CartState = {
 export const lineKey = (l: {
   product: { id: string };
   meta?: CartLineMeta;
-}): string => {
-  const m = (l.meta ?? {}) as CartLineMeta & { variant_id?: string };
-  return [
-    l.product.id,
-    m.kind ?? "buy",
-    m.variantId ?? m.variant_id ?? "",
-    m.bookingDate ?? "",
-    m.bookingSlot ?? "",
-    m.borrowDuration ?? "",
-    (m.addonIds ?? []).slice().sort().join(","),
-    m.printConfig
-      ? `${m.printConfig.pages}-${m.printConfig.copies}-${m.printConfig.colorMode}-${m.printConfig.sided}-${m.printConfig.binding}-${m.printConfig.fileName ?? ""}`
-      : "",
-  ].join("|");
-};
-
-const buildIndex = (items: Record<string, CartLine>): Record<string, string> => {
-  const idx: Record<string, string> = {};
-  for (const [key, line] of Object.entries(items)) {
-    // First key wins for a given productId (matches existing find() semantics).
-    if (!(line.product.id in idx)) idx[line.product.id] = key;
-  }
-  return idx;
-};
+}): string =>
+  computeRuntimeLineKey({
+    productId: l.product.id,
+    kindData: legacyMetaToKindData(l.product.id, l.meta),
+  });
 
 // ---------------------------------------------------------------------------
-// Store
+// Legacy ⇄ Sovereign translators (kernel-minimalism preserved).
 // ---------------------------------------------------------------------------
-
-const STORAGE_KEY = "reef-cart-v2";
 
 const FALLBACK_CART_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
 
-// localStorage may be blocked in sandboxed iframes (Lovable preview).
+/**
+ * Translate a legacy `CartLineMeta` into a strict {@link CartLineKindData}.
+ * The kernel has no domain knowledge — this adapter encodes ONLY the
+ * 1-to-1 mapping from the legacy flat shape to the polymorphic block.
+ */
+function legacyMetaToKindData(
+  _productId: string,
+  meta: CartLineMeta | undefined,
+): CartLineKindData {
+  const k = meta?.kind ?? "buy";
+  if (k === "borrow") {
+    return {
+      kind: "borrow",
+      duration: meta?.borrowDuration ?? "7d",
+      days: meta?.borrowDays,
+      deposit: meta?.borrowDeposit,
+    };
+  }
+  if (k === "print" && meta?.printConfig) {
+    return { kind: "print", config: meta.printConfig };
+  }
+  if (meta?.bookingDate) {
+    return {
+      kind: "booking",
+      date: meta.bookingDate,
+      slot: meta.bookingSlot,
+      note: meta.bookingNote,
+      prepHours: meta.prepHours,
+      payDeposit: meta.payDeposit,
+    };
+  }
+  return {
+    kind: "buy",
+    variantId: meta?.variantId,
+    addonIds: meta?.addonIds,
+  };
+}
+
+/**
+ * Reverse adapter — derive the flat legacy meta from the polymorphic block
+ * for projection back into the Zustand mirror that legacy UI reads.
+ */
+function kindDataToLegacyMeta(
+  kindData: CartLineKindData,
+  base: CartLineMeta | undefined,
+): CartLineMeta {
+  const out: CartLineMeta = { ...(base ?? {}) };
+  switch (kindData.kind) {
+    case "buy":
+      out.kind = "buy";
+      if (kindData.variantId !== undefined) out.variantId = kindData.variantId;
+      if (kindData.addonIds !== undefined)
+        out.addonIds = Array.from(kindData.addonIds);
+      break;
+    case "booking":
+      out.bookingDate = kindData.date;
+      if (kindData.slot !== undefined) out.bookingSlot = kindData.slot;
+      if (kindData.note !== undefined) out.bookingNote = kindData.note;
+      if (kindData.prepHours !== undefined) out.prepHours = kindData.prepHours;
+      if (kindData.payDeposit !== undefined) out.payDeposit = kindData.payDeposit;
+      break;
+    case "borrow":
+      out.kind = "borrow";
+      out.borrowDuration = kindData.duration;
+      if (kindData.days !== undefined) out.borrowDays = kindData.days;
+      if (kindData.deposit !== undefined) out.borrowDeposit = kindData.deposit;
+      break;
+    case "print":
+      out.kind = "print";
+      out.printConfig = { ...kindData.config };
+      break;
+  }
+  return out;
+}
+
+/** Synthesise a minimal `ProductFinancialDNA` from the legacy product shape. */
+function productToDna(
+  product: Product,
+  meta: CartLineMeta | undefined,
+): ProductFinancialDNA {
+  return {
+    currency: "EGP",
+    base_price: meta?.unitPrice ?? product.price ?? 0,
+  };
+}
+
+function metaModifiersToCartLineModifiers(
+  modifiers: ReadonlyArray<Modifier> | undefined,
+): ReadonlyArray<CartLineModifier> | undefined {
+  if (!modifiers || modifiers.length === 0) return undefined;
+  return modifiers.map((m) => ({
+    id: m.id,
+    label: m.label,
+    unit_price_delta: m.amount,
+  }));
+}
+
+function captureDisplay(
+  product: Product,
+  meta: CartLineMeta | undefined,
+): CartLineDisplay {
+  return {
+    capturedName: product.name,
+    capturedImage: product.image,
+    capturedPrice: meta?.unitPrice ?? product.price,
+    capturedAt: new Date().toISOString(),
+    unit: product.unit,
+  };
+}
+
+/** Build a strict {@link AddCartItemIntent} from a legacy `(product, qty, meta)` tuple. */
+function legacyAddToIntent(
+  product: Product,
+  qty: number,
+  meta: CartLineMeta | undefined,
+): AddCartItemIntent {
+  const kindData = legacyMetaToKindData(product.id, meta);
+  return {
+    lineId: computeRuntimeLineKey({ productId: product.id, kindData }),
+    productId: product.id,
+    dna: productToDna(product, meta),
+    qty,
+    modifiers: metaModifiersToCartLineModifiers(meta?.appliedModifiers),
+    name: product.name,
+    kindData,
+    display: captureDisplay(product, meta),
+    extensions: meta?.properties as Record<string, never> | undefined,
+  };
+}
+
+function legacyLineToIntent(line: CartLine): AddCartItemIntent {
+  const product = line.product;
+  const meta = line.meta;
+  const kindData = legacyMetaToKindData(product.id, meta);
+  return {
+    lineId: computeRuntimeLineKey({ productId: product.id, kindData }),
+    productId: product.id,
+    dna: productToDna(product, meta),
+    qty: line.qty,
+    modifiers: metaModifiersToCartLineModifiers(meta?.appliedModifiers),
+    name: line.capturedName ?? product.name,
+    kindData,
+    display: {
+      capturedName: line.capturedName ?? product.name,
+      capturedImage: line.capturedImage ?? product.image,
+      capturedPrice: line.capturedPrice ?? meta?.unitPrice ?? product.price,
+      capturedAt: line.capturedAt,
+      unit: product.unit,
+    },
+    extensions: meta?.properties as Record<string, never> | undefined,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Persistent projection storage.
+// ---------------------------------------------------------------------------
+
+const STORAGE_KEY = "reef-cart-v2";
 const memoryStore: Record<string, string> = {};
 const safeStorage = createJSONStorage<CartState>(() => ({
   getItem: (key) => {
@@ -174,44 +314,55 @@ const safeStorage = createJSONStorage<CartState>(() => ({
 }));
 
 // ---------------------------------------------------------------------------
-// Wave P-B (Static Catalog Killer)
-// ---------------------------------------------------------------------------
-// Capture a thin display snapshot at add-to-cart time, plus the canonical
-// identity (productId, variantId). Snapshot fields make the cart usable
-// offline and during hydration; live VMs come from `useCartHydration`.
+// Projection: CartRuntimeLine → legacy CartLine (read-only mirror).
 // ---------------------------------------------------------------------------
 
-const captureSnapshot = (
-  product: Product,
-  meta: CartLineMeta | undefined,
-): Pick<
-  CartLine,
-  | "productId"
-  | "variantId"
-  | "capturedPrice"
-  | "capturedName"
-  | "capturedImage"
-  | "capturedAt"
-> => ({
-  productId: product.id,
-  variantId: meta?.variantId ?? (meta as { variant_id?: string } | undefined)?.variant_id,
-  capturedPrice: meta?.unitPrice ?? product.price,
-  capturedName: product.name,
-  capturedImage: product.image,
-  capturedAt: new Date().toISOString(),
-});
+function runtimeLineToCartLine(rl: CartRuntimeLine): CartLine {
+  const display = rl.display ?? {};
+  const meta = kindDataToLegacyMeta(rl.kindData, {
+    properties: rl.extensions as Record<string, unknown> | undefined,
+    unitPrice: display.capturedPrice ?? rl.dna.base_price,
+  });
+  const productStub: Product = {
+    id: rl.productId,
+    name: display.capturedName ?? rl.name ?? "",
+    price: display.capturedPrice ?? rl.dna.base_price ?? 0,
+    image: display.capturedImage ?? FALLBACK_CART_IMG,
+    unit: display.unit ?? "",
+    category: "general",
+    source: "supermarket",
+  } as Product;
+  return {
+    productId: rl.productId,
+    variantId: rl.kindData.kind === "buy" ? rl.kindData.variantId : undefined,
+    capturedPrice: display.capturedPrice ?? rl.dna.base_price,
+    capturedName: display.capturedName ?? rl.name,
+    capturedImage: display.capturedImage,
+    capturedAt: display.capturedAt,
+    product: productStub,
+    qty: rl.qty,
+    meta,
+  };
+}
+
+function projectRuntimeState(state: CartRuntimeState): CartState {
+  const items: Record<string, CartLine> = {};
+  const productIndex: Record<string, string> = {};
+  for (const rl of state.lines) {
+    const key = rl.lineId;
+    items[key] = runtimeLineToCartLine(rl);
+    if (!(rl.productId in productIndex)) productIndex[rl.productId] = key;
+  }
+  return { items, productIndex };
+}
+
+// ---------------------------------------------------------------------------
+// Persisted-shape rehydration → CartRuntime (one-shot at boot).
+// ---------------------------------------------------------------------------
 
 /**
- * Wave P-B (Static Catalog Killer) — one-shot persisted-cart migration.
- *
- * Lifts pre-P-B persisted lines (`{ product, qty, meta }`) into the new
- * canonical shape (`{ productId, variantId, capturedPrice, capturedName,
- * capturedImage, capturedAt, product (deprecated bridge), qty, meta }`).
- *
- * - Idempotent: lines already in the new shape are left untouched.
- * - Non-throwing: a malformed line is dropped, never crashes rehydration.
- * - The `product` bridge is preserved during the B-3 transition; a follow-up
- *   migration removes it once every UI leaf reads via `useCartHydration`.
+ * @deprecated Pre-V3 persisted shape lifter, retained for one wave so existing
+ * `localStorage` carts survive the projection inversion.
  */
 export const migrateLegacyCartShape = (
   items: Record<string, CartLine>,
@@ -220,184 +371,145 @@ export const migrateLegacyCartShape = (
   for (const [k, raw] of Object.entries(items)) {
     if (!raw || typeof raw !== "object") continue;
     const line = raw as CartLine;
-    if (!line.product || typeof line.product.id !== "string") continue;
-    if (line.productId && typeof line.capturedPrice === "number") {
-      out[k] = line; // already migrated
+    if (!line.product || typeof line.product.id !== "string") {
+      // Try to re-synthesise from captured snapshot.
+      const id = line.productId;
+      if (!id) continue;
+      out[k] = {
+        ...line,
+        product: {
+          id,
+          name: line.capturedName ?? "",
+          price: line.capturedPrice ?? 0,
+          image: line.capturedImage ?? FALLBACK_CART_IMG,
+          unit: "",
+          category: "general",
+          source: "supermarket",
+        } as Product,
+      };
       continue;
     }
-    const snap = captureSnapshot(line.product, line.meta);
-    out[k] = { ...line, ...snap };
+    out[k] = line;
   }
   return out;
 };
 
-export const useCartStore = create<CartState & CartActions>()(
-  persist(
-    (set) => ({
-      items: {},
-      productIndex: {},
+// ---------------------------------------------------------------------------
+// Store — read-only projection.
+// ---------------------------------------------------------------------------
 
-      add: (product, qty = 1, meta) =>
-        set((state) => {
-          const candidate: CartLine = {
-            product,
-            qty,
-            meta,
-            ...captureSnapshot(product, meta),
-          };
-          const key = lineKey(candidate);
-          const existing = state.items[key];
-          const nextLine: CartLine = existing
-            ? {
-                ...existing,
-                qty: existing.qty + qty,
-                meta: meta ? { ...existing.meta, ...meta } : existing.meta,
-              }
-            : candidate;
-          const items = { ...state.items, [key]: nextLine };
-          return { items, productIndex: buildIndex(items) };
-        }),
-
-      remove: (productId) =>
-        set((state) => {
-          const items: Record<string, CartLine> = {};
-          for (const [k, l] of Object.entries(state.items)) {
-            if (l.product.id !== productId) items[k] = l;
-          }
-          return { items, productIndex: buildIndex(items) };
-        }),
-
-      setQty: (productId, qty) =>
-        set((state) => {
-          const items: Record<string, CartLine> = {};
-          for (const [k, l] of Object.entries(state.items)) {
-            if (l.product.id === productId) {
-              if (qty > 0) items[k] = { ...l, qty };
-              // qty <= 0 → drop line
-            } else {
-              items[k] = l;
-            }
-          }
-          return { items, productIndex: buildIndex(items) };
-        }),
-
-      updateMeta: (productId, meta) =>
-        set((state) => {
-          const items: Record<string, CartLine> = {};
-          for (const [k, l] of Object.entries(state.items)) {
-            items[k] =
-              l.product.id === productId
-                ? { ...l, meta: { ...l.meta, ...meta } }
-                : l;
-          }
-          return { items, productIndex: buildIndex(items) };
-        }),
-
-      clear: () => set({ items: {}, productIndex: {} }),
-
-      replaceAll: (lines) =>
-        set(() => {
-          const items: Record<string, CartLine> = {};
-          for (const l of lines) {
-            const k = lineKey(l);
-            const enriched: CartLine = l.productId && typeof l.capturedPrice === "number"
-              ? l
-              : { ...l, ...captureSnapshot(l.product, l.meta) };
-            const existing = items[k];
-            // Use max() to defend against duplicate echoed rows from remote sync.
-            items[k] = existing
-              ? { ...existing, qty: Math.max(existing.qty, enriched.qty) }
-              : enriched;
-          }
-          return { items, productIndex: buildIndex(items) };
-        }),
+export const useCartStore = create<CartState>()(
+  persist<CartState>(
+    () => ({
+      items: {} as Record<string, CartLine>,
+      productIndex: {} as Record<string, string>,
     }),
     {
       name: STORAGE_KEY,
       storage: safeStorage,
-      // Wave P-C (Payload Diet) — persist ONLY identity + thin display snapshot.
-      // The deprecated `product` bridge is dropped from disk to keep
-      // localStorage in the kilobyte range; it is re-synthesised as a stub
-      // on rehydrate so legacy `l.product.*` consumers keep compiling until
-      // they migrate to `useCartHydration`.
-      partialize: (s) => ({
-        items: Object.fromEntries(
-          Object.entries(s.items).map(([k, l]) => [
-            k,
-            {
-              productId: l.productId ?? l.product?.id,
-              variantId: l.variantId,
-              qty: l.qty,
-              capturedPrice: l.capturedPrice ?? l.product?.price,
-              capturedName: l.capturedName ?? l.product?.name,
-              capturedImage:
-                typeof l.capturedImage === "string"
-                  ? l.capturedImage
-                  : typeof l.product?.image === "string"
-                    ? l.product.image
-                    : undefined,
-              capturedAt: l.capturedAt,
-              meta: l.meta,
-            } as unknown as CartLine,
-          ]),
-        ),
-        productIndex: {},
-      }),
+      partialize: (s: CartState) =>
+        ({
+          items: Object.fromEntries(
+            Object.entries(s.items).map(([k, l]) => [
+              k,
+              {
+                productId: l.productId ?? l.product?.id,
+                variantId: l.variantId,
+                qty: l.qty,
+                capturedPrice: l.capturedPrice ?? l.product?.price,
+                capturedName: l.capturedName ?? l.product?.name,
+                capturedImage:
+                  typeof l.capturedImage === "string"
+                    ? l.capturedImage
+                    : typeof l.product?.image === "string"
+                      ? l.product.image
+                      : undefined,
+                capturedAt: l.capturedAt,
+                meta: l.meta,
+              } as CartLine,
+            ]),
+          ),
+          productIndex: {} as Record<string, string>,
+        }) satisfies CartState,
       onRehydrateStorage: () => (state) => {
         if (!state) return;
-        // Wave P-B: lift persisted legacy lines into the canonical shape.
         state.items = migrateLegacyCartShape(state.items);
-        // Wave P-C: re-synthesise a thin `product` stub from the captured
-        // snapshot for any line that was persisted without the bridge.
-        for (const [k, l] of Object.entries(state.items)) {
-          if (!l.product || typeof l.product.id !== "string") {
-            const id = l.productId;
-            if (!id) {
-              delete state.items[k];
-              continue;
-            }
-            state.items[k] = {
-              ...l,
-              product: {
-                id,
-                name: l.capturedName ?? "",
-                price: l.capturedPrice ?? 0,
-                image: l.capturedImage ?? FALLBACK_CART_IMG,
-                unit: "",
-                category: "general",
-                source: "supermarket",
-              } as Product,
-            };
-          }
-        }
-        // Rebuild the index defensively against stale persisted data.
-        state.productIndex = buildIndex(state.items);
+        const intents: AddCartItemIntent[] = Object.values(state.items).map(
+          (l: CartLine) => legacyLineToIntent(l),
+        );
+        cartRuntime.replaceAll(intents);
       },
     },
   ),
 );
 
+// ---------------------------------------------------------------------------
+// Runtime → Store projection bridge (single subscriber, process-wide).
+// ---------------------------------------------------------------------------
+
+let bridgeInstalled = false;
+function ensureProjectionBridge(): void {
+  if (bridgeInstalled) return;
+  bridgeInstalled = true;
+  cartRuntime.subscribe((state) => {
+    const projected = projectRuntimeState(state);
+    useCartStore.setState(projected, true);
+  });
+}
+ensureProjectionBridge();
 
 // ---------------------------------------------------------------------------
-// Selector hooks — granular, O(1) where possible
+// Selector hooks — granular, read-only.
 // ---------------------------------------------------------------------------
-
-/** Stable actions reference. Never causes a re-render. */
-export const useCartActions = (): CartActions =>
-  useCartStore(
-    useShallow((s) => ({
-      add: s.add,
-      remove: s.remove,
-      setQty: s.setQty,
-      updateMeta: s.updateMeta,
-      clear: s.clear,
-      replaceAll: s.replaceAll,
-    })),
-  );
 
 /**
- * O(1): re-renders only when THIS product's qty changes.
+ * Stable actions reference. Every action delegates to the canonical
+ * {@link cartRuntime}; this hook never mutates the Zustand store directly.
  */
+export const useCartActions = (): CartActions => {
+  const ref = useRef<CartActions | null>(null);
+  if (ref.current === null) {
+    ref.current = {
+      add: (product, qty = 1, meta) => {
+        cartRuntime.add(legacyAddToIntent(product, qty, meta));
+      },
+      remove: (productId) => {
+        cartRuntime.removeByProductId(productId);
+      },
+      setQty: (productId, qty) => {
+        if (qty <= 0) {
+          cartRuntime.removeByProductId(productId);
+          return;
+        }
+        cartRuntime.setQtyByProductId(productId, qty);
+      },
+      updateMeta: (productId, meta) => {
+        const kindData = legacyMetaToKindData(productId, meta);
+        cartRuntime.updateMetaByProductId(productId, {
+          kindData,
+          extensions: meta.properties as Record<string, never> | undefined,
+        });
+      },
+      clear: () => {
+        cartRuntime.clear();
+      },
+      replaceAll: (lines) => {
+        cartRuntime.replaceAll(lines.map((l) => legacyLineToIntent(l)));
+      },
+    };
+  }
+  return ref.current;
+};
+
+/**
+ * Imperative bridge for non-React call sites (realtime sync, server effects).
+ * Equivalent to {@link useCartActions().replaceAll} but safe outside hooks.
+ */
+export function replaceCartLines(lines: ReadonlyArray<CartLine>): void {
+  cartRuntime.replaceAll(lines.map((l) => legacyLineToIntent(l)));
+}
+
+/** O(1): re-renders only when THIS product's qty changes. */
 export const useCartLineQty = (productId: string): number =>
   useCartStore((s) => {
     const key = s.productIndex[productId];
@@ -413,9 +525,8 @@ export const useCartTotalItems = (): number =>
   });
 
 /**
- * Returns the items dictionary as a flat array. Memoized by `items` identity:
- * the array reference is stable until the dictionary changes, so consumers
- * (and downstream useMemo selectors) only recompute on real cart mutations.
+ * Returns the items dictionary as a flat array. Memoised by `items` identity:
+ * the array reference is stable until the dictionary changes.
  */
 let _linesCacheItems: Record<string, CartLine> | null = null;
 let _linesCacheArr: CartLine[] = [];
@@ -426,4 +537,9 @@ const linesArraySelector = (s: CartState): CartLine[] => {
   }
   return _linesCacheArr;
 };
-export const useCartLinesArray = (): CartLine[] => useCartStore(linesArraySelector);
+export const useCartLinesArray = (): CartLine[] =>
+  useCartStore(linesArraySelector);
+
+// `useShallow` and `useEffect`/`useMemo` are re-exported for parity with the
+// pre-inversion module surface (some legacy tests imported them indirectly).
+export { useShallow, useEffect, useMemo };
