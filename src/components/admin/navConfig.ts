@@ -53,7 +53,7 @@ const ERP_BOTTOM: NavItem[] = [
   { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
   { to: "/admin/customers", label: "العملاء", icon: Users },
   { to: "/admin/inventory", label: "المخزون", icon: Box },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
+  { to: "/admin/modules", label: "الوحدات والمحركات", icon: Layers3 },
 ];
 
 const REEF_FACTORY_NAV: NavItem[] = [
