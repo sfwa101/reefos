@@ -23,7 +23,30 @@ export function useMintUSA() {
   const qc = useQueryClient();
   return useMutation<string, Error, MintUSAInput>({
     mutationFn: async (payload) => {
-      const { data, error } = await HakimGateway.mintUniversalAsset(payload);
+      // Fold sovereign rich-DNA fields into `traits` jsonb (Article V-1.C):
+      // traits column on `salsabil_assets` is jsonb — store both semantic
+      // tags AND structured extras so admin search/RLS can read them.
+      const a = payload.asset;
+      const richTraits: Record<string, unknown> = {
+        tags: Array.isArray(a.traits) ? a.traits : [],
+        category_path: a.category_path ?? null,
+        brand: a.brand ?? null,
+        origin_country: a.origin_country ?? null,
+        barcode: (a as { barcode?: string | null }).barcode ?? null,
+        halal: (a as { halal?: boolean | null }).halal ?? null,
+        nutrition: a.nutrition ?? null,
+        net_weight: a.physical?.net_weight ?? null,
+        weight_unit: a.physical?.weight_unit ?? null,
+        allergens: a.allergens ?? null,
+        marketing: a.marketing ?? null,
+        tier_rules: (a as { tier_rules?: Record<string, unknown> | null }).tier_rules ?? null,
+        variant_axes: (payload.skus ?? []).map((s) => s.variant_axes ?? null),
+      };
+      const enrichedPayload = {
+        ...payload,
+        asset: { ...a, traits: richTraits as unknown as string[] },
+      };
+      const { data, error } = await HakimGateway.mintUniversalAsset(enrichedPayload);
       if (error) throw new Error(error.message ?? "mint_failed");
       return String(data);
     },
