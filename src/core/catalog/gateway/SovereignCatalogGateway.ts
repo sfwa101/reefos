@@ -225,6 +225,12 @@ export function assetToProduct(row: RawAsset): Product | null {
       ? lowStockRaw
       : Number(lowStockRaw ?? 10) || 10;
 
+  const packagingTiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
+  const defaultTierId =
+    packagingTiers.find((t) => t.is_default_sell)?.tier_id
+    ?? packagingTiers[0]?.tier_id
+    ?? null;
+
   return {
     id: toLegacyAssetId(row.id),
     name: row.name,
@@ -254,14 +260,8 @@ export function assetToProduct(row: RawAsset): Product | null {
       low_stock_threshold: lowStockThreshold,
     },
     description: row.description ?? undefined,
-    packagingTiers: (() => {
-      const tiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
-      return tiers;
-    })(),
-    defaultTierId: (() => {
-      const tiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
-      return tiers.find((t) => t.is_default_sell)?.tier_id ?? tiers[0]?.tier_id ?? null;
-    })(),
+    packagingTiers,
+    defaultTierId,
   };
 }
 
