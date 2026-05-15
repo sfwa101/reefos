@@ -1,6 +1,35 @@
-# REEFOS — System Constitution · **v3.0 (Imperial Override)**
+# REEFOS — System Constitution · **v5.1 (Automated Enforcement)**
 
 > **Status:** Ratified · Phase P-1 — Sovereign Cleanup & Nucleus Hardening
+> **v5.1 Amendment:** Article §15 (Automated Enforcement) added — the Constitution is now backed by ESLint guards (`eslint.config.js`). Disabling those guards is treason.
+
+---
+
+## §15. Automated Enforcement (v5.1)
+
+> *"الدستور المكتوب لا يكفي إذا لم يكن مدعوماً بإنفاذ آلي."*
+> — Emperor Hassan, Sovereign Decree, 2026‑05‑15.
+
+The Constitution is no longer a document — it is a **Linter**. As of v5.1, the
+following articles are mechanically enforced by `eslint.config.js`:
+
+| Guard | Article | Selector | Allowed In |
+|---|---|---|---|
+| **Kernel Purity** | Article 2 | `import … from "@/apps/**"` inside `src/core/**` | Nowhere. Invert the dependency. |
+| **Gateway Exclusivity** | Article 4 | `supabase.from(...)` / `supabase.rpc(...)` | `**/gateway/**`, `*.functions.ts`, `src/integrations/supabase/**`, `src/core/runtime-ui/watchdog.ts` |
+| **UI Component Purity** | Article 6 | Raw `<button>` / `<input>` JSX | `src/components/ui/**` (the shadcn primitives only) |
+
+### Enforcement Rules
+
+1. **No silent disables.** Any `// eslint-disable-next-line no-restricted-imports` or `// eslint-disable-next-line no-restricted-syntax` targeting the three guards above is **architectural treason** and MUST be reverted on sight. Pull requests carrying such disables are rejected without review.
+2. **No localized overrides.** Adding a new file glob to the allowlist requires an ADR under `docs/adr/` ratified by the Sovereign (Emperor Hassan).
+3. **Counters monotonically decrease.** The legacy violation counters (Kernel Purity ≈ 29, Gateway Exclusivity ≈ 6, UI Purity ≈ 25 as of v5.1 ratification — see `docs/audits/EXECUTION_REPORT_AUTOMATED_CONSTITUTION.md`) MAY only go down. Any wave that increases a counter is rejected.
+4. **Counter‑zero promotion.** Once any counter reaches zero, the corresponding rule is promoted from `error` (warn‑on‑build) to **CI‑blocking**: the deploy pipeline refuses to ship a build where the rule fires even once.
+5. **The Watchdog stays.** `src/core/runtime-ui/watchdog.ts` (the runtime trap that catches direct `supabase.from` calls escaping into the UI render path) is the second line of defence and MUST NOT be deleted, even after the Linter counter reaches zero.
+
+### Original v3.0 Header
+
+> **v3.0 (Imperial Override)** · Phase P-1 — Sovereign Cleanup & Nucleus Hardening
 > **Scope:** Binding on every human contributor, AI agent, automation, and runtime module operating inside REEFOS / Salsabil OS.
 > **Precedence:** This document overrides any tutorial, framework default, or stylistic preference. The companion `SOVEREIGN_V3_MANDATE.md` overrides this document for matters of intent and phase priority. Where a conflict exists, V3 wins.
 
