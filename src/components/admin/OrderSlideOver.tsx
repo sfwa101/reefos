@@ -86,7 +86,7 @@ export function OrderSlideOver({ orderId, onClose }: Props) {
                     <li key={it.id} className="py-1.5 flex items-center justify-between gap-2">
                       <span className="truncate">{it.product_name}</span>
                       <span className="text-foreground-tertiary shrink-0">×{it.quantity}</span>
-                      <span className="num shrink-0 font-semibold">{fmtMoney(it.price * it.quantity)}</span>
+                      <span className="num shrink-0 font-semibold">{fmtMoney(it.total)}</span>
                     </li>
                   ))}
                 </ul>

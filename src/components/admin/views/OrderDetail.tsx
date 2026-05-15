@@ -82,6 +82,7 @@ interface ItemRow {
   id: string;
   quantity: number;
   price: number;
+  total: number;
   product_name: string;
   product_image: string | null;
 }
@@ -266,7 +267,7 @@ export default function OrderDetail() {
                     <p className="text-[14px] font-medium truncate">{it.product_name}</p>
                     <p className="text-[11.5px] text-foreground-tertiary num">{it.quantity} × {fmtMoney(it.price)}</p>
                   </div>
-                  <span className="font-display text-[14px] num">{fmtMoney(it.price * it.quantity)}</span>
+                  <span className="font-display text-[14px] num">{fmtMoney(it.total)}</span>
                 </IOSRow>
               ))}
             </IOSList>
