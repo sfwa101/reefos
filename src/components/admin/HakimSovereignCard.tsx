@@ -84,7 +84,7 @@ export function HakimSovereignCard() {
     <>
       <button
         onClick={openReport}
-        className="w-full text-right group relative overflow-hidden rounded-3xl p-5 lg:p-6 text-white transition-all hover:shadow-[0_20px_60px_-15px_rgba(99,102,241,0.6)] active:scale-[0.995]"
+        className="w-full text-right group relative overflow-hidden rounded-3xl p-5 lg:p-6 text-primary-foreground transition-all hover:shadow-[0_20px_60px_-15px_rgba(99,102,241,0.6)] active:scale-[0.995]"
         style={{
           background: "linear-gradient(135deg, hsl(230 45% 14%) 0%, hsl(245 50% 22%) 45%, hsl(265 55% 30%) 100%)",
         }}
@@ -97,7 +97,7 @@ export function HakimSovereignCard() {
         <div className="relative">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="h-10 w-10 rounded-2xl bg-white/15 backdrop-blur-md border border-white/20 flex items-center justify-center">
+              <div className="h-10 w-10 rounded-2xl bg-primary-foreground/15 backdrop-blur-md border border-primary-foreground/20 flex items-center justify-center">
                 <Sparkles className="h-5 w-5" />
               </div>
               <div>
@@ -105,12 +105,12 @@ export function HakimSovereignCard() {
                 <p className="text-[10.5px] opacity-70 leading-tight">مركز القيادة الذكي</p>
               </div>
             </div>
-            <div className="hidden sm:flex items-center gap-1 bg-white/10 backdrop-blur rounded-full p-0.5 border border-white/15">
+            <div className="hidden sm:flex items-center gap-1 bg-primary-foreground/10 backdrop-blur rounded-full p-0.5 border border-primary-foreground/15">
               {[7, 30, 90].map((d) => (
                 <span
                   key={d}
                   onClick={(e) => { e.stopPropagation(); setDays(d); }}
-                  className={`px-2.5 py-1 rounded-full text-[10.5px] cursor-pointer transition ${days === d ? "bg-white text-[hsl(245_50%_22%)] font-bold" : "opacity-70 hover:opacity-100"}`}
+                  className={`px-2.5 py-1 rounded-full text-[10.5px] cursor-pointer transition ${days === d ? "bg-primary-foreground text-[hsl(245_50%_22%)] font-bold" : "opacity-70 hover:opacity-100"}`}
                 >
                   {d} يوم
                 </span>
@@ -126,7 +126,7 @@ export function HakimSovereignCard() {
           </div>
 
           {/* AI Pulse line */}
-          <div className="flex items-center justify-between gap-3 bg-white/5 backdrop-blur rounded-xl px-3 py-2 border border-white/10">
+          <div className="flex items-center justify-between gap-3 bg-primary-foreground/5 backdrop-blur rounded-xl px-3 py-2 border border-primary-foreground/10">
             <p className={`text-[12px] font-medium leading-tight transition-all ${pulseColor}`} key={pulseIdx} style={{ animation: "fadeInUp 0.4s ease" }}>
               {pulse.text}
             </p>
@@ -143,9 +143,9 @@ export function HakimSovereignCard() {
       {/* Full report drawer */}
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetContent side="left" className="w-full sm:max-w-2xl overflow-y-auto p-0" dir="rtl">
-          <div className="bg-gradient-to-br from-[hsl(230_45%_14%)] via-[hsl(245_50%_22%)] to-[hsl(265_55%_30%)] text-white p-5 sticky top-0 z-10">
+          <div className="bg-gradient-to-br from-[hsl(230_45%_14%)] via-[hsl(245_50%_22%)] to-[hsl(265_55%_30%)] text-primary-foreground p-5 sticky top-0 z-10">
             <div className="flex items-center gap-3">
-              <div className="h-11 w-11 rounded-2xl bg-white/15 backdrop-blur flex items-center justify-center">
+              <div className="h-11 w-11 rounded-2xl bg-primary-foreground/15 backdrop-blur flex items-center justify-center">
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
@@ -155,10 +155,10 @@ export function HakimSovereignCard() {
             </div>
 
             {/* Period filter */}
-            <div className="flex gap-1 mt-3 bg-white/10 rounded-xl p-1 border border-white/10 w-fit">
+            <div className="flex gap-1 mt-3 bg-primary-foreground/10 rounded-xl p-1 border border-primary-foreground/10 w-fit">
               {[7, 30, 90].map((d) => (
                 <button key={d} onClick={() => setDays(d)}
-                  className={`px-3 h-7 rounded-lg text-[11px] transition ${days === d ? "bg-white text-[hsl(245_50%_22%)] font-bold" : "opacity-70"}`}>
+                  className={`px-3 h-7 rounded-lg text-[11px] transition ${days === d ? "bg-primary-foreground text-[hsl(245_50%_22%)] font-bold" : "opacity-70"}`}>
                   {d} يوم
                 </button>
               ))}
@@ -218,7 +218,7 @@ export function HakimSovereignCard() {
             {/* Hakim AI narrative */}
             <div className="bg-gradient-to-br from-[hsl(var(--purple))]/5 to-[hsl(var(--info))]/5 border border-[hsl(var(--purple))]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(var(--purple))] to-[hsl(var(--info))] text-white flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(var(--purple))] to-[hsl(var(--info))] text-primary-foreground flex items-center justify-center">
                   <Sparkles className="h-3.5 w-3.5" />
                 </div>
                 <h3 className="font-display text-[14px]">تحليل حكيم</h3>
@@ -257,7 +257,7 @@ function KpiBlock({ label, value, icon: Icon, accent }: { label: string; value: 
 function KpiCard({ label, value, icon: Icon, tone }: { label: string; value: string; icon: React.ElementType; tone: string }) {
   return (
     <div className="bg-surface rounded-2xl border border-border/40 p-3.5 shadow-soft">
-      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${tone} flex items-center justify-center text-white mb-2`}>
+      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${tone} flex items-center justify-center text-primary-foreground mb-2`}>
         <Icon className="h-4 w-4" />
       </div>
       <p className="text-[11px] text-foreground-tertiary">{label}</p>
