@@ -66,6 +66,7 @@ export const TaskActionCard = ({
   const address = order?.address ?? null;
   const inSurge = task.service_type === "express";
   const updateStatus = useServerFn(updateDispatchTaskStatusFn);
+  const recordCash = useServerFn(recordDriverCashCollectionFn);
   const [pending, setPending] = useState<DispatchTaskAction | null>(null);
   const isBusy = busy || pending !== null;
 
@@ -85,6 +86,18 @@ export const TaskActionCard = ({
           lng: fix?.lng ?? null,
         },
       });
+      // After delivery, if COD, record collection (server is single source of truth on amount)
+      if (action === "delivered" && task.cod_amount > 0) {
+        try {
+          const res = await recordCash({
+            data: { nodeId: task.id, confirmedAmount: task.cod_amount },
+          });
+          toast.success(`تم تحصيل ${res.amount} ج.م نقداً`);
+        } catch (e) {
+          const msg = e instanceof Error ? e.message : "تعذّر تسجيل التحصيل";
+          toast.error(`تعذّر تسجيل النقد: ${msg}`);
+        }
+      }
       toast.success(
         action === "arrived_vendor"
           ? "تم تسجيل الوصول للمتجر"
