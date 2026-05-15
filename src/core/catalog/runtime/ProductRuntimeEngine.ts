@@ -62,7 +62,7 @@ function assetRowToProductRow(
     ? (traits.badges as unknown[]).filter((t): t is string => typeof t === "string")
     : [];
 
-  return {
+  return ({
     id: asset.id,
     slug: typeof traits.slug === "string" ? (traits.slug as string) : asset.id,
     sku: sku?.sku_code ?? null,
@@ -97,7 +97,8 @@ function assetRowToProductRow(
     is_featured: traits.featured === true,
     created_at: asset.created_at ?? new Date().toISOString(),
     updated_at: asset.updated_at ?? new Date().toISOString(),
-  } as Row<"usa_products">;
+    deleted_at: asset.deleted_at ?? null,
+  } as unknown) as Row<"usa_products">;
 }
 
 export interface BuildCardsBatchInput {
