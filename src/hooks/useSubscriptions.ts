@@ -19,7 +19,7 @@ import {
   updateSubscription,
   deleteSubscription,
   migrateLegacySubscriptions,
-} from "@/core/orders/subscriptions";
+} from "@/core/orders/gateway/SubscriptionGateway";
 import type { SubscriptionRecord } from "@/core/commerce/policies/bundle-thresholds";
 
 const KEY = (userId: string) => ["saved-baskets", "subscription", userId] as const;
