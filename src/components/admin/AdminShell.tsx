@@ -121,15 +121,21 @@ function AdminHeader({
           </div>
         </Link>
 
-        <div className="relative ms-auto hidden flex-1 max-w-md md:block">
-          <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="بحث سريع · طلب، عميل، منتج…"
-            className="h-10 rounded-2xl border-white/40 bg-white/40 pe-10 text-[13px] font-medium backdrop-blur-md placeholder:text-muted-foreground/70 focus-visible:ring-2 focus-visible:ring-primary/30"
-            aria-label="بحث سريع"
-          />
-        </div>
+        <button
+          type="button"
+          onClick={() => openLayer("command")}
+          aria-label="افتح شريط الأوامر"
+          className="relative ms-auto hidden h-10 w-full max-w-md flex-1 items-center gap-2 rounded-2xl border border-white/40 bg-white/40 px-4 text-[13px] font-medium backdrop-blur-md transition hover:bg-white/60 md:flex"
+        >
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <span className="flex-1 text-right text-muted-foreground/80">
+            بحث سريع · طلب، عميل، منتج…
+          </span>
+          <kbd className="rounded-md border border-white/60 bg-white/60 px-1.5 py-0.5 text-[10px] font-extrabold text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
+
 
         <div className="ms-auto flex items-center gap-2 md:ms-0">
           <Button
