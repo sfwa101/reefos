@@ -87,6 +87,9 @@ export type Product = {
   wakalahEligible?: boolean;
   hideOnZero?: boolean;
   lowStockThreshold?: number;
+  /** Wave P-9 — packaging tier projection (empty array if asset has no tiers). */
+  packagingTiers?: PackagingOptionVM[];
+  defaultTierId?: string | null;
 };
 
 /** @deprecated Wave P-B — sanctioned only inside `src/core/catalog/**`. */
