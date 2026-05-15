@@ -9,6 +9,7 @@ import {
   computeParticipantShares,
   useSharedCartSync,
 } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
+import { sumPricedQuantityRows } from "@/core/orders/runtime/lineTotals";
 
 /**
  * Phase 7 — Global Approval Banner
@@ -23,16 +24,16 @@ const GlobalApprovalBanner = () => {
   const [busy, setBusy] = useState(false);
 
   const subtotal = useMemo(
-    () => items.reduce((s, it) => s + it.unit_price * it.quantity, 0),
+    () => sumPricedQuantityRows(items),
     [items],
   );
 
   const myShare = useMemo(() => {
     if (!myParticipant) return 0;
     if (myParticipant.split_type === "itemized") {
-      return items
-        .filter((it) => it.added_by === myParticipant.user_id)
-        .reduce((s, it) => s + it.unit_price * it.quantity, 0);
+      return sumPricedQuantityRows(
+        items.filter((it) => it.added_by === myParticipant.user_id),
+      );
     }
     const shares = computeParticipantShares(participants, subtotal);
     return shares[myParticipant.user_id] ?? 0;

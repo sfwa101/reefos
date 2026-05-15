@@ -92,7 +92,7 @@ const ProductDetail = () => {
     : selectedUnit
       ? baseUnitPrice * selectedUnit.conversion_factor
       : baseUnitPrice;
-  const total = unitPrice * qty;
+  const total = speculativeLineTotal(unitPrice, qty);
 
   useEffect(() => {
     setPriceFlash((x) => x + 1);

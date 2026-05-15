@@ -6,6 +6,7 @@ import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { toast } from "sonner";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 
 interface Props {
   meal: KitchenMeal | null;
@@ -40,7 +41,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
   );
   const addonsTotal = selectedAddons.reduce((s, a) => s + a.price, 0);
   const unitPrice = (size?.price ?? 0) + addonsTotal;
-  const total = unitPrice * qty;
+  const total = speculativeLineTotal(unitPrice, qty);
 
   const toggleAddon = (id: string) =>
     setAddonIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));

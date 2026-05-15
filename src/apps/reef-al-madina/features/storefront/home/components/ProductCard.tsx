@@ -74,7 +74,7 @@ export const ProductCard = ({
   const ratingAvg = p.rating?.avg ?? 0;
   const ratingCount = p.rating?.count ?? 0;
   const deposit = isPre
-    ? Math.round((price * (view.depositPct ?? 25)) / 100)
+    ? preorderDepositAmount(price, view.depositPct ?? 25)
     : 0;
   const inCompare = compare.has(p.id);
   const compareFull = !inCompare && compare.items.length >= compare.max;

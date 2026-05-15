@@ -6,6 +6,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toast } from "sonner";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 
 interface Props {
   product: Product | null;
@@ -44,7 +45,7 @@ const RestaurantItemSheet = ({ product, open, onClose, brandHue = "18 78% 48%" }
   );
   const addonsTotal = selectedAddons.reduce((s, a) => s + a.price, 0);
   const unitPrice = (product?.price ?? 0) + (variant?.priceDelta ?? 0) + addonsTotal;
-  const total = unitPrice * qty;
+  const total = speculativeLineTotal(unitPrice, qty);
 
   const toggleAddon = (id: string) =>
     setAddonIds((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id]));

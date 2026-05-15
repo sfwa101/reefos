@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Lock, AlertCircle, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import type { GroupBuyCampaign, ResolvedTierState } from "../types/group-buy.types";
+import { groupBuyEscrowAmount } from "@/core/commerce/policies/deposits";
 
 interface Props {
   open: boolean;
@@ -31,7 +32,7 @@ export const GroupBuyPledgeDialog = ({
   const [qty, setQty] = useState(1);
   const [submitting, setSubmitting] = useState(false);
 
-  const escrow = (tierState.currentPrice * qty).toFixed(2);
+  const escrow = groupBuyEscrowAmount(tierState.currentPrice, qty).toFixed(2);
 
   const handleConfirm = async () => {
     if (qty <= 0) {

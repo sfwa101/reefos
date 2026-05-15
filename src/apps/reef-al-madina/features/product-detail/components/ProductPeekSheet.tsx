@@ -53,7 +53,7 @@ const ProductPeekSheet = ({ productId, isOpen, onClose }: ProductPeekSheetProps)
 
   if (!product) return null;
 
-  const total = (Number(product.price) || 0) * qty;
+  const total = speculativeLineTotal(Number(product.price) || 0, qty);
   const fav = has(product.id);
 
   const handleAdd = () => {
