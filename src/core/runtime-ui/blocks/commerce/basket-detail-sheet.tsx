@@ -7,6 +7,7 @@ import {
 import { toast } from "sonner";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
+import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
 import { useAuth } from "@/context/AuthContext";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { toLatin } from "@/lib/format";
