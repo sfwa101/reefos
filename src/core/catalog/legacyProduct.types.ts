@@ -30,6 +30,28 @@ export type ProductVariant = { id: string; label: string; priceDelta: number };
 /** @deprecated Wave P-B — use `ProductAddonVM` from `@/core/catalog/types`. */
 export type ProductAddon = { id: string; label: string; price: number };
 
+/**
+ * Wave P-9 — Catalog × Packaging integration.
+ * Lightweight UI-facing projection of a `salsabil_packaging_tiers` row.
+ * Resolved by `SovereignCatalogGateway.buildPackagingOptions`. Backward
+ * compatible: assets without tiers expose `packagingTiers: []`, so all
+ * existing UI code that reads `Product.price` / `Product.unit` keeps working.
+ */
+export type PackagingOptionVM = {
+  tier_id: string;
+  parent_tier_id: string | null;
+  label: string;
+  uom_code: string | null;
+  conversion_to_parent: number;
+  conversion_to_base: number;
+  unit_price: number;
+  price_source: "tier_override" | "sku_base" | "none";
+  barcode: string | null;
+  is_default_sell: boolean;
+  is_stock_keeping: boolean;
+  sort_order: number;
+};
+
 /** @deprecated Wave P-B — section identity now flows through `SectionIdentityRegistry`. */
 export type ProductSource =
   | "supermarket" | "kitchen" | "dairy" | "produce" | "recipes"
@@ -65,6 +87,9 @@ export type Product = {
   wakalahEligible?: boolean;
   hideOnZero?: boolean;
   lowStockThreshold?: number;
+  /** Wave P-9 — packaging tier projection (empty array if asset has no tiers). */
+  packagingTiers?: PackagingOptionVM[];
+  defaultTierId?: string | null;
 };
 
 /** @deprecated Wave P-B — sanctioned only inside `src/core/catalog/**`. */

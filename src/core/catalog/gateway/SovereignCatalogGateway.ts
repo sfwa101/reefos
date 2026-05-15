@@ -16,7 +16,7 @@
  * callers continue to compile while migration completes.
  */
 import { supabase } from "@/integrations/supabase/client";
-import type { Product, ProductSource } from "@/core/catalog/legacyProduct.types";
+import type { PackagingOptionVM, Product, ProductSource } from "@/core/catalog/legacyProduct.types";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
 import { Tracer } from "@/core/system/observability/Tracer";
 
@@ -80,6 +80,22 @@ type RawSku = {
   }> | null;
 };
 
+type RawPackagingTier = {
+  id: string;
+  asset_id?: string;
+  parent_tier_id: string | null;
+  tier_label: string;
+  uom_code: string | null;
+  conversion_to_parent: number | string | null;
+  conversion_to_base: number | string | null;
+  barcode: string | null;
+  price_override: number | string | null;
+  is_stock_keeping: boolean | null;
+  is_default_sell: boolean | null;
+  is_active: boolean | null;
+  sort_order: number | null;
+};
+
 type RawAsset = {
   id: string;
   name: string;
@@ -89,7 +105,14 @@ type RawAsset = {
   media: unknown;
   is_active: boolean;
   salsabil_skus: RawSku[] | null;
+  salsabil_packaging_tiers?: RawPackagingTier[] | null;
 };
+
+const PACKAGING_TIER_FIELDS = `
+  id, parent_tier_id, tier_label, uom_code,
+  conversion_to_parent, conversion_to_base, barcode, price_override,
+  is_stock_keeping, is_default_sell, is_active, sort_order
+` as const;
 
 const SOVEREIGN_SELECT = `
   id, name, description, category_path, traits, media, is_active,
@@ -97,7 +120,8 @@ const SOVEREIGN_SELECT = `
     id, sku_code, attributes, sort_order, is_active, barcode,
     salsabil_financial_contracts ( base_price, contract_rules ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 ` as const;
 
 const pickPrimarySku = (skus: RawSku[]): RawSku | undefined => {
@@ -129,6 +153,51 @@ const skuCost = (sku: RawSku | undefined): number | null => {
 
 /* ── Public Product shape (matches legacy `useProductsQuery` mapping) ── */
 
+const toNumberOr = (v: unknown, fallback: number): number => {
+  if (v == null) return fallback;
+  const n = typeof v === "number" ? v : Number(v);
+  return Number.isFinite(n) ? n : fallback;
+};
+
+/**
+ * Wave P-9 — translate raw `salsabil_packaging_tiers` rows into UI-facing
+ * `PackagingOptionVM[]`. Pure, side-effect-free. Returns [] when the asset
+ * has no tiers (preserves backward compatibility for legacy callers).
+ */
+export function buildPackagingOptions(
+  rawTiers: RawPackagingTier[] | null | undefined,
+  skuBasePrice: number,
+): PackagingOptionVM[] {
+  if (!rawTiers || rawTiers.length === 0) return [];
+  return rawTiers
+    .filter((t) => t.is_active !== false)
+    .map<PackagingOptionVM>((t) => {
+      const override = t.price_override != null ? Number(t.price_override) : null;
+      const hasOverride = override != null && Number.isFinite(override);
+      const unit_price = hasOverride
+        ? (override as number)
+        : Number.isFinite(skuBasePrice) ? skuBasePrice : 0;
+      const price_source: PackagingOptionVM["price_source"] = hasOverride
+        ? "tier_override"
+        : (Number.isFinite(skuBasePrice) && skuBasePrice > 0 ? "sku_base" : "none");
+      return {
+        tier_id: t.id,
+        parent_tier_id: t.parent_tier_id,
+        label: t.tier_label,
+        uom_code: t.uom_code,
+        conversion_to_parent: toNumberOr(t.conversion_to_parent, 1),
+        conversion_to_base: toNumberOr(t.conversion_to_base, 1),
+        unit_price,
+        price_source,
+        barcode: t.barcode,
+        is_default_sell: t.is_default_sell === true,
+        is_stock_keeping: t.is_stock_keeping === true,
+        sort_order: t.sort_order ?? 0,
+      };
+    })
+    .sort((a, b) => a.sort_order - b.sort_order);
+}
+
 export function assetToProduct(row: RawAsset): Product | null {
   const skus = row.salsabil_skus ?? [];
   const primary = pickPrimarySku(skus);
@@ -155,6 +224,12 @@ export function assetToProduct(row: RawAsset): Product | null {
     typeof lowStockRaw === "number"
       ? lowStockRaw
       : Number(lowStockRaw ?? 10) || 10;
+
+  const packagingTiers = buildPackagingOptions(row.salsabil_packaging_tiers, skuPrice(primary));
+  const defaultTierId =
+    packagingTiers.find((t) => t.is_default_sell)?.tier_id
+    ?? packagingTiers[0]?.tier_id
+    ?? null;
 
   return {
     id: toLegacyAssetId(row.id),
@@ -185,6 +260,8 @@ export function assetToProduct(row: RawAsset): Product | null {
       low_stock_threshold: lowStockThreshold,
     },
     description: row.description ?? undefined,
+    packagingTiers,
+    defaultTierId,
   };
 }
 
@@ -517,6 +594,7 @@ export type CatalogQueryRow = {
       availability_data: Record<string, unknown> | null;
     }> | null;
   }> | null;
+  salsabil_packaging_tiers?: RawPackagingTier[] | null;
 };
 
 const QUERY_FULL_SELECT = `
@@ -525,7 +603,8 @@ const QUERY_FULL_SELECT = `
     id, sku_code, attributes, sort_order, is_active,
     salsabil_financial_contracts ( base_price, currency ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 `;
 
 const QUERY_MINIMAL_SELECT = `
@@ -534,7 +613,8 @@ const QUERY_MINIMAL_SELECT = `
     id, sku_code, attributes, sort_order, is_active,
     salsabil_financial_contracts ( base_price, currency ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 `;
 
 /** Full catalog snapshot (heavy `media` included) for the SWR-cached grid. */
