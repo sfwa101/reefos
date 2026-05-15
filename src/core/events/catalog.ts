@@ -24,6 +24,8 @@ export const EVENT_CATALOG = Object.freeze({
   CART_ITEM_QTY_CHANGED: "cart.item.qty_changed",
   CART_CLEARED: "cart.cleared",
   CART_UPDATED: "cart.updated",
+  CART_LINE_META_UPDATED: "cart.line.meta_updated",
+  CART_REPLACED: "cart.replaced",
   ORDER_PLACED: "order.placed",
   KDS_TICKET_CREATED: "kds.ticket.created",
   KDS_TICKET_UPDATED: "kds.ticket.updated",
