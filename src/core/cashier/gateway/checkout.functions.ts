@@ -85,7 +85,8 @@ export const validatedSovereignCheckoutFn = createServerFn({ method: "POST" })
     }
 
     // 3) Hash matched → call the Sovereign Router atomically.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    //    The DB layer re-verifies the snapshot hash against the
+    //    cashier_snapshots ledger (Article 7.1 — Sovereign Veto at the source).
     const { data: orderId, error } = await dynamicSb.rpc(
       "process_checkout_sovereign",
       {
@@ -93,6 +94,8 @@ export const validatedSovereignCheckoutFn = createServerFn({ method: "POST" })
         p_cart_items: data.cart_items,
         p_delivery_info: data.delivery_info,
         p_idempotency_key: data.idempotency_key,
+        p_payment_method: "cash_on_delivery",
+        p_expected_snapshot_hash: data.expected_snapshot_hash,
       },
     );
 
