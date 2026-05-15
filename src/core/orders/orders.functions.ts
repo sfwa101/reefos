@@ -48,12 +48,42 @@ export const createOrder = createServerFn({ method: 'POST' })
   .handler(async ({ data, context }): Promise<CreateOrderResult> => {
     const { supabase, userId } = context;
 
+    // WAVE C-5: the sovereign RPC now requires a snapshot_hash registered in
+    // the cashier_snapshots ledger. The legacy createOrder flow does not run
+    // through the cashier preview (different ID space), so we self-attest a
+    // deterministic hash and persist it before calling the RPC.
+    const cartFingerprint = JSON.stringify({
+      u: userId,
+      i: data.items.map((it) => ({ p: it.product_id, q: it.quantity })),
+      k: data.idempotency_key,
+    });
+    const hashBuf = await crypto.subtle.digest(
+      'SHA-256',
+      new TextEncoder().encode(cartFingerprint),
+    );
+    const expectedSnapshotHash = Array.from(new Uint8Array(hashBuf))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+
+    await supabase
+      .from('cashier_snapshots')
+      .upsert(
+        {
+          snapshot_hash: expectedSnapshotHash,
+          input_payload: { source: 'createOrder', items: data.items } as never,
+          output_payload: { source: 'createOrder' } as never,
+          actor_id: userId,
+        },
+        { onConflict: 'snapshot_hash', ignoreDuplicates: true },
+      );
+
     const { data: orderId, error } = await supabase.rpc('process_checkout_sovereign', {
       p_customer_id: userId,
       p_cart_items: data.items as unknown as never,
       p_delivery_info: (data.delivery_info ?? {}) as unknown as never,
-      p_payment_method: data.payment_method,
       p_idempotency_key: data.idempotency_key,
+      p_payment_method: data.payment_method,
+      p_expected_snapshot_hash: expectedSnapshotHash,
     });
 
     if (error) {
