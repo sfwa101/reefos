@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Check, ChevronDown, Layers, Sparkles } from "lucide-react";
 
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { OS_COMPANIES, STATUS_META, type OSCompany } from "@/core/identity/osCompanies";
 import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
