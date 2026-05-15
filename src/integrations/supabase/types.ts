@@ -9931,9 +9931,9 @@ export type Database = {
       process_checkout_sovereign: {
         Args: {
           p_cart_items: Json
+          p_client_snapshot_hash: string
           p_customer_id: string
           p_delivery_info: Json
-          p_expected_snapshot_hash: string
           p_idempotency_key: string
           p_payment_method: string
         }
