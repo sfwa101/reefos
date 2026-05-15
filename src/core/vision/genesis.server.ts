@@ -80,7 +80,9 @@ const SYSTEM_PROMPT = `أنت "حكيم Vision" — قشرة استخراج ال
 5. يجب دائماً اقتراح category_path هرمي بصيغة "قسم > فئة > فئة فرعية".
 6. اقترح traits مفيدة مثل cold_chain, fragile, requires_calendar, halal_certified, loose_weight.
 7. حدد النوع: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات.
-8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).`;
+8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).
+9. حقول سيادية إجبارية يجب استخراجها دائمًا من الصورة (لا تتركها فارغة): category_path (هرمي)، brand، barcode (إن ظهر على العبوة)، halal (true/false بناءً على شعار الحلال أو طبيعة المنتج)، nutrition، net_weight + weight_unit، variant_axes (size/flavor) داخل كل SKU.
+10. tier_rules: إن كان المنتج يدعم تسعير الجملة/الكمية، أرجع كائن بقواعد الطبقات مثل {"min_qty": 12, "discount_pct": 10}، وإلا اتركه null.`;
 
 const TOOL_PARAMETERS = {
   type: "object",
