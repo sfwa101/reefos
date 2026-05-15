@@ -61,11 +61,15 @@ const LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE = {
 const KERNEL_FORBIDDEN_APP_IMPORTS = {
   paths: LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE.paths,
   patterns: [
-    ...LEGACY_PRODUCTS_FORBIDDEN_EVERYWHERE.patterns,
+    {
+      group: ["@/lib/products/*", "**/SduiCategoryPage*"],
+      message:
+        "Constitution Article 3a / Wave P-C — legacy catalog & SduiCategoryPage are decommissioned.",
+    },
     {
       group: ["@/apps/*", "@/apps/**"],
       message:
-        "Constitution v5.1 Article 2 (Kernel Purity) — `src/core/**` is the sovereign kernel and MUST NOT import from any vertical app under `@/apps/*`. Invert the dependency: expose a port from core and let the app implement it.",
+        "Constitution v5.1 Article 2 (Kernel Purity) — src/core MUST NOT import from any vertical app under @/apps/*. Invert the dependency: expose a port from core and let the app implement it.",
     },
   ],
 };
