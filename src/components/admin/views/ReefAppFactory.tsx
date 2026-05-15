@@ -123,10 +123,10 @@ export function ReefAppFactory() {
 
       {/* KPIs */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <GlassKpiCard label="لوحات الكاشير النشطة" value={12} accent="emerald" icon={MonitorSmartphone} />
-        <GlassKpiCard label="السائقون المتصلون" value={34} accent="sky" icon={Truck} />
-        <GlassKpiCard label="تجار في الشبكة" value={87} accent="amber" icon={Store} />
-        <GlassKpiCard label="وحدات DNA مفعّلة" value={9} accent="violet" icon={Sparkles} />
+        <GlassKpiCard label="لوحات الكاشير النشطة" value="12" accent="success" icon={MonitorSmartphone} />
+        <GlassKpiCard label="السائقون المتصلون" value="34" accent="info" icon={Truck} />
+        <GlassKpiCard label="تجار في الشبكة" value="87" accent="warning" icon={Store} />
+        <GlassKpiCard label="وحدات DNA مفعّلة" value="9" accent="accent" icon={Sparkles} />
       </div>
 
       {/* Stem cells */}
