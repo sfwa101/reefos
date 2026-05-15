@@ -145,7 +145,7 @@ function AdminHeader({
 
 /* ------------------------------------------------------------------ */
 
-function AdminSidebar({ activePath }: { activePath: string }) {
+function AdminSidebar({ activePath, items }: { activePath: string; items: NavItem[] }) {
   return (
     <aside className="hidden lg:block w-60 shrink-0 px-4 py-6">
       <nav className="glass-steel sticky top-24 rounded-3xl p-2.5 shadow-elevated">
@@ -153,7 +153,7 @@ function AdminSidebar({ activePath }: { activePath: string }) {
           الإدارة
         </p>
         <ul className="space-y-1">
-          {PRIMARY_NAV.map((item) => {
+          {items.map((item) => {
             const Icon = item.icon;
             const active =
               item.to === "/admin"
