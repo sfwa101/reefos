@@ -7,6 +7,7 @@ import { fetchPosCatalog } from "@/core/catalog/gateway/SovereignCatalogGateway"
 import { enqueueOfflineMutation, isLikelyNetworkError } from "@/lib/offlineSyncQueue";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { callSovereignCheckout } from "@/core/hakim-ai/hooks/useSovereignCheckout";
+import { posCartSubtotal } from "../lib/posTotals";
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -136,7 +137,7 @@ export function usePosEngine() {
   const removeLine = useCallback((id: string) => setCart(p => p.filter(l => l.product_id !== id)), []);
   const clearCart = useCallback(() => setCart([]), []);
 
-  const subtotal = useMemo(() => cart.reduce((s, l) => s + l.price * l.qty, 0), [cart]);
+  const subtotal = useMemo(() => posCartSubtotal(cart), [cart]);
   const itemCount = useMemo(() => cart.reduce((s, l) => s + l.qty, 0), [cart]);
 
   // ---------- Cashier Brain — Sovereign price observer (Phase POS-2 Step 1) ----------
