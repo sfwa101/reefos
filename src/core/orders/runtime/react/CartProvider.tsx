@@ -29,11 +29,13 @@ import {
   mergeCarts,
   type LocalLine,
 } from "@/lib/cartSync";
+import type { CartPricingResult } from "@/core/commerce/pricing/cartPricingAdapter";
+import type { PricingContext, PriceBreakdown } from "@/core/commerce/pricing/types";
 import {
-  evaluateCartLineItem,
-  type CartPricingResult,
-} from "@/core/commerce/pricing/cartPricingAdapter";
-import type { PricingContext } from "@/core/commerce/pricing/types";
+  evaluateCartLineCanonical,
+  sumCanonicalGrandTotals,
+  type CanonicalLineBreakdown,
+} from "@/core/orders/runtime/lineTotals";
 import {
   useCartProjectionStore,
   useCartActions as useProjectionActions,
