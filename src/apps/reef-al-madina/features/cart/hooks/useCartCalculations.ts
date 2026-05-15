@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 /** @deprecated Wave P-B B-3 — calculations already prefer `capturedPrice` over `product.price`. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
@@ -9,8 +9,7 @@ import {
   DEPOSIT_THRESHOLD,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
-import { calculateUniversalPrice, mod, type Modifier } from "@/core/commerce/pricing/modifiers";
-import { useCashierPreview } from "@/core/cashier/gateway/hooks";
+import { evaluateCartLineCanonical } from "@/core/orders/runtime/lineTotals";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
 const UUID_RE =
