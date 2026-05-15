@@ -361,22 +361,8 @@ export const useCartActions = (): CartActions => useProjectionActions();
 function evaluateLineForCart(
   l: CartLine,
   tier: CustomerTier,
-):
-  | { result: CartPricingResult; legacyTotal: number }
-  | { result: null; legacyTotal: number } {
-  const legacyTotal = l.qty * (l.meta?.unitPrice ?? l.product.price);
-  const props = l.meta?.properties as { selection?: unknown } | undefined;
-  const hasNewShape =
-    (l.meta?.appliedModifiers && l.meta.appliedModifiers.length > 0) ||
-    props?.selection !== undefined;
-  if (!hasNewShape) return { result: null, legacyTotal };
-  const result = evaluateCartLineItem({
-    product: l.product,
-    quantity: l.qty,
-    selection: ((props?.selection ?? props) ?? {}) as never,
-    context: { customerTier: tier },
-  });
-  return { result, legacyTotal };
+): CanonicalLineBreakdown {
+  return evaluateCartLineCanonical(l, tier);
 }
 
 export const useCartLineBreakdown = (
@@ -387,7 +373,23 @@ export const useCartLineBreakdown = (
   return useMemo(() => {
     const line = lines.find((l) => l.product.id === productId);
     if (!line) return null;
-    return evaluateLineForCart(line, tier).result;
+    return evaluateLineForCart(line, tier).engineResult;
+  }, [lines, productId, tier]);
+};
+
+/**
+ * Wave P-1.3 — canonical PriceBreakdown for one cart line. UI consumes
+ * this DIRECTLY instead of multiplying `price * qty`. Always non-null.
+ */
+export const useCartLineTotals = (
+  productId: string,
+): PriceBreakdown | null => {
+  const tier = useTier();
+  const lines = useCartLines();
+  return useMemo(() => {
+    const line = lines.find((l) => l.product.id === productId);
+    if (!line) return null;
+    return evaluateLineForCart(line, tier).breakdown;
   }, [lines, productId, tier]);
 };
 
@@ -423,9 +425,7 @@ export const useCartCheckoutRules = (): CartCheckoutRules => {
       amount: number;
     }> = [];
     for (const l of lines) {
-      const { result } = evaluateLineForCart(l, tier);
-      if (!result || result.kind !== "ok") continue;
-      const b = result.breakdown;
+      const b = evaluateLineForCart(l, tier).breakdown;
       if (b.depositRequired && b.depositAmount > 0) {
         hasRequiredDeposit = true;
         blocksCOD = true;
@@ -449,23 +449,7 @@ export const useCartCheckoutRules = (): CartCheckoutRules => {
 export const useCartTotal = (): number => {
   const tier = useTier();
   const lines = useCartLines();
-  return useMemo(
-    () =>
-      lines.reduce((sum, l) => {
-        const { result, legacyTotal } = evaluateLineForCart(l, tier);
-        if (result === null) return sum + legacyTotal;
-        if (result.kind === "ok") return sum + result.breakdown.grandTotal;
-        if (result.kind === "fallback") return sum + legacyTotal;
-        console.warn(
-          "[cart] pricing engine error:",
-          result.code,
-          result.message,
-          { productId: l.product.id },
-        );
-        return sum;
-      }, 0),
-    [lines, tier],
-  );
+  return useMemo(() => sumCanonicalGrandTotals(lines, tier), [lines, tier]);
 };
 
 export type CartLineError = {
