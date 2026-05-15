@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useCart } from "@/core/orders/runtime/react/CartProvider";
+import { useCart, useCartLineTotals } from "@/core/orders/runtime/react/CartProvider";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 
@@ -29,52 +29,15 @@ const CartPanel = () => {
       ) : (
         <div className="flex-1 space-y-2 overflow-y-auto p-3">
           {lines.map((l) => (
-            <div
+            <CartPanelLine
               key={l.product.id}
-              className="flex gap-2 rounded-2xl bg-background/60 p-2 ring-1 ring-border/40"
-            >
-              <img
-                src={l.product.image}
-                alt=""
-                className="h-14 w-14 shrink-0 rounded-lg object-cover"
-              />
-              <div className="flex flex-1 flex-col">
-                <div className="flex items-start justify-between gap-1">
-                  <h3 className="line-clamp-2 text-xs font-bold leading-tight">
-                    {l.product.name}
-                  </h3>
-                  <button
-                    onClick={() => remove(l.product.id)}
-                    className="text-muted-foreground hover:text-destructive"
-                    aria-label="حذف"
-                  >
-                    <Trash2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="mt-auto flex items-center justify-between pt-1">
-                  <span className="font-display text-sm font-extrabold text-primary tabular-nums">
-                    {fmtMoney(l.product.price * l.qty)}
-                  </span>
-                  <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-0.5">
-                    <button
-                      onClick={() => setQty(l.product.id, l.qty - 1)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-background"
-                    >
-                      <Minus className="h-3 w-3" />
-                    </button>
-                    <span className="w-5 text-center text-xs font-bold tabular-nums">
-                      {toLatin(l.qty)}
-                    </span>
-                    <button
-                      onClick={() => setQty(l.product.id, l.qty + 1)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
-                    >
-                      <Plus className="h-3 w-3" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
+              productId={l.product.id}
+              name={l.product.name}
+              image={l.product.image}
+              qty={l.qty}
+              setQty={setQty}
+              remove={remove}
+            />
           ))}
         </div>
       )}
@@ -94,6 +57,65 @@ const CartPanel = () => {
         </Link>
       </footer>
     </aside>
+  );
+};
+
+const CartPanelLine = ({
+  productId,
+  name,
+  image,
+  qty,
+  setQty,
+  remove,
+}: {
+  productId: string;
+  name: string;
+  image: string;
+  qty: number;
+  setQty: (id: string, q: number) => void;
+  remove: (id: string) => void;
+}) => {
+  // Wave P-1.3 — engine-authoritative line total (no manual math).
+  const totals = useCartLineTotals(productId);
+  const lineTotal = totals?.grandTotal ?? 0;
+  return (
+    <div className="flex gap-2 rounded-2xl bg-background/60 p-2 ring-1 ring-border/40">
+      <img src={image} alt="" className="h-14 w-14 shrink-0 rounded-lg object-cover" />
+      <div className="flex flex-1 flex-col">
+        <div className="flex items-start justify-between gap-1">
+          <h3 className="line-clamp-2 text-xs font-bold leading-tight">{name}</h3>
+          <button
+            onClick={() => remove(productId)}
+            className="text-muted-foreground hover:text-destructive"
+            aria-label="حذف"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+        <div className="mt-auto flex items-center justify-between pt-1">
+          <span className="font-display text-sm font-extrabold text-primary tabular-nums">
+            {fmtMoney(lineTotal)}
+          </span>
+          <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-0.5">
+            <button
+              onClick={() => setQty(productId, qty - 1)}
+              className="flex h-6 w-6 items-center justify-center rounded-full bg-background"
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="w-5 text-center text-xs font-bold tabular-nums">
+              {toLatin(qty)}
+            </span>
+            <button
+              onClick={() => setQty(productId, qty + 1)}
+              className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

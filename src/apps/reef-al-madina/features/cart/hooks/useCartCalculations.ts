@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
+import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 /** @deprecated Wave P-B B-3 — calculations already prefer `capturedPrice` over `product.price`. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import {
@@ -9,8 +10,7 @@ import {
   DEPOSIT_THRESHOLD,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
-import { calculateUniversalPrice, mod, type Modifier } from "@/core/commerce/pricing/modifiers";
-import { useCashierPreview } from "@/core/cashier/gateway/hooks";
+import { evaluateCartLineCanonical } from "@/core/orders/runtime/lineTotals";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 
 const UUID_RE =
@@ -87,7 +87,14 @@ export const useCartCalculations = ({
           note: l.meta?.bookingNote,
         },
       });
-      buckets[t].subtotal += (l.capturedPrice ?? l.product.price) * l.qty;
+      // Wave P-1.3 — engine-authoritative line subtotal (no manual math).
+      buckets[t].subtotal += evaluateCartLineCanonical({
+        productId: l.product.id,
+        product: l.product,
+        qty: l.qty,
+        meta: l.meta,
+        capturedPrice: l.capturedPrice,
+      } as never).breakdown.lineTotal;
     }
     return buckets;
   }, [lines]);
@@ -105,8 +112,14 @@ export const useCartCalculations = ({
           fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
       )
       .map((l) => {
-        const unit = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
-        const sub = unit * l.qty;
+        // Wave P-1.3 — engine-authoritative subtotal.
+        const sub = evaluateCartLineCanonical({
+          productId: l.product.id,
+          product: l.product,
+          qty: l.qty,
+          meta: l.meta,
+          capturedPrice: l.capturedPrice,
+        } as never).breakdown.lineTotal;
         const lineRequired = sub >= DEPOSIT_THRESHOLD;
         const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
         return {
@@ -200,61 +213,11 @@ export const useCartCalculations = ({
     };
   }, [subtotal, FREE_DELIVERY_THRESHOLD, GIFT_THRESHOLD, zone.deliveryFee]);
 
-  /* ---------------- Shadow compute (PoC, Phase 1) ----------------
-   * Run the Universal Pricing Engine in parallel with the legacy
-   * calculation. Result is logged ONLY (no UI consumption) so we can
-   * audit deltas before flipping the source-of-truth in Phase 2.
-   * ---------------------------------------------------------------- */
-  useEffect(() => {
-    if (lines.length === 0) return;
-    try {
-      let shadowSubtotal = 0;
-      let shadowDeposit = 0;
-      for (const l of lines) {
-        const base = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
-        const mods: Modifier[] = [];
-        // Domain-agnostic projection — every preserved meta.appliedModifiers
-        // bubbles straight through; otherwise we treat the line as flat.
-        const stored = (l.meta as { appliedModifiers?: Modifier[] } | undefined)
-          ?.appliedModifiers;
-        if (Array.isArray(stored)) mods.push(...stored);
-        const br = calculateUniversalPrice(base, mods, l.qty);
-        shadowSubtotal += br.lineTotal;
-        shadowDeposit += br.depositAmount;
-      }
-      const shadowDiscount = appliedPromo
-        ? calculateUniversalPrice(shadowSubtotal, [
-            mod.discount("promo", "كود خصم", appliedPromo.pct, {
-              percent: true,
-              scope: "line",
-            }),
-          ]).discountTotal
-        : 0;
-      const delta = Math.abs(shadowSubtotal - subtotal);
-      console.info("[pricing-shadow]", {
-        legacy: { subtotal, discount, aggregateDeposit },
-        universal: {
-          subtotal: shadowSubtotal,
-          discount: shadowDiscount,
-          deposit: shadowDeposit,
-        },
-        delta,
-      });
-    } catch (e) {
-      console.warn("[pricing-shadow] failed", e);
-    }
-    // Only re-run on cart structure / promo changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lines, appliedPromo?.pct]);
-
-  /* ---------------- Cashier Brain shadow (Phase C3) ----------------
-   * Fires the sovereign Cashier gateway in parallel with the legacy
-   * calculation. Discrepancies are logged ONLY — UI continues to trust
-   * `useCartCalculations` until the cutover phase. Failures swallowed.
-   *
-   * Hardened (Phase C3.1): content-hashed signature + 500ms debounce
-   * to prevent render-loop saturation. Logs gated to DEV only.
-   * ------------------------------------------------------------------ */
+  /* ---------------- Cashier Brain — AUTHORITATIVE (Wave P-1.3) ----------
+   * The Sovereign Cashier gateway is now the source of truth for the
+   * snapshot hash handed to the server-side Price Judge at checkout.
+   * Shadow comparison logging removed — the engine IS the truth.
+   * ---------------------------------------------------------------------- */
   const cashierPreview = useCashierPreview();
   const cashierMutate = cashierPreview.mutate;
   const [cashierSnapshotHash, setCashierSnapshotHash] = useState<string | null>(
@@ -287,32 +250,13 @@ export const useCartCalculations = ({
         { items: cashierItems, context: { member_tier: "guest" } },
         {
           onSuccess: (snapshot) => {
-            // Phase C5 — capture the latest authoritative snapshot hash so
-            // the checkout submit can hand it to the Sovereign Price Judge.
+            // Wave P-1.3 — authoritative snapshot hash for the Price Judge.
             setCashierSnapshotHash(snapshot.snapshot_hash);
             setCashierSnapshotSignature(cartSignature);
-
-            const delta = Math.abs(snapshot.totals.grand_total - grand);
-            if (delta > 0.01) {
-              if (import.meta.env.DEV) {
-                console.warn(
-                  `[CASHIER-SHADOW-MISMATCH] Legacy: ${grand}, Brain: ${snapshot.totals.grand_total}, Hash: ${snapshot.snapshot_hash}`,
-                  {
-                    legacy: { subtotal, discount, delivery, grand },
-                    brain: snapshot.totals,
-                  },
-                );
-              }
-            } else if (import.meta.env.DEV) {
-              console.info("[cashier-shadow] match", {
-                grand,
-                hash: snapshot.snapshot_hash,
-              });
-            }
           },
           onError: (err) => {
             if (import.meta.env.DEV) {
-              console.warn("[cashier-shadow] preview failed:", err.message);
+              console.warn("[cashier] preview failed:", err.message);
             }
           },
         },
