@@ -28,7 +28,7 @@ import { useSharedCartAdapter } from "./useSharedCartAdapter";
 import { useCartCalculations } from "./useCartCalculations";
 import { useCartVendorGrouping } from "./useCartVendorGrouping";
 import { useSystemSetting } from "@/hooks/useSystemSettings";
-import { useCartCheckoutRules, useCartHasErrors } from "@/context/CartContext";
+import { useCartCheckoutRules, useCartHasErrors } from "@/core/orders/runtime/react/CartProvider";
 /** @deprecated Wave P-B B-3 — capability check; will move to `vm.capabilities.includes("perishable")` in B-7+. */
 import { isPerishable } from "@/core/catalog/legacyProduct.types";
 import { computeLogisticsQuote } from "@/core/logistics/core/quote";

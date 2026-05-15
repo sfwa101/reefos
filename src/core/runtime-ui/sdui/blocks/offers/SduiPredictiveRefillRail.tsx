@@ -11,7 +11,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { RefreshCw, Plus } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { products } from "@/core/catalog/runtime/legacyRuntime";
 import type { SduiPredictiveRefillRailBlock } from "./schemas";
 

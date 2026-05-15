@@ -14,7 +14,7 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { SovereignThemeProvider } from "@/core/theme/SovereignThemeProvider";
 import { LocaleProvider } from "@/context/LocaleContext";
 import { UIProvider } from "@/context/UIContext";
-import { CartProvider } from "@/context/CartContext";
+import { CartProvider } from "@/core/orders/runtime/react/CartProvider";
 import { CompareProvider } from "@/context/CompareContext";
 import { FavoritesProvider } from "@/context/FavoritesContext";
 import { AuthProvider } from "@/context/AuthContext";

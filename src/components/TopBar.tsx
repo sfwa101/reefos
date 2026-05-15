@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, MapPin, Menu, Plus, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useCartTotal } from "@/context/CartContext";
+import { useCartTotal } from "@/core/orders/runtime/react/CartProvider";
 import { useLocationStatic as useDeliveryLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
 import { LogisticsGateway, type SavedAddressVM } from "@/core/logistics";

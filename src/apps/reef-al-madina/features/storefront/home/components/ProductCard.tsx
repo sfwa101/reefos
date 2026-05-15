@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner";
 
 import OptimizedImage from "@/components/ui/OptimizedImage";
-import { useCartActions, useCartLineQty } from "@/context/CartContext";
+import { useCartActions, useCartLineQty } from "@/core/orders/runtime/react/CartProvider";
 import { useCompare, type CompareItem } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";

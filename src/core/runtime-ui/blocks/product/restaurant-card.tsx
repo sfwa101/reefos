@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Plus, Star, Wallet, Clock } from "lucide-react";
 import { motion } from "framer-motion";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { products as ALL_PRODUCTS } from "@/core/catalog/runtime/legacyRuntime";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { toLatin } from "@/lib/format";

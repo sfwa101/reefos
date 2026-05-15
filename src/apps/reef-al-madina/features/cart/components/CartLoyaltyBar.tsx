@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Sparkles, Gift, Lock } from "lucide-react";
-import { useCartLoyalty } from "@/context/CartContext";
+import { useCartLoyalty } from "@/core/orders/runtime/react/CartProvider";
 import { toLatin } from "@/lib/format";
 import { getTier, type TierKey } from "@/lib/tiers";
 

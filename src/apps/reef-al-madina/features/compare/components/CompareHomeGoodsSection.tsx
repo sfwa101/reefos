@@ -1,5 +1,5 @@
 import { useCompare } from "@/context/CompareContext";
-import { useCartActions } from "@/context/CartContext";
+import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
 import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
 import { Link } from "@tanstack/react-router";

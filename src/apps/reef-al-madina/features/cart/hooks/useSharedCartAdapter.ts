@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useCart, type CartLineMeta } from "@/context/CartContext";
+import { useCart, type CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import { useSharedCartSync } from "./useSharedCartSync";
 /**
  * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape kept only

@@ -1,7 +1,7 @@
 // Curated student bundles (backpacks, exam kits…) rendered as a stacked grid.
 
 import { toast } from "sonner";
-import { useCartActions } from "@/context/CartContext";
+import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
 import { LIBRARY_BUNDLES } from "@/lib/digital-borrowing";

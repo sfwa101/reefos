@@ -3,7 +3,7 @@
 import { memo } from "react";
 import { Clock, Flame as FlameIcon, Plus, Timer, TrendingUp, Zap } from "lucide-react";
 import { toLatin } from "@/lib/format";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import {
   FILTERS, MARKETING, MEAL_WINDOWS, SECTIONS,
   isMealOpenNow, minutesUntilClose,

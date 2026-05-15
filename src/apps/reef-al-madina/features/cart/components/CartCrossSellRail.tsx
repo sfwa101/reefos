@@ -5,7 +5,7 @@ import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 /** @deprecated Wave P-B B-3 — bridge type; the rail will consume `ProductCardVM[]` after §2.E migrates. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import type { CartLineMeta } from "@/context/CartContext";
+import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 
 type Props = {
   items: Product[];

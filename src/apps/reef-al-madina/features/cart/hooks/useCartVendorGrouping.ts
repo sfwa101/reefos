@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import type { CartLineMeta } from "@/context/CartContext";
+import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import { CartGateway } from "@/core/orders/gateway/CartGateway";
 /**
  * @deprecated Wave P-B B-3 — `Product` is the legacy bridge shape. The

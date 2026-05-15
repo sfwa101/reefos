@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { useCartActions } from "@/context/CartContext";
+import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
 import { toLatin } from "@/lib/format";
 
 import { getById } from "@/core/catalog/runtime/legacyRuntime";

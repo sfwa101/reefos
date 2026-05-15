@@ -2,7 +2,7 @@ import { useParams, Link, useRouter } from "@tanstack/react-router";
 import BackHeader from "@/components/BackHeader";
 import ProductCard from "@/components/ProductCard";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";
-import { useCart } from "@/context/CartContext";
+import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { useFavorites } from "@/lib/favorites";
 import { Star, Truck, ShieldCheck, Heart, Sparkles } from "lucide-react";
 import { Suspense, lazy, useEffect, useMemo, useState } from "react";

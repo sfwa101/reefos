@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
-import { useCartActions } from "@/context/CartContext";
+import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import {
