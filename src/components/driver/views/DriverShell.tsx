@@ -3,6 +3,7 @@ import { RoleGuard } from "@/components/admin/RoleGuard";
 import { Truck, Wallet, Map } from "lucide-react";
 import { IncomingOfferModal } from "@/apps/reef-al-madina/features/driver/components/IncomingOfferModal";
 import { DutyToggle } from "@/components/driver/DutyToggle";
+import { DriverGpsPinger } from "@/components/driver/DriverGpsPinger";
 
 export default function DriverShell() {
   const { pathname } = useLocation();
@@ -20,6 +21,7 @@ export default function DriverShell() {
         </header>
         <main className="p-4 max-w-2xl mx-auto"><Outlet /></main>
         <IncomingOfferModal />
+        <DriverGpsPinger />
         <nav className="fixed bottom-0 inset-x-0 bg-surface border-t border-border/40 grid grid-cols-3">
           {tabs.map(t => {
             const active = pathname === t.to;

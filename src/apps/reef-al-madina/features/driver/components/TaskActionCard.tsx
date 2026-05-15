@@ -15,16 +15,38 @@ import {
   MessageCircle,
   Navigation,
   Phone,
-  ScanLine,
+  Store,
+  PackageCheck,
 } from "lucide-react";
+import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  updateDispatchTaskStatusFn,
+  type DispatchTaskAction,
+} from "@/core/logistics/driver.functions";
 import type {
   DriverEvent,
   DriverTask,
   OrderInfo,
 } from "../types/driver.types";
+
+function getGpsBest(): Promise<{ lat: number; lng: number } | null> {
+  return new Promise((resolve) => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve(null);
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => resolve(null),
+      { enableHighAccuracy: true, timeout: 6_000 },
+    );
+  });
+}
 
 export const TaskActionCard = ({
   task,
@@ -40,7 +62,43 @@ export const TaskActionCard = ({
   onComplete: (task: DriverTask) => void;
 }) => {
   const phone = order?.phone ?? null;
+  const address = order?.address ?? null;
   const inSurge = task.service_type === "express";
+  const updateStatus = useServerFn(updateDispatchTaskStatusFn);
+  const [pending, setPending] = useState<DispatchTaskAction | null>(null);
+  const isBusy = busy || pending !== null;
+
+  const mapsHref = address
+    ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
+    : null;
+
+  const advance = async (action: DispatchTaskAction) => {
+    setPending(action);
+    try {
+      const fix = action !== "arrived_vendor" ? await getGpsBest() : null;
+      await updateStatus({
+        data: {
+          nodeId: task.id,
+          action,
+          lat: fix?.lat ?? null,
+          lng: fix?.lng ?? null,
+        },
+      });
+      toast.success(
+        action === "arrived_vendor"
+          ? "تم تسجيل الوصول للمتجر"
+          : action === "picked_up"
+            ? "تم تسجيل الاستلام"
+            : "تم تسجيل التوصيل",
+      );
+      // Engine subscribes to realtime; UI will refresh automatically.
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "تعذّر تحديث الحالة";
+      toast.error(msg);
+    } finally {
+      setPending(null);
+    }
+  };
 
   return (
     <Card
@@ -59,6 +117,11 @@ export const TaskActionCard = ({
             >
               #{task.order_id.slice(0, 8)}
             </p>
+            {address && (
+              <p className="text-[12px] text-foreground-secondary mt-1 line-clamp-2">
+                {address}
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-1">
             <Badge variant={inSurge ? "destructive" : "secondary"}>
@@ -92,9 +155,9 @@ export const TaskActionCard = ({
           )}
         </div>
 
-        {/* Quick contact row — large tap targets */}
+        {/* Quick contact row */}
         <div className="grid grid-cols-3 gap-2">
-          {phone && (
+          {phone ? (
             <>
               <Button size="sm" variant="outline" className="h-11" asChild>
                 <a href={`tel:${phone}`}>
@@ -113,55 +176,75 @@ export const TaskActionCard = ({
                 </a>
               </Button>
             </>
-          )}
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-11"
-            disabled={busy}
-            onClick={() => onFire(task.id, "location_ping")}
-          >
-            <Navigation className="h-4 w-4 ml-1" />
-            موقعي
-          </Button>
-        </div>
-
-        {/* Primary FSM action — single full-width CTA matching state */}
-        <div>
-          {task.status === "pending" && (
+          ) : null}
+          {mapsHref ? (
+            <Button size="sm" variant="outline" className="h-11" asChild>
+              <a href={mapsHref} target="_blank" rel="noreferrer">
+                <Navigation className="h-4 w-4 ml-1" />
+                خريطة
+              </a>
+            </Button>
+          ) : (
             <Button
-              className="w-full h-12 text-[14px] font-extrabold"
+              size="sm"
+              variant="outline"
+              className="h-11"
               disabled={busy}
-              onClick={() => onFire(task.id, "out_for_delivery")}
+              onClick={() => onFire(task.id, "location_ping")}
             >
-              خرجت للتوصيل
+              <Navigation className="h-4 w-4 ml-1" />
+              موقعي
             </Button>
           )}
-          {task.status === "out_for_delivery" && (
+        </div>
+
+        {/* Canonical 3-step FSM (Wave D-1.B) */}
+        <div className="space-y-2">
+          {(task.status === "pending" || task.status === "assigned") && (
+            <Button
+              className="w-full h-12 text-[14px] font-extrabold"
+              disabled={isBusy}
+              onClick={() => advance("arrived_vendor")}
+            >
+              <Store className="h-4 w-4 ml-1" />
+              {pending === "arrived_vendor" ? "جارٍ التسجيل..." : "وصلت للمتجر"}
+            </Button>
+          )}
+          {(task.status === "preparing" || task.status === "ready_for_pickup") && (
             <Button
               className="w-full h-12 text-[14px] font-extrabold"
               variant="secondary"
-              disabled={busy}
-              onClick={() => onFire(task.id, "arrived")}
+              disabled={isBusy}
+              onClick={() => advance("picked_up")}
             >
-              <MapPin className="h-4 w-4 ml-1" />
-              وصلت للعميل
+              <PackageCheck className="h-4 w-4 ml-1" />
+              {pending === "picked_up" ? "جارٍ التسجيل..." : "تم الاستلام"}
             </Button>
           )}
-          {(task.status === "arrived" ||
-            task.status === "out_for_delivery") && (
+          {(task.status === "out_for_delivery" || task.status === "arrived") && (
             <Button
-              className="mt-2 w-full h-12 text-[14px] font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white"
-              disabled={busy}
-              onClick={() => onComplete(task)}
+              className="w-full h-12 text-[14px] font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white"
+              disabled={isBusy}
+              onClick={() => {
+                if (task.cod_amount > 0) {
+                  const ok = window.confirm(
+                    `هل حصّلت ${task.cod_amount} ج.م نقداً؟`,
+                  );
+                  if (!ok) return;
+                }
+                if (onComplete) onComplete(task);
+                void advance("delivered");
+              }}
             >
-              {task.customer_barcode ? (
-                <ScanLine className="h-4 w-4 ml-1" />
-              ) : (
-                <CheckCircle2 className="h-4 w-4 ml-1" />
-              )}
-              تأكيد التسليم
+              <CheckCircle2 className="h-4 w-4 ml-1" />
+              {pending === "delivered" ? "جارٍ التسجيل..." : "تم التوصيل"}
             </Button>
+          )}
+          {task.status === "delivered" && (
+            <div className="flex items-center justify-center gap-2 py-2 text-emerald-600 text-[13px] font-bold">
+              <CheckCircle2 className="h-4 w-4" />
+              تم التوصيل بنجاح
+            </div>
           )}
         </div>
       </CardContent>
