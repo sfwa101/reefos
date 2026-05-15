@@ -1,17 +1,45 @@
-import { useEffect, useState, useCallback } from "react";
-import { Search, Save, Loader2, AlertTriangle, Boxes } from "lucide-react";
-import { MobileTopbar } from "@/components/admin/MobileTopbar";
-import { IOSCard } from "@/components/ios/IOSCard";
-import { fmtMoney } from "@/lib/format";
+/**
+ * Admin Inventory & Pricing — WAVE UI-11 (Steel Glass overhaul).
+ *
+ * Rebuilt with the Sovereign Glass Arsenal. Data flow is unchanged:
+ *  - read: `fetchAdminCatalog` (Sovereign Catalog gateway).
+ *  - write: `upsertSkuPrice` / `upsertSkuStock` (gateway, batched).
+ *  - nested breakdown: `getNestedStockBreakdownFn` server fn.
+ * The UI is pure presentation: SectionHeader, GlassTable, GlassEmptyState,
+ * GlassDialog. Inline editing happens inside the dialog so the table stays
+ * scannable on every viewport.
+ */
+import { useEffect, useMemo, useState } from "react";
+import {
+  AlertTriangle,
+  Boxes,
+  Loader2,
+  PackageSearch,
+  Save,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
-import { fetchAdminCatalog, upsertSkuPrice, upsertSkuStock } from "@/core/commerce/knowledge/sovereignCatalog";
-import { getNestedStockBreakdownFn } from "@/core/ops/ops.functions";
+
+import { SectionHeader } from "@/components/admin/ui/SectionHeader";
+import {
+  GlassTable,
+  type GlassTableColumn,
+} from "@/components/admin/ui/GlassTable";
+import { GlassEmptyState } from "@/components/admin/ui/GlassEmptyState";
+import { GlassDialog, GlassDialogClose } from "@/components/admin/ui/GlassDialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { fmtMoney } from "@/lib/format";
+import { cn } from "@/lib/utils";
+import {
+  fetchAdminCatalog,
+  upsertSkuPrice,
+  upsertSkuStock,
+} from "@/core/commerce/knowledge/sovereignCatalog";
+import { getNestedStockBreakdownFn } from "@/core/ops/ops.functions";
 
 type Row = {
-  id: string;        // sku_id (Sovereign)
+  id: string;
   name: string;
   unit: string;
   price: number;
@@ -19,7 +47,33 @@ type Row = {
   is_active: boolean;
   source: string;
 };
+
 type Edit = { price?: string; stock?: string };
+
+function StockBadge({ stock }: { stock: number }) {
+  if (stock <= 0) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-rose-500/15 px-2 py-0.5 text-[10.5px] font-extrabold text-rose-700">
+        <AlertTriangle className="h-3 w-3" strokeWidth={2.6} />
+        نافد
+      </span>
+    );
+  }
+  if (stock < 20) {
+    return (
+      <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2 py-0.5 text-[10.5px] font-extrabold text-amber-700">
+        <AlertTriangle className="h-3 w-3" strokeWidth={2.6} />
+        منخفض · {stock}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/15 px-2 py-0.5 text-[10.5px] font-extrabold text-emerald-700">
+      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+      {stock}
+    </span>
+  );
+}
 
 export default function Inventory() {
   const [rows, setRows] = useState<Row[] | null>(null);
@@ -27,14 +81,68 @@ export default function Inventory() {
   const [src, setSrc] = useState("all");
   const [edits, setEdits] = useState<Record<string, Edit>>({});
   const [saving, setSaving] = useState(false);
-  const [breakdowns, setBreakdowns] = useState<Record<string, string>>({});
-  const [loadingBreakdown, setLoadingBreakdown] = useState<Record<string, boolean>>({});
+
+  const [selected, setSelected] = useState<Row | null>(null);
+  const [breakdown, setBreakdown] = useState<string>("");
+  const [loadingBreakdown, setLoadingBreakdown] = useState(false);
+
+  const load = async () => {
+    setRows(null);
+    try {
+      const data = await fetchAdminCatalog();
+      setRows(
+        data.map<Row>((r) => ({
+          id: r.id,
+          name: r.name,
+          unit: r.unit,
+          price: r.price,
+          stock: r.stock,
+          is_active: r.is_active,
+          source: r.source,
+        })),
+      );
+    } catch (e) {
+      toast.error((e as Error).message);
+      setRows([]);
+    }
+  };
+
+  useEffect(() => {
+    load();
+  }, []);
+
+  const sources = useMemo(
+    () => Array.from(new Set((rows ?? []).map((r) => r.source))).sort(),
+    [rows],
+  );
+
+  const filtered = useMemo(
+    () =>
+      (rows ?? []).filter((r) => {
+        if (src !== "all" && r.source !== src) return false;
+        if (q && !r.name.toLowerCase().includes(q.toLowerCase())) return false;
+        return true;
+      }),
+    [rows, src, q],
+  );
+
+  const dirtyCount = Object.keys(edits).length;
+  const setEdit = (id: string, patch: Edit) =>
+    setEdits((e) => ({ ...e, [id]: { ...e[id], ...patch } }));
 
   const formatBreakdown = (raw: unknown): string => {
     if (!raw) return "";
-    type Piece = { qty?: number; quantity?: number; unit?: string; unit_code?: string; code?: string };
+    type Piece = {
+      qty?: number;
+      quantity?: number;
+      unit?: string;
+      unit_code?: string;
+      code?: string;
+    };
     const obj = raw as { breakdown?: Piece[]; units?: Piece[] };
-    const list: Piece[] = Array.isArray(raw) ? (raw as Piece[]) : (obj.breakdown ?? obj.units ?? []);
+    const list: Piece[] = Array.isArray(raw)
+      ? (raw as Piece[])
+      : (obj.breakdown ?? obj.units ?? []);
     if (!Array.isArray(list) || list.length === 0) return "";
     return list
       .filter((p) => p && (p.qty ?? p.quantity ?? 0) > 0)
@@ -42,46 +150,19 @@ export default function Inventory() {
       .join("، ");
   };
 
-  const loadBreakdown = async (productId: string) => {
-    if (breakdowns[productId] !== undefined) return;
-    setLoadingBreakdown((s) => ({ ...s, [productId]: true }));
+  const openRow = async (r: Row) => {
+    setSelected(r);
+    setBreakdown("");
+    setLoadingBreakdown(true);
     try {
-      const data = await getNestedStockBreakdownFn({ data: { productId } });
-      setBreakdowns((s) => ({ ...s, [productId]: formatBreakdown(data) }));
+      const data = await getNestedStockBreakdownFn({ data: { productId: r.id } });
+      setBreakdown(formatBreakdown(data));
     } catch {
-      setBreakdowns((s) => ({ ...s, [productId]: "" }));
+      setBreakdown("");
     } finally {
-      setLoadingBreakdown((s) => ({ ...s, [productId]: false }));
+      setLoadingBreakdown(false);
     }
   };
-
-  const load = useCallback(async () => {
-    setRows(null);
-    try {
-      const data = await fetchAdminCatalog();
-      setRows(data.map<Row>((r) => ({
-        id: r.id, name: r.name, unit: r.unit, price: r.price,
-        stock: r.stock, is_active: r.is_active, source: r.source,
-      })));
-    } catch (e) {
-      toast.error((e as Error).message);
-      setRows([]);
-    }
-  }, []);
-  useEffect(() => { load(); }, [load]);
-
-  const sources = Array.from(new Set((rows ?? []).map((r) => r.source))).sort();
-
-  const filtered = (rows ?? []).filter((r) => {
-    if (src !== "all" && r.source !== src) return false;
-    if (q && !r.name.toLowerCase().includes(q.toLowerCase())) return false;
-    return true;
-  });
-
-  const setEdit = (id: string, patch: Edit) =>
-    setEdits((e) => ({ ...e, [id]: { ...e[id], ...patch } }));
-
-  const dirtyCount = Object.keys(edits).length;
 
   const saveAll = async () => {
     if (!dirtyCount) return;
@@ -103,117 +184,216 @@ export default function Inventory() {
       } else {
         toast.success(`تم حفظ ${dirtyCount} منتج`);
         setEdits({});
-        load();
+        await load();
       }
     } finally {
       setSaving(false);
     }
   };
 
+  const columns: GlassTableColumn<Row>[] = [
+    {
+      id: "name",
+      header: "المنتج",
+      cell: (r) => {
+        const dirty = !!edits[r.id];
+        return (
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="truncate font-semibold text-foreground/90">
+                {r.name}
+              </span>
+              {dirty && (
+                <span className="rounded-full bg-amber-500/20 px-1.5 py-0.5 text-[9.5px] font-extrabold text-amber-700">
+                  معدّل
+                </span>
+              )}
+            </div>
+            <div className="mt-0.5 text-[11px] text-muted-foreground">
+              {r.unit} · {r.source}
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      id: "price",
+      header: "السعر",
+      align: "end",
+      width: "w-28",
+      hideOnMobile: true,
+      cell: (r) => (
+        <span className="font-display text-[13px] font-extrabold tracking-tight">
+          {fmtMoney(edits[r.id]?.price ? Number(edits[r.id].price) : r.price)}
+        </span>
+      ),
+    },
+    {
+      id: "stock",
+      header: "المخزون",
+      align: "end",
+      width: "w-32",
+      cell: (r) => (
+        <StockBadge
+          stock={
+            edits[r.id]?.stock !== undefined
+              ? Number(edits[r.id].stock)
+              : r.stock
+          }
+        />
+      ),
+    },
+  ];
+
+  const selectedEdit = selected ? edits[selected.id] ?? {} : {};
+  const selectedPrice =
+    selectedEdit.price ?? (selected ? String(selected.price) : "");
+  const selectedStock =
+    selectedEdit.stock ?? (selected ? String(selected.stock) : "");
+
   return (
-    <>
-      <MobileTopbar title="المخزون والأسعار" />
-      <div className="px-4 lg:px-6 pt-2 pb-24 max-w-5xl mx-auto">
-        <div className="flex gap-2 mb-3">
+    <div className="px-4 py-6 lg:px-8">
+      <div className="mx-auto max-w-6xl space-y-6">
+        <SectionHeader
+          eyebrow="ريف المدينة · ERP"
+          title="المخزون والأسعار"
+          description="ضبط لحظي لأسعار ومخزون SKUs السيادية. التغييرات تُحفظ دفعة واحدة عبر الـ Gateway."
+          action={
+            <Button
+              type="button"
+              onClick={saveAll}
+              disabled={!dirtyCount || saving}
+              className="rounded-2xl bg-gradient-to-br from-primary to-primary-glow px-4 font-extrabold text-primary-foreground shadow-elevated hover:opacity-95 disabled:opacity-50"
+            >
+              {saving ? (
+                <Loader2 className="me-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Save className="me-2 h-4 w-4" strokeWidth={2.4} />
+              )}
+              حفظ {dirtyCount || ""} تغيير
+            </Button>
+          }
+        />
+
+        <div className="glass-steel flex flex-col gap-2 rounded-3xl border border-white/40 p-3 shadow-soft sm:flex-row sm:items-center">
           <div className="relative flex-1">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
+            <Search className="pointer-events-none absolute end-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="ابحث..."
-              className="w-full bg-surface-muted rounded-2xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
+              placeholder="ابحث في المنتجات..."
+              className="h-11 w-full rounded-2xl border-white/40 bg-white/50 pe-10 ps-4 text-[13px] backdrop-blur-md focus-visible:ring-primary/40"
             />
           </div>
-          <select value={src} onChange={(e) => setSrc(e.target.value)} className="h-11 px-3 rounded-2xl bg-surface-muted text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30">
+          <select
+            value={src}
+            onChange={(e) => setSrc(e.target.value)}
+            className="h-11 rounded-2xl border border-white/40 bg-white/50 px-3 text-[13px] font-bold backdrop-blur-md focus:outline-none focus:ring-2 focus:ring-primary/40"
+          >
             <option value="all">كل الأقسام</option>
-            {sources.map((s) => <option key={s} value={s}>{s}</option>)}
+            {sources.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
           </select>
         </div>
 
-        {rows === null ? (
-          <div className="space-y-2">{[...Array(6)].map((_, i) => <div key={i} className="h-14 rounded-2xl bg-surface-muted animate-pulse" />)}</div>
-        ) : (
-          <IOSCard padded={false} className="overflow-hidden">
-            <div className="divide-y divide-border/40">
-              {filtered.map((r) => {
-                const edit = edits[r.id] ?? {};
-                const priceVal = edit.price ?? String(r.price);
-                const stockVal = edit.stock ?? String(r.stock);
-                const dirty = !!edits[r.id];
-                const low = Number(stockVal) > 0 && Number(stockVal) < 20;
-                const out = Number(stockVal) <= 0;
-                return (
-                  <div key={r.id} className={cn("p-3 flex flex-wrap items-center gap-2", dirty && "bg-warning/5")}>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] font-semibold truncate">{r.name}</p>
-                      <p className="text-[11px] text-foreground-tertiary">{r.unit} • {r.source}</p>
-                      {breakdowns[r.id] ? (
-                        <p className="text-[11px] text-primary font-medium mt-0.5 flex items-center gap-1">
-                          <Boxes className="h-3 w-3" /> {breakdowns[r.id]}
-                        </p>
-                      ) : (
-                        <Button
-                          type="button"
-                          onClick={() => loadBreakdown(r.id)}
-                          className="text-[10px] text-primary/80 hover:text-primary mt-0.5 flex items-center gap-1"
-                        >
-                          <Boxes className="h-3 w-3" />
-                          {loadingBreakdown[r.id] ? "..." : "عرض الوحدات المتداخلة"}
-                        </Button>
-                      )}
-                    </div>
-                    <div className="w-24">
-                      <label className="block text-[10px] text-foreground-tertiary mb-0.5">السعر</label>
-                      <Input
-                        type="number"
-                        step="0.01"
-                        value={priceVal}
-                        onChange={(e) => setEdit(r.id, { price: e.target.value })}
-                        className="w-full h-9 rounded-lg bg-surface-muted px-2 text-[13px] num text-right border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
-                      />
-                    </div>
-                    <div className="w-20">
-                      <label className="block text-[10px] text-foreground-tertiary mb-0.5">المخزون</label>
-                      <Input
-                        type="number"
-                        value={stockVal}
-                        onChange={(e) => setEdit(r.id, { stock: e.target.value })}
-                        className={cn(
-                          "w-full h-9 rounded-lg bg-surface-muted px-2 text-[13px] num text-right border-0 focus:outline-none focus:ring-2 focus:ring-primary/30",
-                          out && "text-destructive font-bold",
-                          low && !out && "text-warning font-bold"
-                        )}
-                      />
-                    </div>
-                    {(low || out) && (
-                      <AlertTriangle className={cn("h-4 w-4 flex-shrink-0", out ? "text-destructive" : "text-warning")} />
-                    )}
-                  </div>
-                );
-              })}
-              {filtered.length === 0 && (
-                <div className="p-10 text-center text-foreground-tertiary text-[13px]">لا توجد نتائج</div>
-              )}
-            </div>
-          </IOSCard>
-        )}
+        <GlassTable<Row>
+          data={filtered}
+          columns={columns}
+          rowKey={(r) => r.id}
+          loading={rows === null}
+          onRowClick={(r) => openRow(r)}
+          emptyState={
+            <GlassEmptyState
+              icon={PackageSearch}
+              accent="info"
+              title="لا توجد منتجات"
+              description="لم نعثر على عناصر تطابق البحث الحالي. جرّب كلمة أخرى أو غيّر القسم."
+            />
+          }
+        />
       </div>
 
-      {dirtyCount > 0 && (
-        <div className="fixed bottom-tab lg:bottom-4 left-4 right-4 lg:right-auto lg:w-96 z-30">
-          <Button
-            onClick={saveAll}
-            disabled={saving}
-            className="w-full h-13 rounded-2xl bg-primary text-primary-foreground font-semibold text-[14px] shadow-2xl press flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-            حفظ {dirtyCount} تغيير
-          </Button>
-        </div>
-      )}
+      <GlassDialog
+        open={!!selected}
+        onOpenChange={(open) => !open && setSelected(null)}
+        eyebrow={selected ? selected.source : undefined}
+        title={selected?.name}
+        description={selected ? `الوحدة: ${selected.unit}` : undefined}
+        size="max-w-md"
+        footer={
+          selected ? (
+            <GlassDialogClose asChild>
+              <Button
+                type="button"
+                className="rounded-2xl bg-gradient-to-br from-primary to-primary-glow px-4 font-extrabold text-primary-foreground shadow-elevated hover:opacity-95"
+              >
+                تم
+              </Button>
+            </GlassDialogClose>
+          ) : null
+        }
+      >
+        {selected && (
+          <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-3">
+              <label className="rounded-2xl border border-white/40 bg-white/40 p-3 backdrop-blur-md">
+                <span className="block text-[10.5px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                  السعر
+                </span>
+                <Input
+                  type="number"
+                  step="0.01"
+                  value={selectedPrice}
+                  onChange={(e) =>
+                    setEdit(selected.id, { price: e.target.value })
+                  }
+                  className="num mt-1 h-10 w-full border-0 bg-transparent p-0 text-end text-[16px] font-extrabold focus-visible:ring-0"
+                />
+              </label>
+              <label className="rounded-2xl border border-white/40 bg-white/40 p-3 backdrop-blur-md">
+                <span className="block text-[10.5px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                  المخزون
+                </span>
+                <Input
+                  type="number"
+                  value={selectedStock}
+                  onChange={(e) =>
+                    setEdit(selected.id, { stock: e.target.value })
+                  }
+                  className={cn(
+                    "num mt-1 h-10 w-full border-0 bg-transparent p-0 text-end text-[16px] font-extrabold focus-visible:ring-0",
+                    Number(selectedStock) <= 0 && "text-rose-600",
+                    Number(selectedStock) > 0 &&
+                      Number(selectedStock) < 20 &&
+                      "text-amber-600",
+                  )}
+                />
+              </label>
+            </div>
 
-      {/* placeholder for unused fmtMoney import */}
-      <span className="hidden">{fmtMoney(0)}</span>
-    </>
+            <div className="rounded-2xl border border-white/40 bg-white/40 p-3 backdrop-blur-md">
+              <p className="flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-widest text-muted-foreground">
+                <Boxes className="h-3.5 w-3.5" strokeWidth={2.4} />
+                التفكيك المتداخل
+              </p>
+              <p className="mt-1 text-[13px] font-bold text-foreground/90">
+                {loadingBreakdown
+                  ? "جارٍ الاحتساب..."
+                  : breakdown || "لا تتوفر وحدات متداخلة لهذا المنتج."}
+              </p>
+            </div>
+
+            {edits[selected.id] && (
+              <p className="text-[11.5px] font-bold text-amber-700">
+                التعديل في الانتظار. اضغط «حفظ» في أعلى الصفحة لإرساله إلى الـ Gateway.
+              </p>
+            )}
+          </div>
+        )}
+      </GlassDialog>
+    </div>
   );
 }
