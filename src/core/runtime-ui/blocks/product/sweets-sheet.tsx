@@ -17,8 +17,8 @@ import {
   DEPOSIT_PCT,
   DEPOSIT_THRESHOLD,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
-import { sweetsBookingToModifiers } from "@/lib/pricingAdapters";
-import { mod, type Modifier } from "@/lib/pricingEngine";
+import { sweetsBookingToModifiers } from "@/core/commerce/pricing/adapters";
+import { mod, type Modifier } from "@/core/commerce/pricing/modifiers";
 import { VariantPicker } from "@/apps/reef-al-madina/features/custom-fulfillment/components/VariantPicker";
 import { FulfillmentSelector } from "@/core/runtime-ui/blocks/commerce/fulfillment-selector";
 import { SweetsCustomizationForm } from "@/apps/reef-al-madina/features/custom-fulfillment/components/SweetsCustomizationForm";

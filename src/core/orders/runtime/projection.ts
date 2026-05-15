@@ -30,7 +30,7 @@ import type {
   CartLineModifier,
 } from "@/core/cashier/domain/types";
 import type { Product } from "@/core/catalog/legacyProduct.types";
-import type { Modifier } from "@/lib/pricingEngine";
+import type { Modifier } from "@/core/commerce/pricing/modifiers";
 import type {
   CartLine,
   CartLineMeta,
