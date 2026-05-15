@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useNavigate } from "@tanstack/react-router";
 import * as LucideIcons from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import type {
   SectionIdentity,
   SectionQuickAction,
@@ -58,7 +59,7 @@ export const SectionHeroBanner = ({ identity }: { identity: SectionIdentity }) =
           {actions.map((qa) => {
             const Icon = resolveIcon(qa.icon);
             return (
-              <button
+              <Button
                 key={qa.label}
                 onClick={() => handleAction(qa)}
                 className="glass-strong flex flex-col items-center gap-2 rounded-2xl p-3 shadow-soft text-center"
@@ -67,7 +68,7 @@ export const SectionHeroBanner = ({ identity }: { identity: SectionIdentity }) =
                   <Icon className="h-5 w-5 text-primary" strokeWidth={2.4} />
                 </div>
                 <span className="text-[11px] font-bold leading-tight">{qa.label}</span>
-              </button>
+              </Button>
             );
           })}
         </div>

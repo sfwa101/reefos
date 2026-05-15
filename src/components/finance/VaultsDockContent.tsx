@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { PiggyBank, Settings2, Target, Sparkles, TrendingUp } from "lucide-react";
 import { useWalletSavings } from "@/core/finance/hooks/useWalletSavings";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 /**
  * VaultsDockContent — "حصّالاتي" dock panel.
@@ -62,14 +63,14 @@ export const VaultsDockContent = ({
               </p>
             </div>
           </div>
-          <button
+          <Button
             type="button"
             onClick={onOpenSettings}
             className="inline-flex items-center gap-1 rounded-full bg-primary/10 text-primary px-2.5 py-1.5 text-[11px] font-extrabold ring-1 ring-primary/25 active:scale-95 transition"
           >
             <Settings2 className="h-3.5 w-3.5" />
             تعديل
-          </button>
+          </Button>
         </div>
 
         <div className="relative mt-4 grid grid-cols-2 gap-2">

@@ -1,5 +1,6 @@
 import { Component, type ReactNode } from "react";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 type Props = { children: ReactNode };
 type State = { error: Error | null };
@@ -45,13 +46,13 @@ export class GlobalErrorBoundary extends Component<Props, State> {
           <p className="mt-2 text-sm text-muted-foreground">
             حدث خطأ غير متوقع أثناء تحميل الواجهة. اضغط لإعادة المحاولة.
           </p>
-          <button
+          <Button
             type="button"
             onClick={this.handleReload}
             className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground shadow-pill transition hover:opacity-90"
           >
             إعادة تحميل التطبيق
-          </button>
+          </Button>
           {import.meta.env.DEV && (
             <pre className="mt-6 max-h-48 overflow-auto rounded-md bg-muted p-3 text-left text-[11px] leading-relaxed text-muted-foreground">
               {this.state.error.message}

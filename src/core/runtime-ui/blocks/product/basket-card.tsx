@@ -6,6 +6,7 @@ import { basketMarketing, sumBasketRetail, hydrateBasket } from "@/core/commerce
 import { toLatin } from "@/lib/format";
 import BasketSheet from "@/core/runtime-ui/blocks/commerce/basket-detail-sheet";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 const toneClass = (tone?: string) =>
   tone === "amber" ? "bg-amber-500/20 text-amber-800 dark:text-amber-200 ring-amber-500/40"
@@ -28,7 +29,7 @@ const BasketCard = ({ product }: { product: Product }) => {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(true)}
         className="group relative block w-full overflow-hidden rounded-3xl bg-card text-right shadow-tile ring-1 ring-border/60 transition active:scale-[0.99]"
@@ -97,7 +98,7 @@ const BasketCard = ({ product }: { product: Product }) => {
             </span>
           </div>
         </div>
-      </button>
+      </Button>
 
       <BasketSheet product={product} open={open} onClose={() => setOpen(false)} />
     </>

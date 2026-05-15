@@ -224,9 +224,9 @@ export default function VendorInventory() {
                   <TooltipProvider delayDuration={150}>
                     <Tooltip>
                       <TooltipTrigger asChild>
-                        <button type="button" className="text-foreground-tertiary hover:text-primary">
+                        <Button type="button" className="text-foreground-tertiary hover:text-primary">
                           <Info className="h-3.5 w-3.5" />
-                        </button>
+                        </Button>
                       </TooltipTrigger>
                       <TooltipContent side="top" className="max-w-[260px] text-[11.5px] leading-relaxed">
                         اتركه فارغاً للبيع بالسعر الرسمي الموحد. أضف سعراً هنا إذا كنت تقدم خدمة إضافية أو بسبب تكاليف منطقتك.

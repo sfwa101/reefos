@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import type { LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 /**
  * WalletTabs — Animated segmented control (iOS native feel).
@@ -34,7 +35,7 @@ export const WalletTabs = ({
         const Icon = t.icon;
         const isActive = t.id === active;
         return (
-          <button
+          <Button
             key={t.id}
             role="tab"
             aria-selected={isActive}
@@ -54,7 +55,7 @@ export const WalletTabs = ({
               <Icon className="h-3.5 w-3.5" strokeWidth={2.5} />
               {t.label}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>

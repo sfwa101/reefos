@@ -15,6 +15,7 @@ import AccountWalletRail from "@/apps/reef-al-madina/features/account/components
 import AccountSettingRow from "@/apps/reef-al-madina/features/account/components/AccountSettingRow";
 import { SETTING_GROUPS } from "@/apps/reef-al-madina/features/account/data";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 const formatPhone = (raw: string): string => {
   const d = raw.replace(/\D/g, "");
@@ -147,7 +148,7 @@ const Account = () => {
         </section>
       ))}
 
-      <button
+      <Button
         onClick={handleSignOut}
         className="flex w-full items-center gap-3 rounded-2xl bg-card px-4 py-3 text-right shadow-soft ring-1 ring-border/60"
       >
@@ -155,7 +156,7 @@ const Account = () => {
           <LogOut className="h-4 w-4 text-destructive" strokeWidth={2.4} />
         </div>
         <span className="flex-1 text-sm font-bold text-destructive">تسجيل الخروج</span>
-      </button>
+      </Button>
       <p className="pt-4 text-center text-[10px] text-muted-foreground tabular-nums">
         ريف المدينة · الإصدار 1.0.0 · الوضع: {resolvedMode === "dark" ? "داكن" : "فاتح"}
       </p>

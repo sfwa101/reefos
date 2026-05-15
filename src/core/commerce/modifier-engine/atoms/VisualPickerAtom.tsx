@@ -4,6 +4,7 @@
  */
 import { Check } from "lucide-react";
 import { ACCENTS, type VisualPickerGroupSchema } from "../types";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   group: VisualPickerGroupSchema;
@@ -29,7 +30,7 @@ export const VisualPickerAtom = ({ group, value, onChange }: Props) => {
       {group.options.map((opt) => {
         const active = selected.has(opt.id);
         return (
-          <button
+          <Button
             key={opt.id}
             type="button"
             disabled={opt.disabled}
@@ -59,7 +60,7 @@ export const VisualPickerAtom = ({ group, value, onChange }: Props) => {
             <span className="line-clamp-1 text-[10.5px] font-extrabold leading-tight">
               {opt.label}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>

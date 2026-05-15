@@ -120,7 +120,7 @@ export function WithdrawDialog({
             <Label className="text-xs mb-1.5 block">طريقة الاستلام</Label>
             <div className="grid grid-cols-3 gap-2">
               {METHODS.map((m) => (
-                <button
+                <Button
                   key={m.id}
                   type="button"
                   onClick={() => setMethod(m.id)}
@@ -131,7 +131,7 @@ export function WithdrawDialog({
                   }`}
                 >
                   {m.label}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

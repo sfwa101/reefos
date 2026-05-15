@@ -3,6 +3,7 @@ import { QrCode, ShieldCheck, X } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import Barcode from "react-barcode";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 /**
  * WalletPosBarcode — in-store payment / loyalty scan dialog.
@@ -48,12 +49,12 @@ export const WalletPosBarcode = ({
               <p className="text-[11px] text-muted-foreground">اعرض الكود للكاشير لكسب نقاطك</p>
             </div>
           </div>
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <div className="rounded-2xl bg-white p-5 shadow-soft ring-1 ring-border/40">

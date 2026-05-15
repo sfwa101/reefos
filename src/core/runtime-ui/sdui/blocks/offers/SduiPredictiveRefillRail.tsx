@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { products } from "@/core/catalog/runtime/legacyRuntime";
 import type { SduiPredictiveRefillRailBlock } from "./schemas";
+import { Button } from "@/components/ui/button";
 
 const LEDGER_KEY = "salsabil.recent_purchases";
 
@@ -116,13 +117,13 @@ export const SduiPredictiveRefillRail = ({
             <p className="mt-0.5 text-[10px] text-muted-foreground">
               آخر طلب قبل {daysAgo} يوم
             </p>
-            <button
+            <Button
               type="button"
               onClick={() => add(product, 1)}
               className="mt-2 inline-flex w-full items-center justify-center gap-1 rounded-full bg-primary px-2 py-1 text-[11px] font-bold text-primary-foreground transition active:scale-95"
             >
               <Plus className="h-3 w-3" /> إعادة الطلب
-            </button>
+            </Button>
           </div>
         ))}
       </div>

@@ -3,6 +3,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { maskAmount } from "@/core/finance/hooks/useHideBalance";
 import type { WalletAsset } from "@/core/finance/hooks/useWalletAssets";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   asset: WalletAsset;
@@ -63,14 +64,14 @@ export function NeoSuperCard({ asset, active, hidden, onToggleHide, ownerName }:
               <p className="text-[10.5px] opacity-65 mt-0.5">{asset.subtitle}</p>
             </div>
             {active && (
-              <button
+              <Button
                 type="button"
                 onClick={onToggleHide}
                 className="rounded-full bg-white/15 backdrop-blur-md p-2 ring-1 ring-white/25 active:scale-95 transition"
                 aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
               >
                 {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             )}
           </div>
 

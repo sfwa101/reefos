@@ -484,7 +484,7 @@ const SearchPage = () => {
                 <p className="mt-4 text-[11px] font-extrabold text-foreground/70">
                   الحد الأقصى للسعر: {toLatin(maxPrice.toLocaleString("en-US"))} ج.م
                 </p>
-                <input
+                <Input
                   type="range"
                   min={1}
                   max={priceCeiling}

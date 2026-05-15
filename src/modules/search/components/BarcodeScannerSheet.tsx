@@ -5,6 +5,7 @@
 import { useEffect, useRef } from "react";
 import { X, Loader2 } from "lucide-react";
 import { useBarcodeScanner } from "../hooks/useBarcodeScanner";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   readonly open: boolean;
@@ -34,13 +35,13 @@ export const BarcodeScannerSheet = ({ open, onClose, onDetected }: Props) => {
   return (
     <div className="fixed inset-0 z-[90] flex flex-col bg-black" role="dialog" aria-modal="true">
       <div className="flex items-center justify-between p-3">
-        <button
+        <Button
           onClick={onClose}
           aria-label="إغلاق"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-white"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
         <p className="text-sm font-extrabold text-white">امسح باركود المنتج</p>
         <span className="w-9" />
       </div>

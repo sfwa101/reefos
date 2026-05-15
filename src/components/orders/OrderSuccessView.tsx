@@ -7,6 +7,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
 import { OrderGateway } from "@/core/orders";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 type StoredWaFallback = {
   phone: string;
@@ -136,9 +137,9 @@ const OrderSuccess = () => {
             {waFallback.text}
           </pre>
           <div className="grid grid-cols-2 gap-2">
-            <button onClick={copySummary} className="flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-3 text-xs font-bold">
+            <Button onClick={copySummary} className="flex items-center justify-center gap-2 rounded-xl border border-border bg-background px-3 py-3 text-xs font-bold">
               <Copy className="h-4 w-4" /> نسخ الملخص
-            </button>
+            </Button>
             <a href={waUrl} target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-2 rounded-xl bg-primary px-3 py-3 text-xs font-extrabold text-primary-foreground">
               <ExternalLink className="h-4 w-4" /> فتح واتساب
             </a>

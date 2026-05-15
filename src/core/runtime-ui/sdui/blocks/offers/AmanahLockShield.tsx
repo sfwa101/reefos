@@ -3,6 +3,7 @@
  * tier is below the block's required tier. Drives upgrade conversion.
  */
 import { Lock, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const TIER_LABEL = {
   bronze: "برونز",
@@ -33,13 +34,13 @@ export const AmanahLockShield = ({
       <p className="text-[11px] text-muted-foreground">
         ارفع مستوى الأمانة لفتح هذا العرض
       </p>
-      <button
+      <Button
         type="button"
         className="mt-1 inline-flex items-center gap-1 rounded-full bg-foreground px-3 py-1 text-[11px] font-bold text-background shadow"
       >
         <Sparkles className="h-3 w-3" />
         كيف أرفع مستواي؟
-      </button>
+      </Button>
     </div>
   </section>
 );
