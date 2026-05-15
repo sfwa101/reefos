@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useCart } from "@/core/orders/runtime/react/CartProvider";
+import { useCart, useCartLineTotals } from "@/core/orders/runtime/react/CartProvider";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 
