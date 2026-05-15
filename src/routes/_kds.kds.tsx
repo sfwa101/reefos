@@ -20,6 +20,7 @@ export const Route = createFileRoute("/_kds/kds")({
   component: KdsBoard,
 });
 
+const WARN_THRESHOLD_MS = 5 * 60_000;
 const LATE_THRESHOLD_MS = 15 * 60_000;
 
 function KdsBoard() {
