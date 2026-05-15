@@ -465,13 +465,13 @@ export const useCartErrors = (): readonly CartLineError[] => {
   return useMemo(() => {
     const out: CartLineError[] = [];
     for (const l of lines) {
-      const { result } = evaluateLineForCart(l, tier);
-      if (result && result.kind === "engine_error") {
+      const r = evaluateLineForCart(l, tier).engineResult;
+      if (r && r.kind === "engine_error") {
         out.push({
           productId: l.product.id,
           productName: l.product.name,
-          code: result.code,
-          message: result.message,
+          code: r.code,
+          message: r.message,
         });
       }
     }
@@ -516,9 +516,9 @@ export const useCartLoyalty = (): CartLoyaltySummary => {
       bonusPoints: number;
     }> = [];
     for (const l of lines) {
-      const { result } = evaluateLineForCart(l, tier);
-      if (!result || result.kind !== "ok") continue;
-      const b = result.breakdown;
+      const c = evaluateLineForCart(l, tier);
+      if (c.kind !== "engine") continue;
+      const b = c.breakdown;
       basePoints += b.pointsEarned;
       const lb = b.bonusPoints ?? 0;
       if (lb > 0) {
@@ -576,9 +576,9 @@ export const useCartProfit = (): CartProfitSummary => {
     }> = [];
     for (const l of lines) {
       if (l.product.source === "kitchen") hasKitchenItem = true;
-      const { result } = evaluateLineForCart(l, tier);
-      if (!result || result.kind !== "ok") continue;
-      const b = result.breakdown;
+      const c = evaluateLineForCart(l, tier);
+      if (c.kind !== "engine") continue;
+      const b = c.breakdown;
       totalNetProfit += b.netProfit;
       totalCostPrice += b.costPrice;
       if (b.requiresAdminApproval) {
