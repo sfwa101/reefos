@@ -3,6 +3,8 @@ import { Plus, Pencil, Trash2, X, Loader2, Store as StoreIcon } from "lucide-rea
 import { MobileTopbar } from "@/components/admin/MobileTopbar";
 import { IOSCard } from "@/components/ios/IOSCard";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   listStoresFn,
   upsertStoreFn,
