@@ -180,13 +180,21 @@ export const listProductsBySectionFn = createServerFn({ method: "POST" })
     if (!section) return { items: [], total: 0, hasMore: false };
 
     // 2) Sovereign assets scoped by category_path prefix.
-    const slugLike = `${data.sectionSlug}%`;
+    // WAVE R-1: `home-goods` is the canonical home aggregator — returns ALL
+    // active physical assets regardless of category_path so the storefront
+    // never goes Ghost when assets are uncategorised. Other slugs do prefix
+    // match (and tolerate NULL category_path so freshly-genesised assets
+    // surface until categorisation lands).
+    const isHomeAggregator = data.sectionSlug === "home-goods";
     let query = supabase
       .from("salsabil_assets")
       .select(SOVEREIGN_SELECT, { count: "exact" })
       .eq("is_active", true)
-      .eq("asset_type", "physical")
-      .ilike("category_path", slugLike);
+      .eq("asset_type", "physical");
+    if (!isHomeAggregator) {
+      const slugLike = `${data.sectionSlug}%`;
+      query = query.or(`category_path.ilike.${slugLike},category_path.is.null`);
+    }
 
     switch (data.sort) {
       case "new":
