@@ -25,15 +25,18 @@ import { Card } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import { useHomeOrchestrator } from "../hooks/useHomeOrchestrator";
+import type { HomeOrchestrator } from "../hooks/useHomeOrchestrator";
 import { CATS } from "../dictionaries";
 import { ProductCard } from "./ProductCard";
 import SmartGreeting from "@/apps/reef-al-madina/features/main-hub/components/SmartGreeting";
 
 const TRENDING_LIMIT = 12;
 
-export const SovereignSmartShowcase = () => {
-  const orch = useHomeOrchestrator();
+export const SovereignSmartShowcase = ({
+  orchestrator: orch,
+}: {
+  orchestrator: HomeOrchestrator;
+}) => {
   const navigate = useNavigate();
 
   // Trending = top of the live catalog (already sorted by popularity in the gateway).
