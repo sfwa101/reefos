@@ -10,7 +10,7 @@ import type {
   GroupBuyCampaign,
   GroupBuyPledge,
   GroupBuyTier,
-} from "@/apps/reef-al-madina/features/group-buy/types/group-buy.types";
+} from "@/core/contracts/group-buy";
 
 function publicClient() {
   const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL;

@@ -15,7 +15,7 @@ import {
 } from "../domain/POSMode";
 import { POSGateway } from "../gateway/POSGateway";
 import type { CapabilityKey } from "@/core/capabilities/CapabilityRegistry";
-import type { PosShift } from "@/apps/reef-al-madina/features/pos/types/pos.types";
+import type { PosShift } from "@/core/contracts/pos";
 
 export interface CashierBrainRuntime {
   readonly shift: PosShift | null;

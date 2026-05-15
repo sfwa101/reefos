@@ -68,46 +68,11 @@ const vmToProduct = (vm: ProductCardVM, source: ProductSource): Product => {
   };
 };
 
-export type HomeOrchestrator = {
-  // ─── primitive state ───
-  cat: string;
-  setCat: (c: string) => void;
-  q: string;
-  setQ: (q: string) => void;
-  openId: string | null;
-  setOpenId: (id: string | null) => void;
-  sort: SortId;
-  setSort: (s: SortId) => void;
-  fulFilter: FulfillmentFilter;
-  setFulFilter: (f: FulfillmentFilter) => void;
-  filtersOpen: boolean;
-  setFiltersOpen: (b: boolean) => void;
-  priceMax: number;
-  setPriceMax: (n: number) => void;
-  priceMaxAvail: number;
-
-  // ─── derived (canonical sovereign view-models) ───
-  /** Full live catalog (DB-driven, canonical view-model). */
-  catalog: ProductCardVM[];
-  /** Legacy `Product` rows — transitional, only for un-migrated rails. */
-  rawProducts: Product[];
-  filtered: ProductCardVM[];
-  bestSellers: ProductCardVM[];
-  opened: ProductCardVM | null;
-  /** Legacy opened — transitional, only for un-migrated callers. */
-  openedRaw: Product | null;
-  filtersActive: boolean;
-  loading: boolean;
-  /**
-   * DB-derived subcategory pills for non-Home sections. `undefined` for
-   * the Home Goods page so it keeps using the hardcoded `CATS` list.
-   */
-  dynamicCats?: SubcategoryItem[];
-
-  // ─── compound actions ───
-  resetAll: () => void;
-  resetFilters: () => void;
-};
+// HomeOrchestrator type lives in the kernel as a port (Constitution v5.1
+// Article 2 — Kernel Purity). Re-exported here so existing app imports
+// keep working without churn.
+export type { HomeOrchestrator } from "@/core/contracts/home-orchestrator";
+import type { HomeOrchestrator } from "@/core/contracts/home-orchestrator";
 
 /**
  * Wave P-D (One Artery) — single canonical cache key for the home section.

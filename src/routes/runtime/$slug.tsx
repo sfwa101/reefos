@@ -12,6 +12,7 @@ import { Suspense, useMemo } from "react";
 import { sectionListQuery, sectionQuery } from "@/core/catalog/gateway";
 import { RuntimeRenderer, resolveListTree } from "@/core/runtime-ui";
 import { registerCoreBlocks } from "@/core/runtime-ui/blocks";
+import "@/apps/reef-al-madina/runtime-blocks/register";
 
 registerCoreBlocks();
 

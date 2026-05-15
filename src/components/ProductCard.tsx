@@ -11,8 +11,8 @@ import {
   fulfillmentTypeFor,
   isSweetsProduct,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
-import SweetsProductSheet from "@/core/runtime-ui/blocks/product/sweets-sheet";
-import ButcherSheet from "@/core/runtime-ui/blocks/product/butcher-sheet";
+import SweetsProductSheet from "@/apps/reef-al-madina/runtime-blocks/product/sweets-sheet";
+import ButcherSheet from "@/apps/reef-al-madina/runtime-blocks/product/butcher-sheet";
 import { isButcheryProduct } from "@/core/commerce/variants/weighed-prep-rules";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import { Button } from "@/components/ui/button";

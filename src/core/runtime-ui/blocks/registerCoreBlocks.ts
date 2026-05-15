@@ -1,6 +1,11 @@
 /**
- * Block Registry — تسجيل البلوكات الأساسية مرة واحدة عند تحميل الموديول.
- * الإضافة لاحقاً = استدعاء blockRegistry.register بدون لمس RuntimeRenderer.
+ * Block Registry — تسجيل البلوكات الأساسية للنواة فقط.
+ *
+ * Constitution v5.1 / Article 2 (Kernel Purity): app-bound blocks
+ * (butcher / sweets / compare-grid / section page wrappers) are NOT
+ * registered here. Each vertical app registers its own blocks at boot
+ * via its `runtime-blocks/register.ts` file. See
+ * `src/apps/reef-al-madina/runtime-blocks/register.ts`.
  */
 import { blockRegistry } from "@/core/runtime-ui/RuntimeRenderer";
 import {
@@ -21,28 +26,17 @@ import {
   SubscribeCtaBlock,
 } from "./blocks";
 import {
-  BackHeaderBlock,
-  CompareBarBlock,
-  ProductDetailSheetBlock,
-  SectionFiltersSheetBlock,
-  SectionHeroBannerBlock,
-  SectionLayoutFactoryBlock,
-} from "./sectionPage";
-import {
   BasketCardBlock,
   BasketDetailSheetBlock,
   SmartSwapSheetBlock,
   CartUpgradeBannerBlock,
   FulfillmentSelectorBlock,
   MealSheetBlock,
-  ButcherSheetBlock,
   RestaurantCardBlock,
   RestaurantItemSheetBlock,
-  SweetsSheetBlock,
   CompareSectionBlock,
   BasketBuilderBlock,
   SubscriptionManagerBlock,
-  CompareGridBlock,
 } from "./migratedSheets";
 
 let registered = false;
@@ -55,14 +49,11 @@ export function registerCoreBlocks() {
     "commerce.cart_upgrade_banner": CartUpgradeBannerBlock,
     "commerce.fulfillment_selector": FulfillmentSelectorBlock,
     "product.meal_sheet": MealSheetBlock,
-    "product.butcher_sheet": ButcherSheetBlock,
     "product.restaurant_card": RestaurantCardBlock,
     "product.restaurant_item_sheet": RestaurantItemSheetBlock,
-    "product.sweets_sheet": SweetsSheetBlock,
     "product.compare_section": CompareSectionBlock,
     "commerce.basket_builder": BasketBuilderBlock,
     "commerce.subscription_manager": SubscriptionManagerBlock,
-    "commerce.compare_grid": CompareGridBlock,
     "section.header": SectionHeaderBlock,
     "product.grid": ProductGridBlock,
     "product.list": ProductListBlock,
@@ -78,12 +69,6 @@ export function registerCoreBlocks() {
     "commerce.add_to_cart": AddToCartBlock,
     "commerce.quick_buy_bar": QuickBuyBarBlock,
     "commerce.subscribe_cta": SubscribeCtaBlock,
-    "nav.back_header": BackHeaderBlock,
-    "section.hero_banner": SectionHeroBannerBlock,
-    "section.layout_factory": SectionLayoutFactoryBlock,
-    "section.filters_sheet": SectionFiltersSheetBlock,
-    "commerce.compare_bar": CompareBarBlock,
-    "product.detail_sheet": ProductDetailSheetBlock,
   });
   registered = true;
 }
