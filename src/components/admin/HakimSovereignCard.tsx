@@ -218,7 +218,7 @@ export function HakimSovereignCard() {
             {/* Hakim AI narrative */}
             <div className="bg-gradient-to-br from-[hsl(var(--purple))]/5 to-[hsl(var(--info))]/5 border border-[hsl(var(--purple))]/20 rounded-2xl p-4">
               <div className="flex items-center gap-2 mb-2">
-                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(var(--purple))] to-[hsl(var(--info))] text-white flex items-center justify-center">
+                <div className="h-7 w-7 rounded-lg bg-gradient-to-br from-[hsl(var(--purple))] to-[hsl(var(--info))] text-primary-foreground flex items-center justify-center">
                   <Sparkles className="h-3.5 w-3.5" />
                 </div>
                 <h3 className="font-display text-[14px]">تحليل حكيم</h3>
@@ -257,7 +257,7 @@ function KpiBlock({ label, value, icon: Icon, accent }: { label: string; value: 
 function KpiCard({ label, value, icon: Icon, tone }: { label: string; value: string; icon: React.ElementType; tone: string }) {
   return (
     <div className="bg-surface rounded-2xl border border-border/40 p-3.5 shadow-soft">
-      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${tone} flex items-center justify-center text-white mb-2`}>
+      <div className={`h-8 w-8 rounded-xl bg-gradient-to-br ${tone} flex items-center justify-center text-primary-foreground mb-2`}>
         <Icon className="h-4 w-4" />
       </div>
       <p className="text-[11px] text-foreground-tertiary">{label}</p>
