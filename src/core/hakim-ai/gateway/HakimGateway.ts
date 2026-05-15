@@ -41,7 +41,7 @@ export interface ProductDNAAsset {
     | "service"
     | "rental"
     | "milestone_project";
-  readonly traits: string[];
+  readonly traits: string[] | Record<string, unknown>;
   readonly category_path?: string | null;
   readonly brand?: string | null;
   readonly origin_country?: string | null;
@@ -49,6 +49,9 @@ export interface ProductDNAAsset {
   readonly nutrition?: Record<string, number | null> | null;
   readonly physical?: { net_weight: number | null; weight_unit: string | null } | null;
   readonly allergens?: string[] | null;
+  readonly barcode?: string | null;
+  readonly halal?: boolean | null;
+  readonly tier_rules?: Record<string, unknown> | null;
   readonly media?: string[];
 }
 
