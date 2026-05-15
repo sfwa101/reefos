@@ -11,6 +11,7 @@
  */
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 
 import { Drawer, DrawerContent } from "@/components/ui/drawer";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
@@ -53,7 +54,7 @@ const ProductPeekSheet = ({ productId, isOpen, onClose }: ProductPeekSheetProps)
 
   if (!product) return null;
 
-  const total = (Number(product.price) || 0) * qty;
+  const total = speculativeLineTotal(Number(product.price) || 0, qty);
   const fav = has(product.id);
 
   const handleAdd = () => {

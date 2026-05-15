@@ -29,6 +29,7 @@ import type { ProductCardVM } from "@/core/catalog/types";
 
 import { fmt } from "../dictionaries";
 import { homeProductCardAdapter } from "../adapter";
+import { preorderDepositAmount } from "@/core/commerce/policies/deposits";
 
 const TrustBadge = ({
   icon: Icon,
@@ -93,7 +94,7 @@ export const DetailSheet = ({
   const ratingAvg = product.rating?.avg ?? 0;
   const ratingCount = product.rating?.count ?? 0;
   const deposit = isPre
-    ? Math.round((price * (view.depositPct ?? 25)) / 100)
+    ? preorderDepositAmount(price, view.depositPct ?? 25)
     : 0;
   const remaining = price - deposit;
 

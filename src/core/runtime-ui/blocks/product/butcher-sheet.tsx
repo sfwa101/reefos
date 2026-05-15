@@ -13,6 +13,7 @@ import {
   getButcheryRules, computeButcheryPrice, slaForPrep, slaMeta,
   type PrepOption, type WeightOption,
 } from "@/core/commerce/variants/weighed-prep-rules";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
 import { butcheryToModifiers } from "@/core/commerce/pricing/adapters";
 import { AnimatedNumber, Panel } from "@/apps/reef-al-madina/features/weighed-prep/components/Panel";
 import { CutBuilder } from "@/apps/reef-al-madina/features/weighed-prep/components/CutBuilder";
@@ -99,10 +100,11 @@ const ButcherSheet = ({ product, open, onClose }: Props) => {
   );
 
   // Legacy fallback math — used only if engine is unavailable for safety.
+  // Kept canonical via the engine-layer speculative resolver (Law 3).
   const legacyUnit = computeButcheryPrice(
     product.price, weight, prep, addonIds, rules, packagingId,
   );
-  const legacyLine = legacyUnit * qty;
+  const legacyLine = speculativeLineTotal(legacyUnit, qty);
   const legacyCross = rules.crossSell
     .filter((c) => crossIds.includes(c.id))
     .reduce((s, c) => s + c.price, 0);

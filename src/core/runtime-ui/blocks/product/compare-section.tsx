@@ -3,18 +3,22 @@ import { products, registerProducts } from "@/core/catalog/runtime/legacyRuntime
 import { storeThemes } from "@/lib/storeThemes";
 import { Crown, Boxes, Truck, BadgePercent } from "lucide-react";
 import { useMemo } from "react";
+import { bulkPackPricingFromRetail } from "@/core/commerce/policies/bulk-pack";
 
-// Simulate bulk packs from regular products (5-6× quantity, ~13% off)
+// Simulate bulk packs from regular products via the wholesale policy helper.
 function buildBulk() {
-  const bulk = products.map((p) => ({
-    ...p,
-    id: `bulk-${p.id}`,
-    name: `عبوة وفر · ${p.name}`,
-    unit: `حزمة 6× ${p.unit}`,
-    price: Math.round(p.price * 5.2),
-    oldPrice: Math.round(p.price * 6),
-    source: "wholesale" as const,
-  }));
+  const bulk = products.map((p) => {
+    const { price, oldPrice } = bulkPackPricingFromRetail(p.price);
+    return {
+      ...p,
+      id: `bulk-${p.id}`,
+      name: `عبوة وفر · ${p.name}`,
+      unit: `حزمة 6× ${p.unit}`,
+      price,
+      oldPrice,
+      source: "wholesale" as const,
+    };
+  });
   registerProducts(bulk);
   return bulk;
 }

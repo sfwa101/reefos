@@ -19,6 +19,8 @@ import {
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import { sweetsBookingToModifiers } from "@/core/commerce/pricing/adapters";
 import { mod, type Modifier } from "@/core/commerce/pricing/modifiers";
+import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
+import { bookingDepositSplit } from "@/core/commerce/policies/deposits";
 import { VariantPicker } from "@/apps/reef-al-madina/features/custom-fulfillment/components/VariantPicker";
 import { FulfillmentSelector } from "@/core/runtime-ui/blocks/commerce/fulfillment-selector";
 import { SweetsCustomizationForm } from "@/apps/reef-al-madina/features/custom-fulfillment/components/SweetsCustomizationForm";
@@ -78,14 +80,16 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
     .filter((a) => addonIds.includes(a.id))
     .reduce((s, a) => s + a.price, 0);
   const unitPrice = product.price + variantDelta + addonsSum;
-  const lineTotal = unitPrice * qty;
+  const lineTotal = speculativeLineTotal(unitPrice, qty);
 
   // Deposit math (only meaningful when isBooking)
   const depositRequired = isBooking && lineTotal >= DEPOSIT_THRESHOLD;
   const effectivePayDeposit = isBooking && (depositRequired || payDeposit);
-  const depositAmount = isBooking ? Math.round(lineTotal * DEPOSIT_PCT) : 0;
+  const { depositAmount: bookingDeposit, remainderAmount: bookingRemainder } =
+    bookingDepositSplit(lineTotal, DEPOSIT_PCT);
+  const depositAmount = isBooking ? bookingDeposit : 0;
   const remainderOnDelivery =
-    effectivePayDeposit && lineTotal > 0 ? lineTotal - depositAmount : 0;
+    effectivePayDeposit && lineTotal > 0 ? bookingRemainder : 0;
 
   const toggleAddon = (id: string) =>
     setAddonIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));

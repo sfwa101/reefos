@@ -39,3 +39,41 @@ export function borrowStartingPrice(
   const safe = Number.isFinite(price) ? Math.max(0, price) : 0;
   return round((safe * pct) / 100);
 }
+
+/**
+ * Wave P-1.5 — Booking deposit split.
+ *
+ * Used by sweets-sheet (and any future "pay deposit now / remainder later"
+ * flow). `pctFraction` is a fraction (e.g. 0.5 for 50%), NOT a percentage
+ * — preserves legacy `DEPOSIT_PCT` semantics from custom-fulfillment-rules.
+ */
+export interface BookingDepositSplit {
+  readonly depositAmount: number;
+  readonly remainderAmount: number;
+}
+
+export function bookingDepositSplit(
+  lineTotal: number,
+  pctFraction: number,
+): BookingDepositSplit {
+  const safe = Number.isFinite(lineTotal) ? Math.max(0, lineTotal) : 0;
+  const depositAmount = Math.round(safe * pctFraction);
+  const remainderAmount = Math.max(0, safe - depositAmount);
+  return { depositAmount, remainderAmount };
+}
+
+/**
+ * Wave P-1.5 — Group-buy escrow lock amount.
+ *
+ * Pure policy: how much to freeze in the participant's wallet for a pledge
+ * of `qty` units at `currentPrice`. Lives in the policy layer so the
+ * pledge dialog (and any future bulk-pledge surface) consume one source.
+ */
+export function groupBuyEscrowAmount(
+  currentPricePerUnit: number,
+  qty: number,
+): number {
+  const safePrice = Number.isFinite(currentPricePerUnit) ? Math.max(0, currentPricePerUnit) : 0;
+  const safeQty = Number.isFinite(qty) ? Math.max(0, Math.floor(qty)) : 0;
+  return Math.round(safePrice * safeQty * 100) / 100;
+}
