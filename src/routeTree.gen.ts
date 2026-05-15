@@ -77,6 +77,7 @@ import { Route as AdminHakimChatRouteImport } from './routes/admin.hakim-chat'
 import { Route as AdminHakimAnomaliesRouteImport } from './routes/admin.hakim-anomalies'
 import { Route as AdminHakimRouteImport } from './routes/admin.hakim'
 import { Route as AdminFinanceRouteImport } from './routes/admin.finance'
+import { Route as AdminFactoryRouteImport } from './routes/admin.factory'
 import { Route as AdminExpensesRouteImport } from './routes/admin.expenses'
 import { Route as AdminExecutiveRouteImport } from './routes/admin.executive'
 import { Route as AdminDriverSettlementsRouteImport } from './routes/admin.driver-settlements'
@@ -482,6 +483,11 @@ const AdminHakimRoute = AdminHakimRouteImport.update({
 const AdminFinanceRoute = AdminFinanceRouteImport.update({
   id: '/finance',
   path: '/finance',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminFactoryRoute = AdminFactoryRouteImport.update({
+  id: '/factory',
+  path: '/factory',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminExpensesRoute = AdminExpensesRouteImport.update({
@@ -892,6 +898,7 @@ export interface FileRoutesByFullPath {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/factory': typeof AdminFactoryRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -1024,6 +1031,7 @@ export interface FileRoutesByTo {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/factory': typeof AdminFactoryRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -1165,6 +1173,7 @@ export interface FileRoutesById {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
+  '/admin/factory': typeof AdminFactoryRoute
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -1304,6 +1313,7 @@ export interface FileRouteTypes {
     | '/admin/driver-settlements'
     | '/admin/executive'
     | '/admin/expenses'
+    | '/admin/factory'
     | '/admin/finance'
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
@@ -1436,6 +1446,7 @@ export interface FileRouteTypes {
     | '/admin/driver-settlements'
     | '/admin/executive'
     | '/admin/expenses'
+    | '/admin/factory'
     | '/admin/finance'
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
@@ -1576,6 +1587,7 @@ export interface FileRouteTypes {
     | '/admin/driver-settlements'
     | '/admin/executive'
     | '/admin/expenses'
+    | '/admin/factory'
     | '/admin/finance'
     | '/admin/hakim'
     | '/admin/hakim-anomalies'
@@ -2157,6 +2169,13 @@ declare module '@tanstack/react-router' {
       path: '/finance'
       fullPath: '/admin/finance'
       preLoaderRoute: typeof AdminFinanceRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/factory': {
+      id: '/admin/factory'
+      path: '/factory'
+      fullPath: '/admin/factory'
+      preLoaderRoute: typeof AdminFactoryRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/expenses': {
@@ -2878,6 +2897,7 @@ interface AdminRouteChildren {
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
+  AdminFactoryRoute: typeof AdminFactoryRoute
   AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
   AdminHakimRoute: typeof AdminHakimRoute
   AdminHakimAnomaliesRoute: typeof AdminHakimAnomaliesRoute
@@ -2958,6 +2978,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
   AdminExpensesRoute: AdminExpensesRoute,
+  AdminFactoryRoute: AdminFactoryRoute,
   AdminFinanceRoute: AdminFinanceRouteWithChildren,
   AdminHakimRoute: AdminHakimRoute,
   AdminHakimAnomaliesRoute: AdminHakimAnomaliesRoute,
