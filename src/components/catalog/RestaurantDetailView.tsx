@@ -77,33 +77,33 @@ const RestaurantDetail = () => {
   return (
     <div className="-mx-4 -mt-4 pb-12 sm:mx-0 sm:mt-0">
       {/* ===== Brand hero header ===== */}
-      <header className="relative px-4 pb-6 pt-4 text-white" style={{ background: banner }}>
+      <header className="relative px-4 pb-6 pt-4 text-primary-foreground" style={{ background: banner }}>
         <button
           onClick={() => navigate({ to: "/store/$slug", params: { slug: "restaurants" } })}
-          className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/25 transition active:scale-95"
+          className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-foreground/25 transition active:scale-95"
           aria-label="رجوع"
         >
           <ArrowRight className="h-4 w-4" strokeWidth={2.5} />
         </button>
         <div className="flex items-center gap-3">
-          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-xl">
+          <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-primary-foreground shadow-xl">
             <span className="text-3xl font-extrabold" style={{ color: accent }}>
               {r.monogram}
             </span>
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="font-display text-xl font-extrabold drop-shadow-sm">{r.name}</h1>
-            <p className="mt-0.5 text-[12px] font-medium text-white/90">{r.tagline}</p>
+            <p className="mt-0.5 text-[12px] font-medium text-primary-foreground/90">{r.tagline}</p>
             <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary-foreground/25 px-2 py-0.5">
                 <Star className="h-3 w-3 fill-yellow-300 text-yellow-300" />
                 {toLatin(r.rating)} ({toLatin(r.reviews)})
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary-foreground/25 px-2 py-0.5">
                 <Clock className="h-3 w-3" />
                 {r.etaLabel}
               </span>
-              <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary-foreground/25 px-2 py-0.5">
                 <Wallet className="h-3 w-3" />
                 كاش باك {toLatin(r.cashbackPct)}٪
               </span>
@@ -111,7 +111,7 @@ const RestaurantDetail = () => {
           </div>
         </div>
         {r.hook && (
-          <p className="mt-3 rounded-2xl bg-white/15 px-3 py-2 text-[12px] font-bold">
+          <p className="mt-3 rounded-2xl bg-primary-foreground/15 px-3 py-2 text-[12px] font-bold">
             ✨ {r.hook}
           </p>
         )}
@@ -231,7 +231,7 @@ const MenuCard = ({
             <span
               key={pulse}
               aria-hidden
-              className="animate-plus-one pointer-events-none absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-white shadow-pill"
+              className="animate-plus-one pointer-events-none absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-primary-foreground shadow-pill"
               style={{ background: `hsl(${brandHue})` }}
             >
               +1
@@ -250,7 +250,7 @@ const MenuCard = ({
                 toast.success(`تمت إضافة ${product.name}`, { duration: 1200 });
               }
             }}
-            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-white shadow-[0_4px_14px_-2px_rgba(0,0,0,0.25)] ring-2 ring-white"
+            className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full text-primary-foreground shadow-[0_4px_14px_-2px_rgba(0,0,0,0.25)] ring-2 ring-primary-foreground"
             style={{ background: `hsl(${brandHue})` }}
             aria-label="أضف للسلة"
           >

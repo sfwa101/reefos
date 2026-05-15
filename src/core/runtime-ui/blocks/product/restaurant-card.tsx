@@ -45,7 +45,7 @@ const QuickAdd = ({
         <span
           key={pulse}
           aria-hidden
-          className="animate-plus-one pointer-events-none absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-white shadow-pill"
+          className="animate-plus-one pointer-events-none absolute -top-3 left-1/2 z-10 -translate-x-1/2 rounded-full px-2 py-0.5 text-[10px] font-extrabold text-primary-foreground shadow-pill"
           style={{ background: `hsl(${brandHue})` }}
         >
           +1
@@ -64,7 +64,7 @@ const QuickAdd = ({
             toast.success(`تمت إضافة ${product.name}`, { duration: 1200 });
           }
         }}
-        className="flex h-10 w-10 items-center justify-center rounded-full text-white shadow-[0_4px_14px_-2px_rgba(0,0,0,0.25)] ring-2 ring-white"
+        className="flex h-10 w-10 items-center justify-center rounded-full text-primary-foreground shadow-[0_4px_14px_-2px_rgba(0,0,0,0.25)] ring-2 ring-primary-foreground"
         style={{ background: `hsl(${brandHue})` }}
         aria-label="أضف للسلة"
       >
