@@ -80,7 +80,9 @@ const SYSTEM_PROMPT = `أنت "حكيم Vision" — قشرة استخراج ال
 5. يجب دائماً اقتراح category_path هرمي بصيغة "قسم > فئة > فئة فرعية".
 6. اقترح traits مفيدة مثل cold_chain, fragile, requires_calendar, halal_certified, loose_weight.
 7. حدد النوع: physical للسلع، service للخدمات، rental للإيجار، milestone_project للتشطيبات.
-8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).`;
+8. إن لم يوجد سعر، اقترح سعراً منطقياً للسوق المصري بالجنيه (EGP).
+9. حقول سيادية إجبارية يجب استخراجها دائمًا من الصورة (لا تتركها فارغة): category_path (هرمي)، brand، barcode (إن ظهر على العبوة)، halal (true/false بناءً على شعار الحلال أو طبيعة المنتج)، nutrition، net_weight + weight_unit، variant_axes (size/flavor) داخل كل SKU.
+10. tier_rules: إن كان المنتج يدعم تسعير الجملة/الكمية، أرجع كائن بقواعد الطبقات مثل {"min_qty": 12, "discount_pct": 10}، وإلا اتركه null.`;
 
 const TOOL_PARAMETERS = {
   type: "object",
@@ -120,8 +122,11 @@ const TOOL_PARAMETERS = {
           },
         },
         allergens: { type: ["array", "null"], items: { type: "string" } },
+        barcode: { type: ["string", "null"] },
+        halal: { type: ["boolean", "null"] },
+        tier_rules: { type: ["object", "null"], additionalProperties: true },
       },
-      required: ["name", "description", "asset_type", "traits"],
+      required: ["name", "description", "asset_type", "traits", "category_path", "brand"],
     },
     skus: {
       type: "array",
@@ -401,6 +406,9 @@ export interface VisionAssetDTO {
   nutrition: VisionAssetNutrition | null;
   physical: VisionAssetPhysical | null;
   allergens: string[] | null;
+  barcode: string | null;
+  halal: boolean | null;
+  tier_rules: JsonObject | null;
 }
 export interface VisionSkuVariantAxes {
   size: string | null;
@@ -579,6 +587,9 @@ export async function runVisionGenesis(body: VisionGenesisInput): Promise<Vision
       nutrition,
       physical,
       allergens: optStrArr(a.allergens, 20),
+      barcode: optStr(a.barcode, 64),
+      halal: typeof a.halal === "boolean" ? a.halal : null,
+      tier_rules: isObj(a.tier_rules) ? toJsonObject(a.tier_rules) : null,
     };
 
     const sanitizedSkus: VisionSkuDTO[] = skusRaw.slice(0, 20).map((sRaw, i) => {
