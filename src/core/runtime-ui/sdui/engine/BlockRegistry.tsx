@@ -1,7 +1,11 @@
 /**
- * BlockRegistry — single source of truth mapping `block.type` → renderer.
- * Adding a new block: extend the schema union + register here. Renderer
- * auto-skips unknown types via the exhaustiveness guard.
+ * SduiBlockRegistry — runtime-pluggable map of `block.type` → renderer.
+ *
+ * Constitution v5.1 / Article 2 (Kernel Purity): the kernel registers only
+ * the core, app-agnostic blocks via `registerCoreSduiBlocks()`. Vertical
+ * apps (e.g. `reef-al-madina`) register their own renderers at boot via
+ * `sduiBlockRegistry.register(type, renderer)`. The renderer here never
+ * imports from `@/apps/*`.
  */
 import type { ReactElement } from "react";
 import type { SduiBlock } from "./schemas";
@@ -13,44 +17,49 @@ import { SduiAppGridBlock } from "../blocks/SduiAppGridBlock";
 import { SduiOmniSearchBlock } from "../blocks/SduiOmniSearchBlock";
 import { SduiUnifiedStatusBlock } from "../blocks/SduiUnifiedStatusBlock";
 import { SduiBarqTrackingBlock } from "../blocks/SduiBarqTrackingBlock";
-import { SduiOfferFlashSale } from "../blocks/offers/SduiOfferFlashSale";
-import { SduiOfferBundle } from "../blocks/offers/SduiOfferBundle";
-import { SduiOfferGroupBuy } from "../blocks/offers/SduiOfferGroupBuy";
-import { SduiOfferNeighborhoodPool } from "../blocks/offers/SduiOfferNeighborhoodPool";
 import { SduiPredictiveRefillRail } from "../blocks/offers/SduiPredictiveRefillRail";
 
-export function renderBlock(block: SduiBlock): ReactElement | null {
-  switch (block.type) {
-    case "hero":
-      return <SduiHeroBlock block={block} />;
-    case "bento_grid":
-      return <SduiBentoBlock block={block} />;
-    case "smart_rail":
-      return <SduiSmartRail block={block} />;
-    case "modifier_group":
-      return <SduiModifierBlock block={block} />;
-    case "app_grid":
-      return <SduiAppGridBlock block={block} />;
-    case "omni_search":
-      return <SduiOmniSearchBlock block={block} />;
-    case "unified_status":
-      return <SduiUnifiedStatusBlock />;
-    case "barq_tracking":
-      return <SduiBarqTrackingBlock block={block} />;
-    case "offer_flash_sale":
-      return <SduiOfferFlashSale block={block} />;
-    case "offer_bundle":
-      return <SduiOfferBundle block={block} />;
-    case "offer_group_buy":
-      return <SduiOfferGroupBuy block={block} />;
-    case "offer_neighborhood_pool":
-      return <SduiOfferNeighborhoodPool block={block} />;
-    case "predictive_refill_rail":
-      return <SduiPredictiveRefillRail block={block} />;
-    default: {
-      const _exhaustive: never = block;
-      void _exhaustive;
-      return null;
-    }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type SduiRenderer = (block: any) => ReactElement | null;
+
+class SduiBlockRegistryClass {
+  private map = new Map<string, SduiRenderer>();
+
+  register<T extends SduiBlock["type"]>(
+    type: T,
+    renderer: (block: Extract<SduiBlock, { type: T }>) => ReactElement | null,
+  ): void {
+    this.map.set(type, renderer as SduiRenderer);
   }
+
+  render(block: SduiBlock): ReactElement | null {
+    const r = this.map.get(block.type);
+    return r ? r(block) : null;
+  }
+}
+
+export const sduiBlockRegistry = new SduiBlockRegistryClass();
+
+let coreRegistered = false;
+export function registerCoreSduiBlocks(): void {
+  if (coreRegistered) return;
+  sduiBlockRegistry.register("hero", (b) => <SduiHeroBlock block={b} />);
+  sduiBlockRegistry.register("bento_grid", (b) => <SduiBentoBlock block={b} />);
+  sduiBlockRegistry.register("smart_rail", (b) => <SduiSmartRail block={b} />);
+  sduiBlockRegistry.register("modifier_group", (b) => <SduiModifierBlock block={b} />);
+  sduiBlockRegistry.register("app_grid", (b) => <SduiAppGridBlock block={b} />);
+  sduiBlockRegistry.register("omni_search", (b) => <SduiOmniSearchBlock block={b} />);
+  sduiBlockRegistry.register("unified_status", () => <SduiUnifiedStatusBlock />);
+  sduiBlockRegistry.register("barq_tracking", (b) => <SduiBarqTrackingBlock block={b} />);
+  sduiBlockRegistry.register("predictive_refill_rail", (b) => (
+    <SduiPredictiveRefillRail block={b} />
+  ));
+  coreRegistered = true;
+}
+
+// Auto-register on module load to preserve existing import behaviour.
+registerCoreSduiBlocks();
+
+export function renderBlock(block: SduiBlock): ReactElement | null {
+  return sduiBlockRegistry.render(block);
 }
