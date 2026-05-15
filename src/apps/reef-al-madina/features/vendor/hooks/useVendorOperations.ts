@@ -4,6 +4,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "sonner";
 import { isGodMode } from "@/lib/godMode";
 import type { VendorLiveOrderItem, VendorProduct } from "../types/vendor-ops.types";
+import { historicalLineTotal } from "@/core/commerce/pricing/historicalLineTotal";
 
 const MOCK_VENDOR_IDS = ["god-mode-vendor"];
 const MOCK_VENDOR_PRODUCTS: VendorProduct[] = [
