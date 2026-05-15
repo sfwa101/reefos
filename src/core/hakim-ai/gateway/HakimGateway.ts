@@ -41,7 +41,7 @@ export interface ProductDNAAsset {
     | "service"
     | "rental"
     | "milestone_project";
-  readonly traits: string[] | Record<string, unknown>;
+  readonly traits: string[];
   readonly category_path?: string | null;
   readonly brand?: string | null;
   readonly origin_country?: string | null;
