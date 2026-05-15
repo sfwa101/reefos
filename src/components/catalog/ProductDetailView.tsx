@@ -275,6 +275,40 @@ const ProductDetail = () => {
               );
             })()}
 
+            {/* Halal & Stock indicators (sourced from traits / product.stock) */}
+            <div className="flex flex-wrap items-center gap-2">
+              {readHalal(meta) && (
+                <Badge className="bg-emerald-600 text-white hover:bg-emerald-600 gap-1 rounded-full px-2.5 py-1 text-[10.5px] font-extrabold">
+                  <ShieldCheck className="h-3 w-3" />
+                  حلال موثّق
+                </Badge>
+              )}
+              {(() => {
+                const stock = product.stock;
+                if (stock == null) return null;
+                if (stock <= 0) {
+                  return (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-destructive/15 px-2.5 py-1 text-[10.5px] font-extrabold text-destructive ring-1 ring-destructive/30">
+                      نفد من المخزون
+                    </span>
+                  );
+                }
+                const low = product.lowStockThreshold ?? 0;
+                if (low > 0 && stock <= low) {
+                  return (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-2.5 py-1 text-[10.5px] font-extrabold text-amber-800 ring-1 ring-amber-300">
+                      كمية محدودة · باقي {toLatin(stock)}
+                    </span>
+                  );
+                }
+                return (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2.5 py-1 text-[10.5px] font-extrabold text-emerald-800 ring-1 ring-emerald-300">
+                    متوفر
+                  </span>
+                );
+              })()}
+            </div>
+
             {product.rating && (
               <div className="flex items-center gap-2 text-xs">
                 <span className="flex items-center gap-1 rounded-full bg-accent/20 px-2 py-1 font-bold text-accent-foreground">
