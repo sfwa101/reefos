@@ -18,6 +18,7 @@ import { CAP } from "@/core/capabilities/CapabilityRegistry";
 import type { PackagingTierDraft, FinancialContractDraft, InventoryDraft } from "@/core/commerce";
 import type { AssetTagDraft } from "@/core/commerce/types/assetTag";
 import { PackagingGateway, TagsGateway, PricingGateway, InventoryGateway } from "@/core/commerce";
+import { Tracer } from "@/core/system/observability/Tracer";
 import { useUpdateUSA } from "@/core/hakim-ai/hooks/useUpdateUSA";
 import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
 import { useAssetMatchmaker, type MatchedAsset } from "@/core/hakim-ai/hooks/useAssetMatchmaker";
@@ -144,7 +145,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           setPackagingTiers(rows as unknown as PackagingTierDraft[]);
           if (rows.length > 0) setPackagingEnabled(true);
         } catch (e) {
-          console.warn("[USAEditor] failed to load packaging tiers", e);
+          Tracer.warn("admin", "usa_editor_load_packaging_failed", { error: String(e) });
         }
         try {
           const links = await TagsGateway.listLinksFor(asset.id);
@@ -165,7 +166,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
             );
           }
         } catch (e) {
-          console.warn("[USAEditor] failed to load tag links", e);
+          Tracer.warn("admin", "usa_editor_load_tags_failed", { error: String(e) });
         }
       })();
       return () => {
@@ -296,7 +297,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       toast.success("تمت مزامنة شجرة العبوات بنجاح");
       return idMap;
     } catch (e) {
-      console.error("[USAEditor] packaging sync failed", e);
+      Tracer.error("admin", "usa_editor_packaging_sync_failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ شجرة العبوات";
       toast.error(`⚠️ ${msg}`);
       return new Map();
@@ -323,7 +324,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const baseSkuId = await PricingGateway.resolveBaseSku(assetId);
       if (!baseSkuId) {
         if (financialContractsDraft.length > 0) {
-          console.warn("[USAEditor] no base SKU yet — skipping pricing sync");
+          Tracer.warn("admin", "usa_editor_pricing_skip_no_sku", {});
         }
         return;
       }
@@ -338,7 +339,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       );
       toast.success("تمت مزامنة سياسات التسعير الذكي");
     } catch (e) {
-      console.error("[USAEditor] pricing sync failed", e);
+      Tracer.error("admin", "usa_editor_pricing_sync_failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ سياسات التسعير";
       toast.error(`⚠️ ${msg}`);
     }
@@ -362,7 +363,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const baseSkuId = await PricingGateway.resolveBaseSku(assetId);
       if (!baseSkuId) {
         if (inventoryDrafts.length > 0) {
-          console.warn("[USAEditor] no base SKU yet — skipping inventory sync");
+          Tracer.warn("admin", "usa_editor_inventory_skip_no_sku", {});
         }
         return;
       }
@@ -373,7 +374,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       await InventoryGateway.syncInventory(baseSkuId, inventoryDrafts, tierIdMap);
       toast.success("تمت مزامنة المخزون الحي");
     } catch (e) {
-      console.error("[USAEditor] inventory sync failed", e);
+      Tracer.error("admin", "usa_editor_inventory_sync_failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ المخزون";
       toast.error(`⚠️ ${msg}`);
     }
@@ -409,7 +410,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       await TagsGateway.syncLinks(assetId, tagDrafts);
       toast.success("تمت مزامنة الأبعاد التصنيفية");
     } catch (e) {
-      console.error("[USAEditor] tag sync failed", e);
+      Tracer.error("admin", "usa_editor_tag_sync_failed", e);
       const msg = e instanceof Error ? e.message : "تعذّر حفظ الأبعاد";
       toast.error(`⚠️ ${msg}`);
     }
@@ -435,7 +436,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       const { error } = await HakimGateway.updateAssetTraits(assetId, next);
       if (error) throw error;
     } catch (e) {
-      console.warn("[USAEditor] trait sync failed", e);
+      Tracer.warn("admin", "usa_editor_trait_sync_failed", { error: String(e) });
     }
   };
 
@@ -451,7 +452,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
       });
       return url ? [url] : undefined;
     } catch (e) {
-      console.warn("[USAEditor] media upload failed", e);
+      Tracer.warn("admin", "usa_editor_media_upload_failed", { error: String(e) });
       toast.error("تعذّر رفع الصورة — سيُسكّ الأصل بدون صورة");
       return undefined;
     }

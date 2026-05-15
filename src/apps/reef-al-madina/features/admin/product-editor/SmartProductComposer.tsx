@@ -18,6 +18,7 @@ import {
   Wand2, Brain, Tags, Barcode, FileImage,
 } from "lucide-react";
 import { toast } from "sonner";
+import { Tracer } from "@/core/system/observability/Tracer";
 import { cn } from "@/lib/utils";
 import {
   Dialog, DialogContent, DialogTitle, DialogDescription,
@@ -134,7 +135,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
       setPrimaryFile(dataUrlToFile(cleaned.imageDataUrl));
       toast.success("تم تحسين الصورة");
     } catch (err) {
-      console.error("[Composer] clean error", err);
+      Tracer.error("admin", "composer_clean_error", err);
       toast.error("فشل تحسين الصورة");
     } finally {
       setStage("idle");
@@ -157,7 +158,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
       markAI(["name", "description", "category", "price", "cost"]);
       toast.success("تم استخراج البيانات");
     } catch (err) {
-      console.error("[Composer] analyze error", err);
+      Tracer.error("admin", "composer_analyze_error", err);
       toast.error("فشل تحليل الصورة");
     } finally {
       setStage("idle");
@@ -199,7 +200,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
       onPublished?.();
       setTimeout(() => onOpenChange(false), 900);
     } catch (err) {
-      console.error("[Composer] mint error", err);
+      Tracer.error("admin", "composer_mint_error", err);
       toast.error("فشل النشر");
       setStage("idle");
     }
