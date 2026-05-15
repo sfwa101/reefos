@@ -1,8 +1,19 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
+/**
+ * /vendor/dashboard — P0 / V-12 fix.
+ *
+ * Previously a silent redirect to `/vendor`, which made the dashboard
+ * URL unusable for direct sharing / deep links and broke vendor KPIs
+ * for unit testing. Now mounts the real `VendorDashboard` inside the
+ * RoleGuard so cards render at the canonical URL.
+ */
+import { createFileRoute } from "@tanstack/react-router";
+import VendorDashboard from "@/components/vendor/views/VendorDashboard";
+import { RoleGuard } from "@/components/admin/RoleGuard";
 
-// Alias: /vendor/dashboard → /vendor (canonical vendor home).
 export const Route = createFileRoute("/vendor/dashboard")({
-  beforeLoad: () => {
-    throw redirect({ to: "/vendor", replace: true });
-  },
+  component: () => (
+    <RoleGuard roles={["vendor", "admin"]}>
+      <VendorDashboard />
+    </RoleGuard>
+  ),
 });

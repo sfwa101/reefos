@@ -1,35 +1,36 @@
 /**
  * SalsabilStatusBar — Phase VIII Global Identity & Wallet ribbon.
  * ---------------------------------------------------------------
- * Hydration-safe `—` / `…` placeholder until client mount, then a
- * **TanStack-Query-cached** wallet read keyed by user id. Every shell
- * that renders this bar shares the same in-flight request — no more
- * N parallel `supabase.from("wallets")` fetches across navigation.
+ * P0 / V-1 fix: wallet balance now flows through `getWalletBalanceFn`
+ * (server function with `requireSupabaseAuth`) instead of a direct
+ * client-side gateway call. The UI no longer touches a Supabase table
+ * — it only consumes a typed RPC via TanStack Query.
  */
 import { useEffect, useState } from "react";
 import { Wallet, ShieldCheck, ShieldAlert } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
 import { useAuth } from "@/context/AuthContext";
-import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
+import { getWalletBalanceFn } from "@/core/identity/user.functions";
 import { toLatin } from "@/lib/format";
 
 export const SalsabilStatusBar = () => {
   const { user, profile } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const getWalletBalance = useServerFn(getWalletBalanceFn);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const { data: balance } = useQuery({
+  const { data } = useQuery({
     queryKey: ["wallet", "status-bar", user?.id ?? "_anon"],
     enabled: mounted && Boolean(user?.id),
     staleTime: 60_000,
     gcTime: 5 * 60_000,
-    queryFn: async (): Promise<number> => {
-      return IdentityGateway.getWalletBalance(user!.id);
-    },
+    queryFn: async () => getWalletBalance(),
   });
+  const balance = data?.balance;
 
   const verified = mounted && Boolean(profile?.full_name && profile?.phone);
 
