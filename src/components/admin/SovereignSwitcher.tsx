@@ -66,8 +66,9 @@ export function SovereignSwitcher() {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <button
+        <Button
           type="button"
+          variant="ghost"
           aria-label="بدّل بين شركات Salsabil OS"
           className={cn(
             "group inline-flex h-10 items-center gap-2 rounded-2xl",
@@ -89,7 +90,7 @@ export function SovereignSwitcher() {
               open && "rotate-180",
             )}
           />
-        </button>
+        </Button>
       </PopoverTrigger>
 
       <PopoverContent
