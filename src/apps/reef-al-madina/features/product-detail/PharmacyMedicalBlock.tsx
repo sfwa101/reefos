@@ -92,7 +92,7 @@ const PharmacyMedicalBlock = ({
       )}
 
       <div
-        className="relative overflow-hidden rounded-2xl p-4 text-white shadow-tile"
+        className="relative overflow-hidden rounded-2xl p-4 text-primary-foreground shadow-tile"
         style={{
           background:
             "linear-gradient(135deg, hsl(168 55% 28%) 0%, hsl(210 55% 32%) 100%)",
@@ -100,14 +100,14 @@ const PharmacyMedicalBlock = ({
       >
         <span
           aria-hidden
-          className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10 blur-xl"
+          className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-primary-foreground/10 blur-xl"
         />
         <div className="mb-3 flex items-center gap-2">
-          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-white/15 ring-1 ring-white/25">
+          <span className="inline-flex h-8 w-8 items-center justify-center rounded-xl bg-primary-foreground/15 ring-1 ring-primary-foreground/25">
             <span className="text-base" aria-hidden>🧮</span>
           </span>
           <div>
-            <div className="inline-flex items-center gap-1 rounded-full bg-white/20 px-2 py-0.5 text-[9.5px] font-extrabold">
+            <div className="inline-flex items-center gap-1 rounded-full bg-primary-foreground/20 px-2 py-0.5 text-[9.5px] font-extrabold">
               AI · تجريبي
             </div>
             <h3 className="font-display text-base font-extrabold leading-tight">
@@ -115,45 +115,45 @@ const PharmacyMedicalBlock = ({
             </h3>
           </div>
         </div>
-        <p className="mb-3 text-[11.5px] leading-snug text-white/85">
+        <p className="mb-3 text-[11.5px] leading-snug text-primary-foreground/85">
           أدخل وزنك وعمرك لاقتراح جرعة مبدئية لـ{" "}
           <span className="font-extrabold">{productName}</span> — لا يُعد بديلاً عن استشارة الطبيب.
         </p>
         <div className="grid grid-cols-2 gap-2">
           <label className="block">
-            <span className="mb-1 block text-[10.5px] font-bold text-white/80">الوزن (كجم)</span>
+            <span className="mb-1 block text-[10.5px] font-bold text-primary-foreground/80">الوزن (كجم)</span>
             <input
               inputMode="numeric"
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               placeholder="70"
-              className="w-full rounded-xl bg-white/15 px-3 py-2 text-sm font-extrabold text-white placeholder:text-white/40 outline-none ring-1 ring-white/20 focus:ring-white/50"
+              className="w-full rounded-xl bg-primary-foreground/15 px-3 py-2 text-sm font-extrabold text-primary-foreground placeholder:text-primary-foreground/40 outline-none ring-1 ring-primary-foreground/20 focus:ring-primary-foreground/50"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-[10.5px] font-bold text-white/80">العمر (سنة)</span>
+            <span className="mb-1 block text-[10.5px] font-bold text-primary-foreground/80">العمر (سنة)</span>
             <input
               inputMode="numeric"
               value={age}
               onChange={(e) => setAge(e.target.value)}
               placeholder="30"
-              className="w-full rounded-xl bg-white/15 px-3 py-2 text-sm font-extrabold text-white placeholder:text-white/40 outline-none ring-1 ring-white/20 focus:ring-white/50"
+              className="w-full rounded-xl bg-primary-foreground/15 px-3 py-2 text-sm font-extrabold text-primary-foreground placeholder:text-primary-foreground/40 outline-none ring-1 ring-primary-foreground/20 focus:ring-primary-foreground/50"
             />
           </label>
         </div>
         <button
           onClick={compute}
-          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-white px-3 py-2.5 text-[13px] font-extrabold text-emerald-800 shadow-pill transition active:scale-[0.98]"
+          className="mt-3 inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary-foreground px-3 py-2.5 text-[13px] font-extrabold text-emerald-800 shadow-pill transition active:scale-[0.98]"
         >
           <Sparkles className="h-3.5 w-3.5" strokeWidth={2.6} />
           احسب الجرعة المقترحة
         </button>
         {computed && (
-          <div className="mt-3 rounded-xl bg-white/12 p-3 text-[12px] font-bold leading-relaxed ring-1 ring-white/20">
+          <div className="mt-3 rounded-xl bg-primary-foreground/10 p-3 text-[12px] font-bold leading-relaxed ring-1 ring-primary-foreground/20">
             {computed}
           </div>
         )}
-        <p className="mt-2 text-[10px] text-white/70">
+        <p className="mt-2 text-[10px] text-primary-foreground/70">
           ⚠️ هذه التوصية إرشادية فقط ولا تُغني عن استشارة طبيب أو صيدلي مرخّص.
         </p>
       </div>

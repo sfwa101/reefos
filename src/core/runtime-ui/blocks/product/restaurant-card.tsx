@@ -122,28 +122,28 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
         style={{ background: banner }}
       >
         {/* Logo tile */}
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/95 text-2xl font-extrabold shadow-lg">
+        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary-foreground/95 text-2xl font-extrabold shadow-lg">
           <span style={{ color: `hsl(${r.brandHue})` }}>{r.monogram}</span>
         </div>
 
         {/* Brand text */}
-        <div className="flex-1 min-w-0 text-white">
+        <div className="flex-1 min-w-0 text-primary-foreground">
           <h3 className="font-display text-base font-extrabold leading-tight drop-shadow-sm">
             {r.name}
           </h3>
-          <p className="mt-0.5 line-clamp-1 text-[11.5px] font-medium text-white/90">
+          <p className="mt-0.5 line-clamp-1 text-[11.5px] font-medium text-primary-foreground/90">
             {r.hook ?? r.tagline}
           </p>
-          <div className="mt-1 flex items-center gap-2 text-[10px] font-bold text-white/95">
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/25 px-1.5 py-0.5">
+          <div className="mt-1 flex items-center gap-2 text-[10px] font-bold text-primary-foreground/95">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary-foreground/25 px-1.5 py-0.5">
               <Star className="h-2.5 w-2.5 fill-yellow-300 text-yellow-300" />
               <span className="tabular-nums">{toLatin(r.rating)}</span>
             </span>
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/25 px-1.5 py-0.5">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary-foreground/25 px-1.5 py-0.5">
               <Clock className="h-2.5 w-2.5" />
               {r.etaLabel}
             </span>
-            <span className="inline-flex items-center gap-0.5 rounded-full bg-white/25 px-1.5 py-0.5">
+            <span className="inline-flex items-center gap-0.5 rounded-full bg-primary-foreground/25 px-1.5 py-0.5">
               <Wallet className="h-2.5 w-2.5" />
               {toLatin(r.cashbackPct)}٪
             </span>
@@ -151,7 +151,7 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
         </div>
 
         {/* CTA arrow */}
-        <div className="flex shrink-0 flex-col items-center gap-1 text-white">
+        <div className="flex shrink-0 flex-col items-center gap-1 text-primary-foreground">
           <span className="text-[11px] font-extrabold">شوف المنيو</span>
           <ArrowLeft className="h-4 w-4" strokeWidth={3} />
         </div>
