@@ -4,6 +4,12 @@ import { X, Check, ArrowRightLeft, TrendingUp, TrendingDown } from "lucide-react
 import { swapsFor, productById } from "@/core/commerce/policies/bundle-thresholds";
 import { toLatin } from "@/lib/format";
 import type { Product } from "@/core/catalog/legacyProduct.types";
+import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
+import type { CartLine } from "@/core/orders/runtime/types";
+
+/** Speculative line cost via the canonical engine — never multiplies in render. */
+const swapLineCost = (product: Product, qty: number): number =>
+  lineGrandTotal({ product, qty } as CartLine);
 
 type Props = {
   open: boolean;
@@ -28,7 +34,7 @@ const SmartSwapSheet = ({ open, originalId, currentId, qty, onClose, onSwap }: P
   useEffect(() => { if (open) setPicked(null); }, [open]);
 
   if (!current || !original) return null;
-  const currentLineCost = current.price * qty;
+  const currentLineCost = swapLineCost(current, qty);
 
   return (
     <AnimatePresence>
@@ -67,7 +73,7 @@ const SmartSwapSheet = ({ open, originalId, currentId, qty, onClose, onSwap }: P
                 </p>
               )}
               {candidates.map((p) => {
-                const lineCost = p.price * qty;
+                const lineCost = swapLineCost(p, qty);
                 const diff = lineCost - currentLineCost;
                 const sign = diff > 0 ? "+" : diff < 0 ? "−" : "";
                 const isPicked = picked === p.id;

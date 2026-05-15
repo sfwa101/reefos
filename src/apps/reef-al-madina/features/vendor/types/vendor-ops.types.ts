@@ -18,6 +18,8 @@ export type VendorLiveOrderItem = {
   product_image: string | null;
   quantity: number;
   price: number;
+  /** Pre-computed canonical line total (price × quantity) — Wave P-1.4. */
+  total: number;
   created_at: string;
   // joined from orders
   order_status: string;

@@ -2,6 +2,7 @@
 // Aggregates the Business-Ops Dashboard data behind `requireAdmin`.
 import { createServerFn } from "@tanstack/react-start";
 import { requireAdmin } from "@/integrations/supabase/admin-middleware";
+import { historicalLineTotal } from "@/core/commerce/pricing/historicalLineTotal";
 
 export type OpsKpiSnapshot = {
   revenue: number;
@@ -289,6 +290,8 @@ export type MasterOrderDetail = {
     id: string;
     quantity: number;
     price: number;
+    /** Pre-computed canonical line total (price × quantity) — see Wave P-1.4. */
+    total: number;
     product_name: string;
     product_image: string | null;
   }>;
@@ -326,10 +329,13 @@ export const getMasterOrderDetailFn = createServerFn({ method: "GET" })
       (n.salsabil_fulfillment_items ?? []).forEach((it: SbAny) => {
         const media = it?.salsabil_skus?.salsabil_assets?.media ?? {};
         const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+        const price = Number(it.price_at_time ?? 0);
+        const quantity = it.quantity;
         items.push({
           id: it.id,
-          quantity: it.quantity,
-          price: Number(it.price_at_time ?? 0),
+          quantity,
+          price,
+          total: historicalLineTotal({ price, quantity }),
           product_name: it?.salsabil_skus?.salsabil_assets?.name ?? "منتج",
           product_image: image,
         });

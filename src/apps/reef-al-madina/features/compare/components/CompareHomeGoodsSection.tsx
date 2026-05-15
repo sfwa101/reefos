@@ -1,5 +1,9 @@
 import { useCompare } from "@/context/CompareContext";
 import { useCartActions } from "@/core/orders/runtime/react/CartProvider";
+import {
+  preorderDepositAmount,
+  preorderRemainderAmount,
+} from "@/core/commerce/policies/deposits";
 import BackHeader from "@/components/BackHeader";
 import { toLatin } from "@/lib/format";
 import { Link } from "@tanstack/react-router";
@@ -29,7 +33,7 @@ const CompareHomeGoodsSection = () => {
 
   const handleAdd = (it: (typeof items)[number]) => {
     const isPre = it.fulfillment === "preorder";
-    const deposit = isPre ? Math.round(it.price * 0.25) : 0;
+    const deposit = isPre ? preorderDepositAmount(it.price) : 0;
     add(
       {
         id: it.id,
@@ -218,9 +222,9 @@ const CompareHomeGoodsSection = () => {
 
                   {isPre && (
                     <p className="mt-1 rounded-lg bg-amber-50 px-2 py-1.5 text-[9.5px] font-bold leading-relaxed text-amber-800 ring-1 ring-amber-200">
-                      دفعة مقدمة {fmt(Math.round(it.price * 0.25))} والمتبقي
+                      دفعة مقدمة {fmt(preorderDepositAmount(it.price))} والمتبقي
                       {" "}
-                      {fmt(it.price - Math.round(it.price * 0.25))} عند الاستلام
+                      {fmt(preorderRemainderAmount(it.price))} عند الاستلام
                     </p>
                   )}
 

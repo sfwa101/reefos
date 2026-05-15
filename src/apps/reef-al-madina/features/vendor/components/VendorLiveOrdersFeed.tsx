@@ -116,7 +116,7 @@ function ItemCard({ item, dim, children }: { item: VendorLiveOrderItem; dim?: bo
           </div>
           <div className="flex items-center gap-3 mt-1.5 text-[12px]">
             <span className="font-semibold">×{item.quantity}</span>
-            <span className="text-primary font-semibold num">{fmtMoney(item.price * item.quantity)}</span>
+            <span className="text-primary font-semibold num">{fmtMoney(item.total)}</span>
             <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-surface-muted text-foreground-secondary">
               #{item.order_id.slice(0, 6)}
             </span>

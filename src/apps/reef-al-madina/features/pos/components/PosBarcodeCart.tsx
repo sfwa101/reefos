@@ -3,6 +3,7 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Search, Plus, Minus, Trash2, ScanLine, Package2 } from "lucide-react";
 import type { PosCartLine, PosProduct } from "../types/pos.types";
+import { posLineTotal } from "../lib/posTotals";
 
 type Props = {
   query: string;
@@ -79,7 +80,7 @@ export function PosBarcodeCart({ query, setQuery, filtered, cart, onAdd, onInc, 
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-[13px] font-semibold truncate">{l.name}</p>
-                    <p className="text-[11px] text-foreground-tertiary num">{fmtMoney(l.price)} × {l.qty} = <span className="text-primary font-semibold">{fmtMoney(l.price * l.qty)}</span></p>
+                    <p className="text-[11px] text-foreground-tertiary num">{fmtMoney(l.price)} × {l.qty} = <span className="text-primary font-semibold">{fmtMoney(posLineTotal(l))}</span></p>
                   </div>
                   <div className="flex items-center gap-1">
                     <button onClick={() => onDec(l.product_id)} className="h-8 w-8 rounded-lg bg-surface-muted flex items-center justify-center press" aria-label="إنقاص"><Minus className="h-3.5 w-3.5" /></button>

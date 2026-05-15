@@ -234,6 +234,28 @@ export const tierForSubtotal = (subtotal: number) => {
 export const nextTierForSubtotal = (subtotal: number) =>
   BUILD_BOX_THRESHOLDS.find((t) => subtotal < t.min) ?? null;
 
+/* ===== Build-Your-Own-Box pricing helpers (Wave P-1.4) ===== */
+
+export type BuildBoxLine = { product: Product; qty: number };
+
+/** Subtotal across build-your-own-box lines. */
+export const sumBuildBoxSubtotal = (lines: ReadonlyArray<BuildBoxLine>): number =>
+  lines.reduce((s, l) => s + l.product.price * l.qty, 0);
+
+/**
+ * Compute the discounted unit price for a build-your-own-box line, given
+ * the global discount ratio (`final / subtotal`). Sealed in policy so UI
+ * never inlines `price * ratio`.
+ */
+export const buildBoxDiscountedUnitPrice = (
+  unitPrice: number,
+  ratio: number,
+): number => {
+  const safe = Number.isFinite(unitPrice) ? Math.max(0, unitPrice) : 0;
+  const r = Number.isFinite(ratio) ? Math.max(0, ratio) : 1;
+  return Math.round(safe * r);
+};
+
 /* ===== Cart auto-upgrade detector ===== */
 
 /**

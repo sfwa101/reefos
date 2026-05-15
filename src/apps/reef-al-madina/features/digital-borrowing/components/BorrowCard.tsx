@@ -3,6 +3,7 @@
 import { BookOpen } from "lucide-react";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
+import { borrowStartingPrice } from "@/core/commerce/policies/deposits";
 import { PALETTE } from "../data";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 
@@ -26,7 +27,7 @@ export const BorrowCard = ({
       <p className="mt-1 text-[11px] text-muted-foreground">{product.unit}</p>
       <div className="mt-2 flex items-center gap-1 text-[11px] font-bold" style={{ color: PALETTE.primary }}>
         <BookOpen className="h-3.5 w-3.5" />
-        <span>استعارة من {fmtMoney(Math.round(product.price * 0.15))}</span>
+        <span>استعارة من {fmtMoney(borrowStartingPrice(product.price))}</span>
       </div>
     </div>
     <span className="rounded-full px-3 py-1.5 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>استعِر</span>
