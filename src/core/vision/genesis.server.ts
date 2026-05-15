@@ -120,8 +120,11 @@ const TOOL_PARAMETERS = {
           },
         },
         allergens: { type: ["array", "null"], items: { type: "string" } },
+        barcode: { type: ["string", "null"] },
+        halal: { type: ["boolean", "null"] },
+        tier_rules: { type: ["object", "null"], additionalProperties: true },
       },
-      required: ["name", "description", "asset_type", "traits"],
+      required: ["name", "description", "asset_type", "traits", "category_path", "brand"],
     },
     skus: {
       type: "array",
