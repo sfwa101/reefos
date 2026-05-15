@@ -57,7 +57,9 @@
   --color-indigo: hsl(var(--indigo));
 
 
-  --font-display: 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-display: 'Outfit', 'Tajawal', 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-body: 'Figtree', 'Tajawal', system-ui, -apple-system, sans-serif;
+  --font-arabic: 'Tajawal', 'Cairo', system-ui, sans-serif;
 
   /* Tayseer Sovereign palette — Phase 59 (safe static tokens) */
   --color-tayseer-night: #0A0F1A;
