@@ -183,7 +183,7 @@ function RootComponent() {
           <UIProvider>
             <TooltipProvider>
               <AuthProvider>
-                <SovereignThemeProvider tenantId="reef">
+                <SovereignTenantBridge>
                 <LocationProvider>
                   <CartProvider>
                       <CompareProvider>
