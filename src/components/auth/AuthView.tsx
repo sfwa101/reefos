@@ -17,6 +17,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { Phone, Lock, User, Sparkles, Eye, EyeOff, MapPin, Loader2, ChevronRight, ArrowRight } from "lucide-react";
 import { toast } from "sonner";
 import reefLogo from "@/assets/reef-logo.webp";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { toLatin } from "@/lib/format";
 import { IdentityGateway } from "@/core/identity";
@@ -172,7 +174,7 @@ const Auth = () => {
               </select>
               <div className="relative flex-1">
                 <Phone className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-muted-foreground" />
-                <input
+                <Input
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="١٠٠ ١٢٣ ٤٥٦٧"
@@ -180,14 +182,14 @@ const Auth = () => {
                   inputMode="tel"
                   autoComplete="tel"
                   dir="ltr"
-                  className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-4 text-sm font-bold outline-none focus:border-primary"
+                  className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-4 text-sm font-bold h-auto outline-none focus:border-primary"
                 />
               </div>
             </div>
-            <button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
+            <Button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 h-auto font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
               {busy ? "جاري التحقّق…" : "متابعة"}
-            </button>
+            </Button>
           </form>
         )}
 
@@ -196,7 +198,7 @@ const Auth = () => {
           <form onSubmit={submitPin} className="glass-strong space-y-3 rounded-3xl p-5 shadow-tile">
             <div className="relative">
               <Lock className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-muted-foreground" />
-              <input
+              <Input
                 value={pin}
                 onChange={(e) => setPin(toLatin(e.target.value).replace(/\D/g, "").slice(0, 8))}
                 placeholder="•••• ••"
@@ -207,19 +209,19 @@ const Auth = () => {
                 minLength={6}
                 autoFocus
                 dir="ltr"
-                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 text-center font-mono text-base tracking-[0.3em] outline-none focus:border-primary"
+                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 h-auto text-center font-mono text-base tracking-[0.3em] outline-none focus:border-primary"
               />
-              <button type="button" onClick={() => setShowPwd((v) => !v)} className="absolute inset-y-0 left-3 flex items-center text-muted-foreground" aria-label="إظهار كلمة السر">
+              <Button type="button" variant="ghost" size="icon" onClick={() => setShowPwd((v) => !v)} className="absolute inset-y-0 left-3 h-auto w-auto bg-transparent p-0 text-muted-foreground hover:bg-transparent" aria-label="إظهار كلمة السر">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
-            <button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
+            <Button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 h-auto font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ChevronRight className="h-4 w-4" />}
               {busy ? "جاري الدخول…" : "دخول"}
-            </button>
-            <button type="button" onClick={() => { setStep("phone"); setPin(""); }} className="mx-auto mt-2 block text-xs font-bold text-muted-foreground">
+            </Button>
+            <Button type="button" variant="link" onClick={() => { setStep("phone"); setPin(""); }} className="mx-auto mt-2 block h-auto p-0 text-xs font-bold text-muted-foreground no-underline hover:no-underline">
               تغيير الرقم
-            </button>
+            </Button>
           </form>
         )}
 
@@ -228,12 +230,12 @@ const Auth = () => {
           <form onSubmit={submitRegister} className="glass-strong space-y-3 rounded-3xl p-5 shadow-tile">
             <div className="relative">
               <User className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-muted-foreground" />
-              <input
+              <Input
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="الاسم الكامل"
                 autoComplete="name"
-                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-4 text-sm font-bold outline-none focus:border-primary"
+                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-4 h-auto text-sm font-bold outline-none focus:border-primary"
               />
             </div>
 
@@ -247,21 +249,21 @@ const Auth = () => {
                   <option key={g.code} value={g.label}>{g.label}</option>
                 ))}
               </select>
-              <button type="button" onClick={useGps} disabled={gpsBusy} className="inline-flex items-center justify-center rounded-2xl bg-primary/10 px-3 text-primary ring-1 ring-primary/20 transition active:scale-[0.97] disabled:opacity-60">
+              <Button type="button" variant="ghost" size="icon" onClick={useGps} disabled={gpsBusy} className="inline-flex items-center justify-center rounded-2xl bg-primary/10 px-3 h-auto w-auto text-primary ring-1 ring-primary/20 transition active:scale-[0.97] disabled:opacity-60 hover:bg-primary/15">
                 {gpsBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <MapPin className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
 
-            <input
+            <Input
               value={city}
               onChange={(e) => setCity(e.target.value)}
               placeholder="المدينة / القرية"
-              className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 px-4 text-sm font-bold outline-none focus:border-primary"
+              className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 px-4 h-auto text-sm font-bold outline-none focus:border-primary"
             />
 
             <div className="relative">
               <Lock className="pointer-events-none absolute inset-y-0 right-3 my-auto h-4 w-4 text-muted-foreground" />
-              <input
+              <Input
                 value={pin}
                 onChange={(e) => setPin(toLatin(e.target.value).replace(/\D/g, "").slice(0, 8))}
                 placeholder="رقم سري (٦ أرقام)"
@@ -271,21 +273,21 @@ const Auth = () => {
                 autoComplete="new-password"
                 minLength={6}
                 dir="ltr"
-                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 text-center font-mono text-base tracking-[0.3em] outline-none focus:border-primary"
+                className="w-full rounded-2xl border border-border/60 bg-background/80 py-3 pe-9 ps-10 h-auto text-center font-mono text-base tracking-[0.3em] outline-none focus:border-primary"
               />
-              <button type="button" onClick={() => setShowPwd((v) => !v)} className="absolute inset-y-0 left-3 flex items-center text-muted-foreground" aria-label="إظهار كلمة السر">
+              <Button type="button" variant="ghost" size="icon" onClick={() => setShowPwd((v) => !v)} className="absolute inset-y-0 left-3 h-auto w-auto bg-transparent p-0 text-muted-foreground hover:bg-transparent" aria-label="إظهار كلمة السر">
                 {showPwd ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-              </button>
+              </Button>
             </div>
 
-            <button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
+            <Button type="submit" disabled={busy} className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-primary py-3.5 h-auto font-display text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-60">
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
               {busy ? "جاري الإنشاء…" : "إنشاء الحساب"}
-            </button>
+            </Button>
 
-            <button type="button" onClick={() => { setStep("phone"); setPin(""); }} className="mx-auto mt-2 block text-xs font-bold text-muted-foreground">
+            <Button type="button" variant="link" onClick={() => { setStep("phone"); setPin(""); }} className="mx-auto mt-2 block h-auto p-0 text-xs font-bold text-muted-foreground no-underline hover:no-underline">
               تغيير الرقم
-            </button>
+            </Button>
 
             <p className="text-center text-[10.5px] text-muted-foreground">
               المحفظة وميزات السيادة تُفتح بعد توثيق الرقم القومي.

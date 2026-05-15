@@ -24,6 +24,8 @@ import { SECTION_REGISTRY, type PageKey } from "@/core/runtime-ui/sdui/registry"
 import type {
   SectionConfig, SectionKey,
 } from "@/core/runtime-ui/sdui/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const PAGE_TABS: { key: PageKey; label: string; previewPath: string }[] = [
   { key: "main_hub", label: "الرئيسية (Hero)", previewPath: "/" },
@@ -70,7 +72,7 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
       <div className="overflow-x-auto -mx-1 px-1 no-scrollbar">
         <div className="inline-flex gap-1.5 bg-surface-muted rounded-full p-1">
           {PAGE_TABS.map(t => (
-            <button
+            <Button variant="ghost"
               key={t.key}
               onClick={() => { setActivePage(t.key); setEditingKey(null); }}
               className={cn(
@@ -79,7 +81,7 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
               )}
             >
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -108,16 +110,16 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
                   )}
                 >
                   <div className="flex flex-col gap-1">
-                    <button type="button" onClick={() => ed.moveSectionUp(i)} disabled={i === 0}
+                    <Button variant="ghost" type="button" onClick={() => ed.moveSectionUp(i)} disabled={i === 0}
                       className="h-7 w-7 rounded-lg bg-card hover:bg-accent/15 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center press"
                       aria-label="نقل للأعلى">
                       <ChevronUp className="h-4 w-4" />
-                    </button>
-                    <button type="button" onClick={() => ed.moveSectionDown(i)} disabled={i === ed.layout!.section_order.length - 1}
+                    </Button>
+                    <Button variant="ghost" type="button" onClick={() => ed.moveSectionDown(i)} disabled={i === ed.layout!.section_order.length - 1}
                       className="h-7 w-7 rounded-lg bg-card hover:bg-accent/15 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center press"
                       aria-label="نقل للأسفل">
                       <ChevronDown className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -140,16 +142,16 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
                   <div className="flex items-center gap-1.5 shrink-0">
                     {enabled ? <Eye className="h-4 w-4 text-success" /> : <EyeOff className="h-4 w-4 text-foreground-tertiary" />}
                     <Switch checked={enabled} onCheckedChange={() => ed.toggleSection(key)} aria-label="تفعيل القسم" />
-                    <button type="button" onClick={() => setEditingKey(key)}
+                    <Button variant="ghost" type="button" onClick={() => setEditingKey(key)}
                       className="h-8 w-8 rounded-lg bg-card hover:bg-accent/15 flex items-center justify-center press"
                       aria-label="إعدادات القسم" title="إعدادات">
                       <Settings2 className="h-3.5 w-3.5" />
-                    </button>
-                    <button type="button" onClick={() => ed.removeSection(key)}
+                    </Button>
+                    <Button variant="ghost" type="button" onClick={() => ed.removeSection(key)}
                       className="h-8 w-8 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive flex items-center justify-center press"
                       aria-label="إزالة القسم">
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   </div>
                 </li>
               );
@@ -163,11 +165,11 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
               </p>
               <div className="flex flex-wrap gap-2">
                 {ed.availableToAdd.map((k: SectionKey) => (
-                  <button key={k} type="button" onClick={() => ed.addSection(k)}
+                  <Button variant="ghost" key={k} type="button" onClick={() => ed.addSection(k)}
                     className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 hover:bg-primary/20 text-primary text-xs font-medium px-3 py-1.5 press">
                     <Plus className="h-3.5 w-3.5" />
                     {SECTION_REGISTRY[k]?.label ?? k}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
@@ -182,25 +184,25 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
               <span className="text-foreground-tertiary">v{ed.layout.version ?? 1}</span>
             </div>
             <div className="flex items-center gap-2">
-              <button type="button" onClick={onPreview}
+              <Button variant="ghost" type="button" onClick={onPreview}
                 className="inline-flex items-center gap-1 rounded-xl bg-card hover:bg-accent/15 px-3 py-2 text-xs font-semibold press border border-border/40">
                 <ExternalLink className="h-3.5 w-3.5" />
                 معاينة
-              </button>
-              <button type="button" onClick={onSave} disabled={!ed.dirty || ed.saving}
+              </Button>
+              <Button variant="ghost" type="button" onClick={onSave} disabled={!ed.dirty || ed.saving}
                 className={cn(
                   "rounded-xl px-4 py-2 text-xs font-semibold press border border-border/40 bg-card hover:bg-accent/15",
                   (!ed.dirty || ed.saving) && "opacity-50 cursor-not-allowed",
                 )}>
                 {ed.saving ? "جاري الحفظ…" : "حفظ مسودة"}
-              </button>
-              <button type="button" onClick={onPublish} disabled={ed.publishing}
+              </Button>
+              <Button variant="ghost" type="button" onClick={onPublish} disabled={ed.publishing}
                 className={cn(
                   "rounded-xl px-5 py-2 text-sm font-semibold press shadow-soft bg-gradient-primary text-primary-foreground",
                   ed.publishing && "opacity-50 cursor-not-allowed",
                 )}>
                 {ed.publishing ? "جاري النشر…" : "نشر للعملاء"}
-              </button>
+              </Button>
             </div>
           </div>
         </>
@@ -209,22 +211,22 @@ export function LayoutEditorGrid({ pageKey: defaultPageKey = "main_hub" }: { pag
       {/* Settings drawer */}
       {editingKey && editingMeta && (
         <div className="fixed inset-0 z-50 flex" dir="rtl">
-          <button className="flex-1 bg-foreground/40 backdrop-blur-sm" onClick={() => setEditingKey(null)} aria-label="إغلاق" />
+          <Button variant="ghost" className="flex-1 bg-foreground/40 backdrop-blur-sm" onClick={() => setEditingKey(null)} aria-label="إغلاق" />
           <div className="w-full max-w-md bg-surface shadow-2xl overflow-y-auto">
             <div className="sticky top-0 bg-surface border-b border-border/40 p-4 flex items-center justify-between">
               <div>
                 <h3 className="font-display text-base">{editingMeta.label}</h3>
                 <p className="text-[11px] text-foreground-tertiary">{editingMeta.description}</p>
               </div>
-              <button onClick={() => setEditingKey(null)} className="h-9 w-9 rounded-xl bg-card hover:bg-accent/15 flex items-center justify-center press">
+              <Button variant="ghost" onClick={() => setEditingKey(null)} className="h-9 w-9 rounded-xl bg-card hover:bg-accent/15 flex items-center justify-center press">
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             <div className="p-4 space-y-5">
               {editingMeta.allowedOverrides.includes("title") && (
                 <Field label="عنوان مخصص (اتركه فارغاً للاسم الافتراضي)">
-                  <input
+                  <Input
                     type="text" value={editingTitle} maxLength={80}
                     onChange={(e) => ed.renameSection(editingKey, e.target.value)}
                     placeholder={editingMeta.label}
@@ -321,13 +323,13 @@ function SegBtns<T extends string>({ value, options, onChange }: {
   return (
     <div className="inline-flex flex-wrap gap-1 bg-surface-muted rounded-xl p-1">
       {options.map((o) => (
-        <button key={o.v || "_"} type="button" onClick={() => onChange(o.v)}
+        <Button variant="ghost" key={o.v || "_"} type="button" onClick={() => onChange(o.v)}
           className={cn(
             "px-3 h-8 rounded-lg text-[12px] font-semibold transition press",
             value === o.v ? "bg-surface text-foreground shadow-sm" : "text-foreground-secondary",
           )}>
           {o.l}
-        </button>
+        </Button>
       ))}
     </div>
   );
