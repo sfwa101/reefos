@@ -111,12 +111,14 @@ export function ReefAppFactory() {
             </p>
           </div>
           <Button
-            type="button"
+            asChild
             size="lg"
             className="rounded-2xl bg-gradient-to-br from-primary to-primary-glow px-5 text-[13px] font-extrabold text-primary-foreground shadow-elevated hover:opacity-95"
           >
-            <Plus className="h-4 w-4" strokeWidth={2.6} />
-            إنشاء واجهة جديدة
+            <Link to="/admin/factory/new">
+              <Plus className="h-4 w-4" strokeWidth={2.6} />
+              إنشاء واجهة جديدة
+            </Link>
           </Button>
         </div>
       </motion.section>

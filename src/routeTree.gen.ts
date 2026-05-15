@@ -129,6 +129,7 @@ import { Route as AdminMarketingPromosRouteImport } from './routes/admin.marketi
 import { Route as AdminMarketingNotificationsRouteImport } from './routes/admin.marketing.notifications'
 import { Route as AdminMarketingBannersRouteImport } from './routes/admin.marketing.banners'
 import { Route as AdminFinanceLedgerRouteImport } from './routes/admin.finance.ledger'
+import { Route as AdminFactoryNewRouteImport } from './routes/admin.factory.new'
 import { Route as AdminDeliveryZonesRouteImport } from './routes/admin.delivery.zones'
 import { Route as AdminCustomersCustomerIdRouteImport } from './routes/admin.customers.$customerId'
 import { Route as AdminAssetsGenesisRouteImport } from './routes/admin.assets.genesis'
@@ -748,6 +749,11 @@ const AdminFinanceLedgerRoute = AdminFinanceLedgerRouteImport.update({
   path: '/ledger',
   getParentRoute: () => AdminFinanceRoute,
 } as any)
+const AdminFactoryNewRoute = AdminFactoryNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminFactoryRoute,
+} as any)
 const AdminDeliveryZonesRoute = AdminDeliveryZonesRouteImport.update({
   id: '/zones',
   path: '/zones',
@@ -898,7 +904,7 @@ export interface FileRoutesByFullPath {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/factory': typeof AdminFactoryRoute
+  '/admin/factory': typeof AdminFactoryRouteWithChildren
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -976,6 +982,7 @@ export interface FileRoutesByFullPath {
   '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
+  '/admin/factory/new': typeof AdminFactoryNewRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
   '/admin/marketing/banners': typeof AdminMarketingBannersRoute
   '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
@@ -1031,7 +1038,7 @@ export interface FileRoutesByTo {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/factory': typeof AdminFactoryRoute
+  '/admin/factory': typeof AdminFactoryRouteWithChildren
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -1109,6 +1116,7 @@ export interface FileRoutesByTo {
   '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
+  '/admin/factory/new': typeof AdminFactoryNewRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
   '/admin/marketing/banners': typeof AdminMarketingBannersRoute
   '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
@@ -1173,7 +1181,7 @@ export interface FileRoutesById {
   '/admin/driver-settlements': typeof AdminDriverSettlementsRoute
   '/admin/executive': typeof AdminExecutiveRoute
   '/admin/expenses': typeof AdminExpensesRoute
-  '/admin/factory': typeof AdminFactoryRoute
+  '/admin/factory': typeof AdminFactoryRouteWithChildren
   '/admin/finance': typeof AdminFinanceRouteWithChildren
   '/admin/hakim': typeof AdminHakimRoute
   '/admin/hakim-anomalies': typeof AdminHakimAnomaliesRoute
@@ -1252,6 +1260,7 @@ export interface FileRoutesById {
   '/admin/assets/genesis': typeof AdminAssetsGenesisRoute
   '/admin/customers/$customerId': typeof AdminCustomersCustomerIdRoute
   '/admin/delivery/zones': typeof AdminDeliveryZonesRoute
+  '/admin/factory/new': typeof AdminFactoryNewRoute
   '/admin/finance/ledger': typeof AdminFinanceLedgerRoute
   '/admin/marketing/banners': typeof AdminMarketingBannersRoute
   '/admin/marketing/notifications': typeof AdminMarketingNotificationsRoute
@@ -1391,6 +1400,7 @@ export interface FileRouteTypes {
     | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
+    | '/admin/factory/new'
     | '/admin/finance/ledger'
     | '/admin/marketing/banners'
     | '/admin/marketing/notifications'
@@ -1524,6 +1534,7 @@ export interface FileRouteTypes {
     | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
+    | '/admin/factory/new'
     | '/admin/finance/ledger'
     | '/admin/marketing/banners'
     | '/admin/marketing/notifications'
@@ -1666,6 +1677,7 @@ export interface FileRouteTypes {
     | '/admin/assets/genesis'
     | '/admin/customers/$customerId'
     | '/admin/delivery/zones'
+    | '/admin/factory/new'
     | '/admin/finance/ledger'
     | '/admin/marketing/banners'
     | '/admin/marketing/notifications'
@@ -2535,6 +2547,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminFinanceLedgerRouteImport
       parentRoute: typeof AdminFinanceRoute
     }
+    '/admin/factory/new': {
+      id: '/admin/factory/new'
+      path: '/new'
+      fullPath: '/admin/factory/new'
+      preLoaderRoute: typeof AdminFactoryNewRouteImport
+      parentRoute: typeof AdminFactoryRoute
+    }
     '/admin/delivery/zones': {
       id: '/admin/delivery/zones'
       path: '/zones'
@@ -2839,6 +2858,18 @@ const AdminDeliveryRouteWithChildren = AdminDeliveryRoute._addFileChildren(
   AdminDeliveryRouteChildren,
 )
 
+interface AdminFactoryRouteChildren {
+  AdminFactoryNewRoute: typeof AdminFactoryNewRoute
+}
+
+const AdminFactoryRouteChildren: AdminFactoryRouteChildren = {
+  AdminFactoryNewRoute: AdminFactoryNewRoute,
+}
+
+const AdminFactoryRouteWithChildren = AdminFactoryRoute._addFileChildren(
+  AdminFactoryRouteChildren,
+)
+
 interface AdminFinanceRouteChildren {
   AdminFinanceLedgerRoute: typeof AdminFinanceLedgerRoute
 }
@@ -2897,7 +2928,7 @@ interface AdminRouteChildren {
   AdminDriverSettlementsRoute: typeof AdminDriverSettlementsRoute
   AdminExecutiveRoute: typeof AdminExecutiveRoute
   AdminExpensesRoute: typeof AdminExpensesRoute
-  AdminFactoryRoute: typeof AdminFactoryRoute
+  AdminFactoryRoute: typeof AdminFactoryRouteWithChildren
   AdminFinanceRoute: typeof AdminFinanceRouteWithChildren
   AdminHakimRoute: typeof AdminHakimRoute
   AdminHakimAnomaliesRoute: typeof AdminHakimAnomaliesRoute
@@ -2978,7 +3009,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDriverSettlementsRoute: AdminDriverSettlementsRoute,
   AdminExecutiveRoute: AdminExecutiveRoute,
   AdminExpensesRoute: AdminExpensesRoute,
-  AdminFactoryRoute: AdminFactoryRoute,
+  AdminFactoryRoute: AdminFactoryRouteWithChildren,
   AdminFinanceRoute: AdminFinanceRouteWithChildren,
   AdminHakimRoute: AdminHakimRoute,
   AdminHakimAnomaliesRoute: AdminHakimAnomaliesRoute,
