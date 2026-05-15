@@ -11,7 +11,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import {
   BORROW_DURATIONS, calcBorrowPrice, type BorrowDuration,
 } from "@/lib/digital-borrowing";
-import { libraryBorrowToModifiers } from "@/lib/pricingAdapters";
+import { libraryBorrowToModifiers } from "@/core/commerce/pricing/adapters";
 import { PALETTE } from "../data";
 
 export const BorrowSheet = ({

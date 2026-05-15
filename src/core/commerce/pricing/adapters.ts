@@ -1,27 +1,22 @@
 /**
- * Domain → Universal Pricing Engine adapters.
- * ----------------------------------------------------------------
- * Each adapter takes the domain-specific selection (butchery prep,
- * sweets booking, library borrow) and returns a unified
- * `Modifier[]` array consumable by `calculateUniversalPrice`.
+ * Salsabil OS — Wave P-1.2 · Domain → Modifier Adapters.
  *
- * These adapters are the "Proof of Concept" that the engine can
- * price ANY product polymorphically — including a hypothetical
- * frankenstein product that combines butchery prep + cake message
- * + library deposit (see `composeUniversal()` at the bottom).
+ * Each adapter takes a domain-specific selection (butchery prep, sweets
+ * booking, library borrow) and returns a unified `Modifier[]` array
+ * consumable by `calculateUniversalPrice` (or by the orchestrator after
+ * structural projection to `PricingModifier`).
  *
- * IMPORTANT: this file does NOT replace the existing domain
- * compute helpers (computeButcheryPrice, computeSweetsRules,
- * calcBorrowPrice). Those stay intact for now to guarantee zero
- * regressions. We migrate consumers one-by-one in follow-up phases.
+ * Constitutional source of truth — relocated from the destroyed
+ * `the destroyed legacy pricing adapters` to enforce Law 9 across the pricing
+ * namespace. Behavior is byte-for-byte identical.
  */
 
 import {
   calculateUniversalPrice,
   mod,
   type Modifier,
-  type PriceBreakdown,
-} from "./pricingEngine";
+  type ModifierBreakdown,
+} from "./modifiers";
 import type {
   ButcheryRules,
   PrepOption,
@@ -31,7 +26,7 @@ import {
   BORROW_DURATIONS,
   BORROW_DEPOSIT_RATIO,
   type BorrowDuration,
-} from "./digital-borrowing";
+} from "@/lib/digital-borrowing";
 
 /* =============== Butchery → modifiers =============== */
 
@@ -67,14 +62,14 @@ export function libraryBorrowToModifiers(
   const cfg = BORROW_DURATIONS.find((d) => d.id === duration)!;
   const rental = Math.round(bookPrice * cfg.ratio);
   const deposit = Math.round(bookPrice * BORROW_DEPOSIT_RATIO);
-  // The rental fee replaces the base price entirely (book is borrowed,
-  // not bought). We model it as: base=0 + line_addon(rental) + deposit.
   return [
     mod.addon(`borrow-fee:${duration}`, `إيجار ${cfg.label}`, rental),
-    mod.deposit(`borrow-deposit:${duration}`, "تأمين قابل للاسترجاع", deposit, {
-      refundable: true,
-      duration,
-    }),
+    mod.deposit(
+      `borrow-deposit:${duration}`,
+      "تأمين قابل للاسترجاع",
+      deposit,
+      { refundable: true, duration },
+    ),
   ];
 }
 
@@ -90,7 +85,11 @@ export function sweetsBookingToModifiers(opts: {
   const out: Modifier[] = [];
   if (opts.cakeMessage && (opts.cakeMessageFee ?? 0) > 0) {
     out.push(
-      mod.addon("cake-message", `رسالة على التورتة: ${opts.cakeMessage}`, opts.cakeMessageFee!),
+      mod.addon(
+        "cake-message",
+        `رسالة على التورتة: ${opts.cakeMessage}`,
+        opts.cakeMessageFee!,
+      ),
     );
   }
   if (opts.bookingSubtotal >= opts.threshold) {
@@ -111,20 +110,12 @@ export function sweetsBookingToModifiers(opts: {
  * Compose ANY combination of modifier sources for a single product.
  * Demonstrates how a frankenstein product (butchery + cake message
  * + library deposit) prices correctly through the SAME pipeline.
- *
- *   const breakdown = composeUniversal(
- *     basePrice,
- *     qty,
- *     butcheryToModifiers(w, p, addons, rules, "vacuum"),
- *     sweetsBookingToModifiers({ bookingSubtotal: 800, depositPct: 0.5, threshold: 300, cakeMessage: "🎂", cakeMessageFee: 25 }),
- *     libraryBorrowToModifiers(150, "7d"),
- *   );
  */
 export function composeUniversal(
   basePrice: number,
   qty: number,
   ...modifierGroups: Modifier[][]
-): PriceBreakdown {
+): ModifierBreakdown {
   const merged = modifierGroups.flat();
   return calculateUniversalPrice(basePrice, merged, qty);
 }

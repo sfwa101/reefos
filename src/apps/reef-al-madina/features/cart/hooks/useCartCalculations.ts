@@ -9,7 +9,7 @@ import {
   DEPOSIT_THRESHOLD,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import { toLatin } from "@/lib/format";
-import { calculateUniversalPrice, mod, type Modifier } from "@/lib/pricingEngine";
+import { calculateUniversalPrice, mod, type Modifier } from "@/core/commerce/pricing/modifiers";
 import { useCashierPreview } from "@/core/cashier/gateway/hooks";
 import { GIFT_BONUS, type SweetsBucket } from "../types/cart.types";
 

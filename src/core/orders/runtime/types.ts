@@ -10,7 +10,7 @@
  * re-export from this module marked `@deprecated`.
  */
 
-import type { Modifier } from "@/lib/pricingEngine";
+import type { Modifier } from "@/core/commerce/pricing/modifiers";
 /**
  * @deprecated Wave P-B (Static Catalog Killer) — `Product` is the legacy
  * denormalized shape, kept ONLY as a transitional bridge until every UI

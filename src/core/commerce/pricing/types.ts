@@ -5,7 +5,7 @@
  * engine. NO `any`, NO `as unknown`. These types are the SINGLE source
  * of truth that every Strategy and Discount Rule must respect.
  *
- * Built in PARALLEL to legacy `src/lib/pricingEngine.ts` — nothing here
+ * Built in PARALLEL to legacy `the destroyed legacy pricing module` — nothing here
  * imports from or mutates the live cart pipeline. Wiring is a later phase.
  */
 
