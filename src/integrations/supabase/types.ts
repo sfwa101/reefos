@@ -5830,6 +5830,7 @@ export type Database = {
       }
       salsabil_fulfillment_nodes: {
         Row: {
+          arrived_vendor_at: string | null
           assigned_at: string | null
           created_at: string
           delivered_at: string | null
@@ -5849,6 +5850,7 @@ export type Database = {
           vendor_id: string
         }
         Insert: {
+          arrived_vendor_at?: string | null
           assigned_at?: string | null
           created_at?: string
           delivered_at?: string | null
@@ -5868,6 +5870,7 @@ export type Database = {
           vendor_id: string
         }
         Update: {
+          arrived_vendor_at?: string | null
           assigned_at?: string | null
           created_at?: string
           delivered_at?: string | null
