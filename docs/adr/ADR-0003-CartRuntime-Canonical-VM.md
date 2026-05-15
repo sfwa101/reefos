@@ -1,7 +1,8 @@
 # ADR-0003 — CartRuntime Canonical ViewModel (V3)
 
-- **Status:** Accepted
-- **Date:** Phase P-1.1.A (Wave Sovereign Cleanup)
+- **Status:** CLOSED (Wave P-1.1.D-γ — Final Mass Sweep)
+- **Date:** Phase P-1.1.A → Closed P-1.1.D-γ
+- **Closure Verification:** `rg -l "CartContext|useCartStore" src/` → 0 · `bunx tsc --noEmit` → 0 · facades physically deleted
 - **Supersedes:** ad-hoc `CartLineMeta` flat shape in `src/store/useCartStore.ts`
 - **Related:** `SOVEREIGN_V3_MANDATE.md` §4 (Singularity), `ARCHITECTURE_LAWS.md` Law 8 (Kernel Minimalism), Law 9 (Single Source of Truth)
 
