@@ -12,9 +12,10 @@
  */
 import { readFileSync, writeFileSync } from "node:fs";
 
-const N = 50;
+const START = parseInt(process.env.START ?? "0", 10);
+const END = parseInt(process.env.END ?? "50", 10);
 const report = JSON.parse(readFileSync("reports/sweep-atomize-dryrun.json", "utf8"));
-const chunk = report.planned.slice(0, N);
+const chunk = report.planned.slice(START, END);
 
 const RX_BUTTON_OPEN  = /<button(\s|>)/g;
 const RX_BUTTON_CLOSE = /<\/button>/g;
