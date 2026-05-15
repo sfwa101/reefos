@@ -16,6 +16,8 @@ import {
   type BindingKey, type PrintConfig,
 } from "@/lib/digital-borrowing";
 import { PALETTE } from "../data";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const PrintWizard = () => {
   const { user } = useAuth();
@@ -108,7 +110,7 @@ export const PrintWizard = () => {
           <h3 className="font-display text-base font-extrabold">1. ارفع ملفك</h3>
           <p className="mt-1 text-xs text-muted-foreground">PDF أو Word — حتى 20 ميجا</p>
           <input ref={inputRef} type="file" accept=".pdf,.doc,.docx" hidden onChange={(e) => onPick(e.target.files?.[0] ?? null)} />
-          <button
+          <Button variant="ghost"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-dashed py-8 text-sm font-bold disabled:opacity-50"
@@ -117,13 +119,13 @@ export const PrintWizard = () => {
             {uploading ? <><Upload className="h-5 w-5 animate-pulse" /> جارٍ الرفع…</> :
               file ? <><CheckCircle2 className="h-5 w-5" /> {file.name}</> :
               <><Upload className="h-5 w-5" /> اختر ملفاً</>}
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             disabled={!file || uploading}
             onClick={() => setStep(2)}
             className="mt-3 w-full rounded-2xl py-3 text-sm font-extrabold text-white disabled:opacity-40"
             style={{ background: PALETTE.primary }}
-          >التالي</button>
+          >التالي</Button>
         </div>
       )}
 
@@ -138,12 +140,12 @@ export const PrintWizard = () => {
               {([["bw", "أبيض وأسود", "1 ج.م/صفحة"], ["color", "ألوان", "3 ج.م/صفحة"]] as const).map(([id, label, sub]) => {
                 const active = colorMode === id;
                 return (
-                  <button key={id} onClick={() => setColorMode(id)}
+                  <Button variant="ghost" key={id} onClick={() => setColorMode(id)}
                     className={`rounded-2xl p-3 text-center text-xs font-bold ${active ? "text-white" : "bg-foreground/5"}`}
                     style={active ? { background: PALETTE.primary } : undefined}>
                     <p className="font-extrabold">{label}</p>
                     <p className={`mt-0.5 text-[10px] ${active ? "opacity-90" : "text-muted-foreground"}`}>{sub}</p>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -155,20 +157,20 @@ export const PrintWizard = () => {
               {([["single", "وجه واحد", ""], ["double", "وجهين", "خصم 20%"]] as const).map(([id, label, sub]) => {
                 const active = sided === id;
                 return (
-                  <button key={id} onClick={() => setSided(id)}
+                  <Button variant="ghost" key={id} onClick={() => setSided(id)}
                     className={`rounded-2xl p-3 text-center text-xs font-bold ${active ? "text-white" : "bg-foreground/5"}`}
                     style={active ? { background: PALETTE.primary } : undefined}>
                     <p className="font-extrabold">{label}</p>
                     {sub && <p className={`mt-0.5 text-[10px] ${active ? "opacity-90" : "text-emerald-600"}`}>{sub}</p>}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(1)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</button>
-            <button onClick={() => setStep(3)} className="flex-1 rounded-2xl py-3 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>التالي</button>
+            <Button variant="ghost" onClick={() => setStep(1)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</Button>
+            <Button variant="ghost" onClick={() => setStep(3)} className="flex-1 rounded-2xl py-3 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>التالي</Button>
           </div>
         </div>
       )}
@@ -182,18 +184,18 @@ export const PrintWizard = () => {
               const active = binding === id;
               const labels: Record<BindingKey, string> = { none: "بدون", spiral: "كعب حلزوني سلك", plastic: "كعب بلاستيك", thermal: "تغليف حراري" };
               return (
-                <button key={id} onClick={() => setBinding(id)}
+                <Button variant="ghost" key={id} onClick={() => setBinding(id)}
                   className={`rounded-2xl p-3 text-center text-xs font-bold ${active ? "text-white" : "bg-foreground/5"}`}
                   style={active ? { background: PALETTE.primary } : undefined}>
                   <p className="font-extrabold">{labels[id]}</p>
                   <p className={`mt-0.5 text-[10px] ${active ? "opacity-90" : "text-muted-foreground"}`}>+{toLatin(price)} ج.م</p>
-                </button>
+                </Button>
               );
             })}
           </div>
           <div className="flex gap-2">
-            <button onClick={() => setStep(2)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</button>
-            <button onClick={() => setStep(4)} className="flex-1 rounded-2xl py-3 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>التالي</button>
+            <Button variant="ghost" onClick={() => setStep(2)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</Button>
+            <Button variant="ghost" onClick={() => setStep(4)} className="flex-1 rounded-2xl py-3 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>التالي</Button>
           </div>
         </div>
       )}
@@ -208,19 +210,19 @@ export const PrintWizard = () => {
           <div>
             <p className="mb-2 text-xs font-bold text-muted-foreground">عدد الصفحات</p>
             <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 p-2">
-              <button onClick={() => setPages((p) => Math.max(1, p - 5))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Minus className="h-4 w-4" /></button>
-              <input type="number" value={pages} onChange={(e) => setPages(Math.max(1, parseInt(e.target.value) || 1))}
+              <Button variant="ghost" onClick={() => setPages((p) => Math.max(1, p - 5))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Minus className="h-4 w-4" /></Button>
+              <Input type="number" value={pages} onChange={(e) => setPages(Math.max(1, parseInt(e.target.value) || 1))}
                 className="flex-1 bg-transparent text-center font-display text-lg font-extrabold outline-none" />
-              <button onClick={() => setPages((p) => p + 5)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Plus className="h-4 w-4" /></button>
+              <Button variant="ghost" onClick={() => setPages((p) => p + 5)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Plus className="h-4 w-4" /></Button>
             </div>
           </div>
 
           <div>
             <p className="mb-2 text-xs font-bold text-muted-foreground">عدد النسخ</p>
             <div className="flex items-center gap-3 rounded-2xl bg-foreground/5 p-2">
-              <button onClick={() => setCopies((c) => Math.max(1, c - 1))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Minus className="h-4 w-4" /></button>
+              <Button variant="ghost" onClick={() => setCopies((c) => Math.max(1, c - 1))} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Minus className="h-4 w-4" /></Button>
               <span className="flex-1 text-center font-display text-lg font-extrabold">{toLatin(copies)}</span>
-              <button onClick={() => setCopies((c) => c + 1)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Plus className="h-4 w-4" /></button>
+              <Button variant="ghost" onClick={() => setCopies((c) => c + 1)} className="flex h-9 w-9 items-center justify-center rounded-xl bg-card"><Plus className="h-4 w-4" /></Button>
             </div>
           </div>
 
@@ -238,10 +240,10 @@ export const PrintWizard = () => {
           </div>
 
           <div className="flex gap-2">
-            <button onClick={() => setStep(3)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</button>
-            <button onClick={submit} className="flex-[2] rounded-2xl py-3.5 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>
+            <Button variant="ghost" onClick={() => setStep(3)} className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold">رجوع</Button>
+            <Button variant="ghost" onClick={submit} className="flex-[2] rounded-2xl py-3.5 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>
               أضف للسلة — {fmtMoney(total)}
-            </button>
+            </Button>
           </div>
         </div>
       )}

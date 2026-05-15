@@ -2,6 +2,7 @@ import BackHeader from "@/components/BackHeader";
 import { Check, Sparkles, Dumbbell, Heart, Pause, Clock, Truck, Leaf, Flame, AlertCircle, UtensilsCrossed, ChefHat, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { subscriptionMeals, type SubscriptionMeal } from "@/lib/subscriptionMeals";
+import { Button } from "@/components/ui/button";
 
 type PlanId = "loss" | "maintain" | "muscle" | "family";
 const plans: { id: PlanId; title: string; icon: React.ElementType; calories: string; basePrice: number; color: string; tag: string }[] = [
@@ -115,7 +116,7 @@ const SubscriptionsBuilderSection = () => {
             const Icon = p.icon;
             const isActive = p.id === planId;
             return (
-              <button key={p.id} onClick={() => setPlanId(p.id)}
+              <Button variant="ghost" key={p.id} onClick={() => setPlanId(p.id)}
                 className={`relative overflow-hidden rounded-2xl p-3 text-right transition ease-apple ${
                   isActive ? "ring-2 ring-primary shadow-pill" : "glass-strong shadow-soft"
                 }`}>
@@ -125,7 +126,7 @@ const SubscriptionsBuilderSection = () => {
                 <p className="font-display text-sm font-extrabold">{p.title}</p>
                 <p className="mt-0.5 text-[10px] text-muted-foreground">{p.calories}</p>
                 <span className="mt-1 inline-block rounded-full bg-foreground/5 px-2 py-0.5 text-[9px] font-bold">{p.tag}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -138,10 +139,10 @@ const SubscriptionsBuilderSection = () => {
           {frequencies.map((f) => {
             const isActive = f.id === freq;
             return (
-              <button key={f.id} onClick={() => setFreq(f.id)}
+              <Button variant="ghost" key={f.id} onClick={() => setFreq(f.id)}
                 className={`rounded-2xl py-3 text-center text-[11px] font-bold transition ${
                   isActive ? "bg-primary text-primary-foreground shadow-pill" : "glass text-foreground"
-                }`}>{f.label}</button>
+                }`}>{f.label}</Button>
             );
           })}
         </div>
@@ -154,7 +155,7 @@ const SubscriptionsBuilderSection = () => {
           {durations.map((d) => {
             const isActive = d.id === dur;
             return (
-              <button key={d.id} onClick={() => setDur(d.id)}
+              <Button variant="ghost" key={d.id} onClick={() => setDur(d.id)}
                 className={`relative rounded-2xl py-3 text-center transition ${
                   isActive ? "bg-foreground text-background shadow-pill" : "glass text-foreground"
                 }`}>
@@ -162,7 +163,7 @@ const SubscriptionsBuilderSection = () => {
                 {d.discount > 0 && (
                   <p className={`text-[10px] ${isActive ? "text-background/80" : "text-primary"}`}>وفر {Math.round(d.discount * 100)}%</p>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -175,12 +176,12 @@ const SubscriptionsBuilderSection = () => {
             <UtensilsCrossed className="h-5 w-5 text-primary" />
             اختر وجبات الأسبوع
           </h3>
-          <button
+          <Button variant="ghost"
             onClick={autoFillWeek}
             className="text-[11px] font-bold text-primary underline-offset-2 hover:underline"
           >
             ملء تلقائي
-          </button>
+          </Button>
         </div>
         <p className="px-1 text-[11px] text-muted-foreground">
           اختر وجبة لكل يوم من أيام اشتراكك ({filledCount}/{activeDays.length})
@@ -192,7 +193,7 @@ const SubscriptionsBuilderSection = () => {
             const mealId = dailyMeals[dayId];
             const meal = mealId ? subscriptionMeals.find((m) => m.id === mealId) : null;
             return (
-              <button
+              <Button variant="ghost"
                 key={dayId}
                 onClick={() => setPickerDay(dayId)}
                 className={`flex items-center gap-3 rounded-2xl p-3 text-right transition ease-apple ${
@@ -222,7 +223,7 @@ const SubscriptionsBuilderSection = () => {
                     <ChefHat className="h-5 w-5 text-muted-foreground" />
                   </>
                 )}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -244,9 +245,9 @@ const SubscriptionsBuilderSection = () => {
           <p className="text-[11px] text-muted-foreground">يضرب السعر ×{people}</p>
         </div>
         <div className="flex items-center gap-3">
-          <button onClick={() => setPeople((p) => Math.max(1, p - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">−</button>
+          <Button variant="ghost" onClick={() => setPeople((p) => Math.max(1, p - 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/10">−</Button>
           <span className="w-6 text-center font-display text-lg font-extrabold tabular-nums">{people}</span>
-          <button onClick={() => setPeople((p) => Math.min(8, p + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">+</button>
+          <Button variant="ghost" onClick={() => setPeople((p) => Math.min(8, p + 1))} className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">+</Button>
         </div>
       </section>
 
@@ -259,10 +260,10 @@ const SubscriptionsBuilderSection = () => {
           {dietPrefs.map((d) => {
             const on = diets.has(d);
             return (
-              <button key={d} onClick={() => toggle(diets, setDiets, d)}
+              <Button variant="ghost" key={d} onClick={() => toggle(diets, setDiets, d)}
                 className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
                   on ? "bg-primary text-primary-foreground" : "glass"
-                }`}>{on && "✓ "}{d}</button>
+                }`}>{on && "✓ "}{d}</Button>
             );
           })}
         </div>
@@ -277,10 +278,10 @@ const SubscriptionsBuilderSection = () => {
           {allergies.map((a) => {
             const on = allergic.has(a);
             return (
-              <button key={a} onClick={() => toggle(allergic, setAllergic, a)}
+              <Button variant="ghost" key={a} onClick={() => toggle(allergic, setAllergic, a)}
                 className={`rounded-full px-3 py-1.5 text-xs font-bold transition ${
                   on ? "bg-destructive text-destructive-foreground" : "glass"
-                }`}>{on ? "✕ " : ""}{a}</button>
+                }`}>{on ? "✕ " : ""}{a}</Button>
             );
           })}
         </div>
@@ -293,10 +294,10 @@ const SubscriptionsBuilderSection = () => {
         </h3>
         <div className="grid grid-cols-4 gap-2">
           {timeSlots.map((t) => (
-            <button key={t} onClick={() => setSlot(t)}
+            <Button variant="ghost" key={t} onClick={() => setSlot(t)}
               className={`rounded-xl py-2 text-[11px] font-bold transition ${
                 slot === t ? "bg-foreground text-background" : "glass"
-              }`}>{t}</button>
+              }`}>{t}</Button>
           ))}
         </div>
       </section>
@@ -310,10 +311,10 @@ const SubscriptionsBuilderSection = () => {
             <p className="text-[10px] text-muted-foreground">أوقف اشتراكك دون إلغاء</p>
           </div>
         </div>
-        <button onClick={() => setPaused((p) => !p)}
+        <Button variant="ghost" onClick={() => setPaused((p) => !p)}
           className={`relative h-7 w-12 rounded-full transition ${paused ? "bg-primary" : "bg-foreground/15"}`}>
           <span className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow transition ${paused ? "right-0.5" : "right-6"}`} />
-        </button>
+        </Button>
       </section>
 
       {/* Features */}
@@ -347,12 +348,12 @@ const SubscriptionsBuilderSection = () => {
           <span className="font-display text-sm font-bold">الإجمالي</span>
           <span className="font-display text-2xl font-extrabold text-primary tabular-nums">{totalPrice} ج.م</span>
         </div>
-        <button
+        <Button variant="ghost"
           disabled={filledCount === 0}
           className="w-full rounded-2xl bg-primary py-4 font-bold text-primary-foreground shadow-pill transition disabled:opacity-50"
         >
           {filledCount === 0 ? "اختر وجبات الأسبوع أولاً" : "ابدأ اشتراكك الآن"}
-        </button>
+        </Button>
       </section>
 
       {/* Meal picker bottom-sheet */}
@@ -370,20 +371,20 @@ const SubscriptionsBuilderSection = () => {
                 <h4 className="font-display text-lg font-extrabold">اختر وجبة {weekDays.find((d) => d.id === pickerDay)?.long}</h4>
                 <p className="text-[11px] text-muted-foreground">السعر داخل الاشتراك مختلف عن الطلب الفردي</p>
               </div>
-              <button
+              <Button variant="ghost"
                 onClick={() => setPickerDay(null)}
                 className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/10"
                 aria-label="إغلاق"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
             <div className="space-y-2 overflow-y-auto p-4 pb-8" style={{ maxHeight: "70vh" }}>
               {availableMeals.map((m) => {
                 const isSelected = dailyMeals[pickerDay] === m.id;
                 const savings = Math.round(((m.standalonePrice - m.subscriptionPrice) / m.standalonePrice) * 100);
                 return (
-                  <button
+                  <Button variant="ghost"
                     key={m.id}
                     onClick={() => pickMealForDay(m.id)}
                     className={`flex w-full items-start gap-3 rounded-2xl p-3 text-right transition ${
@@ -411,7 +412,7 @@ const SubscriptionsBuilderSection = () => {
                         </span>
                       </div>
                     </div>
-                  </button>
+                  </Button>
                 );
               })}
             </div>

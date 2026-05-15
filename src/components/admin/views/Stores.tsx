@@ -45,9 +45,9 @@ export default function Stores() {
       <div className="px-4 lg:px-6 pt-2 pb-6 max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-4">
           <p className="text-[13px] text-foreground-secondary">إدارة المتاجر والعمولات</p>
-          <button onClick={() => setCreating(true)} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground flex items-center gap-1.5 press shadow-sm font-semibold text-[13px]">
+          <Button variant="ghost" onClick={() => setCreating(true)} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground flex items-center gap-1.5 press shadow-sm font-semibold text-[13px]">
             <Plus className="h-4 w-4" /> متجر جديد
-          </button>
+          </Button>
         </div>
 
         {items === null ? (
@@ -73,12 +73,12 @@ export default function Stores() {
                   </div>
                   <p className="text-[11px] text-foreground-tertiary num">{s.type} • عمولة {s.commission_pct}%</p>
                 </div>
-                <button onClick={() => setEditing(s)} className="h-9 w-9 rounded-lg bg-surface-muted flex items-center justify-center press">
+                <Button variant="ghost" onClick={() => setEditing(s)} className="h-9 w-9 rounded-lg bg-surface-muted flex items-center justify-center press">
                   <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={() => del(s)} className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press">
+                </Button>
+                <Button variant="ghost" onClick={() => del(s)} className="h-9 w-9 rounded-lg bg-destructive/10 text-destructive flex items-center justify-center press">
                   <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -146,11 +146,11 @@ function StoreEditor({ store, onClose, onSaved }: { store: Store | null; onClose
       <div className="bg-background w-full lg:max-w-md max-h-[92vh] overflow-y-auto rounded-t-3xl lg:rounded-3xl" onClick={(e) => e.stopPropagation()} dir="rtl">
         <div className="sticky top-0 bg-background/95 backdrop-blur px-5 py-3 border-b border-border/40 flex items-center justify-between">
           <h2 className="font-display text-[18px]">{isNew ? "متجر جديد" : "تعديل المتجر"}</h2>
-          <button onClick={onClose} className="h-9 w-9 rounded-full bg-surface-muted flex items-center justify-center press"><X className="h-4 w-4" /></button>
+          <Button variant="ghost" onClick={onClose} className="h-9 w-9 rounded-full bg-surface-muted flex items-center justify-center press"><X className="h-4 w-4" /></Button>
         </div>
         <div className="p-5 space-y-3">
-          <Field label="الاسم *"><input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} className={inp} /></Field>
-          <Field label="المعرّف (slug) *"><input value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} placeholder="store-name" className={inp} /></Field>
+          <Field label="الاسم *"><Input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} className={inp} /></Field>
+          <Field label="المعرّف (slug) *"><Input value={f.slug} onChange={(e) => setF({ ...f, slug: e.target.value })} placeholder="store-name" className={inp} /></Field>
           <Field label="النوع">
             <select value={f.type} onChange={(e) => setF({ ...f, type: e.target.value })} className={inp}>
               <option value="internal">داخلي</option>
@@ -159,23 +159,23 @@ function StoreEditor({ store, onClose, onSaved }: { store: Store | null; onClose
             </select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="الهاتف"><input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} className={inp + " num"} /></Field>
-            <Field label="العمولة %"><input type="number" step="0.01" value={f.commission_pct} onChange={(e) => setF({ ...f, commission_pct: Number(e.target.value) })} className={inp + " num text-right"} /></Field>
+            <Field label="الهاتف"><Input value={f.phone} onChange={(e) => setF({ ...f, phone: e.target.value })} className={inp + " num"} /></Field>
+            <Field label="العمولة %"><Input type="number" step="0.01" value={f.commission_pct} onChange={(e) => setF({ ...f, commission_pct: Number(e.target.value) })} className={inp + " num text-right"} /></Field>
           </div>
-          <Field label="العنوان"><input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} className={inp} /></Field>
-          <Field label="رابط الشعار"><input value={f.logo_url} onChange={(e) => setF({ ...f, logo_url: e.target.value })} className={inp} /></Field>
-          <button type="button" onClick={() => setF({ ...f, is_active: !f.is_active })} className="flex items-center gap-2 press">
+          <Field label="العنوان"><Input value={f.address} onChange={(e) => setF({ ...f, address: e.target.value })} className={inp} /></Field>
+          <Field label="رابط الشعار"><Input value={f.logo_url} onChange={(e) => setF({ ...f, logo_url: e.target.value })} className={inp} /></Field>
+          <Button variant="ghost" type="button" onClick={() => setF({ ...f, is_active: !f.is_active })} className="flex items-center gap-2 press">
             <span className={"w-10 h-6 rounded-full relative " + (f.is_active ? "bg-primary" : "bg-surface-muted border border-border/60")}>
               <span className={"absolute top-0.5 h-5 w-5 rounded-full bg-background shadow transition-all " + (f.is_active ? "right-0.5" : "right-[18px]")} />
             </span>
             <span className="text-[13px] font-semibold">نشط</span>
-          </button>
+          </Button>
         </div>
         <div className="sticky bottom-0 bg-background/95 backdrop-blur px-5 py-3 border-t border-border/40 flex gap-2">
-          <button onClick={onClose} className="flex-1 h-11 rounded-2xl bg-surface-muted text-[14px] font-semibold press">إلغاء</button>
-          <button onClick={save} disabled={saving} className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-[14px] font-semibold press flex items-center justify-center gap-2 disabled:opacity-50">
+          <Button variant="ghost" onClick={onClose} className="flex-1 h-11 rounded-2xl bg-surface-muted text-[14px] font-semibold press">إلغاء</Button>
+          <Button variant="ghost" onClick={save} disabled={saving} className="flex-1 h-11 rounded-2xl bg-primary text-primary-foreground text-[14px] font-semibold press flex items-center justify-center gap-2 disabled:opacity-50">
             {saving && <Loader2 className="h-4 w-4 animate-spin" />} حفظ
-          </button>
+          </Button>
         </div>
       </div>
     </div>

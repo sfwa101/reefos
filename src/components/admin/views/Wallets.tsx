@@ -14,6 +14,8 @@ import { fmtMoney, fmtNum, fmtRelative } from "@/lib/format";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Profile = ProfileSearchRow;
 type Topup = {
@@ -132,7 +134,7 @@ function TopupForm() {
         <>
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-            <input value={search} onChange={(e) => setSearch(e.target.value)}
+            <Input value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث عن عميل بالاسم أو الهاتف"
               className="w-full bg-surface-muted rounded-xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
@@ -140,7 +142,7 @@ function TopupForm() {
           {matches.length > 0 && (
             <div className="space-y-1.5 max-h-60 overflow-y-auto">
               {matches.map((m) => (
-                <button key={m.id} onClick={() => { setSelected(m); setSearch(""); setMatches([]); }}
+                <Button variant="ghost" key={m.id} onClick={() => { setSelected(m); setSearch(""); setMatches([]); }}
                   className="w-full flex items-center justify-between bg-surface-muted hover:bg-primary/5 rounded-xl p-3 text-right press">
                   <div>
                     <p className="text-[13.5px] font-semibold">{m.full_name ?? "بدون اسم"}</p>
@@ -148,7 +150,7 @@ function TopupForm() {
                       <Phone className="h-3 w-3" /> {m.phone ?? "—"}
                     </p>
                   </div>
-                </button>
+                </Button>
               ))}
             </div>
           )}
@@ -164,28 +166,28 @@ function TopupForm() {
               <p className="text-[10px] opacity-80">الرصيد</p>
               <p className="font-display text-[18px] num leading-none">{balance === null ? "…" : fmtMoney(balance)}</p>
             </div>
-            <button onClick={() => setSelected(null)} className="text-[11px] underline opacity-90">تغيير</button>
+            <Button variant="ghost" onClick={() => setSelected(null)} className="text-[11px] underline opacity-90">تغيير</Button>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <input type="number" inputMode="decimal" step="0.01" min="1" max="100000"
+            <Input type="number" inputMode="decimal" step="0.01" min="1" max="100000"
               value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="المبلغ"
               className="h-11 rounded-xl bg-surface-muted px-3 text-[15px] num text-right font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="رقم التحويل *"
+            <Input value={reference} onChange={(e) => setReference(e.target.value)} placeholder="رقم التحويل *"
               className="h-11 rounded-xl bg-surface-muted px-3 text-[13px] num text-right border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
           </div>
 
           <div className="grid grid-cols-4 gap-1.5">
             {METHODS.map((m) => (
-              <button key={m.v} onClick={() => setMethod(m.v)}
+              <Button variant="ghost" key={m.v} onClick={() => setMethod(m.v)}
                 className={cn("h-9 rounded-xl text-[11px] font-semibold press border",
                   method === m.v ? "border-primary bg-primary text-primary-foreground" : `border-border/40 ${m.color}`)}>
                 {m.l}
-              </button>
+              </Button>
             ))}
           </div>
 
-          <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ملاحظة (اختياري)"
+          <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ملاحظة (اختياري)"
             className="w-full h-10 rounded-xl bg-surface-muted px-3 text-[12.5px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
 
           {reference.length > 0 && reference.trim().length < 4 && (
@@ -194,11 +196,11 @@ function TopupForm() {
             </p>
           )}
 
-          <button onClick={handleTopup} disabled={!valid || submitting}
+          <Button variant="ghost" onClick={handleTopup} disabled={!valid || submitting}
             className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold text-[14px] press disabled:opacity-40 flex items-center justify-center gap-2">
             {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
             {submitting ? "جارٍ الشحن…" : `شحن ${amount ? fmtMoney(Number(amount)) : "—"}`}
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -280,16 +282,16 @@ function AdjustPanel() {
       </div>
 
       <div className="grid grid-cols-2 gap-1.5">
-        <button onClick={() => setMode("adjust")}
+        <Button variant="ghost" onClick={() => setMode("adjust")}
           className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
             mode === "adjust" ? "border-primary bg-primary text-primary-foreground" : "border-border/40 bg-surface-muted")}>
           تسوية يدوية
-        </button>
-        <button onClick={() => setMode("reverse")}
+        </Button>
+        <Button variant="ghost" onClick={() => setMode("reverse")}
           className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
             mode === "reverse" ? "border-primary bg-primary text-primary-foreground" : "border-border/40 bg-surface-muted")}>
           إلغاء قيد
-        </button>
+        </Button>
       </div>
 
       {mode === "adjust" ? (
@@ -297,14 +299,14 @@ function AdjustPanel() {
           <>
             <div className="relative">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)}
+              <Input value={search} onChange={(e) => setSearch(e.target.value)}
                 placeholder="ابحث عن عميل بالاسم أو الهاتف"
                 className="w-full bg-surface-muted rounded-xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
             </div>
             {matches.length > 0 && (
               <div className="space-y-1.5 max-h-60 overflow-y-auto">
                 {matches.map((m) => (
-                  <button key={m.id} onClick={() => { setSelected(m); setSearch(""); setMatches([]); }}
+                  <Button variant="ghost" key={m.id} onClick={() => { setSelected(m); setSearch(""); setMatches([]); }}
                     className="w-full flex items-center justify-between bg-surface-muted hover:bg-primary/5 rounded-xl p-3 text-right press">
                     <div>
                       <p className="text-[13.5px] font-semibold">{m.full_name ?? "بدون اسم"}</p>
@@ -312,7 +314,7 @@ function AdjustPanel() {
                         <Phone className="h-3 w-3" /> {m.phone ?? "—"}
                       </p>
                     </div>
-                  </button>
+                  </Button>
                 ))}
               </div>
             )}
@@ -324,46 +326,46 @@ function AdjustPanel() {
                 <p className="text-[12.5px] font-semibold">{selected.full_name ?? "بدون اسم"}</p>
                 <p className="num text-[11px] text-foreground-tertiary">{selected.phone ?? "—"}</p>
               </div>
-              <button onClick={() => setSelected(null)} className="text-[11px] underline">تغيير</button>
+              <Button variant="ghost" onClick={() => setSelected(null)} className="text-[11px] underline">تغيير</Button>
             </div>
             <div className="grid grid-cols-2 gap-1.5">
-              <button onClick={() => setKind("credit")}
+              <Button variant="ghost" onClick={() => setKind("credit")}
                 className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
                   kind === "credit" ? "border-success bg-success text-success-foreground" : "border-border/40 bg-success/10 text-success")}>
                 إيداع (Credit)
-              </button>
-              <button onClick={() => setKind("debit")}
+              </Button>
+              <Button variant="ghost" onClick={() => setKind("debit")}
                 className={cn("h-9 rounded-xl text-[12px] font-semibold press border",
                   kind === "debit" ? "border-destructive bg-destructive text-destructive-foreground" : "border-border/40 bg-destructive/10 text-destructive")}>
                 خصم (Debit)
-              </button>
+              </Button>
             </div>
-            <input type="number" inputMode="decimal" min="1" max="1000000" value={amount}
+            <Input type="number" inputMode="decimal" min="1" max="1000000" value={amount}
               onChange={(e) => setAmount(e.target.value)} placeholder="المبلغ"
               className="w-full h-11 rounded-xl bg-surface-muted px-3 text-[15px] num text-right font-semibold border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="وصف القيد (3-200 حرف) *"
+            <Input value={label} onChange={(e) => setLabel(e.target.value)} placeholder="وصف القيد (3-200 حرف) *"
               className="w-full h-10 rounded-xl bg-surface-muted px-3 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ملاحظة (اختياري)"
+            <Input value={note} onChange={(e) => setNote(e.target.value)} placeholder="ملاحظة (اختياري)"
               className="w-full h-10 rounded-xl bg-surface-muted px-3 text-[12.5px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-            <button onClick={handleAdjust} disabled={busy || !amount || label.trim().length < 3}
+            <Button variant="ghost" onClick={handleAdjust} disabled={busy || !amount || label.trim().length < 3}
               className="w-full h-11 rounded-2xl bg-primary text-primary-foreground font-bold text-[14px] press disabled:opacity-40 flex items-center justify-center gap-2">
               {busy && <Loader2 className="h-4 w-4 animate-spin" />}
               {busy ? "جارٍ التنفيذ…" : (kind === "credit" ? `إيداع ${amount ? fmtMoney(Number(amount)) : "—"}` : `خصم ${amount ? fmtMoney(Number(amount)) : "—"}`)}
-            </button>
+            </Button>
           </>
         )
       ) : (
         <>
-          <input value={entryId} onChange={(e) => setEntryId(e.target.value)} placeholder="معرف العملية (UUID)"
+          <Input value={entryId} onChange={(e) => setEntryId(e.target.value)} placeholder="معرف العملية (UUID)"
             className="w-full h-11 rounded-xl bg-surface-muted px-3 text-[12px] num border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
           <textarea value={reason} onChange={(e) => setReason(e.target.value)}
             placeholder="سبب الإلغاء (3-300 حرف) *" rows={2}
             className="w-full rounded-xl bg-surface-muted px-3 py-2 text-[13px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30" />
-          <button onClick={handleReverse} disabled={busy}
+          <Button variant="ghost" onClick={handleReverse} disabled={busy}
             className="w-full h-11 rounded-2xl bg-destructive text-destructive-foreground font-bold text-[14px] press disabled:opacity-40 flex items-center justify-center gap-2">
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             {busy ? "جارٍ الإلغاء…" : "إلغاء القيد"}
-          </button>
+          </Button>
           <p className="text-[10.5px] text-foreground-tertiary">
             ملاحظة: هذه الأداة تلغي قيد محفظة (wallet_transactions) عبر إنشاء قيد عكسي مساوٍ.
           </p>

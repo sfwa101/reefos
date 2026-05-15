@@ -28,6 +28,8 @@ import {
   type USAGenesisPayload,
 } from "@/core/hakim-ai/hooks/useVisionGenesis";
 import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Stage = "idle" | "cleaning" | "describing" | "publishing" | "done";
 
@@ -230,13 +232,13 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
               </DialogDescription>
             </div>
           </div>
-          <button
+          <Button variant="ghost"
             onClick={() => onOpenChange(false)}
             className="h-9 w-9 rounded-xl hover:bg-surface-muted flex items-center justify-center press"
             aria-label="إغلاق"
           >
             <X className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
 
         {/* Split body */}
@@ -252,7 +254,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
             />
 
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <Button variant="ghost"
                 type="button"
                 disabled={!primaryFile || busy}
                 onClick={runClean}
@@ -265,8 +267,8 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
               >
                 {cleaning ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Wand2 className="h-3.5 w-3.5" />}
                 ✨ تنظيف
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 type="button"
                 disabled={!primaryFile || busy}
                 onClick={runAnalyze}
@@ -279,7 +281,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
               >
                 {describing ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Brain className="h-3.5 w-3.5" />}
                 🤖 تحليل
-              </button>
+              </Button>
             </div>
 
             <div className="grid grid-cols-2 gap-2 pt-2">
@@ -319,7 +321,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
           <section className="overflow-y-auto p-6 space-y-5">
             <FieldGroup title="الأساسيات">
               <Field label="اسم المنتج" ai={aiFilled.has("name")}>
-                <input
+                <Input
                   value={name}
                   onChange={(e) => { setName(e.target.value); clearAI("name"); }}
                   placeholder="مثال: زيت زيتون عضوي 500مل"
@@ -336,7 +338,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                 />
               </Field>
               <Field label="التصنيف" ai={aiFilled.has("category")}>
-                <input
+                <Input
                   value={category}
                   onChange={(e) => { setCategory(e.target.value); clearAI("category"); }}
                   placeholder="غذاء، ملابس، إلكترونيات…"
@@ -348,7 +350,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
             <FieldGroup title="المالية">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="التكلفة (ج.م)" ai={aiFilled.has("cost")}>
-                  <input
+                  <Input
                     type="number" step="0.01"
                     value={cost}
                     onChange={(e) => { setCost(Number(e.target.value)); clearAI("cost"); }}
@@ -356,7 +358,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                   />
                 </Field>
                 <Field label="السعر (ج.م)" ai={aiFilled.has("price")}>
-                  <input
+                  <Input
                     type="number" step="0.01"
                     value={price}
                     onChange={(e) => { setPrice(Number(e.target.value)); clearAI("price"); }}
@@ -364,7 +366,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                   />
                 </Field>
                 <Field label="خصم (%)" ai={aiFilled.has("discount")}>
-                  <input
+                  <Input
                     type="number" step="1" min={0} max={100}
                     value={discount}
                     onChange={(e) => { setDiscount(Number(e.target.value)); clearAI("discount"); }}
@@ -372,7 +374,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                   />
                 </Field>
                 <Field label="رمز الضريبة" ai={aiFilled.has("taxCode")}>
-                  <input
+                  <Input
                     value={taxCode}
                     onChange={(e) => { setTaxCode(e.target.value); clearAI("taxCode"); }}
                     className="w-full bg-transparent outline-none text-[13px]"
@@ -384,7 +386,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
             <FieldGroup title="اللوجستيات">
               <div className="grid grid-cols-2 gap-3">
                 <Field label="SKU" ai={aiFilled.has("sku")}>
-                  <input
+                  <Input
                     value={sku}
                     onChange={(e) => { setSku(e.target.value); clearAI("sku"); }}
                     placeholder="auto"
@@ -392,14 +394,14 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                   />
                 </Field>
                 <Field label="الباركود" ai={aiFilled.has("barcode")}>
-                  <input
+                  <Input
                     value={barcode}
                     onChange={(e) => { setBarcode(e.target.value); clearAI("barcode"); }}
                     className="w-full bg-transparent outline-none text-[13px] font-mono"
                   />
                 </Field>
                 <Field label="الوزن (كجم)" ai={aiFilled.has("weight")}>
-                  <input
+                  <Input
                     type="number" step="0.001"
                     value={weight}
                     onChange={(e) => { setWeight(Number(e.target.value)); clearAI("weight"); }}
@@ -407,7 +409,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
                   />
                 </Field>
                 <Field label="الأبعاد (س×ع×ع)" ai={aiFilled.has("dimensions")}>
-                  <input
+                  <Input
                     value={dimensions}
                     onChange={(e) => { setDimensions(e.target.value); clearAI("dimensions"); }}
                     placeholder="20×10×5"
@@ -427,13 +429,13 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
               : <>لن يُلمس شيء بدون أمرك. اضغط <span className="font-semibold">تحليل</span> لتفعيل حكيم.</>}
           </div>
           <div className="flex items-center gap-2">
-            <button
+            <Button variant="ghost"
               onClick={() => onOpenChange(false)}
               className="h-10 px-4 rounded-2xl text-[12.5px] font-semibold press hover:bg-surface-muted"
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               type="button"
               onClick={publish}
               disabled={busy || done || !name.trim() || price <= 0}
@@ -447,7 +449,7 @@ export function SmartProductComposer({ open, onOpenChange, onPublished }: SmartP
               {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
               {done && <CheckCircle2 className="h-4 w-4" />}
               {done ? "تم النشر" : "تأكيد ونشر"}
-            </button>
+            </Button>
           </div>
         </div>
       </DialogContent>
@@ -502,14 +504,14 @@ function PrimarySlot({
         </div>
       )}
       {url && !busy && (
-        <button
+        <Button variant="ghost"
           type="button"
           onClick={(e) => { e.stopPropagation(); onClear(); }}
           className="absolute top-2 left-2 h-7 w-7 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
           aria-label="حذف"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -548,14 +550,14 @@ function SecondarySlot({
         </div>
       )}
       {url && (
-        <button
+        <Button variant="ghost"
           type="button"
           onClick={(e) => { e.stopPropagation(); onClear(); }}
           className="absolute top-1 left-1 h-6 w-6 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
           aria-label="حذف"
         >
           <X className="h-3 w-3" />
-        </button>
+        </Button>
       )}
     </div>
   );

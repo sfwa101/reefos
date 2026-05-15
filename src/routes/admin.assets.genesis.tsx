@@ -26,6 +26,8 @@ import {
   useVisionGenesis, type USAGenesisPayload,
 } from "@/core/hakim-ai/hooks/useVisionGenesis";
 import { useMintUSA } from "@/core/hakim-ai/hooks/useMintUSA";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/admin/assets/genesis")({
   component: GenesisPage,
@@ -257,13 +259,13 @@ function GenesisPage() {
       {/* Header */}
       <header className="sticky top-0 z-20 bg-card/95 backdrop-blur border-b border-border/50">
         <div className="mx-auto max-w-2xl px-4 py-3 flex items-center justify-between">
-          <button
+          <Button variant="ghost"
             onClick={() => navigate({ to: "/admin/assets" })}
             className="h-10 w-10 rounded-xl hover:bg-surface-muted flex items-center justify-center press"
             aria-label="رجوع"
           >
             <ArrowRight className="h-5 w-5" />
-          </button>
+          </Button>
           <div className="text-center">
             <h1 className="font-display text-[16px] leading-tight flex items-center gap-1.5 justify-center">
               <Sparkles className="h-4 w-4 text-primary" />
@@ -292,7 +294,7 @@ function GenesisPage() {
           />
           {primaryFile && !hasDraft && (
             <div className="grid grid-cols-2 gap-2">
-              <button
+              <Button variant="ghost"
                 type="button" disabled={busy} onClick={() => runClean()}
                 className={cn(
                   "h-12 rounded-2xl text-[12.5px] font-semibold press transition-base",
@@ -302,8 +304,8 @@ function GenesisPage() {
               >
                 {cleaning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                 ✨ تنظيف
-              </button>
-              <button
+              </Button>
+              <Button variant="ghost"
                 type="button" disabled={busy} onClick={runAnalyze}
                 className={cn(
                   "h-12 rounded-2xl text-[13px] font-semibold press transition-base",
@@ -313,7 +315,7 @@ function GenesisPage() {
               >
                 {describing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Brain className="h-4 w-4" />}
                 🤖 استخراج DNA
-              </button>
+              </Button>
             </div>
           )}
 
@@ -346,7 +348,7 @@ function GenesisPage() {
 
             <DnaGroup title="الهوية">
               <DnaField label="الاسم" ai={aiFields.has("name")}>
-                <input
+                <Input
                   value={name}
                   onChange={(e) => { setName(e.target.value); clearAi("name"); }}
                   className="w-full bg-transparent outline-none text-[15px] font-display"
@@ -362,14 +364,14 @@ function GenesisPage() {
               </DnaField>
               <div className="grid grid-cols-2 gap-2">
                 <DnaField label="التصنيف" ai={aiFields.has("category")}>
-                  <input
+                  <Input
                     value={category}
                     onChange={(e) => { setCategory(e.target.value); clearAi("category"); }}
                     className="w-full bg-transparent outline-none text-[12.5px]"
                   />
                 </DnaField>
                 <DnaField label="الماركة" ai={aiFields.has("brand")}>
-                  <input
+                  <Input
                     value={brand}
                     onChange={(e) => { setBrand(e.target.value); clearAi("brand"); }}
                     className="w-full bg-transparent outline-none text-[12.5px]"
@@ -377,7 +379,7 @@ function GenesisPage() {
                 </DnaField>
               </div>
               <DnaField label="بلد المنشأ" ai={aiFields.has("origin")}>
-                <input
+                <Input
                   value={origin}
                   onChange={(e) => { setOrigin(e.target.value); clearAi("origin"); }}
                   className="w-full bg-transparent outline-none text-[12.5px]"
@@ -444,7 +446,7 @@ function GenesisPage() {
                       <option value="l">لتر</option>
                     </select>
                   </div>
-                  <button
+                  <Button variant="ghost"
                     type="button"
                     onClick={() => setApproxWeight((v) => !v)}
                     className={cn(
@@ -456,11 +458,11 @@ function GenesisPage() {
                     aria-pressed={approxWeight}
                   >
                     {approxWeight ? "≈ وزن تقريبي" : "وزن تقريبي؟"}
-                  </button>
+                  </Button>
                 </DnaField>
               </div>
               <DnaField label="مسببات الحساسية" ai={aiFields.has("allergens")}>
-                <input
+                <Input
                   value={allergens}
                   onChange={(e) => { setAllergens(e.target.value); clearAi("allergens"); }}
                   placeholder="جلوتين، حليب، مكسرات…"
@@ -471,7 +473,7 @@ function GenesisPage() {
 
             <DnaGroup title="التسويق">
               <DnaField label="عبارة قصيرة" ai={aiFields.has("marketingShort")}>
-                <input
+                <Input
                   value={marketingShort}
                   onChange={(e) => { setMarketingShort(e.target.value); clearAi("marketingShort"); }}
                   className="w-full bg-transparent outline-none text-[13px]"
@@ -512,14 +514,14 @@ function GenesisPage() {
       >
         <div className="mx-auto max-w-2xl px-4 py-3">
           <div className="flex items-center gap-2">
-            <button
+            <Button variant="ghost"
               onClick={() => navigate({ to: "/admin/assets" })}
               disabled={busy}
               className="h-12 px-4 rounded-2xl text-[12.5px] font-semibold press hover:bg-surface-muted disabled:opacity-40"
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               onClick={() => setEditMode(true)}
               disabled={busy || (!hasDraft && !primaryFile)}
               className={cn(
@@ -529,8 +531,8 @@ function GenesisPage() {
               )}
             >
               تعديل
-            </button>
-            <button
+            </Button>
+            <Button variant="ghost"
               onClick={approve}
               disabled={busy || done || !canApprove}
               className={cn(
@@ -543,7 +545,7 @@ function GenesisPage() {
               {publishing && <Loader2 className="h-4 w-4 animate-spin" />}
               {done ? <CheckCircle2 className="h-4 w-4" /> : null}
               {done ? "تم الاعتماد" : "اعتماد ونشر"}
-            </button>
+            </Button>
           </div>
           {!hasDraft && (
             <p className="text-[10.5px] text-foreground-tertiary text-center mt-2">
@@ -605,13 +607,13 @@ function CaptureZone({
           </div>
         )}
         {url && !busy && (
-          <button
+          <Button variant="ghost"
             onClick={onClear}
             className="absolute top-2 left-2 h-9 w-9 rounded-full bg-card/95 border border-border/60 flex items-center justify-center press"
             aria-label="حذف"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         )}
       </div>
 
@@ -625,18 +627,18 @@ function CaptureZone({
             ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />
-          <button
+          <Button variant="ghost"
             type="button" onClick={() => galleryRef.current?.click()}
             className="h-12 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[12.5px] font-semibold press flex items-center justify-center gap-2"
           >
             <ImagePlus className="h-4 w-4" /> من المعرض
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             type="button" onClick={() => cameraRef.current?.click()}
             className="h-12 rounded-2xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[12.5px] font-semibold press flex items-center justify-center gap-2"
           >
             <Camera className="h-4 w-4" /> الكاميرا
-          </button>
+          </Button>
         </div>
       )}
     </div>
@@ -695,7 +697,7 @@ function NumInput({
     lastSeen.current = value;
   }
   return (
-    <input
+    <Input
       type="number"
       step={step}
       inputMode="decimal"
@@ -735,7 +737,7 @@ function PaletteVetoBar({
         <span className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary font-semibold">
           خلفية الأصل · حق النقض البصري
         </span>
-        <button
+        <Button variant="ghost"
           type="button" disabled={busy || !selected}
           onClick={onRegenerate}
           className={cn(
@@ -746,13 +748,13 @@ function PaletteVetoBar({
         >
           <Wand2 className="h-3 w-3" />
           إعادة توليد الخلفية
-        </button>
+        </Button>
       </div>
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
         {palettes.map((p) => {
           const active = selected?.name === p.name;
           return (
-            <button
+            <Button variant="ghost"
               key={p.name}
               type="button"
               onClick={() => onSelect(p)}
@@ -768,7 +770,7 @@ function PaletteVetoBar({
               {active && (
                 <CheckCircle2 className="h-4 w-4 text-primary absolute -top-1 -right-1 bg-card rounded-full" />
               )}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -796,13 +798,13 @@ function SecondaryCaptureZone({
           </p>
         </div>
         {url && !busy && (
-          <button
+          <Button variant="ghost"
             onClick={onClear}
             className="h-8 w-8 rounded-full bg-card border border-border/60 flex items-center justify-center press"
             aria-label="حذف"
           >
             <X className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         )}
       </div>
       {url ? (
@@ -819,18 +821,18 @@ function SecondaryCaptureZone({
             ref={cameraRef} type="file" accept="image/*" capture="environment" className="hidden"
             onChange={(e) => onFile(e.target.files?.[0])}
           />
-          <button
+          <Button variant="ghost"
             type="button" disabled={busy} onClick={() => galleryRef.current?.click()}
             className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
           >
             <ImagePlus className="h-3.5 w-3.5" /> من المعرض
-          </button>
-          <button
+          </Button>
+          <Button variant="ghost"
             type="button" disabled={busy} onClick={() => cameraRef.current?.click()}
             className="h-10 rounded-xl bg-foreground/5 hover:bg-foreground/10 border border-border/50 text-[11.5px] font-semibold press flex items-center justify-center gap-1.5 disabled:opacity-40"
           >
             <Camera className="h-3.5 w-3.5" /> الكاميرا
-          </button>
+          </Button>
         </div>
       )}
     </div>
