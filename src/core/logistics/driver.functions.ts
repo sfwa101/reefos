@@ -139,3 +139,140 @@ export const resolveDriverIdFn = createServerFn({ method: "GET" })
     }
     return { driverId: null };
   });
+
+/* ─────────────────────────── Duty Toggle (Wave D-1.A) ─────────────────────────── */
+
+export type DriverShiftRow = {
+  id: string;
+  driver_id: string;
+  started_at: string;
+  ended_at: string | null;
+};
+
+type ShiftQuery = {
+  from: (t: string) => {
+    select: (s: string) => {
+      eq: (c: string, v: string) => {
+        is: (c: string, v: null) => {
+          order: (c: string, opts: { ascending: boolean }) => {
+            limit: (n: number) => {
+              maybeSingle: () => Promise<{
+                data: DriverShiftRow | null;
+                error: { message: string } | null;
+              }>;
+            };
+          };
+        };
+      };
+    };
+    insert: (v: Record<string, unknown>) => {
+      select: (s: string) => {
+        single: () => Promise<{
+          data: DriverShiftRow | null;
+          error: { message: string } | null;
+        }>;
+      };
+    };
+    update: (v: Record<string, unknown>) => {
+      eq: (c: string, v: string) => Promise<{
+        error: { message: string } | null;
+      }>;
+    };
+  };
+};
+
+async function resolveDriverId(
+  supabase: unknown,
+  userId: string,
+): Promise<string> {
+  const { data, error } = await (
+    supabase as {
+      from: (t: string) => {
+        select: (s: string) => {
+          eq: (c: string, v: string) => {
+            maybeSingle: () => Promise<{
+              data: { id: string } | null;
+              error: { message: string } | null;
+            }>;
+          };
+        };
+      };
+    }
+  )
+    .from("drivers")
+    .select("id")
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) throw new Error(error.message);
+  if (!data?.id) throw new Error("driver_not_linked");
+  return data.id;
+}
+
+export const getActiveDriverShiftFn = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<DriverShiftRow | null> => {
+    const { supabase, userId } = context;
+    const driverId = await resolveDriverId(supabase, userId);
+    const { data, error } = await (supabase as unknown as ShiftQuery)
+      .from("salsabil_driver_shifts")
+      .select("id,driver_id,started_at,ended_at")
+      .eq("driver_id", driverId)
+      .is("ended_at", null)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    return data;
+  });
+
+export const startDriverShiftFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<DriverShiftRow> => {
+    const { supabase, userId } = context;
+    const driverId = await resolveDriverId(supabase, userId);
+
+    // Idempotent: return existing open shift if any.
+    const { data: existing } = await (supabase as unknown as ShiftQuery)
+      .from("salsabil_driver_shifts")
+      .select("id,driver_id,started_at,ended_at")
+      .eq("driver_id", driverId)
+      .is("ended_at", null)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (existing) return existing;
+
+    const { data, error } = await (supabase as unknown as ShiftQuery)
+      .from("salsabil_driver_shifts")
+      .insert({ driver_id: driverId })
+      .select("id,driver_id,started_at,ended_at")
+      .single();
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("shift_insert_failed");
+    return data;
+  });
+
+export const endDriverShiftFn = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<{ ok: true; ended: number }> => {
+    const { supabase, userId } = context;
+    const driverId = await resolveDriverId(supabase, userId);
+
+    const { data: open } = await (supabase as unknown as ShiftQuery)
+      .from("salsabil_driver_shifts")
+      .select("id,driver_id,started_at,ended_at")
+      .eq("driver_id", driverId)
+      .is("ended_at", null)
+      .order("started_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (!open) return { ok: true as const, ended: 0 };
+
+    const { error } = await (supabase as unknown as ShiftQuery)
+      .from("salsabil_driver_shifts")
+      .update({ ended_at: new Date().toISOString() })
+      .eq("id", open.id);
+    if (error) throw new Error(error.message);
+    return { ok: true as const, ended: 1 };
+  });
