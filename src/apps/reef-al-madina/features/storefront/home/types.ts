@@ -31,11 +31,6 @@ export type Bundle = {
   badge: string;
 };
 
-export type SortId =
-  | "relevance"
-  | "price-asc"
-  | "price-desc"
-  | "rating"
-  | "discount";
-
-export type FulfillmentFilter = "all" | "instant" | "preorder";
+// Sort + fulfillment filter axes are owned by the kernel contract
+// (Constitution v5.1 Article 2). Re-exported here for app-side ergonomics.
+export type { SortId, FulfillmentFilter } from "@/core/contracts/home-orchestrator";
