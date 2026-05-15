@@ -305,6 +305,7 @@ export function AdminShell() {
 
       <AdminBottomNav activePath={activePath} />
       <HakimFloatingLauncher />
+      <HakimLayer />
     </div>
   );
 }
