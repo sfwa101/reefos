@@ -594,6 +594,7 @@ export type CatalogQueryRow = {
       availability_data: Record<string, unknown> | null;
     }> | null;
   }> | null;
+  salsabil_packaging_tiers?: RawPackagingTier[] | null;
 };
 
 const QUERY_FULL_SELECT = `
@@ -602,7 +603,8 @@ const QUERY_FULL_SELECT = `
     id, sku_code, attributes, sort_order, is_active,
     salsabil_financial_contracts ( base_price, currency ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 `;
 
 const QUERY_MINIMAL_SELECT = `
@@ -611,7 +613,8 @@ const QUERY_MINIMAL_SELECT = `
     id, sku_code, attributes, sort_order, is_active,
     salsabil_financial_contracts ( base_price, currency ),
     salsabil_inventory_matrix ( availability_data )
-  )
+  ),
+  salsabil_packaging_tiers ( ${PACKAGING_TIER_FIELDS} )
 `;
 
 /** Full catalog snapshot (heavy `media` included) for the SWR-cached grid. */
