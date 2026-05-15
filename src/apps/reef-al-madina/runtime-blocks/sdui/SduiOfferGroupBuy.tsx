@@ -9,8 +9,8 @@ import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Users } from "lucide-react";
-import { AmanahLockShield } from "./AmanahLockShield";
-import type { SduiOfferGroupBuyBlock } from "./schemas";
+import { AmanahLockShield } from "@/core/runtime-ui/sdui/blocks/offers/AmanahLockShield";
+import type { SduiOfferGroupBuyBlock } from "@/core/runtime-ui/sdui/blocks/offers/schemas";
 
 export const SduiOfferGroupBuy = ({ block }: { block: SduiOfferGroupBuyBlock }) => {
   const { title, subtitle, campaign_id, honest_margin, amanah_lock, allow_fakka_roundup } =

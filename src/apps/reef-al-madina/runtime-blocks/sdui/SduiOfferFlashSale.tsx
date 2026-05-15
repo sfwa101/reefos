@@ -9,8 +9,8 @@ import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
 import { products } from "@/core/catalog/runtime/legacyRuntime";
 import { useSovereignPrayerStore } from "@/core/spirit/useSovereignPrayer";
-import { AmanahLockShield } from "./AmanahLockShield";
-import type { SduiOfferFlashSaleBlock } from "./schemas";
+import { AmanahLockShield } from "@/core/runtime-ui/sdui/blocks/offers/AmanahLockShield";
+import type { SduiOfferFlashSaleBlock } from "@/core/runtime-ui/sdui/blocks/offers/schemas";
 
 export const SduiOfferFlashSale = ({ block }: { block: SduiOfferFlashSaleBlock }) => {
   const { title, subtitle, honest_margin, amanah_lock, allow_fakka_roundup } = block.props;

@@ -14,8 +14,8 @@ import { RuntimeUIGateway } from "@/core/runtime-ui/gateway/RuntimeUIGateway";
 import { useAuth } from "@/context/AuthContext";
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
-import { AmanahLockShield } from "./AmanahLockShield";
-import type { SduiOfferNeighborhoodPoolBlock } from "./schemas";
+import { AmanahLockShield } from "@/core/runtime-ui/sdui/blocks/offers/AmanahLockShield";
+import type { SduiOfferNeighborhoodPoolBlock } from "@/core/runtime-ui/sdui/blocks/offers/schemas";
 
 type NeighborState = { city: string | null; count: number };
 

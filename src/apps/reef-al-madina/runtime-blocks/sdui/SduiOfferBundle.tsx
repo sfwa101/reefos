@@ -6,8 +6,8 @@ import BundleDealsRail, { type BundleDeal } from "@/apps/reef-al-madina/features
 import HonestMarginBadge from "@/apps/reef-al-madina/features/offers/components/HonestMarginBadge";
 import FakkaRoundupToggle from "@/apps/reef-al-madina/features/offers/components/FakkaRoundupToggle";
 import EitharToggle from "@/apps/reef-al-madina/features/offers/components/EitharToggle";
-import { AmanahLockShield } from "./AmanahLockShield";
-import type { SduiOfferBundleBlock } from "./schemas";
+import { AmanahLockShield } from "@/core/runtime-ui/sdui/blocks/offers/AmanahLockShield";
+import type { SduiOfferBundleBlock } from "@/core/runtime-ui/sdui/blocks/offers/schemas";
 
 export const SduiOfferBundle = ({ block }: { block: SduiOfferBundleBlock }) => {
   const { title, honest_margin, amanah_lock, allow_fakka_roundup } = block.props;
