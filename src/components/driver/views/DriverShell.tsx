@@ -14,8 +14,9 @@ export default function DriverShell() {
   return (
     <RoleGuard roles={["delivery", "admin"]}>
       <div dir="rtl" className="min-h-screen bg-background pb-20">
-        <header className="sticky top-0 z-30 bg-surface border-b border-border/40 px-4 py-3">
+        <header className="sticky top-0 z-30 bg-surface border-b border-border/40 px-4 py-3 flex items-center justify-between gap-3">
           <h1 className="font-display text-[18px]">بوابة المندوب</h1>
+          <DutyToggle />
         </header>
         <main className="p-4 max-w-2xl mx-auto"><Outlet /></main>
         <IncomingOfferModal />
