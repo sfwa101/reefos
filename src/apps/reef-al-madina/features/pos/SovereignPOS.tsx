@@ -123,7 +123,7 @@ export default function SovereignPOS() {
                     {customer.profile?.full_name ?? "عميل تيسير"}
                   </p>
                   <p className="truncate text-[11px] text-foreground/60 tabular-nums">
-                    {customer.profile?.phone ?? "—"} · {customer.tier ?? "guest"}
+                    {customer.profile?.phone ?? "—"}
                   </p>
                 </div>
                 <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-[12px] font-bold text-primary tabular-nums">
@@ -412,7 +412,7 @@ function WalletLookupDialog({
                       {w.profile?.full_name ?? "عميل تيسير"}
                     </p>
                     <p className="truncate text-[11px] text-foreground/60 tabular-nums">
-                      {w.profile?.phone ?? "—"} · {w.tier ?? "guest"}
+                      {w.profile?.phone ?? "—"}
                     </p>
                   </div>
                   <span className="rounded-xl bg-primary/10 px-2.5 py-1 text-[12px] font-bold tabular-nums text-primary">
