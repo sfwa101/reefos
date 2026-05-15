@@ -86,7 +86,14 @@ export const useCartCalculations = ({
           note: l.meta?.bookingNote,
         },
       });
-      buckets[t].subtotal += (l.capturedPrice ?? l.product.price) * l.qty;
+      // Wave P-1.3 — engine-authoritative line subtotal (no manual math).
+      buckets[t].subtotal += evaluateCartLineCanonical({
+        productId: l.product.id,
+        product: l.product,
+        qty: l.qty,
+        meta: l.meta,
+        capturedPrice: l.capturedPrice,
+      } as never).breakdown.lineTotal;
     }
     return buckets;
   }, [lines]);
@@ -104,8 +111,14 @@ export const useCartCalculations = ({
           fulfillmentTypeFor(l.product.id, l.product.subCategory) === "C",
       )
       .map((l) => {
-        const unit = l.meta?.unitPrice ?? l.capturedPrice ?? l.product.price;
-        const sub = unit * l.qty;
+        // Wave P-1.3 — engine-authoritative subtotal.
+        const sub = evaluateCartLineCanonical({
+          productId: l.product.id,
+          product: l.product,
+          qty: l.qty,
+          meta: l.meta,
+          capturedPrice: l.capturedPrice,
+        } as never).breakdown.lineTotal;
         const lineRequired = sub >= DEPOSIT_THRESHOLD;
         const wantsDeposit = lineRequired || (l.meta?.payDeposit ?? true);
         return {
