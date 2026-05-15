@@ -8,7 +8,6 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  Boxes,
   PackagePlus,
   Receipt,
   Truck,
@@ -76,8 +75,7 @@ export default function ErpMutations() {
       <SectionHeader
         eyebrow="ترسانة المُدخلات"
         title="مركز الإنشاء السيادي"
-        subtitle="من هنا يبدأ كل قيد جديد في حضارة Reef Al Madina الرقمية."
-        icon={Boxes}
+        description="من هنا يبدأ كل قيد جديد في حضارة Reef Al Madina الرقمية."
       />
 
       <section className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
