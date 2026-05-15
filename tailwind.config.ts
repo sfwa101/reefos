@@ -8,6 +8,12 @@ export default {
   content: ["./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
+      fontFamily: {
+        // WAVE UI-4 — Steel Glass typography stack.
+        display: ["Outfit", "Tajawal", "system-ui", "sans-serif"],
+        body: ["Figtree", "Tajawal", "system-ui", "sans-serif"],
+        arabic: ["Tajawal", "Cairo", "system-ui", "sans-serif"],
+      },
       colors: {
         tayseer: {
           night: "#0A0F1A",
