@@ -92,7 +92,7 @@ export const copyTextToClipboard = async (text: string): Promise<boolean> => {
       return true;
     }
   } catch (e) {
-    Tracer.warn("whatsapp", "clipboard_api_failed", e);
+    Tracer.warn("whatsapp", "clipboard_api_failed", { error: String(e) });
   }
   try {
     const ta = document.createElement("textarea");
