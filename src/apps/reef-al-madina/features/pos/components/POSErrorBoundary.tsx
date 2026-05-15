@@ -9,6 +9,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   readonly children: ReactNode;
@@ -52,13 +53,13 @@ export class POSErrorBoundary extends Component<Props, State> {
           نظام نقطة البيع لا يزال يعمل. يمكنك إعادة تحميل هذه اللوحة دون
           فقدان حالة الورديّة أو السلة.
         </p>
-        <button
+        <Button
           type="button"
           onClick={this.reset}
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[12px] font-semibold press"
         >
           <RefreshCcw className="h-4 w-4" /> إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }

@@ -10,6 +10,8 @@ import {
   supermarketTaxonomy,
 } from "@/lib/supermarketTaxonomy";
 import { volumeDealFor } from "@/core/commerce/pricing/volumeDeals";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 interface DualNavStoreProps {
   themeKey: StoreThemeKey;
@@ -140,7 +142,7 @@ const DualNavStore = ({
       {/* Search */}
       <div className="glass mb-3 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-soft">
         <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
-        <input
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={searchPlaceholder}
@@ -184,7 +186,7 @@ const DualNavStore = ({
                   const isActive = g.id === activeGroup.id;
                   const enabled = grouped.some((x) => x.group.id === g.id);
                   return (
-                    <button
+                    <Button
                       key={g.id}
                       data-main={g.id}
                       onClick={() => enabled && jumpToGroup(g.id)}
@@ -205,7 +207,7 @@ const DualNavStore = ({
                     >
                       <span aria-hidden className="text-[13px] leading-none">{g.emoji}</span>
                       <span>{g.name}</span>
-                    </button>
+                    </Button>
                   );
                   });
                 })()}
@@ -229,7 +231,7 @@ const DualNavStore = ({
                 visibleSubs.map((s) => {
                   const isActive = s.id === activeSub;
                   return (
-                    <button
+                    <Button
                       key={s.id}
                       data-sub={s.id}
                       type="button"
@@ -246,7 +248,7 @@ const DualNavStore = ({
                           background: isActive ? `hsl(${activeGroup.color.hue})` : "transparent",
                         }}
                       />
-                    </button>
+                    </Button>
                   );
                 })
               )}

@@ -1,6 +1,7 @@
 import { useRouter } from "@tanstack/react-router";
 import { ChevronRight } from "lucide-react";
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 interface BackHeaderProps {
   title: string;
@@ -21,14 +22,14 @@ const BackHeader = ({ title, subtitle, fallbackTo = "/", right, accent }: BackHe
 
   return (
     <div className="mb-4 flex items-center justify-between gap-3 pt-2">
-      <button
+      <Button
         type="button"
         onClick={goBack}
         aria-label="رجوع"
         className="flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft transition hover:bg-muted ease-apple"
       >
         <ChevronRight className="h-5 w-5 text-foreground" strokeWidth={2.4} />
-      </button>
+      </Button>
       <div className="flex-1 text-center">
         {accent && (
           <span className="mb-0.5 inline-block rounded-full bg-primary-soft px-2 py-0.5 text-[10px] font-bold text-primary">

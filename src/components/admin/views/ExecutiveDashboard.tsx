@@ -48,10 +48,10 @@ export default function ExecutiveDashboard() {
         {/* Period switcher */}
         <div className="flex gap-2 bg-surface rounded-xl p-1 border border-border/40">
           {[7, 30, 90].map(d => (
-            <button key={d} onClick={() => setDays(d)}
+            <Button key={d} onClick={() => setDays(d)}
               className={`flex-1 h-8 rounded-lg text-sm font-medium transition ${days === d ? "bg-primary text-primary-foreground" : "text-foreground-secondary"}`}>
               آخر {d} يوم
-            </button>
+            </Button>
           ))}
         </div>
 

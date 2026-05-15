@@ -4,6 +4,8 @@ import { useAuth } from "@/context/AuthContext";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, MapPin, LogIn, LogOut, Plus, Wallet, ShieldAlert, Clock, CheckCircle2, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   checkInFn,
   checkOutFn,
@@ -133,24 +135,24 @@ export default function EmployeeHub() {
             {todayAtt.check_out_at ? (
               <p className="mt-1 text-sm text-muted-foreground">انصرفت الساعة {new Date(todayAtt.check_out_at).toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" })}</p>
             ) : (
-              <button onClick={checkOut} disabled={busy} className="mt-3 w-full rounded-full bg-destructive py-3 font-display font-extrabold text-destructive-foreground">
+              <Button onClick={checkOut} disabled={busy} className="mt-3 w-full rounded-full bg-destructive py-3 font-display font-extrabold text-destructive-foreground">
                 <LogOut className="me-1 inline h-4 w-4" /> تسجيل انصراف
-              </button>
+              </Button>
             )}
           </>
         ) : (
-          <button onClick={checkIn} disabled={busy} className="w-full rounded-full bg-primary py-3 font-display font-extrabold text-primary-foreground">
+          <Button onClick={checkIn} disabled={busy} className="w-full rounded-full bg-primary py-3 font-display font-extrabold text-primary-foreground">
             <LogIn className="me-1 inline h-4 w-4" /> تسجيل حضور <MapPin className="ms-1 inline h-4 w-4" />
-          </button>
+          </Button>
         )}
       </section>
 
       <section className="mt-5 rounded-3xl border border-border bg-card p-5">
         <div className="mb-3 flex items-center justify-between">
           <h2 className="flex items-center gap-2 font-bold"><Wallet className="h-4 w-4" /> طلباتي</h2>
-          <button onClick={() => setShowForm((v) => !v)} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">
+          <Button onClick={() => setShowForm((v) => !v)} className="rounded-full bg-primary-soft px-3 py-1.5 text-xs font-bold text-primary">
             <Plus className="me-1 inline h-3 w-3" /> طلب جديد
-          </button>
+          </Button>
         </div>
 
         {showForm && (
@@ -161,14 +163,14 @@ export default function EmployeeHub() {
               <option value="petty_cash">نثريّة (مصروف فوري)</option>
               <option value="reimbursement">استرداد مبلغ صرفته</option>
             </select>
-            <input value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
+            <Input value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))}
               inputMode="decimal" placeholder="المبلغ (ج.م)"
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm" />
             <textarea value={form.reason} onChange={(e) => setForm((f) => ({ ...f, reason: e.target.value }))}
               rows={2} placeholder="السبب أو التفاصيل"
               className="w-full rounded-xl border border-border bg-card px-3 py-2 text-sm" />
-            <button onClick={submitRequest} disabled={busy}
-              className="w-full rounded-full bg-primary py-2.5 text-sm font-bold text-primary-foreground">إرسال للمدير</button>
+            <Button onClick={submitRequest} disabled={busy}
+              className="w-full rounded-full bg-primary py-2.5 text-sm font-bold text-primary-foreground">إرسال للمدير</Button>
           </div>
         )}
 

@@ -17,6 +17,7 @@ import { LifestyleTab } from "@/apps/reef-al-madina/features/account/profile/com
 import { BudgetTab } from "@/apps/reef-al-madina/features/account/profile/components/BudgetTab";
 import { AvatarTab } from "@/apps/reef-al-madina/features/account/profile/components/AvatarTab";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 const Profile = () => {
   const { user, profile, loading, refreshProfile } = useAuth();
@@ -189,9 +190,9 @@ const Profile = () => {
               <h3 className="text-sm font-extrabold text-foreground">مشكلة في مزامنة البيانات</h3>
               <p className="mt-1 text-xs leading-6 text-muted-foreground">{errorMessage || "تعذّر تحميل آخر نسخة."}</p>
             </div>
-            <button type="button" onClick={() => void syncProfile()} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft" aria-label="إعادة المحاولة">
+            <Button type="button" onClick={() => void syncProfile()} className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-card shadow-soft" aria-label="إعادة المحاولة">
               <RefreshCcw className="h-4 w-4" />
-            </button>
+            </Button>
           </div>
         </section>
       )}

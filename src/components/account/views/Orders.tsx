@@ -8,6 +8,7 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { getById } from "@/core/catalog/runtime/legacyRuntime";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 /**
  * Phase 14 Part 1 — Customer Order History rewritten to read exclusively
@@ -201,9 +202,9 @@ const Orders = () => {
                 <span className="font-display text-base font-extrabold text-primary tabular-nums">
                   {fmtMoney(Number(o.total_amount))}
                 </span>
-                <button onClick={() => reorder(o)} className="flex items-center gap-1 rounded-full bg-foreground/5 px-3 py-1.5 text-[11px] font-bold">
+                <Button onClick={() => reorder(o)} className="flex items-center gap-1 rounded-full bg-foreground/5 px-3 py-1.5 text-[11px] font-bold">
                   <RotateCcw className="h-3 w-3" /> أعد الطلب
-                </button>
+                </Button>
               </div>
             </div>
           );

@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { BalanceCard } from "./BalanceCard";
 import type { SavingsJar } from "@/core/finance/types/wallet.types";
+import { Button } from "@/components/ui/button";
 
 /**
  * BalanceCardsCarousel — Native-style horizontal snap carousel of
@@ -148,14 +149,14 @@ const AffiliateCard = ({
             {referralCode ?? "—"}
           </p>
         </div>
-        <button
+        <Button
           type="button"
           onClick={onCopy}
           className="flex items-center gap-1.5 rounded-full bg-accent-foreground/15 px-3 py-1.5 ring-1 ring-accent-foreground/25 backdrop-blur-sm transition active:scale-95"
         >
           <Copy className="h-3 w-3" />
           <span className="text-[10px] font-extrabold">نسخ</span>
-        </button>
+        </Button>
       </div>
     </div>
   </motion.section>

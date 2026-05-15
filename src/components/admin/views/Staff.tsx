@@ -10,6 +10,8 @@ import {
   type StaffProfileRow,
 } from "@/core/hr/hr.functions";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 
 const APP_ROLES = [
@@ -183,13 +185,13 @@ export default function StaffAdmin() {
         metrics={metrics}
         topSlot={
           <div className="flex justify-end">
-            <button
+            <Button
               type="button"
               onClick={onAdd}
               className="inline-flex items-center gap-1 rounded-lg bg-primary text-primary-foreground px-3 py-2 text-sm font-bold"
             >
               <Plus className="h-4 w-4" /> إسناد دور
-            </button>
+            </Button>
           </div>
         }
         columns={columns}
@@ -214,7 +216,7 @@ export default function StaffAdmin() {
             {!editing.id && (
               <div className="space-y-1">
                 <label className="text-xs font-semibold">المستخدم</label>
-                <input
+                <Input
                   type="text"
                   placeholder="ابحث بالاسم/الهاتف/المعرف..."
                   value={profileQuery}
@@ -260,18 +262,18 @@ export default function StaffAdmin() {
             </label>
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
+              <Button
                 type="button"
                 disabled={saving}
                 onClick={() => setEditing(null)}
                 className="px-3 py-1.5 rounded border border-border text-sm"
-              >إلغاء</button>
-              <button
+              >إلغاء</Button>
+              <Button
                 type="button"
                 disabled={saving}
                 onClick={save}
                 className="px-3 py-1.5 rounded bg-primary text-primary-foreground text-sm font-bold disabled:opacity-60"
-              >{saving ? "جاري الحفظ..." : "حفظ"}</button>
+              >{saving ? "جاري الحفظ..." : "حفظ"}</Button>
             </div>
           </div>
         </div>

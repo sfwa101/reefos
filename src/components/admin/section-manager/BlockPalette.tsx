@@ -14,6 +14,7 @@ import {
   type LayoutBlockKind,
 } from "@/lib/section-manager.types";
 import { useSectionManagerStore } from "./useSectionManagerStore";
+import { Button } from "@/components/ui/button";
 
 const ULID_ALPHABET = "0123456789ABCDEFGHJKMNPQRSTVWXYZ";
 function genUlid(): string {
@@ -64,14 +65,14 @@ export function BlockPalette() {
           const meta = KIND_META[kind];
           const Icon = meta.icon;
           return (
-            <button
+            <Button
               key={kind}
               onClick={() => handleAdd(kind)}
               className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/40 bg-surface-muted hover:bg-primary/10 hover:border-primary/40 press transition-base"
             >
               <Icon className="h-5 w-5 text-primary" />
               <span className="text-[11.5px] font-medium text-foreground">{meta.label}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

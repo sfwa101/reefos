@@ -9,6 +9,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { listAdminGridFn } from "@/core/runtime-ui/admin/admin-grid.functions";
 import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Density = "compact" | "comfortable";
 const DENSITY_ROW: Record<Density, string> = {
@@ -295,7 +297,7 @@ export function UniversalAdminGrid<T = any>({
             {searchKeys.length ? (
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-                <input
+                <Input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder={searchPlaceholder ?? "بحث..."}
@@ -304,7 +306,7 @@ export function UniversalAdminGrid<T = any>({
               </div>
             ) : <div className="flex-1" />}
             <div className="hidden md:flex items-center rounded-2xl border border-border/50 bg-card/70 p-0.5" role="group" aria-label="كثافة العرض">
-              <button
+              <Button
                 type="button"
                 onClick={() => setDensity("comfortable")}
                 aria-pressed={density === "comfortable"}
@@ -315,8 +317,8 @@ export function UniversalAdminGrid<T = any>({
                 )}
               >
                 <Rows2 className="h-4 w-4" />
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={() => setDensity("compact")}
                 aria-pressed={density === "compact"}
@@ -327,7 +329,7 @@ export function UniversalAdminGrid<T = any>({
                 )}
               >
                 <Rows3 className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
           </div>
         ) : null}
@@ -395,7 +397,7 @@ export function UniversalAdminGrid<T = any>({
                           {rowActions.map((a) => {
                             const AIcon = a.icon;
                             return (
-                              <button
+                              <Button
                                 key={a.label}
                                 onClick={(e) => { e.stopPropagation(); a.onClick(row); }}
                                 className={cn(
@@ -407,7 +409,7 @@ export function UniversalAdminGrid<T = any>({
                               >
                                 {AIcon && <AIcon className="h-3.5 w-3.5 inline -mt-0.5 ml-1" />}
                                 {a.label}
-                              </button>
+                              </Button>
                             );
                           })}
                         </div>

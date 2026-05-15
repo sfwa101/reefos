@@ -10,6 +10,7 @@ import { Search, ScanLine } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { SEARCH_PLACEHOLDERS } from "@/lib/personalize";
 import { useEffect, useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 
 export const MainSearchHeader = () => {
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -48,7 +49,7 @@ export const MainSearchHeader = () => {
           <span className="flex-1 truncate text-[13px] font-medium text-muted-foreground">
             {SEARCH_PLACEHOLDERS[0] ?? "ابحث في ريف المدينة…"}
           </span>
-          <button
+          <Button
             type="button"
             aria-label="مسح باركود"
             onClick={(e) => {
@@ -59,7 +60,7 @@ export const MainSearchHeader = () => {
             className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-primary"
           >
             <ScanLine className="h-3.5 w-3.5" strokeWidth={2.6} />
-          </button>
+          </Button>
         </Link>
       </section>
     </>

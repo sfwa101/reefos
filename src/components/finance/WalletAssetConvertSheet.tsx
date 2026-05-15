@@ -4,6 +4,8 @@ import { ArrowDownUp, ChevronLeft, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import type { WalletAsset } from "@/core/finance/hooks/useWalletAssets";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Pair = {
   fromKey: WalletAsset["type"];
@@ -74,13 +76,13 @@ export const WalletAssetConvertSheet = ({
         className="w-full max-w-md rounded-t-3xl bg-card p-5 ring-1 ring-border/50 shadow-2xl sm:rounded-3xl"
       >
         <div className="mb-4 flex items-center gap-2">
-          <button
+          <Button
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <div>
             <h2 className="font-display text-lg font-extrabold">تحويل الأصول</h2>
             <p className="text-[11px] text-muted-foreground">
@@ -92,7 +94,7 @@ export const WalletAssetConvertSheet = ({
         {/* Pair selector */}
         <div className="mb-4 grid grid-cols-3 gap-1.5 rounded-2xl bg-muted/40 p-1 ring-1 ring-border/40">
           {PAIRS.map((p, i) => (
-            <button
+            <Button
               key={p.label}
               type="button"
               onClick={() => {
@@ -106,7 +108,7 @@ export const WalletAssetConvertSheet = ({
               }`}
             >
               {p.label}
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -117,7 +119,7 @@ export const WalletAssetConvertSheet = ({
           unit={from?.unit ?? ""}
           balance={Number(from?.balance ?? 0)}
         >
-          <input
+          <Input
             inputMode="decimal"
             dir="ltr"
             value={amount}
@@ -151,14 +153,14 @@ export const WalletAssetConvertSheet = ({
           </p>
         )}
 
-        <button
+        <Button
           type="button"
           onClick={submit}
           disabled={busy || !amt || overBalance}
           className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-primary px-3 py-3 text-sm font-extrabold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-50"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "تحويل الآن"}
-        </button>
+        </Button>
         <p className="mt-2 text-center text-[10.5px] text-muted-foreground">
           سعر الصرف ١ {to?.unit} = {toLatin(pair.rate)} {from?.unit}
         </p>

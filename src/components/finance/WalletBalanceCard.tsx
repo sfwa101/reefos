@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 /**
  * WalletBalanceCard (a.k.a. DigitalCard) — hero balance panel.
@@ -124,27 +125,27 @@ export const WalletBalanceCard = ({
 
       {/* primary actions */}
       <div className="mt-3.5 grid grid-cols-3 gap-2">
-        <button
+        <Button
           onClick={onPos}
           className="flex flex-col items-center justify-center gap-1 rounded-xl bg-primary-foreground py-2.5 text-primary shadow-pill transition active:scale-95"
         >
           <ScanLine className="h-4 w-4" strokeWidth={2.4} />
           <span className="text-[10px] font-extrabold leading-none">الدفع في الفرع</span>
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onTopup}
           className="flex flex-col items-center justify-center gap-1 rounded-xl bg-primary-foreground/15 py-2.5 text-primary-foreground ring-1 ring-primary-foreground/20 transition active:scale-95"
         >
           <Plus className="h-4 w-4" strokeWidth={2.4} />
           <span className="text-[10px] font-extrabold leading-none">شحن الرصيد</span>
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onTransfer}
           className="flex flex-col items-center justify-center gap-1 rounded-xl bg-primary-foreground/15 py-2.5 text-primary-foreground ring-1 ring-primary-foreground/20 transition active:scale-95"
         >
           <Send className="h-4 w-4" strokeWidth={2.4} />
           <span className="text-[10px] font-extrabold leading-none">تحويل</span>
-        </button>
+        </Button>
       </div>
 
       {trustLimit > 0 && (

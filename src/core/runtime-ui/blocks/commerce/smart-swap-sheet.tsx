@@ -6,6 +6,7 @@ import { toLatin } from "@/lib/format";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
 import type { CartLine } from "@/core/orders/runtime/types";
+import { Button } from "@/components/ui/button";
 
 /** Speculative line cost via the canonical engine — never multiplies in render. */
 const swapLineCost = (product: Product, qty: number): number =>
@@ -61,9 +62,9 @@ const SmartSwapSheet = ({ open, originalId, currentId, qty, onClose, onSwap }: P
                   بدائل لـ {current.name}
                 </h3>
               </div>
-              <button onClick={onClose} aria-label="إغلاق" className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5">
+              <Button onClick={onClose} aria-label="إغلاق" className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5">
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </header>
 
             <div className="space-y-2 p-4">
@@ -79,7 +80,7 @@ const SmartSwapSheet = ({ open, originalId, currentId, qty, onClose, onSwap }: P
                 const isPicked = picked === p.id;
                 const isOriginal = p.id === originalId;
                 return (
-                  <button
+                  <Button
                     key={p.id}
                     onClick={() => setPicked(p.id)}
                     className={`flex w-full items-center gap-3 rounded-[16px] border-2 bg-card p-2.5 text-right transition ${
@@ -116,20 +117,20 @@ const SmartSwapSheet = ({ open, originalId, currentId, qty, onClose, onSwap }: P
                     }`}>
                       {isPicked ? <Check className="h-3.5 w-3.5" strokeWidth={3.5} /> : <ArrowRightLeft className="h-3.5 w-3.5" />}
                     </span>
-                  </button>
+                  </Button>
                 );
               })}
             </div>
 
             <div className="sticky bottom-0 border-t border-border/60 bg-card/95 p-4">
-              <button
+              <Button
                 onClick={() => picked && onSwap(picked)}
                 disabled={!picked}
                 className="flex w-full items-center justify-center gap-2 rounded-2xl bg-emerald-600 py-3 font-display text-sm font-extrabold text-white shadow-pill transition active:scale-[0.98] disabled:opacity-50"
               >
                 <ArrowRightLeft className="h-4 w-4" />
                 {picked ? "تأكيد الاستبدال" : "اختر بديلًا"}
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>

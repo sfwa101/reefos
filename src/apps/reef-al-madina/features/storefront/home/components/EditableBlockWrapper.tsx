@@ -11,6 +11,7 @@ import { ArrowDown, ArrowUp, Settings, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { LayoutBlock } from "@/lib/section-manager.types";
 import { useSectionManagerStore } from "@/components/admin/section-manager/useSectionManagerStore";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   block: LayoutBlock;
@@ -35,7 +36,7 @@ export function EditableBlockWrapper({ block, index, total, active, children }: 
       )}
     >
       <div className="absolute -top-3 right-3 z-10 flex items-center gap-1 rounded-full border border-border bg-background/95 px-1.5 py-1 shadow-md backdrop-blur">
-        <button
+        <Button
           type="button"
           onClick={() => moveBlock(block.id, "up")}
           disabled={index === 0}
@@ -43,8 +44,8 @@ export function EditableBlockWrapper({ block, index, total, active, children }: 
           aria-label="نقل لأعلى"
         >
           <ArrowUp className="h-3.5 w-3.5" />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => moveBlock(block.id, "down")}
           disabled={index === total - 1}
@@ -52,23 +53,23 @@ export function EditableBlockWrapper({ block, index, total, active, children }: 
           aria-label="نقل لأسفل"
         >
           <ArrowDown className="h-3.5 w-3.5" />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => openInspector(block.id)}
           className="flex h-7 w-7 items-center justify-center rounded-full text-foreground/80 hover:bg-primary/10 hover:text-primary"
           aria-label="تعديل"
         >
           <Settings className="h-3.5 w-3.5" />
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           onClick={() => removeBlock(block.id)}
           className="flex h-7 w-7 items-center justify-center rounded-full text-destructive hover:bg-destructive/10"
           aria-label="حذف"
         >
           <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        </Button>
       </div>
       <span className="absolute -top-3 left-3 z-10 rounded-full border border-border bg-background/95 px-2 py-0.5 text-[10px] font-mono uppercase text-muted-foreground shadow-sm backdrop-blur">
         {block.kind}

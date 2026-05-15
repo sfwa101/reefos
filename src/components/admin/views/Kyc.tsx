@@ -4,6 +4,7 @@ import { UniversalAdminGrid, type BentoMetric, type Column, type RowAction } fro
 import { getKycSignedUrlsFn, updateKycStatusFn } from "@/core/hr/hr.functions";
 import { fmtNum } from "@/lib/format";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const STATUS: Record<string, { label: string; cls: string }> = {
   pending: { label: "بانتظار", cls: "bg-warning/15 text-warning" },
@@ -121,11 +122,11 @@ export default function KycAdmin() {
           >
             <div className="flex items-center justify-between">
               <h2 className="text-base font-bold">مستندات التحقق</h2>
-              <button
+              <Button
                 type="button"
                 onClick={() => setViewing(null)}
                 className="px-2 py-1 text-sm border border-border rounded"
-              >إغلاق</button>
+              >إغلاق</Button>
             </div>
             <div className="text-xs text-foreground-tertiary">
               <p>الرقم القومي: <span className="font-mono">{viewing.national_id ?? "—"}</span></p>
@@ -161,16 +162,16 @@ export default function KycAdmin() {
             )}
 
             <div className="flex justify-end gap-2 pt-2">
-              <button
+              <Button
                 type="button"
                 onClick={async () => { await update(viewing.id, "rejected"); setViewing(null); }}
                 className="px-3 py-1.5 rounded bg-destructive text-destructive-foreground text-sm font-bold"
-              >رفض</button>
-              <button
+              >رفض</Button>
+              <Button
                 type="button"
                 onClick={async () => { await update(viewing.id, "approved"); setViewing(null); }}
                 className="px-3 py-1.5 rounded bg-success text-success-foreground text-sm font-bold"
-              >توثيق</button>
+              >توثيق</Button>
             </div>
           </div>
         </div>

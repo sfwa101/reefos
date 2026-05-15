@@ -4,6 +4,7 @@
 import { Check, PackageCheck, Sparkles } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import type { Product } from "@/core/catalog/legacyProduct.types";
+import { Button } from "@/components/ui/button";
 
 type Variant = NonNullable<Product["variants"]>[number];
 type Addon = NonNullable<Product["addons"]>[number];
@@ -32,7 +33,7 @@ export const VariantPicker = ({
             const active = v.id === variantId;
             const delta = v.priceDelta;
             return (
-              <button
+              <Button
                 key={v.id}
                 onClick={() => onVariantChange(v.id)}
                 className={`flex items-center justify-between gap-3 rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
@@ -50,7 +51,7 @@ export const VariantPicker = ({
                 <span className="text-[11px] font-extrabold tabular-nums text-violet-700 dark:text-violet-300">
                   {delta === 0 ? "السعر الأساسي" : delta > 0 ? `+${toLatin(delta)} ج.م` : `${toLatin(delta)} ج.م`}
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -70,7 +71,7 @@ export const VariantPicker = ({
           {addons.map((a) => {
             const active = addonIds.includes(a.id);
             return (
-              <button
+              <Button
                 key={a.id}
                 onClick={() => onToggleAddon(a.id)}
                 className={`flex items-center justify-between gap-3 rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
@@ -88,7 +89,7 @@ export const VariantPicker = ({
                 <span className="text-[11px] font-extrabold tabular-nums text-violet-700 dark:text-violet-300">
                   +{toLatin(a.price)} ج.م
                 </span>
-              </button>
+              </Button>
             );
           })}
         </div>

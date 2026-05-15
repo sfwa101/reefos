@@ -22,6 +22,7 @@ import { LayoutCanvas } from "@/components/admin/section-manager/LayoutCanvas";
 import { BlockPalette } from "@/components/admin/section-manager/BlockPalette";
 import { BlockInspector } from "@/components/admin/section-manager/BlockInspector";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const TAB_LABELS: Record<ZoneTab, string> = {
   all: "الكل",
@@ -110,22 +111,22 @@ export default function SectionManager() {
             {dirty ? " · تغييرات غير محفوظة" : ""}
           </p>
         </div>
-        <button
+        <Button
           onClick={onSaveDraft}
           disabled={!dirty || saving !== null || loading}
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-surface-muted text-foreground text-[12.5px] font-semibold press disabled:opacity-50"
         >
           <Save className="h-4 w-4" />
           {saving === "draft" ? "..." : "حفظ مسودة"}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={onPublish}
           disabled={!draftDoc || saving !== null || loading}
           className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[12.5px] font-semibold press disabled:opacity-50"
         >
           <Send className="h-4 w-4" />
           {saving === "publish" ? "..." : "نشر"}
-        </button>
+        </Button>
       </header>
 
       {/* 3-pane Workbench */}
@@ -141,7 +142,7 @@ export default function SectionManager() {
             {/* Zone Tabs */}
             <div className="flex items-center gap-1 p-2 border-b border-border/40">
               {(Object.keys(TAB_LABELS) as ZoneTab[]).map((t) => (
-                <button
+                <Button
                   key={t}
                   onClick={() => setTab(t)}
                   className={cn(
@@ -152,7 +153,7 @@ export default function SectionManager() {
                   )}
                 >
                   {TAB_LABELS[t]}
-                </button>
+                </Button>
               ))}
             </div>
             <div className="p-4">

@@ -21,6 +21,7 @@ import { KYCGateDialog } from "@/apps/reef-al-madina/features/digital-borrowing/
 import { BorrowSheet } from "@/apps/reef-al-madina/features/digital-borrowing/components/BorrowSheet";
 import { BundlesGrid } from "@/apps/reef-al-madina/features/digital-borrowing/components/BundlesGrid";
 import { PrintWizard } from "@/apps/reef-al-madina/features/digital-borrowing/components/PrintWizard";
+import { Button } from "@/components/ui/button";
 
 const SchoolLibrarySection = () => {
   const [tab, setTab] = useState<TabKey>("store");
@@ -94,7 +95,7 @@ const SchoolLibrarySection = () => {
               <p className="text-[11px] text-muted-foreground">{isVerified ? "يمكنك استعارة أي كتاب الآن" : "وثّق هويتك مرة واحدة لتفعيل الاستعارة"}</p>
             </div>
             {!isVerified && (
-              <button onClick={() => setKycOpen(true)} className="rounded-full px-3 py-1.5 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>وثّق</button>
+              <Button onClick={() => setKycOpen(true)} className="rounded-full px-3 py-1.5 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>وثّق</Button>
             )}
           </div>
 

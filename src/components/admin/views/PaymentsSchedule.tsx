@@ -4,6 +4,7 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { getPaymentsScheduleFn, type PaymentsScheduleRow } from "@/core/finance/finance.functions";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, CalendarClock, AlertTriangle } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function PaymentsSchedule() {
   const { hasRole, loading: rolesLoading } = useAdminRoles();
@@ -46,9 +47,9 @@ export default function PaymentsSchedule() {
 
         <div className="flex gap-2">
           {[7, 14, 30].map((d) => (
-            <button key={d} onClick={() => setDays(d)} className={`px-3 py-1.5 rounded-lg text-[12px] ${days === d ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
+            <Button key={d} onClick={() => setDays(d)} className={`px-3 py-1.5 rounded-lg text-[12px] ${days === d ? "bg-primary text-primary-foreground" : "bg-muted"}`}>
               {d} يوم
-            </button>
+            </Button>
           ))}
         </div>
 

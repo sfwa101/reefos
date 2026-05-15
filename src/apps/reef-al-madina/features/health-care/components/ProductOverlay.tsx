@@ -4,6 +4,8 @@ import { Bot, Calculator, CheckCircle2, Plus, Sparkle, Star, X } from "lucide-re
 import { toast } from "sonner";
 import OptimizedImage from "@/components/ui/OptimizedImage";
 import type { RxProduct } from "../types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) => {
   const { add } = useCartActions();
@@ -44,13 +46,13 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
           <span className="h-1 w-10 rounded-full bg-foreground/20" />
         </div>
 
-        <button
+        <Button
           onClick={onClose}
           aria-label="إغلاق"
           className="absolute left-3 top-3 z-20 flex h-9 w-9 items-center justify-center rounded-full bg-background/95 text-foreground shadow-pill ring-1 ring-border/50 active:scale-90"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
 
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
           <OptimizedImage
@@ -114,7 +116,7 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
             <div className="mt-3 grid grid-cols-2 gap-3">
               <label className="block text-[11px] font-bold text-foreground/85">
                 الوزن (كجم)
-                <input
+                <Input
                   type="number"
                   min={20}
                   max={200}
@@ -125,7 +127,7 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
               </label>
               <label className="block text-[11px] font-bold text-foreground/85">
                 العمر
-                <input
+                <Input
                   type="number"
                   min={1}
                   max={120}
@@ -163,7 +165,7 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
             </p>
           </div>
 
-          <button
+          <Button
             onClick={() => {
               add({ id: p.id, name: p.name, price: p.price, image: p.image, unit: p.unit, category: "صيدلية", source: "pharmacy" });
               toast.success("أُضيف للسلة", { description: p.name });
@@ -172,7 +174,7 @@ const ProductOverlay = ({ p, onClose }: { p: RxProduct; onClose: () => void }) =
           >
             <Plus className="h-4 w-4" strokeWidth={2.6} />
             {qty > 0 ? `أضِف المزيد (${qty} في السلة)` : `أضِف للسلة · ${p.price} ج.م`}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@
  */
 import { useEffect, useState } from "react";
 import { HandCoins } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "salsabil_fakka_roundup";
 
@@ -33,7 +34,7 @@ export const FakkaRoundupToggle = ({ offerId }: { offerId: string }) => {
   };
 
   return (
-    <button
+    <Button
       type="button"
       onClick={toggle}
       data-offer-id={offerId}
@@ -46,7 +47,7 @@ export const FakkaRoundupToggle = ({ offerId }: { offerId: string }) => {
     >
       <HandCoins className="h-3 w-3" />
       تقريب للصدقة
-    </button>
+    </Button>
   );
 };
 

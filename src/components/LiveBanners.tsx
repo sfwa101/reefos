@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useBanners } from "@/hooks/useMarketing";
+import { Button } from "@/components/ui/button";
 
 /**
  * LiveBanners — public-facing storefront carousel of admin-managed banners.
@@ -60,7 +61,7 @@ export default function LiveBanners({ placement = "hero" }: { placement?: string
         {list.length > 1 && (
           <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
             {list.map((_, i) => (
-              <button
+              <Button
                 key={i}
                 onClick={() => setIdx(i)}
                 aria-label={`Banner ${i + 1}`}

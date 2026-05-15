@@ -7,6 +7,7 @@ import { Area, AreaChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianG
 import ReactMarkdown from "react-markdown";
 import { getExecutiveDashboardStatsFn } from "@/core/finance/finance.functions";
 import { getHakimAdvisorReportFn } from "@/core/hakim-ai/hakim-admin.functions";
+import { Button } from "@/components/ui/button";
 
 type Stats = {
   period_days: number;
@@ -82,7 +83,7 @@ export function HakimSovereignCard() {
 
   return (
     <>
-      <button
+      <Button
         onClick={openReport}
         className="w-full text-right group relative overflow-hidden rounded-3xl p-5 lg:p-6 text-primary-foreground transition-all hover:shadow-[0_20px_60px_-15px_rgba(99,102,241,0.6)] active:scale-[0.995]"
         style={{
@@ -138,7 +139,7 @@ export function HakimSovereignCard() {
         </div>
 
         <style>{`@keyframes fadeInUp { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-      </button>
+      </Button>
 
       {/* Full report drawer */}
       <Sheet open={open} onOpenChange={setOpen}>
@@ -157,10 +158,10 @@ export function HakimSovereignCard() {
             {/* Period filter */}
             <div className="flex gap-1 mt-3 bg-primary-foreground/10 rounded-xl p-1 border border-primary-foreground/10 w-fit">
               {[7, 30, 90].map((d) => (
-                <button key={d} onClick={() => setDays(d)}
+                <Button key={d} onClick={() => setDays(d)}
                   className={`px-3 h-7 rounded-lg text-[11px] transition ${days === d ? "bg-primary-foreground text-[hsl(245_50%_22%)] font-bold" : "opacity-70"}`}>
                   {d} يوم
-                </button>
+                </Button>
               ))}
             </div>
           </div>

@@ -16,6 +16,7 @@ import {
 } from "@/core/commerce/policies/bundle-thresholds";
 import AnimatedNumber from "@/components/baskets/AnimatedNumber";
 import { PackagePlus, Plus, Minus, Sparkles, Check, ShoppingCart } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const BUILD_SOURCES: Product["source"][] = ["produce", "dairy", "village", "supermarket"];
 
@@ -143,7 +144,7 @@ const BasketBuilderBlock = () => {
       <div className="sticky top-14 z-20 -mx-4 border-y border-border/40 bg-background/85 px-4 py-2 shadow-[0_4px_12px_-8px_rgba(0,0,0,0.15)]">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 scrollbar-hide">
           {cats.map((c) => (
-            <button
+            <Button
               key={c}
               onClick={() => setActiveCat(c)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-extrabold transition ${
@@ -151,7 +152,7 @@ const BasketBuilderBlock = () => {
               }`}
             >
               {c === "all" ? "الكل" : c}
-            </button>
+            </Button>
           ))}
         </div>
       </div>
@@ -183,22 +184,22 @@ const BasketBuilderBlock = () => {
                     {toLatin(p.price)} <span className="text-[9px] font-bold text-muted-foreground">ج</span>
                   </span>
                   {q === 0 ? (
-                    <button
+                    <Button
                       onClick={() => inc(p.id)}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-600 text-white shadow-pill transition active:scale-90"
                       aria-label="إضافة"
                     >
                       <Plus className="h-3.5 w-3.5" strokeWidth={3} />
-                    </button>
+                    </Button>
                   ) : (
                     <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-0.5">
-                      <button onClick={() => dec(p.id)} className="flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-sm">
+                      <Button onClick={() => dec(p.id)} className="flex h-6 w-6 items-center justify-center rounded-full bg-background shadow-sm">
                         <Minus className="h-3 w-3" />
-                      </button>
+                      </Button>
                       <span className="w-4 text-center text-[11px] font-extrabold tabular-nums">{toLatin(q)}</span>
-                      <button onClick={() => inc(p.id)} className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">
+                      <Button onClick={() => inc(p.id)} className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-600 text-white">
                         <Plus className="h-3 w-3" strokeWidth={3} />
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -210,7 +211,7 @@ const BasketBuilderBlock = () => {
 
       {/* Sticky checkout */}
       <div className="fixed inset-x-0 bottom-[68px] z-30 px-3">
-        <button
+        <Button
           onClick={checkout}
           disabled={lines.length === 0}
           className="flex w-full items-center justify-between gap-3 rounded-[20px] bg-emerald-600 px-4 py-3.5 text-white shadow-float transition active:scale-[0.99] disabled:opacity-50"
@@ -224,7 +225,7 @@ const BasketBuilderBlock = () => {
           <span className="font-display text-base font-extrabold tabular-nums">
             <AnimatedNumber value={final} /> ج
           </span>
-        </button>
+        </Button>
         {tier && (
           <p className="mt-1 text-center text-[10px] font-extrabold text-emerald-700 dark:text-emerald-300">
             <Sparkles className="-mt-0.5 inline h-3 w-3" /> {tier.label} مفعّل · توفير {toLatin(discount)} ج.م

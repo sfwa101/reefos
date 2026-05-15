@@ -9,6 +9,7 @@ import { useAffiliateEngine } from "@/core/finance/hooks/useAffiliateEngine";
 import { WithdrawDialog } from "@/components/finance/WithdrawDialog";
 import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { openWhatsApp } from "@/lib/whatsapp";
+import { Button } from "@/components/ui/button";
 
 // shopping bag icon (lucide doesn't expose ShoppingBagIcon by that name in older imports)
 function ShoppingBagIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -216,20 +217,20 @@ export const WalletAffiliateHub = ({
           </p>
 
           <div className="mt-3 flex gap-2">
-            <button
+            <Button
               onClick={copyCode}
               disabled={busy}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white/20 py-2.5 text-[11px] font-extrabold text-white ring-1 ring-white/20 transition active:scale-95 disabled:opacity-50"
             >
               <Copy className="h-3.5 w-3.5" /> نسخ الكود
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={share}
               disabled={busy}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-white py-2.5 text-[11px] font-extrabold text-foreground transition active:scale-95 disabled:opacity-50"
             >
               <Share2 className="h-3.5 w-3.5" /> مشاركة عبر واتساب
-            </button>
+            </Button>
           </div>
         </div>
       </motion.div>
@@ -268,7 +269,7 @@ export const WalletAffiliateHub = ({
       </div>
 
       {/* WITHDRAW CTA — Phase 22 */}
-      <button
+      <Button
         onClick={() => {
           if (!userId) { toast.error("سجّل الدخول أولاً"); return; }
           setWithdrawOpen(true);
@@ -282,7 +283,7 @@ export const WalletAffiliateHub = ({
         <span className="text-[11px] font-bold opacity-90">
           متاح: {toLatin(balance.toFixed(2))} ج
         </span>
-      </button>
+      </Button>
 
       <WithdrawDialog
         open={withdrawOpen}

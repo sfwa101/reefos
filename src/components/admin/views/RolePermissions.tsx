@@ -4,6 +4,7 @@ import { UniversalAdminGrid } from "@/components/admin/UniversalAdminGrid";
 import { getPermissionMatrixFn, togglePermissionFn, type AppRole } from "@/core/capabilities/rbac.functions";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 const ROLES: { key: AppRole; label: string }[] = [
   { key: "admin", label: "مدير" },
@@ -67,7 +68,7 @@ function MatrixRow({ row }: { row: Row }) {
         {ROLES.map((r) => {
           const on = granted.has(r.key);
           return (
-            <button
+            <Button
               key={r.key}
               onClick={() => toggle(r.key)}
               disabled={busy === r.key}
@@ -79,7 +80,7 @@ function MatrixRow({ row }: { row: Row }) {
               )}
             >
               {r.label}
-            </button>
+            </Button>
           );
         })}
       </div>

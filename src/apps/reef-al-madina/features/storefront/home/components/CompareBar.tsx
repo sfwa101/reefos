@@ -7,6 +7,7 @@ import { Scale, X } from "lucide-react";
 
 import { useCompare } from "@/context/CompareContext";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 export const CompareBar = () => {
   const compare = useCompare();
@@ -34,13 +35,13 @@ export const CompareBar = () => {
         </div>
       </div>
       <div className="flex items-center gap-1.5">
-        <button
+        <Button
           onClick={compare.clear}
           className="flex h-8 w-8 items-center justify-center rounded-full bg-background/15 text-background"
           aria-label="مسح المقارنة"
         >
           <X className="h-3.5 w-3.5" />
-        </button>
+        </Button>
         <Link
           to="/store/$slug"
           params={{ slug: "home-compare" }}

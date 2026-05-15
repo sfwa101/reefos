@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Pencil } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { useFakkaCalculator } from "../hooks/useFakkaCalculator";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -125,7 +127,7 @@ export const SmartFakkaRail = ({
           className="mt-2 overflow-hidden"
         >
           <div className="flex items-center gap-2">
-            <input
+            <Input
               type="number"
               inputMode="numeric"
               min={0}
@@ -135,13 +137,13 @@ export const SmartFakkaRail = ({
               placeholder="أدخل المبلغ"
               className="flex-1 rounded-xl bg-foreground/5 px-3 py-2.5 text-sm font-bold outline-none focus:ring-2 focus:ring-primary/40"
             />
-            <button
+            <Button
               type="button"
               onClick={applyCustom}
               className="rounded-xl bg-foreground px-4 py-2.5 text-xs font-extrabold text-background"
             >
               تأكيد
-            </button>
+            </Button>
           </div>
         </motion.div>
       )}

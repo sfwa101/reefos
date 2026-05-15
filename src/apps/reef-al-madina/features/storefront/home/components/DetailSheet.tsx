@@ -30,6 +30,7 @@ import type { ProductCardVM } from "@/core/catalog/types";
 import { fmt } from "../dictionaries";
 import { homeProductCardAdapter } from "../adapter";
 import { preorderDepositAmount } from "@/core/commerce/policies/deposits";
+import { Button } from "@/components/ui/button";
 
 const TrustBadge = ({
   icon: Icon,
@@ -144,13 +145,13 @@ export const DetailSheet = ({
         className="relative max-h-[90vh] w-full max-w-md overflow-hidden rounded-t-[28px] bg-background shadow-2xl ring-1 ring-border/60 animate-in slide-in-from-bottom-8"
       >
         <div className="flex items-center justify-between border-b border-border/50 px-4 py-3">
-          <button
+          <Button
             onClick={onClose}
             aria-label="إغلاق"
             className="flex h-8 w-8 items-center justify-center rounded-full bg-secondary"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
           <span className="text-[11px] font-bold text-muted-foreground">
             {isPre ? "منتج بالحجز المسبق" : "متوفر للتسليم الفوري"}
           </span>
@@ -275,7 +276,7 @@ export const DetailSheet = ({
 
         {/* Sticky CTA */}
         <div className="absolute inset-x-0 bottom-0 border-t border-border/50 bg-background/95 px-4 py-3 backdrop-blur">
-          <button
+          <Button
             onClick={handleConfirm}
             className={`flex h-12 w-full items-center justify-center gap-2 rounded-2xl text-[14px] font-extrabold shadow-pill transition active:scale-[0.98] ${
               isPre
@@ -294,7 +295,7 @@ export const DetailSheet = ({
                 أضف إلى السلة — {fmt(price)}
               </>
             )}
-          </button>
+          </Button>
           {isPre && (
             <p className="mt-1.5 text-center text-[10px] font-bold text-muted-foreground">
               ادفع {fmt(deposit)} الآن — والمتبقي {fmt(remaining)} عند الاستلام

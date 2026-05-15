@@ -3,6 +3,8 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Loader2, Minus, Plus, Search, AlertTriangle } from "lucide-react";
 import type { VendorProduct } from "../types/vendor-ops.types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   products: VendorProduct[];
@@ -37,7 +39,7 @@ export function VendorInventoryGrid({ products, loading, onUpdate }: Props) {
     <div className="space-y-3">
       <div className="relative">
         <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-        <input
+        <Input
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="ابحث في منتجاتك..."
@@ -66,37 +68,37 @@ export function VendorInventoryGrid({ products, loading, onUpdate }: Props) {
                     <p className="text-[11px] text-foreground-tertiary truncate">{p.category}</p>
                     <p className="font-semibold text-primary text-[13px] num mt-0.5">{fmtMoney(p.price)}</p>
                   </div>
-                  <button
+                  <Button
                     onClick={() => toggleActive(p)}
                     disabled={busy === p.id}
                     className={`text-[10px] px-2.5 py-1 rounded-full font-semibold press ${p.is_active ? "bg-success/15 text-success" : "bg-destructive/15 text-destructive"}`}
                   >
                     {p.is_active ? "نشط" : "موقوف"}
-                  </button>
+                  </Button>
                 </div>
 
                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-border/40">
                   <span className="text-[12px] text-foreground-secondary">المخزون</span>
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
                       onClick={() => adjust(p, -1)}
                       disabled={busy === p.id || p.stock === 0}
                       className="h-9 w-9 rounded-xl bg-surface-muted flex items-center justify-center press disabled:opacity-40"
                       aria-label="إنقاص"
                     >
                       <Minus className="h-4 w-4" />
-                    </button>
+                    </Button>
                     <span className={`min-w-[3ch] text-center font-display text-[18px] num ${out ? "text-destructive" : low ? "text-warning" : ""}`}>
                       {p.stock}
                     </span>
-                    <button
+                    <Button
                       onClick={() => adjust(p, 1)}
                       disabled={busy === p.id}
                       className="h-9 w-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center press"
                       aria-label="زيادة"
                     >
                       <Plus className="h-4 w-4" />
-                    </button>
+                    </Button>
                   </div>
                 </div>
               </IOSCard>

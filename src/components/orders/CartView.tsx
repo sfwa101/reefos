@@ -23,6 +23,7 @@ import { CartLoyaltyBar } from "@/apps/reef-al-madina/features/cart/components/C
 import { RechargeDialog } from "@/apps/reef-al-madina/features/cart/components/RechargeDialog";
 import { HakimPredictiveBasket } from "@/apps/reef-al-madina/features/cart/components/HakimPredictiveBasket";
 import type { SharedCartSplitType } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
+import { Button } from "@/components/ui/button";
 
 const Cart = () => {
   const { sharedCartId } = useSharedCart();
@@ -161,9 +162,9 @@ const Cart = () => {
         grand={o.effectiveGrand}
       />
 
-      <button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">
+      <Button onClick={() => o.clear()} className="w-full rounded-2xl bg-foreground/5 py-3 text-xs font-bold text-muted-foreground">
         تفريغ السلة
-      </button>
+      </Button>
 
       {/* Sticky CTA — 3/4 checkout + 1/4 home shortcut (Phase 12.8) */}
       <motion.div
@@ -175,7 +176,7 @@ const Cart = () => {
       >
         <div className="mx-auto flex w-full max-w-md flex-row-reverse items-stretch gap-2">
           {/* Primary CTA — flex-1 (≈3/4) */}
-          <button
+          <Button
             type="button"
             onClick={() => setCheckoutOpen(true)}
             disabled={checkoutDisabled}
@@ -198,10 +199,10 @@ const Cart = () => {
             <span className="rounded-[12px] bg-primary-foreground/15 px-3 py-1.5 text-sm font-extrabold tabular-nums">
               {toLatin(Math.round(o.effectiveGrand))} ج
             </span>
-          </button>
+          </Button>
 
           {/* Home shortcut — shrink-0 w-16 (≈1/4) */}
-          <button
+          <Button
             type="button"
             aria-label="العودة للرئيسية"
             onClick={() => navigate({ to: "/" })}
@@ -209,7 +210,7 @@ const Cart = () => {
           >
             <Home className="h-5 w-5" strokeWidth={2.4} />
             <span className="text-[9.5px] font-extrabold leading-none">الرئيسية</span>
-          </button>
+          </Button>
         </div>
       </motion.div>
 

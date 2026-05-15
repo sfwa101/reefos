@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { bookingTimeSlots } from "@/core/commerce/variants/custom-fulfillment-rules";
+import { Button } from "@/components/ui/button";
 
 type ShipMode = "split" | "wait";
 
@@ -46,7 +47,7 @@ export const FulfillmentSelector = ({
             const day = d.toLocaleDateString("ar-EG", { day: "numeric" });
             const month = d.toLocaleDateString("ar-EG", { month: "short" });
             return (
-              <button
+              <Button
                 key={i}
                 onClick={() => onDayChange(i)}
                 className={`flex w-[72px] shrink-0 flex-col items-center gap-0.5 rounded-2xl border-2 px-2 py-2.5 transition ${
@@ -56,7 +57,7 @@ export const FulfillmentSelector = ({
                 <span className="text-[10px] font-bold opacity-80">{weekday}</span>
                 <span className="font-display text-lg font-extrabold leading-none tabular-nums">{toLatin(Number(day))}</span>
                 <span className="text-[9px] font-bold opacity-80">{month}</span>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -73,7 +74,7 @@ export const FulfillmentSelector = ({
         {bookingTimeSlots.map((s) => {
           const active = s.id === slot;
           return (
-            <button
+            <Button
               key={s.id}
               onClick={() => onSlotChange(s.id)}
               className={`flex items-center justify-between rounded-[14px] border-2 px-3 py-2.5 text-[11px] font-extrabold transition ${
@@ -84,7 +85,7 @@ export const FulfillmentSelector = ({
             >
               <span>{s.label}</span>
               {active && <Check className="h-3.5 w-3.5" />}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -104,7 +105,7 @@ export const FulfillmentSelector = ({
           const active = shipMode === m.id;
           const Icon = m.icon;
           return (
-            <button
+            <Button
               key={m.id}
               onClick={() => onShipModeChange(m.id)}
               className={`flex items-start gap-3 rounded-[14px] border-2 p-3 text-right transition ${
@@ -123,7 +124,7 @@ export const FulfillmentSelector = ({
               <span className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${
                 active ? "border-violet-500 bg-violet-500" : "border-muted-foreground/40"
               }`} />
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -164,7 +165,7 @@ export const FulfillmentSelector = ({
           const Icon = opt.icon;
           const disabled = depositRequired && opt.id === "full";
           return (
-            <button
+            <Button
               key={opt.id}
               onClick={opt.onClick}
               disabled={disabled}
@@ -184,7 +185,7 @@ export const FulfillmentSelector = ({
               <span className={`mt-1 h-4 w-4 shrink-0 rounded-full border-2 ${
                 opt.on ? "border-violet-500 bg-violet-500" : "border-muted-foreground/40"
               }`} />
-            </button>
+            </Button>
           );
         })}
       </div>

@@ -11,6 +11,7 @@ import { useLocationStatic as useLocation } from "@/context/LocationContext";
 import { toLatin } from "@/lib/format";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 type Addr = {
   id: string;
@@ -78,19 +79,19 @@ const AddressCard = ({
           )}
           <div className="mt-3 flex flex-wrap gap-2">
             {!a.is_default && (
-              <button
+              <Button
                 onClick={onSetDefault}
                 className="rounded-full bg-foreground/5 px-3 py-1.5 text-[11px] font-extrabold text-foreground"
               >
                 جعله افتراضيًا
-              </button>
+              </Button>
             )}
-            <button
+            <Button
               onClick={onRemove}
               className="flex items-center gap-1 rounded-full bg-destructive/10 px-3 py-1.5 text-[11px] font-extrabold text-destructive"
             >
               <Trash2 className="h-3 w-3" /> حذف
-            </button>
+            </Button>
           </div>
         </div>
       </div>

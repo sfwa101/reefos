@@ -5,6 +5,7 @@ import { Info, Scale } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { Panel } from "./Panel";
 import type { WeightOption } from "@/core/commerce/variants/weighed-prep-rules";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   weights: WeightOption[];
@@ -24,7 +25,7 @@ export const CutBuilder = ({ weights, weightId, basePrice, onChange }: Props) =>
         const active = w.id === weightId;
         const wp = Math.round(basePrice * w.factor);
         return (
-          <button
+          <Button
             key={w.id}
             onClick={() => onChange(w.id)}
             className={`flex items-center justify-between rounded-[14px] border-2 px-3 py-2.5 text-right transition ${
@@ -35,7 +36,7 @@ export const CutBuilder = ({ weights, weightId, basePrice, onChange }: Props) =>
             <span className="text-[11px] font-extrabold tabular-nums text-rose-700 dark:text-rose-300">
               {toLatin(wp)} ج.م
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>

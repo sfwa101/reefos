@@ -4,6 +4,7 @@ import { Copy, ExternalLink, MessageCircle, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import { copyTextToClipboard, buildWaUrl, normalizeWaPhone } from "@/lib/whatsapp";
+import { Button } from "@/components/ui/button";
 
 export type WaFallbackPayload = {
   phone: string;
@@ -83,13 +84,13 @@ export const WhatsAppFallbackDialog = ({ open, payload, onClose }: Props) => {
                   </div>
                 </div>
               </div>
-              <button
+              <Button
                 onClick={onClose}
                 className="rounded-full p-1.5 text-muted-foreground hover:bg-foreground/5"
                 aria-label="إغلاق"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             </div>
 
             {phone && (
@@ -109,13 +110,13 @@ export const WhatsAppFallbackDialog = ({ open, payload, onClose }: Props) => {
             </pre>
 
             <div className="mt-3 grid grid-cols-2 gap-2">
-              <button
+              <Button
                 onClick={onCopy}
                 className="flex items-center justify-center gap-2 rounded-2xl border border-border/60 bg-background px-3 py-2.5 text-[12.5px] font-bold transition active:scale-[0.97]"
               >
                 <Copy className="h-4 w-4" />
                 {copied ? "تم النسخ ✓" : "نسخ نص الطلب"}
-              </button>
+              </Button>
               <a
                 href={url}
                 target="_blank"
@@ -127,12 +128,12 @@ export const WhatsAppFallbackDialog = ({ open, payload, onClose }: Props) => {
                 فتح واتساب
               </a>
             </div>
-            <button
+            <Button
               onClick={onConfirmSent}
               className="mt-2 w-full rounded-2xl bg-foreground px-3 py-2.5 text-[12.5px] font-extrabold text-background transition active:scale-[0.97]"
             >
               تم الإرسال، انتقل لصفحة التأكيد
-            </button>
+            </Button>
           </motion.div>
         </motion.div>
       )}

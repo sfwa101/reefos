@@ -32,6 +32,7 @@ import { MediaGateway } from "@/core/media";
 import { decodeEgyptianId, normalizeIdInput, type DecodedEgyptianId } from "./egyptianIdDecoder";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 // 6 Sovereign Avatar slots for the Modesty Library (female-only path).
 const SOVEREIGN_AVATARS = [
@@ -199,7 +200,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
                       const Icon = a.icon;
                       const active = avatarKey === a.key;
                       return (
-                        <button
+                        <Button
                           key={a.key}
                           type="button"
                           onClick={() => setAvatarKey(a.key)}
@@ -212,7 +213,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
                         >
                           <Icon className="h-6 w-6" strokeWidth={2.2} />
                           <span className="text-[10.5px] font-semibold">{a.label}</span>
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -250,7 +251,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
               )}
             </AnimatePresence>
 
-            <button
+            <Button
               type="button"
               onClick={submit}
               disabled={!decoded.isValid || busy}
@@ -258,7 +259,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
             >
               {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
               {busy ? "جاري التحقّق…" : "تفعيل المواطنة السيادية"}
-            </button>
+            </Button>
 
             <p className="text-center text-[10.5px] text-muted-foreground">
               يمكنك المتابعة كـ <b>مقيم</b> دون توثيق، لكن المحفظة ستبقى مغلقة.

@@ -7,6 +7,7 @@ import { useCart } from "@/core/orders/runtime/react/CartProvider";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { fireMiniConfetti } from "@/lib/confetti";
+import { Button } from "@/components/ui/button";
 
 const CartUpgradeBanner = () => {
   const { lines, add, remove } = useCart();
@@ -39,13 +40,13 @@ const CartUpgradeBanner = () => {
         className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700 p-3.5 text-white shadow-tile ring-1 ring-emerald-400/40"
       >
         <div className="absolute -top-6 -right-6 h-24 w-24 rounded-full bg-white/10 blur-2xl" />
-        <button
+        <Button
           onClick={() => setDismissed(true)}
           aria-label="إغلاق"
           className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-white"
         >
           <X className="h-3 w-3" />
-        </button>
+        </Button>
         <div className="relative flex gap-3">
           <img src={basket.image} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover ring-2 ring-white/40" />
           <div className="min-w-0 flex-1">
@@ -59,12 +60,12 @@ const CartUpgradeBanner = () => {
               حوّلها للسلة الجاهزة ووفّر {toLatin(savings)} ج.م فوراً
             </p>
             <div className="mt-2 flex gap-1.5">
-              <button
+              <Button
                 onClick={upgrade}
                 className="flex flex-1 items-center justify-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-[11px] font-extrabold text-emerald-700 shadow-pill transition active:scale-[0.97]"
               >
                 <ArrowLeftRight className="h-3 w-3" /> حوّل ووفّر
-              </button>
+              </Button>
               <Link
                 to="/store/$slug"
                 params={{ slug: "baskets" }}

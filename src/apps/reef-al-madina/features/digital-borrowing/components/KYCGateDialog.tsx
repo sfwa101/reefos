@@ -6,6 +6,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { PALETTE } from "../data";
+import { Button } from "@/components/ui/button";
 
 export const KYCGateDialog = ({
   open, onOpenChange,
@@ -24,19 +25,19 @@ export const KYCGateDialog = ({
           </DialogDescription>
         </DialogHeader>
         <div className="mt-2 flex gap-2">
-          <button
+          <Button
             onClick={() => onOpenChange(false)}
             className="flex-1 rounded-2xl bg-foreground/5 py-3 text-sm font-bold text-foreground"
           >
             لاحقاً
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => { onOpenChange(false); navigate({ to: "/account/verification" }); }}
             className="flex-1 rounded-2xl py-3 text-sm font-extrabold text-white"
             style={{ background: PALETTE.primary }}
           >
             وثّق الآن
-          </button>
+          </Button>
         </div>
       </DialogContent>
     </Dialog>

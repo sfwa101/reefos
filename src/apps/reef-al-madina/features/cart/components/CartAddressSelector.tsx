@@ -3,6 +3,7 @@ import { Check, MapPin, Plus } from "lucide-react";
 import type { AuthUser as User } from "@/core/identity";
 import type { Addr } from "../types/cart.types";
 import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   user: User | null;
@@ -41,7 +42,7 @@ export const CartAddressSelector = ({
               {addresses.map((a) => {
                 const active = a.id === addrId;
                 return (
-                  <button
+                  <Button
                     key={a.id}
                     onClick={() => setAddrId(a.id)}
                     className={`flex w-[200px] shrink-0 flex-col items-start gap-1 rounded-2xl border-2 p-3 text-right transition ${
@@ -64,26 +65,26 @@ export const CartAddressSelector = ({
                         افتراضي
                       </span>
                     )}
-                  </button>
+                  </Button>
                 );
               })}
-              <button
+              <Button
                 type="button"
                 onClick={() => setSheetOpen(true)}
                 className="flex w-[120px] shrink-0 flex-col items-center justify-center gap-1 rounded-2xl border-2 border-dashed border-primary/50 bg-primary/5 p-3 text-[11px] font-bold text-primary"
               >
                 <Plus className="h-5 w-5" /> عنوان جديد
-              </button>
+              </Button>
             </div>
           </div>
         ) : (
-          <button
+          <Button
             type="button"
             onClick={() => setSheetOpen(true)}
             className="flex w-full items-center justify-center gap-1.5 rounded-2xl bg-primary/10 py-3 text-xs font-bold text-primary"
           >
             <Plus className="h-4 w-4" /> أضف عنوانًا للتوصيل
-          </button>
+          </Button>
         )
       ) : (
         <textarea

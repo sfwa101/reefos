@@ -10,6 +10,8 @@ import {
 } from "@/core/finance/types/wallet.types";
 import { bonusFor } from "@/core/finance/lib/walletAdvisor";
 import { isMobileWaContext, openWhatsApp } from "@/lib/whatsapp";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const paymentMethods: PaymentMethod[] = [
   { id: "instapay", label: "إنستا باي", icon: Banknote, sub: "تحويل بنكي فوري" },
@@ -82,13 +84,13 @@ export const WalletTopupDialog = ({
             <h2 className="font-display text-lg font-extrabold">شحن المحفظة</h2>
             <p className="text-[11px] text-muted-foreground">اختر القيمة وطريقة الدفع</p>
           </div>
-          <button
+          <Button
             onClick={onClose}
             aria-label="إغلاق"
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         <AnimatePresence mode="wait">
@@ -111,7 +113,7 @@ export const WalletTopupDialog = ({
           {TOPUP_PRESETS.map((p) => {
             const active = !custom && amount === p;
             return (
-              <button
+              <Button
                 key={p}
                 onClick={() => {
                   setAmount(p);
@@ -122,7 +124,7 @@ export const WalletTopupDialog = ({
                 }`}
               >
                 {toLatin(p)}
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -130,7 +132,7 @@ export const WalletTopupDialog = ({
         <label className="mb-4 block">
           <span className="mb-1 block text-[11px] font-bold text-muted-foreground">مبلغ مخصص</span>
           <div className="flex items-center gap-2 rounded-xl bg-foreground/5 px-3 py-2.5">
-            <input
+            <Input
               type="text"
               inputMode="numeric"
               value={custom}
@@ -149,7 +151,7 @@ export const WalletTopupDialog = ({
             const Icon = m.icon;
             const active = method === m.id;
             return (
-              <button
+              <Button
                 key={m.id}
                 onClick={() => setMethod(m.id)}
                 className={`flex w-full items-center gap-3 rounded-xl border p-2.5 text-right transition ${
@@ -172,17 +174,17 @@ export const WalletTopupDialog = ({
                     active ? "border-primary bg-primary" : "border-muted-foreground/40"
                   }`}
                 />
-              </button>
+              </Button>
             );
           })}
         </div>
 
-        <button
+        <Button
           onClick={submit}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98]"
         >
           متابعة عبر واتساب · {fmtMoney(finalAmount || 0)}
-        </button>
+        </Button>
         <p className="mt-2 text-center text-[10px] text-muted-foreground">
           سيتم تحويلك للواتساب لإتمام الدفع وإضافة الرصيد لمحفظتك
         </p>

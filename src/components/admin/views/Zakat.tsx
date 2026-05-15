@@ -9,6 +9,8 @@ import {
 import { Loader2, ShieldAlert, Calculator, Scale, Sparkles } from "lucide-react";
 import { fmtMoney } from "@/lib/format";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Z = ZakatAssessmentRow;
 
@@ -66,13 +68,13 @@ export default function Zakat() {
           <div className="flex gap-2 items-end">
             <div className="flex-1">
               <label className="text-[11px] text-foreground-tertiary">قيمة النصاب (ج.م)</label>
-              <input type="number" value={nisab} onChange={(e) => setNisab(Number(e.target.value))}
+              <Input type="number" value={nisab} onChange={(e) => setNisab(Number(e.target.value))}
                 className="w-full h-10 rounded-lg bg-background/60 px-3 text-[13px] num focus:outline-none focus:ring-2 focus:ring-success/30" />
             </div>
-            <button onClick={compute} disabled={computing}
+            <Button onClick={compute} disabled={computing}
               className="h-10 px-4 rounded-lg bg-success text-success-foreground font-semibold text-[13px] flex items-center gap-1 disabled:opacity-50">
               {computing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Calculator className="h-4 w-4" />} احسب
-            </button>
+            </Button>
           </div>
         </div>
 

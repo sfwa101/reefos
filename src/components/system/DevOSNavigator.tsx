@@ -26,6 +26,7 @@ import {
   Crown,
 } from "lucide-react";
 import { appRegistry } from "@/core/capabilities/app-registry";
+import { Button } from "@/components/ui/button";
 
 const STORAGE_KEY = "salsabil.dev.maeenAsDefault";
 const LEGACY_STORAGE_KEYS = [
@@ -173,14 +174,14 @@ export const DevOSNavigator = () => {
               <span className="h-px w-full bg-primary-foreground/15" />
 
               {/* Admin Nexus trigger */}
-              <button
+              <Button
                 onClick={() => setNexusOpen(true)}
                 className="flex h-10 w-full items-center justify-center gap-2 rounded-2xl border border-primary-foreground/15 bg-gradient-to-br from-slate-700 to-slate-900 px-3 shadow transition hover:from-slate-600 active:scale-95"
                 title="Admin Nexus"
               >
                 <Shield className="h-4 w-4 text-primary-foreground drop-shadow" />
                 <span className="text-[11px] font-bold text-primary-foreground">Admin Nexus</span>
-              </button>
+              </Button>
 
               {/* Maeen-as-default toggle */}
               <label
@@ -273,12 +274,12 @@ export const DevOSNavigator = () => {
               >
                 <div className="mb-4 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
                       onClick={() => setNexusOpen(false)}
                       className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-foreground/10 text-primary-foreground"
                     >
                       <ChevronLeft className="h-4 w-4" />
-                    </button>
+                    </Button>
                     <div>
                       <h3 className="text-sm font-extrabold tracking-tight text-primary-foreground">
                         Admin Nexus

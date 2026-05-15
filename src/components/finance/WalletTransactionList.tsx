@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { toLatin } from "@/lib/format";
 import { formatDate, iconFor, isPositive } from "@/core/finance/lib/walletAdvisor";
 import type { Tx } from "@/core/finance/types/wallet.types";
+import { Button } from "@/components/ui/button";
 
 /**
  * WalletTransactionList — "The Vault" sheet.
@@ -22,9 +23,9 @@ export const WalletTransactionList = ({ txs }: { txs: Tx[] }) => (
         </h2>
         <p className="text-[11px] text-muted-foreground">آخر العمليات على محفظتك</p>
       </div>
-      <button className="text-[11px] font-bold text-primary hover:underline">
+      <Button className="text-[11px] font-bold text-primary hover:underline">
         عرض الكل
-      </button>
+      </Button>
     </div>
 
     {txs.length === 0 ? (

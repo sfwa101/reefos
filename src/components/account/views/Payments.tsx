@@ -3,6 +3,7 @@ import BackHeader from "@/components/BackHeader";
 import { CreditCard, Wallet, Plus, Trash2, Check, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { IdentityGateway } from "@/core/identity";
+import { Button } from "@/components/ui/button";
 
 /**
  * PaymentMethod — shape served by the future `payment_methods` table.
@@ -108,20 +109,20 @@ const Payments = () => {
                 </div>
                 <div className="flex gap-1">
                   {!m.is_default && (
-                    <button
+                    <Button
                       onClick={() => setDefault(m.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-foreground/5"
                     >
                       <Check className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   )}
                   {m.kind === "card" && (
-                    <button
+                    <Button
                       onClick={() => remove(m.id)}
                       className="flex h-8 w-8 items-center justify-center rounded-full bg-destructive/10 text-destructive"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
-                    </button>
+                    </Button>
                   )}
                 </div>
               </div>
@@ -130,12 +131,12 @@ const Payments = () => {
         </div>
       )}
 
-      <button
+      <Button
         onClick={() => toast("سيتم فتح نموذج إضافة بطاقة جديدة قريباً")}
         className="glass flex w-full items-center justify-center gap-2 rounded-2xl py-4 text-sm font-bold text-primary shadow-soft"
       >
         <Plus className="h-4 w-4" /> إضافة وسيلة دفع
-      </button>
+      </Button>
     </div>
   );
 };

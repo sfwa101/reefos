@@ -13,6 +13,7 @@ import { memo, useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Search, Loader2 } from "lucide-react";
 import { eventBus, type SalsabilAppId } from "@/core/events";
+import { Input } from "@/components/ui/input";
 
 export type OmniScope = {
   appId: SalsabilAppId | string;
@@ -84,7 +85,7 @@ function SearchAtomImpl({ scopes, placeholder = "ابحث في كل سلسبيل
         {loading && (
           <Loader2 className="absolute left-3 h-4 w-4 animate-spin text-muted-foreground" />
         )}
-        <input
+        <Input
           autoFocus={autoFocus}
           value={q}
           onChange={(e) => setQ(e.target.value)}

@@ -5,6 +5,7 @@ import { lazyPage } from "@/routes/-lazyRoute";
 import { useAuth } from "@/context/AuthContext";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
 import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
+import { Button } from "@/components/ui/button";
 
 const Wallet = lazyPage(() => import("@/components/finance/WalletView"));
 
@@ -65,14 +66,14 @@ const ProgressiveKycBanner = () => {
           ائتمان أعلى وميزات سيادية إضافية في المستقبل.
         </p>
       </div>
-      <button
+      <Button
         type="button"
         onClick={dismiss}
         aria-label="إخفاء"
         className="rounded-lg p-1 text-muted-foreground transition hover:bg-muted/40"
       >
         <X className="h-4 w-4" />
-      </button>
+      </Button>
     </div>
   );
 };

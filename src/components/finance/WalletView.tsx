@@ -32,6 +32,7 @@ import { InsightsDockContent } from "@/components/finance/InsightsDockContent";
 import { SavingsJarDialog } from "@/components/finance/WalletSavingsJars";
 import { toLatin } from "@/lib/format";
 import { FloatingGuardian } from "@/components/hakim/FloatingGuardian";
+import { Button } from "@/components/ui/button";
 
 type DockKey = "ops" | "gameyas" | "vaults" | "insights" | "charity" | "family";
 
@@ -111,14 +112,14 @@ const Wallet = () => {
           </div>
           <div className="flex items-center gap-2">
             <FloatingGuardian workspace="wallet" inline />
-            <button
+            <Button
               type="button"
               onClick={toggleHide}
               aria-label={hidden ? "إظهار الرصيد" : "إخفاء الرصيد"}
               className="grid h-9 w-9 place-items-center rounded-full bg-card text-foreground ring-1 ring-border/50 shadow-sm active:scale-95 transition"
             >
               {hidden ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-            </button>
+            </Button>
           </div>
         </motion.section>
 
@@ -133,7 +134,7 @@ const Wallet = () => {
         {/* QUICK ACTION HUD — 4 large rounded sovereign buttons */}
         <div className="grid grid-cols-4 gap-2.5">
           {actions.map((a) => (
-            <button
+            <Button
               key={a.id}
               type="button"
               onClick={a.onClick}
@@ -141,7 +142,7 @@ const Wallet = () => {
             >
               <a.icon className="h-5 w-5 text-primary" strokeWidth={2.2} />
               <span className="text-[11px] font-extrabold">{a.label}</span>
-            </button>
+            </Button>
           ))}
         </div>
 
@@ -165,7 +166,7 @@ const Wallet = () => {
         {/* MINI-APP DOCK */}
         <div className="grid grid-cols-5 gap-1 rounded-2xl bg-muted/30 p-1 ring-1 ring-border/40">
           {docks.map((t) => (
-            <button
+            <Button
               key={t.id}
               type="button"
               onClick={() => {
@@ -183,7 +184,7 @@ const Wallet = () => {
             >
               <t.icon className="h-4 w-4" />
               {t.label}
-            </button>
+            </Button>
           ))}
         </div>
 

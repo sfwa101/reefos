@@ -1,5 +1,6 @@
 import { Lock, Sparkles } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 
 type Level = "bronze" | "silver" | "gold" | "platinum";
 const RANK: Record<Level, number> = { bronze: 1, silver: 2, gold: 3, platinum: 4 };
@@ -109,6 +110,6 @@ export default function LockedOfferCard({
 
   if (locked) return inner;
   if (href) return <Link to={href as never}>{inner}</Link>;
-  if (onClick) return <button onClick={onClick} className="w-full text-right">{inner}</button>;
+  if (onClick) return <Button onClick={onClick} className="w-full text-right">{inner}</Button>;
   return inner;
 }

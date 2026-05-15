@@ -16,6 +16,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
 
 type Item = { to?: string; params?: Record<string, string>; icon: React.ElementType; label: string; color: string; onClick?: () => void };
 type Group = { title: string; items: Item[] };
@@ -157,13 +158,13 @@ export default function More() {
                         <span className="text-[12px] font-medium leading-tight">{it.label}</span>
                       </Link>
                     ) : (
-                      <button key={it.label} onClick={it.onClick}
+                      <Button key={it.label} onClick={it.onClick}
                         className="flex items-center gap-2 p-2.5 rounded-xl bg-surface-muted/60 hover:bg-primary/10 transition press text-right">
                         <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${it.color} flex items-center justify-center text-white shadow-sm shrink-0`}>
                           <it.icon className="h-[15px] w-[15px]" strokeWidth={2.5} />
                         </div>
                         <span className="text-[12px] font-medium leading-tight">{it.label}</span>
-                      </button>
+                      </Button>
                     )
                   ))}
                 </div>

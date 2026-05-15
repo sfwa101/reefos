@@ -3,6 +3,7 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { Banknote, Delete, Zap } from "lucide-react";
 import { ZeroFrictionButton } from "@/components/ui/ZeroFrictionButton";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   total: number;
@@ -67,14 +68,14 @@ export function PosQuickPay({ total, itemCount, disabled, onPay }: Props) {
       </div>
 
       {/* ⚡ One-tap exact-pay shortcut — the 90% case */}
-      <button
+      <Button
         onClick={exactPay}
         disabled={disabled || busy || total <= 0}
         className="w-full mb-3 h-12 rounded-2xl bg-secondary text-secondary-foreground font-display text-[15px] flex items-center justify-center gap-2 press disabled:opacity-50 ring-1 ring-border"
       >
         <Zap className="h-4 w-4" />
         ادفع بالضبط · {fmtMoney(total)}
-      </button>
+      </Button>
 
       <div className="bg-muted rounded-2xl p-3 mb-3">
         <div className="flex items-center justify-between">
@@ -89,34 +90,34 @@ export function PosQuickPay({ total, itemCount, disabled, onPay }: Props) {
 
       <div className="flex gap-1.5 mb-2 overflow-x-auto">
         {QUICK.map(v => (
-          <button
+          <Button
             key={v}
             onClick={() => { vibrate(10); setTendered(String(v)); }}
             disabled={disabled}
             className="shrink-0 h-9 px-3 rounded-xl bg-muted text-foreground text-[12px] font-semibold press num"
           >
             {v}
-          </button>
+          </Button>
         ))}
-        <button
+        <Button
           onClick={() => { vibrate(10); setTendered(""); }}
           disabled={disabled}
           className="shrink-0 h-9 px-3 rounded-xl bg-destructive/10 text-destructive text-[12px] font-semibold press"
         >
           مسح
-        </button>
+        </Button>
       </div>
 
       <div className="grid grid-cols-3 gap-1.5 mb-3">
         {keys.map(k => (
-          <button
+          <Button
             key={k}
             onClick={() => press(k)}
             disabled={disabled}
             className="h-12 rounded-xl bg-muted text-foreground font-display text-[18px] num press flex items-center justify-center disabled:opacity-50"
           >
             {k === "<" ? <Delete className="h-4 w-4" /> : k}
-          </button>
+          </Button>
         ))}
       </div>
 

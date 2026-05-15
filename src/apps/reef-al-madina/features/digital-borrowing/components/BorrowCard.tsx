@@ -6,11 +6,12 @@ import { fmtMoney } from "@/lib/format";
 import { borrowStartingPrice } from "@/core/commerce/policies/deposits";
 import { PALETTE } from "../data";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 export const BorrowCard = ({
   product, onBorrow,
 }: { product: Product; onBorrow: (p: Product) => void }) => (
-  <button
+  <Button
     onClick={() => onBorrow(product)}
     className="group flex w-full items-center gap-3 rounded-2xl bg-card p-3 text-right shadow-soft ring-1 ring-border/50 transition hover:-translate-y-0.5 active:scale-[0.98]"
   >
@@ -31,5 +32,5 @@ export const BorrowCard = ({
       </div>
     </div>
     <span className="rounded-full px-3 py-1.5 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>استعِر</span>
-  </button>
+  </Button>
 );

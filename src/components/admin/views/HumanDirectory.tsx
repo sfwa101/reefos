@@ -14,6 +14,8 @@ import { HumanProfileSheet } from "@/components/admin/crm/HumanProfileSheet";
 import { CreateHumanDialog } from "@/components/admin/crm/CreateHumanDialog";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Profile = HumanProfile;
 type Rel = HumanRelationship;
@@ -82,18 +84,18 @@ export default function HumanDirectory() {
         <div className="flex items-center gap-2 mb-3">
           <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-            <input
+            <Input
               value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث بالاسم أو الجوال — لا فرق بين عميل، تاجر، شريك، موظف"
               className="w-full bg-surface-muted rounded-2xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
           </div>
-          <button
+          <Button
             onClick={() => setCreateOpen(true)}
             className="inline-flex items-center gap-1.5 h-11 px-4 rounded-2xl bg-primary text-primary-foreground text-[12.5px] font-semibold press"
           >
             <UserPlus className="h-4 w-4" /> إضافة إنسان
-          </button>
+          </Button>
         </div>
 
         {/* Filter chips */}
@@ -123,7 +125,7 @@ export default function HumanDirectory() {
               const kinds = Array.from(relMap.get(p.id) ?? []);
               return (
                 <li key={p.id}>
-                  <button
+                  <Button
                     onClick={() => setOpenId(p.id)}
                     className="w-full flex items-center gap-3 bg-surface rounded-2xl p-3 border border-border/40 text-right press hover:border-primary/30 transition-base"
                   >
@@ -148,7 +150,7 @@ export default function HumanDirectory() {
                         </span>
                       ))}
                     </div>
-                  </button>
+                  </Button>
                 </li>
               );
             })}
@@ -171,7 +173,7 @@ export default function HumanDirectory() {
 
 function FilterChip({ label, active, onClick, styles }: { label: string; active: boolean; onClick: () => void; styles?: string }) {
   return (
-    <button
+    <Button
       onClick={onClick}
       className={cn(
         "text-[11.5px] px-3 py-1.5 rounded-xl border transition-base press",
@@ -179,6 +181,6 @@ function FilterChip({ label, active, onClick, styles }: { label: string; active:
       )}
     >
       {label}
-    </button>
+    </Button>
   );
 }

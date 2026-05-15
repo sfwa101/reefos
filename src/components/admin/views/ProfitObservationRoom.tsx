@@ -38,6 +38,7 @@ import {
 } from "@/core/finance/profit-observation.functions";
 import { useAdminOverrideLogsRealtime } from "@/core/events/hooks/useAdminOverrideLogsRealtime";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 const ProfitObservationRoom = () => {
   const [rows, setRows] = useState<OverrideLogRow[] | null>(null);
@@ -265,12 +266,12 @@ const OverrideCard = ({
         />
       </div>
 
-      <button
+      <Button
         onClick={onReview}
         className="mt-2 w-full rounded-xl bg-primary px-3 py-2 text-[12px] font-extrabold text-primary-foreground press"
       >
         اعتماد إداري
-      </button>
+      </Button>
     </motion.li>
   );
 };
@@ -312,13 +313,13 @@ const ReviewDialog = ({
         <h2 className="font-display text-[16px] font-extrabold">
           اعتماد التجاوز إداريّاً
         </h2>
-        <button
+        <Button
           onClick={onClose}
           aria-label="إغلاق"
           className="rounded-full bg-muted p-1.5"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
       <div className="rounded-xl bg-amber-50 dark:bg-amber-950/20 p-3 text-[11px] font-bold text-amber-800 dark:text-amber-300 ring-1 ring-amber-300/40">
@@ -347,19 +348,19 @@ const ReviewDialog = ({
       </div>
 
       <div className="grid grid-cols-2 gap-2">
-        <button
+        <Button
           onClick={onClose}
           className="rounded-xl bg-muted px-3 py-2.5 text-[12px] font-extrabold"
         >
           إلغاء
-        </button>
-        <button
+        </Button>
+        <Button
           disabled={submitting || reason.trim().length < 10}
           onClick={onSubmit}
           className="rounded-xl bg-destructive px-3 py-2.5 text-[12px] font-extrabold text-destructive-foreground disabled:opacity-40"
         >
           {submitting ? "…جارٍ التسجيل" : "اعتماد وتسجيل"}
-        </button>
+        </Button>
       </div>
     </motion.div>
   </div>

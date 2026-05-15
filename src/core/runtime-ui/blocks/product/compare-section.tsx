@@ -4,6 +4,7 @@ import { storeThemes } from "@/lib/storeThemes";
 import { Crown, Boxes, Truck, BadgePercent } from "lucide-react";
 import { useMemo } from "react";
 import { bulkPackPricingFromRetail } from "@/core/commerce/policies/bulk-pack";
+import { Button } from "@/components/ui/button";
 
 // Simulate bulk packs from regular products via the wholesale policy helper.
 function buildBulk() {
@@ -59,9 +60,9 @@ const WholesaleComparisonSection = () => {
             وفّر حتى 35٪<br />عند الشراء بكميّات كبيرة
           </h2>
           <p className="mt-1 text-xs text-white/80">للأفراد والعائلات · بدون حد أدنى للطلب</p>
-          <button className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-foreground shadow-pill">
+          <Button className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-xs font-bold text-accent-foreground shadow-pill">
             اشترك بـ 299 ج.م/سنة
-          </button>
+          </Button>
         </div>
       </section>
     }

@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { fmtMoney, fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 type Human360 = Human360Result;
 
@@ -267,9 +268,9 @@ function PromoteCard({ icon: Icon, title, subtitle, cta }: { icon: typeof Sparkl
       </div>
       <p className="font-display text-[16px]">{title}</p>
       <p className="text-[12px] text-foreground-tertiary mt-1 mb-4">{subtitle}</p>
-      <button className="bg-primary text-primary-foreground rounded-xl h-10 px-5 text-[13px] font-semibold press" disabled>
+      <Button className="bg-primary text-primary-foreground rounded-xl h-10 px-5 text-[13px] font-semibold press" disabled>
         {cta} (قريباً)
-      </button>
+      </Button>
     </div>
   );
 }

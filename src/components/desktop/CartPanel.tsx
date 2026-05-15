@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { useCart, useCartLineTotals } from "@/core/orders/runtime/react/CartProvider";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { fmtMoney, toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 const CartPanel = () => {
   const { lines, total, count, setQty, remove } = useCart();
@@ -84,34 +85,34 @@ const CartPanelLine = ({
       <div className="flex flex-1 flex-col">
         <div className="flex items-start justify-between gap-1">
           <h3 className="line-clamp-2 text-xs font-bold leading-tight">{name}</h3>
-          <button
+          <Button
             onClick={() => remove(productId)}
             className="text-muted-foreground hover:text-destructive"
             aria-label="حذف"
           >
             <Trash2 className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
         <div className="mt-auto flex items-center justify-between pt-1">
           <span className="font-display text-sm font-extrabold text-primary tabular-nums">
             {fmtMoney(lineTotal)}
           </span>
           <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-0.5">
-            <button
+            <Button
               onClick={() => setQty(productId, qty - 1)}
               className="flex h-6 w-6 items-center justify-center rounded-full bg-background"
             >
               <Minus className="h-3 w-3" />
-            </button>
+            </Button>
             <span className="w-5 text-center text-xs font-bold tabular-nums">
               {toLatin(qty)}
             </span>
-            <button
+            <Button
               onClick={() => setQty(productId, qty + 1)}
               className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground"
             >
               <Plus className="h-3 w-3" />
-            </button>
+            </Button>
           </div>
         </div>
       </div>

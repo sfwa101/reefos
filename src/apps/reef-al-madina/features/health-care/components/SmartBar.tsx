@@ -1,5 +1,6 @@
 import { Sparkles } from "lucide-react";
 import type { SmartItem } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const SmartBar = ({
   title,
@@ -25,7 +26,7 @@ export const SmartBar = ({
     >
       <div className="grid grid-cols-4 gap-2">
         {items.map((it) => (
-          <button
+          <Button
             key={it.id}
             onClick={() => onPick(it.id)}
             className="group flex flex-col items-center gap-1.5 rounded-2xl bg-background/60 p-2.5 ring-1 ring-border/40 transition active:scale-95"
@@ -42,7 +43,7 @@ export const SmartBar = ({
             <span className="text-center text-[10px] font-extrabold leading-tight text-foreground/85">
               {it.label}
             </span>
-          </button>
+          </Button>
         ))}
       </div>
     </div>

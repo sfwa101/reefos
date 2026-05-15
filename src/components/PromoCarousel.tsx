@@ -1,6 +1,7 @@
 import { useEffect, useState, memo } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Slide = {
   id: string;
@@ -162,7 +163,7 @@ const PromoCarousel = () => {
         {/* Dots */}
         <div className="absolute inset-x-0 bottom-1.5 z-10 flex justify-center gap-1.5">
           {SLIDES.map((_, idx) => (
-            <button
+            <Button
               key={idx}
               onClick={() => setI(idx)}
               aria-label={`عرض ${idx + 1}`}

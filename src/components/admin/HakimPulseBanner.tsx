@@ -1,5 +1,6 @@
 import { Sparkles, Loader2, MessageCircle } from "lucide-react";
 import { useHakimPulseBanner } from "@/hooks/useHakimPulseBanner";
+import { Button } from "@/components/ui/button";
 
 export function HakimPulseBanner({
   metrics, page = "finance", onChat,
@@ -35,13 +36,13 @@ export function HakimPulseBanner({
           )}
         </div>
         {onChat && (
-          <button
+          <Button
             onClick={onChat}
             className="shrink-0 inline-flex items-center gap-1 text-[12px] font-semibold bg-primary text-primary-foreground rounded-full px-3 py-1.5 shadow-sm hover:shadow-md press"
           >
             <MessageCircle className="h-3.5 w-3.5" />
             اسأل حكيم
-          </button>
+          </Button>
         )}
       </div>
     </div>

@@ -11,6 +11,7 @@ import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { Pause, Play, Trash2, Clock, Lock, CalendarClock, Wallet, Sparkles, ShoppingBasket } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const SubscriptionManagerBlock = () => {
   const { subs, isAuthed, updateSubscription, deleteSubscription } = useSubscriptions();
@@ -137,26 +138,26 @@ const SubscriptionManagerBlock = () => {
 
                 {/* Actions */}
                 <div className="grid grid-cols-3 gap-1.5 border-t border-border/50 p-2">
-                  <button
+                  <Button
                     onClick={() => togglePause(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >
                     {s.paused ? <><Play className="h-3.5 w-3.5" /> استئناف</> : <><Pause className="h-3.5 w-3.5" /> إيقاف</>}
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => skipNext(s)}
                     disabled={locked}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-foreground/5 py-2 text-[11px] font-extrabold disabled:opacity-40"
                   >
                     <CalendarClock className="h-3.5 w-3.5" /> تأجيل
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     onClick={() => remove(s.id)}
                     className="flex items-center justify-center gap-1.5 rounded-xl bg-rose-500/10 py-2 text-[11px] font-extrabold text-rose-700 dark:text-rose-300"
                   >
                     <Trash2 className="h-3.5 w-3.5" /> إلغاء
-                  </button>
+                  </Button>
                 </div>
               </article>
             );

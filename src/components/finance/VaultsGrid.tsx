@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Target, Plus, Lock, Sparkles } from "lucide-react";
 import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 type Vault = {
   id: string;
@@ -51,14 +52,14 @@ export const VaultsGrid = ({ userId }: { userId: string | null }) => {
         <h3 className="font-display text-base font-black tracking-tight">
           حصّالاتي
         </h3>
-        <button
+        <Button
           type="button"
           disabled
           className="flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-extrabold text-primary ring-1 ring-primary/25 transition active:scale-95 disabled:opacity-70"
         >
           <Plus className="h-3 w-3" />
           حصّالة جديدة
-        </button>
+        </Button>
       </div>
 
       {loading ? (

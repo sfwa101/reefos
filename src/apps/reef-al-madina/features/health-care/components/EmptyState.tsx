@@ -1,4 +1,5 @@
 import { Camera, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const EmptyState = ({ onScan }: { onScan: () => void }) => (
   <div className="rounded-2xl bg-card/80 p-6 text-center ring-1 ring-border/40">
@@ -9,11 +10,11 @@ export const EmptyState = ({ onScan }: { onScan: () => void }) => (
     <p className="mt-1 text-[11px] text-muted-foreground">
       جرّب الماسح الذكي للعثور على البدائل المناسبة
     </p>
-    <button
+    <Button
       onClick={onScan}
       className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-[12px] font-extrabold text-primary-foreground active:scale-95"
     >
       <Camera className="h-3.5 w-3.5" /> امسح عبوة دواء
-    </button>
+    </Button>
   </div>
 );

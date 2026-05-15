@@ -6,6 +6,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 type Slide = {
   id: string;
@@ -99,7 +100,7 @@ export const PromotionSlider = () => {
         {/* Dots */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 z-10">
           {SLIDES.map((_, i) => (
-            <button
+            <Button
               key={i}
               onClick={() => setIdx(i)}
               className={`h-1.5 rounded-full transition-all ${

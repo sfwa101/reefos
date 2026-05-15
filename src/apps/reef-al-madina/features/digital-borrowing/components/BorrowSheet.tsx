@@ -13,6 +13,7 @@ import {
 } from "@/lib/digital-borrowing";
 import { libraryBorrowToModifiers } from "@/core/commerce/pricing/adapters";
 import { PALETTE } from "../data";
+import { Button } from "@/components/ui/button";
 
 export const BorrowSheet = ({
   product, open, onOpenChange,
@@ -51,7 +52,7 @@ export const BorrowSheet = ({
             const active = d.id === duration;
             const p = calcBorrowPrice(product.price, d.id).rental;
             return (
-              <button
+              <Button
                 key={d.id}
                 onClick={() => setDuration(d.id)}
                 className={`rounded-2xl p-3 text-center text-xs font-extrabold transition ${active ? "text-white" : "bg-foreground/5 text-foreground"}`}
@@ -59,7 +60,7 @@ export const BorrowSheet = ({
               >
                 <p>{d.label}</p>
                 <p className={`mt-1 text-[11px] ${active ? "opacity-90" : "text-muted-foreground"}`}>{toLatin(p)} ج.م</p>
-              </button>
+              </Button>
             );
           })}
         </div>
@@ -74,9 +75,9 @@ export const BorrowSheet = ({
           ⚠️ يُسترد التأمين كاملاً للمحفظة عند إرجاع الكتاب بحالة جيدة. غرامة التأخير: <strong>5 ج.م/يوم</strong> تُخصم من التأمين.
         </div>
 
-        <button onClick={confirm} className="mt-2 w-full rounded-2xl py-3.5 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>
+        <Button onClick={confirm} className="mt-2 w-full rounded-2xl py-3.5 text-sm font-extrabold text-white" style={{ background: PALETTE.primary }}>
           أضف للسلة — {fmtMoney(total)}
-        </button>
+        </Button>
       </DialogContent>
     </Dialog>
   );

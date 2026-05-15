@@ -15,6 +15,7 @@ import {
   type KDSTicketStatus,
 } from "@/core/kds/runtime/KDSRuntime";
 import { kdsOrderPlacedReactor } from "@/core/events/handlers/KDSOrderPlacedReactor";
+import { Button } from "@/components/ui/button";
 
 const STATUS_ORDER: Record<KDSTicketStatus, number> = {
   queued: 0,
@@ -114,31 +115,31 @@ function KDSTicketCard({ ticket }: { ticket: KDSTicket }) {
 
       <footer>
         {ticket.status === "queued" && (
-          <button
+          <Button
             type="button"
             onClick={() => dispatch("preparing")}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <Play className="h-4 w-4" /> ابدأ التجهيز
-          </button>
+          </Button>
         )}
         {ticket.status === "preparing" && (
-          <button
+          <Button
             type="button"
             onClick={() => dispatch("ready")}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <CheckCircle2 className="h-4 w-4" /> جاهز
-          </button>
+          </Button>
         )}
         {ticket.status === "ready" && (
-          <button
+          <Button
             type="button"
             onClick={() => dispatch("delivered")}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <PackageCheck className="h-4 w-4" /> تم التسليم
-          </button>
+          </Button>
         )}
         {ticket.status === "delivered" && (
           <div className="w-full text-center text-[12px] font-bold text-primary py-2">

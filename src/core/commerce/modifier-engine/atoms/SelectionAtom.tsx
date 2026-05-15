@@ -5,6 +5,7 @@
 import { Check } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import { ACCENTS, type SelectionGroupSchema } from "../types";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   group: SelectionGroupSchema;
@@ -34,7 +35,7 @@ export const SelectionAtom = ({ group, value, onChange }: Props) => {
       {group.options.map((opt) => {
         const active = selected.has(opt.id);
         return (
-          <button
+          <Button
             key={opt.id}
             type="button"
             disabled={opt.disabled}
@@ -65,7 +66,7 @@ export const SelectionAtom = ({ group, value, onChange }: Props) => {
                 </span>
               )}
             </span>
-          </button>
+          </Button>
         );
       })}
     </div>

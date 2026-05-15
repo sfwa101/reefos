@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import { NeoSuperCard } from "./NeoSuperCard";
 import type { WalletAsset } from "@/core/finance/hooks/useWalletAssets";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   assets: WalletAsset[];
@@ -64,7 +65,7 @@ export function NeoCardsCarousel({
       {/* dot dock */}
       <div className="mt-3 flex items-center justify-center gap-1.5">
         {assets.map((a, i) => (
-          <button
+          <Button
             key={a.type}
             type="button"
             aria-label={`عرض ${a.label}`}

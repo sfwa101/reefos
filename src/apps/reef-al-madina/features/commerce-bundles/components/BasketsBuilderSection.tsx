@@ -8,6 +8,7 @@ import { findFrequency } from "@/core/commerce/policies/bundle-thresholds";
 import { useSubscriptions } from "@/hooks/useSubscriptions";
 import { toLatin } from "@/lib/format";
 import { Sparkles, PackagePlus, ShoppingBasket, CalendarClock, ChevronLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const categories = [
   { id: "all", name: "الكل" },
@@ -115,7 +116,7 @@ const BasketsBuilderSection = () => {
       <div className="sticky top-14 z-20 -mx-4 border-y border-border/40 bg-background/85 px-4 py-2 shadow-[0_4px_12px_-8px_rgba(0,0,0,0.15)]">
         <div className="-mx-4 flex gap-2 overflow-x-auto px-4 scrollbar-hide">
           {categories.map((c) => (
-            <button
+            <Button
               key={c.id}
               onClick={() => setActive(c.id)}
               className={`shrink-0 rounded-full px-3.5 py-1.5 text-[12px] font-extrabold transition ${
@@ -125,7 +126,7 @@ const BasketsBuilderSection = () => {
               }`}
             >
               {c.name}
-            </button>
+            </Button>
           ))}
         </div>
       </div>

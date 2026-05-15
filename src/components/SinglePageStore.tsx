@@ -5,6 +5,8 @@ import { storeThemes, type StoreThemeKey } from "@/lib/storeThemes";
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import UniversalPremiumSkeleton from "@/components/UniversalPremiumSkeleton";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export type StoreCategory = {
   /** unique id used for scroll-spy */
@@ -107,7 +109,7 @@ const SinglePageStore = ({
       {/* Search */}
       <div className="glass mb-3 mt-4 flex items-center gap-3 rounded-2xl px-4 py-3 shadow-soft">
         <Search className="h-4 w-4 text-muted-foreground" strokeWidth={2.4} />
-        <input
+        <Input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={searchPlaceholder}
@@ -134,7 +136,7 @@ const SinglePageStore = ({
             {categories.map((c) => {
               const isActive = c.id === active;
               return (
-                <button
+                <Button
                   key={c.id}
                   data-cat={c.id}
                   onClick={() => jumpTo(c.id)}
@@ -144,7 +146,7 @@ const SinglePageStore = ({
                   style={isActive ? { background: `hsl(${theme.hue})` } : undefined}
                 >
                   {c.name}
-                </button>
+                </Button>
               );
             })}
           </div>

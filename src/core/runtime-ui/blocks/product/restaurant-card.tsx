@@ -11,6 +11,7 @@ import { toast } from "sonner";
 import type { Restaurant } from "@/lib/vendor-menu-config";
 import RestaurantItemSheet from "@/core/runtime-ui/blocks/product/restaurant-item-sheet";
 import OptimizedImage from "@/components/ui/OptimizedImage";
+import { Button } from "@/components/ui/button";
 
 const resolve = (ids: string[]): Product[] =>
   ids.map((id) => ALL_PRODUCTS.find((p) => p.id === id)).filter((p): p is Product => !!p);
@@ -115,7 +116,7 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
       )}
 
       {/* ===== Banner (top) ===== */}
-      <button
+      <Button
         type="button"
         onClick={goToRestaurant}
         className="relative flex w-full items-center gap-3 px-3 py-3 text-right transition active:scale-[0.99]"
@@ -155,7 +156,7 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
           <span className="text-[11px] font-extrabold">شوف المنيو</span>
           <ArrowLeft className="h-4 w-4" strokeWidth={3} />
         </div>
-      </button>
+      </Button>
 
       {/* ===== Best sellers row ===== */}
       <div className="bg-card px-2 pb-3 pt-2.5">
@@ -171,7 +172,7 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
           style={{ scrollSnapType: "x mandatory", WebkitOverflowScrolling: "touch" }}
         >
           {dishes.map((p) => (
-            <button
+            <Button
               type="button"
               key={p.id}
               onClick={(e) => {
@@ -206,7 +207,7 @@ const RestaurantBlock = ({ restaurant: r, unavailable = false }: Props) => {
                 {toLatin(p.price)}
                 <span className="ms-0.5 text-[9px] font-medium text-muted-foreground">ج.م</span>
               </span>
-            </button>
+            </Button>
           ))}
         </div>
       </div>

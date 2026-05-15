@@ -4,6 +4,8 @@ import { ChevronLeft, Loader2, Users, ShieldCheck, Sparkles } from "lucide-react
 import { toast } from "sonner";
 import { FinanceGateway } from "@/core/finance/gateway/FinanceGateway";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const AMOUNT_PRESETS = [500, 1000, 2000, 5000];
 const DURATION_PRESETS = [6, 10, 12];
@@ -64,12 +66,12 @@ export const GameyaCreationSheet = ({
         className="w-full max-w-md rounded-t-3xl bg-card p-5 ring-1 ring-border/40 shadow-2xl sm:rounded-3xl"
       >
         <div className="mb-4 flex items-center gap-2">
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
           >
             <ChevronLeft className="h-4 w-4" />
-          </button>
+          </Button>
           <div>
             <h2 className="font-display text-lg font-extrabold">جمعية جديدة</h2>
             <p className="text-[11px] text-muted-foreground">
@@ -82,7 +84,7 @@ export const GameyaCreationSheet = ({
           <span className="mb-1 block text-[11px] font-bold text-muted-foreground">
             اسم الجمعية
           </span>
-          <input
+          <Input
             type="text"
             value={name}
             onChange={(e) => setName(e.target.value.slice(0, 40))}
@@ -97,7 +99,7 @@ export const GameyaCreationSheet = ({
           </span>
           <div className="grid grid-cols-4 gap-2">
             {AMOUNT_PRESETS.map((v) => (
-              <button
+              <Button
                 key={v}
                 type="button"
                 onClick={() => setAmount(v)}
@@ -108,7 +110,7 @@ export const GameyaCreationSheet = ({
                 }`}
               >
                 {toLatin(v)}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -119,7 +121,7 @@ export const GameyaCreationSheet = ({
           </span>
           <div className="grid grid-cols-3 gap-2">
             {DURATION_PRESETS.map((v: number) => (
-              <button
+              <Button
                 key={v}
                 type="button"
                 onClick={() => setMembers(v)}
@@ -130,7 +132,7 @@ export const GameyaCreationSheet = ({
                 }`}
               >
                 {toLatin(v)}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -154,14 +156,14 @@ export const GameyaCreationSheet = ({
           </span>
         </div>
 
-        <button
+        <Button
           onClick={submit}
           disabled={!valid || busy}
           className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-md transition active:scale-[0.98] disabled:opacity-40"
         >
           {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Users className="h-4 w-4" />}
           فتح الجمعية
-        </button>
+        </Button>
       </motion.div>
     </motion.div>
   );

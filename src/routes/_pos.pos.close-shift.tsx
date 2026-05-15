@@ -2,6 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { LockKeyhole } from "lucide-react";
 import { useState } from "react";
 import { usePosEngine } from "@/apps/reef-al-madina/features/pos/hooks/usePosEngine";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export const Route = createFileRoute("/_pos/pos/close-shift")({
   component: PosCloseShift,
@@ -47,20 +49,20 @@ function PosCloseShift() {
         <Row label="المتوقع في الدرج" value={expected.toFixed(2)} bold />
       </div>
       <label className="block text-[12px] text-foreground-secondary mb-1">المبلغ الفعلي في الدرج</label>
-      <input
+      <Input
         inputMode="decimal"
         value={actual}
         onChange={(ev) => setActual(ev.target.value)}
         className="w-full h-11 rounded-xl border border-border bg-background px-3 font-mono text-[15px] mb-3"
         placeholder="0.00"
       />
-      <button
+      <Button
         disabled={busy || actual === ""}
         onClick={onClose}
         className="w-full h-11 rounded-xl bg-primary text-primary-foreground font-medium disabled:opacity-50"
       >
         {busy ? "جارٍ الإغلاق…" : "إغلاق الورديّة"}
-      </button>
+      </Button>
     </div>
   );
 }

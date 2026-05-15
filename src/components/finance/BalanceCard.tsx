@@ -9,6 +9,7 @@ import {
 import { CreditCard, Copy, Cpu, ShieldCheck, Wifi } from "lucide-react";
 import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 /** Build an IBAN-style display id from the user UUID, e.g. REEF-A1B2-C3D4. */
 const buildAccountNumber = (userId: string | null | undefined): string => {
@@ -195,7 +196,7 @@ export const BalanceCard = ({
           </div>
 
           {/* IBAN-style account number with copy */}
-          <button
+          <Button
             type="button"
             onClick={copyAccount}
             className="group flex items-center justify-between gap-2 rounded-xl bg-primary-foreground/10 px-3 py-1.5 ring-1 ring-primary-foreground/20 backdrop-blur-sm transition active:scale-[0.98]"
@@ -209,7 +210,7 @@ export const BalanceCard = ({
               </p>
             </div>
             <Copy className="h-3.5 w-3.5 opacity-70 transition-opacity group-hover:opacity-100" />
-          </button>
+          </Button>
 
           {/* Bottom — name + trust limit */}
           <div className="flex items-end justify-between gap-2">

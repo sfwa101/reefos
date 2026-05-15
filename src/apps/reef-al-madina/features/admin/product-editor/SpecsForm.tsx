@@ -1,5 +1,6 @@
 import { Field, Toggle, inputCls } from "./primitives";
 import { SOURCES, type FieldDef, type ProductRow } from "./types";
+import { Input } from "@/components/ui/input";
 
 interface Props {
   form: ProductRow;
@@ -45,7 +46,7 @@ const SpecsForm = ({ form, fields, updateMeta }: Props) => {
               }
               return (
                 <Field key={f.key} label={f.label + (f.kind === "number" && f.suffix ? ` (${f.suffix})` : "")}>
-                  <input
+                  <Input
                     type={f.kind === "number" ? "number" : "text"}
                     step="any"
                     placeholder={f.kind === "text" ? f.placeholder : undefined}

@@ -15,6 +15,7 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { LOCALE_LABEL, type Locale } from "@/apps/reef-al-madina/features/settings/locales";
+import { Button } from "@/components/ui/button";
 import {
   MODE_OPTIONS,
   THEMES,
@@ -37,7 +38,7 @@ const SwatchButton = ({
   // so the dot always reflects the actual theme color (never hardcoded).
   const wrapperAttr = id === "sage" ? {} : { "data-theme": id };
   return (
-    <button
+    <Button
       type="button"
       onClick={() => onPick(id)}
       className="flex flex-col items-center gap-1.5"
@@ -64,7 +65,7 @@ const SwatchButton = ({
         </div>
       </div>
       <span className="text-[11px] font-bold">{label}</span>
-    </button>
+    </Button>
   );
 };
 
@@ -153,7 +154,7 @@ const Settings = () => {
           {t("settings.preferences")}
         </h3>
         <div className="overflow-hidden rounded-3xl bg-card shadow-soft ring-1 ring-border/60 divide-y divide-border/60">
-          <button
+          <Button
             type="button"
             onClick={() => setLangOpen(true)}
             className="flex w-full items-center gap-3 px-4 py-3 text-right transition active:bg-foreground/5"
@@ -166,7 +167,7 @@ const Settings = () => {
               <p className="text-[10.5px] text-muted-foreground">{LOCALE_LABEL[locale]}</p>
             </div>
             <ChevronLeft className="h-4 w-4 text-muted-foreground" />
-          </button>
+          </Button>
           <Link
             to="/account/notifications"
             className="flex w-full items-center gap-3 px-4 py-3 text-right transition active:bg-foreground/5"
@@ -193,7 +194,7 @@ const Settings = () => {
             {(Object.keys(LOCALE_LABEL) as Locale[]).map((l) => {
               const active = locale === l;
               return (
-                <button
+                <Button
                   key={l}
                   type="button"
                   onClick={() => {
@@ -208,7 +209,7 @@ const Settings = () => {
                 >
                   <span>{LOCALE_LABEL[l]}</span>
                   {active && <Check className="h-4 w-4" strokeWidth={3} />}
-                </button>
+                </Button>
               );
             })}
           </div>

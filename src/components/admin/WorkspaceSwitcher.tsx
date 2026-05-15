@@ -15,6 +15,7 @@ import {
   DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useCapabilities } from "@/hooks/useCapability";
+import { Button } from "@/components/ui/button";
 import {
   useSovereignContext,
   type WorkspaceKind,
@@ -39,7 +40,7 @@ export function WorkspaceSwitcher({ className }: { className?: string }) {
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
       <DropdownMenuTrigger asChild>
-        <button
+        <Button
           type="button"
           className={cn(
             "inline-flex items-center gap-2 h-10 px-4 rounded-full",
@@ -53,7 +54,7 @@ export function WorkspaceSwitcher({ className }: { className?: string }) {
           <Layers className="h-4 w-4 text-primary" />
           <span className="truncate max-w-[160px]">{label}</span>
           <ChevronDown className={cn("h-4 w-4 text-foreground-tertiary transition-transform", open && "rotate-180")} />
-        </button>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="center" className="w-64 rounded-2xl p-1.5">
         <DropdownMenuLabel className="text-[10.5px] uppercase tracking-wider text-foreground-tertiary">

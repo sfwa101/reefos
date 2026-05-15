@@ -18,6 +18,7 @@ import { Crosshair } from "lucide-react";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
+import { Button } from "@/components/ui/button";
 
 // Configure default icon ONCE
 const DefaultIcon = L.icon({
@@ -100,14 +101,14 @@ export const RealMap = ({ lat, lng, onPinChange, defaultCenter = [31.169, 31.989
       </MapContainer>
 
       {/* Locate-me button (floating top-right) */}
-      <button
+      <Button
         type="button"
         onClick={handleLocate}
         className="absolute right-3 top-3 z-[1000] flex items-center gap-1.5 rounded-full bg-card px-3 py-2 text-xs font-extrabold text-primary shadow-md ring-1 ring-border/40 active:scale-95"
       >
         <Crosshair className="h-3.5 w-3.5" strokeWidth={2.6} />
         موقعي
-      </button>
+      </Button>
 
       {/* Helper hint */}
       {(lat == null || lng == null) && (
