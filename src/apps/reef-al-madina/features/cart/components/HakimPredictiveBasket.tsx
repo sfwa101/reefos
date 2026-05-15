@@ -16,6 +16,7 @@ import type { CartLine } from "@/core/orders/runtime/types";
 import { sumCanonicalGrandTotals } from "@/core/orders/runtime/lineTotals";
 /** @deprecated Wave P-B B-3 — bridge type; predicted basket synthesizes a Product to feed the deprecated CartLine.product field. */
 import type { Product } from "@/core/catalog/legacyProduct.types";
+import { Button } from "@/components/ui/button";
 
 const FALLBACK_IMG =
   "data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23f3f4f6'/%3E%3C/svg%3E";
@@ -105,14 +106,14 @@ export function HakimPredictiveBasket({ className = "" }: { className?: string }
         ))}
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={handleApply}
         className="relative mt-3 flex w-full items-center justify-center gap-2 rounded-2xl bg-primary-foreground py-2.5 text-[13px] font-extrabold text-fuchsia-700 shadow-pill transition active:scale-[0.98]"
       >
         <Sparkles className="h-4 w-4" />
         استبدل سلتي بضغطة واحدة
-      </button>
+      </Button>
     </section>
   );
 }

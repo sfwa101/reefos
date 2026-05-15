@@ -270,7 +270,7 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
             )}
             {filteredProducts.map((p) => (
               <li key={p.id}>
-                <button
+                <Button
                   type="button"
                   onClick={() => addLine(p)}
                   className="w-full text-right px-3 py-2.5 hover:bg-accent/15 press flex items-center justify-between gap-3"
@@ -279,7 +279,7 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
                   <span className="text-[10px] text-foreground-tertiary tabular-nums shrink-0">
                     تكلفة: {fmtMoney(Number(p.cost_price ?? 0))} • مخزون: {p.stock ?? 0}
                   </span>
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -297,14 +297,14 @@ export function PurchaseInvoiceBuilder({ onCreated }: { onCreated?: () => void }
               <li key={l.product_id} className="bg-card rounded-xl p-3 ring-1 ring-border/40">
                 <div className="flex items-start justify-between gap-2 mb-2">
                   <p className="text-sm font-semibold flex-1 truncate">{l.product_name}</p>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => removeLine(i)}
                     className="h-7 w-7 rounded-lg bg-destructive/10 hover:bg-destructive/20 text-destructive flex items-center justify-center press"
                     aria-label="حذف"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
-                  </button>
+                  </Button>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>

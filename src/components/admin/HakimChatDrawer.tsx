@@ -4,6 +4,7 @@ import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { useHakimChatStream } from "@/hooks/useHakimChatStream";
+import { Button } from "@/components/ui/button";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -90,9 +91,9 @@ export function HakimChatDrawer({
               <p className="text-[10.5px] text-foreground-tertiary">المستشار المالي الذكي</p>
             </div>
           </div>
-          <button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center press">
+          <Button onClick={onClose} className="h-8 w-8 rounded-full hover:bg-muted flex items-center justify-center press">
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </header>
 
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -124,13 +125,13 @@ export function HakimChatDrawer({
               rows={1}
               className="flex-1 resize-none bg-background border border-border/50 rounded-2xl px-4 py-2.5 text-[13.5px] outline-none focus:border-primary/50 max-h-32"
             />
-            <button
+            <Button
               onClick={send}
               disabled={streaming || !input.trim()}
               className="h-10 w-10 rounded-2xl bg-primary text-primary-foreground flex items-center justify-center shadow-sm disabled:opacity-50 press"
             >
               {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-            </button>
+            </Button>
           </div>
         </footer>
       </aside>

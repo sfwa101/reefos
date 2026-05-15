@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Camera, ScanLine, X } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 const ScannerOverlay = ({ onClose }: { onClose: () => void }) => {
   useEffect(() => {
@@ -11,12 +12,12 @@ const ScannerOverlay = ({ onClose }: { onClose: () => void }) => {
     <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
       <div onClick={onClose} className="absolute inset-0 animate-overlay-fade bg-black/70" aria-hidden />
       <div className="relative animate-overlay m-4 w-full max-w-sm overflow-hidden rounded-[28px] bg-background ring-1 ring-border/60">
-        <button
+        <Button
           onClick={onClose}
           className="absolute left-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-background/95 text-foreground shadow-pill ring-1 ring-border/50"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
         <div
           className="relative flex h-72 items-center justify-center overflow-hidden"
           style={{
@@ -43,7 +44,7 @@ const ScannerOverlay = ({ onClose }: { onClose: () => void }) => {
           <p className="mt-1.5 text-[12px] font-medium text-muted-foreground">
             سنحلل الباركود والاسم التجاري لإظهار التفاعلات والبدائل خلال ثوانٍ
           </p>
-          <button
+          <Button
             onClick={() => {
               onClose();
               toast("الماسح في وضع التجربة", { description: "سيتم تفعيله مع تحديث الكاميرا" });
@@ -51,7 +52,7 @@ const ScannerOverlay = ({ onClose }: { onClose: () => void }) => {
             className="mt-4 inline-flex items-center justify-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-[12.5px] font-extrabold text-primary-foreground active:scale-95"
           >
             <ScanLine className="h-4 w-4" /> ابدأ المسح
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Wifi, WifiOff, RefreshCw } from "lucide-react";
 import { offlineQueueSize, processQueue } from "@/lib/offlineSyncQueue";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 
 /**
  * Phase 63 — POS Sync Radar.
@@ -60,7 +61,7 @@ export function PosSyncPill({ online }: { online: boolean }) {
 
   if (!online) {
     return (
-      <button
+      <Button
         onClick={flush}
         className="inline-flex items-center gap-1.5 rounded-full bg-warning/10 px-2.5 py-1 text-warning ring-1 ring-warning/20"
       >
@@ -69,20 +70,20 @@ export function PosSyncPill({ online }: { online: boolean }) {
         {pending > 0 && (
           <span className="rounded-full bg-warning px-1.5 text-[10px] font-extrabold text-warning-foreground">{pending}</span>
         )}
-      </button>
+      </Button>
     );
   }
 
   // online + has pending — show sync action
   return (
-    <button
+    <Button
       onClick={flush}
       disabled={busy}
       className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-primary ring-1 ring-primary/20 disabled:opacity-60"
     >
       <RefreshCw className={`h-3.5 w-3.5 ${busy ? "animate-spin" : ""}`} />
       <span className="text-[11px] font-bold">مزامنة {pending}</span>
-    </button>
+    </Button>
   );
 }
 

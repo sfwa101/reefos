@@ -2,6 +2,7 @@ import { Check, Minus, Plus } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import BottomCTA from "@/components/BottomCTA";
 import { fmtMoney, toLatin } from "@/lib/format";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   qty: number;
@@ -26,23 +27,23 @@ const StickyAddCTA = ({
     <BottomCTA>
       <div className="glass-strong flex items-center gap-3 rounded-[1.5rem] p-3 shadow-float">
         <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-1">
-          <button
+          <Button
             onClick={() => setQty((q) => Math.max(1, q - 1))}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-background shadow-soft active:scale-90"
             aria-label="إنقاص"
           >
             <Minus className="h-3.5 w-3.5" />
-          </button>
+          </Button>
           <span className="w-6 text-center font-display text-base font-extrabold tabular-nums">
             {toLatin(qty)}
           </span>
-          <button
+          <Button
             onClick={() => setQty((q) => q + 1)}
             className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground active:scale-90"
             aria-label="زيادة"
           >
             <Plus className="h-3.5 w-3.5" />
-          </button>
+          </Button>
         </div>
         <motion.button
           onClick={onAdd}

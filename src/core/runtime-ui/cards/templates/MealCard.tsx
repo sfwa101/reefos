@@ -15,6 +15,7 @@ import { toLatin } from "@/lib/format";
 
 import type { CardTemplateProps } from "./types";
 import { pickName } from "./types";
+import { Button } from "@/components/ui/button";
 
 const PORTIONS = ["صغير", "وسط", "كبير"] as const;
 
@@ -79,7 +80,7 @@ export function MealCard({ vm, onOpen, onAddToCart }: CardTemplateProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {PORTIONS.map((p) => (
-              <button
+              <Button
                 key={p}
                 onClick={() => setPortion(p)}
                 className={`flex-1 rounded-full px-2 py-1 text-[10px] font-bold transition ${
@@ -89,7 +90,7 @@ export function MealCard({ vm, onOpen, onAddToCart }: CardTemplateProps) {
                 }`}
               >
                 {p}
-              </button>
+              </Button>
             ))}
           </div>
         )}
@@ -101,7 +102,7 @@ export function MealCard({ vm, onOpen, onAddToCart }: CardTemplateProps) {
             </span>
             <span className="text-[10px] font-medium text-muted-foreground"> ج.م</span>
           </div>
-          <button
+          <Button
             onClick={(e) => {
               e.stopPropagation();
               onAddToCart(vm.id);
@@ -110,7 +111,7 @@ export function MealCard({ vm, onOpen, onAddToCart }: CardTemplateProps) {
             className="rounded-full bg-primary px-4 py-2 text-[11px] font-extrabold text-primary-foreground shadow-pill transition active:scale-95 disabled:bg-muted disabled:text-muted-foreground"
           >
             {vm.inStock ? "اطلب الآن" : "غير متاح"}
-          </button>
+          </Button>
         </div>
       </div>
     </article>

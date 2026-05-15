@@ -4,6 +4,8 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { listHakimInsightsFn, runHakimAdvisorFn, type HakimInsightRow } from "@/core/hakim-ai/hakim-admin.functions";
 import { Loader2, ShieldAlert, Sparkles, Send, AlertTriangle, Info, CheckCircle2, AlertOctagon } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Insight = HakimInsightRow;
 
@@ -68,16 +70,16 @@ export default function HakimAdvisor() {
             </div>
           </div>
           <div className="flex gap-2">
-            <input
+            <Input
               className="flex-1 bg-background/60 rounded-lg px-3 py-2 text-[13px]"
               placeholder="اسأل حكيم (اختياري) أو اضغط 'تحليل'"
               value={question}
               onChange={(e) => setQuestion(e.target.value)}
             />
-            <button onClick={ask} disabled={generating} className="bg-primary text-primary-foreground rounded-lg px-4 font-medium flex items-center gap-1 disabled:opacity-50">
+            <Button onClick={ask} disabled={generating} className="bg-primary text-primary-foreground rounded-lg px-4 font-medium flex items-center gap-1 disabled:opacity-50">
               {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
               تحليل
-            </button>
+            </Button>
           </div>
         </div>
 

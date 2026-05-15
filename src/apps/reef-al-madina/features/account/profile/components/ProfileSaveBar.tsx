@@ -1,5 +1,6 @@
 import { CheckCircle2, CircleAlert, Loader2, RefreshCcw, Save } from "lucide-react";
 import type { SaveState } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const ProfileSaveBar = ({
   saveState, isDirty, onReset, onSave,
@@ -24,15 +25,15 @@ export const ProfileSaveBar = ({
         : <CircleAlert className="h-5 w-5 text-accent" />}
     </div>
     <div className="mt-4 grid grid-cols-2 gap-2">
-      <button type="button" onClick={onReset} disabled={!isDirty || saveState === "saving"}
+      <Button type="button" onClick={onReset} disabled={!isDirty || saveState === "saving"}
         className="flex h-12 items-center justify-center gap-2 rounded-full border border-border/60 bg-background font-extrabold text-foreground disabled:opacity-50">
         <RefreshCcw className="h-4 w-4" /> تراجع
-      </button>
-      <button type="button" onClick={onSave} disabled={saveState === "saving" || !isDirty}
+      </Button>
+      <Button type="button" onClick={onSave} disabled={saveState === "saving" || !isDirty}
         className="flex h-12 items-center justify-center gap-2 rounded-full bg-primary font-extrabold text-primary-foreground shadow-pill disabled:opacity-60">
         {saveState === "saving" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
         {saveState === "saving" ? "جاري الحفظ…" : "حفظ التعديلات"}
-      </button>
+      </Button>
     </div>
   </section>
 );

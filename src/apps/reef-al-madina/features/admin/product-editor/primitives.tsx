@@ -1,5 +1,6 @@
 // Shared primitives used across ProductEditor tab components.
 import type { ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 export const inputCls =
   "w-full h-11 rounded-xl bg-surface-muted px-3 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30";
@@ -21,7 +22,7 @@ export function Toggle({
   checked, onChange, label,
 }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={() => onChange(!checked)}
       className="flex items-center gap-2 press"
@@ -40,7 +41,7 @@ export function Toggle({
         />
       </span>
       <span className="text-[13px] font-semibold">{label}</span>
-    </button>
+    </Button>
   );
 }
 

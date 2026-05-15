@@ -1,6 +1,7 @@
 import { Repeat, ShieldCheck } from "lucide-react";
 import { toLatin } from "@/lib/format";
 import type { villageMetaFor } from "@/core/commerce/knowledge/sourcing-meta";
+import { Button } from "@/components/ui/button";
 
 type Village = NonNullable<ReturnType<typeof villageMetaFor>>;
 
@@ -71,7 +72,7 @@ export const VillageSubscription = ({
         اختر طريقة الشراء
       </p>
       <div className="grid grid-cols-1 gap-2.5">
-        <button
+        <Button
           onClick={() => setSubMode(false)}
           className="relative flex items-center justify-between rounded-2xl p-4 text-right transition active:scale-[0.99]"
           style={{
@@ -88,9 +89,9 @@ export const VillageSubscription = ({
             <span className="font-display text-lg font-extrabold tabular-nums">{toLatin(unitPrice)}</span>
             <span className="ms-0.5 text-[10px]">ج.م</span>
           </div>
-        </button>
+        </Button>
 
-        <button
+        <Button
           onClick={() => setSubMode(true)}
           className="relative flex items-center justify-between overflow-hidden rounded-2xl p-4 text-right transition active:scale-[0.99]"
           style={{
@@ -123,7 +124,7 @@ export const VillageSubscription = ({
             </span>
             <span className="ms-0.5 text-[10px]">ج.م</span>
           </div>
-        </button>
+        </Button>
       </div>
     </section>
   );

@@ -6,6 +6,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney } from "@/lib/format";
 import { LIBRARY_BUNDLES } from "@/lib/digital-borrowing";
 import { PALETTE } from "../data";
+import { Button } from "@/components/ui/button";
 
 export const BundlesGrid = () => {
   const { add } = useCartActions();
@@ -33,9 +34,9 @@ export const BundlesGrid = () => {
               {b.oldPrice && <span className="text-[11px] text-muted-foreground line-through">{fmtMoney(b.oldPrice)}</span>}
             </div>
           </div>
-          <button onClick={() => handleAdd(b)} className="rounded-full px-3 py-2 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>
+          <Button onClick={() => handleAdd(b)} className="rounded-full px-3 py-2 text-xs font-extrabold text-white" style={{ background: PALETTE.primary }}>
             أضف
-          </button>
+          </Button>
         </div>
       ))}
     </div>

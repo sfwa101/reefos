@@ -7,6 +7,8 @@
  */
 import { useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   ChevronLeft, Search, X,
   // Operations
@@ -219,7 +221,7 @@ export default function AdminHub() {
           </div>
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-            <input
+            <Input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -228,14 +230,14 @@ export default function AdminHub() {
               aria-label="ابحث في المحركات"
             />
             {query && (
-              <button
+              <Button
                 type="button"
                 onClick={() => setQuery("")}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-foreground-tertiary press"
                 aria-label="مسح البحث"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
             )}
           </div>
         </div>

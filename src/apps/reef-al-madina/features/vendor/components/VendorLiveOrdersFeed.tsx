@@ -2,6 +2,7 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { CheckCircle2, Clock, Package2, Undo2, Loader2 } from "lucide-react";
 import type { VendorLiveOrderItem } from "../types/vendor-ops.types";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   items: VendorLiveOrderItem[];
@@ -54,12 +55,12 @@ export function VendorLiveOrdersFeed({ items, loading, onMarkReady, onUndo }: Pr
           <div className="space-y-2">
             {pending.map(i => (
               <ItemCard key={i.id} item={i}>
-                <button
+                <Button
                   onClick={() => onMarkReady(i.id)}
                   className="w-full mt-3 h-12 rounded-2xl bg-success text-success-foreground font-semibold text-[14px] flex items-center justify-center gap-2 press shadow-sm"
                 >
                   <CheckCircle2 className="h-5 w-5" /> تم التجهيز
-                </button>
+                </Button>
               </ItemCard>
             ))}
           </div>
@@ -71,12 +72,12 @@ export function VendorLiveOrdersFeed({ items, loading, onMarkReady, onUndo }: Pr
           <div className="space-y-2">
             {ready.map(i => (
               <ItemCard key={i.id} item={i} dim>
-                <button
+                <Button
                   onClick={() => onUndo(i.id)}
                   className="mt-3 h-9 px-3 rounded-xl bg-surface-muted text-[12px] font-semibold flex items-center gap-1.5 press"
                 >
                   <Undo2 className="h-3.5 w-3.5" /> تراجع
-                </button>
+                </Button>
               </ItemCard>
             ))}
           </div>

@@ -1,6 +1,7 @@
 // Block Inspector — Wave R-3 · Step 6B.
 // Edits the currently selected block via the local Zustand store.
 import { useSectionManagerStore } from "./useSectionManagerStore";
+import { Input } from "@/components/ui/input";
 
 export function BlockInspector() {
   const selectedId = useSectionManagerStore((s) => s.selectedBlockId);
@@ -32,7 +33,7 @@ export function BlockInspector() {
       {/* Title */}
       <label className="block">
         <span className="text-[11px] text-foreground-secondary font-medium">العنوان</span>
-        <input
+        <Input
           type="text"
           value={block.title ?? ""}
           onChange={(e) => patch({ title: e.target.value || undefined })}
@@ -44,7 +45,7 @@ export function BlockInspector() {
       {/* Subtitle */}
       <label className="block">
         <span className="text-[11px] text-foreground-secondary font-medium">العنوان الفرعي</span>
-        <input
+        <Input
           type="text"
           value={block.subtitle ?? ""}
           onChange={(e) => patch({ subtitle: e.target.value || undefined })}

@@ -1,5 +1,6 @@
 import { categories } from "../data";
 import type { CatId } from "../types";
+import { Button } from "@/components/ui/button";
 
 export const CategoryRail = ({
   active,
@@ -14,7 +15,7 @@ export const CategoryRail = ({
         {categories.map((c) => {
           const isActive = c.id === active;
           return (
-            <button
+            <Button
               key={c.id}
               onClick={() => onChange(c.id)}
               className={`shrink-0 inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-[12px] font-extrabold ring-1 transition active:scale-95 ${
@@ -25,7 +26,7 @@ export const CategoryRail = ({
             >
               <c.icon className="h-3.5 w-3.5" strokeWidth={2.4} />
               <span>{c.name}</span>
-            </button>
+            </Button>
           );
         })}
       </div>

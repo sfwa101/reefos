@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/context/AuthContext";
 import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { Loader2, LayoutDashboard, Package, Wallet, LogOut, Store as StoreIcon, ClipboardList, Library } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export default function VendorShell() {
   const { user, loading: authLoading, signOut } = useAuth();
@@ -25,7 +26,7 @@ export default function VendorShell() {
           </div>
           <h1 className="font-display text-[22px] mb-2">بوابة التجار</h1>
           <p className="text-[13px] text-foreground-secondary mb-5">حسابك ليس مفعّلاً كتاجر. تواصل مع الإدارة.</p>
-          <button onClick={signOut} className="rounded-xl h-11 px-6 bg-surface-muted">تسجيل الخروج</button>
+          <Button onClick={signOut} className="rounded-xl h-11 px-6 bg-surface-muted">تسجيل الخروج</Button>
         </div>
       </div>
     );
@@ -49,9 +50,9 @@ export default function VendorShell() {
             </div>
             <p className="font-display text-[16px]">بوابة التاجر</p>
           </div>
-          <button onClick={signOut} className="text-foreground-tertiary press">
+          <Button onClick={signOut} className="text-foreground-tertiary press">
             <LogOut className="h-5 w-5" />
-          </button>
+          </Button>
         </div>
       </header>
       <main className="max-w-3xl mx-auto"><Outlet /></main>

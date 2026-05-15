@@ -70,7 +70,7 @@ export function DriverDutyToggle() {
       {watching && (
         <div className="grid grid-cols-2 gap-2">
           {(["IDLE", "BREAK"] as DriverStatus[]).map((s) => (
-            <button
+            <Button
               key={s}
               onClick={() => setStatus(s)}
               className={cn(
@@ -81,7 +81,7 @@ export function DriverDutyToggle() {
               )}
             >
               {STATUS_LABEL[s]}
-            </button>
+            </Button>
           ))}
         </div>
       )}

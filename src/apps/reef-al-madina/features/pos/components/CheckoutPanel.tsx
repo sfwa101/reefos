@@ -18,6 +18,7 @@ import {
   type PaymentMethod,
 } from "@/core/orders/runtime";
 import { Banknote, CreditCard, Wallet, CircleDollarSign } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 const PAYMENT_METHODS: ReadonlyArray<{
   readonly id: PaymentMethod;
@@ -89,7 +90,7 @@ export function CheckoutPanel(props: CheckoutPanelProps) {
         {PAYMENT_METHODS.map(({ id, label, Icon }) => {
           const active = method === id;
           return (
-            <button
+            <Button
               key={id}
               type="button"
               onClick={() => setMethod(id)}
@@ -104,7 +105,7 @@ export function CheckoutPanel(props: CheckoutPanelProps) {
             >
               <Icon className="h-4 w-4" />
               {label}
-            </button>
+            </Button>
           );
         })}
       </div>
@@ -116,7 +117,7 @@ export function CheckoutPanel(props: CheckoutPanelProps) {
         </span>
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={handleCheckout}
         disabled={disabled}
@@ -127,7 +128,7 @@ export function CheckoutPanel(props: CheckoutPanelProps) {
           : itemCount === 0
             ? "Add items to charge"
             : `Charge ${fmtMoney(totals.grand_total)} ${currency}`}
-      </button>
+      </Button>
 
       {error ? (
         <div className="text-[12px] text-destructive" role="alert">

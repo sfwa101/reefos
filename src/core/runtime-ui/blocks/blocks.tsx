@@ -7,6 +7,7 @@
  * مهم: هذه نسخة MVP — يمكن استبدال أي تطبيق بلا تغيير الـ resolver.
  */
 import type { BlockComponent } from "@/core/runtime-ui/RuntimeRenderer";
+import { Button } from "@/components/ui/button";
 import type {
   BadgeVM,
   MediaRefVM,
@@ -166,13 +167,13 @@ export const ProductVariantsBlock: BlockComponent = ({ block }) => {
           <p className="mb-1 text-sm font-medium text-foreground">{axis}</p>
           <div className="flex flex-wrap gap-2">
             {opts.map((o) => (
-              <button
+              <Button
                 key={o.id}
                 disabled={!o.inStock}
                 className="rounded-full border border-border bg-background px-3 py-1 text-sm disabled:opacity-50"
               >
                 {o.axisValueLabel.ar}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -262,9 +263,9 @@ export const ProductRelationsBlock: BlockComponent = ({ block }) => {
 // ─── Commerce blocks ───
 export const AddToCartBlock: BlockComponent = () => (
   <div className="sticky bottom-0 border-t border-border bg-background/95 p-3 backdrop-blur">
-    <button className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground">
+    <Button className="h-12 w-full rounded-xl bg-primary text-base font-semibold text-primary-foreground">
       أضف إلى السلة
-    </button>
+    </Button>
   </div>
 );
 
@@ -276,8 +277,8 @@ export const QuickBuyBarBlock: BlockComponent = () => (
 
 export const SubscribeCtaBlock: BlockComponent = () => (
   <div className="sticky bottom-0 border-t border-border bg-background/95 p-3 backdrop-blur">
-    <button className="h-12 w-full rounded-xl bg-accent text-base font-semibold text-accent-foreground">
+    <Button className="h-12 w-full rounded-xl bg-accent text-base font-semibold text-accent-foreground">
       اشترك للتوصيل المتكرر
-    </button>
+    </Button>
   </div>
 );

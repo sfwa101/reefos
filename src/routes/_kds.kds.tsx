@@ -14,6 +14,7 @@ import { Loader2, Play, CheckCircle2, Clock, AlertTriangle } from "lucide-react"
 import { toast } from "sonner";
 import { useKdsEngine, type KdsTicket } from "@/apps/reef-al-madina/features/kds/hooks/useKdsEngine";
 import type { PrepStatus } from "@/apps/reef-al-madina/features/kds/types";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/_kds/kds")({
   component: KdsBoard,
@@ -140,22 +141,22 @@ function TicketCard({
 
       <footer>
         {ticket.prep.status === "pending" && (
-          <button
+          <Button
             type="button"
             onClick={() => onAction("preparing")}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-amber-500 hover:bg-amber-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <Play className="h-4 w-4" /> ابدأ التجهيز
-          </button>
+          </Button>
         )}
         {ticket.prep.status === "preparing" && (
-          <button
+          <Button
             type="button"
             onClick={() => onAction("ready")}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-background font-extrabold py-2.5 text-[13px] transition active:scale-[0.98]"
           >
             <CheckCircle2 className="h-4 w-4" /> تم التجهيز
-          </button>
+          </Button>
         )}
         {ticket.prep.status === "ready" && (
           <div className="w-full text-center text-[12px] font-bold text-emerald-500 py-2">

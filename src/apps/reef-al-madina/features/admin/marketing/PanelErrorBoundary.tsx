@@ -1,6 +1,7 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
 
 interface Props { children: ReactNode; label?: string }
 interface State { error: Error | null }
@@ -29,12 +30,12 @@ export class PanelErrorBoundary extends Component<Props, State> {
         <p className="text-[12.5px] text-foreground-tertiary mb-4 line-clamp-2">
           {this.state.error.message || "حدث خطأ غير متوقع"}
         </p>
-        <button
+        <Button
           onClick={this.reset}
           className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2"
         >
           <RefreshCw className="h-4 w-4" /> إعادة المحاولة
-        </button>
+        </Button>
       </div>
     );
   }

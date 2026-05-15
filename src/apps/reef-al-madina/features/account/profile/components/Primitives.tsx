@@ -1,5 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import type { ReactNode } from "react";
+import { Input } from "@/components/ui/input";
 
 export const Section = ({
   icon: Icon, title, helper, children,
@@ -22,7 +23,7 @@ export const SmartField = ({
     <div className="mb-2 flex items-center gap-2 text-[11px] font-extrabold text-muted-foreground">
       <Icon className="h-3.5 w-3.5 text-primary" /> {label}
     </div>
-    <input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
+    <Input type="text" value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder}
       autoComplete="name" className="w-full bg-transparent text-sm font-extrabold text-foreground outline-none placeholder:text-muted-foreground" />
     <p className="mt-2 text-[11px] leading-6 text-muted-foreground">{helper}</p>
   </label>

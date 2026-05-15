@@ -24,6 +24,7 @@ import { bookingDepositSplit } from "@/core/commerce/policies/deposits";
 import { VariantPicker } from "@/apps/reef-al-madina/features/custom-fulfillment/components/VariantPicker";
 import { FulfillmentSelector } from "@/core/runtime-ui/blocks/commerce/fulfillment-selector";
 import { SweetsCustomizationForm } from "@/apps/reef-al-madina/features/custom-fulfillment/components/SweetsCustomizationForm";
+import { Button } from "@/components/ui/button";
 
 type Props = {
   product: Product;
@@ -163,13 +164,13 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
             <div className="relative h-48 w-full overflow-hidden">
               <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-card via-card/30 to-transparent" />
-              <button
+              <Button
                 onClick={onClose}
                 aria-label="إغلاق"
                 className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-background/90 text-foreground shadow-pill"
               >
                 <X className="h-4 w-4" />
-              </button>
+              </Button>
               <span className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-extrabold ${fMeta.badgeBg} ${fMeta.badgeText} shadow-pill`}>
                 {fMeta.emoji} {fMeta.badge}
               </span>
@@ -255,7 +256,7 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
                   <span className="tabular-nums">{fmtMoney(depositAmount)}</span>
                 </div>
               )}
-              <button
+              <Button
                 onClick={confirm}
                 className="flex w-full items-center justify-between gap-3 rounded-[18px] bg-gradient-to-r from-violet-600 to-fuchsia-600 px-4 py-3.5 font-extrabold text-white shadow-[0_10px_30px_-10px_rgba(124,58,237,0.55)] transition active:scale-[0.98]"
               >
@@ -266,7 +267,7 @@ const SweetsProductSheet = ({ product, open, onClose }: Props) => {
                 <span className="rounded-[12px] bg-white/15 px-3 py-1.5 text-sm tabular-nums">
                   {fmtMoney(lineTotal)}
                 </span>
-              </button>
+              </Button>
             </div>
           </motion.div>
         </motion.div>
