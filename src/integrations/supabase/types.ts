@@ -9796,6 +9796,7 @@ export type Database = {
         Args: { p_user_id: string; p_vault_id: string }
         Returns: boolean
       }
+      is_sovereign: { Args: { _uid: string }; Returns: boolean }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
       is_vendor_member: {
         Args: { _role?: string; _user_id: string; _vendor_id: string }

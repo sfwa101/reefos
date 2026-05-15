@@ -27,7 +27,7 @@ import { toast } from "sonner";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { IdentityGateway } from "@/core/identity/gateway/IdentityGateway";
 import { MediaGateway } from "@/core/media";
 import { decodeEgyptianId, normalizeIdInput, type DecodedEgyptianId } from "./egyptianIdDecoder";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
@@ -89,8 +89,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
         is_kyc_verified: true,
         kyc_verified_at: new Date().toISOString(),
       };
-      const { error } = await supabase.from("profiles").update(payload).eq("id", user.id);
-      if (error) throw error;
+      await IdentityGateway.updateProfileFields(user.id, payload);
       // Optional: stash the male photo into avatars bucket. We tolerate failures.
       if (decoded.gender === "male" && photoFile) {
         try {
@@ -103,7 +102,7 @@ const KycUpgradeGate = ({ children, reason = "هذه الميزة", forceWhenNoP
             upsert: true,
           });
           if (publicUrl) {
-            await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
+            await IdentityGateway.updateProfileFields(user.id, { avatar_url: publicUrl });
           }
         } catch { /* non-fatal: photo can be re-uploaded from settings */ }
       }
