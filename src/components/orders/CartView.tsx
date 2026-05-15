@@ -7,7 +7,7 @@ import BackHeader from "@/components/BackHeader";
 import CartUpgradeBanner from "@/core/runtime-ui/blocks/commerce/cart-upgrade-banner";
 import { toLatin } from "@/lib/format";
 import { useCartOrchestrator } from "@/apps/reef-al-madina/features/cart/hooks/useCartOrchestrator";
-import { useSharedCartContext } from "@/context/SharedCartContext";
+import { useSharedCart } from "@/core/orders/runtime/SharedCartRuntime";
 import { CartCrossSellRail } from "@/apps/reef-al-madina/features/cart/components/CartCrossSellRail";
 import { CartAddressSelector } from "@/apps/reef-al-madina/features/cart/components/CartAddressSelector";
 import { CartSummary } from "@/apps/reef-al-madina/features/cart/components/CartSummary";
@@ -25,7 +25,7 @@ import { HakimPredictiveBasket } from "@/apps/reef-al-madina/features/cart/compo
 import type { SharedCartSplitType } from "@/apps/reef-al-madina/features/cart/hooks/useSharedCartSync";
 
 const Cart = () => {
-  const { sharedCartId } = useSharedCartContext();
+  const { sharedCartId } = useSharedCart();
   const o = useCartOrchestrator({ sharedCartId });
   const hasPricingErrors = o.hasPricingErrors;
   const [checkoutOpen, setCheckoutOpen] = useState(false);

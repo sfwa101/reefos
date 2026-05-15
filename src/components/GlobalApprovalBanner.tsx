@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { Check, X, Users } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney } from "@/lib/format";
-import { useSharedCartContext } from "@/context/SharedCartContext";
+import { useSharedCart } from "@/core/orders/runtime/SharedCartRuntime";
 import {
   computeParticipantShares,
   useSharedCartSync,
@@ -17,7 +17,7 @@ import {
  * participant to approve or reject their share.
  */
 const GlobalApprovalBanner = () => {
-  const { sharedCartId, setSharedCartId } = useSharedCartContext();
+  const { sharedCartId, setSharedCartId } = useSharedCart();
   const { cart, participants, items, myParticipant, approve, reject } =
     useSharedCartSync(sharedCartId);
   const [busy, setBusy] = useState(false);
