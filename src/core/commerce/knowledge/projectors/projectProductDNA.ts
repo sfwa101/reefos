@@ -223,3 +223,93 @@ export function projectProductDNABatch(
 ): ProductCivilizationEntity[] {
   return rows.map(projectProductDNA);
 }
+
+// ─────────────────────── Sovereign Asset Projector ──────────────────────────
+// WAVE R-1: native projector for `salsabil_assets` rows. Bridges the new
+// Sovereign shape (id/name/description/category_path/traits/media) into the
+// same `ProductCivilizationEntity` envelope without forcing callers to
+// fabricate a fake `usa_products` row.
+
+export interface SalsabilAssetRow {
+  id: string;
+  name?: string | null;
+  description?: string | null;
+  category_path?: string | null;
+  asset_type?: string | null;
+  traits?: JsonValue;
+  media?: JsonValue;
+  is_active?: boolean | null;
+  created_at?: string | null;
+  updated_at?: string | null;
+  deleted_at?: string | null;
+  /** Optional joined SKU + contract context for richer DNA. */
+  primary_sku?: { sku_code?: string | null; attributes?: JsonValue } | null;
+  primary_contract?: {
+    base_price?: number | string | null;
+    currency?: string | null;
+    compare_at_price?: number | string | null;
+    wholesale_price?: number | string | null;
+    member_price?: number | string | null;
+    tax_class?: string | null;
+  } | null;
+  [key: string]: unknown;
+}
+
+/** Map a Sovereign Asset row into the legacy `UsaProductRow` shape so we
+ *  can reuse the well-tested 5-layer projector without duplication. */
+function assetToProductRow(asset: SalsabilAssetRow): UsaProductRow {
+  const traits = jsonObj(asset.traits);
+  const sku = asset.primary_sku ?? null;
+  const contract = asset.primary_contract ?? null;
+  const skuAttrs = jsonObj(sku?.attributes);
+  const unit =
+    typeof skuAttrs.unit === "string"
+      ? (skuAttrs.unit as string)
+      : typeof traits.unit === "string"
+        ? (traits.unit as string)
+        : null;
+  return {
+    id: asset.id,
+    slug: typeof traits.slug === "string" ? (traits.slug as string) : asset.id,
+    sku: sku?.sku_code ?? null,
+    section_id: null,
+    name_i18n: { ar: str(asset.name) } as unknown as JsonValue,
+    description_i18n: asset.description
+      ? ({ ar: asset.description } as unknown as JsonValue)
+      : null,
+    base_price: contract?.base_price ?? 0,
+    compare_at_price: contract?.compare_at_price ?? null,
+    wholesale_price: contract?.wholesale_price ?? null,
+    member_price: contract?.member_price ?? null,
+    currency: contract?.currency ?? "EGP",
+    tax_class: contract?.tax_class ?? null,
+    sale_unit: unit,
+    is_perishable: traits.perishable === true,
+    tags: Array.isArray(traits.tags)
+      ? (traits.tags as unknown[]).filter((t): t is string => typeof t === "string")
+      : null,
+    badges: Array.isArray(traits.badges)
+      ? (traits.badges as unknown[]).filter((t): t is string => typeof t === "string")
+      : null,
+    attributes: traits as unknown as JsonValue,
+    is_active: asset.is_active ?? true,
+    created_at: asset.created_at ?? null,
+    updated_at: asset.updated_at ?? null,
+    deleted_at: asset.deleted_at ?? null,
+  };
+}
+
+export function projectAssetDNALayers(asset: SalsabilAssetRow): ProductDNA {
+  return projectProductDNALayers(assetToProductRow(asset));
+}
+
+export function projectAssetDNA(asset: SalsabilAssetRow): ProductCivilizationEntity {
+  return projectProductDNA(assetToProductRow(asset));
+}
+
+export function projectAssetDNABatch(
+  assets: readonly SalsabilAssetRow[],
+): ProductCivilizationEntity[] {
+  return assets.map(projectAssetDNA);
+}
+
