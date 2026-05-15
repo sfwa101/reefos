@@ -185,7 +185,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         return;
       }
       skipNextPushRef.current = true;
-      useCartStore.getState().replaceAll(next);
+      useCartStoreActions().replaceAll(next);
       lastPushedSignatureRef.current = nextSignature;
       skipNextPushRef.current = false;
     };
@@ -219,7 +219,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
             if (nextSignature === lastPushedSignatureRef.current) return;
             if (nextSignature === cartSignature(linesFromStore())) return;
             skipNextPushRef.current = true;
-            useCartStore.getState().replaceAll(remote);
+            useCartStoreActions().replaceAll(remote);
             lastPushedSignatureRef.current = nextSignature;
             skipNextPushRef.current = false;
           } catch (err) {

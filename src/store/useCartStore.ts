@@ -399,48 +399,43 @@ export const migrateLegacyCartShape = (
 // ---------------------------------------------------------------------------
 
 export const useCartStore = create<CartState>()(
-  persist(
+  persist<CartState>(
     () => ({
-      items: {},
-      productIndex: {},
+      items: {} as Record<string, CartLine>,
+      productIndex: {} as Record<string, string>,
     }),
     {
       name: STORAGE_KEY,
       storage: safeStorage,
-      partialize: (s) => ({
-        items: Object.fromEntries(
-          Object.entries(s.items).map(([k, l]) => [
-            k,
-            {
-              productId: l.productId ?? l.product?.id,
-              variantId: l.variantId,
-              qty: l.qty,
-              capturedPrice: l.capturedPrice ?? l.product?.price,
-              capturedName: l.capturedName ?? l.product?.name,
-              capturedImage:
-                typeof l.capturedImage === "string"
-                  ? l.capturedImage
-                  : typeof l.product?.image === "string"
-                    ? l.product.image
-                    : undefined,
-              capturedAt: l.capturedAt,
-              meta: l.meta,
-              // The deprecated `product` bridge is omitted from disk; it is
-              // re-synthesised at rehydrate from the captured snapshot.
-            } as CartLine,
-          ]),
-        ),
-        productIndex: {},
-      }),
+      partialize: (s: CartState) =>
+        ({
+          items: Object.fromEntries(
+            Object.entries(s.items).map(([k, l]) => [
+              k,
+              {
+                productId: l.productId ?? l.product?.id,
+                variantId: l.variantId,
+                qty: l.qty,
+                capturedPrice: l.capturedPrice ?? l.product?.price,
+                capturedName: l.capturedName ?? l.product?.name,
+                capturedImage:
+                  typeof l.capturedImage === "string"
+                    ? l.capturedImage
+                    : typeof l.product?.image === "string"
+                      ? l.product.image
+                      : undefined,
+                capturedAt: l.capturedAt,
+                meta: l.meta,
+              } as CartLine,
+            ]),
+          ),
+          productIndex: {} as Record<string, string>,
+        }) satisfies CartState,
       onRehydrateStorage: () => (state) => {
         if (!state) return;
         state.items = migrateLegacyCartShape(state.items);
-        // Push the rehydrated lines into the canonical CartRuntime so it
-        // becomes the single source of truth from boot onward. The runtime
-        // listener installed below will then re-project the canonical state
-        // back into this store on the next tick.
         const intents: AddCartItemIntent[] = Object.values(state.items).map(
-          (l) => legacyLineToIntent(l),
+          (l: CartLine) => legacyLineToIntent(l),
         );
         cartRuntime.replaceAll(intents);
       },
