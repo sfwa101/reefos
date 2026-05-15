@@ -40,7 +40,13 @@ export type VisionGenesisError =
   | "unknown";
 
 async function fileToCompressedDataUrl(file: File): Promise<string> {
-  const compressed = await compressImage(file);
+  // WAVE R-2 (C-3 fix): cap longest edge at 800px and re-encode as JPEG q=0.85
+  // before base64 transit to keep server payloads under the safe ceiling.
+  const compressed = await compressImage(file, {
+    maxDimension: 800,
+    quality: 0.85,
+    mimeType: "image/jpeg",
+  });
   return blobToDataUrl(compressed);
 }
 
