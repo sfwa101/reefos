@@ -217,3 +217,19 @@ function RootComponent() {
     </GlobalErrorBoundary>
   );
 }
+
+/**
+ * SovereignTenantBridge — reactive tenant resolver for the theme matrix.
+ *
+ * Replaces the hardcoded `tenantId="reef"`. Resolution order:
+ *   1. Server-attested workspace id from `getWorkspaceIdSync()` (JWT).
+ *   2. Active OS company kind chosen via `<SovereignSwitcher />`.
+ *   3. Fallback to "reef" so the storefront keeps rendering pre-auth.
+ */
+function SovereignTenantBridge({ children }: { children: React.ReactNode }) {
+  const activeId = useActiveOSCompany((s) => s.activeId);
+  const wsId = getWorkspaceIdSync();
+  const company = getOSCompany(activeId);
+  const tenantId = wsId ?? company.workspaceKind ?? "reef";
+  return <SovereignThemeProvider tenantId={tenantId}>{children}</SovereignThemeProvider>;
+}
