@@ -328,10 +328,13 @@ export const getMasterOrderDetailFn = createServerFn({ method: "GET" })
       (n.salsabil_fulfillment_items ?? []).forEach((it: SbAny) => {
         const media = it?.salsabil_skus?.salsabil_assets?.media ?? {};
         const image = Array.isArray(media) ? (media[0]?.url ?? null) : (media?.url ?? null);
+        const price = Number(it.price_at_time ?? 0);
+        const quantity = it.quantity;
         items.push({
           id: it.id,
-          quantity: it.quantity,
-          price: Number(it.price_at_time ?? 0),
+          quantity,
+          price,
+          total: historicalLineTotal({ price, quantity }),
           product_name: it?.salsabil_skus?.salsabil_assets?.name ?? "منتج",
           product_image: image,
         });
