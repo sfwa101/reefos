@@ -11,6 +11,8 @@ import {
   type SkuAdminRow,
 } from "@/core/commerce/knowledge/sovereignCatalog";
 import { costFromMarginPct } from "@/core/commerce/pricing/marginUtils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 
 type Row = SkuAdminRow;
@@ -129,9 +131,9 @@ export default function CostBulk() {
           </div>
           <div className="grid grid-cols-4 gap-1.5">
             {[20, 30, 40, 50].map((m) => (
-              <button key={m} onClick={() => applyMargin(m)} className="h-9 rounded-xl bg-primary/10 text-primary text-[12px] font-bold press">
+              <Button key={m} onClick={() => applyMargin(m)} className="h-9 rounded-xl bg-primary/10 text-primary text-[12px] font-bold press">
                 هامش {m}%
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -140,7 +142,7 @@ export default function CostBulk() {
         <div className="space-y-2 mb-3">
           <div className="relative">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-foreground-tertiary" />
-            <input
+            <Input
               value={q} onChange={(e) => setQ(e.target.value)}
               placeholder="ابحث عن منتج"
               className="w-full bg-surface-muted rounded-xl h-11 pr-10 pl-4 text-[14px] border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -148,7 +150,7 @@ export default function CostBulk() {
           </div>
           <div className="flex gap-1.5 overflow-x-auto no-scrollbar">
             {(["missing", "set", "all"] as const).map((f) => (
-              <button
+              <Button
                 key={f}
                 onClick={() => setFilter(f)}
                 className={cn(
@@ -157,7 +159,7 @@ export default function CostBulk() {
                 )}
               >
                 {f === "missing" ? "ناقصة التكلفة" : f === "set" ? "محددة" : "الكل"}
-              </button>
+              </Button>
             ))}
             <select
               value={source} onChange={(e) => setSource(e.target.value)}
@@ -195,7 +197,7 @@ export default function CostBulk() {
                     </div>
                     <div>
                       <p className="text-[10px] text-foreground-tertiary mb-0.5">التكلفة</p>
-                      <input
+                      <Input
                         type="number" step="0.01" inputMode="decimal"
                         defaultValue={r.cost_price ?? ""}
                         value={e.cost}
@@ -206,7 +208,7 @@ export default function CostBulk() {
                     </div>
                     <div>
                       <p className="text-[10px] text-foreground-tertiary mb-0.5">عمولة %</p>
-                      <input
+                      <Input
                         type="number" step="0.5" min="0" max="50"
                         value={e.aff}
                         onChange={(ev) => setEdit(r.id, "aff", ev.target.value)}
@@ -241,20 +243,20 @@ export default function CostBulk() {
             <p className="flex-1 text-[12.5px] font-bold">
               <span className="num">{dirty.length}</span> تغيير غير محفوظ
             </p>
-            <button
+            <Button
               onClick={() => setEdits({})}
               className="h-11 px-4 rounded-xl bg-surface-muted text-[13px] font-bold press"
             >
               إلغاء
-            </button>
-            <button
+            </Button>
+            <Button
               onClick={saveAll}
               disabled={saving}
               className="h-11 px-5 rounded-xl bg-primary text-primary-foreground text-[13px] font-bold press flex items-center gap-2 disabled:opacity-40"
             >
               {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
               حفظ الكل
-            </button>
+            </Button>
           </div>
         </div>
       )}

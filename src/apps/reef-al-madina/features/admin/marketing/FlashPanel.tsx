@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import { fmtNum } from "@/lib/format";
 import { Kpi, Field } from "./shared";
 import type { FlashSale, FlashSaleProduct, FlashProductForm } from "./types";
+import { Button } from "@/components/ui/button";
 import {
   getActiveFlashSaleFn,
   ensureActiveFlashSaleFn,
@@ -92,10 +93,10 @@ export default function FlashPanel() {
           <span className="text-[12px] text-foreground-tertiary">لا توجد حملة نشطة — أضف منتجاً لبدء حملة جديدة.</span>
         )}
         <div className="flex items-center gap-2">
-          {activeSale && <button onClick={endSale} className="h-10 px-3 rounded-2xl border border-destructive/30 text-destructive text-[12.5px] font-semibold press">إنهاء الحملة</button>}
-          <button onClick={() => { setEditing(null); setOpen(true); }} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2">
+          {activeSale && <Button onClick={endSale} className="h-10 px-3 rounded-2xl border border-destructive/30 text-destructive text-[12.5px] font-semibold press">إنهاء الحملة</Button>}
+          <Button onClick={() => { setEditing(null); setOpen(true); }} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2">
             <Plus className="h-4 w-4" /> منتج للفلاش
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -114,7 +115,7 @@ export default function FlashPanel() {
                   <p className="text-[11.5px] text-foreground-tertiary">من {fmtNum(p.original_price)} • خصم {p.discount_pct}%</p>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => remove(p)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <Button onClick={() => remove(p)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             ))}
@@ -207,8 +208,8 @@ function FlashDialog({
           <Field label="السبب / الوسم"><Input value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} placeholder="عرض اليوم" /></Field>
         </div>
         <DialogFooter>
-          <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</button>
-          <button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "إضافة"}</button>
+          <Button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</Button>
+          <Button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "إضافة"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

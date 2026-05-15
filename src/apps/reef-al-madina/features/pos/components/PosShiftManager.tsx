@@ -3,6 +3,8 @@ import { IOSCard } from "@/components/ios/IOSCard";
 import { fmtMoney } from "@/lib/format";
 import { LogIn, LogOut, AlertTriangle, Loader2 } from "lucide-react";
 import type { PosShift } from "../types/pos.types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Props = {
   shift: PosShift | null;
@@ -34,18 +36,18 @@ export function PosShiftManager({ shift, loading, onOpen, onClose }: Props) {
           <h2 className="font-display text-[22px] mb-1">افتح ورديّة جديدة</h2>
           <p className="text-[12px] text-muted-foreground mb-4">أدخل رصيد الدُرج الافتتاحي لبدء البيع.</p>
           <label className="text-[12px] text-muted-foreground block mb-1">رصيد افتتاحي (نقد)</label>
-          <input
+          <Input
             type="number" inputMode="decimal" min="0" step="0.01"
             value={opening} onChange={(e) => setOpening(e.target.value)}
             className="w-full bg-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
           />
-          <button
+          <Button
             disabled={busy}
             onClick={async () => { setBusy(true); await onOpen(Number(opening) || 0); setBusy(false); }}
             className="mt-4 w-full h-12 rounded-2xl bg-primary text-primary-foreground font-semibold press flex items-center justify-center gap-2 ring-1 ring-border disabled:opacity-60"
           >
             {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogIn className="h-5 w-5" />} فتح الورديّة
-          </button>
+          </Button>
         </IOSCard>
       </div>
     );
@@ -77,12 +79,12 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
             </div>
             <p className="font-display text-[16px] num">{fmtMoney(shift.total_sales)} <span className="text-[11px] text-muted-foreground">({shift.total_orders} طلب)</span></p>
           </div>
-          <button
+          <Button
             onClick={() => setClosing(true)}
             className="h-10 px-3 rounded-xl bg-destructive/10 text-destructive font-semibold text-[12px] flex items-center gap-1.5 press"
           >
             <LogOut className="h-4 w-4" /> إنهاء
-          </button>
+          </Button>
         </div>
       </IOSCard>
 
@@ -101,17 +103,17 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
               <Stat label="عدد الطلبات" value={String(shift.total_orders)} />
             </div>
             <label className="text-[12px] text-muted-foreground block mb-1">رصيد الدُرج الفعلي</label>
-            <input
+            <Input
               type="number" inputMode="decimal" min="0" step="0.01" autoFocus
               value={actual} onChange={(e) => setActual(e.target.value)}
               className="w-full bg-muted rounded-2xl h-12 px-4 text-[16px] num text-center font-display border-0 focus:outline-none focus:ring-2 focus:ring-primary/30"
             />
             <div className="flex gap-2 mt-4">
-              <button
+              <Button
                 onClick={() => setClosing(false)}
                 className="flex-1 h-12 rounded-2xl bg-muted text-foreground font-semibold press"
-              >إلغاء</button>
-              <button
+              >إلغاء</Button>
+              <Button
                 disabled={busy}
                 onClick={async () => {
                   setBusy(true);
@@ -122,7 +124,7 @@ function ActiveShiftBar({ shift, actual, setActual, onClose, busy, setBusy }: {
                 className="flex-1 h-12 rounded-2xl bg-destructive text-destructive-foreground font-semibold press flex items-center justify-center gap-2"
               >
                 {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <LogOut className="h-5 w-5" />} إغلاق
-              </button>
+              </Button>
             </div>
           </IOSCard>
         </div>

@@ -10,6 +10,7 @@ import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Kpi, Field } from "./shared";
 import { PLACEMENTS, type Banner, type BannerForm } from "./types";
+import { Button } from "@/components/ui/button";
 import {
   listBannersFn,
   upsertBannerFn,
@@ -63,12 +64,12 @@ export default function BannersPanel() {
       </div>
 
       <div className="flex justify-end">
-        <button
+        <Button
           onClick={() => { setEditing(null); setOpen(true); }}
           className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2"
         >
           <Plus className="h-4 w-4" /> بانر جديد
-        </button>
+        </Button>
       </div>
 
       <section className="bg-surface rounded-3xl border border-border/50 shadow-soft overflow-hidden">
@@ -98,9 +99,9 @@ export default function BannersPanel() {
                 </div>
                 <span className={cn("h-2 w-2 rounded-full", r.is_active ? "bg-success" : "bg-foreground-tertiary")} />
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => toggleActive(r)} className="h-8 w-8 rounded-xl border border-border/60 inline-flex items-center justify-center press"><Power className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => { setEditing(r); setOpen(true); }} className="h-8 w-8 rounded-xl bg-primary-soft text-primary border border-primary/20 inline-flex items-center justify-center press"><Pencil className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => remove(r)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <Button onClick={() => toggleActive(r)} className="h-8 w-8 rounded-xl border border-border/60 inline-flex items-center justify-center press"><Power className="h-3.5 w-3.5" /></Button>
+                  <Button onClick={() => { setEditing(r); setOpen(true); }} className="h-8 w-8 rounded-xl bg-primary-soft text-primary border border-primary/20 inline-flex items-center justify-center press"><Pencil className="h-3.5 w-3.5" /></Button>
+                  <Button onClick={() => remove(r)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             ))}
@@ -189,13 +190,13 @@ function BannerDialog({
           <div className="grid grid-cols-2 gap-3">
             <Field label="الترتيب"><Input type="number" value={form.sort_order} onChange={(e) => setForm({ ...form, sort_order: Number(e.target.value) })} /></Field>
             <Field label="الحالة">
-              <button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })} className={cn("w-full h-10 rounded-md text-[13px] font-semibold border", form.is_active ? "bg-success/10 text-success border-success/20" : "bg-surface-muted border-border/60")}>{form.is_active ? "نشط" : "موقوف"}</button>
+              <Button type="button" onClick={() => setForm({ ...form, is_active: !form.is_active })} className={cn("w-full h-10 rounded-md text-[13px] font-semibold border", form.is_active ? "bg-success/10 text-success border-success/20" : "bg-surface-muted border-border/60")}>{form.is_active ? "نشط" : "موقوف"}</Button>
             </Field>
           </div>
         </div>
         <DialogFooter>
-          <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</button>
-          <button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "حفظ"}</button>
+          <Button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</Button>
+          <Button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "حفظ"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

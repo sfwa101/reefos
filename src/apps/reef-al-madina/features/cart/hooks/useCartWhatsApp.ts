@@ -9,6 +9,7 @@ import {
 import type { Product } from "@/core/catalog/legacyProduct.types";
 import type { CartLineMeta } from "@/core/orders/runtime/react/CartProvider";
 import { lineGrandTotal } from "@/core/orders/runtime/lineTotals";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type WaCartLine = { product: Product; qty: number; meta?: CartLineMeta };
 
@@ -170,7 +171,6 @@ export type DispatchWaInput = {
  */
 export const dispatchWhatsApp = (i: DispatchWaInput): OpenResult => {
   const url = buildWaUrl({ phone: i.phone, text: i.text });
-  console.log("[checkout] dispatching WhatsApp via hidden anchor", { source: i.source, url });
   try {
     const link = document.createElement("a");
     link.href = url;
@@ -181,7 +181,7 @@ export const dispatchWhatsApp = (i: DispatchWaInput): OpenResult => {
     document.body.removeChild(link);
     return { ok: true, method: "window-open" };
   } catch (e) {
-    console.warn("[checkout] hidden anchor click failed", { source: i.source, error: e });
+    Tracer.warn("cart", "checkout_hidden_anchor_click_failed", { args: ["[checkout] hidden anchor click failed", { source: i.source, error: e }] });
     return { ok: false, url, text: i.text, reason: "anchor_failed" };
   }
 };

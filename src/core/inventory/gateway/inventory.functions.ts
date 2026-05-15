@@ -25,6 +25,7 @@ import type {
   StockLedgerEvent,
   StockLedgerEventType,
 } from "@/core/commerce/inventory/types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const RESERVATION_TTL_MS = 15 * 60 * 1000;
 const SUPPORTS_BACKORDER = false;
@@ -417,7 +418,7 @@ export const cleanupExpiredReservationsFn = createServerFn({ method: "POST" })
         processed += 1;
       } catch (err) {
         failed += 1;
-        console.error(`[janitor] Failed to expire reservation '${row.id}':`, err);
+        Tracer.error("inventory", "log", { args: [`[janitor] Failed to expire reservation '${row.id}':`, err] });
       }
     }
 

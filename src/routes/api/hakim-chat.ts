@@ -9,6 +9,7 @@ import {
   type HakimChatStreamRequest,
 } from "@/core/hakim-ai/hakim.server";
 import { asDynamic } from "@/integrations/supabase/dynamic";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -124,7 +125,7 @@ export const Route = createFileRoute("/api/hakim-chat")({
             },
           });
         } catch (e) {
-          console.error("hakim-chat route error", e);
+          Tracer.error("routes", "hakim_chat_route_error", { args: ["hakim-chat route error", e] });
           return json({ error: e instanceof Error ? e.message : "unknown" }, 500);
         }
       },

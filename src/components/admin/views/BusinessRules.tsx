@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import BackHeader from "@/components/BackHeader";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   listLoyaltyTierRulesFn,
   updateLoyaltyTierRuleFn,
@@ -88,7 +90,7 @@ const TabBtn = ({
   onClick: () => void;
   label: string;
 }) => (
-  <button
+  <Button
     onClick={onClick}
     className={`rounded-xl px-3 py-2 text-[12.5px] font-extrabold transition-colors ${
       active
@@ -97,7 +99,7 @@ const TabBtn = ({
     }`}
   >
     {label}
-  </button>
+  </Button>
 );
 
 /* ===================== Loyalty Tier Editor ===================== */
@@ -214,7 +216,7 @@ const LoyaltyEditor = () => {
                 step={100}
               />
 
-              <button
+              <Button
                 disabled={savingId === r.id}
                 onClick={() => persistRow(r)}
                 className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[12px] font-extrabold text-primary-foreground press disabled:opacity-50"
@@ -225,7 +227,7 @@ const LoyaltyEditor = () => {
                   <Save className="h-3.5 w-3.5" />
                 )}
                 حفظ
-              </button>
+              </Button>
             </div>
           </motion.div>
         );
@@ -339,7 +341,7 @@ const IncentiveEditor = () => {
             step={50}
           />
 
-          <button
+          <Button
             disabled={savingId === r.id}
             onClick={() => persistRow(r)}
             className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2 text-[12px] font-extrabold text-primary-foreground press disabled:opacity-50"
@@ -350,7 +352,7 @@ const IncentiveEditor = () => {
               <Save className="h-3.5 w-3.5" />
             )}
             حفظ
-          </button>
+          </Button>
         </motion.div>
       ))}
     </div>
@@ -380,7 +382,7 @@ const NumberRow = ({
       {label}
     </label>
     <div className="flex items-center gap-1">
-      <input
+      <Input
         type="number"
         value={Number.isFinite(value) ? value : 0}
         step={step}
@@ -405,7 +407,7 @@ const TextRow = ({ label, value, onChange }: TextRowProps) => (
     <label className="mb-1 block text-[11px] font-bold text-muted-foreground">
       {label}
     </label>
-    <input
+    <Input
       type="text"
       value={value}
       onChange={(e) => onChange(e.target.value)}
@@ -421,7 +423,7 @@ const ToggleSwitch = ({
   checked: boolean;
   onChange: (v: boolean) => void;
 }) => (
-  <button
+  <Button
     type="button"
     onClick={() => onChange(!checked)}
     className={`relative h-6 w-10 rounded-full transition-colors ${
@@ -434,7 +436,7 @@ const ToggleSwitch = ({
         checked ? "right-0.5" : "right-[18px]"
       }`}
     />
-  </button>
+  </Button>
 );
 
 export default BusinessRules;

@@ -7,6 +7,9 @@ import { MediaGateway } from "@/core/media";
 import { IdentityGateway } from "@/core/identity";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Tracer } from "@/core/system/observability/Tracer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type KycStatus = "pending" | "verified" | "rejected";
 type KycRow = {
@@ -109,7 +112,7 @@ const Verification = () => {
       setFrontFile(null); setBackFile(null);
       toast.success("تم إرسال الطلب — ستصلك نتيجة التوثيق قريبًا");
     } catch (e) {
-      console.error("kyc submit error", e);
+      Tracer.error("account", "kyc_submit_error", { args: ["kyc submit error", e] });
       toast.error("تعذّر إرسال الطلب، حاول مرة أخرى");
     } finally {
       setSaving(false);
@@ -182,7 +185,7 @@ const Verification = () => {
         <div className="mb-2 flex items-center gap-2 text-sm font-extrabold">
           <IdCard className="h-4 w-4 text-primary" /> الرقم القومي
         </div>
-        <input
+        <Input
           type="text"
           inputMode="numeric"
           maxLength={14}
@@ -218,7 +221,7 @@ const Verification = () => {
 
       {/* Submit */}
       {editable && (
-        <button
+        <Button
           type="button"
           onClick={submit}
           disabled={saving}
@@ -226,7 +229,7 @@ const Verification = () => {
         >
           {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           {saving ? "جاري الإرسال…" : row?.status === "rejected" ? "إعادة إرسال الطلب" : "إرسال طلب التوثيق"}
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -249,18 +252,18 @@ const ImageDrop = ({
         <div className="relative">
           <img src={preview} alt={label} className="h-32 w-full rounded-xl object-cover" />
           {!disabled && (
-            <button
+            <Button
               type="button"
               onClick={onClear}
               className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-foreground/70 text-background"
               aria-label="إزالة الصورة"
             >
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
         </div>
       ) : (
-        <button
+        <Button
           type="button"
           disabled={disabled}
           onClick={() => inputRef.current?.click()}
@@ -268,7 +271,7 @@ const ImageDrop = ({
         >
           <Camera className="h-5 w-5" />
           اضغط للالتقاط
-        </button>
+        </Button>
       )}
       <input
         ref={inputRef}
@@ -279,13 +282,13 @@ const ImageDrop = ({
         onChange={(e) => onPick(e.target.files?.[0] ?? null)}
       />
       {preview && !disabled && (
-        <button
+        <Button
           type="button"
           onClick={() => inputRef.current?.click()}
           className="mt-2 flex w-full items-center justify-center gap-1 rounded-lg bg-muted py-2 text-[11px] font-extrabold"
         >
           <Upload className="h-3 w-3" /> تغيير الصورة
-        </button>
+        </Button>
       )}
     </div>
   );

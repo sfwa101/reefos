@@ -30,6 +30,8 @@ import {
   Truck,
 } from "lucide-react";
 import type { PackagingTierDraft } from "@/core/commerce";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Draft = PackagingTierDraft & {
   id: string;
@@ -248,20 +250,20 @@ export default function PackagingHierarchyBuilder({
           <div className="flex items-center gap-2">
             {!isRoot && <CornerDownRight className="h-3.5 w-3.5 text-foreground-tertiary" />}
             <Icon className="h-4 w-4 text-primary" />
-            <input
+            <Input
               value={tier.tier_label}
               onChange={(e) => updateTier(tier.id, { tier_label: e.target.value })}
               placeholder={isRoot ? "اسم الوحدة الأساسية (مثل: جرام)" : "اسم الطبقة (مثل: كرتونة)"}
               className="flex-1 h-9 rounded-lg border border-border bg-background px-2.5 text-[12.5px] font-bold outline-none focus:border-primary"
             />
-            <button
+            <Button
               type="button"
               onClick={() => removeTier(tier.id)}
               className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-500/10"
               aria-label="حذف الطبقة"
             >
               <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
@@ -287,7 +289,7 @@ export default function PackagingHierarchyBuilder({
               <span className="block text-[10px] font-bold text-foreground-tertiary mb-1">
                 {isRoot ? "الكمية في الوحدة الأساسية" : "كم وحدة من الأب؟"}
               </span>
-              <input
+              <Input
                 type="number"
                 inputMode="decimal"
                 step="0.000001"
@@ -310,7 +312,7 @@ export default function PackagingHierarchyBuilder({
               <span className="block text-[10px] font-bold text-foreground-tertiary mb-1 inline-flex items-center gap-1">
                 <Barcode className="h-3 w-3" /> باركود
               </span>
-              <input
+              <Input
                 value={tier.barcode ?? ""}
                 onChange={(e) => updateTier(tier.id, { barcode: e.target.value || null })}
                 placeholder="اختياري"
@@ -322,7 +324,7 @@ export default function PackagingHierarchyBuilder({
               <span className="block text-[10px] font-bold text-foreground-tertiary mb-1">
                 سعر مخصص لهذه الطبقة
               </span>
-              <input
+              <Input
                 type="number"
                 inputMode="decimal"
                 step="0.01"
@@ -372,13 +374,13 @@ export default function PackagingHierarchyBuilder({
               </strong>{" "}
               من الوحدة الأساسية
             </span>
-            <button
+            <Button
               type="button"
               onClick={() => addTier(tier.id)}
               className="inline-flex items-center gap-1 h-7 px-2.5 rounded-lg bg-primary/10 text-primary text-[10.5px] font-extrabold press"
             >
               <Plus className="h-3 w-3" /> طبقة فرعية
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -413,7 +415,7 @@ export default function PackagingHierarchyBuilder({
             {TIER_PRESETS.map((p) => {
               const Icon = p.icon;
               return (
-                <button
+                <Button
                   key={p.label}
                   type="button"
                   onClick={() => applyPreset(p)}
@@ -421,28 +423,28 @@ export default function PackagingHierarchyBuilder({
                 >
                   <Icon className="h-3.5 w-3.5 text-primary" />
                   {p.label}
-                </button>
+                </Button>
               );
             })}
           </div>
-          <button
+          <Button
             type="button"
             onClick={() => addTier(null)}
             className="inline-flex items-center gap-1.5 h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[12px] font-extrabold press"
           >
             <Plus className="h-3.5 w-3.5" /> إضافة طبقة أساسية
-          </button>
+          </Button>
         </div>
       ) : (
         <>
           <div className="space-y-2">{roots.map((r) => renderTier(r, 0))}</div>
-          <button
+          <Button
             type="button"
             onClick={() => addTier(null)}
             className="w-full inline-flex items-center justify-center gap-1.5 h-10 rounded-xl bg-background-secondary text-[12px] font-extrabold press border border-dashed border-border hover:border-primary"
           >
             <Plus className="h-3.5 w-3.5" /> طبقة جذرية أخرى
-          </button>
+          </Button>
         </>
       )}
     </div>
@@ -461,7 +463,7 @@ function Toggle({
   label: string;
 }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
       className={`inline-flex items-center gap-1 h-7 px-2.5 rounded-full text-[10.5px] font-extrabold press border transition-colors ${
@@ -472,6 +474,6 @@ function Toggle({
     >
       {icon}
       {label}
-    </button>
+    </Button>
   );
 }

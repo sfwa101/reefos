@@ -8,6 +8,7 @@
  * NOTE: pre-existing `as never` casts are preserved verbatim pending Wave P-7.
  */
 import { supabase } from "@/integrations/supabase/client";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export const SystemGateway = {
   async getSetting<T>(key: string): Promise<T | null> {
@@ -26,7 +27,7 @@ export const SystemGateway = {
       .from("app_settings")
       .upsert([{ key, value: value as never }], { onConflict: "key" });
     if (error) {
-      console.error("[system-settings] save failed", key, error);
+      Tracer.error("system", "system_settings_save_failed", { args: ["[system-settings] save failed", key, error] });
       return false;
     }
     return true;

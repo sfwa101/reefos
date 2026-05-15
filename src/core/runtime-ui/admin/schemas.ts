@@ -9,6 +9,7 @@
  * The exhaustiveness guard in `registry.tsx` enforces (3) at compile time.
  */
 import { z } from "zod";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // ─── Atomic field types ─────────────────────────────────────────────
 export const AdminFieldDataTypeSchema = z.enum([
@@ -172,7 +173,7 @@ export function parseAdminBlocks(raw: unknown): AdminBlock[] {
     if (r.success) out.push(r.data);
     else if (typeof console !== "undefined") {
       // eslint-disable-next-line no-console
-      console.warn("[AdminSDUI] dropped invalid block", r.error.issues[0]?.message);
+      Tracer.warn("runtime-ui", "adminsdui_dropped_invalid_block", { args: ["[AdminSDUI] dropped invalid block", r.error.issues[0]?.message] });
     }
   }
   return out;

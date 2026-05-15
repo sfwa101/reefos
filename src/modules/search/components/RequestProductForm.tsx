@@ -8,6 +8,8 @@ import { Loader2, Send, Camera, ImagePlus, CheckCircle2 } from "lucide-react";
 import { insertProductRequest } from "@/core/catalog/gateway/SovereignCatalogGateway";
 import { IdentityGateway } from "@/core/identity";
 import type { ProductRequestPayload } from "../types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const schema = z.object({
   product_name: z.string().trim().min(2, "اسم المنتج مطلوب").max(120),
@@ -90,7 +92,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
         <label className="mb-1 block text-[11px] font-extrabold text-foreground/70">
           اسم المنتج <span className="text-destructive">*</span>
         </label>
-        <input
+        <Input
           value={productName}
           onChange={(e) => setProductName(e.target.value)}
           maxLength={120}
@@ -114,15 +116,15 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
       </div>
 
       <div>
-        <button
+        <Button
           type="button"
           onClick={() => setShowBarcode((v) => !v)}
           className="text-[11px] font-extrabold text-primary"
         >
           {showBarcode ? "إخفاء حقل الباركود" : "+ إضافة باركود"}
-        </button>
+        </Button>
         {showBarcode && (
-          <input
+          <Input
             value={barcode}
             onChange={(e) => setBarcode(e.target.value)}
             inputMode="numeric"
@@ -139,7 +141,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
         </label>
         <div className="relative">
           <ImagePlus className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <input
+          <Input
             value={imageUrl}
             onChange={(e) => setImageUrl(e.target.value)}
             type="url"
@@ -153,7 +155,7 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
         <label className="mb-1 block text-[11px] font-extrabold text-foreground/70">
           واتساب للتواصل
         </label>
-        <input
+        <Input
           value={whatsapp}
           onChange={(e) => setWhatsapp(e.target.value)}
           inputMode="tel"
@@ -169,14 +171,14 @@ export const RequestProductForm = ({ initialQuery = "", initialBarcode = "", onS
         </p>
       )}
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
         className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-primary text-[13px] font-extrabold text-primary-foreground shadow-pill disabled:opacity-60"
       >
         {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
         أرسل الطلب
-      </button>
+      </Button>
       <p className="flex items-center justify-center gap-1 text-[10px] text-muted-foreground">
         <Camera className="h-3 w-3" />
         يمكنك مسح باركود المنتج من شريط البحث الرئيسي

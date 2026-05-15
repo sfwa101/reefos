@@ -7,6 +7,7 @@ import type { Product } from "@/core/catalog/legacyProduct.types";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { toast } from "sonner";
 import { speculativeLineTotal } from "@/core/orders/runtime/lineTotals";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   meal: KitchenMeal | null;
@@ -106,13 +107,13 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
           <div className="relative h-56 shrink-0 overflow-hidden rounded-t-[2rem]">
             <img src={meal.image} alt={meal.name} className="h-full w-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10" />
-            <button
+            <Button
               onClick={onClose}
               aria-label="إغلاق"
               className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-foreground shadow-lg"
             >
               <X className="h-4 w-4" strokeWidth={2.5} />
-            </button>
+            </Button>
             <div className="absolute inset-x-0 bottom-0 p-4 text-white">
               {weeklyDayLabel && (
                 <span className="mb-1 inline-block rounded-full bg-primary/90 px-2.5 py-0.5 text-[10px] font-bold">
@@ -155,7 +156,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
                 {meal.sizes.map((s) => {
                   const active = sizeId === s.id;
                   return (
-                    <button
+                    <Button
                       key={s.id}
                       onClick={() => setSizeId(s.id)}
                       className={`flex w-full items-center justify-between rounded-2xl border-2 p-3.5 text-right transition ${
@@ -177,7 +178,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
                       <span className="font-display text-sm font-extrabold text-primary tabular-nums">
                         {fmtMoney(s.price)}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -190,7 +191,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
                 {meal.addons.map((a) => {
                   const active = addonIds.includes(a.id);
                   return (
-                    <button
+                    <Button
                       key={a.id}
                       onClick={() => toggleAddon(a.id)}
                       className={`flex w-full items-center justify-between rounded-2xl border p-3 text-right transition ${
@@ -212,7 +213,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
                       <span className="text-xs font-bold text-muted-foreground tabular-nums">
                         +{fmtMoney(a.price)}
                       </span>
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -235,25 +236,25 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
           <div className="absolute inset-x-0 bottom-0 border-t border-border/60 bg-background/95 p-4">
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 rounded-full bg-foreground/5 p-1">
-                <button
+                <Button
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-background shadow-sm"
                   aria-label="إنقاص"
                 >
                   <Minus className="h-4 w-4" />
-                </button>
+                </Button>
                 <span className="w-7 text-center font-display text-base font-extrabold tabular-nums">
                   {toLatin(qty)}
                 </span>
-                <button
+                <Button
                   onClick={() => setQty((q) => q + 1)}
                   className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm"
                   aria-label="زيادة"
                 >
                   <Plus className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
-              <button
+              <Button
                 onClick={handleAdd}
                 className="flex flex-1 items-center justify-between rounded-2xl bg-primary px-5 py-3.5 font-bold text-primary-foreground shadow-pill transition active:scale-[0.98]"
               >
@@ -261,7 +262,7 @@ const MealSheet = ({ meal, open, onClose, weeklyDay, weeklyDayLabel }: Props) =>
                 <span className="font-display text-base font-extrabold tabular-nums">
                   {fmtMoney(total)}
                 </span>
-              </button>
+              </Button>
             </div>
           </div>
         </div>

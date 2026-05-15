@@ -12,6 +12,8 @@ import { useSearchHistory } from "../hooks/useSearchHistory";
 import { BarcodeScannerSheet } from "./BarcodeScannerSheet";
 import { RequestProductForm } from "./RequestProductForm";
 import type { SearchHit } from "../types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const TRENDING = ["دجاج", "حليب", "أرز", "زيت", "خضار", "قهوة"] as const;
 
@@ -85,16 +87,16 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
     <div className="fixed inset-0 z-[85] flex flex-col bg-background" role="dialog" aria-modal="true" dir="rtl">
       {/* Search bar */}
       <div className="glass-strong flex items-center gap-2 border-b border-border/40 px-4 py-3">
-        <button
+        <Button
           onClick={onClose}
           aria-label="إغلاق"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-foreground/5"
         >
           <X className="h-4 w-4" />
-        </button>
+        </Button>
         <div className="flex flex-1 items-center gap-2 rounded-2xl bg-card px-3 py-2 ring-1 ring-border/60 focus-within:ring-primary">
           <SearchIcon className="h-4 w-4 text-muted-foreground" />
-          <input
+          <Input
             autoFocus
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -103,18 +105,18 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
             inputMode="search"
           />
           {query && (
-            <button onClick={() => setQuery("")} aria-label="مسح" className="text-muted-foreground">
+            <Button onClick={() => setQuery("")} aria-label="مسح" className="text-muted-foreground">
               <X className="h-3.5 w-3.5" />
-            </button>
+            </Button>
           )}
         </div>
-        <button
+        <Button
           onClick={() => setScannerOpen(true)}
           aria-label="مسح باركود"
           className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-pill"
         >
           <ScanLine className="h-4 w-4" />
-        </button>
+        </Button>
       </div>
 
       {/* Body */}
@@ -128,24 +130,24 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
                   <p className="flex items-center gap-1.5 text-[11px] font-extrabold text-foreground/70">
                     <History className="h-3.5 w-3.5" /> آخر عمليات البحث
                   </p>
-                  <button
+                  <Button
                     onClick={clear}
                     className="flex items-center gap-1 text-[10.5px] font-extrabold text-destructive"
                   >
                     <Trash2 className="h-3 w-3" /> مسح الكل
-                  </button>
+                  </Button>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {history.map((h) => (
                     <span key={h} className="inline-flex items-center gap-1 rounded-full bg-foreground/5 ps-3 pe-1 py-1.5">
-                      <button onClick={() => setQuery(h)} className="text-xs font-bold">{h}</button>
-                      <button
+                      <Button onClick={() => setQuery(h)} className="text-xs font-bold">{h}</Button>
+                      <Button
                         onClick={() => remove(h)}
                         aria-label={`إزالة ${h}`}
                         className="flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground hover:bg-foreground/10"
                       >
                         <X className="h-3 w-3" />
-                      </button>
+                      </Button>
                     </span>
                   ))}
                 </div>
@@ -158,13 +160,13 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
               </p>
               <div className="flex flex-wrap gap-2">
                 {TRENDING.map((t) => (
-                  <button
+                  <Button
                     key={t}
                     onClick={() => setQuery(t)}
                     className="rounded-full bg-primary/10 px-3.5 py-1.5 text-xs font-bold text-primary"
                   >
                     {t}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </section>
@@ -183,7 +185,7 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
                 <h3 className="mb-2 px-1 font-display text-sm font-extrabold">{cat}</h3>
                 <div className="space-y-1.5">
                   {items.map((h) => (
-                    <button
+                    <Button
                       key={h.id}
                       onClick={() => handleSelect(h)}
                       className="flex w-full items-center gap-3 rounded-2xl bg-card p-2.5 text-right ring-1 ring-border/60 active:scale-[0.99]"
@@ -201,7 +203,7 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
                           <p className="truncate text-[11px] text-muted-foreground">{h.subtitle}</p>
                         )}
                       </div>
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </section>
@@ -222,12 +224,12 @@ export const SearchOverlay = ({ open, onClose }: Props) => {
               </p>
             </div>
             {!showRequest ? (
-              <button
+              <Button
                 onClick={() => setShowRequest(true)}
                 className="h-12 w-full rounded-2xl bg-foreground text-[13px] font-extrabold text-background shadow-pill"
               >
                 طلب إضافة منتج
-              </button>
+              </Button>
             ) : (
               <RequestProductForm
                 initialQuery={query}

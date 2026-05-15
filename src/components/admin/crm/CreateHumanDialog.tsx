@@ -9,6 +9,8 @@ import { useServerFn } from "@tanstack/react-start";
 import { Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { createHumanFn } from "@/core/crm/crm.functions";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -90,7 +92,7 @@ export function CreateHumanDialog({
 
         <div className="space-y-2">
           <Field label="الاسم الكامل" required>
-            <input
+            <Input
               autoFocus
               value={form.full_name}
               onChange={(e) => setForm({ ...form, full_name: e.target.value })}
@@ -99,7 +101,7 @@ export function CreateHumanDialog({
             />
           </Field>
           <Field label="الجوال">
-            <input
+            <Input
               value={form.phone}
               onChange={(e) => setForm({ ...form, phone: e.target.value })}
               className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]"
@@ -108,14 +110,14 @@ export function CreateHumanDialog({
           </Field>
           <div className="grid grid-cols-2 gap-2">
             <Field label="المحافظة">
-              <input
+              <Input
                 value={form.governorate}
                 onChange={(e) => setForm({ ...form, governorate: e.target.value })}
                 className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]"
               />
             </Field>
             <Field label="المدينة">
-              <input
+              <Input
                 value={form.city}
                 onChange={(e) => setForm({ ...form, city: e.target.value })}
                 className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]"
@@ -123,7 +125,7 @@ export function CreateHumanDialog({
             </Field>
           </div>
           <Field label="المهنة">
-            <input
+            <Input
               value={form.occupation}
               onChange={(e) => setForm({ ...form, occupation: e.target.value })}
               className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]"
@@ -132,21 +134,21 @@ export function CreateHumanDialog({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-2">
-          <button
+          <Button
             onClick={() => onOpenChange(false)}
             disabled={busy}
             className="h-10 px-4 rounded-xl bg-muted text-[13px] font-medium press disabled:opacity-50"
           >
             إلغاء
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={submit}
             disabled={busy || !form.full_name.trim()}
             className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold flex items-center gap-2 press disabled:opacity-50"
           >
             {busy && <Loader2 className="h-4 w-4 animate-spin" />}
             حفظ
-          </button>
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

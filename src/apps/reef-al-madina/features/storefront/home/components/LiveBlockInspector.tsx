@@ -11,6 +11,8 @@ import { X } from "lucide-react";
 import { useSectionManagerStore } from "@/components/admin/section-manager/useSectionManagerStore";
 import type { LayoutBlock } from "@/lib/section-manager.types";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Tone = "primary" | "accent" | "info" | "success" | "warning" | "teal";
 type Padding = "sm" | "md" | "lg";
@@ -50,7 +52,7 @@ export function LiveBlockInspector() {
   return (
     <>
       {/* Backdrop */}
-      <button
+      <Button
         type="button"
         aria-label="إغلاق"
         onClick={closeInspector}
@@ -79,21 +81,21 @@ export function LiveBlockInspector() {
               {block.kind} · {block.id.slice(0, 8)}…
             </p>
           </div>
-          <button
+          <Button
             type="button"
             onClick={closeInspector}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted"
             aria-label="إغلاق"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </header>
 
         {/* Body */}
         <div className="flex-1 overflow-y-auto px-4 py-4 space-y-5">
           {/* Title */}
           <Field label="العنوان">
-            <input
+            <Input
               type="text"
               value={block.title ?? ""}
               onChange={(e) => updateBlock(block.id, { title: e.target.value || undefined })}
@@ -104,7 +106,7 @@ export function LiveBlockInspector() {
 
           {/* Subtitle */}
           <Field label="العنوان الفرعي">
-            <input
+            <Input
               type="text"
               value={block.subtitle ?? ""}
               onChange={(e) => updateBlock(block.id, { subtitle: e.target.value || undefined })}
@@ -127,7 +129,7 @@ export function LiveBlockInspector() {
               {TONES.map((t) => {
                 const active = cfg.tone === t.value;
                 return (
-                  <button
+                  <Button
                     key={t.value}
                     type="button"
                     onClick={() => patchConfig({ tone: t.value })}
@@ -140,7 +142,7 @@ export function LiveBlockInspector() {
                   >
                     <span className={cn("h-3 w-3 rounded-full ring-2 ring-background", t.swatch)} />
                     {t.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -152,7 +154,7 @@ export function LiveBlockInspector() {
               {PADDINGS.map((p) => {
                 const active = cfg.padding === p.value;
                 return (
-                  <button
+                  <Button
                     key={p.value}
                     type="button"
                     onClick={() => patchConfig({ padding: p.value })}
@@ -164,7 +166,7 @@ export function LiveBlockInspector() {
                     )}
                   >
                     {p.label}
-                  </button>
+                  </Button>
                 );
               })}
             </div>
@@ -177,7 +179,7 @@ export function LiveBlockInspector() {
                 {COLUMNS.map((c) => {
                   const active = cfg.columns === c;
                   return (
-                    <button
+                    <Button
                       key={c}
                       type="button"
                       onClick={() => patchConfig({ columns: c })}
@@ -189,7 +191,7 @@ export function LiveBlockInspector() {
                       )}
                     >
                       {c}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -266,7 +268,7 @@ function ToggleRow({
         <div className="text-[12.5px] font-medium text-foreground">{label}</div>
         {hint ? <div className="text-[10.5px] text-muted-foreground">{hint}</div> : null}
       </div>
-      <button
+      <Button
         type="button"
         role="switch"
         aria-checked={checked}
@@ -282,7 +284,7 @@ function ToggleRow({
             checked ? "translate-x-0.5" : "translate-x-[18px]",
           )}
         />
-      </button>
+      </Button>
     </label>
   );
 }

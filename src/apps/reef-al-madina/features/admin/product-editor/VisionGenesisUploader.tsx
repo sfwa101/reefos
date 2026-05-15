@@ -14,6 +14,8 @@ import {
 } from "@/core/hakim-ai/hooks/useVisionGenesis";
 import { useAestheticProcessor } from "@/core/hakim-ai/hooks/useAestheticProcessor";
 import { useProductImageUpload } from "@/hooks/useProductImageUpload";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   useInferEntity,
   useApproveInference,
@@ -212,13 +214,13 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
           </p>
         </div>
         {payload && (
-          <button
+          <Button
             type="button"
             onClick={reset}
             className="text-[11px] font-bold text-foreground-tertiary hover:text-foreground"
           >
             بدء جديد
-          </button>
+          </Button>
         )}
       </header>
 
@@ -244,14 +246,14 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
                   alt="معاينة"
                   className="rounded-2xl object-cover w-full h-48"
                 />
-                <button
+                <Button
                   type="button"
                   onClick={reset}
                   className="absolute -top-2 -right-2 rounded-full bg-foreground text-background p-1.5 shadow-lg"
                   aria-label="إزالة"
                 >
                   <X className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             ) : (
               <div className="space-y-3">
@@ -265,21 +267,21 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
                   </p>
                 </div>
                 <div className="flex items-center justify-center gap-2">
-                  <button
+                  <Button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
                     className="h-10 px-4 rounded-xl bg-foreground text-background text-[12px] font-extrabold press"
                   >
                     اختر ملف
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
                     onClick={() => cameraInputRef.current?.click()}
                     className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[12px] font-extrabold press inline-flex items-center gap-1.5"
                   >
                     <Camera className="h-4 w-4" />
                     كاميرا
-                  </button>
+                  </Button>
                 </div>
               </div>
             )}
@@ -302,13 +304,13 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
 
           {file && (
             <div className="space-y-2">
-              <input
+              <Input
                 value={hint}
                 onChange={(e) => setHint(e.target.value)}
                 placeholder="سياق إضافي اختياري (مثال: فاتورة مورد جملة)"
                 className="w-full h-10 rounded-xl border border-border bg-background px-3 text-[12.5px] outline-none focus:border-primary"
               />
-              <button
+              <Button
                 type="button"
                 onClick={analyze}
                 disabled={mutation.isPending}
@@ -325,7 +327,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
                     تحليل وتوليد الأصل
                   </>
                 )}
-              </button>
+              </Button>
             </div>
           )}
         </>
@@ -428,7 +430,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
             </section>
           </div>
 
-          <button
+          <Button
             type="button"
             onClick={approve}
             disabled={aestheticMutation.isPending || (!handoffOnly && mintMutation.isPending)}
@@ -450,7 +452,7 @@ const VisionGenesisUploader = ({ onApprove, handoffOnly = false }: Props) => {
                 {handoffOnly ? "تعبئة النموذج بالاقتراح" : "اعتماد وسكّ الأصل العالمي"}
               </>
             )}
-          </button>
+          </Button>
         </div>
       )}
     </div>

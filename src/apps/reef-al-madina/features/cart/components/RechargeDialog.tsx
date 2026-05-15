@@ -6,6 +6,8 @@ import { fmtMoney, toLatin } from "@/lib/format";
 import { fireConfetti } from "@/lib/confetti";
 import { WA_NUMBER } from "../types/cart.types";
 import { isMobileWaContext, openWhatsApp } from "@/lib/whatsapp";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const rechargePresets = [200, 500, 1000, 2000];
 
@@ -67,12 +69,12 @@ export const RechargeDialog = ({ onClose, userId, currentBalance, shortfall }: P
               رصيدك الحالي: {toLatin(Math.round(currentBalance))} ج.م
             </p>
           </div>
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-[10px] bg-foreground/5"
           >
             <X className="h-4 w-4" />
-          </button>
+          </Button>
         </div>
 
         {shortfall > 0 && (
@@ -86,7 +88,7 @@ export const RechargeDialog = ({ onClose, userId, currentBalance, shortfall }: P
           {rechargePresets.map((p) => {
             const active = !custom && amount === p;
             return (
-              <button
+              <Button
                 key={p}
                 onClick={() => {
                   setAmount(p);
@@ -97,13 +99,13 @@ export const RechargeDialog = ({ onClose, userId, currentBalance, shortfall }: P
                 }`}
               >
                 {toLatin(p)}
-              </button>
+              </Button>
             );
           })}
         </div>
 
         <div className="mb-4 flex items-center gap-2 rounded-[12px] bg-foreground/5 px-3 py-2.5">
-          <input
+          <Input
             type="text"
             inputMode="numeric"
             value={custom}
@@ -125,7 +127,7 @@ export const RechargeDialog = ({ onClose, userId, currentBalance, shortfall }: P
           ].map((m) => {
             const active = method === m.id;
             return (
-              <button
+              <Button
                 key={m.id}
                 onClick={() => setMethod(m.id)}
                 className={`rounded-[12px] border-2 py-2.5 text-xs font-extrabold transition ${
@@ -133,17 +135,17 @@ export const RechargeDialog = ({ onClose, userId, currentBalance, shortfall }: P
                 }`}
               >
                 {m.label}
-              </button>
+              </Button>
             );
           })}
         </div>
 
-        <button
+        <Button
           onClick={submit}
           className="flex w-full items-center justify-center gap-2 rounded-[14px] bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-pill active:scale-[0.98]"
         >
           متابعة عبر واتساب · {fmtMoney(finalAmount || 0)}
-        </button>
+        </Button>
       </motion.div>
     </motion.div>
   );

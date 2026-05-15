@@ -9,6 +9,7 @@ import GlobalApprovalBanner from "@/components/GlobalApprovalBanner";
 import BarcodeScannerModal from "@/components/BarcodeScannerModal";
 import { useCartLines } from "@/core/orders/runtime/react/CartProvider";
 import { useHakimEdgeWorker } from "@/core/hakim-ai/hooks/useHakimEdgeWorker";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // Routes where the bottom TabBar should be HIDDEN to make room for a sticky CTA.
 const HIDE_TABBAR_ROUTES = [
@@ -43,11 +44,7 @@ const AppShell = () => {
     try {
       const raw = localStorage.getItem("reef-cart-v2");
       if (raw && raw.length > 1024 * 1024) {
-        console.warn(
-          "[AppShell] reef-cart-v2 exceeded 1MB (",
-          raw.length,
-          "bytes) — clearing to unfreeze the UI.",
-        );
+        Tracer.warn("AppShell.tsx", "appshell_reef_cart_v2_exceeded_1mb", { args: ["[AppShell] reef-cart-v2 exceeded 1MB (", raw.length, "bytes) — clearing to unfreeze the UI."] });
         localStorage.removeItem("reef-cart-v2");
       }
     } catch {

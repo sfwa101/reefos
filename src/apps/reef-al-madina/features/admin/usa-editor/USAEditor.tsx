@@ -25,6 +25,8 @@ import { useAssetMatchmaker, type MatchedAsset } from "@/core/hakim-ai/hooks/use
 import type { USAGenesisPayload } from "@/core/hakim-ai/hooks/useVisionGenesis";
 import { useProductImageUpload } from "@/hooks/useProductImageUpload";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface USARecord {
   id: string;
@@ -504,15 +506,15 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </ul>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
-          <button
+          <Button
             type="button"
             onClick={handleAcceptAdvice}
             className="h-11 rounded-xl bg-emerald-600 text-white text-[12px] font-extrabold press inline-flex items-center justify-center gap-1.5"
           >
             <ShieldCheck className="h-4 w-4" />
             قبول نصيحة حكيم (إلغاء السكّ)
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={handleForceMint}
             disabled={isPending}
@@ -520,13 +522,13 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           >
             <AlertTriangle className="h-4 w-4" />
             تخطي حكيم وسكّ كأصل جديد
-          </button>
+          </Button>
         </div>
       </div>
     ) : null;
 
   const SaveButton = () => (
-    <button
+    <Button
       type="button"
       onClick={() => handleSave(false)}
       disabled={isPending || !name.trim() || duplicateMatches.length > 0}
@@ -545,7 +547,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
           {isNew ? "سكّ الأصل العالمي" : "حفظ التعديلات"}
         </>
       )}
-    </button>
+    </Button>
   );
   return (
     <Sheet open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
@@ -600,18 +602,18 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                       راجع الحقول ثم اضغط "سكّ الأصل العالمي" لاعتماد التكوين.
                     </p>
                   </div>
-                  <button
+                  <Button
                     type="button"
                     onClick={() => setAiDraft(null)}
                     className="text-[10.5px] font-bold text-foreground-tertiary hover:text-foreground"
                   >
                     تجاهل
-                  </button>
+                  </Button>
                 </div>
               )}
 
               <Field label="اسم الأصل">
-                <input
+                <Input
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="مثال: زيت زيتون عضوي 1 لتر"
@@ -690,7 +692,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
               )}
 
               <Field label={`السعر الأساسي (${asset?.currency ?? currency})`}>
-                <input
+                <Input
                   type="number"
                   inputMode="decimal"
                   step="0.01"
@@ -731,7 +733,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     const next = !packagingEnabled;
@@ -745,7 +747,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   }`}
                 >
                   {packagingEnabled ? "مفعّل" : "غير مفعّل"}
-                </button>
+                </Button>
               </div>
 
               {packagingEnabled ? (
@@ -776,7 +778,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                     </p>
                   </div>
                 </div>
-                <button
+                <Button
                   type="button"
                   onClick={() => {
                     const next = !classificationEnabled;
@@ -790,7 +792,7 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
                   }`}
                 >
                   {classificationEnabled ? "مفعّل" : "غير مفعّل"}
-                </button>
+                </Button>
               </div>
 
               {classificationEnabled ? (
@@ -841,9 +843,9 @@ export default function USAEditor({ open, asset, onClose, onSaved }: Props) {
         </Tabs>
 
         <div className="bg-background/95 backdrop-blur border-t border-border/40 px-5 py-3 flex gap-2">
-          <button onClick={onClose} className="flex-1 h-12 rounded-2xl bg-surface-muted text-[14px] font-semibold press">
+          <Button onClick={onClose} className="flex-1 h-12 rounded-2xl bg-surface-muted text-[14px] font-semibold press">
             إغلاق
-          </button>
+          </Button>
         </div>
       </SheetContent>
     </Sheet>

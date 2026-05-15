@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Copy, Crown, Lock, Send, UserPlus, Users } from "lucide-react";
 import { toast } from "sonner";
 import { fmtMoney } from "@/lib/format";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   computeParticipantShares,
   type SharedCart,
@@ -171,42 +173,42 @@ export const SharedCartManager = ({
       {/* Owner controls */}
       {isOwner && (
         <div className="flex flex-wrap gap-2 pt-1">
-          <button
+          <Button
             onClick={() => setShowInvite((v) => !v)}
             disabled={isLocked}
             className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-foreground/5 px-3 py-2.5 text-xs font-extrabold disabled:opacity-50"
           >
             <UserPlus className="h-3.5 w-3.5" />
             دعوة عضو
-          </button>
+          </Button>
           {cart.status === "active" && (
-            <button
+            <Button
               onClick={() => guard(onRequestApprovals)}
               disabled={busy || subtotal <= 0}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-primary to-[hsl(150_55%_38%)] px-3 py-2.5 text-xs font-extrabold text-primary-foreground shadow-[0_6px_18px_-6px_hsl(150_60%_40%/0.55)] disabled:opacity-50"
             >
               <Send className="h-3.5 w-3.5" />
               طلب الموافقات
-            </button>
+            </Button>
           )}
           {(cart.status === "pending_approvals" || cart.status === "frozen") && (
-            <button
+            <Button
               onClick={() => guard(onReopenForEdits)}
               disabled={busy}
               className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-foreground/10 px-3 py-2.5 text-xs font-extrabold disabled:opacity-50"
             >
               <Lock className="h-3.5 w-3.5" />
               إعادة الفتح للتعديل
-            </button>
+            </Button>
           )}
           {cart.status !== "completed" && cart.status !== "cancelled" && (
-            <button
+            <Button
               onClick={() => guard(onCancel)}
               disabled={busy}
               className="rounded-xl bg-rose-500/10 px-3 py-2.5 text-xs font-extrabold text-rose-600 dark:text-rose-300 disabled:opacity-50"
             >
               إلغاء
-            </button>
+            </Button>
           )}
         </div>
       )}
@@ -220,18 +222,18 @@ export const SharedCartManager = ({
             className="overflow-hidden"
           >
             <div className="flex items-center gap-2 rounded-xl bg-foreground/5 p-2">
-              <input
+              <Input
                 value={inviteUrl}
                 readOnly
                 className="flex-1 bg-transparent text-[11px] outline-none ltr:text-left rtl:text-right tabular-nums"
               />
-              <button
+              <Button
                 onClick={copyInvite}
                 className="flex items-center gap-1 rounded-lg bg-primary px-3 py-2 text-[11px] font-extrabold text-primary-foreground"
               >
                 <Copy className="h-3 w-3" />
                 نسخ
-              </button>
+              </Button>
             </div>
             <p className="mt-1 px-1 text-[10px] text-muted-foreground">
               شارك هذا الرابط مع أفراد العائلة للانضمام للسلة

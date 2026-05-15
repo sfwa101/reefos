@@ -9,6 +9,7 @@ import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSchemaRollback } from "../hooks/useSchemaRollback";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 interface Props {
   children: ReactNode;
@@ -78,7 +79,7 @@ export class AdminErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, info: ErrorInfo) {
     if (typeof console !== "undefined") {
       // eslint-disable-next-line no-console
-      console.error("[AdminErrorBoundary]", error, info.componentStack);
+      Tracer.error("runtime-ui", "adminerrorboundary", { args: ["[AdminErrorBoundary]", error, info.componentStack] });
     }
   }
 

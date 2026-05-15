@@ -8,6 +8,7 @@
  */
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCcw } from "lucide-react";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 interface Props {
   readonly children: ReactNode;
@@ -26,7 +27,7 @@ export class POSErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo): void {
     // eslint-disable-next-line no-console
-    console.error("[POSErrorBoundary]", error, info.componentStack);
+    Tracer.error("pos", "poserrorboundary", { args: ["[POSErrorBoundary]", error, info.componentStack] });
   }
 
   private reset = (): void => {

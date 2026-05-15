@@ -32,6 +32,7 @@ import { useSectionSubcategories, type SubcategoryItem } from "@/core/catalog/ho
 import { BESTSELLER_IDS } from "../dictionaries";
 import { homeProductCardAdapter } from "../adapter";
 import type { FulfillmentFilter, SortId } from "../types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 // Wave 2.E — section slugs for sources that don't equal the source name.
 const SOURCE_TO_SLUG: Partial<Record<ProductSource, string>> = {
@@ -125,7 +126,7 @@ export const homeSectionQueryOptions = (
     queryFn: async (): Promise<ProductCardVM[]> => {
       const r = await catalogGateway.listSection({ slug, limit, sort: "popularity" });
       if (!r.items.length) {
-        console.warn("[CatalogGateway] Section returned 0 products for slug:", slug);
+        Tracer.warn("storefront", "cataloggateway_section_returned_0_products_for_slug", { args: ["[CatalogGateway] Section returned 0 products for slug:", slug] });
       }
       return r.items;
     },

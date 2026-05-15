@@ -14,6 +14,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { validatedSovereignCheckoutFn } from "@/core/cashier/gateway/checkout.functions";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type SovereignCartItem = {
   product_id: string;
@@ -152,7 +153,7 @@ export const callSovereignCheckout = async (
         ),
       );
     } catch (err) {
-      console.error("[inventory-ledger] checkout dual-write failed:", err);
+      Tracer.error("hakim-ai", "inventory_ledger_checkout_dual_write_failed", { args: ["[inventory-ledger] checkout dual-write failed:", err] });
     }
   })();
 

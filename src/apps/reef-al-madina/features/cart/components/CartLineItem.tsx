@@ -18,6 +18,7 @@ import {
   isSweetsProduct,
 } from "@/core/commerce/variants/custom-fulfillment-rules";
 import { NumberFlow } from "./NumberFlow";
+import { Button } from "@/components/ui/button";
 
 /**
  * Swipeable cart line — extracted verbatim from Cart.tsx.
@@ -93,13 +94,13 @@ const CartLineItemImpl = ({
           <div className="flex flex-1 flex-col">
             <div className="flex items-start justify-between gap-2">
               <h3 className="line-clamp-2 text-sm font-bold leading-tight">{l.product.name}</h3>
-              <button
+              <Button
                 onClick={() => remove(l.product.id)}
                 className="flex h-7 w-7 items-center justify-center rounded-[10px] bg-destructive/10 text-destructive transition active:scale-90"
                 aria-label="حذف"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
             <p className="text-[10px] text-muted-foreground">{l.product.unit}</p>
             {l.meta?.kind === "borrow" && (
@@ -184,23 +185,23 @@ const CartLineItemImpl = ({
                 <span className="text-[10px] font-bold text-muted-foreground">ج.م</span>
               </span>
               <div className="flex items-center gap-0.5 rounded-full bg-foreground/[0.06] p-0.5 ring-1 ring-border/40">
-                <button
+                <Button
                   onClick={() => setQty(l.product.id, l.qty - 1)}
                   className="flex h-6 w-6 items-center justify-center rounded-full bg-background text-foreground/70 shadow-sm transition active:scale-90"
                   aria-label="إنقاص"
                 >
                   <Minus className="h-2.5 w-2.5" strokeWidth={2.6} />
-                </button>
+                </Button>
                 <span className="w-6 text-center text-[12px] font-extrabold tabular-nums">
                   <NumberFlow value={l.qty} />
                 </span>
-                <button
+                <Button
                   onClick={() => setQty(l.product.id, l.qty + 1)}
                   className="flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-sm transition active:scale-90"
                   aria-label="زيادة"
                 >
                   <Plus className="h-2.5 w-2.5" strokeWidth={2.8} />
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -208,7 +209,7 @@ const CartLineItemImpl = ({
 
         {isBooking && (
           <div className="rounded-[14px] bg-violet-500/8 ring-1 ring-violet-500/20">
-            <button
+            <Button
               type="button"
               onClick={() => setEditOpen((v) => !v)}
               className="flex w-full items-center justify-between gap-2 px-3 py-2 text-right"
@@ -240,7 +241,7 @@ const CartLineItemImpl = ({
               >
                 {editOpen ? <X className="h-3.5 w-3.5" /> : <Pencil className="h-3 w-3" strokeWidth={2.6} />}
               </span>
-            </button>
+            </Button>
 
             <AnimatePresence initial={false}>
               {editOpen && (
@@ -256,7 +257,7 @@ const CartLineItemImpl = ({
                       {days.map((d, i) => {
                         const active = i === currentDateIdx;
                         return (
-                          <button
+                          <Button
                             key={i}
                             type="button"
                             onClick={() =>
@@ -276,7 +277,7 @@ const CartLineItemImpl = ({
                             <span className="font-display text-[13px] tabular-nums">
                               {toLatin(d.getDate())}
                             </span>
-                          </button>
+                          </Button>
                         );
                       })}
                     </div>
@@ -286,7 +287,7 @@ const CartLineItemImpl = ({
                     {bookingTimeSlots.map((s) => {
                       const active = s.id === l.meta?.bookingSlot;
                       return (
-                        <button
+                        <Button
                           key={s.id}
                           type="button"
                           onClick={() => updateMeta(l.product.id, { bookingSlot: s.id })}
@@ -297,7 +298,7 @@ const CartLineItemImpl = ({
                           }`}
                         >
                           {s.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -311,7 +312,7 @@ const CartLineItemImpl = ({
                     ).map((m) => {
                       const active = shipMode === m.id;
                       return (
-                        <button
+                        <Button
                           key={m.id}
                           type="button"
                           onClick={() => updateMeta(l.product.id, { shipMode: m.id })}
@@ -322,7 +323,7 @@ const CartLineItemImpl = ({
                           }`}
                         >
                           {m.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>
@@ -344,7 +345,7 @@ const CartLineItemImpl = ({
                       const active = payDeposit === opt.id;
                       const disabled = depositRequired && opt.id === false;
                       return (
-                        <button
+                        <Button
                           key={String(opt.id)}
                           type="button"
                           disabled={disabled}
@@ -358,7 +359,7 @@ const CartLineItemImpl = ({
                           } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
                         >
                           {opt.label}
-                        </button>
+                        </Button>
                       );
                     })}
                   </div>

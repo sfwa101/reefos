@@ -6,6 +6,8 @@ import { useAdminRoles } from "@/components/admin/RoleGuard";
 import { useHakimChatStream } from "@/hooks/useHakimChatStream";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Msg = { role: "user" | "assistant"; content: string };
 
@@ -83,7 +85,7 @@ export function HakimFAB() {
   return (
     <>
       {/* FAB */}
-      <button
+      <Button
         onClick={() => setOpen(true)}
         aria-label="افتح حكيم"
         className={cn(
@@ -98,7 +100,7 @@ export function HakimFAB() {
       >
         <Sparkles className="h-6 w-6 animate-pulse" />
         <span className="absolute -top-1 -right-1 h-3 w-3 rounded-full bg-success ring-2 ring-background animate-pulse" />
-      </button>
+      </Button>
 
       {/* Drawer */}
       {open && (
@@ -117,9 +119,9 @@ export function HakimFAB() {
                 <Link to="/admin/hakim-chat" className="h-8 w-8 rounded-lg hover:bg-white/15 flex items-center justify-center" onClick={() => setOpen(false)}>
                   <Maximize2 className="h-4 w-4" />
                 </Link>
-                <button onClick={() => setOpen(false)} className="h-8 w-8 rounded-lg hover:bg-white/15 flex items-center justify-center">
+                <Button onClick={() => setOpen(false)} className="h-8 w-8 rounded-lg hover:bg-white/15 flex items-center justify-center">
                   <X className="h-4 w-4" />
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -128,10 +130,10 @@ export function HakimFAB() {
                 <div className="space-y-2 pt-2">
                   <p className="text-[12px] text-foreground-tertiary text-center mb-3">اسألني أي شيء عن الصفحة الحالية</p>
                   {suggestions.map((s) => (
-                    <button key={s} onClick={() => send(s)}
+                    <Button key={s} onClick={() => send(s)}
                       className="w-full text-right p-2.5 rounded-xl bg-surface-muted hover:bg-muted text-[12px] transition press">
                       {s}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               )}
@@ -152,15 +154,15 @@ export function HakimFAB() {
 
             <div className="border-t border-border/40 p-2">
               <div className="flex gap-2">
-                <input value={input} onChange={(e) => setInput(e.target.value)}
+                <Input value={input} onChange={(e) => setInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), send())}
                   placeholder="اسأل حكيم..."
                   disabled={streaming}
                   className="flex-1 bg-surface-muted rounded-xl h-10 px-3 text-[13px] focus:outline-none focus:ring-2 focus:ring-primary/30 disabled:opacity-60" />
-                <button onClick={() => send()} disabled={streaming || !input.trim()}
+                <Button onClick={() => send()} disabled={streaming || !input.trim()}
                   className="h-10 px-4 rounded-xl bg-primary text-primary-foreground disabled:opacity-50 flex items-center">
                   {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </button>
+                </Button>
               </div>
             </div>
           </div>

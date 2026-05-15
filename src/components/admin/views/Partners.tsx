@@ -11,6 +11,8 @@ import {
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Users, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type Product = { id: string; name: string };
 
@@ -133,9 +135,9 @@ export default function Partners() {
           <p className="font-display text-[24px] mt-1">{fmtMoney(totalDue)}</p>
         </div>
 
-        <button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
+        <Button onClick={() => setShowForm(!showForm)} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
           <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : "إضافة شريك لمنتج"}
-        </button>
+        </Button>
 
         {showForm && (
           <div className="bg-surface rounded-2xl p-4 border border-border/40 space-y-2">
@@ -143,17 +145,17 @@ export default function Partners() {
               <option value="">— اختر منتج —</option>
               {products.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="اسم الشريك" value={form.partner_name} onChange={(e) => setForm({ ...form, partner_name: e.target.value })} />
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="هاتف" value={form.partner_phone} onChange={(e) => setForm({ ...form, partner_phone: e.target.value })} />
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="اسم الشريك" value={form.partner_name} onChange={(e) => setForm({ ...form, partner_name: e.target.value })} />
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="هاتف" value={form.partner_phone} onChange={(e) => setForm({ ...form, partner_phone: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
               <select className="bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.split_type} onChange={(e) => setForm({ ...form, split_type: e.target.value })}>
                 <option value="net_profit">صافي الربح</option>
                 <option value="gross_profit">إجمالي الربح</option>
                 <option value="revenue">الإيراد</option>
               </select>
-              <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="نسبة %" value={form.percentage} onChange={(e) => setForm({ ...form, percentage: e.target.value })} />
+              <Input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="نسبة %" value={form.percentage} onChange={(e) => setForm({ ...form, percentage: e.target.value })} />
             </div>
-            <button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</button>
+            <Button onClick={create} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">حفظ</Button>
           </div>
         )}
 
@@ -167,15 +169,15 @@ export default function Partners() {
                   <p className="font-medium text-[14px] truncate">{p.partner_name}</p>
                   <p className="text-[11px] text-foreground-tertiary truncate">{p.products?.name} • {p.percentage}% من {p.split_type === "net_profit" ? "صافي الربح" : p.split_type === "gross_profit" ? "إجمالي الربح" : "الإيراد"}</p>
                 </div>
-                <button onClick={() => editPartner(p)} className="text-[11px] p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+                <Button onClick={() => editPartner(p)} className="text-[11px] p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
                   <Pencil className="h-3.5 w-3.5" />
-                </button>
-                <button onClick={() => togglePartner(p.id, p.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${p.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
+                </Button>
+                <Button onClick={() => togglePartner(p.id, p.is_active)} className={`text-[11px] px-2 py-1 rounded-lg ${p.is_active ? "bg-success/10 text-success" : "bg-muted text-foreground-tertiary"}`}>
                   {p.is_active ? "نشط" : "موقوف"}
-                </button>
-                <button onClick={() => removePartner(p)} className="text-[11px] p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+                </Button>
+                <Button onClick={() => removePartner(p)} className="text-[11px] p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
                   <Trash2 className="h-3.5 w-3.5" />
-                </button>
+                </Button>
               </div>
             ))}
           </div>
@@ -192,7 +194,7 @@ export default function Partners() {
                 </div>
                 <p className="font-display text-[13px]">{fmtMoney(l.amount_due)}</p>
                 {l.status === "accrued" ? (
-                  <button onClick={() => markPaid(l.id)} className="text-[11px] px-2 py-1 rounded-lg bg-primary/10 text-primary">دفع</button>
+                  <Button onClick={() => markPaid(l.id)} className="text-[11px] px-2 py-1 rounded-lg bg-primary/10 text-primary">دفع</Button>
                 ) : (
                   <span className="text-[11px] px-2 py-1 rounded-lg bg-success/10 text-success">{l.status === "paid" ? "مدفوع" : l.status}</span>
                 )}

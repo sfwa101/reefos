@@ -5,6 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { listMyNotificationsFn, markAllNotificationsReadFn } from "@/core/identity/user.functions";
 import { toast } from "sonner";
 import { Switch } from "@/components/ui/switch";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type Notif = {
   id: string;
@@ -36,7 +37,7 @@ const Notifications = () => {
       const data = await listMyNotificationsFn();
       setList(data as Notif[]);
     } catch (e) {
-      console.error("notifications load error", e);
+      Tracer.error("account", "notifications_load_error", { args: ["notifications load error", e] });
       setList([]);
     } finally {
       setLoading(false);

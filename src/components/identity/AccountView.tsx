@@ -14,6 +14,7 @@ import AccountTierCard from "@/apps/reef-al-madina/features/account/components/A
 import AccountWalletRail from "@/apps/reef-al-madina/features/account/components/AccountWalletRail";
 import AccountSettingRow from "@/apps/reef-al-madina/features/account/components/AccountSettingRow";
 import { SETTING_GROUPS } from "@/apps/reef-al-madina/features/account/data";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 const formatPhone = (raw: string): string => {
   const d = raw.replace(/\D/g, "");
@@ -48,7 +49,7 @@ const Account = () => {
         setTotalSpent(hub.totalSpent);
         setKycStatus(hub.kycStatus);
       } catch (e) {
-        console.error("account hub load error", e);
+        Tracer.error("identity", "account_hub_load_error", { args: ["account hub load error", e] });
       }
     })();
     return () => { alive = false; };

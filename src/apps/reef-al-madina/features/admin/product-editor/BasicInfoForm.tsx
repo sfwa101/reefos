@@ -3,6 +3,8 @@ import { ImageIcon, Loader2, Upload, ShieldCheck } from "lucide-react";
 import { Field, Label, Toggle, inputCls } from "./primitives";
 import { SOURCES, BADGES, type ProductRow, type ProductMetadata, type ProductMetadataValue } from "./types";
 import SmartTagSuggester from "./SmartTagSuggester";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface BasicInfoFormProps {
   form: ProductRow;
@@ -76,15 +78,15 @@ const BasicInfoForm = ({
                 if (f) onUpload(f);
               }}
             />
-            <button
+            <Button
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
               className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold flex items-center gap-2 press disabled:opacity-50"
             >
               {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
               رفع صورة
-            </button>
-            <input
+            </Button>
+            <Input
               value={form.image_url ?? ""}
               onChange={(e) => update("image_url", e.target.value)}
               placeholder="أو الصق رابط صورة"
@@ -95,7 +97,7 @@ const BasicInfoForm = ({
       </div>
 
       <Field label="الاسم *">
-        <input value={form.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
+        <Input value={form.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
       </Field>
 
       <SmartTagSuggester
@@ -111,7 +113,7 @@ const BasicInfoForm = ({
           </select>
         </Field>
         <Field label="الفئة *">
-          <input
+          <Input
             value={form.category}
             onChange={(e) => update("category", e.target.value)}
             list="cat-list"
@@ -125,16 +127,16 @@ const BasicInfoForm = ({
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="العلامة التجارية">
-          <input value={form.brand ?? ""} onChange={(e) => update("brand", e.target.value)} className={inputCls} />
+          <Input value={form.brand ?? ""} onChange={(e) => update("brand", e.target.value)} className={inputCls} />
         </Field>
         <Field label="الوحدة">
-          <input value={form.unit} onChange={(e) => update("unit", e.target.value)} placeholder="قطعة / كجم / لتر" className={inputCls} />
+          <Input value={form.unit} onChange={(e) => update("unit", e.target.value)} placeholder="قطعة / كجم / لتر" className={inputCls} />
         </Field>
       </div>
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="الفئة الفرعية">
-          <input value={form.sub_category ?? ""} onChange={(e) => update("sub_category", e.target.value || null)} className={inputCls} />
+          <Input value={form.sub_category ?? ""} onChange={(e) => update("sub_category", e.target.value || null)} className={inputCls} />
         </Field>
         <Field label="الشارة">
           <select value={form.badge ?? ""} onChange={(e) => update("badge", e.target.value || null)} className={inputCls}>
@@ -188,7 +190,7 @@ const BasicInfoForm = ({
         </div>
         {(excludeFromDiscounts || excludeFromLoyalty) && (
           <Field label="رسالة الاستثناء (تظهر للعميل في السلة)">
-            <input
+            <Input
               value={exclusionMessage}
               onChange={(e) => setMetaFlag("exclusionMessage", e.target.value)}
               placeholder="هذا المنتج يتمتع بأفضل سعر بيع مباشر…"

@@ -16,6 +16,7 @@
  */
 import { supabase } from "@/integrations/supabase/client";
 import { dynamicSb } from "@/integrations/supabase/dynamic";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type InventoryKind = "count" | "capacity" | "time_slots";
 
@@ -115,9 +116,7 @@ export const InventoryGateway = {
         if (mapped) tierId = mapped;
         else if (isPersistedId(local)) tierId = local;
         else {
-          console.warn(
-            `[InventoryGateway] dropping row: unresolved tier id "${local}"`,
-          );
+          Tracer.warn("commerce", "log", { args: [`[InventoryGateway] dropping row: unresolved tier id "${local}"`] });
           continue;
         }
       }

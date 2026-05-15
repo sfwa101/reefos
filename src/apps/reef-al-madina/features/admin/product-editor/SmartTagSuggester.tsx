@@ -10,6 +10,8 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Plus, Sparkles, X } from "lucide-react";
 import { suggestAliases, normalizeArabic } from "@/core/search/utils/arabicLogic";
 import { Label } from "./primitives";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export interface SmartTagSuggesterProps {
   readonly productName: string;
@@ -82,14 +84,14 @@ const SmartTagSuggester = ({ productName, aliases, onChange }: SmartTagSuggester
               className="inline-flex items-center gap-1 rounded-full bg-primary/12 px-2.5 py-1 text-[11.5px] font-bold text-primary"
             >
               {a}
-              <button
+              <Button
                 type="button"
                 onClick={() => removeAlias(a)}
                 aria-label={`حذف ${a}`}
                 className="rounded-full p-0.5 hover:bg-primary/20"
               >
                 <X className="h-3 w-3" />
-              </button>
+              </Button>
             </span>
           ))}
         </div>
@@ -103,17 +105,17 @@ const SmartTagSuggester = ({ productName, aliases, onChange }: SmartTagSuggester
               <Sparkles className="h-3.5 w-3.5" />
               اقتراحات ذكية ({suggestions.length})
             </span>
-            <button
+            <Button
               type="button"
               onClick={addAll}
               className="rounded-full bg-amber-600 px-3 py-1 text-[10.5px] font-extrabold text-white press"
             >
               إضافة الكل
-            </button>
+            </Button>
           </div>
           <div className="flex flex-wrap gap-1.5">
             {suggestions.map((s) => (
-              <button
+              <Button
                 key={s}
                 type="button"
                 onClick={() => addOne(s)}
@@ -121,7 +123,7 @@ const SmartTagSuggester = ({ productName, aliases, onChange }: SmartTagSuggester
               >
                 <Plus className="h-3 w-3" />
                 {s}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
@@ -129,7 +131,7 @@ const SmartTagSuggester = ({ productName, aliases, onChange }: SmartTagSuggester
 
       {/* Manual entry */}
       <div className="flex items-center gap-2">
-        <input
+        <Input
           value={manual}
           onChange={(e) => setManual(e.target.value)}
           onKeyDown={(e) => {
@@ -141,14 +143,14 @@ const SmartTagSuggester = ({ productName, aliases, onChange }: SmartTagSuggester
           placeholder="أضف كلمة يدوياً…"
           className="flex-1 h-10 rounded-xl border border-border bg-background px-3 text-[13px] outline-none focus:border-primary"
         />
-        <button
+        <Button
           type="button"
           onClick={submitManual}
           disabled={!manual.trim()}
           className="h-10 px-3 rounded-xl bg-foreground text-background text-[12px] font-extrabold disabled:opacity-40 press"
         >
           إضافة
-        </button>
+        </Button>
       </div>
     </div>
   );

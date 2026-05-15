@@ -6,6 +6,8 @@ import { toast } from "sonner";
 import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { useSovereignOverride } from "@/hooks/useSovereignOverride";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   useTransferLogic,
   RESTRICTED_CATEGORIES,
@@ -111,12 +113,12 @@ export const WalletTransferDialog = ({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={onClose}
               className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </Button>
             <div>
               <h2 className="font-display text-lg font-extrabold">تحويل رصيد</h2>
               <p className="text-[11px] text-muted-foreground">إلى أي مستخدم في ريف المدينة</p>
@@ -155,7 +157,7 @@ export const WalletTransferDialog = ({
             <span className="mb-1 flex items-center gap-1 text-[11px] font-bold text-muted-foreground">
               <Phone className="h-3 w-3" /> رقم هاتف المستلم
             </span>
-            <input
+            <Input
               type="tel"
               inputMode="tel"
               dir="ltr"
@@ -170,7 +172,7 @@ export const WalletTransferDialog = ({
             <span className="mb-1 block text-[11px] font-bold text-muted-foreground">
               المبلغ (ج.م) · حد أقصى 5000
             </span>
-            <input
+            <Input
               type="text"
               inputMode="numeric"
               dir="ltr"
@@ -183,13 +185,13 @@ export const WalletTransferDialog = ({
 
           <div className="mb-3 grid grid-cols-4 gap-2">
             {[50, 100, 200, 500].map((v) => (
-              <button
+              <Button
                 key={v}
                 onClick={() => setAmount(String(v))}
                 className="rounded-xl bg-foreground/5 py-2 text-xs font-extrabold transition active:scale-95 disabled:opacity-50"
               >
                 {toLatin(v)}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -197,7 +199,7 @@ export const WalletTransferDialog = ({
             <span className="mb-1 block text-[11px] font-bold text-muted-foreground">
               ملاحظة (اختياري)
             </span>
-            <input
+            <Input
               type="text"
               value={note}
               onChange={(e) => setNote(e.target.value.slice(0, 40))}
@@ -231,7 +233,7 @@ export const WalletTransferDialog = ({
                 {RESTRICTED_CATEGORIES.map((c) => {
                   const active = selectedCats.includes(c.value);
                   return (
-                    <button
+                    <Button
                       key={c.value}
                       type="button"
                       onClick={() => toggleCat(c.value)}
@@ -242,7 +244,7 @@ export const WalletTransferDialog = ({
                       }`}
                     >
                       {c.label}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>
@@ -255,14 +257,14 @@ export const WalletTransferDialog = ({
             </p>
           </div>
 
-          <button
+          <Button
             onClick={submit}
             disabled={!valid || busy}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary py-3.5 text-sm font-extrabold text-primary-foreground shadow-pill transition active:scale-[0.98] disabled:opacity-40"
           >
             {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
             تحويل {amt > 0 ? `${toLatin(amt)} ج.م` : ""}
-          </button>
+          </Button>
         </fieldset>
       </motion.div>
     </motion.div>

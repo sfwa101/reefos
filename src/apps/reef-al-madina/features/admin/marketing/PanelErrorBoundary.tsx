@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 interface Props { children: ReactNode; label?: string }
 interface State { error: Error | null }
@@ -12,7 +13,7 @@ export class PanelErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    console.error("[PanelErrorBoundary]", this.props.label ?? "panel", error, info);
+    Tracer.error("admin", "panelerrorboundary", { args: ["[PanelErrorBoundary]", this.props.label ?? "panel", error, info] });
   }
 
   reset = () => this.setState({ error: null });

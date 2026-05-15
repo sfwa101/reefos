@@ -11,6 +11,7 @@ import type {
   BuildingType,
   DeliveryMethod,
 } from "@/core/logistics/core/types";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export const FALLBACK_STANDARD_DELIVERY_METHOD: DeliveryMethod = {
   id: "fallback-standard",
@@ -324,7 +325,7 @@ export const LogisticsExtras = {
       p_limit: limit,
     });
     if (error) {
-      console.error("[findNearestDrivers] failed", error.message);
+      Tracer.error("logistics", "findnearestdrivers_failed", { args: ["[findNearestDrivers] failed", error.message] });
       return [];
     }
     return (data ?? []) as Array<{ driver_id: string; distance_m: number; updated_at: string }>;

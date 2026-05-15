@@ -16,6 +16,7 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
 } from "@/components/ui/dialog";
 import { useSovereignContext, type WorkspaceKind } from "@/core/capabilities/store/useSovereignContext";
+import { Button } from "@/components/ui/button";
 // SmartProductComposer dialog removed in V-1.C — replaced by /admin/assets/genesis route.
 
 type Action = {
@@ -106,7 +107,7 @@ export function SmartActionComposer() {
 
   return (
     <>
-      <button
+      <Button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="إضافة سريعة"
@@ -117,8 +118,8 @@ export function SmartActionComposer() {
         )}
       >
         <Plus className="h-7 w-7" strokeWidth={2.5} />
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
         onClick={() => setOpen(true)}
         aria-label="إضافة سريعة"
@@ -129,23 +130,23 @@ export function SmartActionComposer() {
         )}
       >
         <Plus className="h-4 w-4" strokeWidth={2.5} /> إضافة
-      </button>
+      </Button>
 
       <Dialog open={open} onOpenChange={(o) => (o ? setOpen(true) : close())}>
         <DialogContent dir="rtl" className="sm:max-w-md rounded-3xl p-0 overflow-hidden">
           <DialogHeader className="p-5 pb-3 border-b border-border/40">
             <div className="flex items-center justify-between">
               {picked ? (
-                <button onClick={() => setPicked(null)} className="text-foreground-tertiary press" aria-label="رجوع">
+                <Button onClick={() => setPicked(null)} className="text-foreground-tertiary press" aria-label="رجوع">
                   <ArrowLeft className="h-5 w-5" />
-                </button>
+                </Button>
               ) : <span />}
               <DialogTitle className="font-display text-[18px]">
                 {picked ? picked.label : "ماذا تريد أن تسجل؟"}
               </DialogTitle>
-              <button onClick={close} className="text-foreground-tertiary press" aria-label="إغلاق">
+              <Button onClick={close} className="text-foreground-tertiary press" aria-label="إغلاق">
                 <X className="h-5 w-5" />
-              </button>
+              </Button>
             </div>
             <DialogDescription className="text-[12px] text-foreground-tertiary text-center mt-1">
               {picked ? picked.hint : "اختر إجراءً — حكيم يتولى الباقي"}
@@ -157,7 +158,7 @@ export function SmartActionComposer() {
               <ul className="grid grid-cols-1 gap-2">
                 {actions.map((a) => (
                   <li key={a.key}>
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handlePick(a)}
                       disabled={a.soon}
@@ -182,7 +183,7 @@ export function SmartActionComposer() {
                         </div>
                         <p className="text-[11.5px] text-foreground-tertiary leading-tight mt-0.5">{a.hint}</p>
                       </div>
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
@@ -195,12 +196,12 @@ export function SmartActionComposer() {
                   محرر <span className="font-semibold text-foreground">{picked.label}</span> قيد التهيئة.
                   حكيم سيملأ الحقول من السياق — وأنت تؤكد فقط.
                 </p>
-                <button
+                <Button
                   onClick={close}
                   className="mt-5 h-11 px-6 rounded-xl bg-foreground text-background text-[12.5px] font-semibold press"
                 >
                   حسنًا
-                </button>
+                </Button>
               </div>
             )}
           </div>

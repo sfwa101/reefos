@@ -14,6 +14,8 @@ import { toLatin } from "@/lib/format";
 import { fireMiniConfetti } from "@/lib/confetti";
 import { formatDate } from "@/core/finance/lib/walletAdvisor";
 import type { SavingsJar, SavingsTx } from "@/core/finance/types/wallet.types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 /* ================= SAVINGS TILE (collapsed surface) ================= */
 export const SavingsJarTile = ({
@@ -205,12 +207,12 @@ export const SavingsJarDialog = ({
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <button
+            <Button
               onClick={onClose}
               className="flex h-9 w-9 items-center justify-center rounded-xl bg-foreground/5"
             >
               <ChevronLeft className="h-4 w-4" />
-            </button>
+            </Button>
             <div>
               <h2 className="font-display text-lg font-extrabold">الحصّالة الذكية</h2>
               <p className="text-[11px] text-muted-foreground">ادّخر بدون أن تشعر</p>
@@ -257,18 +259,18 @@ export const SavingsJarDialog = ({
         <p className="mb-2 text-[11px] font-bold text-muted-foreground">إيداع سريع (ج.م)</p>
         <div className="mb-2 grid grid-cols-4 gap-2">
           {[5, 10, 25, 50].map((v) => (
-            <button
+            <Button
               key={v}
               onClick={() => deposit(v, `إيداع يدوي ${v} ج.م`)}
               disabled={busy}
               className="rounded-xl bg-primary/10 py-2.5 text-xs font-extrabold text-primary transition active:scale-95 disabled:opacity-50"
             >
               +{toLatin(v)}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="mb-4 flex items-center gap-2">
-          <input
+          <Input
             type="text"
             inputMode="numeric"
             dir="ltr"
@@ -277,20 +279,20 @@ export const SavingsJarDialog = ({
             placeholder="مبلغ مخصص"
             className="flex-1 rounded-xl bg-foreground/5 px-3 py-2.5 text-sm font-bold tabular-nums outline-none"
           />
-          <button
+          <Button
             onClick={() => deposit(Number(depositAmount), `إيداع يدوي ${depositAmount} ج.م`)}
             disabled={busy || !depositAmount}
             className="flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-primary-foreground disabled:opacity-50"
           >
             <Plus className="h-4 w-4" strokeWidth={3} />
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={withdraw}
             disabled={busy || !depositAmount}
             className="flex h-11 w-11 items-center justify-center rounded-xl bg-foreground/10 text-foreground disabled:opacity-50"
           >
             <Minus className="h-4 w-4" strokeWidth={3} />
-          </button>
+          </Button>
         </div>
 
         <div className="mb-4 rounded-2xl bg-foreground/5 p-3">
@@ -299,7 +301,7 @@ export const SavingsJarDialog = ({
               <Settings2 className="h-4 w-4 text-primary" />
               <p className="text-[12px] font-extrabold">الادخار التلقائي</p>
             </div>
-            <button
+            <Button
               onClick={() => setAutoSave((v) => !v)}
               className={`relative h-6 w-11 rounded-full transition ${
                 autoSave ? "bg-primary" : "bg-foreground/20"
@@ -310,7 +312,7 @@ export const SavingsJarDialog = ({
                   autoSave ? "right-0.5" : "right-[calc(100%-1.375rem)]"
                 }`}
               />
-            </button>
+            </Button>
           </div>
           <p className="mb-2 text-[10px] text-muted-foreground">
             يُقرّب كل طلب لأقرب مضاعف ويضع الفرق في حصّالتك تلقائيًا
@@ -318,7 +320,7 @@ export const SavingsJarDialog = ({
           <p className="mb-1.5 text-[10px] font-bold text-muted-foreground">قرّب لأقرب</p>
           <div className="grid grid-cols-4 gap-2">
             {[1, 5, 10, 25].map((r) => (
-              <button
+              <Button
                 key={r}
                 onClick={() => setRoundTo(r)}
                 className={`rounded-lg py-2 text-[11px] font-extrabold transition ${
@@ -326,19 +328,19 @@ export const SavingsJarDialog = ({
                 }`}
               >
                 {toLatin(r)} ج
-              </button>
+              </Button>
             ))}
           </div>
 
           <div className="mt-3 grid grid-cols-2 gap-2">
-            <input
+            <Input
               type="text"
               value={goalLabel}
               onChange={(e) => setGoalLabel(e.target.value)}
               placeholder="اسم الهدف (مثلاً: عمرة)"
               className="rounded-lg bg-background px-3 py-2 text-[12px] font-bold outline-none"
             />
-            <input
+            <Input
               type="text"
               inputMode="numeric"
               dir="ltr"
@@ -349,13 +351,13 @@ export const SavingsJarDialog = ({
             />
           </div>
 
-          <button
+          <Button
             onClick={saveSettings}
             disabled={busy}
             className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-[12px] font-extrabold text-primary-foreground disabled:opacity-50"
           >
             حفظ الإعدادات
-          </button>
+          </Button>
         </div>
 
         {txs.length > 0 && (

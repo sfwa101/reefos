@@ -1,6 +1,8 @@
 import { AlertTriangle, Shield, TrendingDown } from "lucide-react";
 import { Field, Stat, inputCls } from "./primitives";
 import type { ProductRow } from "./types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 export type MarginInfo =
   | { kind: "no_cost" }
@@ -39,7 +41,7 @@ const PricingAndInventory = ({
 
         <div className="grid grid-cols-3 gap-2">
           <Field label="سعر التكلفة">
-            <input
+            <Input
               type="number" step="0.01"
               value={(form.cost_price as number) ?? ""}
               onChange={(e) => update("cost_price", e.target.value || null)}
@@ -48,7 +50,7 @@ const PricingAndInventory = ({
             />
           </Field>
           <Field label="سعر البيع *">
-            <input
+            <Input
               type="number" step="0.01"
               value={form.price as number}
               onChange={(e) => update("price", e.target.value)}
@@ -56,7 +58,7 @@ const PricingAndInventory = ({
             />
           </Field>
           <Field label="السعر قبل الخصم">
-            <input
+            <Input
               type="number" step="0.01"
               value={(form.old_price as number) ?? ""}
               onChange={(e) => update("old_price", e.target.value || null)}
@@ -66,7 +68,7 @@ const PricingAndInventory = ({
         </div>
 
         <Field label="نسبة عمولة الأفلييت %">
-          <input
+          <Input
             type="number" step="0.5" min="0" max="50"
             value={(form.affiliate_commission_pct as number) ?? 0}
             onChange={(e) => update("affiliate_commission_pct", e.target.value)}
@@ -143,13 +145,13 @@ const PricingAndInventory = ({
                   placeholder="اكتب سبب التجاوز (10 أحرف على الأقل)"
                   className={inputCls + " resize-none py-2 h-auto"}
                 />
-                <button
+                <Button
                   onClick={() => setShowOverride(true)}
                   disabled={overrideReason.trim().length < 10}
                   className="w-full h-10 rounded-xl bg-destructive text-destructive-foreground text-[12.5px] font-bold press disabled:opacity-40"
                 >
                   أوافق على التجاوز ومسؤولية القرار
-                </button>
+                </Button>
               </div>
             )}
             {requiresOverride && !canOverride && (
@@ -164,10 +166,10 @@ const PricingAndInventory = ({
 
       <div className="grid grid-cols-2 gap-3">
         <Field label="المخزون">
-          <input type="number" value={form.stock} onChange={(e) => update("stock", Number(e.target.value))} className={inputCls + " num text-right"} />
+          <Input type="number" value={form.stock} onChange={(e) => update("stock", Number(e.target.value))} className={inputCls + " num text-right"} />
         </Field>
         <Field label="الترتيب">
-          <input type="number" value={form.sort_order} onChange={(e) => update("sort_order", Number(e.target.value))} className={inputCls + " num text-right"} />
+          <Input type="number" value={form.sort_order} onChange={(e) => update("sort_order", Number(e.target.value))} className={inputCls + " num text-right"} />
         </Field>
       </div>
     </div>

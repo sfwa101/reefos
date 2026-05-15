@@ -9,6 +9,8 @@ import {
 import { fmtMoney } from "@/lib/format";
 import { Loader2, ShieldAlert, Plus, Receipt, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 const CATEGORIES = [
   { value: "operations", label: "تشغيل" },
@@ -133,31 +135,31 @@ export default function Expenses() {
           </div>
         </div>
 
-        <button onClick={() => { if (showForm) { setEditingId(null); resetForm(); } setShowForm(!showForm); }} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
+        <Button onClick={() => { if (showForm) { setEditingId(null); resetForm(); } setShowForm(!showForm); }} className="w-full bg-primary text-primary-foreground rounded-xl py-3 font-medium flex items-center justify-center gap-2">
           <Plus className="h-4 w-4" /> {showForm ? "إخفاء" : (editingId ? "تعديل مصروف" : "تسجيل مصروف")}
-        </button>
+        </Button>
 
         {showForm && (
           <div className="bg-surface rounded-2xl p-4 border border-border/40 space-y-2">
             <select className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
               {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
             </select>
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="تصنيف فرعي (اختياري)" value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })} />
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="تصنيف فرعي (اختياري)" value={form.subcategory} onChange={(e) => setForm({ ...form, subcategory: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
-              <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المبلغ" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
-              <input type="date" className="bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.expense_date} onChange={(e) => setForm({ ...form, expense_date: e.target.value })} />
+              <Input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المبلغ" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+              <Input type="date" className="bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.expense_date} onChange={(e) => setForm({ ...form, expense_date: e.target.value })} />
             </div>
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المستفيد" value={form.paid_to} onChange={(e) => setForm({ ...form, paid_to: e.target.value })} />
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="المستفيد" value={form.paid_to} onChange={(e) => setForm({ ...form, paid_to: e.target.value })} />
             <div className="grid grid-cols-2 gap-2">
               <select className="bg-muted rounded-lg px-3 py-2 text-[14px]" value={form.payment_method} onChange={(e) => setForm({ ...form, payment_method: e.target.value })}>
                 <option value="cash">نقدي</option>
                 <option value="bank_transfer">تحويل بنكي</option>
                 <option value="wallet">محفظة</option>
               </select>
-              <input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="مرجع" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
+              <Input className="bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="مرجع" value={form.reference} onChange={(e) => setForm({ ...form, reference: e.target.value })} />
             </div>
-            <input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="ملاحظات" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-            <button onClick={submit} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">{editingId ? "تحديث" : "حفظ"}</button>
+            <Input className="w-full bg-muted rounded-lg px-3 py-2 text-[14px]" placeholder="ملاحظات" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <Button onClick={submit} className="w-full bg-primary text-primary-foreground rounded-lg py-2 font-medium">{editingId ? "تحديث" : "حفظ"}</Button>
           </div>
         )}
 
@@ -173,12 +175,12 @@ export default function Expenses() {
                 <p className="text-[11px] text-foreground-tertiary truncate">{r.expense_date} {r.paid_to ? `• ${r.paid_to}` : ""}</p>
               </div>
               <p className="font-display text-[14px] text-destructive">{fmtMoney(r.amount)}</p>
-              <button onClick={() => startEdit(r)} className="p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
+              <Button onClick={() => startEdit(r)} className="p-1.5 rounded-lg bg-info/10 text-info" aria-label="تعديل">
                 <Pencil className="h-3.5 w-3.5" />
-              </button>
-              <button onClick={() => remove(r.id)} className="p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
+              </Button>
+              <Button onClick={() => remove(r.id)} className="p-1.5 rounded-lg bg-destructive/10 text-destructive" aria-label="حذف">
                 <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              </Button>
             </div>
           ))}
           {rows.length === 0 && <p className="text-center text-foreground-tertiary py-8 text-[13px]">لا توجد مصروفات</p>}

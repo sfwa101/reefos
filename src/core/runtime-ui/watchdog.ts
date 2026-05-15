@@ -1,3 +1,5 @@
+import { Tracer } from "@/core/system/observability/Tracer";
+
 /**
  * Wave P-0 — DEV Watchdog (Constitution Article 3 enforcement, runtime).
  *
@@ -64,13 +66,11 @@ export function assertNoDirectSupabaseInUI(context?: string): void {
   const stack = new Error().stack;
   if (!isUiCaller(stack)) return;
   // eslint-disable-next-line no-console
-  console.error(
-    "🛑 Constitution Article 3 Violation: Direct DB access from UI" +
-      (context ? ` — ${context}` : "") +
-      "\n   UI layers (components/pages/apps/hooks/modules) MUST go through" +
-      " a domain gateway (e.g. catalogGateway) or a server function." +
-      "\n   See docs/constitution/SYSTEM_CONSTITUTION.md §3.",
-  );
+  Tracer.error("runtime-ui", "log", { args: ["🛑 Constitution Article 3 Violation: Direct DB access from UI" +
+          (context ? ` — ${context}` : "") +
+          "\n   UI layers (components/pages/apps/hooks/modules) MUST go through" +
+          " a domain gateway (e.g. catalogGateway) or a server function." +
+          "\n   See docs/constitution/SYSTEM_CONSTITUTION.md §3."] });
 }
 
 type SupabaseLike = {

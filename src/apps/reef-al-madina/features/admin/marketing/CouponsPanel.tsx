@@ -8,6 +8,7 @@ import { fmtNum } from "@/lib/format";
 import { cn } from "@/lib/utils";
 import { Kpi, Field } from "./shared";
 import { TIERS, type Coupon, type CouponForm, type Tier } from "./types";
+import { Button } from "@/components/ui/button";
 import {
   listCouponsFn,
   upsertCouponFn,
@@ -68,9 +69,9 @@ export default function CouponsPanel() {
       </div>
 
       <div className="flex justify-end">
-        <button onClick={() => { setEditing(null); setOpen(true); }} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2">
+        <Button onClick={() => { setEditing(null); setOpen(true); }} className="h-10 px-4 rounded-2xl bg-primary text-primary-foreground text-[13px] font-semibold press inline-flex items-center gap-2">
           <Plus className="h-4 w-4" /> كوبون جديد
-        </button>
+        </Button>
       </div>
 
       <section className="bg-surface rounded-3xl border border-border/50 shadow-soft overflow-hidden">
@@ -97,9 +98,9 @@ export default function CouponsPanel() {
                 </div>
                 <span className={cn("h-2 w-2 rounded-full", r.is_active ? "bg-success" : "bg-foreground-tertiary")} />
                 <div className="flex items-center gap-1 shrink-0">
-                  <button onClick={() => toggleActive(r)} className="h-8 w-8 rounded-xl border border-border/60 inline-flex items-center justify-center press"><Power className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => { setEditing(r); setOpen(true); }} className="h-8 w-8 rounded-xl bg-primary-soft text-primary border border-primary/20 inline-flex items-center justify-center press"><Pencil className="h-3.5 w-3.5" /></button>
-                  <button onClick={() => remove(r)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <Button onClick={() => toggleActive(r)} className="h-8 w-8 rounded-xl border border-border/60 inline-flex items-center justify-center press"><Power className="h-3.5 w-3.5" /></Button>
+                  <Button onClick={() => { setEditing(r); setOpen(true); }} className="h-8 w-8 rounded-xl bg-primary-soft text-primary border border-primary/20 inline-flex items-center justify-center press"><Pencil className="h-3.5 w-3.5" /></Button>
+                  <Button onClick={() => remove(r)} className="h-8 w-8 rounded-xl bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center justify-center press"><Trash2 className="h-3.5 w-3.5" /></Button>
                 </div>
               </div>
             ))}
@@ -171,8 +172,8 @@ function CouponDialog({
           <Field label="الوصف"><Input value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} /></Field>
           <Field label="نوع الخصم">
             <div className="grid grid-cols-2 gap-2">
-              <button type="button" onClick={() => setForm({ ...form, type: "pct" })} className={cn("h-10 rounded-xl text-[13px] font-semibold border", form.type === "pct" ? "bg-primary-soft text-primary border-primary/30" : "bg-surface border-border/60")}><Percent className="h-4 w-4 inline -mt-0.5 ml-1" />نسبة %</button>
-              <button type="button" onClick={() => setForm({ ...form, type: "amount" })} className={cn("h-10 rounded-xl text-[13px] font-semibold border", form.type === "amount" ? "bg-primary-soft text-primary border-primary/30" : "bg-surface border-border/60")}>مبلغ ثابت</button>
+              <Button type="button" onClick={() => setForm({ ...form, type: "pct" })} className={cn("h-10 rounded-xl text-[13px] font-semibold border", form.type === "pct" ? "bg-primary-soft text-primary border-primary/30" : "bg-surface border-border/60")}><Percent className="h-4 w-4 inline -mt-0.5 ml-1" />نسبة %</Button>
+              <Button type="button" onClick={() => setForm({ ...form, type: "amount" })} className={cn("h-10 rounded-xl text-[13px] font-semibold border", form.type === "amount" ? "bg-primary-soft text-primary border-primary/30" : "bg-surface border-border/60")}>مبلغ ثابت</Button>
             </div>
           </Field>
           {form.type === "pct" ? (
@@ -195,8 +196,8 @@ function CouponDialog({
           <Field label="تاريخ الانتهاء"><Input type="datetime-local" value={form.ends_at} onChange={(e) => setForm({ ...form, ends_at: e.target.value })} /></Field>
         </div>
         <DialogFooter>
-          <button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</button>
-          <button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "حفظ"}</button>
+          <Button onClick={() => setOpen(false)} className="h-10 px-4 rounded-xl border border-border/60 text-[13px]">إلغاء</Button>
+          <Button onClick={save} disabled={saving} className="h-10 px-4 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold disabled:opacity-50">{saving ? "حفظ..." : "حفظ"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

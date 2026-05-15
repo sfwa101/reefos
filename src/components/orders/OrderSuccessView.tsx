@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { fmtMoney, toLatin } from "@/lib/format";
 import { buildWaUrl, copyTextToClipboard, normalizeWaPhone } from "@/lib/whatsapp";
 import { OrderGateway } from "@/core/orders";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 type StoredWaFallback = {
   phone: string;
@@ -30,7 +31,7 @@ const OrderSuccess = () => {
       const parsed = JSON.parse(raw) as StoredWaFallback;
       if (parsed?.text) setWaFallback(parsed);
     } catch (e) {
-      console.warn("[checkout] failed to read WhatsApp fallback", e);
+      Tracer.warn("orders", "checkout_failed_to_read_whatsapp_fallback", { args: ["[checkout] failed to read WhatsApp fallback", e] });
     }
   }, []);
 

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { SystemGateway } from "@/core/system/gateway/SystemGateway";
+import { Tracer } from "@/core/system/observability/Tracer";
 
 /**
  * Lightweight reader for system app-settings (key/value JSONB store).
@@ -18,7 +19,7 @@ export function useSystemSetting<T>(key: string, fallback: T): {
       const v = await SystemGateway.getSetting<T>(key);
       setValue(v ?? fallback);
     } catch (e) {
-      console.warn("[system-settings] fallback for", key, e);
+      Tracer.warn("hooks", "system_settings_fallback_for", { args: ["[system-settings] fallback for", key, e] });
       setValue(fallback);
     } finally {
       setLoading(false);
