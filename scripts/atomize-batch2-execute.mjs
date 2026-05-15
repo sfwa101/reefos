@@ -87,7 +87,7 @@ for (const entry of chunk) {
   }
 }
 
-console.log(`\n=== ATOMIZE — CHUNK 1 (top ${N}) DONE ===`);
+console.log(`\n=== ATOMIZE — CHUNK [${START}..${END}] DONE ===`);
 console.log(`Files touched: ${touched}`);
 console.log(`<button> → <Button>: ${btnReplaced}`);
 console.log(`<input>  → <Input> : ${inpReplaced}`);
