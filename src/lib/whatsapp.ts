@@ -17,6 +17,7 @@
  *   4) If everything fails, return `{ ok: false, url, text }` so the UI can
  *      show a fallback dialog with copy-to-clipboard and a manual link.
  */
+import { Tracer } from "@/core/system/observability/Tracer";
 
 export type WaTarget = {
   /** International phone, digits only. e.g. "201080068689". */
