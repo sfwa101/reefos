@@ -19,23 +19,13 @@
  */
 import { Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import type { LucideIcon } from "lucide-react";
 import {
   Bell,
-  BarChart3,
-  Box,
   Home,
-  LayoutDashboard,
-  Megaphone,
   Moon,
-  Package,
   Search,
-  Settings,
-  ShoppingBag,
   Sparkles,
   Sun,
-  Users,
-  Wallet,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -43,33 +33,11 @@ import { Button } from "@/components/ui/button";
 
 import { HakimLayer } from "./hakim/HakimLayer";
 import { useHakimLayer } from "./hakim/useHakimLayer";
+import { SovereignSwitcher } from "./SovereignSwitcher";
+import { useActiveOSCompany } from "@/core/identity/useActiveOSCompany";
+import { getPrimaryNav, getBottomNav, type NavItem } from "./navConfig";
 
-type NavItem = {
-  to: string;
-  label: string;
-  icon: LucideIcon;
-};
-
-/** Primary admin destinations — bound to existing TanStack routes. */
-const PRIMARY_NAV: NavItem[] = [
-  { to: "/admin", label: "اللوحة", icon: LayoutDashboard },
-  { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
-  { to: "/admin/customers", label: "العملاء", icon: Users },
-  { to: "/admin/inventory", label: "المخزون", icon: Package },
-  { to: "/admin/marketing", label: "التسويق", icon: Megaphone },
-  { to: "/admin/finance", label: "المالية", icon: Wallet },
-  { to: "/admin/analytics", label: "التحليلات", icon: BarChart3 },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
-];
-
-/** Mobile bottom-dock — 5 most-used surfaces. */
-const BOTTOM_NAV: NavItem[] = [
-  { to: "/admin", label: "اللوحة", icon: LayoutDashboard },
-  { to: "/admin/orders", label: "الطلبات", icon: ShoppingBag },
-  { to: "/admin/customers", label: "العملاء", icon: Users },
-  { to: "/admin/inventory", label: "المخزون", icon: Box },
-  { to: "/admin/settings", label: "الإعدادات", icon: Settings },
-];
+/* ------------------------------------------------------------------ */
 
 /* ------------------------------------------------------------------ */
 
