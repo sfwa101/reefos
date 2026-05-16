@@ -2,6 +2,8 @@
 
 Each domain has a **single sovereign owner**. Cross-domain changes require explicit handoff.
 
+## Kernel / runtime domains (`src/core/*`)
+
 | Domain | Path | Memory |
 |---|---|---|
 | Catalog | `src/core/catalog/` | `domains/catalog.md` |
@@ -31,5 +33,33 @@ Each domain has a **single sovereign owner**. Cross-domain changes require expli
 | Runtime UI (SDUI) | `src/core/runtime-ui/` | `domains/runtime-ui.md` |
 | Events | `src/core/events/` | `domains/events.md` |
 | System | `src/core/system/` | `domains/system.md` |
+| Khalil (transformation OS) | `src/core/khalil/` | `domains/khalil/DOMAIN_MEMORY.md` |
 
-Each domain memory is created on first material change to that domain. The template lives at `domains/_template.md`.
+## Civilization apps (`src/apps/*`)
+
+A civilization is a sovereign user-facing application that consumes
+kernel domains. It MAY have its own gateway under `src/core/<civ>/`,
+but its presentation layer always lives under `src/apps/<civ>/`.
+
+| Civilization | App path | Core path | Memory |
+|---|---|---|---|
+| Reef Al-Madina | `src/apps/reef-al-madina/` | (multiple) | various |
+| Maeen (super-app hub) | `src/apps/maeen/` | — (consumes kernel only) | `domains/maeen.md` *(pending — ADR-M001)* |
+| Khalil (transformation OS) | `src/apps/khalil/` | `src/core/khalil/` | `domains/khalil/DOMAIN_MEMORY.md` |
+| Asrab Tayba | `src/apps/asrab/` | *(planned)* | *(pending)* |
+| Nabd Al-Hayat | `src/apps/nabd/` | *(planned)* | *(pending)* |
+
+## Boundary rules
+
+- A civilization MUST NOT import from another civilization
+  (`src/apps/<civA>/**` → `src/apps/<civB>/**` is forbidden).
+- A civilization MAY consume any kernel domain via that domain's public
+  gateway (`@/core/<domain>` barrel exports — never internal paths).
+- Kernel domains MUST NOT import from any civilization
+  (Art. IX — Kernel Minimalism).
+- `LayoutFactory` directly importing civilization components
+  (`@/apps/<civ>/components/*`) is **transitional** and tracked as a
+  coupling risk; the long-term target is SDUI-registry resolution.
+
+Each domain memory is created on first material change to that domain.
+The template lives at `domains/_template.md`.
