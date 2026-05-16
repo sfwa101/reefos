@@ -36,6 +36,8 @@ export interface KhalilHomeContext {
   adherence: KhalilAdherenceSummary;
   /** Identity level — server-truth from `khalil_identity_state`. */
   identityLevel: KhalilIdentityLevel;
+  /** Latest pending coach proposal (id + kind only — UI fetches details). */
+  pendingCoachProposal?: { id: string; kind: string } | null;
 }
 
 interface ScoredBlock {
@@ -87,6 +89,12 @@ export function computeUrgencyScore(
       if (idx >= LEVEL_INDEX.disciplined) return 0;
       if (idx >= LEVEL_INDEX.stable) return 8;
       return 30;
+    case "khalil.coach.proposal":
+      // Single visible proposal — quiet placement: under identity,
+      // above welcome/analytics. Hard recovery softens further.
+      if (recovery === "hard") return 40;
+      if (idx >= LEVEL_INDEX.disciplined) return 25;
+      return -20;
     default:
       return 100;
   }
@@ -103,12 +111,28 @@ function visibilityFor(
     if (blockKind === "khalil.analytics.heatmap") return false;
     if (blockKind === "khalil.analytics.adherence") return false;
     if (blockKind === "khalil.workout.next") return false;
+    // Hard recovery softens proposal types: only show recovery / quiet kinds.
+    if (blockKind === "khalil.coach.proposal") {
+      const k = ctx.pendingCoachProposal?.kind;
+      if (!k) return false;
+      return k === "recovery-suggestion" || k === "quiet-day";
+    }
   }
   // P2.5 §9A: seed hides analytics depth (orchestrator-driven only —
   // capabilities are NOT gated by level per p1-capability-ownership).
   if (ctx.identityLevel === "seed") {
     if (blockKind === "khalil.analytics.heatmap") return false;
     if (blockKind === "khalil.analytics.adherence") return false;
+  }
+  // Coach proposal: only emit when there is an actual pending proposal.
+  // Sovereign level reduces guidance noise (§9).
+  if (blockKind === "khalil.coach.proposal") {
+    if (!ctx.pendingCoachProposal) return false;
+    if (ctx.identityLevel === "sovereign") {
+      // Sovereign only sees quiet-day / consistency-guidance.
+      const k = ctx.pendingCoachProposal.kind;
+      return k === "quiet-day" || k === "consistency-guidance";
+    }
   }
   return true;
 }
@@ -151,6 +175,16 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
       kind: "khalil.habit.today",
       id: "khalil.habit.today",
       props: { localDate: ctx.localDate, recovery: ctx.recovery },
+    },
+    {
+      kind: "khalil.coach.proposal",
+      id: "khalil.coach.proposal",
+      props: ctx.pendingCoachProposal
+        ? {
+            proposalId: ctx.pendingCoachProposal.id,
+            kind: ctx.pendingCoachProposal.kind,
+          }
+        : {},
     },
   ];
 

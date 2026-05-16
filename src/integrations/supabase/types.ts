@@ -3489,6 +3489,89 @@ export type Database = {
         }
         Relationships: []
       }
+      khalil_coach_audit: {
+        Row: {
+          action: string
+          created_at: string
+          id: string
+          meta: Json
+          proposal_id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          proposal_id: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          id?: string
+          meta?: Json
+          proposal_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "khalil_coach_audit_proposal_id_fkey"
+            columns: ["proposal_id"]
+            isOneToOne: false
+            referencedRelation: "khalil_coach_proposal"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      khalil_coach_proposal: {
+        Row: {
+          accepted_at: string | null
+          client_event_id: string | null
+          copy_key: string
+          created_at: string
+          dismissed_at: string | null
+          expires_at: string
+          id: string
+          kind: string
+          payload: Json
+          prompt_version: string
+          status: string
+          suggested_capability: string | null
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          client_event_id?: string | null
+          copy_key: string
+          created_at?: string
+          dismissed_at?: string | null
+          expires_at: string
+          id?: string
+          kind: string
+          payload?: Json
+          prompt_version?: string
+          status?: string
+          suggested_capability?: string | null
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string | null
+          client_event_id?: string | null
+          copy_key?: string
+          created_at?: string
+          dismissed_at?: string | null
+          expires_at?: string
+          id?: string
+          kind?: string
+          payload?: Json
+          prompt_version?: string
+          status?: string
+          suggested_capability?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       khalil_habit_completion: {
         Row: {
           client_event_id: string

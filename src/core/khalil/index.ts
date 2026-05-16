@@ -47,3 +47,15 @@ export {
   type AdherenceDay,
   type LevelThreshold,
 } from "./identity";
+export {
+  coachProposalKindSchema,
+  coachProposalStatusSchema,
+  acceptCoachInputSchema,
+  dismissCoachInputSchema,
+  type CoachProposalKind,
+  type CoachProposalStatus,
+  type CoachProposalDTO,
+  type CoachProposalPayload,
+  type AcceptCoachInput,
+  type DismissCoachInput,
+} from "./coach";

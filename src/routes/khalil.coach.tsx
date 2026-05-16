@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { KhalilPlaceholderPage } from "@/apps/khalil/pages/Placeholder";
+import { KhalilCoachPage } from "@/apps/khalil/pages/Coach";
 
 export const Route = createFileRoute("/khalil/coach")({
-  component: () => <KhalilPlaceholderPage titleKey="khalil.nav.coach" />,
+  component: KhalilCoachPage,
 });

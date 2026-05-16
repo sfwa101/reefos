@@ -13,6 +13,7 @@ import { PrayerTodayBlock } from "./PrayerTodayBlock";
 import { HabitTodayBlock } from "./HabitTodayBlock";
 import { RecoveryBannerBlock } from "./RecoveryBannerBlock";
 import { IdentityChipBlock } from "./IdentityChipBlock";
+import { CoachProposalBlock } from "./CoachProposalBlock";
 
 let registered = false;
 
@@ -27,5 +28,6 @@ export function registerKhalilBlocks(): void {
     />
   ));
   blockRegistry.register("khalil.identity.chip", () => <IdentityChipBlock />);
+  blockRegistry.register("khalil.coach.proposal", () => <CoachProposalBlock />);
   registered = true;
 }
