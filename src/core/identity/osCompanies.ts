@@ -3,22 +3,31 @@
  *
  * Pure data module describing the Salsabil OS multi-civilization roster:
  * the Motherboard ("global") and every child company. UI components
- * (SovereignSwitcher, OSHome, sidebars) consume this list — no DB calls,
- * no hardcoded literals scattered across the codebase.
+ * (SovereignSwitcher, OSHome, sidebars, AppSwitcherSheet) consume this
+ * list — no DB calls, no hardcoded literals scattered across the codebase.
+ *
+ * Phase P0.1 — Maeen ↔ Khalil decoupling:
+ *  • `maeen` is now a first-class civilization (the unified empire hub /
+ *    super-app launcher).
+ *  • `khalil` is re-labeled to its real identity: the sovereign
+ *    transformation OS. It no longer carries the launcher tagline or
+ *    `shared_by` entries that belonged to Maeen.
+ *  See `.salsabil/decisions/0003-p0.1-maeen-khalil-decoupling.md`.
  */
 import type { LucideIcon } from "lucide-react";
 import {
   Activity,
   Building2,
+  Compass,
   Factory,
   Globe2,
   HeartPulse,
   Home,
+  Layers,
   Library,
   ShieldCheck,
   Sparkles,
   Store,
-  Users,
 } from "lucide-react";
 
 export type OSCompanyStatus = "live" | "building" | "design";
@@ -29,6 +38,7 @@ export type OSCompanyId =
   | "tayseer"
   | "hakim"
   | "noor_eldin"
+  | "maeen"
   | "khalil"
   | "asrab"
   | "nabd"
@@ -74,6 +84,14 @@ export const OS_COMPANIES: ReadonlyArray<OSCompany> = [
     accent: "from-amber-400 to-orange-500",
   },
   {
+    id: "maeen",
+    name: "معين",
+    tagline: "بوابة الإمبراطورية الموحّدة",
+    status: "live",
+    icon: Layers,
+    accent: "from-violet-500 to-fuchsia-600",
+  },
+  {
     id: "tayseer",
     name: "تيسير",
     tagline: "الهوية والمحفظة المالية",
@@ -103,10 +121,10 @@ export const OS_COMPANIES: ReadonlyArray<OSCompany> = [
   {
     id: "khalil",
     name: "خليل",
-    tagline: "السوبر-أب الموحد",
+    tagline: "نظام التحول السيادي الموجَّه بالذكاء",
     status: "design",
-    icon: Users,
-    accent: "from-violet-500 to-purple-600",
+    icon: Compass,
+    accent: "from-emerald-500 via-teal-500 to-cyan-600",
   },
   {
     id: "asrab",
@@ -156,28 +174,28 @@ export const OS_MODULES: ReadonlyArray<{
     name: "الهوية والصلاحيات",
     domain: "Identity",
     icon: ShieldCheck,
-    shared_by: ["global", "reef", "tayseer", "khalil"],
+    shared_by: ["global", "reef", "tayseer", "maeen", "khalil"],
   },
   {
     id: "wallet",
     name: "المحفظة المالية",
     domain: "Finance",
     icon: Activity,
-    shared_by: ["tayseer", "reef", "khalil"],
+    shared_by: ["tayseer", "reef", "maeen"],
   },
   {
     id: "catalog",
     name: "الكتالوج العالمي",
     domain: "Commerce",
     icon: Store,
-    shared_by: ["reef", "khalil", "asrab"],
+    shared_by: ["reef", "maeen", "asrab"],
   },
   {
     id: "hakim_ai",
     name: "محرك حكيم",
     domain: "AI",
     icon: Sparkles,
-    shared_by: ["global", "reef", "hakim"],
+    shared_by: ["global", "reef", "hakim", "khalil"],
   },
   {
     id: "logistics",
