@@ -28,5 +28,6 @@ export function registerKhalilBlocks(): void {
     />
   ));
   blockRegistry.register("khalil.identity.chip", () => <IdentityChipBlock />);
+  blockRegistry.register("khalil.coach.proposal", () => <CoachProposalBlock />);
   registered = true;
 }
