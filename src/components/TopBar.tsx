@@ -1,28 +1,24 @@
 import { Link } from "@tanstack/react-router";
-import { Check, MapPin, Menu, Plus, ShoppingBag } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useCartTotal } from "@/core/orders/runtime/react/CartProvider";
 import { useLocationStatic as useDeliveryLocation } from "@/context/LocationContext";
 import { useAuth } from "@/context/AuthContext";
-import { LogisticsGateway, type SavedAddressVM } from "@/core/logistics";
+import { LogisticsGateway } from "@/core/logistics";
 import { toLatin } from "@/lib/format";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
 import { Button } from "@/components/ui/button";
+import { AppSwitcherSheet } from "@/components/AppSwitcherSheet";
+import { OS_COMPANIES, type OSCompanyId } from "@/core/identity/osCompanies";
+import { readDefaultLauncher } from "@/lib/defaultLauncher";
 
 /**
- * TopBar — Phase 26 (Sovereign Minimalism).
+ * TopBar — Phase 27 (Sovereign Launcher Notch).
  *
- * Three-zone layout: cart (left) · centered address pill · hamburger (right).
- * The persona switcher has moved to /account. Address pill shows ONLY the
- * dynamic address (e.g. "المنزل، جمصة"); no static "اختر عنوان" placeholder.
+ * The central pill (formerly the address chip) is now the App Switcher
+ * trigger — Apple-style notch that opens the sovereign launcher sheet.
+ * Default-address resolution still happens silently on mount so the
+ * delivery zone is hydrated for downstream cart / catalog logic.
  */
 
 const compactFmt = new Intl.NumberFormat("en-US", {
@@ -32,42 +28,47 @@ const compactFmt = new Intl.NumberFormat("en-US", {
 
 const fmtCompact = (n: number) => toLatin(compactFmt.format(Math.round(n)));
 
-type SavedAddress = SavedAddressVM;
-
 const TopBar = () => {
   const total = useCartTotal();
-  const { zone, setFromAddress } = useDeliveryLocation();
+  const { setFromAddress } = useDeliveryLocation();
   const { user } = useAuth();
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [addrSheetOpen, setAddrSheetOpen] = useState(false);
-  const [addresses, setAddresses] = useState<SavedAddress[]>([]);
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [defaultTick, setDefaultTick] = useState(0);
 
   const expanded = total > 0;
 
-  const loadAddresses = async () => {
-    if (!user) { setAddresses([]); return; }
-    const list = await LogisticsGateway.listAddresses(user.id);
-    setAddresses(list);
-    const def = list.find((a) => a.is_default) ?? list[0];
-    if (def) {
-      setActiveId(def.id);
-      setFromAddress(def.city, def.district);
-    }
-  };
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!user) return;
+      const list = await LogisticsGateway.listAddresses(user.id);
+      if (cancelled) return;
+      const def = list.find((a) => a.is_default) ?? list[0];
+      if (def) setFromAddress(def.city, def.district);
+    })();
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]);
 
-  useEffect(() => { loadAddresses(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, [user?.id]);
+  // Re-read the pinned default whenever the sheet closes (it may have changed).
+  useEffect(() => {
+    if (!switcherOpen) setDefaultTick((n) => n + 1);
+  }, [switcherOpen]);
 
-  const onPickAddress = (a: SavedAddress) => {
-    setActiveId(a.id);
-    setFromAddress(a.city, a.district);
-    setPickerOpen(false);
-  };
+  const notch = useMemo(() => {
+    const pinned = readDefaultLauncher();
+    let companyId: OSCompanyId = "reef";
+    if (pinned?.kind === "app") companyId = pinned.id as OSCompanyId;
+    const company = OS_COMPANIES.find((c) => c.id === companyId) ?? OS_COMPANIES[1];
+    return {
+      label: pinned?.name ?? company.name,
+      icon: company.icon,
+      accent: company.accent,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [defaultTick]);
 
-  const activeAddress = addresses.find((a) => a.id === activeId);
-  const addressText = activeAddress
-    ? `${activeAddress.label}، ${zone.shortName}`
-    : zone.shortName;
+  const NotchIcon = notch.icon;
 
   return (
     <>
@@ -102,17 +103,25 @@ const TopBar = () => {
             </AnimatePresence>
           </Link>
 
-          {/* CENTER — Address Pill (dynamic only) */}
+          {/* CENTER — Sovereign App Switcher Notch */}
           <Button
             type="button"
-            onClick={() => setPickerOpen(true)}
-            aria-label="تغيير عنوان التوصيل"
+            onClick={() => setSwitcherOpen(true)}
+            aria-label="مبدّل التطبيقات"
             aria-haspopup="dialog"
-            aria-expanded={pickerOpen}
-            className="mx-auto inline-flex h-11 min-h-[44px] max-w-full items-center gap-1.5 truncate rounded-full bg-secondary/60 px-4 text-[13px] font-bold text-foreground ring-1 ring-border/40 transition active:scale-[0.97]"
+            aria-expanded={switcherOpen}
+            className="mx-auto inline-flex h-11 min-h-[44px] max-w-full items-center gap-2 truncate rounded-full bg-secondary/60 px-2.5 pe-3.5 text-[13px] font-bold text-foreground ring-1 ring-border/40 transition active:scale-[0.97]"
           >
-            <MapPin className="h-4 w-4 text-primary" strokeWidth={2.4} />
-            <span className="truncate">{addressText}</span>
+            <span
+              className={`flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br text-white shadow-soft ${notch.accent}`}
+            >
+              <NotchIcon className="h-3.5 w-3.5" strokeWidth={2.4} />
+            </span>
+            <span className="truncate font-extrabold">{notch.label}</span>
+            <ChevronDown
+              className={`h-3.5 w-3.5 text-muted-foreground transition-transform ${switcherOpen ? "rotate-180" : ""}`}
+              strokeWidth={2.4}
+            />
           </Button>
 
           {/* RIGHT — Hamburger → /account */}
@@ -126,92 +135,7 @@ const TopBar = () => {
         </div>
       </header>
 
-      {/* Addresses picker */}
-      <Sheet open={pickerOpen} onOpenChange={setPickerOpen}>
-        <SheetContent
-          side="bottom"
-          className="rounded-t-[28px] border-t-0 px-4 pb-6 pt-5"
-          dir="rtl"
-        >
-          <SheetHeader className="text-right">
-            <SheetTitle className="font-display text-lg font-extrabold">
-              عنوان التوصيل
-            </SheetTitle>
-            <SheetDescription className="text-[12px] text-muted-foreground">
-              اختر عنواناً محفوظاً أو أضف عنواناً جديداً على الخريطة.
-            </SheetDescription>
-          </SheetHeader>
-
-          {!user ? (
-            <div className="mt-4 space-y-3 rounded-2xl bg-foreground/[0.04] p-4 text-center">
-              <p className="text-sm font-bold">سجّل الدخول لحفظ عناوينك</p>
-              <Link
-                to="/auth"
-                onClick={() => setPickerOpen(false)}
-                className="inline-flex h-10 items-center justify-center rounded-full bg-primary px-5 text-xs font-extrabold text-primary-foreground"
-              >
-                تسجيل الدخول
-              </Link>
-            </div>
-          ) : (
-            <>
-              <ul className="mt-4 max-h-[50vh] space-y-2 overflow-y-auto">
-                {addresses.length === 0 ? (
-                  <li className="rounded-2xl bg-foreground/[0.04] p-4 text-center text-xs text-muted-foreground">
-                    لا توجد عناوين محفوظة بعد.
-                  </li>
-                ) : (
-                  addresses.map((a) => {
-                    const active = a.id === activeId;
-                    return (
-                      <li key={a.id}>
-                        <Button
-                          type="button"
-                          onClick={() => onPickAddress(a)}
-                          className={`flex w-full items-start justify-between gap-2 rounded-2xl px-4 py-3 text-right transition active:scale-[0.99] ${
-                            active
-                              ? "bg-primary text-primary-foreground shadow-pill"
-                              : "bg-card text-foreground ring-1 ring-border/60"
-                          }`}
-                        >
-                          <span className="flex flex-col">
-                            <span className="font-display text-[14px] font-extrabold">{a.label}</span>
-                            <span
-                              className={`line-clamp-1 text-[11px] ${
-                                active ? "text-primary-foreground/80" : "text-muted-foreground"
-                              }`}
-                            >
-                              {[a.street, a.district, a.city].filter(Boolean).join("، ")}
-                            </span>
-                          </span>
-                          {active && <Check className="mt-1 h-4 w-4 shrink-0" strokeWidth={2.6} />}
-                        </Button>
-                      </li>
-                    );
-                  })
-                )}
-              </ul>
-
-              <Button
-                type="button"
-                onClick={() => { setPickerOpen(false); setAddrSheetOpen(true); }}
-                className="mt-4 flex h-11 w-full items-center justify-center gap-2 rounded-full bg-primary text-[12.5px] font-extrabold text-primary-foreground"
-              >
-                <Plus className="h-4 w-4" strokeWidth={2.6} /> عنوان جديد على الخريطة
-              </Button>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
-
-      <AddressSheet
-        open={addrSheetOpen}
-        onOpenChange={(v) => {
-          setAddrSheetOpen(v);
-          if (!v) loadAddresses();
-        }}
-        onSaved={(id) => { setActiveId(id); loadAddresses(); }}
-      />
+      <AppSwitcherSheet open={switcherOpen} onOpenChange={setSwitcherOpen} />
     </>
   );
 };
