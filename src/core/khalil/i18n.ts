@@ -141,6 +141,49 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.coach.kind.pillar-rebalance-hint": "إعادة توازن",
   "khalil.coach.kind.consistency-guidance": "إرشاد استمرار",
   "khalil.coach.kind.quiet-day": "يوم هادئ",
+
+  // Workout pillar (P2.7)
+  "khalil.workout.block.title": "التمرين التالي",
+  "khalil.workout.block.subtitle": "ابدأ جلسة، أو تابع جلسة مفتوحة.",
+  "khalil.workout.action.start": "ابدأ جلسة",
+  "khalil.workout.action.open": "تابع الجلسة",
+  "khalil.workout.action.close": "أنهِ الجلسة",
+  "khalil.workout.state.no_session": "لا جلسة مفتوحة الآن.",
+  "khalil.workout.state.live": "جلسة مفتوحة",
+  "khalil.workout.state.volume": "الحجم الكلي",
+  "khalil.workout.state.sets": "المجموعات",
+  "khalil.workout.history.title": "آخر الجلسات",
+  "khalil.workout.history.empty": "لا جلسات سابقة بعد.",
+  "khalil.workout.offline.pending": "في انتظار المزامنة",
+
+  // Weight pillar (P2.7)
+  "khalil.weight.block.title": "اتجاه الوزن",
+  "khalil.weight.block.subtitle": "قياس واحد في اليوم يكفي.",
+  "khalil.weight.state.no_data": "لا قياسات بعد.",
+  "khalil.weight.state.latest": "آخر قياس",
+  "khalil.weight.state.avg7": "متوسط ٧ أيام",
+  "khalil.weight.state.avg30": "متوسط ٣٠ يوماً",
+  "khalil.weight.state.avg90": "متوسط ٩٠ يوماً",
+  "khalil.weight.state.delta7": "تغير ٧ أيام",
+  "khalil.weight.trend.down": "نازل",
+  "khalil.weight.trend.flat": "ثابت",
+  "khalil.weight.trend.up": "صاعد",
+  "khalil.weight.unit.kg": "كجم",
+  "khalil.weight.action.record": "سجل اليوم",
+  "khalil.weight.placeholder": "الوزن بالكيلوغرام",
+  "khalil.weight.error.implausible": "قيمة الوزن خارج النطاق المعقول.",
+  "khalil.weight.offline.pending": "في انتظار المزامنة",
+
+  // Analytics (P2.7)
+  "khalil.analytics.heatmap.title": "خريطة الالتزام",
+  "khalil.analytics.heatmap.subtitle": "كل خانة يوم — كلما اشتدّ اللون، اشتدّ الالتزام.",
+  "khalil.analytics.adherence.title": "نسب الالتزام",
+  "khalil.analytics.adherence.subtitle": "الصلاة، العادات، والمركّب.",
+  "khalil.analytics.empty": "لا بيانات كافية بعد.",
+  "khalil.analytics.window.7d": "٧ أيام",
+  "khalil.analytics.window.30d": "٣٠ يوماً",
+  "khalil.analytics.window.90d": "٩٠ يوماً",
+  "khalil.analytics.charts.loading": "تحميل الرسوم…",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({
