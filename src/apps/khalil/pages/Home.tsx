@@ -7,7 +7,7 @@
  */
 import { useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { RuntimeRenderer } from "@/core/runtime-ui";
+import { RuntimeRenderer, type RenderDescriptor } from "@/core/runtime-ui";
 import { composeKhalilHomeFn, khalilKeys, kt } from "@/core/khalil";
 import { useAuth } from "@/context/AuthContext";
 import { KhalilLoading, KhalilError } from "../primitives/StateViews";
@@ -21,6 +21,7 @@ export function KhalilHomePage() {
     enabled: Boolean(user),
     staleTime: 60_000,
   });
+  const descriptor = data?.descriptor as unknown as RenderDescriptor | undefined;
 
   return (
     <div className="flex flex-col gap-4">
@@ -35,7 +36,7 @@ export function KhalilHomePage() {
 
       {isLoading && <KhalilLoading />}
       {isError && <KhalilError onRetry={() => void refetch()} />}
-      {data?.descriptor && <RuntimeRenderer descriptor={data.descriptor} />}
+      {descriptor && <RuntimeRenderer descriptor={descriptor} />}
     </div>
   );
 }

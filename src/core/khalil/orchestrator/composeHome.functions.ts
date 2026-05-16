@@ -44,5 +44,5 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
 
     // Serialize through JSON so TanStack's strict inference resolves to a
     // plain transport shape; the client re-casts to RenderDescriptor.
-    return { descriptor: JSON.parse(JSON.stringify(descriptor)) as RenderDescriptor };
+    return { descriptor: JSON.parse(JSON.stringify(descriptor)) as Record<string, never> };
   });
