@@ -33,6 +33,7 @@ import { Route as VendorCatalogRouteImport } from './routes/vendor.catalog'
 import { Route as RuntimeSlugRouteImport } from './routes/runtime/$slug'
 import { Route as KhalilWorkoutRouteImport } from './routes/khalil.workout'
 import { Route as KhalilWeightRouteImport } from './routes/khalil.weight'
+import { Route as KhalilRecoveryRouteImport } from './routes/khalil.recovery'
 import { Route as KhalilPrayerRouteImport } from './routes/khalil.prayer'
 import { Route as KhalilInsightsRouteImport } from './routes/khalil.insights'
 import { Route as KhalilHabitsRouteImport } from './routes/khalil.habits'
@@ -275,6 +276,11 @@ const KhalilWorkoutRoute = KhalilWorkoutRouteImport.update({
 const KhalilWeightRoute = KhalilWeightRouteImport.update({
   id: '/weight',
   path: '/weight',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilRecoveryRoute = KhalilRecoveryRouteImport.update({
+  id: '/recovery',
+  path: '/recovery',
   getParentRoute: () => KhalilRoute,
 } as any)
 const KhalilPrayerRoute = KhalilPrayerRouteImport.update({
@@ -1027,6 +1033,7 @@ export interface FileRoutesByFullPath {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
   '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
@@ -1171,6 +1178,7 @@ export interface FileRoutesByTo {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
   '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
@@ -1325,6 +1333,7 @@ export interface FileRoutesById {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
   '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
@@ -1477,6 +1486,7 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/insights'
     | '/khalil/prayer'
+    | '/khalil/recovery'
     | '/khalil/weight'
     | '/khalil/workout'
     | '/runtime/$slug'
@@ -1621,6 +1631,7 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/insights'
     | '/khalil/prayer'
+    | '/khalil/recovery'
     | '/khalil/weight'
     | '/khalil/workout'
     | '/runtime/$slug'
@@ -1774,6 +1785,7 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/insights'
     | '/khalil/prayer'
+    | '/khalil/recovery'
     | '/khalil/weight'
     | '/khalil/workout'
     | '/runtime/$slug'
@@ -2004,6 +2016,13 @@ declare module '@tanstack/react-router' {
       path: '/weight'
       fullPath: '/khalil/weight'
       preLoaderRoute: typeof KhalilWeightRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/recovery': {
+      id: '/khalil/recovery'
+      path: '/recovery'
+      fullPath: '/khalil/recovery'
+      preLoaderRoute: typeof KhalilRecoveryRouteImport
       parentRoute: typeof KhalilRoute
     }
     '/khalil/prayer': {
@@ -3300,6 +3319,7 @@ interface KhalilRouteChildren {
   KhalilHabitsRoute: typeof KhalilHabitsRoute
   KhalilInsightsRoute: typeof KhalilInsightsRoute
   KhalilPrayerRoute: typeof KhalilPrayerRoute
+  KhalilRecoveryRoute: typeof KhalilRecoveryRoute
   KhalilWeightRoute: typeof KhalilWeightRoute
   KhalilWorkoutRoute: typeof KhalilWorkoutRoute
   KhalilIndexRoute: typeof KhalilIndexRoute
@@ -3310,6 +3330,7 @@ const KhalilRouteChildren: KhalilRouteChildren = {
   KhalilHabitsRoute: KhalilHabitsRoute,
   KhalilInsightsRoute: KhalilInsightsRoute,
   KhalilPrayerRoute: KhalilPrayerRoute,
+  KhalilRecoveryRoute: KhalilRecoveryRoute,
   KhalilWeightRoute: KhalilWeightRoute,
   KhalilWorkoutRoute: KhalilWorkoutRoute,
   KhalilIndexRoute: KhalilIndexRoute,
