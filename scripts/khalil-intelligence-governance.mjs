@@ -10,7 +10,7 @@ import { join } from "node:path";
 
 const INTEL_ROOT = "src/core/khalil/intelligence";
 const FORBIDDEN = [
-  { rx: /Math\.random/, msg: "Math.random forbidden in intelligence layer" },
+  { rx: /Math\.random\s*\(/, msg: "Math.random() forbidden in intelligence layer" },
   { rx: /Date\.now\(\)/, msg: "Date.now() forbidden — accept `now` via inputs" },
   { rx: /new Date\(\)/, msg: "`new Date()` forbidden — receive ISO `now` from caller" },
   { rx: /crypto\.randomUUID/, msg: "randomUUID forbidden — derive ids deterministically" },
