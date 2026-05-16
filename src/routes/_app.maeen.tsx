@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import MaeenHub from "@/apps/khalil/pages/Hub";
+import MaeenHub from "@/apps/maeen/pages/Hub";
 
 export const Route = createFileRoute("/_app/maeen")({
   head: () => ({
