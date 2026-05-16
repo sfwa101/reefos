@@ -13,7 +13,22 @@ const ctx = (overrides: Partial<KhalilHomeContext> = {}): KhalilHomeContext => (
   recovery: "off",
   capabilities: new Set<string>(),
   adherence: { combinedScore: 0.6, hasActiveHabits: true },
+  identityLevel: "seed",
   ...overrides,
+});
+
+describe("orchestrator identity emphasis (P2.5)", () => {
+  it("disciplined demotes the welcome block below habit", () => {
+    const d = composeKhalilHome(ctx({ identityLevel: "disciplined" }));
+    const welcomeIdx = d.blocks.findIndex((b) => b.kind === "khalil.home.welcome");
+    const habitIdx = d.blocks.findIndex((b) => b.kind === "khalil.habit.today");
+    expect(welcomeIdx).toBeGreaterThan(habitIdx);
+  });
+
+  it("renders the identity chip near the top for any level", () => {
+    const d = composeKhalilHome(ctx({ identityLevel: "seed" }));
+    expect(d.blocks.slice(0, 2).some((b) => b.kind === "khalil.identity.chip")).toBe(true);
+  });
 });
 
 describe("composeKhalilHome", () => {

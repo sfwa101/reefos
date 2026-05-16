@@ -12,6 +12,7 @@ import { KhalilWelcomeBlock } from "./WelcomeBlock";
 import { PrayerTodayBlock } from "./PrayerTodayBlock";
 import { HabitTodayBlock } from "./HabitTodayBlock";
 import { RecoveryBannerBlock } from "./RecoveryBannerBlock";
+import { IdentityChipBlock } from "./IdentityChipBlock";
 
 let registered = false;
 
@@ -25,5 +26,6 @@ export function registerKhalilBlocks(): void {
       mode={(block.props as { mode?: RecoveryMode } | undefined)?.mode}
     />
   ));
+  blockRegistry.register("khalil.identity.chip", () => <IdentityChipBlock />);
   registered = true;
 }

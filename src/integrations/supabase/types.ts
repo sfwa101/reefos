@@ -3436,6 +3436,8 @@ export type Database = {
           habit_completed_count: number
           habit_score: number
           habit_target_count: number
+          identity_level_snapshot: string | null
+          identity_score: number
           on_time_count: number
           on_time_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
           prayer_score: number
@@ -3453,6 +3455,8 @@ export type Database = {
           habit_completed_count?: number
           habit_score?: number
           habit_target_count?: number
+          identity_level_snapshot?: string | null
+          identity_score?: number
           on_time_count?: number
           on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
           prayer_score?: number
@@ -3470,6 +3474,8 @@ export type Database = {
           habit_completed_count?: number
           habit_score?: number
           habit_target_count?: number
+          identity_level_snapshot?: string | null
+          identity_score?: number
           on_time_count?: number
           on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
           prayer_score?: number
@@ -3554,6 +3560,81 @@ export type Database = {
           slug?: string
           target_per_day?: number
           user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_identity_event: {
+        Row: {
+          created_at: string
+          from_level: string
+          id: string
+          reason: string | null
+          score: number
+          to_level: string
+          user_id: string
+          window_180d: number
+          window_30d: number
+          window_90d: number
+        }
+        Insert: {
+          created_at?: string
+          from_level: string
+          id?: string
+          reason?: string | null
+          score: number
+          to_level: string
+          user_id: string
+          window_180d: number
+          window_30d: number
+          window_90d: number
+        }
+        Update: {
+          created_at?: string
+          from_level?: string
+          id?: string
+          reason?: string | null
+          score?: number
+          to_level?: string
+          user_id?: string
+          window_180d?: number
+          window_30d?: number
+          window_90d?: number
+        }
+        Relationships: []
+      }
+      khalil_identity_state: {
+        Row: {
+          current_level: string
+          current_score: number
+          last_computed_at: string
+          observed_days: number
+          updated_at: string
+          user_id: string
+          window_180d: number
+          window_30d: number
+          window_90d: number
+        }
+        Insert: {
+          current_level?: string
+          current_score?: number
+          last_computed_at?: string
+          observed_days?: number
+          updated_at?: string
+          user_id: string
+          window_180d?: number
+          window_30d?: number
+          window_90d?: number
+        }
+        Update: {
+          current_level?: string
+          current_score?: number
+          last_computed_at?: string
+          observed_days?: number
+          updated_at?: string
+          user_id?: string
+          window_180d?: number
+          window_30d?: number
+          window_90d?: number
         }
         Relationships: []
       }
@@ -10027,10 +10108,16 @@ export type Database = {
         Args: { p_date: string; p_user_id: string }
         Returns: undefined
       }
+      khalil_recompute_identity: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       khalil_recompute_recovery_state: {
         Args: { p_user_id: string }
         Returns: undefined
       }
+      level_idx: { Args: { p: string }; Returns: number }
+      level_name: { Args: { i: number }; Returns: string }
       list_open_gam_eyas: {
         Args: never
         Returns: {

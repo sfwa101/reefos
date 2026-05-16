@@ -17,6 +17,7 @@ export const KHALIL_EVENT = Object.freeze({
   WEIGHT_RECORDED: "khalil.weight.recorded",
   RECOVERY_CHANGED: "khalil.recovery.changed",
   IDENTITY_EVOLVED: "khalil.identity.evolved",
+  IDENTITY_RECOMPUTED: "khalil.identity.recomputed",
   COACH_PROPOSED: "khalil.coach.proposed",
   COACH_ACCEPTED: "khalil.coach.accepted",
   COACH_DISMISSED: "khalil.coach.dismissed",

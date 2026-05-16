@@ -12,6 +12,7 @@ import {
   type KhalilHomeContext,
 } from "./composeHome";
 import type { RecoveryMode } from "../recovery/schemas";
+import type { KhalilIdentityLevel } from "../identity/runtime/config";
 
 function bucketTimeOfDay(d: Date): KhalilHomeContext["timeOfDay"] {
   const h = d.getHours();
@@ -31,7 +32,7 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
     const now = new Date();
     const localDate = now.toISOString().slice(0, 10);
 
-    const [{ data: recoveryRow }, { data: adherenceRow }] = await Promise.all([
+    const [{ data: recoveryRow }, { data: adherenceRow }, { data: identityRow }] = await Promise.all([
       supabase
         .from("khalil_recovery_state")
         .select("current_state")
@@ -43,6 +44,11 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
         .eq("user_id", userId)
         .eq("for_date", localDate)
         .maybeSingle(),
+      supabase
+        .from("khalil_identity_state")
+        .select("current_level")
+        .eq("user_id", userId)
+        .maybeSingle(),
     ]);
 
     const recovery: RecoveryMode =
@@ -51,6 +57,11 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
     const combinedScore = Number(
       (adherenceRow as { combined_score?: number } | null)?.combined_score ?? 0,
     );
+
+    const identityLevel: KhalilIdentityLevel =
+      ((identityRow as { current_level?: string } | null)?.current_level as
+        | KhalilIdentityLevel
+        | undefined) ?? "seed";
 
     const descriptor = composeKhalilHome({
       userId,
@@ -62,6 +73,7 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
         combinedScore: Number.isFinite(combinedScore) ? combinedScore : 0,
         hasActiveHabits: false,
       },
+      identityLevel,
     });
 
     // Plain JSON transport — client re-casts to RenderDescriptor.
