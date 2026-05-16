@@ -21,6 +21,7 @@ export const KHALIL_EVENT = Object.freeze({
   COACH_PROPOSED: "khalil.coach.proposed",
   COACH_ACCEPTED: "khalil.coach.accepted",
   COACH_DISMISSED: "khalil.coach.dismissed",
+  COACH_EXPIRED: "khalil.coach.expired",
 } as const);
 
 export type KhalilEventName = (typeof KHALIL_EVENT)[keyof typeof KHALIL_EVENT];
