@@ -186,6 +186,10 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
           }
         : {},
     },
+    { kind: "khalil.workout.next", id: "khalil.workout.next", props: { recovery: ctx.recovery } },
+    { kind: "khalil.weight.trend", id: "khalil.weight.trend", props: {} },
+    { kind: "khalil.analytics.adherence", id: "khalil.analytics.adherence", props: {} },
+    { kind: "khalil.analytics.heatmap", id: "khalil.analytics.heatmap", props: {} },
   ];
 
   const scored: ScoredBlock[] = candidates.map((block) => ({
