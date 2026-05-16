@@ -105,6 +105,42 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.identity.last_computed_at": "آخر حساب:",
   "khalil.identity.note":
     "لا منافسة، لا أوسمة. الهوية تنمو عبر الالتزام الطويل وحده.",
+
+  // Coach pillar (P2.6) — proposal/dispose only. No conversation.
+  "khalil.coach.title": "المرافق",
+  "khalil.coach.subtitle":
+    "اقتراحات هادئة لا تنفّذ من تلقاء نفسها. أنت من يقبل أو يصرف.",
+  "khalil.coach.block.title": "اقتراح اليوم",
+  "khalil.coach.block.subtitle": "اقتراح واحد فقط، بلا ضوضاء.",
+  "khalil.coach.action.accept": "اقبل",
+  "khalil.coach.action.dismiss": "اصرف",
+  "khalil.coach.action.refresh": "اطلب اقتراحاً",
+  "khalil.coach.state.empty": "لا اقتراح فعّال. كل شيء هادئ.",
+  "khalil.coach.state.expired": "انتهى وقت هذا الاقتراح.",
+  "khalil.coach.state.accepted": "قُبِل.",
+  "khalil.coach.state.dismissed": "صُرِف.",
+  "khalil.coach.history.title": "اقتراحات سابقة",
+  "khalil.coach.history.empty": "لا اقتراحات سابقة بعد.",
+  "khalil.coach.offline.pending": "في انتظار المزامنة",
+  "khalil.coach.note":
+    "المرافق لا يكتب في حسابك. هو يقترح فقط؛ التنفيذ يبقى بيدك.",
+
+  // Coach copy registry (allowlisted i18n keys returned by the model).
+  "khalil.coach.copy.calm_breath": "نَفَس هادئ يكفي الآن",
+  "khalil.coach.copy.gentle_return": "عُد بهدوء، خطوة واحدة تكفي",
+  "khalil.coach.copy.one_small_step": "ابدأ بأصغر فعل ممكن",
+  "khalil.coach.copy.rest_today": "اليوم للراحة، لا للعتاب",
+  "khalil.coach.copy.steady_pace": "حافظ على إيقاعك، السرعة ليست المطلوب",
+  "khalil.coach.copy.quiet_day": "يوم هادئ — كل شيء يسير بثبات",
+  "khalil.coach.body.quiet_day":
+    "لا حاجة لفعل إضافي اليوم. تابع ما تفعله من غير ضجيج.",
+
+  // Coach proposal kinds (labels in history list).
+  "khalil.coach.kind.gentle-reminder": "تذكير لطيف",
+  "khalil.coach.kind.recovery-suggestion": "اقتراح تعافٍ",
+  "khalil.coach.kind.pillar-rebalance-hint": "إعادة توازن",
+  "khalil.coach.kind.consistency-guidance": "إرشاد استمرار",
+  "khalil.coach.kind.quiet-day": "يوم هادئ",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({
