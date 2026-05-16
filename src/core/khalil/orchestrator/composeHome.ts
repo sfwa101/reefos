@@ -89,6 +89,13 @@ export function computeUrgencyScore(
       if (idx >= LEVEL_INDEX.disciplined) return 0;
       if (idx >= LEVEL_INDEX.stable) return 8;
       return 30;
+    case "khalil.workout.next":
+      if (isHard) return 80;
+      if (isSoft) return 15;
+      return idx >= LEVEL_INDEX.rising ? 0 : 12;
+    case "khalil.weight.trend":
+      if (isHard) return 60;
+      return idx >= LEVEL_INDEX.stable ? 5 : 18;
     case "khalil.coach.proposal":
       // Single visible proposal — quiet placement: under identity,
       // above welcome/analytics. Hard recovery softens further.
