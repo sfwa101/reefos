@@ -28,11 +28,8 @@ function shiftDateIso(refIso: string, deltaDays: number): string {
 }
 
 async function loadInputs(
-  supabase: NonNullable<Parameters<typeof requireSupabaseAuth.server>[0]>["context"] extends infer C
-    ? C extends { supabase: infer S }
-      ? S
-      : never
-    : never,
+  // Untyped to keep gateway insulated from Supabase generic surface.
+  supabase: any,
   userId: string,
   now: Date,
 ): Promise<IntelligenceInputs> {

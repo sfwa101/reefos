@@ -41,6 +41,9 @@ export const KHALIL_CAP = Object.freeze({
   COACH_PROPOSE_READ: "khalil.coach.propose.read",
   COACH_ACCEPT: "khalil.coach.accept",
   COACH_DISMISS: "khalil.coach.dismiss",
+
+  INTELLIGENCE_READ: "khalil.intelligence.read",
+  INTELLIGENCE_RECOMPUTE: "khalil.intelligence.recompute",
 } as const);
 
 export type KhalilCapabilityKey = (typeof KHALIL_CAP)[keyof typeof KHALIL_CAP];
