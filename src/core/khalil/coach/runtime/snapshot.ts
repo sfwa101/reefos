@@ -5,8 +5,8 @@
  * prompt builder consumes. NEVER includes raw chat, free-form journals,
  * cross-domain data, or hidden analytics.
  */
-import type { RecoveryMode } from "../../recovery/schemas";
-import type { KhalilIdentityLevel } from "../../identity/runtime/config";
+import type { RecoveryMode } from "../../recovery/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
+import type { KhalilIdentityLevel } from "../../identity/runtime/config"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 import type { CoachProposalKind } from "../schemas";
 
 export interface CoachSnapshot {

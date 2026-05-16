@@ -5,7 +5,7 @@
  * server-side (DB check). One measurement per local date.
  */
 import { z } from "zod";
-import { isoDateSchema, clientEventIdSchema } from "../prayer/schemas";
+import { isoDateSchema, clientEventIdSchema } from "../prayer/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 
 export const WEIGHT_MIN_KG = 20;
 export const WEIGHT_MAX_KG = 500;

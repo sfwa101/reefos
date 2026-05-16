@@ -6,7 +6,7 @@
  * reference the original via `correctsSetId`.
  */
 import { z } from "zod";
-import { clientEventIdSchema } from "../prayer/schemas";
+import { clientEventIdSchema } from "../prayer/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 
 export const exerciseSlugSchema = z
   .string()
