@@ -176,6 +176,16 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
       id: "khalil.habit.today",
       props: { localDate: ctx.localDate, recovery: ctx.recovery },
     },
+    {
+      kind: "khalil.coach.proposal",
+      id: "khalil.coach.proposal",
+      props: ctx.pendingCoachProposal
+        ? {
+            proposalId: ctx.pendingCoachProposal.id,
+            kind: ctx.pendingCoachProposal.kind,
+          }
+        : {},
+    },
   ];
 
   const scored: ScoredBlock[] = candidates.map((block) => ({
