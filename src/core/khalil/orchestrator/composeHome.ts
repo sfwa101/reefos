@@ -36,6 +36,8 @@ export interface KhalilHomeContext {
   adherence: KhalilAdherenceSummary;
   /** Identity level — server-truth from `khalil_identity_state`. */
   identityLevel: KhalilIdentityLevel;
+  /** Latest pending coach proposal (id + kind only — UI fetches details). */
+  pendingCoachProposal: { id: string; kind: string } | null;
 }
 
 interface ScoredBlock {
