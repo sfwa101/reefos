@@ -89,6 +89,12 @@ export function computeUrgencyScore(
       if (idx >= LEVEL_INDEX.disciplined) return 0;
       if (idx >= LEVEL_INDEX.stable) return 8;
       return 30;
+    case "khalil.coach.proposal":
+      // Single visible proposal — quiet placement: under identity,
+      // above welcome/analytics. Hard recovery softens further.
+      if (recovery === "hard") return 40;
+      if (idx >= LEVEL_INDEX.disciplined) return 25;
+      return -20;
     default:
       return 100;
   }
