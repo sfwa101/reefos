@@ -92,7 +92,11 @@ for (const f of files) {
       const mt = resolved.match(/^src\/core\/khalil\/([^/]+)/);
       const target = mt?.[1];
       if (target && target !== dom && !SHARED.has(target)) {
-        violations.push(`${rel}: cross-domain import "${imp}" (rule 2)`);
+        const lineNo = src.substring(0, m.index).split("\n").length;
+        const line = src.split("\n")[lineNo - 1] ?? "";
+        // Inline opt-out for legacy imports tracked via ADR.
+        if (/khalil-governance-allow:\s*rule-2/.test(line)) continue;
+        violations.push(`${rel}:${lineNo}: cross-domain import "${imp}" (rule 2)`);
       }
     }
   }
