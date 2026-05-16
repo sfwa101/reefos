@@ -1,10 +1,5 @@
 /**
  * Khalil — block registry boot.
- *
- * Registers `khalil.*` block ids with the shared `blockRegistry` so the
- * RuntimeRenderer can resolve them. Imported once from the Khalil shell.
- * Per Art. IX (kernel minimalism) the shared registry stays domain-agnostic;
- * Khalil registers its own blocks at boot.
  */
 import { blockRegistry } from "@/core/runtime-ui";
 import type { RecoveryMode } from "@/core/khalil";
@@ -14,6 +9,12 @@ import { HabitTodayBlock } from "./HabitTodayBlock";
 import { RecoveryBannerBlock } from "./RecoveryBannerBlock";
 import { IdentityChipBlock } from "./IdentityChipBlock";
 import { CoachProposalBlock } from "./CoachProposalBlock";
+import { WorkoutNextBlock } from "./WorkoutNextBlock";
+import { WeightTrendBlock } from "./WeightTrendBlock";
+import {
+  AnalyticsHeatmapBlock,
+  AnalyticsAdherenceBlock,
+} from "./AnalyticsBlocks";
 
 let registered = false;
 
@@ -29,5 +30,9 @@ export function registerKhalilBlocks(): void {
   ));
   blockRegistry.register("khalil.identity.chip", () => <IdentityChipBlock />);
   blockRegistry.register("khalil.coach.proposal", () => <CoachProposalBlock />);
+  blockRegistry.register("khalil.workout.next", () => <WorkoutNextBlock />);
+  blockRegistry.register("khalil.weight.trend", () => <WeightTrendBlock />);
+  blockRegistry.register("khalil.analytics.heatmap", () => <AnalyticsHeatmapBlock />);
+  blockRegistry.register("khalil.analytics.adherence", () => <AnalyticsAdherenceBlock />);
   registered = true;
 }
