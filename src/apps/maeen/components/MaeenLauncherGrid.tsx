@@ -1,11 +1,12 @@
 /**
- * MaeenLauncherGrid — Phase 29 Stem Cell.
- * ---------------------------------------
- * Self-contained Maeen Hub launcher section. The legacy `sdui_layouts` row
- * (slug `khalil_hub`) still drives the in-grid blocks and the Hakim live
- * tracking injection — but now wrapped as a single SDUI section so the
- * `<MaeenHub />` page can be a pure `<LayoutFactory pageKey="maeen_hub" />`
- * shell on the Sovereign Matrix.
+ * MaeenLauncherGrid — Phase P0.1 (migrated out of `src/apps/khalil/`).
+ * --------------------------------------------------------------------
+ * Self-contained Maeen Hub launcher section. The legacy `sdui_layouts`
+ * row still uses slug `khalil_hub` for data-identity continuity; renaming
+ * the row requires a dedicated schema-migration ADR and is intentionally
+ * deferred (see `.salsabil/domains/khalil/p0.1-coupling-risk.md`).
+ *
+ * Sovereign owner: Maeen domain. Khalil MUST NOT import this component.
  */
 import { useEffect } from "react";
 import { useSduiLayout } from "@/core/runtime-ui/sdui/hooks/useSduiLayout";
@@ -15,6 +16,7 @@ import { SalsabilStatusBar } from "@/components/system/SalsabilStatusBar";
 import { useAuth } from "@/context/AuthContext";
 import { useActiveDelivery } from "@/core/maeen/useActiveDelivery";
 
+/** Legacy SDUI slug — retained for DB compatibility (see coupling-risk). */
 const SLUG = "khalil_hub";
 const TRACKING_BLOCK_ID = "hakim_barq_live";
 

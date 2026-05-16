@@ -38,6 +38,7 @@ const APP_ROUTES: Record<OSCompanyId, string> = {
   tayseer: "/account",
   noor_eldin: "/library",
   family: "/family",
+  maeen: "/maeen",
   khalil: "/khalil",
   asrab: "/asrab",
   nabd: "/nabd",
