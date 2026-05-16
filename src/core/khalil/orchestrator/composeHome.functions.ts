@@ -8,6 +8,7 @@
  */
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import type { RenderDescriptor } from "@/core/runtime-ui";
 import {
   composeKhalilHome,
   type KhalilHomeContext,
@@ -41,5 +42,7 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
       capabilities: new Set<string>(),
     });
 
-    return { descriptor };
+    // Serialize through JSON so TanStack's strict inference resolves to a
+    // plain transport shape; the client re-casts to RenderDescriptor.
+    return { descriptor: JSON.parse(JSON.stringify(descriptor)) as RenderDescriptor };
   });

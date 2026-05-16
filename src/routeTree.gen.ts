@@ -21,6 +21,7 @@ import { Route as DispatchRouteImport } from './routes/_dispatch'
 import { Route as BarqRouteImport } from './routes/_barq'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as VendorIndexRouteImport } from './routes/vendor.index'
+import { Route as KhalilIndexRouteImport } from './routes/khalil.index'
 import { Route as DriverIndexRouteImport } from './routes/driver.index'
 import { Route as AdminIndexRouteImport } from './routes/admin.index'
 import { Route as AppIndexRouteImport } from './routes/_app/index'
@@ -30,6 +31,12 @@ import { Route as VendorOrdersRouteImport } from './routes/vendor.orders'
 import { Route as VendorDashboardRouteImport } from './routes/vendor.dashboard'
 import { Route as VendorCatalogRouteImport } from './routes/vendor.catalog'
 import { Route as RuntimeSlugRouteImport } from './routes/runtime/$slug'
+import { Route as KhalilWorkoutRouteImport } from './routes/khalil.workout'
+import { Route as KhalilWeightRouteImport } from './routes/khalil.weight'
+import { Route as KhalilPrayerRouteImport } from './routes/khalil.prayer'
+import { Route as KhalilInsightsRouteImport } from './routes/khalil.insights'
+import { Route as KhalilHabitsRouteImport } from './routes/khalil.habits'
+import { Route as KhalilCoachRouteImport } from './routes/khalil.coach'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
 import { Route as DriverMapRouteImport } from './routes/driver.map'
 import { Route as DriverDashboardRouteImport } from './routes/driver.dashboard'
@@ -210,6 +217,11 @@ const VendorIndexRoute = VendorIndexRouteImport.update({
   path: '/',
   getParentRoute: () => VendorRoute,
 } as any)
+const KhalilIndexRoute = KhalilIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => KhalilRoute,
+} as any)
 const DriverIndexRoute = DriverIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -254,6 +266,36 @@ const RuntimeSlugRoute = RuntimeSlugRouteImport.update({
   id: '/runtime/$slug',
   path: '/runtime/$slug',
   getParentRoute: () => rootRouteImport,
+} as any)
+const KhalilWorkoutRoute = KhalilWorkoutRouteImport.update({
+  id: '/workout',
+  path: '/workout',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilWeightRoute = KhalilWeightRouteImport.update({
+  id: '/weight',
+  path: '/weight',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilPrayerRoute = KhalilPrayerRouteImport.update({
+  id: '/prayer',
+  path: '/prayer',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilInsightsRoute = KhalilInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilHabitsRoute = KhalilHabitsRouteImport.update({
+  id: '/habits',
+  path: '/habits',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilCoachRoute = KhalilCoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => KhalilRoute,
 } as any)
 const DriverWalletRoute = DriverWalletRouteImport.update({
   id: '/wallet',
@@ -886,7 +928,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
+  '/khalil': typeof KhalilRouteWithChildren
   '/vendor': typeof VendorRouteWithChildren
   '/account': typeof AppAccountRouteWithChildren
   '/affiliate': typeof AppAffiliateRoute
@@ -981,6 +1023,12 @@ export interface FileRoutesByFullPath {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/khalil/coach': typeof KhalilCoachRoute
+  '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/weight': typeof KhalilWeightRoute
+  '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
   '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
@@ -989,6 +1037,7 @@ export interface FileRoutesByFullPath {
   '/vendor/wallet': typeof VendorWalletRoute
   '/admin/': typeof AdminIndexRoute
   '/driver/': typeof DriverIndexRoute
+  '/khalil/': typeof KhalilIndexRoute
   '/vendor/': typeof VendorIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
@@ -1026,7 +1075,6 @@ export interface FileRoutesByTo {
   '/': typeof AppIndexRoute
   '/auth': typeof AuthRoute
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
   '/affiliate': typeof AppAffiliateRoute
   '/cart': typeof AppCartRoute
   '/family': typeof AppFamilyRoute
@@ -1119,6 +1167,12 @@ export interface FileRoutesByTo {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/khalil/coach': typeof KhalilCoachRoute
+  '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/weight': typeof KhalilWeightRoute
+  '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
   '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
@@ -1127,6 +1181,7 @@ export interface FileRoutesByTo {
   '/vendor/wallet': typeof VendorWalletRoute
   '/admin': typeof AdminIndexRoute
   '/driver': typeof DriverIndexRoute
+  '/khalil': typeof KhalilIndexRoute
   '/vendor': typeof VendorIndexRoute
   '/account/addresses': typeof AppAccountAddressesRoute
   '/account/favorites': typeof AppAccountFavoritesRoute
@@ -1171,7 +1226,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/driver': typeof DriverRouteWithChildren
   '/employee': typeof EmployeeRoute
-  '/khalil': typeof KhalilRoute
+  '/khalil': typeof KhalilRouteWithChildren
   '/vendor': typeof VendorRouteWithChildren
   '/_app/account': typeof AppAccountRouteWithChildren
   '/_app/affiliate': typeof AppAffiliateRoute
@@ -1266,6 +1321,12 @@ export interface FileRoutesById {
   '/driver/dashboard': typeof DriverDashboardRoute
   '/driver/map': typeof DriverMapRoute
   '/driver/wallet': typeof DriverWalletRoute
+  '/khalil/coach': typeof KhalilCoachRoute
+  '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/prayer': typeof KhalilPrayerRoute
+  '/khalil/weight': typeof KhalilWeightRoute
+  '/khalil/workout': typeof KhalilWorkoutRoute
   '/runtime/$slug': typeof RuntimeSlugRoute
   '/vendor/catalog': typeof VendorCatalogRoute
   '/vendor/dashboard': typeof VendorDashboardRoute
@@ -1275,6 +1336,7 @@ export interface FileRoutesById {
   '/_app/': typeof AppIndexRoute
   '/admin/': typeof AdminIndexRoute
   '/driver/': typeof DriverIndexRoute
+  '/khalil/': typeof KhalilIndexRoute
   '/vendor/': typeof VendorIndexRoute
   '/_app/account/addresses': typeof AppAccountAddressesRoute
   '/_app/account/favorites': typeof AppAccountFavoritesRoute
@@ -1411,6 +1473,12 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/khalil/coach'
+    | '/khalil/habits'
+    | '/khalil/insights'
+    | '/khalil/prayer'
+    | '/khalil/weight'
+    | '/khalil/workout'
     | '/runtime/$slug'
     | '/vendor/catalog'
     | '/vendor/dashboard'
@@ -1419,6 +1487,7 @@ export interface FileRouteTypes {
     | '/vendor/wallet'
     | '/admin/'
     | '/driver/'
+    | '/khalil/'
     | '/vendor/'
     | '/account/addresses'
     | '/account/favorites'
@@ -1456,7 +1525,6 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/employee'
-    | '/khalil'
     | '/affiliate'
     | '/cart'
     | '/family'
@@ -1549,6 +1617,12 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/khalil/coach'
+    | '/khalil/habits'
+    | '/khalil/insights'
+    | '/khalil/prayer'
+    | '/khalil/weight'
+    | '/khalil/workout'
     | '/runtime/$slug'
     | '/vendor/catalog'
     | '/vendor/dashboard'
@@ -1557,6 +1631,7 @@ export interface FileRouteTypes {
     | '/vendor/wallet'
     | '/admin'
     | '/driver'
+    | '/khalil'
     | '/vendor'
     | '/account/addresses'
     | '/account/favorites'
@@ -1695,6 +1770,12 @@ export interface FileRouteTypes {
     | '/driver/dashboard'
     | '/driver/map'
     | '/driver/wallet'
+    | '/khalil/coach'
+    | '/khalil/habits'
+    | '/khalil/insights'
+    | '/khalil/prayer'
+    | '/khalil/weight'
+    | '/khalil/workout'
     | '/runtime/$slug'
     | '/vendor/catalog'
     | '/vendor/dashboard'
@@ -1704,6 +1785,7 @@ export interface FileRouteTypes {
     | '/_app/'
     | '/admin/'
     | '/driver/'
+    | '/khalil/'
     | '/vendor/'
     | '/_app/account/addresses'
     | '/_app/account/favorites'
@@ -1748,7 +1830,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   DriverRoute: typeof DriverRouteWithChildren
   EmployeeRoute: typeof EmployeeRoute
-  KhalilRoute: typeof KhalilRoute
+  KhalilRoute: typeof KhalilRouteWithChildren
   VendorRoute: typeof VendorRouteWithChildren
   ApiHakimChatRoute: typeof ApiHakimChatRoute
   RuntimeSlugRoute: typeof RuntimeSlugRoute
@@ -1840,6 +1922,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof VendorIndexRouteImport
       parentRoute: typeof VendorRoute
     }
+    '/khalil/': {
+      id: '/khalil/'
+      path: '/'
+      fullPath: '/khalil/'
+      preLoaderRoute: typeof KhalilIndexRouteImport
+      parentRoute: typeof KhalilRoute
+    }
     '/driver/': {
       id: '/driver/'
       path: '/'
@@ -1902,6 +1991,48 @@ declare module '@tanstack/react-router' {
       fullPath: '/runtime/$slug'
       preLoaderRoute: typeof RuntimeSlugRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/khalil/workout': {
+      id: '/khalil/workout'
+      path: '/workout'
+      fullPath: '/khalil/workout'
+      preLoaderRoute: typeof KhalilWorkoutRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/weight': {
+      id: '/khalil/weight'
+      path: '/weight'
+      fullPath: '/khalil/weight'
+      preLoaderRoute: typeof KhalilWeightRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/prayer': {
+      id: '/khalil/prayer'
+      path: '/prayer'
+      fullPath: '/khalil/prayer'
+      preLoaderRoute: typeof KhalilPrayerRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/insights': {
+      id: '/khalil/insights'
+      path: '/insights'
+      fullPath: '/khalil/insights'
+      preLoaderRoute: typeof KhalilInsightsRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/habits': {
+      id: '/khalil/habits'
+      path: '/habits'
+      fullPath: '/khalil/habits'
+      preLoaderRoute: typeof KhalilHabitsRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/coach': {
+      id: '/khalil/coach'
+      path: '/coach'
+      fullPath: '/khalil/coach'
+      preLoaderRoute: typeof KhalilCoachRouteImport
+      parentRoute: typeof KhalilRoute
     }
     '/driver/wallet': {
       id: '/driver/wallet'
@@ -3164,6 +3295,29 @@ const DriverRouteChildren: DriverRouteChildren = {
 const DriverRouteWithChildren =
   DriverRoute._addFileChildren(DriverRouteChildren)
 
+interface KhalilRouteChildren {
+  KhalilCoachRoute: typeof KhalilCoachRoute
+  KhalilHabitsRoute: typeof KhalilHabitsRoute
+  KhalilInsightsRoute: typeof KhalilInsightsRoute
+  KhalilPrayerRoute: typeof KhalilPrayerRoute
+  KhalilWeightRoute: typeof KhalilWeightRoute
+  KhalilWorkoutRoute: typeof KhalilWorkoutRoute
+  KhalilIndexRoute: typeof KhalilIndexRoute
+}
+
+const KhalilRouteChildren: KhalilRouteChildren = {
+  KhalilCoachRoute: KhalilCoachRoute,
+  KhalilHabitsRoute: KhalilHabitsRoute,
+  KhalilInsightsRoute: KhalilInsightsRoute,
+  KhalilPrayerRoute: KhalilPrayerRoute,
+  KhalilWeightRoute: KhalilWeightRoute,
+  KhalilWorkoutRoute: KhalilWorkoutRoute,
+  KhalilIndexRoute: KhalilIndexRoute,
+}
+
+const KhalilRouteWithChildren =
+  KhalilRoute._addFileChildren(KhalilRouteChildren)
+
 interface VendorRouteChildren {
   VendorCatalogRoute: typeof VendorCatalogRoute
   VendorDashboardRoute: typeof VendorDashboardRoute
@@ -3195,7 +3349,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   DriverRoute: DriverRouteWithChildren,
   EmployeeRoute: EmployeeRoute,
-  KhalilRoute: KhalilRoute,
+  KhalilRoute: KhalilRouteWithChildren,
   VendorRoute: VendorRouteWithChildren,
   ApiHakimChatRoute: ApiHakimChatRoute,
   RuntimeSlugRoute: RuntimeSlugRoute,
