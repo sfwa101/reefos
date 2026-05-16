@@ -14,30 +14,26 @@ import type { RenderBlock, RenderDescriptor } from "@/core/runtime-ui";
 import type { RecoveryMode } from "../recovery/schemas";
 import type { KhalilIdentityLevel } from "../identity/runtime/config";
 import { LEVEL_INDEX } from "../identity/runtime/config";
+import type {
+  IntelligenceSnapshot,
+} from "../intelligence/contracts/types";
 
 export interface KhalilAdherenceSummary {
-  /** Combined adherence in [0,1] for the local date, server-projected. */
   combinedScore: number;
-  /** True when the user has at least one active habit definition. */
   hasActiveHabits: boolean;
 }
 
 export interface KhalilHomeContext {
   userId: string;
-  /** ISO date in the user's local timezone (yyyy-mm-dd). */
   localDate: string;
-  /** Coarse time-of-day bucket — server-computed. */
   timeOfDay: "fajr" | "morning" | "midday" | "afternoon" | "evening" | "night";
-  /** Current recovery state — server-truth from `khalil_recovery_state`. */
   recovery: RecoveryMode;
-  /** Capability keys the user holds in the active workspace. */
   capabilities: ReadonlySet<string>;
-  /** Adherence summary for the local date — server-projected. */
   adherence: KhalilAdherenceSummary;
-  /** Identity level — server-truth from `khalil_identity_state`. */
   identityLevel: KhalilIdentityLevel;
-  /** Latest pending coach proposal (id + kind only — UI fetches details). */
   pendingCoachProposal?: { id: string; kind: string } | null;
+  /** Latest sovereign intelligence snapshot — drives adaptive ordering. */
+  intelligence?: IntelligenceSnapshot | null;
 }
 
 interface ScoredBlock {
