@@ -2,8 +2,6 @@
  * Khalil — public gateway barrel.
  *
  * The ONLY surface UI under `src/apps/khalil/` may import for server I/O.
- * Internal runtime (`src/core/khalil/orchestrator/*`, sub-domain modules)
- * is not exported. Per Art. V + p1-data-ownership.md.
  */
 export { composeKhalilHomeFn } from "../orchestrator/composeHome.functions";
 export {
@@ -21,3 +19,25 @@ export {
   dismissCoachFn,
   readCoachHistoryFn,
 } from "../coach";
+export {
+  startWorkoutSessionFn,
+  addWorkoutSetFn,
+  closeWorkoutSessionFn,
+  readWorkoutCurrentFn,
+  readWorkoutHistoryFn,
+} from "../workout";
+export { writeWeightMeasurementFn, readWeightTrendFn } from "../weight";
+export {
+  readAdherenceFn,
+  readHeatmapFn,
+  readWeightDeltaFn,
+  readWorkoutVolumeFn,
+  type AnalyticsWindow,
+  type AdherenceReadDTO,
+  type AdherenceDayDTO,
+  type HeatmapReadDTO,
+  type HeatmapCellDTO,
+  type WorkoutVolumeReadDTO,
+  type WorkoutVolumeWeekDTO,
+  type WeightDeltaDTO,
+} from "../analytics/readAnalytics";
