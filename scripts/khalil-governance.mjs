@@ -69,17 +69,28 @@ for (const f of files) {
     violations.push(`${rel}: direct supabase import (rule 1)`);
   }
 
-  // Rule 2 — cross-domain imports
+  // Rule 2 — cross-domain imports (resolve relative paths against file dir)
   const dom = rel.match(/^src\/core\/khalil\/([^/]+)\//)?.[1];
   if (dom && !SHARED.has(dom)) {
+    const fileDir = rel.substring(0, rel.lastIndexOf("/"));
     const importRe = /from\s+["']([^"']+)["']/g;
     let m;
     while ((m = importRe.exec(src))) {
       const imp = m[1];
-      const cross = imp.match(/(?:@\/core\/khalil|\.{1,2}\/.*core\/khalil|\.{2,}\/)([^/"']+)/);
-      // resolve relative cross-domain: matches like "../identity/..." from recovery
-      const rel2 = imp.match(/^\.\.\/([^/]+)\//);
-      const target = rel2?.[1];
+      let resolved = null;
+      if (imp.startsWith("@/core/khalil/")) {
+        resolved = "src/core/khalil/" + imp.slice("@/core/khalil/".length);
+      } else if (imp.startsWith(".")) {
+        const parts = fileDir.split("/");
+        for (const seg of imp.split("/")) {
+          if (seg === "..") parts.pop();
+          else if (seg !== ".") parts.push(seg);
+        }
+        resolved = parts.join("/");
+      }
+      if (!resolved) continue;
+      const mt = resolved.match(/^src\/core\/khalil\/([^/]+)/);
+      const target = mt?.[1];
       if (target && target !== dom && !SHARED.has(target)) {
         violations.push(`${rel}: cross-domain import "${imp}" (rule 2)`);
       }
