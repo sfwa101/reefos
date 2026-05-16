@@ -11,3 +11,8 @@ export { KHALIL_EVENT, type KhalilEventName } from "./events";
 export { khalilKeys } from "./queryKeys";
 export { kt, setKhalilLocale, getKhalilLocale, type KhalilLocale } from "./i18n";
 export { khalilOfflineQueue, type KhalilQueuedIntent } from "./offlineQueue";
+export {
+  computePrayerAdherence,
+  computeHabitAdherence,
+  computeCombinedAdherence,
+} from "./analytics/computeAdherence";

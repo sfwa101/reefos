@@ -36,6 +36,11 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
       id: "khalil.prayer.today",
       props: { localDate: ctx.localDate, timeOfDay: ctx.timeOfDay },
     },
+    {
+      kind: "khalil.habit.today",
+      id: "khalil.habit.today",
+      props: { localDate: ctx.localDate, recovery: ctx.recovery },
+    },
   ];
 
   return {

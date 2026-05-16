@@ -19,6 +19,7 @@ export const KHALIL_CAP = Object.freeze({
   PRAYER_READ: "khalil.prayer.read",
 
   HABIT_DEFINE_WRITE: "khalil.habit.define.write",
+  HABIT_ARCHIVE_WRITE: "khalil.habit.archive.write",
   HABIT_COMPLETE_WRITE: "khalil.habit.complete.write",
   HABIT_READ: "khalil.habit.read",
 

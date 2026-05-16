@@ -43,6 +43,19 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.prayer.name.asr": "العصر",
   "khalil.prayer.name.maghrib": "المغرب",
   "khalil.prayer.name.isha": "العشاء",
+
+  // Habit pillar (P2.3)
+  "khalil.habit.block.title": "عادات اليوم",
+  "khalil.habit.block.subtitle": "أتمم ما تيسّر؛ القليل المتواصل خير.",
+  "khalil.habit.empty.title": "لم تُعرَّف عادة بعد",
+  "khalil.habit.empty.body": "ابدأ بعادة صغيرة واحدة، وأضف لاحقاً.",
+  "khalil.habit.action.done": "تمّت",
+  "khalil.habit.action.complete": "أكمل",
+  "khalil.habit.offline.pending": "في انتظار المزامنة",
+  "khalil.habit.error.recovery_required": "السماح بالأمس يستلزم وضع التعافي.",
+  "khalil.habit.error.future_date": "لا يمكن تسجيل يوم لم يأتِ بعد.",
+  "khalil.habit.error.stale_date": "هذا اليوم خارج النافذة المسموح بها.",
+  "khalil.habit.error.invalid_partial": "قيمة الإنجاز غير صحيحة.",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({
