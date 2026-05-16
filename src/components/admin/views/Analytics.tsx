@@ -38,18 +38,18 @@ export default function AnalyticsAdmin() {
         title="التحليلات"
         subtitle="نظرة لحظية على آخر 200 طلب — الإيرادات، الحالات، وقنوات البيع"
         dataSource={{
-          table: "orders",
-          select: "id,user_id,total,status,service_type,payment_method,created_at",
+          table: "salsabil_master_orders",
+          select: "id,customer_id,total_amount,status,payment_status,created_at",
           orderBy: { column: "created_at", ascending: false },
           limit: 200,
-          searchKeys: ["id", "status", "service_type", "payment_method"],
+          searchKeys: ["id", "status", "payment_status"],
         }}
         metrics={[
           {
             key: "revenue", label: "إيرادات (مكتملة)", icon: Wallet, tone: "success",
             compute: (rows) => fmtMoney((rows as OrderRow[])
               .filter(r => r.status === "delivered")
-              .reduce((s, r) => s + Number(r.total || 0), 0)),
+              .reduce((s, r) => s + Number(r.total_amount || 0), 0)),
           },
           {
             key: "active", label: "طلبات نشطة", icon: Activity, tone: "primary",
@@ -62,7 +62,7 @@ export default function AnalyticsAdmin() {
           },
           {
             key: "customers", label: "عملاء فريدون", icon: Users, tone: "accent",
-            compute: (rows) => fmtNum(new Set((rows as OrderRow[]).map(r => r.user_id)).size),
+            compute: (rows) => fmtNum(new Set((rows as OrderRow[]).map(r => r.customer_id)).size),
           },
         ]}
         columns={[
@@ -72,7 +72,7 @@ export default function AnalyticsAdmin() {
               <>
                 <p className="text-[13px] font-mono">#{r.id.slice(0, 8)}</p>
                 <p className="text-[11px] text-foreground-tertiary">
-                  {new Date(r.created_at).toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })} • {r.service_type}
+                  {new Date(r.created_at).toLocaleString("ar-EG", { dateStyle: "short", timeStyle: "short" })}
                 </p>
               </>
             ),
@@ -81,8 +81,8 @@ export default function AnalyticsAdmin() {
             key: "total", className: "shrink-0 text-right",
             render: (r) => (
               <>
-                <p className="text-[13px] font-display num">{fmtMoney(r.total)}</p>
-                <p className="text-[10.5px] text-foreground-tertiary">{r.payment_method ?? "—"}</p>
+                <p className="text-[13px] font-display num">{fmtMoney(r.total_amount)}</p>
+                <p className="text-[10.5px] text-foreground-tertiary">{r.payment_status ?? "—"}</p>
               </>
             ),
           },
