@@ -3429,6 +3429,72 @@ export type Database = {
         }
         Relationships: []
       }
+      khalil_adherence_daily: {
+        Row: {
+          for_date: string
+          on_time_count: number
+          on_time_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
+          qadaa_count: number
+          qadaa_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
+          total_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          for_date: string
+          on_time_count?: number
+          on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          qadaa_count?: number
+          qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          total_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          for_date?: string
+          on_time_count?: number
+          on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          qadaa_count?: number
+          qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          total_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_prayer_log: {
+        Row: {
+          client_event_id: string
+          created_at: string
+          id: string
+          logged_for_date: string
+          mode: Database["public"]["Enums"]["khalil_prayer_mode"]
+          occurred_at: string
+          prayer: Database["public"]["Enums"]["khalil_prayer_name"]
+          user_id: string
+        }
+        Insert: {
+          client_event_id: string
+          created_at?: string
+          id?: string
+          logged_for_date: string
+          mode: Database["public"]["Enums"]["khalil_prayer_mode"]
+          occurred_at?: string
+          prayer: Database["public"]["Enums"]["khalil_prayer_name"]
+          user_id: string
+        }
+        Update: {
+          client_event_id?: string
+          created_at?: string
+          id?: string
+          logged_for_date?: string
+          mode?: Database["public"]["Enums"]["khalil_prayer_mode"]
+          occurred_at?: string
+          prayer?: Database["public"]["Enums"]["khalil_prayer_name"]
+          user_id?: string
+        }
+        Relationships: []
+      }
       kyc_documents: {
         Row: {
           created_at: string
@@ -9811,6 +9877,10 @@ export type Database = {
         }
         Returns: string
       }
+      khalil_recompute_adherence: {
+        Args: { p_date: string; p_user_id: string }
+        Returns: undefined
+      }
       list_open_gam_eyas: {
         Args: never
         Returns: {
@@ -10758,6 +10828,8 @@ export type Database = {
       gam_eya_status: "pending" | "active" | "completed" | "cancelled"
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
+      khalil_prayer_mode: "on_time" | "qadaa"
+      khalil_prayer_name: "fajr" | "dhuhr" | "asr" | "maghrib" | "isha"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
       payment_method_kind:
         | "card"
@@ -10966,6 +11038,8 @@ export const Constants = {
       gam_eya_status: ["pending", "active", "completed", "cancelled"],
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
+      khalil_prayer_mode: ["on_time", "qadaa"],
+      khalil_prayer_name: ["fajr", "dhuhr", "asr", "maghrib", "isha"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
       payment_method_kind: [
         "card",
