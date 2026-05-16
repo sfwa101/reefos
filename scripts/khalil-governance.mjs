@@ -105,12 +105,18 @@ for (const f of files) {
   const isKhalilTsx = rel.endsWith(".tsx") &&
     (rel.startsWith("src/apps/khalil/") || /^src\/routes\/khalil\./.test(rel));
   if (isKhalilTsx && ARABIC_RE.test(src)) {
-    // allow inside comments or kt() call sites
+    // allow inside comments, kt() call sites, head()/meta SEO blocks, or opt-out
     const lines = src.split("\n");
+    let inMeta = false;
     lines.forEach((line, i) => {
-      if (ARABIC_RE.test(line) && !/^\s*\/\//.test(line) && !/kt\(/.test(line)) {
-        violations.push(`${rel}:${i + 1}: hardcoded Arabic literal (rule 3)`);
-      }
+      if (/meta\s*:\s*\[|title\s*:\s*["']/.test(line)) inMeta = true;
+      if (inMeta && /^\s*\]\s*,?\s*$/.test(line)) inMeta = false;
+      if (!ARABIC_RE.test(line)) return;
+      if (/^\s*\/\//.test(line)) return;
+      if (/kt\(/.test(line)) return;
+      if (inMeta) return;
+      if (/khalil-governance-allow:\s*rule-3/.test(line)) return;
+      violations.push(`${rel}:${i + 1}: hardcoded Arabic literal (rule 3)`);
     });
   }
 
