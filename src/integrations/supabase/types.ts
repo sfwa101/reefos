@@ -3431,9 +3431,14 @@ export type Database = {
       }
       khalil_adherence_daily: {
         Row: {
+          combined_score: number
           for_date: string
+          habit_completed_count: number
+          habit_score: number
+          habit_target_count: number
           on_time_count: number
           on_time_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
+          prayer_score: number
           qadaa_count: number
           qadaa_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
           total_count: number
@@ -3441,9 +3446,14 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          combined_score?: number
           for_date: string
+          habit_completed_count?: number
+          habit_score?: number
+          habit_target_count?: number
           on_time_count?: number
           on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          prayer_score?: number
           qadaa_count?: number
           qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
           total_count?: number
@@ -3451,13 +3461,92 @@ export type Database = {
           user_id: string
         }
         Update: {
+          combined_score?: number
           for_date?: string
+          habit_completed_count?: number
+          habit_score?: number
+          habit_target_count?: number
           on_time_count?: number
           on_time_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          prayer_score?: number
           qadaa_count?: number
           qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
           total_count?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_habit_completion: {
+        Row: {
+          client_event_id: string
+          created_at: string
+          date: string
+          habit_id: string
+          id: string
+          mode: Database["public"]["Enums"]["khalil_habit_completion_mode"]
+          partial: number
+          user_id: string
+        }
+        Insert: {
+          client_event_id: string
+          created_at?: string
+          date: string
+          habit_id: string
+          id?: string
+          mode?: Database["public"]["Enums"]["khalil_habit_completion_mode"]
+          partial?: number
+          user_id: string
+        }
+        Update: {
+          client_event_id?: string
+          created_at?: string
+          date?: string
+          habit_id?: string
+          id?: string
+          mode?: Database["public"]["Enums"]["khalil_habit_completion_mode"]
+          partial?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "khalil_habit_completion_habit_id_fkey"
+            columns: ["habit_id"]
+            isOneToOne: false
+            referencedRelation: "khalil_habit_definition"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      khalil_habit_definition: {
+        Row: {
+          archived_at: string | null
+          cadence: Database["public"]["Enums"]["khalil_habit_cadence"]
+          created_at: string
+          id: string
+          name_key: string
+          slug: string
+          target_per_day: number
+          user_id: string
+        }
+        Insert: {
+          archived_at?: string | null
+          cadence?: Database["public"]["Enums"]["khalil_habit_cadence"]
+          created_at?: string
+          id?: string
+          name_key: string
+          slug: string
+          target_per_day?: number
+          user_id: string
+        }
+        Update: {
+          archived_at?: string | null
+          cadence?: Database["public"]["Enums"]["khalil_habit_cadence"]
+          created_at?: string
+          id?: string
+          name_key?: string
+          slug?: string
+          target_per_day?: number
           user_id?: string
         }
         Relationships: []
@@ -10828,6 +10917,11 @@ export type Database = {
       gam_eya_status: "pending" | "active" | "completed" | "cancelled"
       group_buy_pledge_status: "locked" | "committed" | "refunded"
       group_buy_status: "gathering" | "succeeded" | "failed" | "fulfilled"
+      khalil_habit_cadence: "daily" | "weekdays" | "custom"
+      khalil_habit_completion_mode:
+        | "normal"
+        | "recovery_yesterday"
+        | "manual_backfill"
       khalil_prayer_mode: "on_time" | "qadaa"
       khalil_prayer_name: "fajr" | "dhuhr" | "asr" | "maghrib" | "isha"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
@@ -11038,6 +11132,12 @@ export const Constants = {
       gam_eya_status: ["pending", "active", "completed", "cancelled"],
       group_buy_pledge_status: ["locked", "committed", "refunded"],
       group_buy_status: ["gathering", "succeeded", "failed", "fulfilled"],
+      khalil_habit_cadence: ["daily", "weekdays", "custom"],
+      khalil_habit_completion_mode: [
+        "normal",
+        "recovery_yesterday",
+        "manual_backfill",
+      ],
       khalil_prayer_mode: ["on_time", "qadaa"],
       khalil_prayer_name: ["fajr", "dhuhr", "asr", "maghrib", "isha"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],

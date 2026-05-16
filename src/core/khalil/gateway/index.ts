@@ -6,3 +6,10 @@
  * is not exported. Per Art. V + p1-data-ownership.md.
  */
 export { composeKhalilHomeFn } from "../orchestrator/composeHome.functions";
+export {
+  defineHabitFn,
+  archiveHabitFn,
+  completeHabitFn,
+  readHabitsTodayFn,
+} from "../habit";
+export { logPrayerFn, readPrayerTodayFn } from "../prayer";

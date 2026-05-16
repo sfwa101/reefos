@@ -8,6 +8,8 @@
  */
 export const KHALIL_EVENT = Object.freeze({
   PRAYER_LOGGED: "khalil.prayer.logged",
+  HABIT_DEFINED: "khalil.habit.defined",
+  HABIT_ARCHIVED: "khalil.habit.archived",
   HABIT_COMPLETED: "khalil.habit.completed",
   WORKOUT_SESSION_OPENED: "khalil.workout.session_opened",
   WORKOUT_SESSION_CLOSED: "khalil.workout.session_closed",
