@@ -1,9 +1,13 @@
 /**
  * Khalil — domain barrel.
  *
- * Intentionally empty in phase P0. The Khalil sovereign domain is documented
- * in `.salsabil/domains/khalil/` and will land code only after the P1 ADR
- * is ratified. Re-exports added here in the future MUST cross the gateway
- * (`./gateway/*`) — never expose `runtime/*` or sub-domain internals to UI.
+ * Re-exports the public gateway and capability/event/i18n constants. UI
+ * MUST import only from `@/core/khalil` — never deep paths into
+ * `runtime/`, `orchestrator/`, or sub-domain internals (Art. VI).
  */
-export {};
+export * from "./gateway";
+export { KHALIL_CAP, type KhalilCapabilityKey } from "./capabilities";
+export { KHALIL_EVENT, type KhalilEventName } from "./events";
+export { khalilKeys } from "./queryKeys";
+export { kt, setKhalilLocale, getKhalilLocale, type KhalilLocale } from "./i18n";
+export { khalilOfflineQueue, type KhalilQueuedIntent } from "./offlineQueue";
