@@ -81,6 +81,30 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.recovery.error.reason_required":
     "التعافي العميق يستلزم سبباً قصيراً.",
   "khalil.recovery.entered_at": "منذ:",
+
+  // Identity engine (P2.5) — calm, non-gamified phrasing.
+  "khalil.identity.title": "هويتك التحوّلية",
+  "khalil.identity.subtitle":
+    "حالة موثَّقة من الخادم، تعكس استمرارك لا لحظة حماسك.",
+  "khalil.identity.level.seed": "بذرة",
+  "khalil.identity.level.stable": "ثابت",
+  "khalil.identity.level.rising": "صاعد",
+  "khalil.identity.level.disciplined": "منضبط",
+  "khalil.identity.level.sovereign": "سيِّد نفسه",
+  "khalil.identity.chip.label": "الهوية الآن",
+  "khalil.identity.chip.score": "النَسَق",
+  "khalil.identity.chip.next": "العتبة التالية",
+  "khalil.identity.chip.top": "بلغت أعلى مستوى متاح في هذه المرحلة.",
+  "khalil.identity.action.recompute": "أعد الحساب",
+  "khalil.identity.action.recomputing": "جارِ الحساب…",
+  "khalil.identity.windows.title": "نوافذ القياس",
+  "khalil.identity.windows.w30": "٣٠ يوماً",
+  "khalil.identity.windows.w90": "٩٠ يوماً",
+  "khalil.identity.windows.w180": "١٨٠ يوماً",
+  "khalil.identity.observed_days": "أيام مرصودة:",
+  "khalil.identity.last_computed_at": "آخر حساب:",
+  "khalil.identity.note":
+    "لا منافسة، لا أوسمة. الهوية تنمو عبر الالتزام الطويل وحده.",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({

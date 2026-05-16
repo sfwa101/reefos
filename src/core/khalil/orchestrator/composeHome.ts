@@ -1,16 +1,19 @@
 /**
- * Khalil — Home orchestrator (pure runtime, P2.4).
+ * Khalil — Home orchestrator (pure runtime, P2.5).
  *
  * Resolves the descriptor tree for `/khalil` based on recovery state,
- * time-of-day, capabilities, and an adherence summary. Pure TypeScript:
- * no React, no supabase, no I/O. Consumed by the server fn wrapper in
- * `composeHome.functions.ts`.
+ * time-of-day, identity level, capabilities, and an adherence summary.
+ * Pure TypeScript: no React, no supabase, no I/O.
  *
- * Per p1-composable-dashboard.md the home is a descriptor tree, NEVER a
- * bespoke page. Per P2.4 the ordering is deterministic + server-owned.
+ * P2.5 upgrade (§9): identity level changes emphasis only — never
+ * gates capabilities. Seed users see prayer/habit/recovery first;
+ * disciplined/sovereign users see consistency surfaces emphasized
+ * and welcome guidance demoted.
  */
 import type { RenderBlock, RenderDescriptor } from "@/core/runtime-ui";
 import type { RecoveryMode } from "../recovery/schemas";
+import type { KhalilIdentityLevel } from "../identity/runtime/config";
+import { LEVEL_INDEX } from "../identity/runtime/config";
 
 export interface KhalilAdherenceSummary {
   /** Combined adherence in [0,1] for the local date, server-projected. */
@@ -31,6 +34,8 @@ export interface KhalilHomeContext {
   capabilities: ReadonlySet<string>;
   /** Adherence summary for the local date — server-projected. */
   adherence: KhalilAdherenceSummary;
+  /** Identity level — server-truth from `khalil_identity_state`. */
+  identityLevel: KhalilIdentityLevel;
 }
 
 interface ScoredBlock {
@@ -42,9 +47,9 @@ interface ScoredBlock {
 }
 
 /**
- * Pure urgency scoring (P2.4 §8). Returns a finite number; lower numbers
- * appear first in the descriptor tree. Deterministic — same inputs always
- * produce the same score.
+ * Pure urgency scoring (P2.4 §8 + P2.5 §9). Deterministic — same
+ * inputs always produce the same score. Identity level only nudges
+ * emphasis; never gates blocks.
  */
 export function computeUrgencyScore(
   blockKind: string,
@@ -53,29 +58,36 @@ export function computeUrgencyScore(
   const recovery = ctx.recovery;
   const isHard = recovery === "hard";
   const isSoft = recovery === "soft";
-  const isNight = ctx.timeOfDay === "night";
   const isFajr = ctx.timeOfDay === "fajr";
-  const lowAdh = ctx.adherence.combinedScore < 0.4;
+  const idx = LEVEL_INDEX[ctx.identityLevel];
+  const isElevated = idx >= LEVEL_INDEX.disciplined; // disciplined / sovereign
 
   switch (blockKind) {
     case "khalil.recovery.banner":
-      // Always first when present; banner visibility decided by recovery state.
       return -100;
+    case "khalil.identity.chip":
+      // Always near the top — calm, single-line state surface.
+      return -60;
     case "khalil.prayer.today":
-      // Promote prayer before Fajr or in hard recovery (calm anchor).
       if (isFajr) return -50;
       if (isHard) return -40;
       return -10;
     case "khalil.habit.today":
-      // Hard recovery → keep visible but never above prayer.
       if (isHard) return 5;
       if (isSoft) return 0;
       return -5;
     case "khalil.home.welcome":
-      // Welcome demotes once real pillars exist; stays in soft/hard for tone.
+      // Demote welcome aggressively for elevated identities (P2.5 §9C).
+      if (isElevated) return 50;
+      if (idx >= LEVEL_INDEX.rising) return 20;
       return 10;
+    case "khalil.analytics.heatmap":
+    case "khalil.analytics.adherence":
+      // Stable / rising see analytics earlier; seed keeps it quiet.
+      if (idx >= LEVEL_INDEX.disciplined) return 0;
+      if (idx >= LEVEL_INDEX.stable) return 8;
+      return 30;
     default:
-      // Unknown blocks render last; deterministic tiebreaker is alphabetical.
       return 100;
   }
 }
@@ -87,17 +99,20 @@ function visibilityFor(
   if (blockKind === "khalil.recovery.banner") {
     return ctx.recovery !== "off";
   }
-  // Hard recovery hides analytics depth + workout emphasis. Those blocks
-  // don't exist yet in P2.4 — guard remains in place for future pillars.
   if (ctx.recovery === "hard") {
     if (blockKind === "khalil.analytics.heatmap") return false;
     if (blockKind === "khalil.analytics.adherence") return false;
     if (blockKind === "khalil.workout.next") return false;
   }
+  // P2.5 §9A: seed hides analytics depth (orchestrator-driven only —
+  // capabilities are NOT gated by level per p1-capability-ownership).
+  if (ctx.identityLevel === "seed") {
+    if (blockKind === "khalil.analytics.heatmap") return false;
+    if (blockKind === "khalil.analytics.adherence") return false;
+  }
   return true;
 }
 
-/** Deterministic ordering used by the resolver and exercised by tests. */
 export function orderBlocksByUrgency(
   scored: ReadonlyArray<ScoredBlock>,
 ): RenderBlock[] {
@@ -111,13 +126,16 @@ export function orderBlocksByUrgency(
 }
 
 export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
-  // Candidate block set — descriptor-only. P2.4 keeps the catalog tight;
-  // each future pillar (workout, weight, analytics, coach) adds an entry.
   const candidates: RenderBlock[] = [
     {
       kind: "khalil.recovery.banner",
       id: "khalil.recovery.banner",
       props: { mode: ctx.recovery },
+    },
+    {
+      kind: "khalil.identity.chip",
+      id: "khalil.identity.chip",
+      props: { level: ctx.identityLevel },
     },
     {
       kind: "khalil.home.welcome",
@@ -150,6 +168,7 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
       localDate: ctx.localDate,
       timeOfDay: ctx.timeOfDay,
       recovery: ctx.recovery,
+      identityLevel: ctx.identityLevel,
       combinedScore: ctx.adherence.combinedScore,
     },
     blocks: ordered,
