@@ -15,3 +15,9 @@ export {
 export { logPrayerFn, readPrayerTodayFn } from "../prayer";
 export { toggleRecoveryFn, readRecoveryStateFn } from "../recovery";
 export { readIdentityFn, recomputeIdentityFn } from "../identity";
+export {
+  proposeCoachFn,
+  acceptCoachFn,
+  dismissCoachFn,
+  readCoachHistoryFn,
+} from "../coach";
