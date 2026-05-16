@@ -3489,6 +3489,30 @@ export type Database = {
         }
         Relationships: []
       }
+      khalil_analytics_event: {
+        Row: {
+          event_name: string
+          id: string
+          occurred_at: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          event_name: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          event_name?: string
+          id?: string
+          occurred_at?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: []
+      }
       khalil_coach_audit: {
         Row: {
           action: string
@@ -3804,6 +3828,240 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      khalil_streak_state: {
+        Row: {
+          combined_current: number
+          combined_longest: number
+          habit_current: number
+          habit_longest: number
+          last_for_date: string | null
+          prayer_current: number
+          prayer_longest: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          combined_current?: number
+          combined_longest?: number
+          habit_current?: number
+          habit_longest?: number
+          last_for_date?: string | null
+          prayer_current?: number
+          prayer_longest?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          combined_current?: number
+          combined_longest?: number
+          habit_current?: number
+          habit_longest?: number
+          last_for_date?: string | null
+          prayer_current?: number
+          prayer_longest?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_weight_measurement: {
+        Row: {
+          client_event_id: string
+          created_at: string
+          for_date: string
+          id: string
+          source: string
+          user_id: string
+          weight_kg: number
+        }
+        Insert: {
+          client_event_id: string
+          created_at?: string
+          for_date: string
+          id?: string
+          source?: string
+          user_id: string
+          weight_kg: number
+        }
+        Update: {
+          client_event_id?: string
+          created_at?: string
+          for_date?: string
+          id?: string
+          source?: string
+          user_id?: string
+          weight_kg?: number
+        }
+        Relationships: []
+      }
+      khalil_weight_projection: {
+        Row: {
+          avg_30d: number | null
+          avg_7d: number | null
+          avg_90d: number | null
+          delta_30d: number | null
+          delta_7d: number | null
+          delta_90d: number | null
+          latest_for_date: string | null
+          latest_kg: number | null
+          measurements_count: number
+          trend_direction: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          avg_30d?: number | null
+          avg_7d?: number | null
+          avg_90d?: number | null
+          delta_30d?: number | null
+          delta_7d?: number | null
+          delta_90d?: number | null
+          latest_for_date?: string | null
+          latest_kg?: number | null
+          measurements_count?: number
+          trend_direction?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          avg_30d?: number | null
+          avg_7d?: number | null
+          avg_90d?: number | null
+          delta_30d?: number | null
+          delta_7d?: number | null
+          delta_90d?: number | null
+          latest_for_date?: string | null
+          latest_kg?: number | null
+          measurements_count?: number
+          trend_direction?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_workout_projection_weekly: {
+        Row: {
+          iso_week: number
+          iso_year: number
+          sessions_count: number
+          total_sets: number
+          total_volume_kg: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          iso_week: number
+          iso_year: number
+          sessions_count?: number
+          total_sets?: number
+          total_volume_kg?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          iso_week?: number
+          iso_year?: number
+          sessions_count?: number
+          total_sets?: number
+          total_volume_kg?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_workout_session: {
+        Row: {
+          client_event_id: string
+          closed_at: string | null
+          created_at: string
+          focus: string | null
+          id: string
+          notes_key: string | null
+          started_at: string
+          user_id: string
+        }
+        Insert: {
+          client_event_id: string
+          closed_at?: string | null
+          created_at?: string
+          focus?: string | null
+          id?: string
+          notes_key?: string | null
+          started_at?: string
+          user_id: string
+        }
+        Update: {
+          client_event_id?: string
+          closed_at?: string | null
+          created_at?: string
+          focus?: string | null
+          id?: string
+          notes_key?: string | null
+          started_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_workout_set: {
+        Row: {
+          client_event_id: string
+          corrects_set_id: string | null
+          created_at: string
+          exercise_slug: string
+          id: string
+          is_correction: boolean
+          reps: number
+          rpe: number | null
+          session_id: string
+          set_index: number
+          user_id: string
+          weight_kg: number
+        }
+        Insert: {
+          client_event_id: string
+          corrects_set_id?: string | null
+          created_at?: string
+          exercise_slug: string
+          id?: string
+          is_correction?: boolean
+          reps: number
+          rpe?: number | null
+          session_id: string
+          set_index: number
+          user_id: string
+          weight_kg: number
+        }
+        Update: {
+          client_event_id?: string
+          corrects_set_id?: string | null
+          created_at?: string
+          exercise_slug?: string
+          id?: string
+          is_correction?: boolean
+          reps?: number
+          rpe?: number | null
+          session_id?: string
+          set_index?: number
+          user_id?: string
+          weight_kg?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "khalil_workout_set_corrects_set_id_fkey"
+            columns: ["corrects_set_id"]
+            isOneToOne: false
+            referencedRelation: "khalil_workout_set"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "khalil_workout_set_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "khalil_workout_session"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       kyc_documents: {
         Row: {
