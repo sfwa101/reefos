@@ -14,6 +14,7 @@ export const KHALIL_CAP = Object.freeze({
   HOME_COMPOSE_READ: "khalil.home.compose.read",
 
   PRAYER_LOG_WRITE: "khalil.prayer.log.write",
+  PRAYER_LOG_READ: "khalil.prayer.log.read",
   PRAYER_QADAA_WRITE: "khalil.prayer.qadaa.write",
   PRAYER_READ: "khalil.prayer.read",
 
