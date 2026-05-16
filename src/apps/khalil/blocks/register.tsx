@@ -15,6 +15,11 @@ import {
   AnalyticsHeatmapBlock,
   AnalyticsAdherenceBlock,
 } from "./AnalyticsBlocks";
+import {
+  CriticalSignalBlock,
+  NudgeBlock,
+  WeeklyFocusBlock,
+} from "./IntelligenceBlocks";
 
 let registered = false;
 
