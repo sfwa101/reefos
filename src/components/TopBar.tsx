@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Check, MapPin, Menu, Plus, ShoppingBag } from "lucide-react";
+import { ChevronDown, Menu, ShoppingBag } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useCartTotal } from "@/core/orders/runtime/react/CartProvider";
@@ -7,15 +7,10 @@ import { useLocationStatic as useDeliveryLocation } from "@/context/LocationCont
 import { useAuth } from "@/context/AuthContext";
 import { LogisticsGateway, type SavedAddressVM } from "@/core/logistics";
 import { toLatin } from "@/lib/format";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "@/components/ui/sheet";
-import AddressSheet from "@/apps/reef-al-madina/features/logistics/components/AddressSheet";
 import { Button } from "@/components/ui/button";
+import { AppSwitcherSheet } from "@/components/AppSwitcherSheet";
+import { OS_COMPANIES } from "@/core/identity/osCompanies";
+import { readDefaultLauncher } from "@/lib/defaultLauncher";
 
 /**
  * TopBar — Phase 26 (Sovereign Minimalism).
