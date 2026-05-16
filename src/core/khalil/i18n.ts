@@ -56,6 +56,31 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.habit.error.future_date": "لا يمكن تسجيل يوم لم يأتِ بعد.",
   "khalil.habit.error.stale_date": "هذا اليوم خارج النافذة المسموح بها.",
   "khalil.habit.error.invalid_partial": "قيمة الإنجاز غير صحيحة.",
+
+  // Recovery pillar (P2.4)
+  "khalil.recovery.title": "وضع التعافي",
+  "khalil.recovery.subtitle":
+    "مساحة هادئة للعودة دون عقوبة. لا خسارة، لا عتاب.",
+  "khalil.recovery.banner.soft": "أنت في وضع التعافي اللطيف. سَرعتك مقبولة.",
+  "khalil.recovery.banner.hard":
+    "أنت في وضع التعافي العميق. لا مسؤوليات إضافية اليوم.",
+  "khalil.recovery.state.off": "نشِط",
+  "khalil.recovery.state.soft": "تعافٍ لطيف",
+  "khalil.recovery.state.hard": "تعافٍ عميق",
+  "khalil.recovery.action.to_soft": "ادخل تعافياً لطيفاً",
+  "khalil.recovery.action.to_hard": "ادخل تعافياً عميقاً",
+  "khalil.recovery.action.to_off": "اخرج من التعافي",
+  "khalil.recovery.reason.label": "سبب الانتقال (مطلوب للتعافي العميق)",
+  "khalil.recovery.reason.placeholder": "اكتب سبباً قصيراً يذكّرك لاحقاً…",
+  "khalil.recovery.audit.title": "سجل التحولات",
+  "khalil.recovery.audit.empty": "لا تحولات سابقة.",
+  "khalil.recovery.offline.pending": "في انتظار المزامنة",
+  "khalil.recovery.error.same_state": "أنت في هذه الحالة بالفعل.",
+  "khalil.recovery.error.illegal_transition":
+    "هذا الانتقال غير مسموح. مرّ بالتعافي اللطيف أولاً.",
+  "khalil.recovery.error.reason_required":
+    "التعافي العميق يستلزم سبباً قصيراً.",
+  "khalil.recovery.entered_at": "منذ:",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({
