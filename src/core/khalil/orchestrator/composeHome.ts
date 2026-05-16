@@ -111,12 +111,28 @@ function visibilityFor(
     if (blockKind === "khalil.analytics.heatmap") return false;
     if (blockKind === "khalil.analytics.adherence") return false;
     if (blockKind === "khalil.workout.next") return false;
+    // Hard recovery softens proposal types: only show recovery / quiet kinds.
+    if (blockKind === "khalil.coach.proposal") {
+      const k = ctx.pendingCoachProposal?.kind;
+      if (!k) return false;
+      return k === "recovery-suggestion" || k === "quiet-day";
+    }
   }
   // P2.5 §9A: seed hides analytics depth (orchestrator-driven only —
   // capabilities are NOT gated by level per p1-capability-ownership).
   if (ctx.identityLevel === "seed") {
     if (blockKind === "khalil.analytics.heatmap") return false;
     if (blockKind === "khalil.analytics.adherence") return false;
+  }
+  // Coach proposal: only emit when there is an actual pending proposal.
+  // Sovereign level reduces guidance noise (§9).
+  if (blockKind === "khalil.coach.proposal") {
+    if (!ctx.pendingCoachProposal) return false;
+    if (ctx.identityLevel === "sovereign") {
+      // Sovereign only sees quiet-day / consistency-guidance.
+      const k = ctx.pendingCoachProposal.kind;
+      return k === "quiet-day" || k === "consistency-guidance";
+    }
   }
   return true;
 }
