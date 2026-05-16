@@ -30,7 +30,7 @@ export const KHALIL_CAP = Object.freeze({
   WEIGHT_MEASUREMENT_WRITE: "khalil.weight.measurement.write",
   WEIGHT_READ: "khalil.weight.read",
 
-  RECOVERY_TOGGLE: "khalil.recovery.toggle",
+  RECOVERY_TOGGLE_WRITE: "khalil.recovery.toggle.write",
   RECOVERY_READ: "khalil.recovery.read",
 
   IDENTITY_READ: "khalil.identity.read",

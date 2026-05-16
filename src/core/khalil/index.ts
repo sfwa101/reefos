@@ -16,3 +16,13 @@ export {
   computeHabitAdherence,
   computeCombinedAdherence,
 } from "./analytics/computeAdherence";
+export {
+  validateRecoveryTransition,
+  resolveRecoveryState,
+  isRecoverySoftened,
+  recoveryModeSchema,
+  type RecoveryMode,
+  type RecoveryStateDTO,
+  type RecoveryEventRow,
+  type ToggleRecoveryInput,
+} from "./recovery";

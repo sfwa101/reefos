@@ -13,3 +13,4 @@ export {
   readHabitsTodayFn,
 } from "../habit";
 export { logPrayerFn, readPrayerTodayFn } from "../prayer";
+export { toggleRecoveryFn, readRecoveryStateFn } from "../recovery";
