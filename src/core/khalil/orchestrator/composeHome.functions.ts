@@ -32,7 +32,7 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
     const now = new Date();
     const localDate = now.toISOString().slice(0, 10);
 
-    const [{ data: recoveryRow }, { data: adherenceRow }, { data: identityRow }] = await Promise.all([
+    const [{ data: recoveryRow }, { data: adherenceRow }, { data: identityRow }, { data: coachRow }] = await Promise.all([
       supabase
         .from("khalil_recovery_state")
         .select("current_state")
@@ -48,6 +48,15 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
         .from("khalil_identity_state")
         .select("current_level")
         .eq("user_id", userId)
+        .maybeSingle(),
+      supabase
+        .from("khalil_coach_proposal")
+        .select("id,kind")
+        .eq("user_id", userId)
+        .eq("status", "pending")
+        .gt("expires_at", new Date().toISOString())
+        .order("created_at", { ascending: false })
+        .limit(1)
         .maybeSingle(),
     ]);
 
