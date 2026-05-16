@@ -86,8 +86,10 @@ for (const f of files) {
     }
   }
 
-  // Rule 3 — hardcoded Arabic in TSX
-  if (rel.endsWith(".tsx") && ARABIC_RE.test(src)) {
+  // Rule 3 — hardcoded Arabic in Khalil TSX (other domains may own raw copy)
+  const isKhalilTsx = rel.endsWith(".tsx") &&
+    (rel.startsWith("src/apps/khalil/") || /^src\/routes\/khalil\./.test(rel));
+  if (isKhalilTsx && ARABIC_RE.test(src)) {
     // allow inside comments or kt() call sites
     const lines = src.split("\n");
     lines.forEach((line, i) => {
