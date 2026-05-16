@@ -1,5 +1,5 @@
 /**
- * Khalil — i18n runtime (P2.1 scaffold).
+ * Khalil — i18n runtime.
  *
  * Per p1-i18n-strategy.md: zero string literals in TSX. Every visible copy
  * goes through `kt(key)`. Today only Arabic is implemented; locale switch
@@ -33,6 +33,16 @@ const AR: Readonly<Record<string, string>> = Object.freeze({
   "khalil.placeholder.coming_soon": "قيد البناء وفق الحَوكَمة",
 
   "khalil.action.back_home": "العودة إلى ريف المدينة",
+
+  // Prayer pillar (P2.2)
+  "khalil.prayer.block.title": "صلوات اليوم",
+  "khalil.prayer.block.subtitle": "اضغط لتسجيل ما صليّت في وقته.",
+  "khalil.prayer.offline.pending": "في انتظار المزامنة",
+  "khalil.prayer.name.fajr": "الفجر",
+  "khalil.prayer.name.dhuhr": "الظهر",
+  "khalil.prayer.name.asr": "العصر",
+  "khalil.prayer.name.maghrib": "المغرب",
+  "khalil.prayer.name.isha": "العشاء",
 });
 
 const DICT: Readonly<Record<string, Readonly<Record<string, string>>>> = Object.freeze({

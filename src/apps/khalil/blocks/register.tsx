@@ -8,11 +8,13 @@
  */
 import { blockRegistry } from "@/core/runtime-ui";
 import { KhalilWelcomeBlock } from "./WelcomeBlock";
+import { PrayerTodayBlock } from "./PrayerTodayBlock";
 
 let registered = false;
 
 export function registerKhalilBlocks(): void {
   if (registered) return;
   blockRegistry.register("khalil.home.welcome", () => <KhalilWelcomeBlock />);
+  blockRegistry.register("khalil.prayer.today", () => <PrayerTodayBlock />);
   registered = true;
 }
