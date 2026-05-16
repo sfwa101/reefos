@@ -20,8 +20,10 @@ export function registerKhalilBlocks(): void {
   blockRegistry.register("khalil.home.welcome", () => <KhalilWelcomeBlock />);
   blockRegistry.register("khalil.prayer.today", () => <PrayerTodayBlock />);
   blockRegistry.register("khalil.habit.today", () => <HabitTodayBlock />);
-  blockRegistry.register("khalil.recovery.banner", (props) => (
-    <RecoveryBannerBlock mode={(props as { mode?: RecoveryMode } | undefined)?.mode} />
+  blockRegistry.register("khalil.recovery.banner", ({ block }) => (
+    <RecoveryBannerBlock
+      mode={(block.props as { mode?: RecoveryMode } | undefined)?.mode}
+    />
   ));
   registered = true;
 }
