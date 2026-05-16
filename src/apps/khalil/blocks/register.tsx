@@ -13,6 +13,7 @@ import { PrayerTodayBlock } from "./PrayerTodayBlock";
 import { HabitTodayBlock } from "./HabitTodayBlock";
 import { RecoveryBannerBlock } from "./RecoveryBannerBlock";
 import { IdentityChipBlock } from "./IdentityChipBlock";
+import { CoachProposalBlock } from "./CoachProposalBlock";
 
 let registered = false;
 
