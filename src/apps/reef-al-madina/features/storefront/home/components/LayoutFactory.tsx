@@ -50,7 +50,7 @@ import PredictiveRefillRail from "@/apps/reef-al-madina/features/main-hub/compon
 
 // Phase 29 — Sovereign Unification (hub-level stem cells)
 import SpatioTemporalOffersRail from "@/apps/reef-al-madina/features/offers/components/SpatioTemporalOffersRail";
-import MaeenLauncherGrid from "@/apps/khalil/components/MaeenLauncherGrid";
+import MaeenLauncherGrid from "@/apps/maeen/components/MaeenLauncherGrid";
 
 // Phase 30 — Advanced Stem Cell Ascendancy primitives
 import { SduiMenuList } from "@/core/runtime-ui/sdui/primitives/SduiMenuList";
