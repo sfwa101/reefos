@@ -3745,6 +3745,51 @@ export type Database = {
         }
         Relationships: []
       }
+      khalil_intelligence_snapshot: {
+        Row: {
+          created_at: string
+          generated_at: string
+          id: string
+          identity_level: string
+          inputs_digest: string
+          nudges: Json
+          priorities: Json
+          recovery_mode: string
+          replay_version: number
+          signals: Json
+          user_id: string
+          weekly_focus: Json
+        }
+        Insert: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          identity_level: string
+          inputs_digest: string
+          nudges?: Json
+          priorities?: Json
+          recovery_mode: string
+          replay_version?: number
+          signals?: Json
+          user_id: string
+          weekly_focus?: Json
+        }
+        Update: {
+          created_at?: string
+          generated_at?: string
+          id?: string
+          identity_level?: string
+          inputs_digest?: string
+          nudges?: Json
+          priorities?: Json
+          recovery_mode?: string
+          replay_version?: number
+          signals?: Json
+          user_id?: string
+          weekly_focus?: Json
+        }
+        Relationships: []
+      }
       khalil_prayer_log: {
         Row: {
           client_event_id: string

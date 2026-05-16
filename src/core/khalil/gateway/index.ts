@@ -41,3 +41,7 @@ export {
   type WorkoutVolumeWeekDTO,
   type WeightDeltaDTO,
 } from "../analytics/readAnalytics";
+export {
+  readIntelligenceSnapshotFn,
+  recomputeIntelligenceSnapshotFn,
+} from "../intelligence";

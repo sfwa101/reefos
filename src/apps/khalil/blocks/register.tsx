@@ -15,6 +15,11 @@ import {
   AnalyticsHeatmapBlock,
   AnalyticsAdherenceBlock,
 } from "./AnalyticsBlocks";
+import {
+  CriticalSignalBlock,
+  NudgeBlock,
+  WeeklyFocusBlock,
+} from "./IntelligenceBlocks";
 
 let registered = false;
 
@@ -34,5 +39,62 @@ export function registerKhalilBlocks(): void {
   blockRegistry.register("khalil.weight.trend", () => <WeightTrendBlock />);
   blockRegistry.register("khalil.analytics.heatmap", () => <AnalyticsHeatmapBlock />);
   blockRegistry.register("khalil.analytics.adherence", () => <AnalyticsAdherenceBlock />);
+  blockRegistry.register("khalil.intelligence.signal", ({ block }) => {
+    const p = (block.props ?? {}) as {
+      signalKey?: string;
+      severity?: "low" | "medium" | "high";
+      score?: number;
+      explanationKey?: string;
+    };
+    if (!p.signalKey || !p.explanationKey) return null;
+    return (
+      <CriticalSignalBlock
+        signalKey={p.signalKey}
+        severity={p.severity ?? "low"}
+        score={p.score ?? 0}
+        explanationKey={p.explanationKey}
+      />
+    );
+  });
+  blockRegistry.register("khalil.intelligence.nudge", ({ block }) => {
+    const p = (block.props ?? {}) as {
+      nudgeId?: string;
+      kind?: string;
+      titleKey?: string;
+      bodyKey?: string;
+      severity?: "low" | "medium" | "high";
+    };
+    if (!p.nudgeId || !p.titleKey || !p.bodyKey || !p.kind) return null;
+    return (
+      <NudgeBlock
+        nudgeId={p.nudgeId}
+        kind={p.kind}
+        titleKey={p.titleKey}
+        bodyKey={p.bodyKey}
+        severity={p.severity ?? "low"}
+      />
+    );
+  });
+  blockRegistry.register("khalil.intelligence.focus", ({ block }) => {
+    const p = (block.props ?? {}) as {
+      primaryFocus?: string;
+      secondaryFocus?: string;
+      rationaleKey?: string;
+      spiritualEmphasis?: string;
+      bodyEmphasis?: string;
+      recoveryEmphasis?: string;
+    };
+    if (!p.primaryFocus || !p.secondaryFocus || !p.rationaleKey) return null;
+    return (
+      <WeeklyFocusBlock
+        primaryFocus={p.primaryFocus}
+        secondaryFocus={p.secondaryFocus}
+        rationaleKey={p.rationaleKey}
+        spiritualEmphasis={p.spiritualEmphasis ?? "low"}
+        bodyEmphasis={p.bodyEmphasis ?? "low"}
+        recoveryEmphasis={p.recoveryEmphasis ?? "low"}
+      />
+    );
+  });
   registered = true;
 }

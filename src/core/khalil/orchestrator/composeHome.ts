@@ -14,30 +14,26 @@ import type { RenderBlock, RenderDescriptor } from "@/core/runtime-ui";
 import type { RecoveryMode } from "../recovery/schemas";
 import type { KhalilIdentityLevel } from "../identity/runtime/config";
 import { LEVEL_INDEX } from "../identity/runtime/config";
+import type {
+  IntelligenceSnapshot,
+} from "../intelligence/contracts/types";
 
 export interface KhalilAdherenceSummary {
-  /** Combined adherence in [0,1] for the local date, server-projected. */
   combinedScore: number;
-  /** True when the user has at least one active habit definition. */
   hasActiveHabits: boolean;
 }
 
 export interface KhalilHomeContext {
   userId: string;
-  /** ISO date in the user's local timezone (yyyy-mm-dd). */
   localDate: string;
-  /** Coarse time-of-day bucket — server-computed. */
   timeOfDay: "fajr" | "morning" | "midday" | "afternoon" | "evening" | "night";
-  /** Current recovery state — server-truth from `khalil_recovery_state`. */
   recovery: RecoveryMode;
-  /** Capability keys the user holds in the active workspace. */
   capabilities: ReadonlySet<string>;
-  /** Adherence summary for the local date — server-projected. */
   adherence: KhalilAdherenceSummary;
-  /** Identity level — server-truth from `khalil_identity_state`. */
   identityLevel: KhalilIdentityLevel;
-  /** Latest pending coach proposal (id + kind only — UI fetches details). */
   pendingCoachProposal?: { id: string; kind: string } | null;
+  /** Latest sovereign intelligence snapshot — drives adaptive ordering. */
+  intelligence?: IntelligenceSnapshot | null;
 }
 
 interface ScoredBlock {
@@ -157,40 +153,27 @@ export function orderBlocksByUrgency(
 }
 
 export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
+  const intel = ctx.intelligence ?? null;
+  const topSignal =
+    intel && intel.signals.length > 0
+      ? [...intel.signals]
+          .filter((s) => s.severity === "high")
+          .sort((a, b) => b.score - a.score)[0] ?? null
+      : null;
+  const topNudge = intel && intel.nudges.length > 0 ? intel.nudges[0] : null;
+  const weeklyFocus = intel?.weeklyFocus ?? null;
+
   const candidates: RenderBlock[] = [
-    {
-      kind: "khalil.recovery.banner",
-      id: "khalil.recovery.banner",
-      props: { mode: ctx.recovery },
-    },
-    {
-      kind: "khalil.identity.chip",
-      id: "khalil.identity.chip",
-      props: { level: ctx.identityLevel },
-    },
-    {
-      kind: "khalil.home.welcome",
-      id: "khalil.home.welcome",
-      props: { recovery: ctx.recovery },
-    },
-    {
-      kind: "khalil.prayer.today",
-      id: "khalil.prayer.today",
-      props: { localDate: ctx.localDate, timeOfDay: ctx.timeOfDay },
-    },
-    {
-      kind: "khalil.habit.today",
-      id: "khalil.habit.today",
-      props: { localDate: ctx.localDate, recovery: ctx.recovery },
-    },
+    { kind: "khalil.recovery.banner", id: "khalil.recovery.banner", props: { mode: ctx.recovery } },
+    { kind: "khalil.identity.chip", id: "khalil.identity.chip", props: { level: ctx.identityLevel } },
+    { kind: "khalil.home.welcome", id: "khalil.home.welcome", props: { recovery: ctx.recovery } },
+    { kind: "khalil.prayer.today", id: "khalil.prayer.today", props: { localDate: ctx.localDate, timeOfDay: ctx.timeOfDay } },
+    { kind: "khalil.habit.today", id: "khalil.habit.today", props: { localDate: ctx.localDate, recovery: ctx.recovery } },
     {
       kind: "khalil.coach.proposal",
       id: "khalil.coach.proposal",
       props: ctx.pendingCoachProposal
-        ? {
-            proposalId: ctx.pendingCoachProposal.id,
-            kind: ctx.pendingCoachProposal.kind,
-          }
+        ? { proposalId: ctx.pendingCoachProposal.id, kind: ctx.pendingCoachProposal.kind }
         : {},
     },
     { kind: "khalil.workout.next", id: "khalil.workout.next", props: { recovery: ctx.recovery } },
@@ -199,11 +182,64 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
     { kind: "khalil.analytics.heatmap", id: "khalil.analytics.heatmap", props: {} },
   ];
 
-  const scored: ScoredBlock[] = candidates.map((block) => ({
-    block,
-    urgency: computeUrgencyScore(block.kind, ctx),
-    visible: visibilityFor(block.kind, ctx),
-  }));
+  // Adaptive intelligence blocks — only emitted when snapshot has content.
+  if (topSignal) {
+    candidates.push({
+      kind: "khalil.intelligence.signal",
+      id: `khalil.intelligence.signal.${topSignal.key}`,
+      props: {
+        signalKey: topSignal.key,
+        severity: topSignal.severity,
+        score: topSignal.score,
+        explanationKey: topSignal.explanationKey,
+      },
+    });
+  }
+  if (topNudge) {
+    candidates.push({
+      kind: "khalil.intelligence.nudge",
+      id: `khalil.intelligence.nudge.${topNudge.id}`,
+      props: {
+        nudgeId: topNudge.id,
+        kind: topNudge.kind,
+        titleKey: topNudge.titleKey,
+        bodyKey: topNudge.bodyKey,
+        severity: topNudge.severity,
+      },
+    });
+  }
+  if (weeklyFocus) {
+    candidates.push({
+      kind: "khalil.intelligence.focus",
+      id: "khalil.intelligence.focus",
+      props: {
+        primaryFocus: weeklyFocus.primaryFocus,
+        secondaryFocus: weeklyFocus.secondaryFocus,
+        rationaleKey: weeklyFocus.rationaleKey,
+        spiritualEmphasis: weeklyFocus.spiritualEmphasis,
+        bodyEmphasis: weeklyFocus.bodyEmphasis,
+        recoveryEmphasis: weeklyFocus.recoveryEmphasis,
+      },
+    });
+  }
+
+  // Priority weights from intelligence (if any) overlay the base urgency.
+  const priorityWeights = new Map<string, number>();
+  if (intel) {
+    for (const p of intel.priorities) priorityWeights.set(p.blockKind, p.weight);
+  }
+
+  const scored: ScoredBlock[] = candidates.map((block) => {
+    const base = computeUrgencyScore(block.kind, ctx);
+    const overlay = priorityWeights.get(block.kind);
+    // Intelligence weight, when present, is authoritative; otherwise base.
+    const urgency = overlay ?? base;
+    return {
+      block,
+      urgency,
+      visible: visibilityFor(block.kind, ctx),
+    };
+  });
 
   const ordered = orderBlocksByUrgency(scored);
 
@@ -215,6 +251,7 @@ export function composeKhalilHome(ctx: KhalilHomeContext): RenderDescriptor {
       recovery: ctx.recovery,
       identityLevel: ctx.identityLevel,
       combinedScore: ctx.adherence.combinedScore,
+      intelligenceGeneratedAt: intel?.generatedAt ?? null,
     },
     blocks: ordered,
   };

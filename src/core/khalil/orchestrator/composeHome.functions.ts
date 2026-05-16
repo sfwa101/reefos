@@ -32,7 +32,13 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
     const now = new Date();
     const localDate = now.toISOString().slice(0, 10);
 
-    const [{ data: recoveryRow }, { data: adherenceRow }, { data: identityRow }, { data: coachRow }] = await Promise.all([
+    const [
+      { data: recoveryRow },
+      { data: adherenceRow },
+      { data: identityRow },
+      { data: coachRow },
+      { data: intelRow },
+    ] = await Promise.all([
       supabase
         .from("khalil_recovery_state")
         .select("current_state")
@@ -58,6 +64,13 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
         .order("created_at", { ascending: false })
         .limit(1)
         .maybeSingle(),
+      (supabase as any)
+        .from("khalil_intelligence_snapshot")
+        .select("*")
+        .eq("user_id", userId)
+        .order("generated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ]);
 
     const recovery: RecoveryMode =
@@ -71,6 +84,20 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
       ((identityRow as { current_level?: string } | null)?.current_level as
         | KhalilIdentityLevel
         | undefined) ?? "seed";
+
+    const intelligence = intelRow
+      ? {
+          generatedAt: (intelRow as any).generated_at as string,
+          replayVersion: Number((intelRow as any).replay_version ?? 1),
+          identityLevel: (intelRow as any).identity_level as KhalilIdentityLevel,
+          recovery: (intelRow as any).recovery_mode as RecoveryMode,
+          signals: ((intelRow as any).signals ?? []) as never,
+          priorities: ((intelRow as any).priorities ?? []) as never,
+          nudges: ((intelRow as any).nudges ?? []) as never,
+          weeklyFocus: ((intelRow as any).weekly_focus ?? {}) as never,
+          inputsDigest: (intelRow as any).inputs_digest as string,
+        }
+      : null;
 
     const descriptor = composeKhalilHome({
       userId,
@@ -86,6 +113,7 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
       pendingCoachProposal: coachRow
         ? { id: coachRow.id as string, kind: coachRow.kind as string }
         : null,
+      intelligence,
     });
 
     // Plain JSON transport — client re-casts to RenderDescriptor.
