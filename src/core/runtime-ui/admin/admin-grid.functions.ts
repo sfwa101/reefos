@@ -45,6 +45,7 @@ const ADMIN_GRID_ALLOWED_TABLES = new Set<string>([
   "referrals",
   "reviews",
   "salsabil_assets",
+  "salsabil_master_orders",
   "savings_jar",
   "staff_advance_requests",
   "staff_attendance",
