@@ -6,11 +6,10 @@ import { fmtMoney, fmtNum } from "@/lib/format";
 
 type OrderRow = {
   id: string;
-  user_id: string;
-  total: number;
+  customer_id: string;
+  total_amount: number;
   status: string;
-  service_type: string;
-  payment_method: string | null;
+  payment_status: string | null;
   created_at: string;
 };
 
