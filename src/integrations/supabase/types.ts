@@ -3441,6 +3441,8 @@ export type Database = {
           prayer_score: number
           qadaa_count: number
           qadaa_prayers: Database["public"]["Enums"]["khalil_prayer_name"][]
+          recovery_days_count: number
+          recovery_modifier: Database["public"]["Enums"]["khalil_recovery_mode"]
           total_count: number
           updated_at: string
           user_id: string
@@ -3456,6 +3458,8 @@ export type Database = {
           prayer_score?: number
           qadaa_count?: number
           qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          recovery_days_count?: number
+          recovery_modifier?: Database["public"]["Enums"]["khalil_recovery_mode"]
           total_count?: number
           updated_at?: string
           user_id: string
@@ -3471,6 +3475,8 @@ export type Database = {
           prayer_score?: number
           qadaa_count?: number
           qadaa_prayers?: Database["public"]["Enums"]["khalil_prayer_name"][]
+          recovery_days_count?: number
+          recovery_modifier?: Database["public"]["Enums"]["khalil_recovery_mode"]
           total_count?: number
           updated_at?: string
           user_id?: string
@@ -3580,6 +3586,57 @@ export type Database = {
           mode?: Database["public"]["Enums"]["khalil_prayer_mode"]
           occurred_at?: string
           prayer?: Database["public"]["Enums"]["khalil_prayer_name"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_recovery_event: {
+        Row: {
+          client_event_id: string
+          created_at: string
+          from_state: Database["public"]["Enums"]["khalil_recovery_mode"]
+          id: string
+          reason: string | null
+          to_state: Database["public"]["Enums"]["khalil_recovery_mode"]
+          user_id: string
+        }
+        Insert: {
+          client_event_id: string
+          created_at?: string
+          from_state: Database["public"]["Enums"]["khalil_recovery_mode"]
+          id?: string
+          reason?: string | null
+          to_state: Database["public"]["Enums"]["khalil_recovery_mode"]
+          user_id: string
+        }
+        Update: {
+          client_event_id?: string
+          created_at?: string
+          from_state?: Database["public"]["Enums"]["khalil_recovery_mode"]
+          id?: string
+          reason?: string | null
+          to_state?: Database["public"]["Enums"]["khalil_recovery_mode"]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_recovery_state: {
+        Row: {
+          current_state: Database["public"]["Enums"]["khalil_recovery_mode"]
+          entered_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_state?: Database["public"]["Enums"]["khalil_recovery_mode"]
+          entered_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_state?: Database["public"]["Enums"]["khalil_recovery_mode"]
+          entered_at?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -9970,6 +10027,10 @@ export type Database = {
         Args: { p_date: string; p_user_id: string }
         Returns: undefined
       }
+      khalil_recompute_recovery_state: {
+        Args: { p_user_id: string }
+        Returns: undefined
+      }
       list_open_gam_eyas: {
         Args: never
         Returns: {
@@ -10924,6 +10985,7 @@ export type Database = {
         | "manual_backfill"
       khalil_prayer_mode: "on_time" | "qadaa"
       khalil_prayer_name: "fajr" | "dhuhr" | "asr" | "maghrib" | "isha"
+      khalil_recovery_mode: "off" | "soft" | "hard"
       loyalty_tier: "bronze" | "silver" | "gold" | "platinum" | "vip"
       payment_method_kind:
         | "card"
@@ -11140,6 +11202,7 @@ export const Constants = {
       ],
       khalil_prayer_mode: ["on_time", "qadaa"],
       khalil_prayer_name: ["fajr", "dhuhr", "asr", "maghrib", "isha"],
+      khalil_recovery_mode: ["off", "soft", "hard"],
       loyalty_tier: ["bronze", "silver", "gold", "platinum", "vip"],
       payment_method_kind: [
         "card",
