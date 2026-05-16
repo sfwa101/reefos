@@ -59,3 +59,27 @@ export {
   type AcceptCoachInput,
   type DismissCoachInput,
 } from "./coach";
+export {
+  STALE_SESSION_MS,
+  computeSessionVolume,
+  effectiveSets,
+  isSessionStale,
+  validateAddSet,
+  type WorkoutSessionRow,
+  type WorkoutSetRow,
+  type WorkoutCurrentDTO,
+  type WorkoutHistoryItemDTO,
+  type StartSessionInput,
+  type AddSetInput,
+  type CloseSessionInput,
+} from "./workout";
+export {
+  WEIGHT_MIN_KG,
+  WEIGHT_MAX_KG,
+  computeWeightTrend,
+  type WeightMeasurementRow,
+  type WeightTrendDTO,
+  type WeightTrendDirection,
+  type WriteMeasurementInput,
+  type WeightSource,
+} from "./weight";
