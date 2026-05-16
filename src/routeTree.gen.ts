@@ -36,6 +36,7 @@ import { Route as KhalilWeightRouteImport } from './routes/khalil.weight'
 import { Route as KhalilRecoveryRouteImport } from './routes/khalil.recovery'
 import { Route as KhalilPrayerRouteImport } from './routes/khalil.prayer'
 import { Route as KhalilInsightsRouteImport } from './routes/khalil.insights'
+import { Route as KhalilIdentityRouteImport } from './routes/khalil.identity'
 import { Route as KhalilHabitsRouteImport } from './routes/khalil.habits'
 import { Route as KhalilCoachRouteImport } from './routes/khalil.coach'
 import { Route as DriverWalletRouteImport } from './routes/driver.wallet'
@@ -291,6 +292,11 @@ const KhalilPrayerRoute = KhalilPrayerRouteImport.update({
 const KhalilInsightsRoute = KhalilInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilIdentityRoute = KhalilIdentityRouteImport.update({
+  id: '/identity',
+  path: '/identity',
   getParentRoute: () => KhalilRoute,
 } as any)
 const KhalilHabitsRoute = KhalilHabitsRouteImport.update({
@@ -1031,6 +1037,7 @@ export interface FileRoutesByFullPath {
   '/driver/wallet': typeof DriverWalletRoute
   '/khalil/coach': typeof KhalilCoachRoute
   '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
@@ -1176,6 +1183,7 @@ export interface FileRoutesByTo {
   '/driver/wallet': typeof DriverWalletRoute
   '/khalil/coach': typeof KhalilCoachRoute
   '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
@@ -1331,6 +1339,7 @@ export interface FileRoutesById {
   '/driver/wallet': typeof DriverWalletRoute
   '/khalil/coach': typeof KhalilCoachRoute
   '/khalil/habits': typeof KhalilHabitsRoute
+  '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
@@ -1484,6 +1493,7 @@ export interface FileRouteTypes {
     | '/driver/wallet'
     | '/khalil/coach'
     | '/khalil/habits'
+    | '/khalil/identity'
     | '/khalil/insights'
     | '/khalil/prayer'
     | '/khalil/recovery'
@@ -1629,6 +1639,7 @@ export interface FileRouteTypes {
     | '/driver/wallet'
     | '/khalil/coach'
     | '/khalil/habits'
+    | '/khalil/identity'
     | '/khalil/insights'
     | '/khalil/prayer'
     | '/khalil/recovery'
@@ -1783,6 +1794,7 @@ export interface FileRouteTypes {
     | '/driver/wallet'
     | '/khalil/coach'
     | '/khalil/habits'
+    | '/khalil/identity'
     | '/khalil/insights'
     | '/khalil/prayer'
     | '/khalil/recovery'
@@ -2037,6 +2049,13 @@ declare module '@tanstack/react-router' {
       path: '/insights'
       fullPath: '/khalil/insights'
       preLoaderRoute: typeof KhalilInsightsRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/identity': {
+      id: '/khalil/identity'
+      path: '/identity'
+      fullPath: '/khalil/identity'
+      preLoaderRoute: typeof KhalilIdentityRouteImport
       parentRoute: typeof KhalilRoute
     }
     '/khalil/habits': {
@@ -3317,6 +3336,7 @@ const DriverRouteWithChildren =
 interface KhalilRouteChildren {
   KhalilCoachRoute: typeof KhalilCoachRoute
   KhalilHabitsRoute: typeof KhalilHabitsRoute
+  KhalilIdentityRoute: typeof KhalilIdentityRoute
   KhalilInsightsRoute: typeof KhalilInsightsRoute
   KhalilPrayerRoute: typeof KhalilPrayerRoute
   KhalilRecoveryRoute: typeof KhalilRecoveryRoute
@@ -3328,6 +3348,7 @@ interface KhalilRouteChildren {
 const KhalilRouteChildren: KhalilRouteChildren = {
   KhalilCoachRoute: KhalilCoachRoute,
   KhalilHabitsRoute: KhalilHabitsRoute,
+  KhalilIdentityRoute: KhalilIdentityRoute,
   KhalilInsightsRoute: KhalilInsightsRoute,
   KhalilPrayerRoute: KhalilPrayerRoute,
   KhalilRecoveryRoute: KhalilRecoveryRoute,
@@ -3378,3 +3399,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
