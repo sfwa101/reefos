@@ -17,7 +17,7 @@ import {
   levelByIndex,
   type KhalilIdentityLevel,
 } from "./config";
-import type { RecoveryMode } from "../../recovery/schemas";
+import type { RecoveryMode } from "../../recovery/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 
 export interface AdherenceDay {
   /** yyyy-mm-dd (UTC, calendar). */

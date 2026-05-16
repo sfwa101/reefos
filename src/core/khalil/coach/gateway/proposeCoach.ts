@@ -28,8 +28,8 @@ import type {
   CoachProposalDTO,
   CoachProposalKind,
 } from "../schemas";
-import type { RecoveryMode } from "../../recovery/schemas";
-import type { KhalilIdentityLevel } from "../../identity/runtime/config";
+import type { RecoveryMode } from "../../recovery/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
+import type { KhalilIdentityLevel } from "../../identity/runtime/config"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 
 const GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 

@@ -6,7 +6,7 @@
  * and UI. Locked by p1-data-ownership.md.
  */
 import { z } from "zod";
-import { isoDateSchema, clientEventIdSchema } from "../prayer/schemas";
+import { isoDateSchema, clientEventIdSchema } from "../prayer/schemas"; // khalil-governance-allow: rule-2 (ADR-2026-P2.8-01: shared primitives pending extraction)
 
 export const HABIT_CADENCES = ["daily", "weekdays", "custom"] as const;
 export type HabitCadence = (typeof HABIT_CADENCES)[number];
