@@ -83,6 +83,9 @@ export const composeKhalilHomeFn = createServerFn({ method: "GET" })
         hasActiveHabits: false,
       },
       identityLevel,
+      pendingCoachProposal: coachRow
+        ? { id: coachRow.id as string, kind: coachRow.kind as string }
+        : null,
     });
 
     // Plain JSON transport — client re-casts to RenderDescriptor.
