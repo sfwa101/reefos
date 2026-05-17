@@ -44,6 +44,11 @@ export const KHALIL_CAP = Object.freeze({
 
   INTELLIGENCE_READ: "khalil.intelligence.read",
   INTELLIGENCE_RECOMPUTE: "khalil.intelligence.recompute",
+
+  MISSIONS_READ: "khalil.missions.read",
+  MISSIONS_ACCEPT: "khalil.missions.accept",
+  MISSIONS_COMPLETE: "khalil.missions.complete",
+  JOURNEY_READ: "khalil.journey.read",
 } as const);
 
 export type KhalilCapabilityKey = (typeof KHALIL_CAP)[keyof typeof KHALIL_CAP];

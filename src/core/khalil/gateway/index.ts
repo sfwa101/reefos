@@ -45,3 +45,11 @@ export {
   readIntelligenceSnapshotFn,
   recomputeIntelligenceSnapshotFn,
 } from "../intelligence";
+export {
+  readMissionsFn,
+  acceptMissionFn,
+  completeMissionFn,
+  dismissMissionFn,
+  readDailyJourneyFn,
+  recomputeJourneyFn,
+} from "../missions";
