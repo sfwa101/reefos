@@ -3596,6 +3596,33 @@ export type Database = {
         }
         Relationships: []
       }
+      khalil_daily_journey: {
+        Row: {
+          created_at: string
+          id: string
+          inputs_digest: string
+          journey_payload: Json
+          local_date: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          inputs_digest: string
+          journey_payload: Json
+          local_date: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          inputs_digest?: string
+          journey_payload?: Json
+          local_date?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       khalil_habit_completion: {
         Row: {
           client_event_id: string
@@ -3789,6 +3816,89 @@ export type Database = {
           weekly_focus?: Json
         }
         Relationships: []
+      }
+      khalil_mission: {
+        Row: {
+          body_key: string
+          category: string
+          created_at: string
+          expires_at: string
+          generated_from_snapshot: string
+          id: string
+          intensity: number
+          mission_type: string
+          stable_key: string
+          status: string
+          title_key: string
+          user_id: string
+        }
+        Insert: {
+          body_key: string
+          category: string
+          created_at?: string
+          expires_at: string
+          generated_from_snapshot: string
+          id?: string
+          intensity?: number
+          mission_type: string
+          stable_key: string
+          status?: string
+          title_key: string
+          user_id: string
+        }
+        Update: {
+          body_key?: string
+          category?: string
+          created_at?: string
+          expires_at?: string
+          generated_from_snapshot?: string
+          id?: string
+          intensity?: number
+          mission_type?: string
+          stable_key?: string
+          status?: string
+          title_key?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      khalil_mission_event: {
+        Row: {
+          client_event_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          mission_id: string
+          payload: Json
+          user_id: string
+        }
+        Insert: {
+          client_event_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          mission_id: string
+          payload?: Json
+          user_id: string
+        }
+        Update: {
+          client_event_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          mission_id?: string
+          payload?: Json
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "khalil_mission_event_mission_id_fkey"
+            columns: ["mission_id"]
+            isOneToOne: false
+            referencedRelation: "khalil_mission"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       khalil_prayer_log: {
         Row: {
