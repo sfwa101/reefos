@@ -35,6 +35,8 @@ import { Route as KhalilWorkoutRouteImport } from './routes/khalil.workout'
 import { Route as KhalilWeightRouteImport } from './routes/khalil.weight'
 import { Route as KhalilRecoveryRouteImport } from './routes/khalil.recovery'
 import { Route as KhalilPrayerRouteImport } from './routes/khalil.prayer'
+import { Route as KhalilMissionsRouteImport } from './routes/khalil.missions'
+import { Route as KhalilJourneyRouteImport } from './routes/khalil.journey'
 import { Route as KhalilInsightsRouteImport } from './routes/khalil.insights'
 import { Route as KhalilIdentityRouteImport } from './routes/khalil.identity'
 import { Route as KhalilHabitsRouteImport } from './routes/khalil.habits'
@@ -287,6 +289,16 @@ const KhalilRecoveryRoute = KhalilRecoveryRouteImport.update({
 const KhalilPrayerRoute = KhalilPrayerRouteImport.update({
   id: '/prayer',
   path: '/prayer',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilMissionsRoute = KhalilMissionsRouteImport.update({
+  id: '/missions',
+  path: '/missions',
+  getParentRoute: () => KhalilRoute,
+} as any)
+const KhalilJourneyRoute = KhalilJourneyRouteImport.update({
+  id: '/journey',
+  path: '/journey',
   getParentRoute: () => KhalilRoute,
 } as any)
 const KhalilInsightsRoute = KhalilInsightsRouteImport.update({
@@ -1039,6 +1051,8 @@ export interface FileRoutesByFullPath {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/journey': typeof KhalilJourneyRoute
+  '/khalil/missions': typeof KhalilMissionsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
@@ -1185,6 +1199,8 @@ export interface FileRoutesByTo {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/journey': typeof KhalilJourneyRoute
+  '/khalil/missions': typeof KhalilMissionsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
@@ -1341,6 +1357,8 @@ export interface FileRoutesById {
   '/khalil/habits': typeof KhalilHabitsRoute
   '/khalil/identity': typeof KhalilIdentityRoute
   '/khalil/insights': typeof KhalilInsightsRoute
+  '/khalil/journey': typeof KhalilJourneyRoute
+  '/khalil/missions': typeof KhalilMissionsRoute
   '/khalil/prayer': typeof KhalilPrayerRoute
   '/khalil/recovery': typeof KhalilRecoveryRoute
   '/khalil/weight': typeof KhalilWeightRoute
@@ -1495,6 +1513,8 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/identity'
     | '/khalil/insights'
+    | '/khalil/journey'
+    | '/khalil/missions'
     | '/khalil/prayer'
     | '/khalil/recovery'
     | '/khalil/weight'
@@ -1641,6 +1661,8 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/identity'
     | '/khalil/insights'
+    | '/khalil/journey'
+    | '/khalil/missions'
     | '/khalil/prayer'
     | '/khalil/recovery'
     | '/khalil/weight'
@@ -1796,6 +1818,8 @@ export interface FileRouteTypes {
     | '/khalil/habits'
     | '/khalil/identity'
     | '/khalil/insights'
+    | '/khalil/journey'
+    | '/khalil/missions'
     | '/khalil/prayer'
     | '/khalil/recovery'
     | '/khalil/weight'
@@ -2042,6 +2066,20 @@ declare module '@tanstack/react-router' {
       path: '/prayer'
       fullPath: '/khalil/prayer'
       preLoaderRoute: typeof KhalilPrayerRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/missions': {
+      id: '/khalil/missions'
+      path: '/missions'
+      fullPath: '/khalil/missions'
+      preLoaderRoute: typeof KhalilMissionsRouteImport
+      parentRoute: typeof KhalilRoute
+    }
+    '/khalil/journey': {
+      id: '/khalil/journey'
+      path: '/journey'
+      fullPath: '/khalil/journey'
+      preLoaderRoute: typeof KhalilJourneyRouteImport
       parentRoute: typeof KhalilRoute
     }
     '/khalil/insights': {
@@ -3338,6 +3376,8 @@ interface KhalilRouteChildren {
   KhalilHabitsRoute: typeof KhalilHabitsRoute
   KhalilIdentityRoute: typeof KhalilIdentityRoute
   KhalilInsightsRoute: typeof KhalilInsightsRoute
+  KhalilJourneyRoute: typeof KhalilJourneyRoute
+  KhalilMissionsRoute: typeof KhalilMissionsRoute
   KhalilPrayerRoute: typeof KhalilPrayerRoute
   KhalilRecoveryRoute: typeof KhalilRecoveryRoute
   KhalilWeightRoute: typeof KhalilWeightRoute
@@ -3350,6 +3390,8 @@ const KhalilRouteChildren: KhalilRouteChildren = {
   KhalilHabitsRoute: KhalilHabitsRoute,
   KhalilIdentityRoute: KhalilIdentityRoute,
   KhalilInsightsRoute: KhalilInsightsRoute,
+  KhalilJourneyRoute: KhalilJourneyRoute,
+  KhalilMissionsRoute: KhalilMissionsRoute,
   KhalilPrayerRoute: KhalilPrayerRoute,
   KhalilRecoveryRoute: KhalilRecoveryRoute,
   KhalilWeightRoute: KhalilWeightRoute,

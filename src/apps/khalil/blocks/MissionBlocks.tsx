@@ -23,6 +23,7 @@ import {
   readIdentityFn,
   readMissionsFn,
   type MissionIntensity,
+  type MissionRecord,
 } from "@/core/khalil";
 import { useAuth } from "@/context/AuthContext";
 import { KhalilEmpty, KhalilLoading } from "../primitives/StateViews";
