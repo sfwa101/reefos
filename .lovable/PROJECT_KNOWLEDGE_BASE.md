@@ -261,3 +261,61 @@ src/context/SharedCartContext.tsx  ← يخزن activeSharedCartId في localSto
 
 ---
 > نهاية الوثيقة. اقترح التحديث عليها كلما تغير فهم أساسي للمشروع.
+
+---
+
+# 📗 ملحق Khalil — حالة المجال السيادي (محدّث: 2026-05-18)
+
+> هذا الملحق أُضيف لأن الوثيقة الأصلية تسبق إطلاق مجال **Khalil**.  
+> Khalil = مجال "التحوّل الشخصي السيادي" — منفصل تماماً عن Reef El-Madina، يعيش تحت `src/core/khalil/` و `src/apps/khalil/`.  
+> القاعدة: **لا cross-domain imports**، لا Supabase مباشر من UI، كل شيء عبر Gateways + Capabilities + Events.
+
+## خط الزمن الكامل للمراحل
+
+| المرحلة | العنوان | الحالة | التقرير المرجعي |
+|---|---|---|---|
+| P0   | Governance scaffolding | ✅ مكتمل | `.salsabil/domains/khalil/DOMAIN_MEMORY.md` |
+| P0.1 | Maeen ↔ Khalil decoupling | ✅ | `p0.1-boundary-correction.md` |
+| P1   | MVP architecture (ADR-0004) | ✅ | `p1-mvp-blueprint.md` |
+| P2.1 | Foundation (events/gateway/i18n) | ✅ | `p2.1-foundation-report.md` |
+| P2.2 | Prayer pillar | ✅ | `p2.2-prayer-report.md` |
+| P2.3 | Habit pillar | ✅ | `p2.3-habit-report.md` |
+| P2.4 | Recovery state machine | ✅ | `p2.4-recovery-report.md` |
+| P2.5 | Identity engine | ✅ | `p2.5-identity-report.md` |
+| P2.6 | Sovereign AI Coach (propose/dispose) | ✅ | `p2.6-coach-report.md` |
+| P2.7 | Workout + Weight + Analytics | ✅ | `p2.7-body-analytics-report.md` |
+| P2.8 | Replay/offline/governance hardening | ✅ | `p2.8-beta-readiness.md` |
+| P3.1 | Sovereign Intelligence Layer | ✅ | `p3.1-sovereign-intelligence-report.md` |
+| **P3.2** | **Sovereign Missions & Adaptive Journeys** | ⚠️ **قيد التنفيذ — لم يكتمل** | (لم يُكتب بعد) |
+
+## P3.2 — ما تم فعلاً
+
+**منفّذ:**
+- Migration: جداول `khalil_mission`, `khalil_mission_event`, `khalil_daily_journey` (append-only + RLS + triggers).
+- محرك المهمات السيادي (PURE): `src/core/khalil/missions/{contracts,types,scoring,adaptation,planner,selectors,engine,replay}.ts`.
+- Determinism مضمون عبر FNV-1a و threading لـ `now` من الـ caller.
+- Gateways + Capabilities: `khalil.missions.read/accept/recompute/journey`.
+- صفحات + Routes: `/khalil/missions`, `/khalil/journey`.
+- Blocks: `MissionBlocks.tsx` (Primary, Secondary, Journey Today, Identity Momentum).
+- Governance tripwire: `scripts/khalil-missions-governance.mjs`.
+- اختبارات determinism + adaptation rules.
+
+**معلّق (لم يُنفّذ بعد):**
+- إصلاح 3 أخطاء implicit-any في `MissionBlocks.tsx`.
+- تسجيل blocks الجديدة في `src/apps/khalil/blocks/register.tsx`.
+- ربط المهمّات بـ `composeKhalilHome` orchestrator.
+- مفاتيح i18n لجميع نصوص المهمّات/الرحلة.
+- توسيع `src/core/khalil/events.ts` بأحداث lifecycle.
+- كتابة تقرير `p3.2-missions-report.md` وتصدير الحزمة إلى `/mnt/documents/khalil-mvp/`.
+- خطّافات التحضير لـ P3.3 (long-term arcs / seasonal plans / elite mode / symbolic memory / recovery forecast).
+
+## القواعد الذهبية لـ Khalil (مُلزمة لأي جلسة قادمة)
+
+1. **لا** استيراد cross-domain (`@/core/reef-*`, `@/core/commerce`, …) — التواصل عبر events + capabilities فقط.
+2. **لا** `supabase` من UI — Gateways حصراً.
+3. **لا** عشوائية ولا `Date.now()` ولا `new Date()` داخل `src/core/khalil/**` PURE — مرّر `now` كـ ISO من الـ caller.
+4. كل قدرة جديدة تُسجَّل في `CapabilityRegistry` في نفس الـ patch.
+5. كل event/projection append-only — replay يجب أن يبني نفس الـ digest بايت-ببايت.
+6. كل النصوص الظاهرة عبر `kt()` — لا hardcoded Arabic داخل `.tsx`.
+
+> نهاية ملحق Khalil. حدِّث هذا القسم كلما اكتملت مرحلة جديدة.
