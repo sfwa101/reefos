@@ -3,7 +3,7 @@
  * Constitution v2.0 · Article 7.1 (Append-Only Stock Ledger) · Chapter 12 (Reservations)
  *
  * Pure domain models. No DB, no I/O. The ledger is the source of truth;
- * `inventory_locations` and `usa_products.stock_qty` become cached projections.
+ * `inventory_locations` and `salsabil_skus.stock_qty` become cached projections.
  */
 import type { ISODateString, JsonObject } from "@/core/commerce/knowledge/dna.types";
 
