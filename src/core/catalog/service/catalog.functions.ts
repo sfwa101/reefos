@@ -7,7 +7,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase as supabaseBrowser } from "@/integrations/supabase/client";
-import { normalizeRelation } from "../runtime/ProductTransformers";
 import type {
   ProductCardVM,
   ProductDetailsVM,
@@ -292,7 +291,11 @@ export const getProductRelationsFn = createServerFn({ method: "POST" })
       .select("*")
       .eq("product_id", data.productId);
     if (error) throw error;
-    return (rows ?? []).map(normalizeRelation);
+    return (rows ?? []).map((row) => ({
+      relatedId: row.related_id,
+      relationType: row.relation_type,
+      strength: Number(row.strength ?? 0),
+    }));
   });
 
 // ─────────────────────────────────────────────────────────────────────────────
