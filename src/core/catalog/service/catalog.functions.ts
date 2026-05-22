@@ -7,7 +7,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { supabase as supabaseBrowser } from "@/integrations/supabase/client";
-import { normalizeRelation } from "../runtime/ProductTransformers";
 import type {
   ProductCardVM,
   ProductDetailsVM,
@@ -26,7 +25,7 @@ import type { ProductCivilizationEntity } from "@/core/commerce/knowledge/dna.ty
 
 /**
  * ملاحظة: نستخدم supabase publishable client (anon) لأن قراءة المنتجات عامة
- * (RLS policy: usa_products_read_active يسمح للجميع). لا حاجة لـ service role.
+ * (RLS policy: asset_read_active يسمح للجميع). لا حاجة لـ service role.
  * في server runtime، client.ts ينشئ instance مناسبة (SSR-safe).
  */
 const supabase = supabaseBrowser;
@@ -43,7 +42,7 @@ const ListSchema = z.object({
  * Storefront grids and PDP now read from `salsabil_assets` joined with
  * `salsabil_skus` and `salsabil_financial_contracts`. Section scoping
  * is done via `category_path` prefix matching since assets carry no
- * `section_id` column. The legacy `usa_products` table is preserved
+ * `section_id` column. The legacy compatibility table is no longer queried
  * for forensic rollback but is no longer queried by the storefront.
  * ──────────────────────────────────────────────────────────────────── */
 
@@ -292,12 +291,16 @@ export const getProductRelationsFn = createServerFn({ method: "POST" })
       .select("*")
       .eq("product_id", data.productId);
     if (error) throw error;
-    return (rows ?? []).map(normalizeRelation);
+    return (rows ?? []).map((row) => ({
+      relatedId: row.related_id,
+      relationType: row.relation_type,
+      strength: Number(row.strength ?? 0),
+    }));
   });
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Phase U-1 (Unification Strike) — Cart hydration & integrity surface.
-// These four handlers were previously bound to the legacy `usa_products`
+// These four handlers were previously bound to a deprecated product table
 // table. They now read directly from the Sovereign Asset Ledger
 // (`salsabil_assets` ⨝ `salsabil_skus` ⨝ `salsabil_financial_contracts`)
 // and reuse the in-file `assetToCardVM` adapter so every consumer of
